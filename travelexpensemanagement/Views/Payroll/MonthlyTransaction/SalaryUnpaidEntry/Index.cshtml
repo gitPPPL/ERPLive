@@ -1,0 +1,536 @@
+﻿@{
+    ViewBag.Title = "Salary Unpaid Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Salary Unpaid Entry</legend>
+    <form id="Form">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+              
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblSalaryUnpaidEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>SNo.</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Amount</th>
+                            <th>Remark</th>
+                            <th>Release Salary Month</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <button type="button" class="btn btn-success btn-add-row" title="Add Row">
+                            <i class="fa fa-plus"></i> Add New Row
+                        </button>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "SalaryUnpaidList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+
+                    <button id="btn_cancel" type="button" class="btn btn-danger" onclick="clearForm()">
+                        <i class="fa fa-close"></i>Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get("mode");
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+    let EMPOptions = '';
+    const $tbody = $('#tblSalaryUnpaidEntry tbody');
+
+    $(document).ready(function () {
+        const $tbody = $('#tblSalaryUnpaidEntry tbody');
+
+        LoadDropDown().then(() => {
+            if (rowId) {
+                LoadFormByID(rowId);
+                if (isReadOnly) setFormReadOnly();
+            } else {
+                const dateInput = document.getElementById('DtDocDate');
+                if (dateInput) {
+                    dateInput.valueAsDate = new Date();
+                }
+
+                GetVNo();
+                addRow();
+            }
+        });
+
+        $tbody.on('click', '.btn-add-action', function () {
+            addRow();
+        });
+
+        $(document).on('click', '.btn-add-row', function () {
+            addRow();
+        });
+
+
+   
+        $tbody.on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+            $row.remove();
+
+            $tbody.find('tr').each(function (index) {
+                $(this).find('td:first').text(index + 1);
+            });
+
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+
+
+
+
+
+            $tbody.on('change', 'input[name="empCode"]', async function () {
+            const empCode = $(this).val().trim();
+            const $row = $(this).closest('tr');
+            const $dropdown = $row.find('.employee-name');
+
+            if (!empCode) {
+                $dropdown.val('');
+                return;
+            }
+
+            if (isDuplicateEmployee(empCode, $row)) {
+                toastr.warning("Duplicate employee code is not allowed.");
+                $(this).val('');
+                $dropdown.val('');
+                $(this).focus();
+                return;
+            }
+
+            $dropdown.val(empCode);
+
+            const docDateInput = document.getElementById("DtDocDate");
+            const docDate = docDateInput?.value ? new Date(docDateInput.value) : null;
+
+            if (!docDate || isNaN(docDate.getTime())) {
+                toastr.info("Please select a valid document date.");
+                return;
+            }
+
+            try {
+                const isValid = await checkUnpaidSalary(empCode, docDate);
+
+                if (!isValid) {
+                    toastr.warning("Employee is not eligible for unpaid salary.");
+                    $(this).val('');
+                    $dropdown.val('');
+                    $(this).addClass('is-invalid');
+
+                    setTimeout(() => $(this).removeClass('is-invalid'), 2000);
+                    $(this).focus();
+                }
+            } catch (error) {
+                console.error("Validation error:", error);
+                toastr.error("Error validating employee.");
+            }
+        });
+
+        $tbody.on('change', '.employee-name', async function () {
+            const selectedValue = $(this).val();
+            const $row = $(this).closest('tr');
+            const $empCodeInput = $row.find('input[name="empCode"]');
+
+            if (!selectedValue) {
+                $empCodeInput.val('');
+                return;
+            }
+
+            if (isDuplicateEmployee(selectedValue, $row)) {
+                toastr.warning("Duplicate employee selection is not allowed.");
+                $(this).val('');
+                $empCodeInput.val('');
+                $(this).focus();
+                return;
+            }
+
+            $empCodeInput.val(selectedValue);
+
+            const docDateInput = document.getElementById("DtDocDate");
+            const docDate = docDateInput && docDateInput.value ? new Date(docDateInput.value) : null;
+
+            if (!selectedValue || !docDate) {
+                toastr.info("Please select a valid employee and document date.");
+                return;
+            }
+
+            try {
+                const hasUnpaidSalary = await checkUnpaidSalary(selectedValue, docDate);
+
+                if (!hasUnpaidSalary) {
+                    $(this).val('');
+                    $empCodeInput.val('');
+                    $(this).focus();
+                    $(this).addClass('is-invalid');
+                    setTimeout(() => $(this).removeClass('is-invalid'), 2000);
+                }
+            } catch (error) {
+                console.error("Error validating unpaid salary:", error);
+                toastr.error("Error validating employee.");
+            }
+        });
+          
+           
+        $("#btn-save").click(async function (e) {
+            e.preventDefault();
+
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+
+            const attendanceData = collectRowData();
+
+            console.log('attendanceData',attendanceData);
+
+
+            if (!attendanceData.length) {
+                toastr.warning("No data found.");
+                return;
+            }
+
+            $("#btn-save").prop("disabled", true);
+
+            try {
+                const response = await $.ajax({
+                    type: "POST",
+                    url: "/SalaryUnpaidEntry/SaveData",
+                    contentType: "application/json",
+                    data: JSON.stringify(attendanceData)
+                });
+
+                if (response.success) {
+                    toastr.success("Data saved successfully");
+                    setTimeout(() => window.location.href = '/SalaryUnpaidList/Index', 1000);
+                } else {
+                    toastr.error(response.message || "Failed to save");
+                }
+            } catch (error) {
+                toastr.error("Error while saving");
+            } finally {
+                $("#btn-save").prop("disabled", false);
+            }
+        });
+
+
+    });
+
+    function addRow(data = {}) {
+        const $tbody = $('#tblSalaryUnpaidEntry tbody');
+
+        $tbody.find('.btn-add-action').remove();
+
+
+
+        const rowNumber = $tbody.find('tr').length + 1;
+        const empSelect = generateEmployeeOptions(data.empCode || '');
+
+        const row = `
+            <tr>
+                <td>${rowNumber}</td>
+                <td><input type="text" class="form-control" name="empCode" value="${data.empCode || ''}" /></td>
+                <td>
+                    <select class="form-control employee-name" style="width:300px;">
+                        ${empSelect}
+                    </select>
+                </td>
+               
+                <td><input type="number" class="form-control" name="amount" value="${data.amount || ''}" /></td>
+                <td><input type="text" class="form-control" name="remark" value="${data.remark || ''}" /></td>
+
+                    <td>
+                    <input type="date" class="form-control" name="salaryMonth" value="${data.salaryMonth || ''}" />
+                    </td>
+
+                    <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+        $tbody.append(row);
+    }
+
+    async function LoadDropDown() {
+        await DDLDocType();
+        await loadEmployeeDropdownOptions();
+    }
+
+    async function DDLDocType() {
+        const response = await fetch('/SalaryUnpaidEntry/DDlDoctype');
+        const data = await response.json();
+        const ddl = $('#ddlDocType');
+        ddl.empty().append();
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    }
+
+    async function GetVNo() {
+        const res = await fetch(`/SalaryUnpaidEntry/GetVNo`);
+        const data = await res.json();
+        if (data.v_NO) {
+            $('#NumDocNo').val(data.v_NO);
+        }
+    }
+
+    async function loadEmployeeDropdownOptions() {
+        const response = await fetch('/SalaryUnpaidEntry/DDLGridEmp');
+        const data = await response.json();
+        EMPOptions = '<option value="">--Select--</option>';
+        data.forEach(emp => {
+            EMPOptions += `<option value="${emp.value}">${emp.text}</option>`;
+        });
+    }
+
+    function generateEmployeeOptions(selectedCode = '') {
+        const $options = $('<div>').html(EMPOptions);
+        $options.find(`option[value="${selectedCode}"]`).attr('selected', true);
+        return $options.html();
+    }
+
+    async function checkUnpaidSalary(empCode, docDate) {
+        try {
+            const isoDate = docDate.toISOString();
+            const response = await fetch(`/SalaryUnpaidEntry/DDLGridEmpValidation?EMPCODE=${empCode}&v_dATE=${isoDate}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            console.log('result:', result);
+
+
+            if(result.success != false )
+            {
+             toastr.info(result.message);
+            }
+               
+            return !result.success;
+
+        } catch (error) {
+            console.error('Error checking unpaid salary:', error);
+            toastr.error('Failed to check unpaid salary.');
+            return false;
+        }
+    }
+
+    function collectRowData() {
+        const rowData = [];
+        const V_no = parseInt($('#NumDocNo').val()) || 0;
+        const V_Type = $('#ddlDocType').val();
+        const V_Date = $('#DtDocDate').val();
+
+        $('#tblSalaryUnpaidEntry tbody tr').each(function () {
+            const $row = $(this);
+            const empCode = $row.find('input[name="empCode"]').val().trim();
+
+            // Only collect row if empCode is not empty
+            if (empCode) {
+                rowData.push({
+                    EMP_CODE: empCode,
+                    Emp_name: $row.find('.employee-name option:selected').text().trim(),
+                    amount: parseFloat($row.find('input[name="amount"]').val().trim()) || 0,
+                    remark: $row.find('input[name="remark"]').val().trim(),
+                    RELEASE_DATE: $row.find('input[name="salaryMonth"]').val().trim(),
+                    V_NO: V_no,
+                    V_TYPE: V_Type,
+                    V_DATE: V_Date
+                });
+            }
+        });
+
+        return rowData;
+    }
+
+    async function LoadFormByID(id) {
+        try {
+            const res = await $.ajax({
+                url: '/SalaryUnpaidList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            });
+
+            const header = res.data?.header;
+            const details = res.data?.details;
+
+            if (!header) {
+                toastr.error("No header data returned from server.");
+                return;
+            }
+
+            $('#TxtCode').val(header.DOC_ID || '');
+            $('#ddlDocType').val(header.V_TYPE || '');
+            $('#NumDocNo').val(header.V_NO || '');
+
+            const formattedDate = header.V_DATE ? formatDate(new Date(header.V_DATE)) : '';
+            $('#DtDocDate').val(formattedDate);
+
+            $('#tblSalaryUnpaidEntry tbody').empty();
+
+            if (Array.isArray(details)) {
+                details.forEach(item => {
+                    addRow({
+                        empCode: item.EMP_CODE || '',
+                        amount: item.AMOUNT || '',
+                        remark: item.REMARK || '',
+                        salaryMonth: formatDate(item.RELEASE_DATE) || ''
+                    });
+                });
+            }
+        } catch (err) {
+            console.error("LoadFormByID Error:", err);
+            toastr.error("Error loading form data");
+        }
+    }
+
+    function formatDate(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function validateRequiredField(selector, fieldName) {
+        const value = $(selector).val();
+        if (!value) {
+            toastr.warning(`Please select ${fieldName}`);
+            $(selector).focus();
+            return false;
+        }
+        return true;
+    }
+
+    function setFormReadOnly() {
+     
+        $('#Form :input')
+            .not(' #btn_cancel, #btn_load, #btn_Calc') 
+            .prop('disabled', true);
+
+        // Hide the save button
+        $('#btn-save').hide();
+
+            $('#btnbacklist').prop('disabled', false);
+
+
+    }
+
+
+        function isDuplicateEmployee(empCode, currentRow) {
+        let duplicateFound = false;
+
+        $('#tblSalaryUnpaidEntry tbody tr').each(function () {
+            if (this === currentRow[0]) return;
+
+            const code = $(this).find('input[name="empCode"]').val().trim();
+            if (code && code === empCode) {
+                duplicateFound = true;
+                return false;
+            }
+        });
+
+        return duplicateFound;
+    }
+
+
+             function clearForm(rowId) {
+
+        if (!rowId) {
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to undo this action!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                         document.querySelector('#tblInstallmentModificationEntry tbody').innerHTML = '';
+
+                              addRow();
+
+
+                        const dateInput = document.getElementById('DtDocDate');
+                        if (dateInput) dateInput.valueAsDate = new Date();
+
+
+                         Swal.fire(
+                        'Cleared!',
+                        'The form has been cleared except for the Document No.',
+                        'success'
+                    );
+                }
+            });
+        } else {
+
+            console.log("RowId is not null, custom behavior goes here.");
+        }
+    }
+
+
+
+</script>

@@ -1,0 +1,329 @@
+﻿@{
+	ViewBag.Title = "Assets Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend>Assets Master</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "AssetsMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+
+	<form id="AssetsMaster">
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">AC Name</label>
+					<select class="form-select form-control" id="ddlACName">
+						<option value="">-- Select AC Name--</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Opening Amount</label>
+					<input type="number" class="form-control" name="OPENINGAMOUNT" id="OPENINGAMOUNT" placeholder="Enter Opening Amount">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Op. Depreciation Amt.</label>
+					<input type="number" class="form-control" name="DEPRECIATION" id="DEPRECIATION" placeholder="Enter Op. Depreciation Amt.">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">List of Asset (in Years)</label>
+					<input type="number" class="form-control" name="ASSET" id="ASSET" placeholder="Enter List of Asset (in Years)">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Depreciation %</label>
+					<input type="number" class="form-control" name="Depreciation%" id="DEP_RATE" placeholder="Enter Depreciation %">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Shift Calculation</label>
+					<input type="number" class="form-control" name="SHIFTCALCULATION" id="SHIFTCALCULATION" placeholder="Enter Shift Calculation">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				@* <button type="submit" class="btn btn-primary">Submit</button> *@
+				<button type="submit" id="btnSubmit" class="btn btn-primary">Submit</button>
+                <button type="button" id="btnUpdate" class="btn btn-primary">Update</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+@* Sumbit Button Code start Block *@
+<script>
+	   $(document).ready(function () {
+		$("#btnUpdate").hide();
+		// Function to get URL parameter
+		function getQueryParam(param) {
+			const urlParams = new URLSearchParams(window.location.search);
+			return urlParams.get(param);
+		}
+		const userId = getQueryParam('id');
+		const mode = getQueryParam("mode");
+
+		// Load dropdown first
+		ddlACName().then(() => {
+			if (userId) {
+				// Edit mode: show Update button, hide Submit
+				$("#btnSubmit").hide();
+				$("#btnUpdate").show();
+
+				// Load asset data and bind form AFTER dropdown is loaded
+				$.ajax({
+					url: '/AssetsMaster/GetAssetBySrno',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify({ code: userId }),
+					success: function (response) {
+						bindItemDeptForm(response);
+					},
+					error: function (xhr) {
+						alert('Error: ' + xhr.responseText);
+					}
+				});
+			}
+		});
+
+		// Handle read-only mode
+		if (mode === "view") {
+			setFormReadOnly();
+			$('#AssetsMaster').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+		}
+
+		// Submit form for INSERT
+		$('#AssetsMaster').submit(function (e) {
+			e.preventDefault();
+			var formData = {
+				AC_CODE: $('#ddlACName').val(),
+				AC_NAME: $('#ddlACName option:selected').text(),
+				OP_AMT: $('#OPENINGAMOUNT').val(),
+				DEP_AMT: $('#DEPRECIATION').val(),
+				DEP_RATE: $('#DEP_RATE').val(),
+				SHIFT_CALC: $('#SHIFTCALCULATION').val(),
+				LIFE: $('#ASSET').val(),
+			};
+			$.ajax({
+				url: '/AssetsMaster/InsertAsset',
+				type: 'POST',
+				data: formData,
+				success: function (response) {
+					if (response.success) {
+					toastr.success(response.message);
+			       $('#AssetsMaster')[0].reset();
+				} 
+				else
+				{
+					toastr.error(response.message);
+				}
+				},
+				error: function (xhr, status, error) {
+					toastr.error("Error saving data: " + error);
+				}
+			});
+		});
+
+		// Submit form for UPDATE (btnUpdate click)
+		$('#btnUpdate').click(function () {
+			var formData = {
+				SRNO: userId,
+				AC_CODE: $('#ddlACName').val(),
+				AC_NAME: $('#ddlACName option:selected').text(),
+				OP_AMT: $('#OPENINGAMOUNT').val(),
+				DEP_AMT: $('#DEPRECIATION').val(),
+				DEP_RATE: $('#DEP_RATE').val(),
+				SHIFT_CALC: $('#SHIFTCALCULATION').val(),
+				LIFE: $('#ASSET').val(),
+			};
+
+			$.ajax({
+				url: '/AssetsMaster/UpdateAsset',
+				type: 'POST',
+				data: formData,
+				success: function (response) {
+					toastr.success("Data updated successfully!");
+					$('#AssetsMaster')[0].reset();
+					$("#btnUpdate").hide();
+					$("#btnSubmit").show();
+				},
+				error: function (xhr, status, error) {
+					toastr.error("Error updating data: " + error);
+				}
+			});
+		});
+	});
+
+	// Modified ddlACName to return a Promise
+	function ddlACName() {
+		return $.ajax({
+			url: '/AssetsMaster/GetddlACName',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				const ddl = $('#ddlACName');
+				ddl.empty().append('<option value="">-- Select AC Name --</option>');
+				$.each(data, function (index, item) {
+					ddl.append(`<option value="${item.value}">${item.text}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading AC Names:", xhr.responseText);
+				alert('Error loading AC Names: ' + error);
+			}
+		});
+	}
+
+	// Bind fetched asset data to form
+	function bindItemDeptForm(response) {
+
+	if ($("#ddlACName option[value='" + response.aC_CODE + "']").length > 0) {
+		$('#ddlACName').val(response.aC_CODE);
+	} else {
+		$('#ddlACName').append(`<option value="${response.aC_CODE}" selected>${response.aC_NAME}</option>`);
+	}
+	$('#OPENINGAMOUNT').val(response.oP_AMT ?? '');
+	$('#DEPRECIATION').val(response.deP_AMT ?? '');
+	$('#DEP_RATE').val(response.deP_RATE ?? '');
+	$('#SHIFTCALCULATION').val(response.shifT_CALC ?? '');
+	$('#ASSET').val(response.life ?? '');
+	$('#hiddenSRNO').val(response.srno ?? '');
+	}
+
+	// Set form as read-only
+	function setFormReadOnly() {
+		$('#AssetsMaster :input').prop('disabled', true);
+		$('#btnSubmit, #btnUpdate').hide();
+	}
+
+</script>
+
+
+@* Sumbit Button Code End Block *@
+@* Cancel Button Popup *@
+@* <script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script> *@
+
+@* Cancel button end *@
+@* status check *@
+@* <script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	</Script> *@
+@* Status Check end *@
+@* <script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+
+</script> *@
+
+@* Script status Button *@

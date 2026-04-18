@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Posting Parameter Salary List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend>Posting Parameter Salary List</legend>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="tableSearch" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
+            </div>
+        </div>
+
+        <div class="col-lg-8 btn-align">
+            <button onclick="window.location.href='@Url.Action("Index", "PostingParameterSalary")'" type="submit" class="btn btn-primary">
+                <i class="fa fa-plus"></i>Add Posting
+            </button>
+
+            <button class="btn btn-print">
+                <i class="fa fa-print"></i> Print
+            </button>
+            <button class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+            <button class="btn btn-mail">
+                <i class="fa fa-envelope"></i> Mail
+            </button>
+            <button class="btn btn-send">
+                <i class="fa fa-paper-plane"></i> Approval Send
+            </button>
+            <button class="btn btn-approved">
+                <i class="fa fa-check"></i> Approved
+            </button>
+
+        </div>
+    </div>
+    <div class="card shadow-sm border-0 mt-2">
+        <div class="table-responsive">
+            <table id="" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">Code</th>
+                        <th>Salary A/C</th>
+                        <th>Salary Payable A/C</th>
+                        <th>HRA A/C</th>
+                        <th>Conveyence A/C</th>
+                        <th>Other A/C</th>
+                        <th>Washing A/C</th>
+                        <th>Special A/C</th>
+                        <th>Employee Con. to PF A/C</th>
+                        <th>Employee Con. to ESI A/C</th>
+                        <th>Employers Con. to PF A/C</th>
+                        <th>Employers Con. to ESI A/C</th>
+                        <th>Advance A/C</th>
+                        <th>TDS Payable A/C</th>
+                        <th>Admin Charges A/C</th>
+                        <th>Family Pension A/C</th>
+                        <th>EPF Payable A/C</th>
+                        <th>ESI Payable A/C</th>
+                        <th>Wages A/C</th>
+                        <th>Wages Payable A/C</th>
+                        <th>Production Incentive A/C</th>
+                        <th>Production Inc. Payable A/C</th>
+                        <th>Ex Gratia A/C</th>
+                        <th>Ex-Gratia Payable A/C</th>
+                        <th>Other Monthly Deduction A/C</th>
+                        <th>Loan A/C</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- Pagination container -->
+        <div class="row p-3">
+            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+        </div>
+    </div>
+
+</fieldset>
+<script>
+    // Pagination controls
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let paginationHtml = '';
+
+        if (currentPage > 1) {
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHtml += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+                        onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(paginationHtml);
+    }
+
+    // Page navigation
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInsurancePolicies();
+    }
+</script>

@@ -1,0 +1,116 @@
+﻿@{
+	ViewBag.Title = "Account Reco";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Account Reco</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "AccountRecoList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DOC_NO" class="form-label">Doc No</label>
+					<input type="number" class="form-control" id="NumDOC_NO" name="DOC_NO" placeholder="Enter Doc No">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="PARTY_NAME" class="form-label">Party Name</label>
+					<select class="form-control" id="ddlPARTY_NAME" name="PARTY_NAME">
+						<option value="">-- Select Party Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DOC_DATE" class="form-label">Doc Date</label>
+					<input type="date" class="form-control" id="DOC_DATE" name="DOC_DATE" placeholder="Enter Date">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BALANCE_OUR_BOOK" class="form-label">Balance as per our books</label>
+					<input type="text" class="form-control" id="TxtBALANCE_OUR_BOOK" name="BALANCE_OUR_BOOK" placeholder="Enter Balance as per our books">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BALANCE_PARTY_BOOKS" class="form-label">Balance as per Party Books</label>
+					<input type="text" class="form-control" id="TxtBALANCE_PARTY_BOOKS" name="BALANCE_PARTY_BOOKS" placeholder="Enter Balance as per Party Books">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="REASON_FOR_DIFF" class="form-label">Reason for Diff</label>
+					<select class="form-control" id="ddlREASON_FOR_DIFF" name="REASON_FOR_DIFF">
+						<option value="">-- Select Reason --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DIFFERENCE_AMOUNT" class="form-label">Difference Amount</label>
+					<input type="number" class="form-control" id="DIFFERENCE_AMOUNT" name="DIFFERENCE_AMOUNT" placeholder="Enter Diff. Amount">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DIFFERENCE_VOUCHERS" class="form-label">Difference in Vouchers</label>
+					<textarea type="text" class="form-control" id="TxtDIFFERENCE_VOUCHERS" name="DIFFERENCE_VOUCHERS" placeholder="Enter Difference in Vouchers"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="REMARKS" class="form-label">Remarks</label>
+					<textarea type="text" class="form-control" id="TxtREMARKS" name="REMARKS" placeholder="Enter Remarks"></textarea>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="STATUS" class="form-label">Status</label>
+					<select class="form-control" id="ddlSTATUS" name="STATUS">
+						<option value="">-- Select Status --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			@* <div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div> *@
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+</script>

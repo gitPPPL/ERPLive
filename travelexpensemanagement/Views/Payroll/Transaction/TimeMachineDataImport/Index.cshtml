@@ -1,0 +1,361 @@
+﻿@{
+    ViewBag.Title = "Time Machine Data Import";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Time Machine Data Import</legend>
+    <form id="TimeMachineForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtEmployeeCode">Employee Code</label>
+                    <input type="text" class="form-control" id="TxtEmployeeCode" placeholder="Enter Employee Code" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtEmployeeName">Employee Name</label>
+                    <input type="text" class="form-control" id="TxtEmployeeName" placeholder="Enter Employee Name" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtMachineCode">Machine Code</label>
+                    <input type="text" class="form-control" id="TxtMachineCode" placeholder="Enter Machine Code">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDepartment">Department</label>
+                    <input type="text" class="form-control" id="TxtDepartment" placeholder="Enter Department">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmInTime">In Time</label>
+                    <input type="time" class="form-control" id="TmInTime" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmOutTime">Out Time</label>
+                    <input type="time" class="form-control" id="TmOutTime" /> 
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="Txtessl">eSSL Machine Data Import</label>
+                    <input type="text" class="form-control" id="Txtessl" />
+                </div>
+            </div>
+            <div class="btn-mt">
+                <button type="button" class="btn btn-success" id="btn_import"><i class="fa fa-download"></i>Import Polytax Data</button>
+                <input type="file" id="FileUpload" accept=".dat" style="display: none;" />
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblTimeMachineDataImport" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Type</th>
+                            <th>SrNo</th>
+                            <th>Date</th>
+                            <th>Emp Code</th>
+                            <th>Emp Name</th>
+                            <th>Deptt</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                            <th>Data</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <div class="btn-mt button-right">
+                    <button type="button" class="btn btn-primary" id="btn_save"><i class="fa fa-save"></i>Save</button>
+                    <button type="button" class="btn btn-danger" id="btn_cancel"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function () {
+        loadImportedData();
+    });
+
+    $('#btn_import').on('click', function () {
+        $('#FileUpload').click();
+    });
+
+    $('#FileUpload').on('change', function () {
+        console.log("File input changed", this.files);
+        const file = this.files[0];
+
+        if (!file) {
+            toastr.warning("No file selected.");
+            return;
+        }
+
+        console.log("Uploading file:", file.name);
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+            url: '/TimeMachineDataImport/ImportFromFile',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                if (res.success) {
+                    console.log(res);
+                    toastr.success("File parsed successfully. Preview below.");
+
+                    const tbody = $('#tblTimeMachineDataImport tbody');
+                    tbody.empty();
+
+                    if (res.data.length === 0) {
+                        tbody.append('<tr><td colspan="11" class="text-center">No records found in file.</td></tr>');
+                        return;
+                    }
+
+                    res.data.forEach(item => {
+                        const empCodeNoLeadingZeros = item.emp_code.replace(/^0+/, '');
+
+                        tbody.append(`
+                            <tr>
+                                <td style="display:none;">${item.Code}</td>
+                                <td>${item.type}</td>
+                                <td>${item.srNo}</td>
+                                <td>${item.date}</td>
+                                <td>${empCodeNoLeadingZeros}</td>
+                                <td>${item.emp_name}</td>
+                                <td>${item.deptt}</td>
+                                <td>${item.in_Time}</td>
+                                <td>${item.out_Time}</td>
+                                <td>${item.data}</td>
+                                <td style="display:none;"></td>
+                            </tr>
+                        `);
+                    });
+
+                    // Store this data somewhere (optional) for "Save" button usage
+                    window.importedTimeMachineData = res.data;
+
+                } else {
+                    toastr.error(res.message || "Failed to parse file.");
+                }
+                $('#FileUpload').val('');
+            },
+            error: function () {
+                toastr.error("Server error during import.");
+                $('#FileUpload').val('');
+            }
+        });
+    });
+
+    $('#btn_save').on('click', function () {
+        if (!window.importedTimeMachineData || window.importedTimeMachineData.length === 0) {
+            toastr.warning("No data to save.");
+            return;
+        }
+
+        $.ajax({
+            url: '/TimeMachineDataImport/SaveImportedData',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(window.importedTimeMachineData),
+            success: function (res) {
+                if (res.success) {
+                    toastr.success(res.message);
+                    $('#tblTimeMachineDataImport tbody').empty();
+                    window.importedTimeMachineData = [];
+                } else {
+                    toastr.error(res.message || "Failed to save data.");
+                }
+            },
+            error: function () {
+                toastr.error("Server error during save.");
+            }
+        });
+    });
+
+    function loadImportedData() {
+        $.ajax({
+            url: '/TimeMachineDataImport/GetDataList',
+            type: 'GET',
+            data: {
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                if (res.success) {
+                    const tbody = $('#tblTimeMachineDataImport tbody');
+                    tbody.empty();
+
+                    const data = res.data || [];
+                    const totalCount = res.totalCount || 0;
+
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="11" class="text-center">No records found.</td></tr>');
+                        $('#tablePagination').empty();
+                        return;
+                    }
+
+                    data.forEach(item => {
+                        const empCodeNoLeadingZeros = item.emp_code.replace(/^0+/, '');
+
+                        tbody.append(`
+                            <tr>
+                                <td style="display:none;">${item.Code}</td>
+                                <td>${item.type}</td>
+                                <td>${item.srNo}</td>
+                                <td>${item.date}</td>
+                                <td>${empCodeNoLeadingZeros}</td>
+                                <td>${item.emp_name}</td>
+                                <td>${item.deptt}</td>
+                                <td>${item.in_Time}</td>
+                                <td>${item.out_Time}</td>
+                                <td>${item.data}</td>
+                                <td style="display:none;"></td>
+                            </tr>
+                        `);
+                    });
+
+                    renderPagination(totalCount, pageSize, currentPage);
+                    window.importedTimeMachineData = data;
+                } else {
+                    toastr.error(res.message || "Failed to fetch data.");
+                }
+            },
+            error: function () {
+                toastr.error("Server error during data load.");
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button onclick="goToPage(1)">First</button>`;
+            html += `<button onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadImportedData();
+    }
+
+    // function loadImportedData() {
+    //     $.ajax({
+    //         url: '/TimeMachineDataImport/GetDataList',
+    //         type: 'GET',
+    //         success: function (res) {
+    //             if (res.success) {
+    //                 const tbody = $('#tblTimeMachineDataImport tbody');
+    //                 tbody.empty();
+
+    //                 if (res.data.length === 0) {
+    //                     tbody.append('<tr><td colspan="11" class="text-center">No records found.</td></tr>');
+    //                     return;
+    //                 }
+
+    //                 res.data.forEach(item => {
+    //                     const empCodeNoLeadingZeros = item.emp_code.replace(/^0+/, '');
+
+    //                     tbody.append(`
+    //                         <tr>
+    //                             <td style="display:none;">${item.Code}</td>
+    //                             <td>${item.type}</td>
+    //                             <td>${item.srNo}</td>
+    //                             <td>${item.date}</td>
+    //                             <td>${empCodeNoLeadingZeros}</td>
+    //                             <td>${item.emp_name}</td>
+    //                             <td>${item.deptt}</td>
+    //                             <td>${item.in_Time}</td>
+    //                             <td>${item.out_Time}</td>
+    //                             <td>${item.data}</td>
+    //                             <td style="display:none;"></td>
+    //                         </tr>
+    //                     `);
+    //                 });
+
+    //                 window.importedTimeMachineData = res.data;
+    //             } else {
+    //                 toastr.error(res.message || "Failed to fetch data.");
+    //             }
+    //         },
+    //         error: function () {
+    //             toastr.error("Server error during data load.");
+    //         }
+    //     });
+    // }
+
+
+</script>

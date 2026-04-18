@@ -1,0 +1,542 @@
+﻿@{
+    ViewBag.Title = "Delivery Challan Memo Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Delivery Challan Memo Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "DeliveryChallanMemoList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="DeliveryChallanMemoForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlEmployeeName">Employee Name</label>
+                    <select class="form-control" id="ddlEmployeeName">
+                        <option>--Select Employee Name--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlVenderName">Vender Name</label>
+                    <select class="form-control" id="ddlVenderName">
+                        <option>--Select Vender Name--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtTransportCourier">Transport/Courier</label>
+                    <input type="text" class="form-control" id="TxtTransportCourier" placeholder="Enter Transport/Courier">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtThrough">Through</label>
+                    <input type="text" class="form-control" id="TxtThrough">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtReturnDate">Return Date</label>
+                    <input type="date" class="form-control" id="DtReturnDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea type="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblChallanEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th style="width:200px;">Item Name</th>
+                            <th>Unit</th>
+                            <th>Nos</th>
+                            <th>Quantity</th>
+                            <th>Approx. Amt.</th>
+                            <th>Remark</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+
+    // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+
+    let rowIndex = 0;
+    const rowsData = [];
+
+
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        if (!isNaN(rowId) && rowId > 0) {
+            //LoadGodownById(rowId);
+            if (isReadOnly) {
+                //setGodownFormReadOnly();
+            }
+            loadItemList(compCode);
+            loadUOMList();
+        }
+        else{
+            $.when(
+                loadItemList(compCode),
+                loadUOMList()
+            ).then(function () {
+                addNewRowBelow();
+            });
+        }
+        loadNextDocNo(yearCode);
+        loadEmployeeList(compCode);
+        loadVendorList(compCode,branchCode,yearCode);
+    });
+    function loadNextDocNo(yearC){
+        $.ajax({
+            url: '/DeliveryChallanMemo/GetNextV_NO',
+            type: 'GET',
+            data: { yearCode : yearC },
+            success: function (response) {
+                $('#NumDocNo').val(response).attr('disabled',true);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading DocNo: ' + error);
+            }
+        });
+    }
+
+    function loadEmployeeList(CCode) {
+        $.ajax({
+            url: '/DeliveryChallanMemo/GetEmpList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode },
+            success: function (data) {
+                var ddl = $('#ddlEmployeeName');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Employee Name --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;' + item.value + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading employee list:", xhr.responseText);
+                toastr.error('Error loading employee list: ' + error);
+            }
+        });
+    }
+
+    function loadVendorList(CCode, BCode, YCode) {
+        $.ajax({
+            url: '/DeliveryChallanMemo/GetVendorList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode, bCode: BCode, yCode: YCode },
+            success: function (data) {
+                var ddl = $('#ddlVenderName');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Vendor Name--</option>');
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading Vendor list: ", xhr.responseText);
+                toastr.error('Error loading Vendor list: ' + error);
+            }
+        });
+    }
+
+    function loadItemList(cCode) {
+        return $.ajax({
+            url: '/DeliveryChallanMemo/GetItemList',
+            type: 'GET',
+            data: { cCode: cCode }, // <-- pass compCode to controller
+            dataType: 'json',
+        }).then(function (data) {
+            const map = {};
+            data.forEach(item => {
+                map[item.value] = item.text;
+            });
+            return map;
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading Item list: ' + error);
+            return {};
+        });
+    }
+    function loadUOMList() {
+        return $.ajax({
+            url: '/DeliveryChallanMemo/GetUOMList',
+            type: 'GET',
+            dataType: 'json',
+        }).then(function (data) {
+            const map = {};
+            data.forEach(item => {
+                map[item.value] = item.text;
+            });
+            return map;
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading UOM list: ' + error);
+            return {};
+        });
+    }
+
+    function addNewRowBelow() {
+        rowIndex++;
+
+        const newRowData = {
+            itemName: '',
+            unit: '',
+            nos: '',
+            quantity: '',
+            approxAmt: '',
+            remark: ''
+        };
+        rowsData.push(newRowData);
+
+        const createRow = () => {
+            return `
+                <tr>
+                    <td class="form-control" style="display:none;">
+                        <input type="hidden" id="code_${rowIndex}" name="code[${rowIndex}]" value="">
+                    </td>
+                    <td style="width:200px;">
+                        <select class="form-control" id="itemName_${rowIndex}" name="itemName[${rowIndex}]" class="form-select form-select-sm">
+                            <option value="">-- Select Item --</option>
+                        </select>
+                    </td>
+                    <td style="width:150px;">
+                        <select class="form-control" id="unit_${rowIndex}" name="unit[${rowIndex}]" class="form-select form-select-sm">
+                            <option value="">-- Select UOM --</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input class="form-control" type="number" id="nos_${rowIndex}" name="nos[${rowIndex}]" value="0">
+                    </td>
+                    <td>
+                        <input class="form-control" type="number" id="quantity_${rowIndex}" name="quantity[${rowIndex}]" value="0">
+                    </td>
+                    <td>
+                        <input class="form-control" type="number" id="approxAmt_${rowIndex}" name="approxAmt[${rowIndex}]" value="0">
+                    </td>
+                    <td>
+                        <input class="form-control" type="text" id="remark_${rowIndex}" name="remark[${rowIndex}]" value="">
+                    </td>
+                    <td>
+                        <i class="fas fa-trash ms-2" onclick="deleteRow(this)" style="color: red; cursor:pointer;"></i>
+                        <i class="fas fa-plus-circle ms-2 text-success add-row-icon" style="cursor:pointer;" onclick="addNewRowBelow()"></i>
+                    </td>
+                </tr>
+            `;
+        };
+
+        $('#tblChallanEntry tbody').append(createRow());
+
+        // Load dropdown data for both Item and UOM
+        Promise.all([
+            loadItemList(compCode),
+            loadUOMList()
+        ]).then(([itemMap, uomMap]) => {
+            const itemName = $(`#itemName_${rowIndex}`);
+            const unit = $(`#unit_${rowIndex}`);
+
+            // Populate item dropdown
+            $.each(itemMap, (code, name) => {
+                itemName.append(`<option value="${code}">${name}</option>`);
+            });
+
+            // Populate UOM dropdown
+            $.each(uomMap, (code, name) => {
+                unit.append(`<option value="${code}">${name}</option>`);
+            });
+        });
+
+        // Show add icon only for the last row
+        $('#tblChallanEntry tbody tr').each(function (index, tr) {
+            $(tr).find('.add-row-icon').toggle(index === $('#tblChallanEntry tbody tr').length - 1);
+        });
+    }
+
+
+    function deleteRow(icon) {
+        $(icon).closest('tr').remove();
+        $('#tblChallanEntry tbody tr').each(function (index, tr) {
+            $(tr).find('.add-row-icon').toggle(index === $('#tblChallanEntry tbody tr').length - 1);
+        });
+    }
+
+    $('#btn-save').click(function (e) {
+        e.preventDefault();
+
+        const docNo = $('#NumDocNo').val();
+        const docDate = $('#DtDocDate').val();
+        const employee = $('#ddlEmployeeName').val();
+        const vendor = $('#ddlVenderName').val();
+
+        if (!docNo || !docDate || !employee || !vendor) {
+            toastr.warning("Please fill all required header fields.");
+            return;
+        }
+
+        // Parse integers safely, or use 0 if invalid
+        const parsedDocNo = parseInt(docNo) || 0;
+        const parsedEmployee = parseInt(employee) || 0;
+        const parsedVendor = parseInt(vendor) || 0;
+
+        // For RETURN_DATE, if empty send null (make sure model property is nullable)
+        let returnDateVal = $('#DtReturnDate').val();
+        if (!returnDateVal) {
+            returnDateVal = null;
+        }
+
+        const headerData = {
+            CODE: $('#TxtCode').val() ? parseInt($('#TxtCode').val()) : 0,
+            V_NO: parsedDocNo,
+            V_DATE: docDate,                // ideally ISO format yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
+            EMP_CODE: parsedEmployee,
+            VENDOR_CODE: parsedVendor,
+            TRANSPORT_NAME: $('#TxtTransportCourier').val() || "",
+            THROUGH: $('#TxtThrough').val() || "",
+            RETURN_DATE: returnDateVal,
+            REMARKS: $('#TxtRemarks').val() || "",
+            // Add default values if your model requires them:
+            STATUS: 1,    // example, adjust as needed
+            AED: "A",     // example default
+            BRANCH_CODE: 1, // replace with actual branch code or from somewhere
+            COMP_CODE: 1,   // replace with actual company code
+            YEAR_CODE: 2025 // replace with actual year code
+        };
+
+        let lineItems = [];
+        let isValid = true;
+
+        $('#tblChallanEntry tbody tr').each(function () {
+            const row = $(this);
+
+            const itemCode = parseInt(row.find('select[id^="itemName_"]').val());
+            const unitName = row.find('input[id^="unit_"]').val() || "";
+            const nos = parseInt(row.find('input[id^="nos_"]').val()) || 0;
+            const quantity = parseFloat(row.find('input[id^="quantity_"]').val()) || 0;
+            const approxAmt = parseFloat(row.find('input[id^="approxAmt_"]').val()) || 0;
+            const remark = row.find('input[id^="remark_"]').val() || "";
+
+            if (!itemCode || quantity <= 0) {
+                toastr.warning("Please fill required item fields (Item Code, Quantity).");
+                isValid = false;
+                return false; // breaks the each loop
+            }
+
+            lineItems.push({
+                ITEM_CODE: itemCode,
+                UNIT_NAME: unitName,
+                NOS: nos,
+                QTY: quantity,
+                APPROX_AMT: approxAmt,
+                REMARKS: remark,
+                // Add default or required fields with placeholder values:
+                COMP_CODE: 1,      // same as header COMP_CODE or wherever you get it
+                BRANCH_CODE: 1,    // same as header
+                YEAR_CODE: 2025,   // same as header
+                DOC_ID: headerData.V_TYPE + headerData.V_NO, // If you have V_TYPE
+                V_NO: headerData.V_NO,
+                V_TYPE: headerData.V_TYPE || "DT", // replace with actual V_TYPE if you have one
+                V_DATE: headerData.V_DATE,
+                UNIT_CODE: 0,      // if you have a code for UNIT, else 0 or null
+                AED: "A",
+                STATUS: 1,
+                SNO: 0,
+                SRNO: 0,
+                UUSER: 0,
+                EUSER: 0,
+                WSID: "WEB",
+                LIP: "127.0.0.1",
+                LID: "MACHINE"
+            });
+        });
+
+        if (!isValid || lineItems.length === 0) {
+            toastr.warning("Please enter at least one valid line item.");
+            return;
+        }
+
+        const payload = {
+            Header: headerData,
+            Items: lineItems
+        };
+
+        console.log(payload);
+
+        $.ajax({
+            url: '/DeliveryChallanMemo/SaveDeliveryChallanMemo',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Delivery Challan saved successfully!');
+                    setTimeout(() => {
+                        window.location.href = '/DeliveryChallanMemoList/Index';
+                    }, 1000);
+                } else {
+                    toastr.error('Save failed: ' + (response.message || 'Unknown error'));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error while saving: ' + error);
+            }
+        });
+    });
+
+
+    // $('#btn-save').click(function (e) {
+    //     e.preventDefault();
+
+    //     const docNo = $('#NumDocNo').val();
+    //     const docDate = $('#DtDocDate').val();
+    //     const employee = $('#ddlEmployeeName').val();
+    //     const vendor = $('#ddlVenderName').val();
+
+    //     if (!docNo || !docDate || !employee || !vendor) {
+    //         toastr.warning("Please fill all required header fields.");
+    //         return;
+    //     }
+
+    //     const headerData = {
+    //         CODE: $('#TxtCode').val() || null,
+    //         DOC_NO: parseInt(docNo),
+    //         DOC_DATE: docDate,
+    //         EMPLOYEE_CODE: employee,
+    //         VENDOR_CODE: vendor,
+    //         TRANSPORT_COURIER: $('#TxtTransportCourier').val(),
+    //         THROUGH: $('#TxtThrough').val(),
+    //         RETURN_DATE: $('#DtReturnDate').val(),
+    //         REMARKS: $('#TxtRemarks').val()
+    //     };
+
+    //     let lineItems = [];
+    //     let isValid = true;
+
+    //     // ✅ THIS is where `row` is defined
+    //     $('#tblChallanEntry tbody tr').each(function () {
+    //         const row = $(this);
+
+    //         const itemName = row.find('select[id^="itemName_"]').val();
+    //         const unit = row.find('input[id^="unit_"]').val();
+    //         const nos = row.find('input[id^="nos_"]').val();
+    //         const quantity = row.find('input[id^="quantity_"]').val();
+    //         const approxAmt = row.find('input[id^="approxAmt_"]').val();
+    //         const remark = row.find('input[id^="remark_"]').val();
+
+    //         if (!itemName || !quantity) {
+    //             toastr.warning("Please fill required item fields (Item Name, Quantity).");
+    //             isValid = false;
+    //             return false; // Break the loop
+    //         }
+
+    //         lineItems.push({
+    //             ITEM_CODE: itemName,
+    //             UNIT: unit,
+    //             NOS: parseInt(nos) || 0,
+    //             QUANTITY: parseFloat(quantity) || 0,
+    //             APPROX_AMOUNT: parseFloat(approxAmt) || 0,
+    //             REMARK: remark
+    //         });
+    //     });
+
+    //     if (!isValid || lineItems.length === 0) {
+    //         toastr.warning("Please enter at least one valid line item.");
+    //         return;
+    //     }
+
+    //     const payload = {
+    //         header: headerData,
+    //         items: lineItems
+    //     };
+
+    //     console.log(payload); 
+        
+    //     $.ajax({
+    //         url: '/DeliveryChallanMemo/SaveDeliveryChallanMemo',
+    //         method: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify(payload),
+    //         success: function (response) {
+    //             if (response.success) {
+    //                 toastr.success('Delivery Challan saved successfully!');
+    //                 setTimeout(() => {
+    //                     window.location.href = '/DeliveryChallanMemoList/Index';
+    //                 }, 1000);
+    //             } else {
+    //                 toastr.error('Save failed: ' + (response.message || 'Unknown error'));
+    //             }
+    //         },
+    //         error: function (xhr, status, error) {
+    //             toastr.error('Error while saving: ' + error);
+    //         }
+    //     });
+    // });
+
+
+</script>
+ 

@@ -1,0 +1,383 @@
+﻿@{
+    ViewBag.Title = "Master Insert";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;  // Exit loop once found current menu permission
+        }
+    }
+}
+
+<fieldset>
+    <legend class="legend-field">Users Details List</legend>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "UserMaster")'" type="submit" class="btn btn-add">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approve
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* Table Design Start *@
+
+
+    <div class="card">
+        <div class="table-responsive">
+            <table id="UsersTable" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th>Code</th>
+                        @* <th>UserName</th> *@
+                        <th>FullName</th>
+                        <th>Designation</th>
+                        <th>Department</th>
+                        @* <th>DepttCode</th> *@
+                        <th>EmpCode</th>
+                        @*  <th>UserLevel</th> *@
+                        <th>Pcname1</th>
+                        <th>Pcname2</th>
+                        @* <th>App device id-1</th>
+                        <th>App device id-2</th> *@
+                        <th>Active</th>
+                        @* <th>Allow days</th>
+                        <th>Password never expired</th>
+                        <th>Password change on next login</th> *@
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+     var canAdd = @canAdd.ToString().ToLower();
+    var canEdit = @canEdit.ToString().ToLower();
+    var canDelete = @canDelete.ToString().ToLower();
+    var canPrint = @canPrint.ToString().ToLower();
+    var canExport = @canExport.ToString().ToLower();
+    var canMail = @canMail.ToString().ToLower();
+    var canApproval = @canApproval.ToString().ToLower();
+    var canDocDetail = @canDocDetail.ToString().ToLower();
+
+        let currentPage = 1;
+        const pageSize = 10;
+        let searchTerm = '';
+        loadUserDetails(currentPage, searchTerm);
+        $('#searchBox').on('keyup', function () {
+            searchTerm = $(this).val().trim();
+            currentPage = 1;
+            loadUserDetails(currentPage, searchTerm);
+        });
+        $(document).on('click', '#pagination .page-link', function () {
+            const page = parseInt($(this).data('page'));
+            if (!isNaN(page)) {
+                currentPage = page;
+                loadUserDetails(currentPage, searchTerm);
+            }
+        });
+        $('#UsersTable').on('click', '.btn-delete', function () {
+        const docCode = $(this).closest('tr').data('id');
+        deleteDocStage(docCode)
+        });
+
+    $(document).on('click', '.btn-details', function() {
+        const docCode = $(this).data('doc');
+        alert(docCode)
+        showDocumentPopup(docCode);  // Your popup function
+    });
+
+        function loadUserDetails(page, search) {
+            $.ajax({
+                url: '/UserDetailslist/GetUserDetailslist',
+                type: 'GET',
+                data: {
+                    page: page,
+                    pageSizeJourneyDetails: pageSize,
+                    searchTerm: search
+                },
+                success: function (response) {
+                    if (response.success && response.travelRequests.length > 0) {
+                        const tbody = $('#UsersTable tbody');
+                        tbody.empty();
+
+                        response.travelRequests.forEach(function (row) {
+                            tbody.append(`
+                                <tr data-id="${row.code}">
+                                    <td>${row.code}</td>
+                                    <td>${row.fulL_NAME || ''}</td>
+                                    <td>${row.designation || ''}</td>
+                                    <td>${row.department || ''}</td>
+                                    <td>${row.emP_CODE || ''}</td>
+                                    <td>${row.pcName1 || ''}</td>
+                                    <td>${row.pcName2 || ''}</td>
+                                    <td>${row.active || ''}</td>
+                                    <td>
+                                    ${canEdit ? `<i class="fas fa-edit editBtn btn-edit" title="Edit"></i>` : ''}
+                                    <i class="fa fa-eye Vewbtn btn-view" title="View"></i>
+                                    ${canDelete ? `<i class='fa fa-trash btn-delete' title="delete"></i></button>` : ''}
+                                    ${canDocDetail ? `<i class="fa fa-file btn-details btn-document" data-doc="${row.code}" title="Details"></i>` : ''}
+                                    </td>
+                                </tr>
+                            `);
+                        });
+
+                        renderPagination(response.totalCount, currentPage);
+                    } else {
+                        $('#UsersTable tbody').html('<tr><td colspan="9" class="text-center text-muted">No data available.</td></tr>');
+                        $('#pagination').empty();
+                    }
+                },
+                error: function (err) {
+                    console.error('Error loading data:', err);
+                    $('#UsersTable tbody').html('<tr><td colspan="9" class="text-danger text-center">Error loading data.</td></tr>');
+                    $('#pagination').empty();
+                }
+            });
+        }
+        function renderPagination(totalCount, currentPage) {
+            const totalPages = Math.ceil(totalCount / pageSize);
+            let html = '<ul class="pagination justify-content-center">';
+
+            if (currentPage > 1) {
+                html += `<li class="page-item"><a class="page-link" href="javascript:void(0);" data-page="1">First</a></li>`;
+                html += `<li class="page-item"><a class="page-link" href="javascript:void(0);" data-page="${currentPage - 1}">Prev</a></li>`;
+            }
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+
+            if (currentPage <= 3) endPage = Math.min(5, totalPages);
+            if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="javascript:void(0);" data-page="${i}">${i}</a>
+                         </li>`;
+            }
+
+            if (currentPage < totalPages) {
+                html += `<li class="page-item"><a class="page-link" href="javascript:void(0);" data-page="${currentPage + 1}">Next</a></li>`;
+                html += `<li class="page-item"><a class="page-link" href="javascript:void(0);" data-page="${totalPages}">Last</a></li>`;
+            }
+
+            html += '</ul>';
+            $('#pagination').html(html);
+        }
+        $('#UsersTable').on('click', '.editBtn', function () {
+            const id = $(this).closest('tr').data('id');
+            window.location.href = '/UserMaster/Index?id=' + id;
+        });
+        $('#UsersTable').on('click', '.Vewbtn', function () {
+            const id = $(this).closest('tr').data('id');
+            window.location.href = '/UserMaster/Index?id=' + id + '&mode=view';
+        });
+
+    });
+
+     function deleteDocStage(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/UserDetailslist/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            // Reload the current page after deletion
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000); // delay 1 second so user sees toastr
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+
+    // Export to Excel Page
+
+    function exportToExcel() {
+            fetch('/UserDetailslist/ExportAllDocs')
+                .then(response => {
+                    if (!response.ok) throw new Error("Network response was not ok");
+                    return response.json();
+                })
+                .then(data => {
+                   const filteredData = data.map(item => ({
+                    "Code": item.code,
+                    "Full Name": item.fullName,
+                    "Designation": item.designation,
+                    "Department": item.department,
+                    "Employee Code": item.empCode,
+                    "PC Name 1": item.pcName1,
+                    "PC Name 2": item.pcName2,
+                    "PC Name 3": item.pcName3,
+                    "Status": item.status
+                }));
+                    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+                    const pageName = "User Master";
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2, '0');
+                    const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+                    const fileName = `${pageName}_${timestamp}.xlsx`;
+                    XLSX.writeFile(workbook, fileName);
+                })
+                .catch(error => {
+                    console.error("Export failed:", error);
+                    toastr.error("Failed to export data.");
+                });
+        }
+    function callGetReportAsPdf() {
+        var reportName = "USER_MAST";
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+            type: 'GET',
+            data: { Reportname: reportName },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    }
+    function showDocumentPopup(docCode) {
+        $.ajax({
+            url: '/UserDetailslist/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',  // important
+            data: { docCode: docCode },
+            success: function(response) {
+                if(response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function() {
+                toastr.error("An error occurred while fetching document details.");
+            }
+        });
+    }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

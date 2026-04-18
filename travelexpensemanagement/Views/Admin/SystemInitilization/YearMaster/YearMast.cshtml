@@ -1,0 +1,524 @@
+﻿@{
+	ViewBag.Title = "Year Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Year Master</legend>
+	<div class="row">
+
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "YearMaster")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+			</div>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCurrentYear">Current Year <span class="required">*</span></label>
+					<input type="text" class="form-control" id="TxtCurrentYear" name="CurrentYear" placeholder="Enter Current Year">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCurrentDSN">Current DSN</label>
+					<input type="text" class="form-control" id="TxtCurrentDSN" name="CurrencyDSN" placeholder="Enter Currency DSN">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCurrentUser">Current User</label>
+					<input type="text" class="form-control" id="TxtCurrentUser" name="TxtCurrentUser" placeholder="Enter Current User">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCurrentServer">Current Server</label>
+					<input type="text" class="form-control" id="TxtCurrentServer" name="CurrentServer" placeholder="Enter Current Server">
+				</div>
+			</div>
+			
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtPreviousYear">Previous Year <span class="required">*</span></label>
+					<input type="text" class="form-control" id="TxtPreviousYear" name="PREVIOUS_YEAR" placeholder="Enter Previous Year">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtPreviousDSN">Previous DSN</label>
+					<input type="text" class="form-control" id="TxtPreviousDSN" name="PreviousDSN" placeholder="Enter Previous DSN">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtPreviousUser">Previous User</label>
+					<input type="text" class="form-control" id="TxtPreviousUser" name="PreviousUser" placeholder="Enter Previous User">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtPreviousServer">Previous Server</label>
+					<input type="text" class="form-control" id="TxtPreviousServer" name="PreviousServer" placeholder="Enter Previous Server">
+				</div>
+			</div>
+							
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCurrentPassword">Current Password</label>
+					<input type="text" class="form-control" id="TxtCurrentPassword" name="CurrentPassword" placeholder="Enter Current Password">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtPreviousPassword">Previous Password</label>
+					<input type="text" class="form-control" id="TxtPreviousPassword" name="PreviousPassword" placeholder="Enter Previous Password">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtPrefixYear">Prefix Year <span class="required">*</span></label>
+					<input type="number" class="form-control" id="TxtPrefixYear" name="PrefixYear" placeholder="Enter Prefix Year">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtStartDate">Start Date <span class="required">*</span></label>
+					<input type="date" class="form-control" id="TxtStartDate" name="StartDate" placeholder="Enter Start Date">
+				</div>
+			</div>							
+			
+		</div>
+		<div class="row">
+			
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtEndDate">End Date <span class="required">*</span></label>
+					<input type="date" class="form-control" id="TxtEndDate" name="EndDate" placeholder="Enter Short Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtTStartDate">TStart Date <span class="required">*</span></label>
+					<input type="date" class="form-control" id="TxtTStartDate" name="TStartDate" placeholder="Enter TStart Date">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlDatabaseAvailable">Database Available</label>
+					<select class="form-control" id="ddlDatabaseAvailable" name="DatabaseAvailable">						 
+						<option value="YES">YES</option>
+						<option value="NO">NO</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlStatus">Status</label>
+					<select class="form-control" id="ddlStatus" name="Status">						
+						<option value="UNLOCK">UNLOCK</option>
+						<option value="LOCK">LOCK</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-6 col-md-6">
+				<div class="btn-align">
+				<button type="button" id="" class="btn btn-success"><i class="fas fa-file-import"></i>Import PrevYear User Permission</button>
+				<button type="button" id="" class="btn btn-success"><i class="fas fa-file-import"></i>Import PrevYear Doc Number</button>
+				<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+			</div>
+			</div>
+		</div>
+	</form>
+
+</fieldset>
+
+<script>
+
+		let YearMastCd=0;
+		let PreviousInputCode=0;
+		let allMastData = [];
+		let filteredData = [];
+		let currentPage = 1;
+		const rowsPerPage = 10;
+		let ModeOfControl="";
+		let getYearMastUpdtData=[];
+	$(document).ready(function () {
+		const storedData = localStorage.getItem('editYearMast');
+		ModeOfControl = localStorage.getItem('Mode');
+		localStorage.removeItem('Mode');
+
+		if (storedData && ModeOfControl === 'Edit') {
+			getYearMastUpdtData = JSON.parse(storedData);
+			$('#TxtCode').val('');
+			$('#TxtCode').val(getYearMastUpdtData.code);
+			fillAlltextFields();
+			$('#btn-save').show();
+			$('#cancelBtn').show();
+			localStorage.removeItem('editYearMast');
+		} else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getYearMastUpdtData = JSON.parse(storedData);
+			fillAlltextFields();
+			localStorage.removeItem('editYearMast');
+		}
+
+		$('#TxtCurrentYear').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtCurrentDSN').focus();
+				}
+			});
+			 $('#TxtCurrentDSN').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtCurrentUser').focus();
+				}
+			});
+			$('#TxtCurrentUser').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtCurrentServer').focus();
+				}
+			});
+			$('#TxtCurrentServer').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtPreviousYear').focus();
+				}
+			});
+
+			 $('#TxtPreviousYear').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtPreviousDSN').focus();
+				}
+			});
+			 $('#TxtPreviousDSN').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtPreviousUser').focus();
+				}
+			$('#TxtPreviousUser').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtPreviousServer').focus();
+				}
+			});
+			 $('#TxtPreviousServer').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtCurrentPassword').focus();
+				}
+			});
+			 $('#TxtCurrentPassword').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtPreviousPassword').focus();
+				}
+			});
+
+			});
+			$('#TxtPreviousPassword').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtPrefixYear').focus();
+				}
+			});
+
+			 $('#TxtPrefixYear').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtStartDate').focus();
+
+				}
+			});
+
+			$('#TxtStartDate').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtEndDate').focus();
+				}
+			});
+			 $('#TxtEndDate').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtTStartDate').focus();
+				}
+			});
+			 $('#TxtTStartDate').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#btn-save').focus();
+				}
+			});
+
+	});
+
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+				if (!validateRequiredField('#TxtCurrentYear', 'Current Year')) return;
+				if (!validateRequiredField('#TxtPreviousYear', 'Previous Year')) return;
+				if (!validateRequiredField('#TxtPrefixYear', 'Prefix Year')) return;
+				if (!validateRequiredField('#TxtStartDate', 'Start Date')) return;
+				if (!validateRequiredField('#TxtEndDate', 'End Date')) return;
+				if (!validateRequiredField('#TxtTStartDate', 'TStart Date')) return;
+
+				var code= toNullableInt($('#TxtCode').val());
+				var CurrentYear = toNullableString($('#TxtCurrentYear').val());
+				var PreviousYear = toNullableString($('#TxtPreviousYear').val());
+				var StartDate= toNullableString($('#TxtStartDate').val());
+				var EndDate = toNullableString($('#TxtEndDate').val());
+				var TStartDate = toNullableString($('#TxtTStartDate').val());
+				var PrefixYear=toNullableString($('#TxtPrefixYear').val());
+				var CurrentDSN = toNullableString($('#TxtCurrentDSN').val());
+				var PreviousDSN = toNullableString($('#TxtPreviousDSN').val());
+				var CurrentServer=toNullableString($('#TxtCurrentServer').val());
+				var PreviousServer = toNullableString($('#TxtPreviousServer').val());
+				var CurrentUser = toNullableString($('#TxtCurrentUser').val());
+				var PreviousUser=toNullableString($('#TxtPreviousUser').val());
+				var CurrentPassword=toNullableString($('#TxtCurrentPassword').val());
+				var PreviousPassword = toNullableString($('#TxtPreviousPassword').val());
+
+				 var DatabaseAvl = $('#ddlDatabaseAvailable').val();
+				 var status = $('#ddlStatus').val();
+
+				var StartDate1=new Date($('#TxtStartDate').val().trim());
+				var EndDate1 =new Date($('#TxtEndDate').val().trim());
+				var TStartDate1 =new Date($('#TxtTStartDate').val().trim());
+
+				if(StartDate1> EndDate1)
+				 {
+				  toastr.warning("Start Date must be greater than end date");
+				  return;
+				 }
+				if (TStartDate1 < StartDate1 || TStartDate1 > EndDate1) {
+				toastr.warning("Transaction Start Date must be between Start Date and End Date.");
+				return;
+				}
+
+		
+
+		if(ModeOfControl=='Edit')
+		{
+			var yearmastDt = {
+					Code:code,
+					CurrentYear: CurrentYear,
+					PreviousYear: PreviousYear,
+					StartDt:StartDate,
+					EndDt: EndDate,
+					TStartDt:TStartDate,
+					PrefixYear: PrefixYear,
+					CurrentDsn: CurrentDSN,
+					PreviousDsn:PreviousDSN,
+					CurrentServer: CurrentServer,
+					PreviousServer:PreviousServer,
+					CurrentUser: CurrentUser,
+					PreviousUser:PreviousUser,
+					CurrentPassword:CurrentPassword,
+					PreviousPassword:PreviousPassword,
+					DatabaseAvl: DatabaseAvl,
+					Status:status,
+				};
+					console.log(yearmastDt);
+			 EditdebitNote(yearmastDt)
+		}
+		else
+		{
+			var yearmastDt = {
+					Code:code,
+					CurrentYear: CurrentYear,
+					PreviousYear: PreviousYear,
+					StartDt:StartDate,
+					EndDt: EndDate,
+					TStartDt:TStartDate,
+					PrefixYear: PrefixYear,
+					CurrentDsn: CurrentDSN,
+					PreviousDsn:PreviousDSN,
+					CurrentServer: CurrentServer,
+					PreviousServer:PreviousServer,
+					CurrentUser: CurrentUser,
+					PreviousUser:PreviousUser,
+					CurrentPassword:CurrentPassword,
+					PreviousPassword:PreviousPassword,
+					DatabaseAvl: DatabaseAvl,
+					Status:status,
+				};
+				console.log(yearmastDt);
+		 saveDebitNoteDt(yearmastDt);
+		}
+	});
+
+	 function saveDebitNoteDt(yearmastDt)	{
+				$.ajax({
+					url:'@Url.Action("saveyearMastDt", "YearMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(yearmastDt),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							resetFields();
+							setTimeout(function () {
+								  window.location.href ='/YearMaster/Index';
+								}, 1500);
+
+						} else {
+							toastr.error(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						console.error(xhr.responseText);
+						toastr.error("Error occurred while saving.");
+					}
+				});
+	}
+	function EditdebitNote(yearmastDt){
+			 $.ajax({
+				url: '/YearMaster/UpdatedYearMastDt',
+				type: 'POST',
+				data:JSON.stringify(yearmastDt),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/YearMaster/Index';
+								}, 1500);
+					} else {
+						toastr.error("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					toastr.error("Data not updated: " + error);
+				}
+			});
+
+	}
+
+		function resetFields() {
+			$('#TxtCurrentYear').val('');
+			$('#TxtPreviousYear').val('');
+			$('#TxtStartDate').val('');
+			$('#TxtEndDate').val('');
+			$('#TxtTStartDate').val('');
+			$('#TxtPrefixYear').val('');
+			$('#TxtCurrentDSN').val('');
+			$('#TxtPreviousDSN').val('');
+			$('#TxtCurrentServer').val('');
+			$('#TxtPreviousServer').val('');
+			$('#TxtCurrentUser').val('');
+			$('#TxtPreviousUser').val('');
+			$('#TxtCurrentPassword').val('');
+			$('#TxtPreviousPassword').val('');
+			$('#ddlDatabaseAvailable').val($('#ddlDatabaseAvailable option:first').val());
+			$('#ddlStatus').val($('#ddlStatus option:first').val());
+			$('#searchInput').val('');
+			$('#TxtCode').val('');
+		}
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		 if(ModeOfControl=='Edit')
+		 {
+		 fillAlltextFields();
+	}
+	else
+	{
+	resetFields();
+	}
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+		function formatDate(dateStr) {
+		const months = {
+			Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+			Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"
+		};
+		const [day, mon, year] = dateStr.split('-');
+		return `${year}-${months[mon]}-${day.padStart(2, '0')}`;
+	}
+
+	function fillAlltextFields() {
+		$('#TxtCode').val(getYearMastUpdtData.code);
+		$('#TxtCurrentYear').val(getYearMastUpdtData.currentYear);
+		$('#TxtCurrentDSN').val(getYearMastUpdtData.currentDsn);
+		$('#TxtCurrentUser').val(getYearMastUpdtData.currentUser);
+		$('#TxtCurrentServer').val(getYearMastUpdtData.currentServer);
+		$('#TxtPreviousYear').val(getYearMastUpdtData.previousYear);
+		$('#TxtPreviousDSN').val(getYearMastUpdtData.previousDsn);
+		$('#TxtPreviousUser').val(getYearMastUpdtData.previousUser);
+		$('#TxtPreviousServer').val(getYearMastUpdtData.previousServer);
+		$('#TxtCurrentPassword').val(getYearMastUpdtData.currentPassword);
+		$('#TxtPreviousPassword').val(getYearMastUpdtData.prevPasswrd);
+		$('#TxtPrefixYear').val(getYearMastUpdtData.prefixYear);
+
+		$('#TxtStartDate').val(formatDate(getYearMastUpdtData.startDt));
+		$('#TxtEndDate').val(formatDate(getYearMastUpdtData.endDt));
+		$('#TxtTStartDate').val(formatDate(getYearMastUpdtData.tStartDt));
+		$('#ddlDatabaseAvailable').val(getYearMastUpdtData.databaseAvl);
+	    $('#ddlStatus').val(getYearMastUpdtData.status);
+
+		// setTimeout(function () {
+		// 	$('#ddlDatabaseAvailable option').filter(function () {
+		// 		return $(this).val() == getYearMastUpdtData.databaseAvl;
+		// 	}).prop('selected', true);
+		// }, 300);
+
+		// setTimeout(function () {
+		// 	$('#ddlStatus option').filter(function () {
+		// 		return $(this).val() == getYearMastUpdtData.status;
+		// 	}).prop('selected', true);
+		// }, 300);
+	}
+
+		const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+</script>

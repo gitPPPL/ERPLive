@@ -1,0 +1,683 @@
+﻿@{
+    ViewBag.Title = "Transport Rate Quotation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var LOGINDATE = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
+}
+<fieldset>
+    <legend class="legend-field">Transport Rate Quotation</legend>
+    <form id="TransportRateQuotationForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right mb-2">
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <input type="hidden" class="form-control" id="Vtpye" >
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumDocumentNo">Document No</label>
+                    <input type="number" class="form-control" id="NumDocumentNo" placeholder="Enter Document No" readonly>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="DtDocumentDate">Document Date</label>
+                    <input type="date" class="form-control" id="DtDocumentDate">
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="ddlDONo">DO No</label>
+                    <select class="form-control" id="ddlDONo">
+                        <option value="">Select DO No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtBillTo">Bill To</label>
+                    <select class="form-control" id="TxtBillTo">
+                        <option value="">Select DO No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtAddressL1">Address L1</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL1" placeholder="Enter Address L1"readonly ></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtAddressL2">Address L2</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL2" placeholder="Enter Address L2" readonly></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtAddressL3">Address L3</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL3" placeholder="Enter Address L3" readonly></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtCity">City</label>
+                    <select class="form-control" id="DDlCityname">
+                        <option value="">Select City Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumQuantity">Quantity</label>
+                    <input type="number" class="form-control" id="NumQuantity" placeholder="Enter Quantity"/>
+                </div>
+            </div>
+        
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Mobile No.</label>
+                    <div class="input-icon-wrapper">
+                        <input type="number" class="form-control" id="NumMobile">
+                        <span class="input-icon" id="Btn_Whatsapp"><i class="fab fa-whatsapp" style="font-size: 18px;color: #25d366;margin-right: 6px;"></i> Whatsapp</span>
+                    </div>
+                </div>
+            </div>
+          
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="button-right btn-mt">
+                    <button type="button" class="btn btn-success" id="btn_load"><i class="fa fa-download"></i> Load Transports</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblTransportRateQuotation" class="table-width">
+                    <colgroup>
+                        <col style="width: 10%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 5%;" />
+                    </colgroup>
+                    <thead class="table-head">
+                        <tr>
+                            <th>Code</th>
+                            <th>Transport name</th>
+                            <th>Rate</th>
+                            <th>Final Rate</th>
+                            <th>Truck No</th>
+                            <th>GR No</th>
+                            <th>GR Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "TransportRateQuotationList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const $tbody = $('#tblTransportRateQuotation tbody');
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    var logindate = "@LOGINDATE"; 
+    const Vtype = "";
+    let transportData = []; 
+
+   $(document).ready(function () {
+        $('#DtDocumentDate').attr("Max", logindate);            
+        LoadDropDown()
+            .then(() => {
+                if (!rowId) {
+                    const dateInput = document.getElementById('DtDocumentDate');
+                    if (dateInput) {
+                        dateInput.valueAsDate = new Date(); 
+                    }
+                    GetVNo(); 
+                }
+                else {
+                    LoadFormByID(rowId); 
+
+                    if(mode= "view")
+                    {
+                       readOnlyForm();
+                    }                   
+                }
+                addRow({}, transportData); 
+            })
+            .catch(error => {
+                console.error("Error loading dropdown:", error);
+            });
+                    
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addRow({}, transportData); 
+        });
+                
+        $("#btn_load").click(async function (e) {
+            e.preventDefault();
+            await GetTransportData(); 
+        });
+
+      $("#Btn_Whatsapp").click(async function(e) {
+        e.preventDefault();
+        var mobileNumber = $("#NumMobile").val();
+        var phoneRegex = /^\d{10}$/;
+
+        if (phoneRegex.test(mobileNumber)) {
+            try {
+                await SendMessage(mobileNumber, "Hi, this is Test whatsapp.", "123");
+            } catch (error) {
+                console.error("Error while sending message: ", error);
+                alert("An error occurred while sending the message.");
+            }
+        } else {
+            alert("Please enter a valid mobile number with 10 digits.");
+        }
+    });
+
+
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+            $row.remove();             
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+
+        $('#ddlDONo').on('select2:select', async function (e) {
+        try {
+            const doNo = $(this).val();
+            const V_NO = $.trim($('#NumDocumentNo').val())
+                          ? parseFloat($.trim($('#NumDocumentNo').val()))
+                          : null;
+
+            await fetchDataByDo(doNo, V_NO);
+            console.log('Data fetched successfully');
+        } catch (error) {
+            console.error('Error during fetch:', error);
+            alert('An error occurred while fetching data.');
+        }
+    });
+
+        $("#btn-save").click(function (e) {
+        e.preventDefault();
+ 
+        const DOC_ID = $.trim($('#TxtCode').val()) || null;
+        const V_NO = $.trim($('#NumDocumentNo').val()) ? parseFloat($.trim($('#NumDocumentNo').val())) : null;
+        const V_DATE = formatDate($("#DtDocumentDate").val()) || null; 
+        const DO_NO = parseInt($('#ddlDONo').val()) || 0;
+        const DO_TYPE = $.trim($('#Vtpye').val()) || "";
+        const BILL_CODE = parseInt($('#TxtBillTo').val()) || 0;
+
+        let BILL_NAME = "" ;
+        if(BILL_CODE)
+        {
+            BILL_NAME = $('#TxtBillTo option:selected').text().trim() || "";
+            BILL_NAME = BILL_NAME.replace(/\s?\(.*\)$/, "").trim() || "";
+        }     
+
+        const SHIP_ADD1 = $.trim($('#TxtAddressL1').val()) || "";
+        const SHIP_ADD2 = $.trim($('#TxtAddressL2').val()) || "";
+        const SHIP_ADD3 = $.trim($('#TxtAddressL3').val()) || "";
+        const REMARKS = $.trim($('#TxtRemarks').val()) || "";
+        const QTY = $.trim($('#NumQuantity').val()) || "";
+        const ACTION = !DOC_ID ? 'INSERT' : 'UPDATE';
+
+        if (!V_DATE) {
+            toastr.warning("Please select a Voucher Date.");
+            $("#DtDocumentDate").focus(); 
+            return;
+        }
+        
+        if (!V_NO) {
+            toastr.warning("Please select a Voucher No.");
+            $("#NumDocumentNo").focus();
+            return;
+        }
+
+        if (!DO_NO) {
+            toastr.warning("Please select a DO No.");
+            $("#ddlDONo").focus();
+            return;
+        }
+        const payload = {
+            Header: {
+                DOC_ID: DOC_ID,
+                BILL_CODE: BILL_CODE,
+                BILL_NAME: BILL_NAME,
+                V_NO: V_NO,
+                V_DATE: V_DATE,
+                DO_NO: DO_NO,
+                DO_TYPE: DO_TYPE,
+                SHIP_ADD1: SHIP_ADD1,
+                SHIP_ADD2: SHIP_ADD2,
+                SHIP_ADD3: SHIP_ADD3,
+                REMARKS: REMARKS,
+                QTY: QTY ? parseFloat(QTY) : 0,
+                ACTION: ACTION
+            },
+            Detail: collectTableData() 
+        };
+        $("#btn-save").prop("disabled", true);
+        $.ajax({
+            url: '/TransportRateQuotation/SavedData',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Saved successfully!");
+                  window.location.href = '/TransportRateQuotation/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true'
+                } else {
+                    toastr.error(response.message || "Save failed.");
+                }
+            },
+            error: function (xhr, status, error) {
+                let errorMessage = "Something went wrong.";
+                if (xhr.status === 400) {
+                    errorMessage = "Bad Request: " + xhr.responseText;
+                } else if (xhr.status === 500) {
+                    errorMessage = "Server error: " + xhr.responseText;
+                } else {
+                    errorMessage = "Unexpected error: " + xhr.statusText;
+                }
+                console.error("Error: ", errorMessage);
+                toastr.error(errorMessage);
+            },
+            complete: function () {
+               
+                $("#btn-save").prop("disabled", false);
+            }
+        });
+    });
+
+    });
+
+   async function GetVNo() {
+        try {
+            const res = await fetch(`/TransportRateQuotation/GetVNo`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+            $('#NumDocumentNo').val(data.v_NO); 
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+ 
+   async function LoadDropDown() {
+        try {
+            await Promise.all([
+                DDlDo(),
+                DDlCityName(),
+                DDlTransPortName() ,
+                DDlBillto()
+            ]);
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+
+   async function DDlTransPortName() {
+        try {
+            const response = await fetch('/TransportRateQuotation/DDlTransPortName');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            transportData = await response.json(); 
+        } catch (error) {
+            console.error("Error loading Transport Names:", error);
+            toastr.error('Error loading Transport Names: ' + error.message);
+        }
+    }
+    
+   async function DDlDo() {
+        try {
+            const response = await fetch('/TransportRateQuotation/DDlDo');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlDONo');
+            ddl.empty().append('<option value="">-- Select DO No --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+            ddl.select2({
+                placeholder: '-- Select DO No --',
+                width: '100%'
+            });
+        } catch (error) {
+            console.error("Error loading DO No:", error);
+            toastr.error('Error loading DO No: ' + error.message);
+        }
+    }
+    
+   async function DDlCityName() {
+        try {
+            const response = await fetch('/TransportRateQuotation/DDlCityName');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#DDlCityname');
+            ddl.empty().append('<option value="">-- Select City Name --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading City Name:", error);
+            toastr.error('Error loading City Name: ' + error.message);
+        }
+    }
+
+   async function fetchDataByDo(Dono, Vno) {
+        try {    
+            const response = await $.ajax({
+                url: '/TransportRateQuotation/GetDatabyDo',
+                type: 'GET',
+                data: { Dono: Dono, Vno: Vno }
+            });
+             
+            if (response.success === false) {
+                toastr.info(response.message);
+                 $('#Vtpye').val('');
+                $('#TxtAddressL1').val('');
+                $('#TxtAddressL2').val('');
+                $('#TxtAddressL3').val('');
+                $('#DDlCityname').val('');
+                return;
+            } else {               
+                $('#Vtpye').val(response.data.v_TYPE || ''); 
+                $('#TxtAddressL1').val(response.data.shiP_ADD1 || '');  
+                $('#TxtAddressL2').val(response.data.shiP_ADD2 || '');  
+                $('#TxtAddressL3').val(response.data.shiP_ADD3 || ''); 
+                $('#DDlCityname').val(response.data.code || ''); 
+            }
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            alert("An error occurred while fetching data.");
+        }
+    }
+
+   async function GetTransportData() {
+        try {
+            const res = await fetch('/TransportRateQuotation/GetFillData');
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+            const data = await res.json();       
+            $('#tblTransportRateQuotation tbody').empty();
+            data.forEach(transport => {
+                addRow({
+                    code: transport.code,
+                    transportName: transport.code,
+                    rate: '',
+                    finalRate: '',
+                    truckNo: '',
+                    grNo: '',
+                    grDate: ''
+                });
+            });
+        } catch (error) {
+            console.error('Error fetching transport data:', error);
+        }
+    }
+
+   function addRow(data = {}) {
+        $tbody.find('.btn-add-action').remove();   
+
+        const transportOptions = transportData.map(transport => {
+            return `<option value="${transport.value}" ${data.transportName === transport.value ? 'selected' : ''}>${transport.text}</option>`;
+        }).join('');
+
+        const row = `
+            <tr class="no-border-input">
+                <!-- Transport Code (hidden, will show selected transport code) -->
+                <td><input type="text" class="form-control transport-code" value="${data.code || ''}" readonly /></td>
+
+                <!-- Transport Name (Dropdown) -->
+                <td>
+                    <select class="form-control transport-dropdown">
+                        <option value="">Select Transport</option>
+                        ${transportOptions}
+                    </select>
+                </td>
+                 <td><input type="number" class="form-control rate" value="${data.rate || ''}" /></td>
+                 <td><input type="number" class="form-control finalRate" value="${data.finalRate || ''}" /></td>
+                 <td><input type="text" class="form-control truckNo" value="${data.truckNo || ''}" /></td>
+                 <td><input type="text" class="form-control grNo" value="${data.grNo || ''}" /></td>
+                 <td><input type="date" class="form-control grDate" value="${data.grDate || ''}" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+
+        $tbody.append(row);
+
+        $tbody.find('.transport-dropdown').last().on('change', function () {
+            const selectedTransport = $(this).val();
+            const $codeField = $(this).closest('tr').find('.transport-code');
+            $codeField.val(selectedTransport);
+        });
+
+        if (data.transportName) {
+            const $selectedOption = $tbody.find('.transport-dropdown').last().find(`option[value="${data.transportName}"]`);
+            if ($selectedOption.length) {
+                $selectedOption.prop('selected', true);
+                const selectedTransportCode = $selectedOption.val();
+                $tbody.find('.transport-code').last().val(selectedTransportCode);
+            }
+        }
+    }
+
+   function formatDate(dateStr) {
+       if (!dateStr) return null;
+       const date = new Date(dateStr);
+       if (isNaN(date)) return null;        
+       const year = date.getFullYear();
+       const month = String(date.getMonth() + 1).padStart(2, '0');
+       const day = String(date.getDate()).padStart(2, '0');
+       return `${year}-${month}-${day}`;
+     }
+ 
+   function collectTableData() {
+        const tableData = [];
+        $tbody.find('tr').each(function() {        
+            const rowData = {
+                TRANSPORT_CODE: $(this).find('.transport-code').val(),
+                TRANSPORT_NAME: $(this).find('.transport-dropdown option:selected').text(),
+
+                RATE: $(this).find('.rate').val(),
+                OUR_RATE: $(this).find('.finalRate').val(),
+                TRUCK_NO: $(this).find('.truckNo').val(),
+                GRNO: $(this).find('.grNo').val(),
+                GRDATE: $(this).find('.grDate').val()
+            };       
+            tableData.push(rowData);
+        });        
+        const collectedData = tableData;
+        return collectedData;
+    }
+
+   async function DDlBillto() {
+        try {
+            const response = await fetch('/TransportRateQuotation/DDlBillto');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#TxtBillTo');
+            ddl.empty().append('<option value="">-- Select Bill To --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+            ddl.select2({
+                placeholder: '-- Select Bill To--',
+                width: '100%'
+            });
+        } catch (error) {
+            console.error("Error loading Bill To:", error);
+            toastr.error('Error loading Bill To: ' + error.message);
+        }
+    }
+
+   async function LoadFormByID(code) {
+        try {
+            const res = await $.ajax({
+                url: '/TransportRateQuotationList/GetDataByCode',
+                method: 'GET',
+                data: { code: code }
+            });
+
+            if (!res.success) {
+                toastr.error(res.message || "Failed to load data.");
+                return;
+            }
+            const header = res.data.header?.[0];
+            const details = res.data.details || [];
+        
+            if (!header) {
+                toastr.warning("No header data found.");
+                return;
+            }
+            
+            $('#TxtCode').val(header.DOC_ID ?? '');
+            $('#NumDocumentNo').val(header.V_NO ?? '');
+            $('#DtDocumentDate').val(formatDate(header.V_DATE));
+            $('#ddlDONo').val(header.DO_NO ?? '').trigger('change');
+            $('#TxtBillTo').val(header.BILL_CODE ?? '').trigger('change');
+            $('#TxtAddressL1').val(header.SHIP_ADD1 ?? '');
+            $('#TxtAddressL2').val(header.SHIP_ADD2 ?? '');
+            $('#TxtAddressL3').val(header.SHIP_ADD3 ?? '');
+            $('#DDlCityname').val(header.SHIP_CITY ?? '');
+            $('#TxtRemarks').val(header.REMARKS ?? '');
+            $('#NumQuantity').val(header.QTY ?? '');
+            $('#Vtpye').val(header.DO_TYPE ?? '');
+    
+            const $tbody = $('#tblTransportRateQuotation tbody');
+            $tbody.empty();
+            if (details && details.length > 0) {
+                details.forEach(d => {
+                    addRow({
+                        code: d.TRANSPORT_CODE ?? '',
+                        transportName: d.TRANSPORT_CODE ?? '', 
+                        rate: d.RATE ?? '',
+                        finalRate: d.OUR_RATE ?? '',
+                        truckNo: d.TRUCK_NO ?? '',
+                        grNo: d.GRNO ?? '',
+                        grDate: d.GRDATE ? formatDate(d.GRDATE) : ''
+                    });
+                });
+            } else {
+                addRow(); 
+            }
+
+
+        } catch (err) {
+            console.error("Failed to load data", err);
+            toastr.error("Something went wrong while loading the form.");
+        }
+    }
+
+   function readOnlyForm() {
+        document.querySelectorAll('#TransportRateQuotationForm input, textarea, select')
+            .forEach(e => e.disabled = true);
+    }
+    async function SendMessage(mobileno, smsMatter , smstemplate) {
+        try {
+            console.log("mobileno", mobileno);
+            console.log("smsMatter", smsMatter);
+            console.log("smstemplate", smstemplate);
+
+            const response = await $.ajax({
+                url: '/TransportRateQuotation/SMSSend',
+                type: 'POST',  // Change GET to POST to match the server method
+                data: {
+                    mobileno: mobileno,
+                    smsMatter: smsMatter,
+                    smstemplate: smstemplate
+                },
+                success: function(response) {
+                    console.log("SMS Response:", response);
+                    if (response.success) {
+                        alert(response.message);  // Show success message
+                    } else {
+                        alert("Error: " + response.message);  // Show error message
+                    }
+                },
+                error: function(error) {
+                    console.error("Error fetching data: ", error);
+                    alert("An error occurred while fetching data.");
+                }
+            });
+
+        } catch (error) {
+            console.error("Error while sending message: ", error);
+            alert("An error occurred while sending the message.");
+        }
+    }
+
+</script>
+
+

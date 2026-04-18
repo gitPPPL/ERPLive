@@ -1,0 +1,89 @@
+﻿@{
+	ViewBag.Title = "Cost Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Cost Master</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "CostMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+
+	<form id="">
+
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Cost Type</label>
+					<select class="form-select form-control" id="COSTTYPE" name="COSTTYPE">
+						<option value="">-- Select Cost Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Cost Code</label>
+					<input type="text" class="form-control" name="COSTCODE" id="COSTCODE" placeholder="Enter Cost Code">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Department</label>
+					<select class="form-select form-control" id="DEPARTMENT" name="DEPARTMENT">
+						<option value="">-- Select Department --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+						<label class="form-label">%</label>
+					<input type="text" class="form-control" name="" id="" placeholder="Enter %">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+	</form>
+
+</fieldset>
+@* Cancel Button Popup *@
+<script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@

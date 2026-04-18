@@ -1,0 +1,425 @@
+﻿@{
+    ViewBag.Title = "Transport Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;  // Exit loop once found current menu permission
+        }
+    }
+}
+
+<fieldset>
+    <legend class="legend-field">Transport Master List</legend>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TransportMaster")'" type="submit" class="btn btn-primary">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-info">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-dark">
+                        <i class="fa fa-check"></i> Approve
+                    </button>
+                }
+            </div>
+        </div>
+        
+    </div>
+
+
+    <div class="card shadow-sm border-0 mt-1">
+        <div class="table-responsive">
+            <table id="transportTable" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th>Code</th>
+                        <th>Transport Name</th>
+                        <th>Party Name</th>
+                        <th>Owner Name</th>
+                        <th>Address</th>
+                        <th>GSTIN No</th>
+                        <th>PAN No</th>
+                        <th>TDS %</th>
+                        <th>Decl No</th>
+                        <th>Decl Date</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Pagination container -->
+        <div class="row p-3">
+            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+        </div>
+    </div>
+</fieldset>
+<script>
+    var canAdd = @canAdd.ToString().ToLower();
+    var canEdit = @canEdit.ToString().ToLower();
+    var canDelete = @canDelete.ToString().ToLower();
+    var canPrint = @canPrint.ToString().ToLower();
+    var canExport = @canExport.ToString().ToLower();
+    var canMail = @canMail.ToString().ToLower();
+    var canApproval = @canApproval.ToString().ToLower();
+    var canDocDetail = @canDocDetail.ToString().ToLower();
+
+    let partyMap = {};
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        $.when(
+            loadPartyList()
+        ).done(function(){
+            loadTransportList()
+        })
+    });
+     
+    function loadPartyList() {
+        $.ajax({
+            url: '/TransportMaster/GetPartyList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#PARTY_NAME');
+                ddl.empty();
+                ddl.append('<option value="">-- Select User --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    partyMap[item.value] = item.text;  
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    function loadTransportList() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/TransportMasterList/GetTransportList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log('kks',res);
+                const lists = res.lists;
+                const totalCount = res.totalCount;
+
+                let tbody = $('#transportTable tbody');
+                tbody.empty();
+
+                if (!lists || lists.length === 0) {
+                    tbody.append('<tr><td colspan="13" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                $.each(lists, function (index, item) {
+                    tbody.append(`
+                      <tr>
+                        <td>${item.code}</td>
+                        <td>${item.name || ''}</td>
+                        <td>${item.partyName || ''}</td>
+                        <td>${item.owneR_NAME || ''}</td>
+                        <td>${item.address || ''}</td>
+                        <td>${item.gstin || ''}</td>
+                        <td>${item.pan || ''}</td>
+                        <td>${item.tdS_PER || ''}</td>
+                        <td>${item.declarationNo || ''}</td>
+                        <td>${formatDate(item.decL_DATE)}</td>
+                        <td>${formatDate(item.expirY_DATE)}</td>
+                        <td>${item.active ? 'Yes' : 'No'}</td>
+                        <td>
+                           ${canEdit ? `<i class="fa fa-edit btn-edit" data-doc="${item.code}" title="Edit"></i>` : ''}
+                           <i class="fa fa-eye btn-view" data-doc="${item.code}" title="View"></i>
+                           ${canDelete ? `<i class="fa fa-trash btn-delete" data-doc="${item.code}" title="Delete"></i>` : ''}
+                           ${canDocDetail ? `<i class="fa fa-file btn-details btn-document" data-doc="${item.code}" title="Details"></i>` : ''}
+                        </td>
+                      </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+              alert('Error loading data: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadTransportList();
+    }
+        
+    $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadTransportList();
+    });
+
+    $(document).on('click', '.btn-edit', function() {
+        const rowId = $(this).data('doc');
+        editTransport(rowId);
+    });
+
+    $(document).on('click', '.btn-view', function() {
+        const rowId = $(this).data('doc');
+        viewTransportDetails(rowId);
+    });
+
+    $(document).on('click', '.btn-delete', function() {
+        const code = $(this).data('doc');
+        deleteTransport(code);  
+    });
+
+    $(document).on('click', '.btn-details', function() {
+        const docCode = $(this).data('doc');
+        showDocumentPopup(docCode);  
+    });
+
+ 
+    // Redirect to EDIT form
+    function editTransport(rowId) {
+        window.location.href = '/TransportMaster/Index?id=' + encodeURIComponent(rowId);
+    }
+
+    // Redirect to VIEW details form (read-only)
+    function viewTransportDetails(rowId) {
+        window.location.href = '/TransportMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+    }
+
+
+    function deleteTransport(code) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action will permanently delete the transport record.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/TransportMaster/DeleteTransportByCode',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                              loadTransportList();
+                            });
+                        } else {
+                            Swal.fire('Failed', response.message, 'warning');
+                        }
+                    },
+                    error: function (xhr) {
+                      Swal.fire('Error!', 'An error occurred while deleting the transport record.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+     function exportToExcel() {
+            fetch('/TransportMasterList/ExportAllDocs')
+                .then(response => {
+                    if (!response.ok) throw new Error("Network response was not ok");
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Export data:", data);
+                    const filteredData = data.map(item => ({
+                        CODE: item.code,
+                        NAME: item.name,
+                        PARTY_CODE: item.partY_CODE,
+                        OWNER_NAME: item.owneR_NAME,
+                        ADDRESS: item.address,
+                        GSTIN: item.gstin,
+                        PAN: item.pan,
+                        TDS_PER: item.tdS_PER,
+                        DECL_NO: item.decL_NO,
+                        DECL_DATE: item.decL_DATE,
+                        EXPIRY_DATE: item.expirY_DATE,
+                        EXPIRY_DATE: item.expirY_DATE,
+                         Active: item.Active === "1" ? "ACTIVE" : "INACTIVE"
+                    }));
+                    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+                    const pageName = "Transport Master";
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2, '0');
+                    const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+                    const fileName = `${pageName}_${timestamp}.xlsx`;
+                    XLSX.writeFile(workbook, fileName);
+                })
+                .catch(error => {
+                    console.error("Export failed:", error);
+                    toastr.error("Failed to export data.");
+                });
+        }
+    function callGetReportAsPdf() {
+        var reportName = "Rpt_Transport_mast";
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+            type: 'GET',
+            data: { Reportname: reportName },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    }
+    function showDocumentPopup(docCode) {
+        $.ajax({
+            url: '/TransportMasterList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',  // important
+            data: { docCode: docCode },
+            success: function(response) {
+                if(response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function() {
+                toastr.error("An error occurred while fetching document details.");
+            }
+        });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString || dateString === "0001-01-01T00:00:00") {
+            return ''; // Return empty string for invalid or default date
+        }
+        const date = new Date(dateString);
+        const day = ("0" + date.getDate()).slice(-2); // Add leading zero for single-digit day
+        const month = ("0" + (date.getMonth() + 1)).slice(-2); // Add leading zero for single-digit month
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+</script>

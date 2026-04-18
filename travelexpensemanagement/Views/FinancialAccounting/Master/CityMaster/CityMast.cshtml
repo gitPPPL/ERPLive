@@ -1,0 +1,500 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .status-label.inactive {
+        color: green !important;
+    }
+</style>
+<fieldset>
+    <legend>City Master</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4 btn-right">
+            <button onclick="window.location.href='@Url.Action("Index", "CityMaster")'" type="submit" class="btn btn-primary">
+                <i class="fa fa-list"></i>Back to list
+            </button>
+        </div>
+    </div>
+
+
+    <form id="fromCityMaster">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="Txtcityname" class="form-label">City Name <span class="required">*</span></label>
+                <input type="text" id="Txtcityname" class="form-control" placeholder="City Name" maxlength="30" />
+            </div>
+            <div class="col-md-4">
+                <label for="TxtShortname" class="form-label">Short Name </label>
+                <input type="text" id="TxtShortname" placeholder="Short Name" class="form-control" maxlength="20" />
+            </div>
+            <div class="col-md-4">
+                <label for="TxtZipCode" class="form-label">Zip Code </label>
+                <input type="number" id="TxtZipCode" class="form-control" placeholder="Zip Code" maxlength="6" oninput="allowOnlyNumbers(this);" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="TxtStdcode" class="form-label">State Code </label>
+                <input type="text" id="TxtStdcode" class="form-control" placeholder="State Code" maxlength="10" oninput="allowOnlyNumbers(this);" />
+            </div>
+            <div class="col-md-4">
+                <label for="DdState" class="form-label">State Name <span class="required">*</span></label>
+                <select id="DdState" class="form-control">
+                    <option selected disabled>- Select State Name -</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="DdCountry" class="form-label">Country Name <span class="required">*</span></label>
+                <select id="DdCountry" class="form-control">
+                    <option selected disabled>- Select Country Name -</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="offset-md-8 col-md-2">
+                <div class="form-group">
+                    <div class="toggle-wrapper justify-content-center" id="">
+                        <input type="hidden" id="DdActive" name="IsActive" value="1" />
+
+                        <div id="customToggle" class="custom-toggle active"></div>
+                        <span id="statusLabel" class="status-label active">Active</span>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 btn-align">
+                <button type="submit" class="btn btn-primary" id="btn-save">Save</button>
+                <button type="button" id="cancelBtn" style="display:none" class="btn btn-danger">Cancel</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const toggle = document.getElementById("customToggle");
+    const statusLabel = document.getElementById("statusLabel");
+    const hiddenInput = document.getElementById("DdActive");
+    toggle.addEventListener("click", function () {
+       if (toggle.classList.contains("disabled")) return;
+
+       toggle.classList.toggle("active");
+       const isActive = toggle.classList.contains("active");
+
+       hiddenInput.value = isActive ? "1" : "0";
+       statusLabel.textContent = isActive ? "Active" : "Inactive";
+       statusLabel.classList.toggle("active", isActive);
+       statusLabel.classList.toggle("inactive", !isActive);
+     });
+    function disableToggle() {
+       toggle.classList.add("disabled");
+     }
+    function enableToggle() {
+       toggle.classList.remove("disabled");
+     }
+    function setToggleState(value) {
+      const toggle = document.getElementById("customToggle");
+      const label = document.getElementById("statusLabel");
+      const hiddenInput = document.getElementById("DdActive");
+      const isActive = Number(value) === 1;
+      toggle.classList.toggle("active", isActive);
+      label.textContent = isActive ? "Active" : "Inactive";
+      label.classList.toggle("active", isActive);
+      label.classList.toggle("inactive", !isActive);
+      hiddenInput.value = isActive ? "1" : "0";
+
+    }
+</script>
+<script>
+   let cityUpdateCode=0;
+   let PreviousInputDt = "";
+   let allMastData = [];
+   let filteredData = [];
+   let currentPage = 1;
+   const rowsPerPage = 10;
+   let ModeOfControl="";
+   let getCityDt=[];
+
+   const storedData = localStorage.getItem('editcity');
+   ModeOfControl = localStorage.getItem('Mode');
+   localStorage.removeItem('Mode');
+   console.log(storedData);
+   $(document).ready(function(){
+            CountryNamebind();
+            StateNamebind();
+
+          if (storedData && ModeOfControl === 'Edit') {
+           getCityDt = JSON.parse(storedData);
+           cityUpdateCode = getCityDt.code;
+           PreviousInputDt = getCityDt.cityname;
+
+            $('#Txtcityname').val(getCityDt.cityname);
+             $('#TxtShortname').val(getCityDt.shortname);
+              $('#TxtZipCode').val(getCityDt.zipcode);
+               $('#TxtStdcode').val(getCityDt.statecode);
+
+          CountryNamebind();
+          setTimeout(function () {
+          $('#DdCountry option').filter(function () {
+              return $(this).text().trim().toLowerCase() === getCityDt.countryId.trim().toLowerCase();
+          }).prop('selected', true);
+          }, 300);
+
+          StateNamebind();
+           setTimeout(function () {
+          $('#DdState option').filter(function () {
+              return $(this).text().trim().toLowerCase() === getCityDt.stateId.trim().toLowerCase();
+          }).prop('selected', true);
+          }, 300);
+
+           setToggleState(getCityDt.active);
+
+            $('input').prop('readonly', false);
+          $('#DdCountry, #DdState').prop('disabled', false);
+            $('#btn-save').show();
+            $('#cancelBtn').show();
+            localStorage.removeItem('editcity');
+
+          }
+          else if (storedData && ModeOfControl === 'View') {
+              $('#btn-save').hide();
+              $('#cancelBtn').hide();
+              getCityDt = JSON.parse(storedData);
+
+             $('#Txtcityname').val(getCityDt.cityname);
+             $('#TxtShortname').val(getCityDt.shortname);
+              $('#TxtZipCode').val(getCityDt.zipcode);
+               $('#TxtStdcode').val(getCityDt.statecode);
+
+           CountryNamebind();
+          setTimeout(function () {
+          $('#DdCountry option').filter(function () {
+              return $(this).text().trim().toLowerCase() === getCityDt.countryId.trim().toLowerCase();
+          }).prop('selected', true);
+          }, 300);
+
+          StateNamebind();
+           setTimeout(function () {
+          $('#DdState option').filter(function () {
+              return $(this).text().trim().toLowerCase() === getCityDt.stateId.trim().toLowerCase();
+          }).prop('selected', true);
+          }, 300);
+
+            $('#DdActive').val(getCityDt.active);
+            setToggleState(getCityDt.active);
+             $('input').prop('readonly', true);
+          $('#DdCountry, #DdState').prop('disabled', true);
+              disableToggle();
+            localStorage.removeItem('editcity');
+          }
+
+          $('#Txtcityname').on('keydown', function (e) {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      $('#TxtShortname').focus();
+                  }
+              });
+               $('#TxtShortname').on('keydown', function (e) {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      $('#TxtZipCode').focus();
+                  }
+              });
+               $('#TxtZipCode').on('keydown', function (e) {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      $('#TxtStdcode').focus();
+                  }
+              });
+               $('#TxtStdcode').on('keydown', function (e) {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      $('#DdState').val($('#DdState option:first').val());
+                      $('#DdState').focus();
+                  }
+              });
+               $('#DdState').on('keydown', function (e) {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      $('#DdCountry').val($('#DdCountry option:first').val());
+                      $('#DdCountry').focus();
+                  }
+              });
+
+              $('#DdCountry').on('keydown', function (e) {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      $('#btn-save').focus();
+                  }
+              });
+
+          });
+   $('#btn-save').on('click', function (e) {
+          e.preventDefault();
+
+          if (!validateRequiredField('#Txtcityname', 'City Name')) return;
+          if (!validateRequiredField('#DdState', 'State Name')) return;
+          if (!validateRequiredField('#DdCountry', 'Country Name')) return;
+
+          const cityname = toNullableString($('#Txtcityname').val());
+          const shortname = toNullableString($('#TxtShortname').val());
+          const zipcode = toNullableString($('#TxtZipCode').val());
+          const statecode = toNullableInt($('#TxtStdcode').val());
+          const stateId= toNullableInt($('#DdState').val());
+          const countryId= toNullableInt($('#DdCountry').val());
+
+          var active = document.getElementById("DdActive").value;
+
+          // if (!cityname || !stateId || !countryId || !active) {
+    //           toastr.warning("Please fill all required fields.");
+          // 	return;
+          // }
+
+
+          console.log(ModeOfControl);
+          if(ModeOfControl=='Edit')
+          {
+
+               var CityDt = {
+                     code: toNullableInt(cityUpdateCode),
+                     CityName: cityname,
+                     ShortName:shortname,
+                     ZipCode:zipcode,
+                     Stdcode:statecode,
+                     stateId:stateId,
+                     CountryId:countryId,
+                     Active: active
+                 };
+                  console.log(CityDt);
+               Editcitymast(CityDt, cityname)
+          }
+          else
+          {
+
+              var CityDt = {
+                     code: cityUpdateCode,
+                     CityName: cityname,
+                     ShortName:shortname,
+                     ZipCode:zipcode,
+                     Stdcode:statecode,
+                     stateId:stateId,
+                     CountryId:countryId,
+                     Active: active
+                 };
+                 console.log(CityDt);
+           saveCityMastDt(CityDt, cityname);
+          }
+      });
+   function saveCityMastDt(CityDt, name)
+      {
+          checkExistOrNot(name)
+                .done(function (data) {
+                 if (data.status === true && data.exists === true) {
+                  toastr.warning("Duplicate City Name");
+                  return;
+                 }
+
+                  $.ajax({
+                      url:'@Url.Action("saveCityMastDt", "CityMaster")',
+                      type: 'POST',
+                      contentType: 'application/json',
+                      data: JSON.stringify(CityDt),
+                      success: function (response) {
+                          if (response.status === true) {
+                              toastr.success('Data Save Successfully.');
+                                setSubGroupFormReadOnly();
+                              // resetFields();
+                              // setTimeout(function () {
+                              // 	  window.location.href ='/CityMaster/Index';
+                              // 	}, 1500);
+                          } else {
+                              toastr.error(response.message || "Save failed");
+                          }
+                      },
+                      error: function (xhr, error) {
+                          toastr.error("Error occurred while saving.");
+                      }
+                  });
+                })
+              .fail(function (xhr, status, error) {
+              toastr.error("Error while checking City type.");
+              });
+      }
+   function Editcitymast(CityDt, name){
+          console.log(CityDt, name);
+          if (PreviousInputDt != name) {
+                    checkExistOrNot(name)
+                        .done(function (data) {
+                         if (data.status === true && data.exists === true) {
+                          toastr.warning("Duplicate City Name");
+                          return;
+                         }
+                          updateCurrencyData(CityDt, name);
+
+                        })
+                      .fail(function (xhr, status, error) {
+                      toastr.error("Error while checking City type.");
+                      });
+                   }
+                   else{
+                       updateCurrencyData(CityDt, name);
+                   }
+      }
+   function updateCurrencyData(CityDt, name) {
+              $.ajax({
+                  url: '/CityMaster/UpdateCityDt',
+                  type: 'POST',
+                  data:JSON.stringify(CityDt),
+                  contentType: 'application/json',
+                  dataType: 'json',
+                  success: function(response) {
+                      if (response.status === true) {
+                           toastr.success('Data update Successfully.');
+                           resetFields();
+                     setTimeout(function () {
+                                    window.location.href ='/CityMaster/Index';
+                                  }, 1500);
+                      } else {
+                          toastr.error("Update failed: " + response.message);
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.error("Error occurred:", xhr.responseText);
+                      toastr.error("Data not updated: " + error);
+                  }
+              });
+          }
+   function resetFields() {
+              $('#Txtcityname').val('');
+               $('#TxtShortname').val('');
+                $('#TxtZipCode').val('');
+                 $('#TxtStdcode').val('');
+              $('#DdState').val($('#DdState option:first').val());
+              $('#DdCountry').val($('#DdCountry option:first').val());
+              $('#searchInput').val();
+
+          }
+   function checkExistOrNot(inputData)
+         {
+             return $.ajax({
+             url: '/CityMaster/getExitOrNot',
+             type: 'GET',
+             dataType: 'json',
+             data: { inputData: inputData }
+         });
+         }
+   document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "Do you want to cancel all the changes?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, cancel it!',
+          cancelButtonText: 'No, keep it',
+          reverseButtons: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire(
+              'Cancelled!',
+              'Your action has been cancelled.',
+              'success'
+            )
+             if(ModeOfControl=='Edit')
+           {
+            $('#Txtcityname').val(getCityDt.cityname);
+            $('#TxtShortname').val(getCityDt.shortname);
+            $('#TxtZipCode').val(getCityDt.zipcode);
+            $('#TxtStdcode').val(getCityDt.statecode);
+            CountryNamebind();
+          setTimeout(function () {
+          $('#DdCountry option').filter(function () {
+              return $(this).text().trim().toLowerCase() === getCityDt.countryId.trim().toLowerCase();
+          }).prop('selected', true);
+          }, 300);
+
+          StateNamebind();
+           setTimeout(function () {
+          $('#DdState option').filter(function () {
+              return $(this).text().trim().toLowerCase() === getCityDt.stateId.trim().toLowerCase();
+          }).prop('selected', true);
+          }, 300);
+
+           setToggleState(getCityDt.active);
+      }
+      else
+      {
+      resetFields();
+      }
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire(
+              'Resumed',
+              'Your action is still in progress.',
+              'info'
+            )
+          }
+        });
+      });
+   function CountryNamebind(){
+             $.ajax({
+                 url:'/StateMaster/GetCountryname',
+                 type:'Get',
+                 datatype:'json',
+                 success:function(response){
+                     if(response.status==true){
+                     console.log(response.data);
+                     var countryId=$('#DdCountry');
+                     countryId.empty();
+                     countryId.append('<option selected disabled>- Select country Name-</option>');
+                     $.each(response.data, function(index, item){
+                         countryId.append('<option value="'+ item.id +'">'+ item.country +'</option>');
+                     });
+                     }else{
+                         toastr.error("City Name Load failed");
+                     }
+                 },
+                 error:function(xhr,status, error){
+                 toastr.error("City Name Load failed", xhr.error);
+                 }
+
+             });
+         }
+   function StateNamebind(){
+             $.ajax({
+                 url:'/CityMaster/GetState',
+                 type:'Get',
+                 datatype:'json',
+                 success:function(response){
+                     if(response.status==true){
+                     var stateId=$('#DdState');
+                     stateId.empty();
+                     stateId.append('<option selected disabled>- Select State Name-</option>');
+                     $.each(response.data, function(index, item){
+                         stateId.append('<option value="'+ item.id +'">'+ item.state +'</option>');
+                     });
+                     }else{
+                         toastr.error("State Name Load failed");
+                     }
+                 },
+                 error:function(xhr,status, error){
+                 toastr.error("State Name Load failed", xhr.error);
+                 }
+             });
+         }
+   function allowOnlyNumbers(input) {
+                input.value = input.value.replace(/[^0-9]/g, '');
+         }
+   function setSubGroupFormReadOnly() {
+              const form = $('#fromCityMaster');
+            form.find('input, select, textarea, button').prop('disabled', true);
+            form.find('.toggle-switch input').prop('disabled', true);
+            form.find('#customToggle').addClass('disabled');
+        }
+   const toNullableInt = (v) => {
+          const t = String(v ?? '').trim();
+          return t === '' ? null : parseInt(t, 10);
+      };
+   const toNullableString = (v) => {
+          const t = String(v ?? '').trim();
+          return t === '' ? null : t;
+      };
+</script>

@@ -1,0 +1,687 @@
+﻿@{
+    ViewBag.Title = "Insurance Cover Note";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var logindate = Convert.ToDateTime(TempData["loginDate"]).ToString("yyyy-MM-dd");
+
+    var currentMenu = ViewBag.CurrentMenu as string;    
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {           
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+}
+<fieldset>
+    <legend class="legend-field">Insurance Cover Note</legend>
+    <div class="row">
+        <div class="offset-md-4 col-md-8">
+            <div class="button-right mb-2">
+                @* <button class="btn btn-print">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <button class="btn btn-export">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+                <button class="btn btn-mail">
+                    <i class="fa fa-envelope"></i> Mail
+                </button> *@
+                @if (canApproval)
+                {
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                }
+                <button class="btn btn-approved">
+                    <i class="fa fa-check"></i> Approved
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="InsuranceCoverNoteForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Document No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Document No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocumentDate">Document Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocumentDate" value="@logindate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlInsuranceType">Insurance Type <span class="required">*</span></label>
+                    <select class="form-control" id="ddlInsuranceType">
+                        <option value="">Select Insurance Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlBillType">Bill Type <span class="required">*</span></label>
+                    <select class="form-control" id="ddlBillType">
+                        <option value="">Select Bill Type</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumFrombillNo">From Bill No <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumFrombillNo">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumTobillNo">To Bill No <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumTobillNo">
+                </div>
+            </div>
+        </div>
+      @*   <div class="card">
+            <div class="table-responsive">
+                <table id="tblInsuranceCoverNote" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Document ID</th>
+                            <th>Insurance Type</th>
+                            <th>Bill Type</th>
+                            <th>From Bill No</th>
+                            <th>To Bill No</th>
+                            <th>Voucher No</th>
+                            <th>Lid</th>
+                            <th>Item Name</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div> *@
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "InsuranceCoverNoteList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
+
+<script>
+    
+    const AllFieldsId = [
+        "TxtDocId",
+        "NumDocNo",
+        "DtDocumentDate",
+        "ddlInsuranceType",
+        "ddlBillType",
+        "NumFrombillNo",
+        "NumTobillNo"
+    ];
+
+    let itemRecords = [
+        'TxtCode',
+        'ddlItemname',
+        'TxtNos',
+        'TxtWeight',
+        'TxtRate',
+        'ddlTenacity',
+        'DtDeliveryDate',
+        'TxtRemarks'
+    ];
+
+    var LoginDate=@logindate;
+    console.log(LoginDate);
+    let docId = "";
+    let readOnly;
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    $(async function () {
+        try {
+            handleDocLoad();
+        } catch (error) {
+            toastr.error('Failed to load document types: ' + error);
+        }
+    });
+
+    $(document).ready(function () {
+    GetInsuranceTypeList();
+    GetBillTypeList();
+    // $("#DtDocumentDate").attr("max", loginDate);
+    setEnterKeyFocus(AllFieldsId);
+          
+    $('#btn-save').on('click', async function (e) {
+          e.preventDefault();
+
+          if (!validateRequiredField('#NumDocNo', 'Document No.')) return;
+          if (!validateRequiredField('#DtDocumentDate', 'Document Date')) return;
+          if (!validateRequiredField('#ddlInsuranceType', 'Insurance Type')) return;
+          if (!validateRequiredField('#ddlBillType', 'Bill Type')) return;
+          if (!validateRequiredField('#NumFrombillNo', 'From billNo')) return;
+          if (!validateRequiredField('#NumTobillNo', 'To bill No')) return;
+
+        try
+        {
+            const tableData = await collectFormData();
+            console.log(tableData);
+            if (docId) {
+                UpdateData(tableData);
+            } else {
+                SaveData(tableData);
+            }
+        } catch (error) {
+            toastr.error('An error occurred while saving the data.');
+        }
+    });
+    
+
+    });
+
+</script>
+
+<script>
+
+    async function handleDocLoad() {
+         docId = getQueryParam('id');
+         readOnly = getQueryParam('readOnly');
+        console.log(docId, readOnly);
+        if (docId) {
+            $('#SaudaDetail').show();
+            $('#ddlStatus').prop('disabled', false);
+            await GetDocData(docId, readOnly);
+        } else {
+            GetDocid();
+        }
+    }
+        
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/InsuranceCoverNote/GetSalesOrderForUpdate',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+
+            if (response.status) {
+                if (readOnly === 'true') {
+                    disableAllFields();
+                    $('.btn-add-row-last').hide();
+                    $('#btn-save, #cancelBtn').hide();
+                } else {
+                    enableAllFields();
+                    $('#btn-save, #cancelBtn').show();
+                    $('.btn-add-row-last').show();
+
+                }
+                console.log(response.data);
+                await fillFormFields(response.data);
+               
+
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            toastr.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateInsuCoverNoteMast", "InsuranceCoverNote")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            // showFlashMessageByKey('insert', 'success');
+                            toastr.success("Data Insert Successfully");
+                            // resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/InsuranceCoverNoteList/Index';
+                            }, 500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateInsuCoverNoteMast", "InsuranceCoverNote")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    showFlashMessageByKey('update', 'success');
+                    // resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/InsuranceCoverNoteList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }      
+
+    async function fillFormFields(data) {
+        if (!Array.isArray(data) || data.length === 0) {
+            toastr.error("Invalid or empty data array");
+            return;
+        }
+        const d = data[0];
+        document.getElementById("TxtDocId").value = d.DOC_ID || '';
+        document.getElementById("NumDocNo").value = d.V_NO || '';
+        document.getElementById("DtDocumentDate").value = formatDate(d.V_DATE) || '';
+        document.getElementById("ddlInsuranceType").value = d.INSU_CODE || '';
+        document.getElementById("ddlBillType").value = d.BILL_TYPE || '';
+        document.getElementById("NumFrombillNo").value = d.F_BILL_NO || '';
+        document.getElementById("NumTobillNo").value = d.T_BILL_NO || '';
+    }
+
+    async function collectFormData() {        
+        const strdocId = toNullableString(document.getElementById("TxtDocId")?.value);
+        const vNo = parseIntSafe(document.getElementById("NumDocNo")?.value);
+        const vDate = toNullableDate(document.getElementById("DtDocumentDate")?.value);
+        const insuCode = parseIntSafe(document.getElementById("ddlInsuranceType")?.value);
+        const billType = toNullableString(document.getElementById("ddlBillType")?.value);
+        const fBillNo = parseIntSafe(document.getElementById("NumFrombillNo")?.value);
+        const tBillNo = parseIntSafe(document.getElementById("NumTobillNo")?.value);
+        const saveOrUpdate = !docId ? "Save" : "Update";
+
+        return {
+            DocId: strdocId,
+            VNo: vNo,
+            VDate: vDate,
+            InsuCode: insuCode,
+            VType: "INSU",
+            BillType: billType,
+            FBillNo: fBillNo,
+            TBillNo: tBillNo,
+            Srno: null,
+            SaveOrUpdate: saveOrUpdate
+        };
+    }
+ 
+    function GetDocid() {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "InsuranceCoverNote")',
+            type: 'GET',
+            data:{V_type:'INSU'},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#NumDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+    
+    function GetInsuranceTypeList() {
+        $.ajax({
+            url: '@Url.Action("GetInsuranceType", "InsuranceCoverNote")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlInsuranceType');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetBillTypeList() {
+        $.ajax({
+            url: '@Url.Action("GetBillTypeList", "InsuranceCoverNote")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlBillType');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+  
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : date.toISOString(); // if server expects ISO string
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function setFieldsEnabled(enabled) {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+     function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+     }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+
+
+</script>
+
+
+
+@* <script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadDocumentStages();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadDocumentStages();
+        });
+    });
+
+    //Load main grid...............
+    function loadDocumentStages() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ApprovalStageMasterList/GetAllDocs',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const docs = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#tblApprovalStageMaster tbody');
+                tbody.empty();
+
+                if (docs.length === 0) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_NAME || ''}</td>
+                            <td>${doc.useR_NO || '0'}</td>
+                            <td>
+                              <div class="action-icons">
+                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
+                               <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
+                              </div>
+
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+            }
+        });
+    }
+
+        function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        pagination.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadDocumentStages();
+    }
+
+    function editDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+    }
+
+    function viewDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+    }
+
+    function deleteDocStage(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ApprovalStageMasterList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+
+
+
+</script>
+ *@

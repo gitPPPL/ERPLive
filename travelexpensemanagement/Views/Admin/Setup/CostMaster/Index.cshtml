@@ -1,0 +1,477 @@
+﻿@{
+	ViewBag.Title = "Cost Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Cost Master</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "CostMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+
+	<form id="">
+
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Cost Type</label>
+					<select class="form-select form-control" id="DdCostType" name="COSTTYPE">
+						<option selected disabled>-- Select Cost Type --</option>
+						<option value="SALARY">SALARY</option>
+						<option value="ELECTRICAL">ELECTRICAL</option>
+						<option value="STORE">STORE</option>
+						<option value="ACCOUNTS">ACCOUNTS</option>	
+						 
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCostCd" class="form-label">Cost Code</label>
+					<input type="text" class="form-control" name="COSTCODE" id="TxtCostCd" placeholder="Enter Cost Code">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Department</label>
+					<select class="form-select form-control" id="DdDepartment" name="DEPARTMENT">
+						<option selected disabled>-- Select Department --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">%</label>
+					<input type="text" class="form-control" name="percent" id="Txtpercent" placeholder="Enter %">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+	</form>
+
+</fieldset>
+ 
+DdDepartment
+<script>
+
+		let OutstandUpdateCd=0;
+		let PreviousInputDt = "";
+		let allMastData = [];
+		let filteredData = [];
+		let currentPage = 1;
+		const rowsPerPage = 10;
+		let ModeOfControl="";
+		let getOutstandDt=[];
+
+		const storedData = localStorage.getItem('editOutstanding');
+		ModeOfControl = localStorage.getItem('Mode');
+		  localStorage.removeItem('Mode');
+		  console.log(storedData);
+
+		$(document).ready(function(){
+		  GetACpayablename();
+		  GetAgentNme(); 
+
+
+		if (storedData && ModeOfControl === 'Edit') {
+		 getOutstandDt = JSON.parse(storedData);
+		 OutstandUpdateCd = getOutstandDt.code;
+		 PreviousInputDt = getOutstandDt.name;
+
+		 fillTextFields();		 
+		 $('input').prop('readonly', false);
+		$('#DdDepartment').prop('disabled', false);
+		  $('#btn-save').show();
+		  $('#cancelBtn').show();
+		  localStorage.removeItem('editOutstanding');
+
+		}
+		else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getOutstandDt = JSON.parse(storedData);
+		   fillTextFields();
+		   
+		   $('input').prop('readonly', true);
+		$('#DdDepartment').prop('disabled', true);
+			disableToggle();
+		  localStorage.removeItem('editOutstanding');
+		}
+
+		$('#Txtname').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtShortNm').focus();
+				}
+			});
+			 $('#TxtShortNm').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#Ddagentname').val($('#Ddagentname option:first').val());
+					$('#Ddagentname').focus();
+				}
+			});
+			 $('#Ddagentname').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DdAgentGroup').val($('#DdAgentGroup option:first').val());
+					$('#DdAgentGroup').focus();
+				}
+			});
+			 $('#DdAgentGroup').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DdComsionType').val($('#DdComsionType option:first').val());
+					$('#DdComsionType').focus();
+				}
+			});
+			 $('#DdComsionType').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DdDepartment').val($('#DdDepartment option:first').val());
+					$('#DdDepartment').focus();
+				}
+			});
+			 $('#DdDepartment').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DdAcpayName').focus();
+				}
+			});
+
+			$('#DdDepartment').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#btn-save').focus();
+				}
+			});
+
+		});
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+		const name = toNullableString($('#Txtname').val());
+		const shortname = toNullableString($('#TxtShortNm').val());
+		const agentname = toNullableString($('#Ddagentname').val());
+		const AgentGroup = toNullableString($('#DdAgentGroup').val());
+		const ComsionType= toNullableString($('#DdComsionType').val());
+		const ComRate= toNullableInt($('#TxtComRate').val());
+		var AcpayName = document.getElementById("DdAcpayName").value;
+
+		var active = document.getElementById("DdActive").value;
+		if (!name || !shortname || !agentname || !AcpayName) {
+			alert("Please fill all required fields.");
+			return;
+		}
+		console.log(ModeOfControl);
+		if(ModeOfControl=='Edit')
+		{
+
+			 var AccPutstandingDt = {
+				   Code: toNullableInt(OutstandUpdateCd),
+				   Name: name,
+				   ShortName:shortname,
+				   AgentCode:agentname,
+				   AgentGroup:AgentGroup,
+				   ComType:ComsionType,
+				   ComRate:ComRate,
+				   ActPayable:AcpayName,
+				   Active: active
+			   };
+				console.log(AccPutstandingDt);
+			 Editcitymast(AccPutstandingDt, name)
+		}
+		else
+		{
+
+			var AccPutstandingDt = {
+					Name: name,
+				   ShortName:shortname,
+				   AgentCode:agentname,
+				   AgentGroup:AgentGroup,
+				   ComType:ComsionType,
+				   ComRate:ComRate,
+				   ActPayable:AcpayName,
+				   Active: active
+			   };
+			   console.log(AccPutstandingDt);
+		 saveCityMastDt(AccPutstandingDt, name);
+		}
+	});
+
+	 function saveCityMastDt(AccPutstandingDt, name)
+	{
+		checkExistOrNot(name)
+			  .done(function (data) {
+			   if (data.status === true && data.exists === true) {
+				alert("Duplicate AccOutstanding Name");
+				return;
+			   }
+
+				$.ajax({
+					url:'@Url.Action("SaveAccountOutstandingMaster", "AccountOutstandingMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(AccPutstandingDt),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							resetFields();
+							setTimeout(function () {
+								  window.location.href ='/AccountOutstandingMasterList/Index';
+								}, 1500);
+
+						} else {
+							alert(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						console.error(xhr.responseText);
+						alert("Error occurred while saving.");
+					}
+				});
+			  })
+			.fail(function (xhr, status, error) {
+			console.error("Check AccOutstanding failed:", error);
+			alert("Error while checking AccOutstanding type.");
+			});
+	}
+
+
+	function Editcitymast(AccPutstandingDt, name){
+		console.log(AccPutstandingDt, name);
+		if (PreviousInputDt != name) {
+				  checkExistOrNot(name)
+					  .done(function (data) {
+					   if (data.status === true && data.exists === true) {
+						alert("Duplicate AccOutstanding Name");
+						return;
+					   }
+						updateCurrencyData(AccPutstandingDt, name);
+
+					  })
+					.fail(function (xhr, status, error) {
+					console.error("Check AccOutstanding failed:", error);
+					alert("Error while checking AccOutstanding type.");
+					});
+				 }
+				 else{
+					 updateCurrencyData(AccPutstandingDt, name);
+				 }
+
+	}
+
+		function updateCurrencyData(AccPutstandingDt, name) {
+			$.ajax({
+				url: '/AccountOutstandingMaster/UpdateAccountOutstandingMaster',
+				type: 'POST',
+				data:JSON.stringify(AccPutstandingDt),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/AccountOutstandingMasterList/Index';
+								}, 1500);
+					} else {
+						alert("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					alert("Data not updated: " + error);
+				}
+			});
+		}
+
+
+		 function resetFields() {
+			$('#Txtname').val('');
+			 $('#TxtShortNm').val('');
+			  $('#TxtComRate').val('');
+			$('#Ddagentname').val($('#Ddagentname option:first').val());
+			$('#DdAgentGroup').val($('#DdAgentGroup option:first').val());
+			$('#DdComsionType').val($('#DdComsionType option:first').val());
+			$('#DdAcpayName').val($('#DdAcpayName option:first').val());
+			$('#searchInput').val();
+
+		}
+
+	  function checkExistOrNot(inputData)
+	   {
+		   return $.ajax({
+		   url: '/AccountOutstandingMaster/getExitOrNot',
+		   type: 'GET',
+		   dataType: 'json',
+		   data: { inputData: inputData }
+	   });
+	   }
+
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		   if(ModeOfControl=='Edit')
+		 {
+		  fillTextFields();
+		 setToggleState(getOutstandDt.active);
+
+	}
+	else
+	{
+	resetFields();
+	}
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+
+		function GetACpayablename(){
+		   $.ajax({
+			   url:'@Url.Action("GetACpayableName", "AccountOutstandingMaster")',
+			   type:'Get',
+			   datatype:'json',
+			   success:function(response){
+				   if(response.status==true){
+				   console.log(response.data);
+				   var countryId=$('#DdDepartment');
+				   countryId.empty();
+				   countryId.append('<option selected disabled>- Select A/C Payable Name-</option>');
+				   $.each(response.data, function(index, item){
+					   countryId.append('<option value="'+ item.code +'">'+ item.name +'</option>');
+				   });
+				   }else{
+					   alert("A/C Payable Name Load failed");
+				   }
+			   },
+			   error:function(xhr,status, error){
+			   alert("A/C Payable Name Load failed", xhr.error);
+			   }
+
+		   });
+		}
+	   function GetAgentNme(){
+		   $.ajax({
+			   url:'@Url.Action("GetAgentName", "AccountOutstandingMaster")',
+			   type:'Get',
+			   datatype:'json',
+			   success:function(response){
+				   if(response.status==true){
+				   console.log(response.data);
+				   var countryId=$('#Ddagentname');
+				   countryId.empty();
+				   countryId.append('<option selected disabled>- Select Agent Name-</option>');
+				   $.each(response.data, function(index, item){
+					   countryId.append('<option value="'+ item.code +'">'+ item.name +'</option>');
+				   });
+				   }else{
+					   alert("Agent Name Load failed");
+				   }
+			   },
+			   error:function(xhr,status, error){
+			   alert("Agent Name Load failed", xhr.error);
+			   }
+
+		   });
+	   }
+
+	   function fillTextFields()
+	   {
+		   $('#Txtname').val(getOutstandDt.name);
+		   $('#TxtShortNm').val(getOutstandDt.shortname);
+		   $('#TxtComRate').val(getOutstandDt.comRate);
+
+		GetACpayablename();
+		setTimeout(function () {
+		$('#DdAcpayName option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getOutstandDt.actPayable.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		 setTimeout(function () {
+		$('#Ddagentname option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getOutstandDt.agent_code.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		 setTimeout(function () {
+		$('#DdAgentGroup option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getOutstandDt.agentgroup.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		 setTimeout(function () {
+		$('#DdComsionType option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getOutstandDt.comType.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		setActiveStatus(getOutstandDt.active);
+
+	   }
+
+	   function allowOnlyNumbers(input) {
+			  input.value = input.value.replace(/[^0-9]/g, '');
+	   }
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+	// 	function setActiveStatus(input) {
+	// 	let isActive = (input.toLowerCase() === 'Yes');
+	// 	$('#ACTIVE').prop('checked', isActive);
+	// 	$('#ACTIVE').val(isActive ? 1 : 0);
+	// 	$('#statusText').text(isActive ? 'Active' : 'Inactive');
+	// }
+
+		function setActiveStatus(input)
+		{
+		let isActive = input == 1;
+		$('#ACTIVE').prop('checked', isActive);
+		$('#ACTIVE').val(isActive ? 1 : 0);
+		$('#statusText').text(isActive ? 'Active' : 'Inactive');
+		}
+
+
+</script>

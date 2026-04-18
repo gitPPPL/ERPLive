@@ -1,0 +1,155 @@
+﻿@{
+	ViewBag.Title = "Api Setting";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+	.form-control {
+		font-size: 13px;
+	}
+
+	a {
+		font-size: 14px;
+		color: #007bff;
+	}
+
+	.main-body {
+		border: none;
+		outline: 2px solid #ccc;
+		padding: 10px;
+		margin-top: 10px;
+	}
+</style>
+<!-- jQuery -->
+<script>
+	function redirectToDashboard() {
+		window.location.href = '@Url.Action("Index", "Dashboard")';
+	}
+</script>
+
+<nav class="breadcrumb">
+	<span class="active" onclick="redirectToDashboard()" style="cursor: pointer;">Dashboard</span>
+	<span> &gt; </span>
+	<a href="#">Whats up Api Setting</a>
+</nav>
+
+<form id="smsForm">
+	<div class="row">
+		<div class="col-md-2">
+			<label style="font-size: 13px;"><b>SMS Key</b></label>
+			<input type="text" id="txtSMSKey" placeholder="SMS Key" class="form-control" />
+		</div>
+		<div class="col-md-2">
+			<label style="font-size: 13px;"><b>Sender</b></label>
+			<input type="text" id="txtSender" placeholder="Sender" class="form-control" />
+		</div>
+
+		<div class="col-md-2">
+			<label style="font-size: 13px;"><b>Auto SMS User 1</b></label>
+			<select id="ddlAutoSMSUser1" class="form-control">
+				<option value="">-- Select AutoSMSUser1 --</option>
+			</select>
+		</div>
+
+		<div class="col-md-3">
+			<label style="font-size: 13px;"><b>Auto SMS User 2</b></label>
+			<select id="ddlAutoSMSUser2" class="form-control">
+				<option value="">-- Select AutoSMSUser2 --</option>
+			</select>
+		</div>
+
+		<div class="col-md-3">
+			<label style="font-size: 13px;"><b>Auto SMS User 3</b></label>
+			<select id="ddlAutoSMSUser3" class="form-control">
+				<option value="">-- Select AutoSMSUser3 --</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="row" style="margin-top:15px;">
+		<div class="col-md-2">
+			<label style="font-size: 13px;"><b>Route</b></label>
+			<input type="text" class="form-control" id="txtRoute" placeholder="Route" />
+		</div>
+
+		<div class="col-md-2">
+			<label style="font-size: 13px;"><b>URL</b></label>
+			<input type="text" class="form-control" id="txtURL" placeholder="URL" />
+		</div>
+
+		<div class="col-md-2">
+			<label style="font-size: 13px;"><b>Whats up Token ID</b></label>
+			<input type="text" class="form-control" id="txtWhatsupTokenID" placeholder="Whats up Token ID" />
+		</div>
+
+		<div class="col-md-3">
+			<label style="font-size: 13px;"><b>Instant ID</b></label>
+			<input type="text" class="form-control" id="txtInstantID" placeholder="Instant ID" />
+		</div>
+
+		<div class="col-md-3">
+			<label style="font-size: 13px; visibility: hidden;"><b>Document</b></label>
+			<button type="button" class="btn btn-primary" id="btnSubmit"
+					style="height: 37px;font-size: 12px; line-height: 1px; margin-top: 0px; width: 100%;">
+				Submit
+			</button>
+		</div>
+	</div>
+</form>
+
+<script>
+	$(document).ready(function () {
+		$('#btnSubmit').click(function () {
+			let smsKey = $('#txtSMSKey').val().trim();
+			let sender = $('#txtSender').val().trim();
+			let user1 = $('#ddlAutoSMSUser1').val();
+			let user2 = $('#ddlAutoSMSUser2').val();
+			let user3 = $('#ddlAutoSMSUser3').val();
+			let route = $('#txtRoute').val().trim();
+			let url = $('#txtURL').val().trim();
+			let whatsupTokenID = $('#txtWhatsupTokenID').val().trim();
+			let instantID = $('#txtInstantID').val().trim();
+			// Validation
+			if (!whatsupTokenID) {
+				toastr.error("Please enter the WhatsApp Token ID.");
+				$('#txtWhatsupTokenID').focus();
+				return;
+			}
+			if (!instantID) {
+				toastr.error("Please enter the Instant ID.");
+				$('#txtInstantID').focus();
+				return;
+			}
+			// AJAX call
+			$.ajax({
+				url: '/WhatsupAPISetting/Savebtn',
+				type: 'POST',
+				data: {
+					SMSKey: smsKey,
+					Sender: sender,
+					AutoSMSUser1: user1,
+					AutoSMSUser2: user2,
+					AutoSMSUser3: user3,
+					Route: route,
+					URL: url,
+					WhatsupTokenID: whatsupTokenID,
+					InstantID: instantID
+				},
+				success: function (response) {
+					if (response.success) {
+						toastr.success(response.message);
+						$('#smsForm')[0].reset(); // Reset form
+					} else {
+						toastr.error(response.message);
+					}
+				},
+				error: function () {
+					toastr.error("An error occurred while saving.");
+				}
+			});
+		});
+	});
+</script>
+
+

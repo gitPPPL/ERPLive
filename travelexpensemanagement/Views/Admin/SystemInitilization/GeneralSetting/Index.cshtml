@@ -1,0 +1,37 @@
+﻿@{
+	ViewBag.Title = "Menu Master Insert";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>kks</h1>
+
+<button id="btnupdateSQLSchema" type="submit" class="btn btn-primary">
+    <i class="fa fa-save"></i> Update stored procedure
+</button>
+<script>
+      $(document).ready(function() {
+        $('#btnupdateSQLSchema').on('click', function() {
+            // Call the function to update the SQL schema
+            updateSQLSchema();
+        });
+    });
+    function updateSQLSchema() {
+        $.ajax({
+            url: '@Url.Action("UpdateSQLSchema", "GeneralSetting")',
+            type: 'POST',
+            success: function(response) {
+                // Handle success response
+                if (response.success) {
+                    alert('SQL Schema updated successfully!');
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Handle error
+                alert('An error occurred while updating the SQL schema: ' + error);
+            }
+        });
+    }
+
+</script>

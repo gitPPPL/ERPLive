@@ -1,0 +1,337 @@
+﻿@{
+    ViewBag.Title = "Master Insert";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Currency Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button onclick="window.location.href='@Url.Action("Index", "CurrencyMaster")'" type="submit" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="CurrencyName">Currency Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" placeholder="Currency Name" id="Txtname" name="Name">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ShortName">Short Name</label>
+                    <input type="text" class="form-control" id="Txtshortname" placeholder="Short Name" name="Short Name">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="CurrencyCode">Currency Code<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtCurrencyCd" placeholder="Currency Code" name="Currency Code">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-8 col-md-2">
+                <div class="form-group">
+                    <div class="toggle-wrapper justify-content-center" id="">
+                        <input type="hidden" id="DdActive" name="IsActive" value="1" />
+
+                        <div id="customToggle" class="custom-toggle active"></div>
+                        <span id="statusLabel" class="status-label active">Active</span>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-last">
+                    <button type="submit" class="btn btn-primary" id="btn-save"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+
+     const toggle = document.getElementById("customToggle");
+     const statusLabel = document.getElementById("statusLabel");
+     const hiddenInput = document.getElementById("DdActive");
+
+     toggle.addEventListener("click", function () {
+       if (toggle.classList.contains("disabled")) return;
+
+       toggle.classList.toggle("active");
+       const isActive = toggle.classList.contains("active");
+
+       hiddenInput.value = isActive ? "1" : "0";
+       statusLabel.textContent = isActive ? "Active" : "Inactive";
+       statusLabel.classList.toggle("active", isActive);
+       statusLabel.classList.toggle("inactive", !isActive);
+     });
+
+     function disableToggle() {
+       toggle.classList.add("disabled");
+     }
+
+     function enableToggle() {
+       toggle.classList.remove("disabled");
+     }
+
+    function setToggleState(value) {
+      const toggle = document.getElementById("customToggle");
+      const label = document.getElementById("statusLabel");
+      const hiddenInput = document.getElementById("DdActive");
+      const isActive = Number(value) === 1;
+      toggle.classList.toggle("active", isActive);
+      label.textContent = isActive ? "Active" : "Inactive";
+      label.classList.toggle("active", isActive);
+      label.classList.toggle("inactive", !isActive);
+      hiddenInput.value = isActive ? "1" : "0";
+
+    }
+
+</script>
+<script>
+        let lanageUpdateCode=0;
+        let PreviousInputDt = "";
+        let allMastData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let ModeOfControl="";
+        let getCurrencyMastDt=[];
+
+        const storedData = localStorage.getItem('editcurrency');
+        ModeOfControl = localStorage.getItem('Mode');
+          localStorage.removeItem('Mode');
+          console.log(storedData);
+
+        $(document).ready(function(){
+        if (storedData && ModeOfControl === 'Edit') {
+          getCurrencyMastDt = JSON.parse(storedData);
+         lanageUpdateCode = getCurrencyMastDt.code;
+         PreviousInputDt = getCurrencyMastDt.name;
+
+          $('#Txtname').val(getCurrencyMastDt.name);
+          $('#Txtshortname').val(getCurrencyMastDt.shortname);
+           $('#TxtCurrencyCd').val(getCurrencyMastDt.currencyCd);
+
+         setToggleState(getCurrencyMastDt.active);
+          $('input').prop('readonly', false);
+          $('#btn-save').show();
+          $('#cancelBtn').show();
+          localStorage.removeItem('editcurrency');
+
+        }
+        else if (storedData && ModeOfControl === 'View') {
+            $('#btn-save').hide();
+            $('#cancelBtn').hide();
+            getCurrencyMastDt = JSON.parse(storedData);
+         $('#Txtname').val(getCurrencyMastDt.name);
+          $('#Txtshortname').val(getCurrencyMastDt.shortname);
+           $('#TxtCurrencyCd').val(getCurrencyMastDt.currencyCd);
+
+          $('#DdActive').val(getCurrencyMastDt.active);
+          setToggleState(getCurrencyMastDt.active);
+           $('input').prop('readonly', true);
+            disableToggle();
+          localStorage.removeItem('editcurrency');
+        }
+        });
+        // Event: Save new Currency
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            if (!validateRequiredField('#Txtname', 'Currency Name')) return;
+            if (!validateRequiredField('#Txtshortname', 'Short Name')) return;
+            if (!validateRequiredField('#TxtCurrencyCd', 'Currency Code')) return;
+
+            if(ModeOfControl=='Edit')
+            {
+                const CurrencyData = {
+                    code: lanageUpdateCode,
+                    Currencyname: name,
+                    ShortNm: shortname,
+                    currencyCode: currencyCd,
+                    Active: active
+                };
+                 EditCurrencymast(CurrencyData, name)
+            }
+            else
+            {
+                const CurrencyData = {
+                    Currencyname: name,
+                    ShortNm: shortname,
+                    currencyCode: currencyCd,
+                    Active: active
+                };
+             saveCurrencyMastDt(CurrencyData, name);
+            }
+        });
+    function saveCurrencyMastDt(CurrencyData, name)
+    {
+            checkExistOrNot(name).done(function (data) {
+                    if (data.status === true && data.exists === true) {
+                        toastr.warning("Duplicate Currency Name");
+                        return;
+                    }
+                        $.ajax({
+                        url: '@Url.Action("SaveCurrencyMastDt", "CurrencyMaster")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(CurrencyData),
+                        success: function (response) {
+                            if (response.status === true) {
+                                toastr.success('Data Save Successfully.');
+                                resetFields();
+                                setTimeout(function () {
+                                 window.location.href ='/CurrencyMaster/Index';
+                                }, 1500);
+
+                            } else {
+                                toastr.error(response.message || "Save failed");
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error occurred while saving.");
+                        }
+                    });
+
+                }).fail(function (xhr, status, error) {
+                    console.error("Check Currency failed:", error);
+                    toastr.error("Error while checking Currency.");
+                });
+    }
+    function EditCurrencymast(CurrencyData, name){
+        if (PreviousInputDt !== name) {
+                checkExistOrNot(name)
+                    .done(function (data) {
+                        if (data.status === true && data.exists === true) {
+                            toastr.warning("Duplicate Currency Name");
+                            return;
+                        }
+                        updateCurrencyData(CurrencyData, name);
+                    })
+                    .fail(function (xhr, status, error) {
+                        console.error("Check Currency failed:", error);
+                        toastr.error("Error while checking Currency.");
+                    });
+            } else {
+                updateCurrencyData(CurrencyData);
+            }
+    }
+        function updateCurrencyData(updatedData) {
+            $.ajax({
+                url: '/CurrencyMaster/UpdateCurrencyDt',
+                type: 'POST',
+                data: JSON.stringify(updatedData),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === true) {
+                        toastr.success('Data update Successfully.');
+                        resetFields();
+                        setTimeout(function () {
+                        window.location.href ='/CurrencyMaster/Index';
+                        }, 1500);
+
+                    } else {
+                        toastr.error("Update failed: " + response.message);
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Error occurred:", xhr.responseText);
+                    toastr.info("Data not updated.");
+                }
+            });
+        }
+
+        function checkExistOrNot(inputData) {
+            return $.ajax({
+                url: '@Url.Action("getExitOrNot", "CurrencyMaster")',
+                type: 'GET',
+                dataType: 'json',
+                data: { doctype: inputData }
+            });
+        }
+
+        $('#Txtname').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#Txtshortname').focus();
+                }
+            });
+
+            $('#Txtshortname').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#TxtCurrencyCd').focus();
+
+                }
+            });
+             $('#TxtCurrencyCd').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#DdActive').focus();
+
+                }
+            });
+            $('#DdActive').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $(this).val('Active');
+                    $('#btn-save').focus();
+                }
+            });
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel all the changes?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Cancelled!',
+            'Your action has been cancelled.',
+            'success'
+          )
+         if(ModeOfControl=='Edit')
+         {
+        $('#Txtname').val(getCurrencyMastDt.name);
+        $('#Txtshortname').val(getCurrencyMastDt.shortname);
+          setToggleState(getCurrencyMastDt.active);
+    }
+    else
+    {
+    resetFields();
+    }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire(
+            'Resumed',
+            'Your action is still in progress.',
+            'info'
+          )
+        }
+      });
+    });
+        function resetFields() {
+            $('#Txtname').val('');
+            $('#Txtshortname').val('');
+            $('#TxtCurrencyCd').val('');
+            $('#DdActive').val($('#DdActive option:first').val());
+            $('#searchInput').val('');
+        }
+</script>

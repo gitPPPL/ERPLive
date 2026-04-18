@@ -1,0 +1,573 @@
+﻿/* NO FLASH – EVER */
+ body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    font-family: 'Inter', system-ui, sans-serif;
+    /* Set the background image */
+   /* background-image: linear-gradient(to right, #beddfd, #eef4f7, #b2ecff);*/
+    background-image: url('../images/bgnew.jpeg');   
+    background-size: cover; /* Make sure the background image covers the whole screen */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Ensure the image stays fixed while scrolling */
+    background-repeat: no-repeat; /* Prevent repeating the image */
+}
+/*Media Queries*/
+/*.row {
+    margin-bottom: 15px;
+    margin-top: 25px !important;
+}*/
+@media (min-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 auto;
+        width: 50%;
+        margin-bottom: 20px;
+    }
+}
+@media (min-width: 576px) {
+    .col-sm-6 {
+        flex: 0 0 auto;
+        width: 48% ;
+    }
+}
+.col-12 {
+    margin-bottom: 20px;
+}
+
+/* Loader */
+#loader {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, #020617, #000);
+    display: grid;
+    place-items: center;
+    z-index: 9999;
+    text-align: center; /* Ensures everything is centered, including the logo */
+}
+
+/* Stage */
+.granule-stage {
+    position: relative;
+    width: 260px;
+    height: 320px;
+    perspective: 1200px;
+}
+
+/* Hide SVG */
+#p-shape {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
+
+/* Granules */
+.granules {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+}
+
+.granule {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: radial-gradient( circle at 30% 30%, #e6f4ee, #3a7d5f 35%, #276537 70% );
+    box-shadow: inset -1px -2px 3px rgba(0,0,0,.45), 0 6px 12px rgba(0,0,0,.55);
+}
+
+/* Main Content */
+
+#main {
+    min-height: 100vh;
+    /* display: grid;*/
+    place-items: center;
+    padding-top: 120px; /* Give space for the logo */
+    opacity: 0;
+}
+
+    #main h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 700;
+        background: linear-gradient(90deg, #198754, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+/* Main Heading */
+.main-heading {
+    font-size: clamp(2rem, 5vw, 3.0rem);
+    font-weight: 700;
+    color: #198754;
+    background: linear-gradient(90deg, #198754, #198754);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center !important;
+   /* margin-bottom: 0rem !important;*/
+   /* margin-top: 15px;*/
+}
+
+/* Line under the heading */
+.heading-line {
+    display: block;
+    width: 25% !important;
+    height: 4px;
+    background-color: #30b577;
+    margin: 0 auto;
+    margin-bottom: 35px;
+}
+
+/* Style for sub-heading */
+.sub-heading {
+    display: block;
+    font-size: 22px;
+    font-weight: 700;
+    padding: 4px 15px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #ffffff, #ffffff);
+    color: #1d1e1e;
+    box-shadow: 0 8px 20px rgb(54 54 54 / 35%);
+    /* margin-bottom: 24px; */
+    border-left: 5px solid #198754;
+    border-bottom: 2px solid #198754;
+    letter-spacing: 2px;
+}
+
+.main_section {
+    background: #ffffffeb;
+    /* padding: 0px !important; */
+     border-radius: 4px; 
+    border-top: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 12px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.2);
+    padding: 12px 18px;
+}
+.main_p {
+    font-size: 20px;
+    /* margin-left: 45px; */
+    font-weight: 600;
+    /* margin-top: 20px; */
+    /* text-transform: uppercase; */
+    color: #ffffff;
+    letter-spacing: 2px;
+    /* border-bottom: 2px solid; */
+    /* width: fit-content; */
+    /* text-decoration: underline; */
+    font-style: italic;
+    text-align: center;
+    background-color: #48a75e;
+    border: 1px solid #218538;
+    border-radius: 2px;
+}
+    /* Optional: Make the line responsive by adjusting the width based on screen size */
+    @media (max-width: 768px) {
+        .heading-line {
+        width: 80%; /* For smaller screens, make the line longer */
+    }
+}
+/* Card hover effect */
+/* CARD */
+.card {
+    width: 250px;
+    background: #f5eded;
+    border-radius: 8px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    /*transition: transform 0.3s ease, box-shadow 0.3s ease;*/
+    height: auto !important;
+    max-width: 280px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    border: 0.7px solid #adadad !important;
+    /*transition: transform 0.35s cubic-bezier(.4,0,.2,1), box-shadow 0.35s cubic-bezier(.4,0,.2,1), border-color 0.35s ease;*/
+}
+    /* ✨ Hover animation */
+    .card:hover {
+        /*transform: translateY(-8px) scale(1.02);*/
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+        border-color: #348545 !important;
+    }
+/* FULL IMAGE */
+.product-image img {
+    width: 100%;
+    height: 190px;
+    object-fit: fill;
+    display: block;
+    transition: transform 0.4s ease;
+    border-bottom: 1px solid #adadad;
+}
+/* Zoom image on card hover */
+.card:hover .product-image img {
+    transform: scale(1.1); /* adjust zoom level if needed */
+    cursor:pointer;
+}
+/* CONTENT AREA */
+.content {
+    padding: 16px 10px;
+    /*color: #fff;*/
+}
+.nav-link:hover{
+    color: #000 !important;
+}
+
+@media (max-width: 767px) {
+    .btn-back i {
+        margin-right: 0;
+    }
+}
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #358847;
+    line-height: 18px;
+    /*white-space: nowrap;*/
+}
+.main_title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #153e1e;
+    line-height: 24px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.text_highlight {
+    color: #2c2828;
+    font-weight: 600;
+    font-size: 18px;
+    display: block;
+}
+
+/* CENTER BUTTON */
+.know-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 6px;
+    background: linear-gradient(135deg, #2f7d3f, #4caf63);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .know-btn:hover {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 6px;
+        background: #fff;
+        border: 1px solid #2f7d3f !important;
+        color: #2f7d3f;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+.btn-tds {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* gap: 8px; */
+    width: 50%;
+    padding: 3px 0px;
+    background: linear-gradient(135deg, #2f7d3f, #4caf63);
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 2px;
+    margin: 0 auto;
+}
+
+    .btn-tds:hover {
+        background: #fff;
+        border: 1px solid #2f7d3f !important;
+        color: #2f7d3f;
+        font-weight: 700;
+    }
+.button-right {
+    float: right;
+   /* margin: 18px 0px;*/
+    background: #0d6efd;
+    border-radius: 5px;
+}
+
+
+.btn-back {
+    background: #0d6efd;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer !important;
+}
+    
+/* The Ripple Animation */
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.btn-back:hover {
+    background-color: #1c8f46;
+    color: white;
+}
+
+i {
+    font-size: 12px;
+    margin-right: 8px;
+    margin-top: 3px;
+}
+
+
+
+/* loader Logo */
+.loader_logo {
+    width: 150px; /* Set the logo width to a medium size */
+    max-width: 200px; /* Ensure the logo doesn't exceed a max size */
+    opacity: 0.9;
+    position: absolute;
+    top: 70%; /* Move it below the loader animation */
+    left: 50%;
+    transform: translateX(-50%); /* Center the logo horizontally */
+    pointer-events: none;
+}
+/* Logo */
+/* Default Logo Style (for large screens - Desktop) */
+/* LOGO */
+/* Header outer wrapper */
+.top-header-wrapper {
+    width: 100%;
+}
+
+/* Header inner container (IMPORTANT) */
+.top-header {
+    max-width: 1200px; /* same visual width as content */
+    margin: 0 auto; /* center the header block */
+    display: flex;
+    align-items: center; /* SAME vertical alignment */
+    justify-content: space-between;
+    padding: 12px 15px;
+}
+
+/* Logo */
+.logo img {
+    height: 70px;
+    width: auto;
+}
+
+/* Logout */
+.logout-btn {
+    white-space: nowrap;
+}
+
+
+@media (max-width: 768px) {
+    .logo img {
+        width: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo img {
+        width: 150px;
+    }
+}
+
+
+/*Modal Popup*/
+/* Modal header styling */
+.modal-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center !important;
+    padding: 6px 14px !important;
+    background-color: #398d4b;
+    color: white;
+    border-radius: 0px;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin: 0;
+}
+    .modal-icon {
+        font-size: 18px;
+        margin-right: 8px;
+        margin-top: 3px;
+    }
+    /* Close button styling */
+    .button-close {
+        color: black !important;
+        font-size: 16px; /* Increase the font size of the close button */
+        background-color: transparent;
+        border: none;
+        color: #000 !important;
+    }
+
+/* Modal body styling */
+.modal-body {
+    padding: 20px; /* Add some padding around the content */
+    text-align: center; /* Center-align text and image */
+}
+
+    /* Make image responsive and centered */
+    .modal-body img {
+        max-width: 90%;
+        height: auto;
+        /* max-height: 70vh; */
+        object-fit: cover;
+        margin: 0 auto;
+    }
+
+/* Make the modal responsive */
+@media (max-width: 768px) {
+    .modal-dialog {
+        max-width: 100%; /* Full width for smaller screens */
+    }
+
+    .modal-body img {
+        max-width: 95%; /* Allow a bit more width for smaller screens */
+        max-height: 60vh; /* Reduce the max height on smaller screens */
+    }
+}
+
+/* Optional: Styling for the modal itself */
+.modal-dialog {
+    max-width: 600px; /* Set a maximum width for the modal */
+    margin: 1.75rem auto; /* Center the modal vertically and horizontally */
+}
+
+.product-tabs {
+    border-bottom: none;
+    gap: 12px;
+}
+
+    .product-tabs .nav-link {
+        border-radius: 10px;
+        padding: 4px 45px;
+        min-width: 140px;
+        background: #e7e7e7;
+        color: #1c1a1a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid #747474;
+    }
+
+        .product-tabs .nav-link i {
+            font-size: 20px;
+            color: #3c914b;
+        }
+
+        .product-tabs .nav-link span {
+            font-size: 18px;
+        }
+
+        .product-tabs .nav-link:hover {
+            background: #e7e7e7;
+            border: none;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.20);
+        }
+
+        .product-tabs .nav-link.active {
+            background: linear-gradient(135deg, #2f7d3f, #4caf63);
+            color: #fff !important;
+            box-shadow: 0 8px 20px rgba(60, 145, 75, 0.35);
+            border: 1px solid #2f7d3f;
+        }
+
+            .product-tabs .nav-link.active i {
+                color: #fff;
+            }
+
+/* Title Container */
+.title-container {
+    text-align: center;
+    width: 100%;
+}
+
+.watermark-container {
+    position: absolute;
+    right: 0;
+    top: 30%;
+    transform: translateY(-50%);
+}
+
+.watermark-logo {
+    width: 30px; /* Adjust the logo width */
+    height: auto;
+    opacity: 0.8; /* Optional: Adjust opacity for watermark effect */
+    pointer-events: none;
+}
+/* Flex container for title and watermark */
+.content-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* CENTER title */
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.b2b-text {
+    font-size: 20px;
+    font-weight: 500;
+    color: #363a38;
+    line-height: 24px;
+    display: block;
+    /* letter-spacing: 0px; */
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/*Return to Top*/
+#return-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    /*  background: #000; */
+    color: #fff;
+    text-align: center;
+    line-height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none; /* hidden by default */
+    z-index: 9999;
+    background: linear-gradient(135deg, #2f7d3f, #4caf63);
+}
+
+    #return-to-top:hover {
+        background: #0d6efd;
+    }
+
+    #return-to-top em {
+        font-size: 22px;
+    }
+
+.hide__font {
+    display: none;
+}

@@ -1,0 +1,1430 @@
+﻿@{
+    ViewBag.Title = "Purchase Bill Pass Entry Direct";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Purchase Bill Pass Direct Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "PurchaseBillPassEntryDirectList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="PurchaseBillPassEntryDirectForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option>--Select DOC Type--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" placeholder="Enter Doc Date">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPONo">PO No</label>
+                    <select class="form-control" id="ddlPONo">
+                        <option value="">Select PO No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-height">
+                    <legend class="sub-legend">Party Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlBillFrom">Bill From</label>
+                                <select class="form-control" id="ddlBillFrom">
+                                    <option>Select Bill From</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd1PD">Add Line1</label>
+                                @* <input type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address Line 1"> *@
+                                <select class="form-control" id="TxtAdd1PD">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd2PD">Add Line2</label>
+                                <input type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address Line 2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlCity">City</label>
+                                <select class="form-control" id="ddlCity">
+                                    <option value="">Select City</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtGSTNo">GST No</label>
+                                <input type="text" class="form-control" id="TxtGSTNo" placeholder="Enter GST No">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Account & Shipping Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlDebitAC">Debit A/c</label>
+                                <select class="form-control" id="ddlDebitAC">
+                                    <option>Select Debit A/C</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlCreditAC">Credit A/c</label>
+                                <select class="form-control" id="ddlCreditAC">
+                                    <option>Select Credit Account</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlShipFrom">Ship from</label>
+                                <select class="form-control" id="ddlShipFrom">
+                                    <option>Select Shipping Party</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtAdd1SF">Add Line1</label>
+                                <input type="text" class="form-control" id="TxtAdd1SF" placeholder="Enter Address Line 1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtAdd2SF">Add Line2</label>
+                                <input type="text" class="form-control" id="TxtAdd2SF" placeholder="Enter Address Line 2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlCitySF">City</label>
+                                <select class="form-control" id="ddlCitySF">
+                                    <option>Select City</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtGSTNoSF">GST No</label>
+                                <input type="text" class="form-control" id="TxtGSTNoSF" placeholder="Enter GST Number">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Document Details</legend>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtBillNo">Bill No</label>
+                                <input type="text" class="form-control" id="TxtBillNo" placeholder="Enter Bill No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtBillDate">Bill Date</label>
+                                <input type="date" class="form-control" id="DtBillDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtChallanNo">Challan No</label>
+                                <input type="text" class="form-control" id="TxtChallanNo" placeholder="Enter Challan No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtChallanDate">Challan Date</label>
+                                <input type="date" class="form-control" id="DtChallanDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtWaybillNo">Waybill No</label>
+                                <input type="text" class="form-control" id="TxtWaybillNo" placeholder="Enter Waybill No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlTransitNo">Transit No</label>
+                                <select class="form-control" id="ddlTransitNo">
+                                    <option>Select Transit No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlStatus">Status</label>
+                                <select class="form-control" id="ddlStatus">
+                                    <option>--Select Status--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumExRate">Ex-Rate(Rs/USD)</label>
+                                <input type="number" class="form-control" id="NumExRate" placeholder="Enter Ex-Rate(Rs/USD)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlInputType">Input Type</label>
+                                <select class="form-control" id="ddlInputType">
+                                    <option>--Select Input Type--</option>
+                                    <option>Central</option>
+                                    <option>GST Input</option>
+                                    <option>GST NA</option>
+                                    <option>Import</option>
+                                    <option>Input Capital</option>
+                                    <option>Input GST</option>
+                                    <option>Input NA</option>
+                                    <option>Input VAT</option>
+                                    <option>Local</option>
+                                    <option>RCM</option>
+                                    <option>Exempt</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumNetAmount">Net Amount</label>
+                                <input type="text" class="form-control" id="NumNetAmount" placeholder="Enter Net Amount">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+       
+        @* Nav tabs start *@
+        <div class="navtab-form">
+            <ul class="nav nav-tabs" id="formTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Item Total</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Logistic Details</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Cr/Dr Note</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab">Attachments</button>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <!-- tab 1 -->
+                <div class="tab-pane fade show active" id="tab1">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblItemRecordPBPED" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th style="display:none;">Code</th>
+                                        <th>Item Name</th>
+                                        <th>HSN Code</th>
+                                        <th>Unit</th>
+                                        <th>Nos</th>
+                                        <th>Rec Qty</th>
+                                        <th>Bill Qty</th>
+                                        <th>USD Rate</th>
+                                        <th>Ex Rate</th>
+                                        <th>Rate</th>
+                                        <th>Amount</th>
+                                        <th>RCM Y/N</th>
+                                        <th>Input Y/N</th>
+                                        <th>Tax Type</th>
+                                        <th>Pack%</th>
+                                        <th>Pack Amt</th>
+                                        <th>Disc %</th>
+                                        <th>Disc</th>
+                                        <th>CGST%</th>
+                                        <th>CGST</th>
+                                        <th>SGST%</th>
+                                        <th>SGST</th>
+                                        <th>IGST%</th>
+                                        <th>IGST</th>
+                                        <th>Cess%</th>
+                                        <th>Cess</th>
+                                        <th>VAT%</th>
+                                        <th>VAT</th>
+                                        <th>Oth Amt</th>
+                                        <th>Net Amt</th>
+                                        <th>Make</th>
+                                        <th>Department</th>
+                                        <th>Remarks</th>
+                                        <th>LD Rate</th>
+                                        <th>LD Amt</th>
+                                        <th>PO LDRate</th>
+                                        <th>PO Rate</th>
+                                        <th>PO Type</th>
+                                        <th>PO No</th>
+                                        <th>Kanta Type</th>
+                                        <th>Kanta No</th>
+                                        <th>Req Type</th>
+                                        <th>Req No</th>
+                                        <th>Ref Type</th>
+                                        <th>Ref No</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePaginationPBPE"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- tab 2 -->
+                <div class="tab-pane fade" id="tab2">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Total</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumReceivedQty">Received Qty</label>
+                                    <input type="number" class="form-control" id="NumReceivedQty" placeholder="Enter Received Qty">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumBillQty">Bill Qty</label>
+                                    <input type="number" class="form-control" id="NumBillQty" placeholder="Enter Bill Quantity">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumAmount">Amount</label>
+                                    <input type="number" class="form-control" id="NumAmount" placeholder="Enter Amount">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumPacking">Packing</label>
+                                    <input type="number" class="form-control" id="NumPacking" placeholder="Enter Packing Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumDiscount">Discount</label>
+                                    <input type="number" class="form-control" id="NumDiscount" placeholder="Enter Discount Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumCgst">CGST</label>
+                                    <input type="number" class="form-control" id="NumCgst" placeholder="Enter CGST Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumSgst">SGST</label>
+                                    <input type="number" class="form-control" id="NumSgst" placeholder="Enter SGST Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumIgst">IGST</label>
+                                    <input type="number" class="form-control" id="NumIgst" placeholder="Enter IGST Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumVat">VAT</label>
+                                    <input type="number" class="form-control" id="NumVat" placeholder="Enter VAT Amt">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumCess">CESS</label>
+                                    <input type="number" class="form-control" id="NumCess" placeholder="Enter CESS Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumOtherAmt">Other Amt</label>
+                                    <input type="number" class="form-control" id="NumOtherAmt" placeholder="Enter Other Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTcs">TCS</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumTcs1">
+                                        <input type="number" class="form-control" id="NumTcs2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumSubTotal">Sub Total</label>
+                                    <input type="number" class="form-control" id="NumSubTotal" placeholder="Enter Subtotal">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumRoundOff">Round Off</label>
+                                    <input type="number" class="form-control" id="NumRoundOff" placeholder="Enter Round Off">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumNetAmount">Net Amount</label>
+                                    <input type="number" class="form-control" id="NumNetAmount" placeholder="Enter Net Amount">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">TDS & Bank Details</legend>
+                        <div class="row">
+                            <!-- TDS A/c -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlTdsAccount">TDS A/c</label>
+                                    <select class="form-control" id="ddlTdsAccount">
+                                        <option value="">Select TDS A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="TxtTds">TDS</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="TxtTds1">
+                                        <input type="text" class="form-control" id="TxtTds2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="TxtTds194q">TDS 194Q</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="TxtTds194q1">
+                                        <input type="text" class="form-control" id="TxtTds194q2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="TxtBankRate">Bank Rate</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="TxtBankRate1">
+                                        <input type="text" class="form-control" id="TxtBankRate2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtPlNo">PL No</label>
+                                    <input type="text" class="form-control" id="ChkPlNo">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtPlNo">PL Date</label>
+                                    <input type="date" class="form-control" id="DtPlDate">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 3-->
+                <div class="tab-pane fade" id="tab3">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Transport Information</legend>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlTransportName">Transport Name</label>
+                                    <select class="form-control" id="ddlTransportName">
+                                        <option value="">Select Transport Name</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtVehicleNo">Vehicle No</label>
+                                    <input type="text" class="form-control" id="txtVehicleNo" placeholder="Enter Vehicle No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtContainerNo">Container No</label>
+                                    <input type="text" class="form-control" id="txtContainerNo" placeholder="Enter Container No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtGRNo">GR No</label>
+                                    <input type="text" class="form-control" id="txtGRNo" placeholder="Enter GR No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtGRDate">GR Date</label>
+                                    <input type="date" class="form-control" id="DtGRDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label class="checkbox-input">
+                                    <input type="checkbox" id="ChkSealedVehicle" />
+                                    Sealed Vehicle
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Freight Details</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlFreightDebitAC">Freight Debit A/C</label>
+                                    <select class="form-control" id="ddlFreightDebitAC">
+                                        <option value="">Select Freight Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlFreightCreditAC">Freight Credit A/C</label>
+                                    <select class="form-control" id="ddlFreightCreditAC">
+                                        <option value="">Select Freight Credit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumFreightAmount">Freight Amount</label>
+                                    <input type="number" class="form-control" id="NumFreightAmount" placeholder="Enter Freight Amount">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumFrtTax">Frt Tax%</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumFrtTax1">
+                                        <input type="number" class="form-control" id="NumFrtTax2">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtFrtPayNarration">Frt Pay Narration</label>
+                                    <input type="text" class="form-control" id="TxtFrtPayNarration" placeholder="Enter Frt Pay Narration">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumTDSonFRT">TDS on FRT%</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumTDSonFRT1">
+                                        <input type="number" class="form-control" id="NumTDSonFRT2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- WB Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">WB Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumWBAmount">WB Amount</label>
+                                    <input type="number" class="form-control" id="NumWBAmount" placeholder="Enter WB Amount">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="WBTDS">WB TDS</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumWBTDS1" placeholder="%">
+                                        <input type="number" class="form-control" id="NumWBTDS2" placeholder="Value">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlWBDebitAC">WB Debit A/c</label>
+                                    <select class="form-control" id="ddlWBDebitAC">
+                                        <option value="">Select WB Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlWBCreditAC">WB Credit A/c</label>
+                                    <select class="form-control" id="ddlWBCreditAC">
+                                        <option value="">Select WB Credit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtWBNarration">WB Narration</label>
+                                    <input type="text" class="form-control" id="TxtWBNarration" placeholder="Enter WB Narration">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- Unloading Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Unloading Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumUnloadAmt">Unloading Amt</label>
+                                    <input type="number" class="form-control" id="NumUnloadAmt" placeholder="Enter Unload Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="UnloadTDS">Unload TDS</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumUnloadTDS1" placeholder="%">
+                                        <input type="number" class="form-control" id="NumUnloadTDS2" placeholder="Value">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlUnloadDebitAC">Unload Debit A/c</label>
+                                    <select class="form-control" id="ddlUnloadDebitAC">
+                                        <option value="">Select Unload Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlUnloadCreditAC">Unload Credit A/c</label>
+                                    <select class="form-control" id="ddlUnloadCreditAC">
+                                        <option value="">Select Unload Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtUnloadNarration">Unload Narration</label>
+                                    <input type="text" class="form-control" id="TxtUnloadNarration" placeholder="Enter Unload Narration">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 4-->
+                <div class="tab-pane fade" id="tab4">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Debit / Credit Notes</legend>
+                        <div class="offset-md-2 col-md-3">
+                            <label class="checkbox-input">
+                                <input type="checkbox" id="ChkDebitFromTransporter" />
+                                Debit from Transporter
+                            </label>
+                        </div>
+                        <!-- One Row = Label + 2 Inputs + Narration -->
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Quality Diff Debit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD1" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD2" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" id="TxtQDDNarration" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Rate Diff Debit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>QC Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Weight Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Others Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Quality Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>QC Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Weight Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Rate Diff Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <!-- Payment, Reason, Hold Date -->
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="ddlPayment">Payment</label>
+                                    <select class="form-control" id="ddlPaymentCRDRNote">
+                                        <option>NA</option>
+                                        <option>Paid</option>
+                                        <option>Hold</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="TxtReason">Reason</label>
+                                    <input type="text" class="form-control" id="TxtReasonCRDRNote">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtHoldDate">Hold Date</label>
+                                    <input type="date" class="form-control" id="DtHoldDateCRDRNote">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 5-->
+                <div class="tab-pane fade" id="tab5">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblAttachmentPBPE" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th style="display:none;">Code</th>
+                                        <th>File Name</th>
+                                        <th>File Upload</th>
+                                        <th>Preview</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePaginationattachment"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+        if (!isNaN(rowId) && rowId > 0) {
+            // loadFullQuotationByVno(rowId, currentDocCode);
+            //if (isReadOnly) {
+            //    // setQCDiscMasterFormReadOnly();
+            //}
+        }
+        loadNextDocNo(yearCode);
+        loadDocTypeList();
+        loadStatusList();
+        loadPOList(compCode,yearCode,branchCode);
+        loadBilltoList(compCode);
+        loadShiptoList(compCode);
+    });
+
+    function loadNextDocNo(yearC){
+        $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetNextV_NO',
+            type: 'GET',
+            data: { yearCode : yearC },
+            success: function (response) {
+                $('#NumDocNo').val(response).attr('disabled',true);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    }
+    function loadDocTypeList() {
+        docTypeMap = {};
+        return $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetDocTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDocType');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Doc Type --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    docTypeMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading DocType list: ' + error);
+            }
+        });
+    }
+    function loadStatusList() {
+        statusMap = {};
+        return $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetStatusList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlStatus');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Status --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    statusMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Status list: ' + error);
+            }
+        });
+    }
+    function loadPOList(CCode,YCode,BCode) {
+        statusMap = {};
+        return $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetPoList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode, yCode: YCode, bCode: BCode },
+            success: function (data) {
+                var ddl = $('#ddlPONo');
+                ddl.empty();
+                ddl.append('<option value="">-- Select PO Num--</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    statusMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Status list: ' + error);
+            }
+        });
+    }
+    function loadBilltoList(CCode) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetBillToList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode},
+        }).then(function (data) {
+            const map = {};
+                const ddl = $('#ddlBillFrom');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Party --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+
+            return map;
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading Party list: ' + error);
+            return {}; // Return empty map on error
+        });
+    }
+    function loadShiptoList(CCode) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetShipToList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode},
+        }).then(function (data) {
+            const map = {};
+                const ddl = $('#ddlShipFrom');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Party --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+
+            return map;
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading Party list: ' + error);
+            return {}; // Return empty map on error
+        });
+    }
+
+    $('#ddlBillFrom').change(function(){
+        var selectedVal = $(this).val();
+        $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetTransitNoByParty',
+            type: 'GET',
+            data: { cCode: compCode, yCode: yearCode,bCode: branchCode,pCode: selectedVal },
+            success: function (res) {
+                var ddl = $('#ddlTransitNo');
+                ddl.empty();
+                ddl.append('<option value="">-- Transit No --</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+                loadAddressListByBillTo(compCode,selectedVal);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    })
+    function loadAddressListByBillTo(CCode,PCode){
+        $('#TxtAdd1PD').data('pcode',PCode);
+        $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetAddressListByBillToParty',
+            type: 'GET',
+            data: { cCode: CCode,pCode: PCode },
+            success: function (res) {
+                var ddl = $('#TxtAdd1PD');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Bill to Address--</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    }
+    $('#TxtAdd1PD').change(function(){
+        var selectedVal = $(this).val();
+        var selectedtxt = $(this).text();
+        var PCode = $(this).data('pcode');
+        alert(PCode);
+
+        $.ajax({
+            url: '/PurchaseBillPassEntryDirect/GetAddressByBillToParty',
+            type: 'GET',
+            data: { cCode: compCode,pCode: PCode,addressId: selectedVal},
+            success: function (res) {
+                console.log(res);
+
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    })
+</script>
+
+
+
+
+
+
+<script>
+    $(function () {
+        $(".draggable-modal").draggable({
+            handle: ".popup-header" // Drag using the header
+        });
+    });
+</script>
+<script>
+    $(function () {
+
+        //==========================
+        // COMMON UTILITY FUNCTION
+        //==========================
+        function reassignPlusIcon($tbody) {
+            const $last = $tbody.find('tr:last td:last');
+            if ($last.find('.btn-add-action').length === 0) {
+                $last.prepend('<i class="fa fa-plus btn-add-action" title="Add Row"></i>');
+            }
+        }
+
+        //==========================
+        // COST ALLOCATION MODAL
+        //==========================
+        function addRowToCostAllocationTable(data = {}) {
+            const $tbody = $('#tblpurchaseallocationmodal tbody');
+            $tbody.find('.btn-add-action').remove(); // Only last row gets add icon
+
+            const row = `
+                <tr class="no-border-input">
+                    <td style="display:none;"><input type="checkbox" class="row-select" /></td>
+                    <td><input type="text" class="form-control" placeholder="Enter Cost Center" value="${data.costCenter || ''}"></td>
+                    <td><input type="number" class="form-control" placeholder="Enter Allocated Amt" value="${data.allocatedAmt || ''}"></td>
+                    <td><input type="text" class="form-control" placeholder="Enter Narration" value="${data.narration || ''}"></td>
+                    <td style="display:none;">
+                        <i class="fa fa-plus btn-add-action" title="Add Row"></i>
+                        <i class="fa fa-trash btn-delete-action" title="Delete Row"></i>
+                    </td>
+                </tr>`;
+            $tbody.append(row);
+            reassignPlusIcon($tbody);
+        }
+
+        $('#selectAllPR').on('change', function () {
+            const checked = $(this).is(':checked');
+            $('#tblpurchaseallocationmodal tbody .row-select').prop('checked', checked);
+        });
+
+        //==========================
+        // ATTACHMENT TAB (TAB 5)
+        //==========================
+        function addRowToAttachmentTable(data = {}) {
+            const $tbody = $('#tblAttachmentPBPE tbody');
+            $tbody.find('.btn-add-action').remove();
+
+            const row = `
+                <tr class="no-border-input">
+                    <td style="display:none;">${data.code || ''}</td>
+                    <td><input type="text" class="form-control mb-1" value="${data.fileName || ''}" placeholder="Enter file name"/></td>
+                    <td><input type="file" class="form-control file-upload" /></td>
+                    <td><input type="" class="form-control" accept="image/*" /></td>
+                    <td>
+                        <i class="fa fa-plus btn-add-action" title="Add Row"></i>
+                        <i class="fa fa-edit btn-edit-action" title="Edit Row"></i>
+                        <i class="fa fa-trash btn-delete-action" title="Delete Row"></i>
+                    </td>
+                </tr>`;
+            $tbody.append(row);
+        }
+
+        $('#saveAttachmentBtn').on('click', function () {
+            const formData = new FormData();
+            const $tbody = $('#tblAttachmentPBPE tbody');
+
+            $tbody.find('tr').each(function (i) {
+                const $td = $(this).find('td');
+                const name = $td.eq(1).find('input').val();
+                const file = $td.eq(2).find('input')[0].files[0];
+
+                formData.append(`Attachments[${i}].FileName`, name);
+                if (file) formData.append(`Attachments[${i}].File`, file);
+            });
+
+            $.ajax({
+                url: '/PurchaseBillPassEntry/UploadAttachments',
+                method: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: () => alert("Attachments uploaded successfully!"),
+                error: (xhr) => alert("Upload failed: " + xhr.responseText)
+            });
+        });
+
+        //==========================
+        // ITEM RECORD TAB (TAB 1)
+        //==========================
+        function addRowToItemTable(data = {}) {
+            const $tbody = $('#tblItemRecordPBPED tbody');
+            $tbody.find('.btn-add-action').remove();
+
+            const row = `
+                <tr class="no-border-input">
+                    <td style="display:none;">${data.code || ''}</td>
+                    <td><input type="text" class="form-control" placeholder="Item Name"></td>
+                    <td><input type="text" class="form-control" placeholder="HSN Code"></td>
+                    <td><input type="text" class="form-control" placeholder="Unit"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><select class="form-select"><option value="">Select</option><option value="Y">Yes</option><option value="N">No</option></select></td>
+                    <td><select class="form-select"><option value="">Select</option><option value="Y">Yes</option><option value="N">No</option></select></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="number" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td><input type="text" class="form-control"></td>
+                    <td>
+                        <i class="fa fa-plus btn-add-action" title="Add Row"></i>
+                        <i class="fa fa-edit btn-edit-action" title="Edit Row"></i>
+                        <i class="fa fa-trash btn-delete-action" title="Delete Row"></i>
+                    </td>
+                </tr>`;
+            $tbody.append(row);
+        }
+
+        //==========================
+        // GLOBAL ACTIONS
+        //==========================
+        addRowToCostAllocationTable(); // Modal
+        addRowToAttachmentTable();     // Tab 5
+        addRowToItemTable();           // Tab 1
+
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+        const $table = $(this).closest('table');
+        const $tab = $(this).closest('.tab-pane');
+
+        // Case 1: Cost Allocation Modal
+        if ($table.attr('id') === 'tblpurchaseordermodal' || $('#costallocationModal').hasClass('show')) {
+            addRowToCostAllocationTable();
+        }
+
+        // Case 2: Tab 5 - Attachment
+        else if ($tab.attr('id') === 'tab5') {
+            addRowToAttachmentTable();
+        }
+
+        // Case 3: Tab 1 - Item Record
+        else if ($tab.attr('id') === 'tab1') {
+            addRowToItemTable();
+        }
+        });
+
+
+        // Delete Row for all tables
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const $tbody = $row.closest('tbody');
+            $row.remove();
+            reassignPlusIcon($tbody);
+        });
+
+    });
+</script>
+<script>
+    document.getElementById('fileUpload').addEventListener('change', function () {
+        const fileInput = this;
+        const fileNameField = document.getElementById('txtFileName');
+
+        if (fileInput.files.length > 0) {
+            fileNameField.value = fileInput.files[0].name;
+        } else {
+            fileNameField.value = '';
+        }
+    });
+</script>
+<script>
+
+
+
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadDocumentStages();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadDocumentStages();
+        });
+    });
+
+    //Load main grid...............
+    function loadDocumentStages() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ApprovalStageMasterList/GetAllDocs',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const docs = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#tblApprovalStageMaster tbody');
+                tbody.empty();
+
+                if (docs.length === 0) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_NAME || ''}</td>
+                            <td>${doc.useR_NO || '0'}</td>
+                            <td>
+                              <div class="action-icons">
+                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
+                               <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
+                              </div>
+
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+            }
+        });
+    }
+
+        function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        pagination.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadDocumentStages();
+    }
+
+    function editDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+    }
+
+    function viewDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+    }
+
+    function deleteDocStage(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ApprovalStageMasterList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+
+
+
+</script>

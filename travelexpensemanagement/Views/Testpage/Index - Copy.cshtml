@@ -1,0 +1,312 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Business Card Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        .media-box {
+            width: 100%;
+            min-height: 320px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        video, img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container mt-3">
+
+    <h3 class="text-success mb-3">
+        <i class="bi bi-camera"></i> Business Card Scanner
+    </h3>
+
+    <!-- Camera Select -->
+        <select id="cameraSelect" class="form-select mb-2" onchange="switchCamera()">
+        <option value="environment">Back Camera</option>
+        <option value="user">Front Camera</option>
+    </select>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="media-box">
+                <video id="video" autoplay playsinline muted></video>
+            </div>
+            <canvas id="canvas" class="d-none"></canvas>
+        </div>
+
+        <div class="col-md-6">
+            <div class="media-box">
+                <img id="photo" />
+            </div>
+        </div>
+    </div>
+
+    <button id="cameraBtn" class="btn btn-primary mt-3" onclick="openOrCapture()">
+        Open Camera
+    </button>
+
+    <hr />
+
+    <h5 class="mt-3"><i class="bi bi-person-badge"></i> Business Card Details</h5>
+
+<div class="row g-3">
+
+    <div class="col-md-6">
+        <label class="form-label">Name<span class="text-danger">*</span></label>
+        <input id="txtName" class="form-control" placeholder="Enter Name" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Sex<span class="text-danger">*</span></label>
+        <select id="gender" class="form-select">
+            <option value="Male" selected>Male</option>
+            <option value="Female">Female</option>
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Mobile No<span class="text-danger">*</span></label>
+        <input id="NumMobileNumber" class="form-control" placeholder="Mobile Number" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Email Address</label>
+        <input id="txtEmail" class="form-control" placeholder="Email Address" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Company Name</label>
+        <input id="txtCompany" class="form-control" placeholder="Company Name" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Address</label>
+        <input id="txtAddress" class="form-control" placeholder="Address" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Trade Type</label>
+        <select id="TradeType" class="form-select">
+            <option value="Trader" selected>Trader</option>
+            <option value="Agent">Agent</option>
+            <option value="Manufacturer">Manufacturer</option>
+            <option value="Service Provider">Service Provider</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Interested Product</label>
+        <input id="txtInterestedProduct" class="form-control" />
+    </div>
+
+    <div class="col-md-12">
+        <label class="form-label">Our User Feedback</label>
+        <textarea id="txtOursUserFeedback" class="form-control" rows="2"></textarea>
+    </div>
+
+</div>
+
+<button class="btn btn-success mt-4" onclick="saveData()">Submit</button>
+
+</div>
+
+
+<script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const photo = document.getElementById("photo");
+    const cameraSelect = document.getElementById("cameraSelect");
+    const cameraBtn = document.getElementById("cameraBtn");
+
+    const txtName = document.getElementById("txtName");
+    const gender = document.getElementById("gender");
+    const NumMobileNumber = document.getElementById("NumMobileNumber");
+    const txtEmail = document.getElementById("txtEmail");
+    const txtCompany = document.getElementById("txtCompany");
+    const txtAddress = document.getElementById("txtAddress");
+    const TradeType = document.getElementById("TradeType");
+    const txtInterestedProduct = document.getElementById("txtInterestedProduct");
+    const txtOursUserFeedback = document.getElementById("txtOursUserFeedback");
+
+    let stream = null;
+    let opened = false;
+    let ocrText = "";
+
+
+    async function openOrCapture() {
+        try {
+            if (!opened) {
+                clearForm();
+                if (stream) stream.getTracks().forEach(t => t.stop());
+
+                const constraints = {
+                    video: {
+                        facingMode: cameraSelect.value,
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                opened = true;
+                cameraBtn.innerText = "Take Photo";
+
+            } else {
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const base64 = canvas.toDataURL("image/jpeg", 1.0);
+                photo.src = base64;
+
+                stream.getTracks().forEach(t => t.stop());
+                opened = false;
+                cameraBtn.innerText = "Open Camera";
+
+                scanOCR(base64);
+            }
+        } catch (err) {
+            alert("Camera access failed ❌");
+            console.error(err);
+        }
+    }
+
+    async function switchCamera() {
+        if (!opened) return;
+
+        if (stream) stream.getTracks().forEach(t => t.stop());
+
+        const constraints = {
+            video: { facingMode: cameraSelect.value }
+        };
+
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+    }
+
+    function scanOCR(img) {
+        fetch('/Testpage/ScanBase64', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageData: img })
+        })
+        .then(r => r.json())
+        .then(d => {
+            console.log('OCR Result:', d);
+
+            txtName.value = d.name || "";
+            txtCompany.value = d.company || "";
+            txtEmail.value = d.email || "";
+            NumMobileNumber.value = d.phone || "";
+            txtAddress.value = d.address || "";
+            ocrText = d.ocrText; 
+        })
+        .catch(err => {
+            console.error(err);
+            alert("OCR failed ❌");
+        });
+    }
+
+    function saveData() {
+
+    // Trim values
+    const name = txtName.value.trim();
+    const sex = gender.value.trim();
+    const mobile = NumMobileNumber.value.trim();
+
+    // Validation
+    if (name === "") {
+        alert("Name is required");
+        txtName.focus();
+        return;
+    }
+
+    if (sex === "") {
+        alert("Sex is required");
+        gender.focus();
+        return;
+    }
+
+    if (mobile === "") {
+        alert("Mobile number is required");
+        NumMobileNumber.focus();
+        return;
+    }
+    // Optional: mobile number format check
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+        alert("Enter a valid 10-digit mobile number");
+        NumMobileNumber.focus();
+        return;
+    }
+    const obj = {
+        Name: name,
+        Gender: sex,
+        MobileNo: mobile,
+        Email: txtEmail.value,
+        Company: txtCompany.value,
+        Address: txtAddress.value,
+        TradeType: TradeType.value,
+        InterestedProduct: txtInterestedProduct.value,
+        UserFeedback: txtOursUserFeedback.value,
+        ImageBase64: photo.src,
+        OcrText: ocrText
+    };
+
+    fetch('/Testpage/SaveBusinessCard', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(obj)
+    })
+    .then(r => {
+        if (!r.ok) throw new Error("Server error");
+        return r.json();
+    })
+    .then(d => {
+        alert(d.message);
+        // clearForm();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Save failed ❌");
+    });
+
+}
+
+function clearForm() {
+    txtName.value = "";
+    gender.value = "";
+    NumMobileNumber.value = "";
+    txtEmail.value = "";
+    txtCompany.value = "";
+    txtAddress.value = "";
+    TradeType.value = "";
+    txtInterestedProduct.value = "";
+    txtOursUserFeedback.value = "";
+    photo.src = "";
+}
+
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,455 @@
+﻿@{
+    ViewBag.Title = "Production Incentive Creation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Production Incentive Creation</legend>
+    <form id="ProductionIncentiveCreationForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Date Fields -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="DtFromDate">From Date</label>
+                            <input type="date" class="form-control" id="DtFromDate" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="DtToDate">To Date</label>
+                            <input type="date" class="form-control" id="DtToDate" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INC Fields -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtIncUnitPP">INC % For Unit PP</label>
+                            <input type="text" class="form-control" id="TxtIncUnitPP" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtHD">HD</label>
+                            <input type="text" class="form-control" id="TxtHD" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtBoth">Both</label>
+                            <input type="text" class="form-control" id="TxtBoth" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Production Master Dropdown -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ddlProductionMaster">Production Master</label>
+                            <select class="form-control" id="ddlProductionMaster">
+                                <option value="">Select Production Master</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Production Table -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-bg">
+                            <table id="ProductionTable" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>%</th>
+                                        <th>Place</th>
+                                        <th>Avg Prod</th>
+                                        <th>Rate</th>
+                                        <th>Eff Rate</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="btn-mt">
+                            <button type="button" class="btn btn-primary" id="btn_createinc"><i class="fa fa-plus"></i>Create Inc. Monthly All</button>
+                            <button type="button" class="btn btn-danger" id="btn_deleteinc"><i class="fa fa-trash"></i>Delete Inc.</button>
+                            <button type="button" class="btn btn-danger" id="btn_exit"><i class="fa fa-close"></i>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Place and Print Options -->
+                <div class="btn-mt">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlPlace">Place</label>
+                                    <select class="form-control" id="ddlPlace">
+                                        <option value="">Unit 1</option>
+                                        <option value="">Unit 2</option>
+                                        <option value="">Both</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group btn-mt">
+                                    <label class="radio-label" id="rdSummary">
+                                        <input type="radio" name="Print" value="Print Summary">
+                                        Print Summary
+                                    </label>
+                                    <label class="radio-label" id="rdDetailed">
+                                        <input type="radio" name="Print" value="Print Detailed">
+                                        Print Detailed
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="btn-mt">
+                                    <button type="button" class="btn btn-print" id="btn_print"><i class="fa fa-print"></i>Print</button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- Department and Employee Fields -->
+            <div class="col-md-4">
+                <!-- Department Section -->
+                <fieldset>
+                    <legend class="sub-legend">For Department</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="radio-label" style="display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: 400;font-size: 12px;color: #122f4d;">
+                                <input type="radio" id="SelectedDepartmentId" name="department" value="selected"> Selected
+                                <input type="radio" id="AllDepartmentId" name="department" value="all"> All
+                            </div>
+                            <div id="dropdown-container" class="dropdown-container" style="display:none;">
+                                <select id="department-dropdown" class="form-control"></select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Employee Section -->
+                <fieldset>
+                    <legend class="sub-legend">Employee</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="radio-label" style="display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: 400;font-size: 12px;color: #122f4d;">
+                                <input type="radio" id="SelectedEmployeeId" name="employee" value="selected"> Selected
+                                <input type="radio" id="AllEmployeeId" name="employee" value="all"> All
+                            </div>
+
+                            <!-- Employee Dropdown -->
+                            <div id="dropdown-container1" class="dropdown-container" style="display: none;">
+                                <select id="department-dropdown1" class="form-control"></select>
+                            </div>
+
+                            <!-- Employee Table -->
+                            <div class="col-md-12" id="table-container" style="display: none;padding-left: 0px !important;padding-right: 0px !important;margin-top: 5px;">
+                                <div class="table-bg">
+                                    <table id="itemTable" class="table-width">
+                                        <thead class="table-head">
+                                            <tr>
+                                                <th style="width: 2px;">Code</th> 
+                                                <th style="width: 8px;">Name</th>
+                                                <th style ="width: 4px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+    
+        DDLProductionMaster();
+        DDLPlace();
+        toggleDropdownAndTable();
+        toggleDepartmentDropdown();
+             
+        $('#SelectedDepartmentId').change(function () {
+            toggleDepartmentDropdown();
+        });
+                
+        $('#SelectedEmployeeId').change(function () {
+            toggleDropdownAndTable();
+        });
+           
+        $('#department-dropdown1').change(function () {
+            const selectedEmployee = $(this).val();
+            const selectedEmployeeText = $("#department-dropdown1 option:selected").text();
+            if (selectedEmployee) {
+                addEmployeeToTable(selectedEmployee, selectedEmployeeText);
+            }
+        });
+
+        $('#btn_createinc').click(function () {
+            processIncentiveCreation();
+        });
+
+        $('#ddlProductionMaster').change(function () {
+            var selectedCode = $(this).val();
+            LoadCopyForm(selectedCode);
+        });
+
+    });
+
+    async function DDLProductionMaster() {
+        try {
+            const res = await fetch('/ProductionIncentiveCreation/DDLProductionMaster');
+            const data = await res.json();
+
+            if (data && Array.isArray(data)) {
+                const ddl = $('#ddlProductionMaster');
+                ddl.empty().append('<option value="">-- Select Production Master --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            } else {
+                console.error('Invalid response format for DDLProductionMaster:', data);
+            }
+        } catch (error) {
+            console.error("Error loading Production Master:", error);
+        }
+    }
+
+    async function DDLPlace() {
+        try {
+            const res = await fetch('/ProductionIncentiveCreation/DDLPlace');
+            const data = await res.json();
+
+            if (data && Array.isArray(data)) {
+                const ddl = $('#ddlPlace');
+                ddl.empty().append('<option value="">-- Select Place --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            } else {
+                console.error('Invalid response format for DDLPlace:', data);
+            }
+        } catch (error) {
+            console.error("Error loading Place:", error);
+        }
+    }
+
+    async function DDLEmpMaster() {
+        try {
+            const res = await fetch('/ProductionIncentiveCreation/DDLEmpMaster');
+            const data = await res.json();
+
+            if (data && Array.isArray(data)) {
+                const ddl = $('#department-dropdown1');
+                ddl.empty().append('<option value="">-- Select Employee --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            } else {
+                console.error('Invalid response format for DDLEmpMaster:', data);
+            }
+        } catch (error) {
+            console.error("Error loading Employee Master:", error);
+        }
+    }
+
+    async function DDLDEPT_MAST() {
+        try {
+            const res = await fetch('/ProductionIncentiveCreation/DDLDEPT_MAST');
+            const data = await res.json();
+
+            if (data && Array.isArray(data)) {
+                const ddl = $('#department-dropdown');
+                ddl.empty().append('<option value="">-- Select Department --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            } else {
+                console.error('Invalid response format for DDLDEPT_MAST:', data);
+            }
+        } catch (error) {
+            console.error("Error loading Department Master:", error);
+        }
+    }
+
+    function toggleDropdownAndTable() {
+        const dropdownContainer1 = document.getElementById('dropdown-container1');
+        const tableContainer = document.getElementById('table-container');
+        const selectedEmployeeRadio = document.getElementById('SelectedEmployeeId');
+
+        if (selectedEmployeeRadio.checked) {
+            dropdownContainer1.style.display = 'block';  // Show employee dropdown
+            tableContainer.style.display = 'block';  // Show employee table
+            DDLEmpMaster(); // Populate employee dropdown
+        } else {
+            dropdownContainer1.style.display = 'none';  // Hide employee dropdown
+            tableContainer.style.display = 'none';  // Hide employee table
+        }
+    }
+
+    function toggleDepartmentDropdown() {
+        const dropdownContainer = document.getElementById('dropdown-container');
+        const selectedDepartmentRadio = document.getElementById('SelectedDepartmentId');
+
+        if (selectedDepartmentRadio.checked) {
+            dropdownContainer.style.display = 'block';  // Show department dropdown
+            DDLDEPT_MAST(); // Populate department dropdown
+        } else {
+            dropdownContainer.style.display = 'none';  // Hide department dropdown
+        }
+    }
+
+    function addEmployeeToTable(employeeCode, employeeName) {
+        const tableBody = $('#itemTable tbody');
+
+        const existingRow = tableBody.find(`tr[data-code="${employeeCode}"]`);
+        if (existingRow.length > 0) {
+            return;
+        }
+
+        if (!employeeCode || !employeeName) {
+            alert("Both employee code and name are required.");
+            return;
+        }
+
+        const newRow = `
+            <tr data-code="${employeeCode}">
+                <td style="width: 2px;">${employeeCode}</td>
+                <td>${employeeName}</td>
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="removeEmployee(this)">Remove</button>
+                </td>
+            </tr>
+        `;
+        tableBody.append(newRow);
+    }
+
+    function removeEmployee(button) {
+        $(button).closest('tr').remove();
+    }
+       
+    function getAllEmployeeData() {
+        const employees = [];
+
+        $('#itemTable tbody tr').each(function() {
+            const employeeCode = $(this).data('code');
+            const employeeName = $(this).find('td:eq(1)').text();
+
+            employees.push({ code: employeeCode, name: employeeName });
+        });
+
+        return employees;
+    }
+
+    async function processIncentiveCreation() {
+        const fromDate = $('#DtFromDate').val();
+        const toDate = $('#DtToDate').val();
+        const incUnitPP = $('#TxtIncUnitPP').val();
+        const hd = $('#TxtHD').val();
+        const both = $('#TxtBoth').val();
+        const productionMaster = $('#ddlProductionMaster').val();
+        const Dept = $('#department-dropdown').val();
+        const place = $('#ddlPlace').val();
+        const printSummary = $("input[name='Print']:checked").val();
+        const departmentSelection = $("input[name='department']:checked").val();
+        const employeeSelection = $("input[name='employee']:checked").val();
+        const employees = getAllEmployeeData();
+
+        const requestData = {
+            fromDate,
+            toDate,
+            incUnitPP,
+            hd,
+            both,
+            productionMaster,
+            place,
+            printSummary,
+            departmentSelection,
+            employeeSelection,
+            employees,
+            Dept
+        };
+
+        try {
+            const response = await fetch('/ProductionIncentiveCreation/ProcessMonthlyIncentive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Incentive creation successful!");
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error processing incentive creation:", error);
+            alert("An error occurred while processing the incentive.");
+        }
+    }
+
+   function LoadCopyForm(code) {
+        return $.ajax({
+            url: '/ProductionIncentiveCreation/GetDataCopyForm',
+            method: 'GET',
+            data: { code: code },  
+            success: function (res) {
+                if (res.success) {
+ 
+                    $('#ProductionTable tbody').empty();
+                    res.data.forEach(function (item) {
+                        var row = '<tr>';
+                            row += '<td>' + (item.incE_RATE || 'N/A') + '</td>';
+                            row += '<td>' + (item.place || 'N/A') + '</td>';
+                            row += '<td>' + (item.avgProd || 'N/A') + '</td>';
+                            row += '<td>' + (item.rate || 'N/A') + '</td>';
+                            row += '<td>' + (item.effRate || '0.0') + '</td>';  
+                            row += '<td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Remove</button></td>';
+                            row += '</tr>';
+
+                        $('#ProductionTable tbody').append(row);
+                    });
+                } else {
+                    console.error("Error from server:", res.message);
+                    toastr.error(res.message || "Failed to load data.");
+                }
+            },
+            error: function (err) {
+                console.error("Failed to load data", err);
+                toastr.error("Something went wrong while loading the form.");
+            }
+        });
+    }
+  
+   function removeRow(button) {
+        $(button).closest('tr').remove();
+    }
+
+</script>

@@ -1,0 +1,804 @@
+﻿@{
+    ViewBag.Title = "Shift Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Shift Schedule</legend>
+    <form id="ShiftScheduleForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="DtDocMonth">Doc Month</label>
+                    <input type="month" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-mt button-right">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-copy"></i> <span id="dropdownText">Copy From</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="copyFromDropdown">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#ShiftScheduleModal" id="ShiftSchedule" onclick="fetchData();">Shift Schedule</a></li>
+                            <li><a class="dropdown-item" href="#" >Import From CSV</a></li>
+                            <li><a class="dropdown-item" href="#" id="btn-export">Import From Excel File</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="fetchDataImportFrom()">Import From Master</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn_SampleFormat">Sample Format</button>
+                </div>
+            </div>
+        </div>
+
+        <!--Shift Schedule Modal-->
+        <div class="modal fade" id="ShiftScheduleModal" tabindex="-1" aria-labelledby="ShiftScheduleLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="ShiftScheduleLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxSS" class="form-control" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendSS">
+                                        <label class="checkbox-label" for="chkAppendSS">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblShiftScheduleModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllSS" /></th>
+                                            <th>V TYPE</th>
+                                            <th>DOCTYPE NAME</th>
+                                            <th>V NO</th>
+                                            <th>V DATE</th>
+                                            <th>DOC ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblShiftSchedule" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Emp Code</th>
+                            <th>Emp Name</th>
+                            @for (int i = 1; i <= 31; i++)
+                            {
+                                <th>@i</th>
+                            }
+                            <th>Off1</th>
+                            <th>Off2</th>
+                            <th>Off3</th>
+                            <th>Off4</th>
+                            <th>Off5</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "ShiftScheduleList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('code');
+    const vtype = urlParams.get('vtype');
+    const mode = urlParams.get('mode');
+    const shiftOptionsList = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const shiftOptionsHtml = shiftOptionsList.map(day => `<option value="${day}">${day}</option>`).join('');
+
+    let shiftScheduleData = [];
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function () {
+     
+     if (!rowId) {
+            const dateInput = document.getElementById('DtDocDate');
+            if (dateInput) {
+                dateInput.valueAsDate = new Date();
+            }
+        }
+
+     LoadDropDown().then(() => {
+            if (rowId) {
+                LoadFormByID(rowId);
+  
+            }
+        });
+
+     $("#ddlDocType").change(function () {
+            if (!rowId) GetVNo(this.value);
+        });
+
+     $('#ShiftScheduleModal').on('click', '.btn-primary', function () {
+              
+             const selectedRows = getSelectedRowsData();
+
+            if (selectedRows.length === 0) {
+                toastr.warning('Please select at least one row to copy.');
+                return;
+            }
+
+            const docids = selectedRows.map(row => row.DOCID);
+            $('#ShiftScheduleModal').modal('hide');
+            fetchDataforMainTable(docids);
+        });
+
+     $('#selectAllSS').on('change', function() {
+      
+         const checked = $(this).prop('checked');
+      
+        $('#tblShiftScheduleModal tbody .selectItem').prop('checked', checked);
+
+
+    });
+
+
+    $("#btn-save").click(async function (e) {
+        e.preventDefault();
+
+        if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+        if (!validateRequiredField('#DtDocDate', 'Date')) return;
+        if (!validateRequiredField('#NumDocNo', 'Document No')) return;
+
+        const tableData = collectAllShiftScheduleData();
+
+        if (!tableData.length) {
+            toastr.warning("No data found.");
+            return;
+        }
+
+        $("#btn-save").prop("disabled", true);
+
+        try {
+            const response = await $.ajax({
+                type: "POST",
+                url: "/ShiftSchedule/SaveData",
+                contentType: "application/json",
+                data: JSON.stringify(tableData)
+            });
+
+            if (response && response.success) {
+                toastr.success("Shift Schedule saved successfully!");
+                setTimeout(() => window.location.href = '/ShiftScheduleList/Index', 1000);
+            } else {
+                toastr.error((response && response.message) || "Failed to save Shift Schedule");
+            }
+        } catch (error) {
+            console.error("Error during save:", error);
+            toastr.error("Error while saving Shift Schedule");
+        } finally {
+            $("#btn-save").prop("disabled", false);
+        }
+    });
+
+
+     $('#tblShiftScheduleModal tbody').on('change', '.selectItem', function() {
+        const allChecked = $('#tblShiftScheduleModal tbody .selectItem').length === $('#tblShiftScheduleModal tbody .selectItem:checked').length;
+        $('#selectAllSS').prop('checked', allChecked);
+    });
+
+     $('#btn-export').click(function () {
+            exportShiftScheduleToExcel();
+        });
+
+    });
+          
+    
+    function collectAllShiftScheduleData() {
+      const updatedData = shiftScheduleData.map(item => ({
+        ...item,
+        H_V_TYPE: $('#ddlDocType').val() || null,
+        H_V_NO: parseInt($('#NumDocNo').val()) || null,
+        H_V_DATE: $('#DtDocDate').val() ? `${$('#DtDocDate').val()}-01` : null
+      }));
+           
+      $('#tblShiftSchedule tbody tr').each(function (rowIdx) {
+        const row = $(this);
+        const dataIndex = (currentPage - 1) * pageSize + rowIdx;
+        const original = updatedData[dataIndex];
+
+        if (!original) return;
+
+        const empCodeRaw = row.find('.employee-code').val();
+        original.EMP_CODE = empCodeRaw && !isNaN(empCodeRaw) ? parseInt(empCodeRaw) : null;
+
+        for (let i = 1; i <= 31; i++) {
+          original[`S${i}`] = row.find(`.s${i}`).val() || null;
+        }
+
+        for (let i = 1; i <= 5; i++) {
+          original[`off${i}`] = row.find(`.Off${i}`).val() || null;
+        }
+      });
+
+      return updatedData;
+    }
+
+    async function LoadDropDown() {
+        await DDLDocType();
+    }
+
+    async function DDLDocType() {
+        try {
+            const response = await fetch('/ShiftSchedule/DDlDeptType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlDocType');
+            ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Doc Type:", error);
+            toastr.error('Error loading Doc Type: ' + error.message);
+        }
+    }
+
+    async function GetVNo(Vtype) {
+        try {
+            const res = await fetch(`/ShiftSchedule/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const data = await res.json();
+            if (data.v_NO) {
+                $('#NumDocNo').val(data.v_NO);
+            } else {
+                console.warn('No document number received');
+            }
+        } catch (error) {
+            console.error("Error getting VNo:", error);
+            toastr.error('Error getting VNo: ' + error.message);
+        }
+    }
+
+    function fetchData() {
+
+        if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+        if (!validateRequiredField('#DtDocDate', 'Date')) return;
+        if (!validateRequiredField('#NumDocNo', 'Document No')) return;
+
+        $.ajax({
+            url: '/ShiftSchedule/GetDataCopyForm',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    $('#tblShiftScheduleModal tbody').empty();
+                    response.data.forEach(item => {
+                        const vType = item.v_TYPE || item.vType || '';
+                        const docTypeName = item.doctypE_NAME || item.docTypeName || '';
+                        const vNo = item.v_NO || item.vNo || '';
+                        const vDate = item.v_DATE || item.vDate || '';
+                        const docId = item.doC_ID || item.docId || '';
+
+                        const row = `
+                            <tr>
+                                <td><input type="checkbox" class="selectItem" /></td>
+                                <td>${vType}</td>
+                                <td>${docTypeName}</td>
+                                <td>${vNo}</td>
+                                <td>${vDate}</td>
+                                <td>${docId}</td>
+                            </tr>
+                        `;
+                        $('#tblShiftScheduleModal tbody').append(row);
+                    });
+                } else {
+                    toastr.warning(response.message);
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+
+    function fetchDataforMainTable(doc_ids) {
+        const params = new URLSearchParams();
+        doc_ids.forEach(id => params.append('doc_id', id));
+
+        $.ajax({
+            url: '/ShiftSchedule/GetDataCopyMainForm?' + params.toString(),
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    loadShiftSchedule(response.data || []);
+                } else {
+                    toastr.warning(response.message);
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+        function fetchDataImportFrom() {
+     
+        const url = '/ShiftSchedule/GetDataImportFrom';
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (response) {
+                if (!response.success) {
+                    toastr.warning(response.message);
+                    return;
+                }
+
+                const monthInput = document.getElementById('DtDocDate');
+                const selectedMonth = monthInput.value; 
+
+                if (!selectedMonth) {
+                    toastr.warning("Please select a month first.");
+                    return;
+                }
+
+                const [yearStr, monthStr] = selectedMonth.split("-");
+                const year = parseInt(yearStr, 10);
+                const month = parseInt(monthStr, 10);
+
+                const daysInMonth = new Date(year, month, 0).getDate();
+
+                const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+                const existingCodes = new Set(
+                    shiftScheduleData.map(r => String(r.emP_CODE))
+                );
+
+                const missingEmployees = response.data.filter(emp => {
+                    const codeStr = String(emp.EMP_CODE); 
+                    return !existingCodes.has(codeStr);
+                });
+
+                const newRows = [];
+
+                for (let i = 0; i < missingEmployees.length; i++) {
+                    const emp = missingEmployees[i];
+
+                    const row = {
+                        emP_CODE: emp.emP_CODE,
+                        emP_NAME: emp.emP_NAME
+                    };
+
+                    for (let j = 1; j <= daysInMonth; j++) {
+                        const dateObj = new Date(year, month - 1, j);
+                        const weekday = weekdayNames[dateObj.getDay()];
+
+                        if (emp.OFFDAY && emp.OFFDAY.toLowerCase() === weekday.toLowerCase()) {
+                            row[`s${j}`] = "O";
+                        } else {
+                            row[`s${j}`] = "D";
+                        }
+                    }
+
+                    row.off1 = '';
+                    row.off2 = '';
+                    row.off3 = '';
+                    row.off4 = '';
+                    row.off5 = '';
+
+                    newRows.push(row);
+                }
+
+                // Append and update once
+                shiftScheduleData = shiftScheduleData.concat(newRows);
+
+                // Efficiently update UI
+                loadShiftSchedule(shiftScheduleData);
+
+                toastr.success("Import Successful!");
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+
+
+
+
+
+
+    function createRowHtml(data = {}) {
+        let shiftInputsHtml = '';
+        for (let i = 1; i <= 31; i++) {
+            const key = `s${i}`;
+            shiftInputsHtml += `<td><input type="text" class="form-control ${key}" value="${data[key] || ''}" readonly style="width:30px;" /></td>`;
+       }
+
+        return `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td><input type="text" class="form-control employee-code" value="${data.employeeCode || ''}" readonly /></td>
+                <td><input type="text" class="form-control employee-name" value="${data.employeeName || ''}" readonly style="width:170px;" /></td>
+                ${shiftInputsHtml}
+                <td><select class="form-control Off1" style="width:60px;">${shiftOptionsHtml}</select></td>
+                <td><select class="form-control Off2" style="width:60px;">${shiftOptionsHtml}</select></td>
+                <td><select class="form-control Off3" style="width:60px;">${shiftOptionsHtml}</select></td>
+                <td><select class="form-control Off4" style="width:60px;">${shiftOptionsHtml}</select></td>
+                <td><select class="form-control Off5" style="width:60px;">${shiftOptionsHtml}</select></td>
+            </tr>
+        `;
+    }
+
+    function loadShiftSchedule(dataArray) {
+        shiftScheduleData = dataArray;
+        renderTablePage(1);
+    }
+
+    function renderTablePage(page) {
+        currentPage = page;
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = shiftScheduleData.slice(start, end);
+        const tbody = $('#tblShiftSchedule tbody');
+        tbody.empty();
+
+        pageData.forEach(item => {
+            const rowData = {
+                code: item.sr || '',
+                employeeCode: item.emP_CODE || '',
+                employeeName: item.emP_NAME || ''
+            };
+
+            for (let i = 1; i <= 31; i++) {
+                rowData[`s${i}`] = item[`s${i}`] || '';
+            }
+
+            for (let i = 1; i <= 5; i++) {
+                rowData[`off${i}`] = item[`off${i}`] || '';
+            }
+
+            tbody.append(createRowHtml(rowData));
+        });
+
+        tbody.find('tr').each(function (index) {
+            const item = pageData[index];
+            for (let i = 1; i <= 5; i++) {
+                $(this).find(`.Off${i}`).val(item[`off${i}`] || '');
+            }
+        });
+
+        setupPagination(shiftScheduleData.length, pageSize, page);
+    }
+
+    function setupPagination(totalItems, itemsPerPage, currentPage) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        // First button
+        const firstBtn = $('<a href="#" class="page-link">First</a>');
+        if (currentPage === 1) {
+            firstBtn.addClass('disabled');
+        } else {
+            firstBtn.on('click', function (e) {
+                e.preventDefault();
+                renderTablePage(1);
+            });
+        }
+        paginationContainer.append(firstBtn);
+
+        // Previous button
+        const prevBtn = $('<a href="#" class="page-link">Prev</a>');
+        if (currentPage === 1) {
+            prevBtn.addClass('disabled');
+        } else {
+            prevBtn.on('click', function (e) {
+                e.preventDefault();
+                renderTablePage(currentPage - 1);
+            });
+        }
+        paginationContainer.append(prevBtn);
+
+        // Show page numbers (for simplicity show max 5 at a time)
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLink = $('<a href="#" class="page-link"></a>').text(i);
+            if (i === currentPage) {
+                pageLink.addClass('active');
+            }
+            pageLink.on('click', function (e) {
+                e.preventDefault();
+                renderTablePage(i);
+            });
+            paginationContainer.append(pageLink);
+        }
+
+        // Next button
+        const nextBtn = $('<a href="#" class="page-link">Next</a>');
+        if (currentPage === totalPages) {
+            nextBtn.addClass('disabled');
+        } else {
+            nextBtn.on('click', function (e) {
+                e.preventDefault();
+                renderTablePage(currentPage + 1);
+            });
+        }
+        paginationContainer.append(nextBtn);
+
+        // Last button
+        const lastBtn = $('<a href="#" class="page-link">Last</a>');
+        if (currentPage === totalPages) {
+            lastBtn.addClass('disabled');
+        } else {
+            lastBtn.on('click', function (e) {
+                e.preventDefault();
+                renderTablePage(totalPages);
+            });
+        }
+        paginationContainer.append(lastBtn);
+    }
+
+    function getSelectedRowsData() {
+        const selectedRows = [];
+        $('#tblShiftScheduleModal tbody tr').each(function () {
+            const checkbox = $(this).find('.selectItem');
+            if (checkbox.prop('checked')) {
+                const rowData = {
+                    v_TYPE: $(this).find('td:eq(1)').text().trim(),
+                    doctypE_NAME: $(this).find('td:eq(2)').text().trim(),
+                    v_NO: $(this).find('td:eq(3)').text().trim(),
+                    v_DATE: $(this).find('td:eq(4)').text().trim(),
+                    DOCID: $(this).find('td:eq(5)').text().trim()
+                };
+                selectedRows.push(rowData);
+            }
+        });
+        return selectedRows;
+    }
+
+    async function LoadFormByID(id) {
+        try {
+        
+            const res = await $.ajax({
+                url: '/ShiftScheduleList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("AJAX failed:", textStatus, errorThrown, jqXHR.responseText);
+                toastr.error("AJAX call failed: " + textStatus);
+                throw new Error(textStatus);
+            });
+
+            if (!res.success) {
+                toastr.error("Failed to load data: " + (res.message || "Unknown error"));
+                return;
+            }
+
+            const header = res.data?.header;
+            const details = res.data?.details;
+
+        
+
+            if (!header) {
+                toastr.error("No header data returned from server.");
+                return;
+            }
+
+        
+            $('#TxtCode').val(header.DOC_ID || '');
+            $('#ddlDocType').val(header.V_TYPE || '');
+            $('#NumDocNo').val(header.V_NO || '');
+                        
+            const formattedMonth = header.V_DATE
+                ? new Date(header.V_DATE).toISOString().slice(0, 7)
+                : '';
+            $('#DtDocDate').val(formattedMonth);
+
+            
+            if (Array.isArray(details)) {
+                const mappedDetails = details.map(item => {
+                    const mapped = {
+                        code: item.DOC_ID || '',
+                        emP_CODE: item.EMP_CODE || '',
+                        emP_NAME: item.EMP_NAME || '',
+
+                    };
+                                        
+                    for (let i = 1; i <= 31; i++) {
+                        mapped[`s${i}`] = item[`S${i}`] || '';
+                    }
+
+                  
+                    for (let i = 1; i <= 5; i++) {
+                        mapped[`off${i}`] = item[`off${i}`] || '';
+                    }
+
+                    return mapped;
+                });
+
+                loadShiftSchedule(mappedDetails); 
+            } else {
+                toastr.warning("No detail data found.");
+                $('#tblShiftSchedule tbody').empty();
+            }
+
+        } catch (err) {
+            console.error("LoadFormByID Error:", err);
+            toastr.error("Something went wrong while loading the form. See console for details.");
+        }
+    }
+
+    function setFormReadOnly() {
+        $('#ShiftScheduleForm :input').prop('disabled', true);
+        $('#btn-save').hide();
+    }
+
+      function exportShiftScheduleToExcel() {
+        if (!shiftScheduleData.length) {
+            toastr.warning("No data to export.");
+            return;
+        }
+
+        const exportData = [
+            [
+                "Employee Code",
+                "Employee Name",
+                ...Array.from({ length: 31 }, (_, i) => `Day ${i + 1}`),
+                "Off Day 1",
+                "Off Day 2",
+                "Off Day 3",
+                "Off Day 4",
+                "Off Day 5"
+            ]
+        ];
+
+        shiftScheduleData.forEach(item => {
+            const row = [
+                item.emP_CODE || '',
+                item.emP_NAME || '',
+                ...Array.from({ length: 31 }, (_, i) => item[`s${i + 1}`] || ''),
+                item.off1 || '',
+                item.off2 || '',
+                item.off3 || '',
+                item.off4 || '',
+                item.off5 || ''
+            ];
+            exportData.push(row);
+        });
+
+        const worksheet = XLSX.utils.aoa_to_sheet(exportData);
+
+        // Set bold font for header
+        const totalColumns = exportData[0].length;
+        for (let col = 0; col < totalColumns; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (!worksheet[cellAddress]) continue;
+
+            worksheet[cellAddress].s = {
+                font: { bold: true }
+            };
+        }
+
+        // 👇 Set column widths
+        worksheet['!cols'] = Array.from({ length: totalColumns }, (_, index) => {
+            if (index === 1) {
+                // Set wider width for "Employee Name"
+                return { wch: 25 }; // Approx 25 characters wide
+            }
+            return { wch: 12 }; // Default width for other columns
+        });
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Schedule");
+
+        XLSX.writeFile(workbook, "ShiftSchedule.xlsx", { cellStyles: true });
+    }
+
+
+</script>
+
+<style>
+    .custom-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        margin-top: 10px;
+    }
+
+    .page-link {
+        cursor: pointer;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #007bff;
+        background-color: #fff;
+    }
+
+        .page-link:hover:not(.disabled) {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .page-link.active {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            cursor: default;
+        }
+
+        .page-link.disabled {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #e9ecef;
+        }
+
+</style>

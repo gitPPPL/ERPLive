@@ -1,0 +1,713 @@
+﻿@{
+    ViewBag.Title = "Form 12";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Form 12</legend>
+    <form id="Form12">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="DtMonthYear">Month/Year</label>
+                    <input type="date" class="form-control" id="DtMonthYear" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="checkbox-input-mt">
+                    <input type="checkbox" id="ChkFillAttendance" />
+                    Fill Attendance
+                </label>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button id="btn_FillData" type="button" class="btn btn-primary"><i class="fa fa-fill"></i>Fill Data</button>
+                    <button id="btn_Print" type="button" class="btn btn-print"><i class="fa fa-print"></i>Print</button>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="checkbox-input-mt">
+                    <input type="checkbox" id="ChkSkipNillDay" />
+                    Skip Nill Day
+                </label>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblForm12" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>SrNo</th>
+                            <th>Department</th>
+                            <th>Emp code</th>
+                            <th>Employee name</th>
+                            <th>Designation</th>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>4</th>
+                            <th>5</th>
+                            <th>6</th>
+                            <th>7</th>
+                            <th>8</th>
+                            <th>9</th>
+                            <th>10</th>
+                            <th>11</th>
+                            <th>12</th>
+                            <th>13</th>
+                            <th>14</th>
+                            <th>15</th>
+                            <th>16</th>
+                            <th>17</th>
+                            <th>18</th>
+                            <th>19</th>
+                            <th>20</th>
+                            <th>21</th>
+                            <th>22</th>
+                            <th>23</th>
+                            <th>24</th>
+                            <th>25</th>
+                            <th>26</th>
+                            <th>27</th>
+                            <th>28</th>
+                            <th>29</th>
+                            <th>30</th>
+                            <th>31</th>
+                            <th>W. day</th>
+                            <th>Shift</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group btn-mt">
+                    <label for="TxtStep1">Step 1:</label>
+                    <button type="button" class="btn btn-success" id="btn_fillweekly"><i class="fa fa-fill"></i>Fill Weekly Off</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group btn-mt">
+                    <label for="TxtStep2">Step 2:</label>
+                    <button type="button" class="btn btn-primary" id="btn_updateweekly"><i class="fa fa-update"></i>Update Weekly Off</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group btn-mt">
+                    <label for="TxtStep3">Step 3:</label>
+                    <button type="button" class="btn btn-primary" id="btn_checksalary"><i class="fa fa-check"></i>Check Salary Day</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtErrorShow">Error Show</label>
+                    <textarea typeof="text" class="form-control" id="TxtErrorShow" style="min-height:100px; max-height:400px;"></textarea>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    let allRowsData = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+
+    $(document).ready(function () {
+         $('#btn_FillData').on('click', function () {
+            var isChecked = document.getElementById("ChkFillAttendance").checked;
+            var fillAttendance = isChecked ? 1 : 0;
+            var selectedMonthYear = $('#DtMonthYear').val();
+            var vDATE = selectedMonthYear ? selectedMonthYear + "-01" : null;
+            var isSkipNillDay = document.getElementById("ChkSkipNillDay").checked;
+            var fillSkipNillDay = isSkipNillDay ? 1 : 0;
+
+            if (!vDATE) {
+                alert("Please select a Month/Year.");
+                return;
+            }
+
+            if (fillAttendance === 1) {
+                GetEmployeeAttendance(vDATE, fillSkipNillDay);
+            } else {
+                fetchDataforMainTable(vDATE);
+            }
+        });
+
+         $("#btn-save").click(async function (e) {
+            e.preventDefault();
+
+            if (!validateRequiredField('#DtMonthYear', 'Date')) return;
+
+            const tableData = collectAllForm12Data();
+            const selectedMonthYear = $('#DtMonthYear').val();
+
+            if (!tableData.length) {
+                toastr.warning("No data found.");
+                return;
+            }
+
+            const payload = {
+                vdate: selectedMonthYear,
+                data: tableData
+            };
+
+            $("#btn-save").prop("disabled", true);
+
+            try {
+                const response = await $.ajax({
+                    type: "POST",
+                    url: "/Form12/SaveData",
+                    contentType: "application/json",
+                    data: JSON.stringify(payload)
+                });
+
+                if (response && response.success) {
+                    toastr.success("Data saved successfully!");
+                } else {
+                    toastr.error((response && response.message) || "Failed to save Shift Schedule");
+                }
+            } catch (error) {
+                console.error("Error during save:", error);
+                toastr.error("Error while saving Shift Schedule");
+            } finally {
+                $("#btn-save").prop("disabled", false);
+            }
+        });
+
+         $('#btn_fillweekly').on('click', function () {
+            applyWeeklyOff();
+        });
+
+         $('#btn_updateweekly').on('click', function () {
+           updateweekly();
+        });
+
+         $('#btn_checksalary').on('click', function () {
+          CheckSalaryDay();
+        });
+
+         $(document).on('input', 'input', function () {
+            const inputClass = $(this).attr('class') || '';
+            const isDayInput = /\bD([1-9]|[12][0-9]|3[01])\b/.test(inputClass);
+            if (!isDayInput) return;
+
+            const allowed = ['A', 'P', 'O', 'E', 'L'];
+            let val = $(this).val().toUpperCase();
+
+            if (allowed.includes(val) && val.length === 1) {
+                $(this).val(val);
+            } else {
+                $(this).val('');
+            }
+        });
+
+         $(document).on('keypress', 'input', function (e) {
+            const inputClass = $(this).attr('class') || '';
+            const isDayInput = /\bD([1-9]|[12][0-9]|3[01])\b/.test(inputClass);
+            if (!isDayInput) return;
+
+            const allowed = ['A', 'P', 'O', 'E', 'L'];
+            const key = String.fromCharCode(e.which).toUpperCase();
+
+            if (!allowed.includes(key)) {
+                e.preventDefault();
+            }
+        });
+
+         $(document).on('paste', 'input', function (e) {
+            const inputClass = $(this).attr('class') || '';
+            const isDayInput = /\bD([1-9]|[12][0-9]|3[01])\b/.test(inputClass);
+            if (!isDayInput) return;
+
+            e.preventDefault();
+            const pasted = (e.originalEvent || e).clipboardData.getData('text').toUpperCase().trim();
+            const allowed = ['A', 'P', 'O', 'E', 'L'];
+
+            if (pasted.length === 1 && allowed.includes(pasted)) {
+                $(this).val(pasted);
+            } else {
+                $(this).val('');
+            }
+        });
+    });
+
+    function collectAllForm12Data() {
+        const selectedMonthYear = $('#DtMonthYear').val();
+        const V_DATE = selectedMonthYear ? `${selectedMonthYear}` : null;
+
+        $('#tblForm12 tbody tr').each(function (index) {
+            const $row = $(this);
+
+            const dataIndex = (currentPage - 1) * rowsPerPage + index;
+            if (allRowsData[dataIndex]) {
+
+                for (let i = 1; i <= 31; i++) {
+                    const val = $row.find(`input.D${i}`).val()?.trim() || '';
+                    if (!allRowsData[dataIndex].days) {
+                        allRowsData[dataIndex].days = {};
+                    }
+                    allRowsData[dataIndex].days[`D${i}`] = val;
+                }
+
+                const dayCountIndex = 6 + 31;
+                const wDayText = $row.find(`td:eq(${dayCountIndex})`).text().trim();
+                allRowsData[dataIndex].w_DAY = parseInt(wDayText) || 0;
+                allRowsData[dataIndex].e_SHIFT = $row.find(`td:eq(${dayCountIndex + 1})`).text().trim() || '';
+            }
+        });
+
+        const collectedData = allRowsData.map(item => {
+            const rowData = {
+                CODE: item.code || null,
+                DEPARTMENT: item.department || null,
+                EMP_CODE: item.emP_CODE || item.EMP_CODE || null,
+                EMP_NAME: item.emP_NAME || item.EMP_NAME || null,
+                DESIGNATION: item.designation || null,
+                V_DATE: V_DATE
+            };
+
+            for (let i = 1; i <= 31; i++) {
+                rowData[`D${i}`] = item.days?.[`D${i}`] || '';
+            }
+
+            rowData.W_DAY = item.w_DAY || 0;
+            rowData.E_SHIFT = item.e_SHIFT || '';
+
+            return rowData;
+        });
+
+        return collectedData;
+    }
+
+    function fetchDataforMainTable(vDATE) {
+        $.ajax({
+            url: '/Form12/GetLoadData?vDATE=' + encodeURIComponent(vDATE),
+            type: 'GET',
+            success: function (response) {
+                      if (response.success && Array.isArray(response.data)) {
+                    allRowsData = response.data;
+                    currentPage = 1;
+
+                    renderPageOptimized(currentPage);
+                    renderPaginationControls();
+                } else {
+                    toastr.warning(response.message || 'No data available.');
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + (error.responseText || 'Unknown error'));
+            }
+        });
+    }
+
+    function GetEmployeeAttendance(vDATE, fillSkipNillDay) {
+        $.ajax({
+            url: '/Form12/GetEmployeeAttendance?vDATE=' + encodeURIComponent(vDATE) + '&skipEmpty=' + (fillSkipNillDay ? 1 : 0),
+            type: 'GET',
+            success: function (response) {
+         
+                if (response.success && Array.isArray(response.data)) {
+
+                    allRowsData = response.data.map(item => {
+                        const rawDays = item.DAYS || {};
+
+                        const normalizedDays = {};
+                        for (let i = 1; i <= 31; i++) {
+                            const key = `D${i}`;
+                            normalizedDays[key] = rawDays[key] || '';
+                        }
+
+                        item.days = normalizedDays;
+                        item.code = item.EMP_CODE || item.code || '';
+                        item.department = item.DEPARTMENT || item.department || '';
+                        item.emP_CODE = item.emP_CODE || item.EMP_CODE || '';
+                        item.emP_NAME = item.EMP_NAME || item.emP_NAME || '';
+                        item.designation = item.DESIGNATION || item.designation || '';
+                        item.w_DAY = item.W_DAY || 0;
+                        item.e_SHIFT = item.E_SHIFT || '';
+
+                        return item;
+                    });
+
+                    currentPage = 1;
+                    $('#tblForm12 tbody').empty();
+                    renderPage(currentPage);
+                    renderPaginationControls();
+                } else {
+                    toastr.warning(response.message || 'No data available.');
+                }
+            },
+            error: function (error) {
+                console.error("Error fetching data:", error);
+                toastr.error('Error fetching data: ' + (error.responseText || 'Unknown error'));
+            }
+        });
+    }
+
+    function generateTableHeader() {
+        let headerHtml = `<tr>
+            <th style="display:none;">Code</th>
+            <th>SrNo</th>
+            <th>Department</th>
+            <th>Emp code</th>
+            <th>Employee name</th>
+            <th>Designation</th>`;
+        for (let i = 1; i <= 31; i++) {
+            headerHtml += `<th>${i}</th>`;
+        }
+        headerHtml += `
+            <th>W. day</th>
+            <th>Shift</th>
+            <th style="display:none;">Action</th>
+        </tr>`;
+        $('#tblForm12 thead').html(headerHtml);
+    }
+
+    let serialCounter = 1;
+
+    function createRowHtml(data = {}, rowIndex = 0) {
+        const serialCounter = rowIndex + 1;
+
+        let shiftInputsHtml = '';
+        for (let i = 1; i <= 31; i++) {
+            const key = `D${i}`;
+            shiftInputsHtml += `
+                <td>
+                    <input type="text" class="D${i}" maxlength="1" value="${data.days?.[key] || ''}" style="width:60px;" />
+                </td>`;
+        }
+
+        return `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td>${serialCounter}</td>
+                 <td style="min-width: 150px;">${data.department || ''}</td>
+
+                <td>${data.code || ''}</td>
+                <td style="min-width: 200px;" >${data.emP_NAME || ''}</td>
+                <td style="min-width: 150px;" >${data.designation || ''}</td>
+                ${shiftInputsHtml}
+                <td>${data.w_DAY || ''}</td>
+                <td>${data.e_SHIFT || ''}</td>
+                <td style="display:none;"></td>
+            </tr>
+        `;
+    }
+
+    allRowsData.forEach((rowData, index) => {
+            const rowHtml = createRowHtml(rowData, index);
+            $('#tblForm12 tbody').append(rowHtml); // optional
+        });
+
+    function renderPage(page) {
+        $('#tblForm12 tbody').empty();
+        const startIndex = (page - 1) * rowsPerPage;
+        const endIndex = Math.min(startIndex + rowsPerPage, allRowsData.length);
+        const pageItems = allRowsData.slice(startIndex, endIndex);
+
+        pageItems.forEach((item, index) => {
+            const globalIndex = startIndex + index;      
+            const rowHtml = createRowHtml(item, globalIndex);
+            $('#tblForm12 tbody').append(rowHtml);
+        });
+    }
+
+    function renderPaginationControls() {
+        const totalPages = Math.ceil(allRowsData.length / rowsPerPage);
+        const container = $('#tablePagination');
+        container.empty();
+
+        function createButton(text, clickHandler, isActive = false) {
+            const btn = $('<button>')
+                .text(text)
+                .toggleClass('active', isActive)
+                .on('click', clickHandler);
+            container.append(btn);
+        }
+
+        if (currentPage > 1) {
+            createButton('First', () => {
+                currentPage = 1;
+                renderPage(currentPage);
+                renderPaginationControls();
+            });
+
+            createButton('Prev', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPage(currentPage);
+                    renderPaginationControls();
+                }
+            });
+        }
+
+        const maxPagesToShow = 5; // increased to 5 for better usability
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+
+        for (let p = startPage; p <= endPage; p++) {
+            createButton(p, () => {
+                currentPage = p;
+                renderPage(currentPage);
+                renderPaginationControls();
+            }, p === currentPage);
+        }
+
+        if (currentPage < totalPages) {
+            createButton('Next', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPage(currentPage);
+                    renderPaginationControls();
+                }
+            });
+
+            createButton('Last', () => {
+                currentPage = totalPages;
+                renderPage(currentPage);
+                renderPaginationControls();
+            });
+        }
+    }
+
+    function renderPageOptimized(page) {
+        $('#tblForm12 tbody').empty();
+
+        const startIndex = (page - 1) * rowsPerPage;
+        const endIndex = Math.min(startIndex + rowsPerPage, allRowsData.length);
+        const pageItems = allRowsData.slice(startIndex, endIndex);
+
+        pageItems.forEach((item, index) => {
+            const globalIndex = startIndex + index;       // Correct global index for serial number
+            const rowHtml = createRowHtml(item, globalIndex);
+            $('#tblForm12 tbody').append(rowHtml);
+        });
+    }
+
+    async function applyWeeklyOff() {
+        const selectedMonthYear = $('#DtMonthYear').val();
+        const form12Data = collectAllForm12Data(); 
+
+        if (!selectedMonthYear) {
+            toastr.warning("Please select a Month/Year.");
+            return;
+        }
+
+        if (!form12Data || form12Data.length === 0) {
+            toastr.warning("No Form12 data found.");
+            return;
+        }
+
+        try {
+            const response = await $.ajax({
+                url: '/Form12/FillWeeklyOff',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    monthDate: selectedMonthYear,
+                    form12Data: form12Data
+                })
+            });
+
+            if (response.success && Array.isArray(response.data)) {
+                  
+                allRowsData = response.data.map(item => {
+                    const days = {};
+                    for (let i = 1; i <= 31; i++) {
+                        const key = `D${i}`;
+                        days[key] = item[key] || '';
+                    }
+
+                    return {
+                        code: item.CODE || '',
+                        department: item.DEPARTMENT || '',
+                        emP_CODE: item.EMP_CODE || '',
+                        emP_NAME: item.EMP_NAME || '',
+                        designation: item.DESIGNATION || '',
+                        days: days,
+                        w_DAY: parseInt(item.W_DAY) || 0,
+                        e_SHIFT: item.E_SHIFT || ''
+                    };
+                });
+
+                currentPage = 1;
+                renderPageOptimized(currentPage);
+                renderPaginationControls();
+
+                toastr.success(response.message || "Weekly off applied successfully!");
+            } else {
+                toastr.warning(response.message || "Failed to apply weekly off.");
+            }
+        } catch (error) {
+            console.error("Weekly off error:", error);
+            toastr.error("Something went wrong.");
+        }
+    }
+
+    async function updateweekly() {
+        const selectedMonthYear = $('#DtMonthYear').val();
+        const form12Data = collectAllForm12Data();
+
+        if (!selectedMonthYear) {
+            toastr.warning("Please select a Month/Year.");
+            return;
+        }
+
+        if (!form12Data || form12Data.length === 0) {
+            toastr.warning("No Form12 data found.");
+            return;
+        }
+
+        try {
+            const response = await $.ajax({
+                url: '/Form12/updateweekly',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    monthDate: selectedMonthYear,
+                    form12Data: form12Data
+                })
+            });
+
+            if (response.success && Array.isArray(response.data)) {
+         
+                allRowsData = response.data.map(item => {
+                    const days = {};
+                    for (let i = 1; i <= 31; i++) {
+                        const key = `D${i}`;
+                        days[key] = item[key] || '';
+                    }
+
+                    return {
+                        code: item.CODE || '',
+                        department: item.DEPARTMENT || '',
+                        emP_CODE: item.EMP_CODE || '',
+                        emP_NAME: item.EMP_NAME || '',
+                        designation: item.DESIGNATION || '',
+                        days: days,
+                        w_DAY: parseInt(item.W_DAY) || 0,
+                        e_SHIFT: item.E_SHIFT || ''
+                    };
+                });
+
+                currentPage = 1;
+                renderPageOptimized(currentPage);
+                renderPaginationControls();
+
+                toastr.success(response.message || "Weekly off applied successfully!");
+            } else {
+                toastr.warning(response.message || "Failed to apply weekly off.");
+            }
+        } catch (error) {
+            console.error("Weekly off error:", error);
+            toastr.error("Something went wrong.");
+        }
+    }
+
+    async function CheckSalaryDay() {
+        const selectedMonthYear = $('#DtMonthYear').val();
+        const form12Data = collectAllForm12Data();
+
+        if (!selectedMonthYear) {
+            toastr.warning("Please select a Month/Year.");
+            return;
+        }
+
+        if (!form12Data || form12Data.length === 0) {
+            toastr.warning("No Form12 data found.");
+            return;
+        }
+
+        try {
+            const response = await $.ajax({
+                url: '/Form12/CheckSalaryDay',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    monthDate: selectedMonthYear,
+                    form12Data: form12Data
+                })
+            });
+
+            const errorTextBox = document.getElementById("TxtErrorShow");
+            if (response.success) {
+                 console.log('Data', response);
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    const errorMessages = response.data.map(item => item).join('\n');
+                    errorTextBox.value = errorMessages;
+                    toastr.warning("Discrepancies found. Check error list.");
+                } else {
+                    errorTextBox.value = "No mismatch found. All records are valid.";
+                    toastr.success(response.message || "Check completed successfully!");
+                }                    
+                         
+            } else {
+                errorTextBox.value = "Error: " + (response.message || "Unknown error occurred.");
+                toastr.error(response.message || "Failed to check salary days.");
+            }
+
+        } catch (error) {
+            console.error("CheckSalaryDay error:", error);
+            document.getElementById("TxtErrorShow").value = "Unexpected error occurred.";
+            toastr.error("Something went wrong during salary day check.");
+        }
+    }
+
+</script>
+
+<style>
+
+    #tablePagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 10px 0;
+        font-family: Arial, sans-serif;
+    }
+
+        #tablePagination button {
+            border: 1px solid #000;
+            background-color: #fff;
+            color: #000;
+            padding: 3px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s ease-in-out;
+        }
+
+            #tablePagination button:hover:not(.active) {
+                background-color: #eaeaea;
+            }
+
+            #tablePagination button.active {
+                background-color: #000;
+                color: #fff;
+                font-weight: bold;
+                border-color: #000;
+            }
+</style>

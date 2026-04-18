@@ -1,0 +1,240 @@
+﻿@{
+	ViewBag.Title = "Visitor Entry List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Visitor Entry List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="tableSearch" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "VisitorEntry")'" type="submit" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print" onclick="printCityMasterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblVisitorEntry" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Vno</th>
+						<th>Vdate</th>
+						<th>Slipno</th>
+						<th>Visitorname</th>
+						<th>Organization</th>
+						<th>Intime</th>
+						<th>Outtime</th>
+						<th>Meetperson</th>
+						<th>Purpose</th>
+						<th>Address</th>
+						<th>Mobile</th>
+						<th>Vehicleno</th>
+						<th>Material</th>
+						<th>Cardno</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+
+<script>
+	// Global Variables from controller
+	var compCode = '@ViewBag.CompCode';
+	var branchCode = '@ViewBag.BranchCode';
+	var yearCode = '@ViewBag.YearCode';
+
+	let currentVisitorPage = 1;
+	const visitorPageSize = 10;
+
+	$(document).ready(function () {
+		loadAllVisitors();
+	});
+
+	function loadAllVisitors() {
+		const searchTerm = $('#tableSearch').val(); 
+
+		$.ajax({
+			url: '/VisitorEntryList/GetAllVisitors', 
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentVisitorPage,
+				pageSize: visitorPageSize
+			},
+			success: function (res) {
+				console.log(res);
+				const visitors = res.visitors || [];
+				const totalCount = res.totalCount || 0;
+
+				let tbody = $('#tblVisitorEntry tbody');
+				tbody.empty();
+
+				if (visitors.length === 0) {
+					tbody.append('<tr><td colspan="16" class="text-center text-muted">No visitors found.</td></tr>');
+					renderVisitorPagination(0, visitorPageSize, currentVisitorPage);
+					return;
+				}
+
+				$.each(visitors, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${item.v_NO || ''}</td>
+							<td>${item.v_NO || ''}</td>
+							<td>${item.v_DATE ? formatDate(item.v_DATE) : ''}</td>
+							<td>${item.sliP_NO || ''}</td>
+							<td>${item.name || ''}</td>
+							<td>${item.organization || ''}</td>
+							<td>${item.iN_TIME || ''}</td>
+							<td>${item.ouT_TIME || ''}</td>
+							<td>${item.meeT_NAME || ''}</td>
+							<td>${item.purpose || ''}</td>
+							<td>${item.address || ''}</td>
+							<td>${item.mobilE_NO || ''}</td>
+							<td>${item.vehiclE_NO || ''}</td>
+							<td>${item.material || ''}</td>
+							<td>${item.carD_NO || ''}</td>
+							<td>
+								<i class="fas fa-edit text-primary" title="Edit" style="cursor:pointer;" onclick="editVisitor(${item.v_NO})"></i>
+								<i class="fas fa-eye text-secondary ms-2" title="View" style="cursor:pointer;" onclick="viewVisitor(${item.v_NO})"></i>
+								<i class="fas fa-trash text-danger ms-2" title="Delete" style="cursor:pointer;" onclick="deleteVisitor(${item.v_NO})"></i>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderVisitorPagination(totalCount, visitorPageSize, currentVisitorPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading visitors: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderVisitorPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToVisitorPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(html);
+	}
+
+	function goToVisitorPage(page) {
+		currentVisitorPage = page;
+		loadAllVisitors();
+	}
+
+	// Search binding
+	$('#tableSearch').on('keyup', function () {
+		currentVisitorPage = 1;
+		loadAllVisitors();
+	});
+
+	// Action Functions
+	function editVisitor(id) {
+		window.location.href = '/VisitorEntry/Index?id=' + encodeURIComponent(id);
+	}
+
+	function viewVisitor(id) {
+		window.location.href = '/VisitorEntry/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	}
+
+	function deleteVisitor(id) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This will permanently delete the visitor entry.",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/VisitorEntry/DeleteVisitorEntryByCode',
+					type: 'POST',
+					data: {
+						code: id,
+						compCode: compCode,
+						branchCode: branchCode,
+						yearCode: yearCode
+					},
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllVisitors();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function () {
+						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+					}
+				});
+			}
+		});
+	}
+
+	// Utility: Format date as dd-MM-yyyy
+	function formatDate(dateString) {
+		if (!dateString) return '';
+		const date = new Date(dateString);
+		return date.toLocaleDateString('en-GB');
+	}
+</script>

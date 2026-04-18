@@ -1,0 +1,571 @@
+﻿@{
+    ViewBag.Title = "Gate Pass Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Gate Pass Entry</legend>
+    <form id="GatePassEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <div class="button-right">
+                    <button id="btn_load" type="button" class="btn btn-success"><i class="fa fa-download"></i> Load Data</button>
+                    <button id="btn_Calc" type="button" onclick="calculateAllDurations()" class="btn btn-primary"><i class="fa fa-calculator"></i> Calc</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblGatePassEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Shift</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                            <th>Reason</th>
+                            <th>HOD Name</th>
+                            <th>Auth.By</th>
+                            <th>GP No.</th>
+                            <th>Remarks</th>
+                            <th>Dur</th>
+                            <th>Mac Time</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-3">
+                <div class="btn-mt">
+                    <button id="btnbacklist" onclick="window.location.href='@Url.Action("Index", "GatePassEntryList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="button" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+</fieldset>
+
+<script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const rowId = urlParams.get('id');
+        const mode = urlParams.get("mode");
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+        let EMPOptions = '';
+        let shiftOptionsList = ['A', 'B', 'C', 'G'];
+        let shiftOptions = shiftOptionsList.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+        let reasonOption = '';
+        let hodOption = '';
+
+    $(document).ready(function () {
+        if (!rowId) {
+            const dateInput = document.getElementById('DtDocDate');
+            if (dateInput) {
+                dateInput.valueAsDate = new Date();
+            }
+        }
+
+        LoadDropDown().then(() => {
+            if (rowId) {
+                LoadFormByID(rowId);
+                if (isReadOnly) setFormReadOnly();
+            }
+        });
+        
+        $('#ddlDocType').on('change', function () {
+            const selectedEmpCode = $(this).val();
+            if (selectedEmpCode) {
+                GetVNo(selectedEmpCode);
+                
+            }
+        });
+
+        $('#btn_load').click(function () {
+            const dateTimeValue = $('#DtDocDate').val();
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+            LoadData(dateTimeValue);
+        });
+
+        $(document).on('change', '.employee-name', async function () {
+            const empCode = $(this).val();
+            const $row = $(this).closest('tr');
+            $row.find('.employee-code').val(empCode || '');
+
+            if (empCode) {
+                const hodOptions = await DDLGridHod(empCode);
+                $row.find('.hod-name').html(hodOptions);
+            } else {
+                $row.find('.hod-name').html('<option value="">--Select--</option>');
+            }
+        });
+
+        $("#btn-save").click(async function (e) {
+            e.preventDefault();
+       
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+
+            const dateTimeValue = $('#DtDocDate').val();
+            const today = new Date().toISOString().split('T')[0];
+
+            if (dateTimeValue > today) {
+                toastr.info("Date cannot be greater than the login date");
+                return;
+            }
+
+            const attendanceData = collectRowData();
+            if (!attendanceData.length) {
+                toastr.warning("No attendance data found.");
+                return;
+            }
+
+            $("#btn-save").prop("disabled", true);
+
+            try {
+                const response = await $.ajax({
+                    type: "POST",
+                    url: "/GatePassEntry/SaveData",
+                    contentType: "application/json",
+                    data: JSON.stringify(attendanceData)
+                    
+                });
+
+                if (response.success) {
+                    toastr.success( "Data saved successfully");
+                  setTimeout(() => window.location.href = '/GatePassEntryList/Index', 1000);
+                } else {
+                    toastr.error(response.message || "Failed to save  GATE PASS ENTRY");
+                }
+            } catch (error) {
+                toastr.error("Error while saving GATE PASS ENTRY");
+            } finally {
+                $("#btn-save").prop("disabled", false);
+            }
+        });
+    });
+
+    async function LoadDropDown() {
+        try {
+            await Promise.all([
+                DDLDocType(),
+                loadEmployeeDropdownOptions(),
+                DDLGridReason(),
+                DDLGridHod()
+            ]);
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+
+    async function DDLDocType() {
+        try {
+            const response = await fetch('/GatePassEntry/ddlDocType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlDocType');
+            ddl.empty().append('<option value="">-- Select Document Type --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Doc Type:", error);
+            toastr.error('Error loading Doc Type: ' + error.message);
+        }
+    }
+
+    async function GetVNo(vtype) {
+        try {
+            const res = await fetch(`/GatePassEntry/GetVNo?vtype=${encodeURIComponent(vtype)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+            $('#NumDocNo').val(data.v_NO);
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+
+    async function loadEmployeeDropdownOptions() {
+        try {
+            const response = await fetch('/GatePassEntry/DDLGridEmp');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+
+          
+
+            EMPOptions = '<option value="">--Select--</option>';
+            data.forEach(emp => {
+                EMPOptions += `<option value="${emp.value}">${emp.text}</option>`;
+            });
+        } catch (error) {
+            console.error("Error loading Employee options:", error);
+            toastr.error('Error loading Employee list: ' + error.message);
+        }
+    }
+
+    async function DDLGridReason() {
+        try {
+            const response = await fetch('/GatePassEntry/DDLGridReason');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            reasonOption = '<option value="">--Select--</option>';
+            data.forEach(item => {
+                reasonOption += `<option value="${item.value}">${item.text}</option>`;
+            });
+        } catch (error) {
+            console.error("Error loading Reason options:", error);
+            toastr.error('Error loading Reason list: ' + error.message);
+        }
+    }
+
+    async function DDLGridHod(empCode) {
+        try {
+            const response = await fetch(`/GatePassEntry/DDLGridHOD?empCode=${encodeURIComponent(empCode)}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            hodOption = '<option value="">--Select--</option>';
+            data.forEach(emp => {
+                hodOption += `<option value="${emp.value}">${emp.text}</option>`;
+            });
+            return hodOption;
+        } catch (error) {
+            console.error("Error loading HOD options:", error);
+            toastr.error('Error loading HOD list: ' + error.message);
+            return '<option value="">--Select--</option>';
+        }
+    }
+
+    function LoadData(vDate) {
+        $.ajax({
+            url: '/GatePassEntry/LoadData',
+            type: 'GET',
+            data: { v_date: vDate },
+            success: function (response) {
+                if (response.success) {
+                    $('#tblGatePassEntry tbody').empty();
+                    response.data.forEach(item => {
+                        addRow({
+                            code: item.code || '',
+                            employeeCode: item.emP_CODE || '',
+                            employeeName: item.emP_NAME || '',
+                            before: item.name || '',
+                            after: '',
+                            shift: item.shift || '',
+                            inTime: item.inTime || '',
+                            outTime: item.outTime || '',
+                            reason: item.reasoN_CODE || '',
+                            hodName: item.hoD_CODE || '',
+                            authBy: item.hoD_NAME || '',
+                            gpNo: item.gP_NO || '',
+                            remarks: item.remarks || '',
+                            dur: '',
+                            macTime: ''
+                        });
+                    });
+                } else {
+                    toastr.info(response.message);
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+
+    function collectRowData() {
+        const rowData = [];
+        const V_no = parseInt($('#NumDocNo').val()) || 0;
+        const V_Type = $('#ddlDocType').val();
+        const V_Date = $('#DtDocDate').val();
+
+        $('#tblGatePassEntry tbody tr').each(function () {
+            const $row = $(this);
+            rowData.push({
+                DOC_ID: $row.find('td:eq(0)').text().trim(),
+                EMP_CODE: parseInt($row.find('.employee-code').val().trim()) || 0,
+                EMP_NAME: $row.find('.employee-name option:selected').text().trim(),
+                BHRS: parseFloat($row.find('.before').val().trim()) || 0,
+                AHRS: parseFloat($row.find('.after').val().trim()) || 0,
+                shift: $row.find('.shift option:selected').text().trim(),
+                IN_TIME: $row.find('.in-time').val().trim(),
+                OUT_TIME: $row.find('.out-time').val().trim(),
+                REASON: $row.find('.reason option:selected').text().trim(),
+                AUTH_BY: $row.find('.auth-by').val().trim(),
+                GP_NO: $row.find('.gp-no').val().trim(),
+                REMARK: $row.find('.remarks').val().trim(),
+                DUR: parseInt($row.find('.duration').val().trim()) || 0,
+                macTime: $row.find('.mac-time').val().trim(),
+                REASON_CODE: parseInt($row.find('.reason').val().trim()) || 0,
+                HOD_CODE: parseInt($row.find('.hod-name').val()) || 0,
+                SYS_TIME: $row.find('.mac-time').val().trim(),
+                V_NO: V_no,
+                V_TYPE: V_Type,
+                V_DATE: V_Date
+            });
+        });
+
+        return rowData;
+    }
+
+    function addRow(data = {}) {
+        const row = `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td><input type="text" class="form-control employee-code" value="${data.employeeCode || ''}" readonly /></td>
+                <td>
+                    <select class="form-control employee-name" style="width:300px;">
+                        ${EMPOptions}
+                    </select>
+                </td>
+             <td><input type="text" class="form-control before" value="${data.before || ''}" style="width: 80px;" /></td>
+
+                <td ><input type="text" class="form-control after" value="${data.after || ''}" style="width: 80px;"  /></td>
+                <td>
+                    <select class="form-control shift" style="width:60px;"   >${shiftOptions}</select>
+                </td>
+                <td><input type="text" class="form-control in-time" value="${data.inTime || ''}" readonly /></td>
+                <td><input type="text" class="form-control out-time" value="${data.outTime || ''}" readonly /></td>
+                <td>
+                    <select class="form-control reason" style="width:250px;">
+                        ${getSelectedOptions(reasonOption, data.reason)}
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control hod-name" style="width:250px;">
+                        ${getSelectedOptions(hodOption, data.hodName)}
+                    </select>
+                </td>
+                <td><input type="text" class="form-control auth-by" value="${data.authBy || ''}" readonly style="width: 120px;"  /></td>
+                <td><input type="text" class="form-control gp-no" value="${data.gpNo || ''}" readonly /></td>
+                <td><input type="text" class="form-control remarks" value="${data.remarks || ''}" readonly  style="width: 200px;"  /></td>
+                <td><input type="text" class="form-control duration" value="${data.dur || ''}"  readonly/></td>
+                <td><input type="text" class="form-control mac-time" value="${data.macTime || ''}" /></td>
+            </tr>
+        `;
+        $('#tblGatePassEntry tbody').append(row);
+
+        const $lastRow = $('#tblGatePassEntry tbody tr:last');
+        if (data.employeeCode) $lastRow.find('.employee-name').val(data.employeeCode);
+        if (data.ReasonCode) $lastRow.find('.reason').val(data.ReasonCode);
+        if (data.HodCode) $lastRow.find('.hod-name').val(data.HodCode);
+        if (data.shift) $lastRow.find('.shift').val(data.shift);
+    }
+
+    function calculateAllDurations() {
+        $('#tblGatePassEntry tbody tr').each(function () {
+            const $row = $(this);
+            const inTime = $row.find('.in-time').val().trim();
+            const outTime = $row.find('.out-time').val().trim();
+
+            if (!inTime || !outTime) return;
+
+            const [inH, inM, inS = "0"] = inTime.split(":");
+            const [outH, outM, outS = "0"] = outTime.split(":");
+
+            const baseDate = new Date(2000, 0, 1);
+            const inDate = new Date(baseDate);
+            inDate.setHours(parseInt(inH), parseInt(inM), parseInt(inS));
+
+            const outDate = new Date(baseDate);
+            outDate.setHours(parseInt(outH), parseInt(outM), parseInt(outS));
+
+            if (outDate < inDate) {
+                outDate.setDate(outDate.getDate() + 1);
+            }
+
+            const diffMs = outDate - inDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            $row.find('.duration').val(diffMins);
+        });
+    }
+
+    function getSelectedOptions(optionsHtml, selectedValue) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = optionsHtml;
+
+        const options = tempDiv.querySelectorAll('option');
+        options.forEach(opt => {
+            if (opt.value == selectedValue) {
+                opt.setAttribute('selected', 'selected');
+            } else {
+                opt.removeAttribute('selected');
+            }
+        });
+
+        return tempDiv.innerHTML;
+    }
+
+    async function LoadFormByID(id) {
+        try {
+            console.log("Calling GetDataByCode with id:", id);
+            const res = await $.ajax({
+                url: '/GatePassEntryList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("AJAX failed:", textStatus, errorThrown, jqXHR.responseText);
+                toastr.error("AJAX call failed: " + textStatus);
+                throw new Error(textStatus);
+            });
+
+            if (!res.success) {
+                toastr.error("Failed to load data: " + (res.message || "Unknown error"));
+                return;
+            }
+
+            const header = res.data?.header;
+            const details = res.data?.details;
+
+            if (!header) {
+                toastr.error("No header data returned from server.");
+                console.error("Header data is missing:", res.data);
+                return;
+            }
+
+            $('#TxtCode').val(header.DOC_ID || '');
+            $('#ddlDocType').val(header.V_TYPE || '');
+            $('#NumDocNo').val(header.V_NO || '');
+
+            const formattedDate = header.V_DATE ? formatDate(new Date(header.V_DATE)) : '';
+            $('#DtDocDate').val(formattedDate);
+
+            $('#tblGatePassEntry tbody').empty();
+
+            if (Array.isArray(details)) {
+                details.forEach(item => {
+                    addRow({
+                        employeeCode: item.EMP_CODE || '',
+                        employeeName: item.emp || '',
+                        before: item.BHRS || '',
+                        after: item.AHRS || '',
+                        inTime: item.IN_TIME || '',
+                        outTime: item.OUT_TIME || '',
+                        reason: item.REASON || '',
+                        ReasonCode: item.REASON_CODE || '',
+                        hodName: item.HOD_NAME || '',
+                        HodCode: item.HOD_CODE || '',
+                        authBy: item.AUTH_BY || '',
+                        gpNo: item.GP_NO || '',
+                        remarks: item.REMARK || '',
+                        dur: item.DUR || '',
+                        macTime: item.SYS_TIME || '',
+                        shift: item.SHIFT || '',
+                        designation: item.desg || ''
+                    });
+                });
+            } else {
+                console.warn("Details data is missing or not an array:", details);
+            }
+
+        } catch (err) {
+            console.error("LoadFormByID Error:", err);
+            toastr.error("Something went wrong while loading the form. See console for details.");
+        }
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        if (isNaN(date)) return '';
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+       function setFormReadOnly() {
+        // Disable all form inputs
+        $('#GatePassEntryForm :input')
+            .not(' #btn_cancel, #btn_load, #btn_Calc') // exclude these buttons
+            .prop('disabled', true);
+
+        // Hide the save button
+        $('#btn-save').hide();
+
+            $('#btnbacklist').prop('disabled', false);
+
+
+    }
+
+
+
+
+
+
+</script>
+
+
+
+<script>
+        document.getElementById("btn_cancel").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel all the changes?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Cancelled!',
+            'Your action has been cancelled.',
+            'success'
+          )
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire(
+            'Resumed',
+            'Your action is still in progress.',
+            'info'
+          )
+        }
+      });
+    });
+</script>

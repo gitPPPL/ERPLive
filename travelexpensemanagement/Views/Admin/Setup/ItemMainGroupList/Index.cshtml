@@ -1,0 +1,385 @@
+﻿@{
+	ViewBag.Title = "TaxCode";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break; 
+		}
+	}
+}
+
+<fieldset>
+	<legend class="legend-field">Item Main Group Master List</legend>
+
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="tableSearch" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				@if (canAdd)
+				{
+					<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "ItemMainGroup")'" type="submit" class="btn btn-add">
+						<i class="fa fa-plus"></i>Add
+					</button>
+				}
+				@if (canPrint)
+				{
+					<button class="btn btn-print" onclick="callGetReportAsPdf()">
+						<i class="fa fa-print"></i> Print
+					</button>
+				}
+				@if (canExport)
+				{
+					<button class="btn btn-export" onclick="exportToExcel()">
+						<i class="fas fa-file-export"></i> Export
+					</button>
+				}
+				@if (canMail)
+				{
+					<button class="btn btn-mail">
+						<i class="fa fa-envelope"></i> Mail
+					</button>
+				}
+				@if (canApproval)
+				{
+					<button class="btn btn-approved">
+						<i class="fa fa-check"></i> Approve
+					</button>
+				}
+			</div>
+		</div>
+		
+	</div>
+
+
+
+	<div class="card" id="ItemMainGroup">
+		<div class="table-responsive">
+			<table id="ItemMainGroup" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th>Name</th>
+						<th>Short Name</th>
+						<th>Main Group Type</th>
+						<th>Planning Method</th>
+						<th>Procurement Method</th>
+						<th>Valuation Method</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</fieldset>
+<script>
+	var canAdd = @canAdd.ToString().ToLower();
+	var canEdit = @canEdit.ToString().ToLower();
+	var canDelete = @canDelete.ToString().ToLower();
+	var canPrint = @canPrint.ToString().ToLower();
+	var canExport = @canExport.ToString().ToLower();
+	var canMail = @canMail.ToString().ToLower();
+	var canApproval = @canApproval.ToString().ToLower();
+	var canDocDetail = @canDocDetail.ToString().ToLower();
+
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadAllItemMainGroups();
+	});
+
+	function loadAllItemMainGroups() {
+		const searchTerm = $('#tableSearch').val();
+
+		$.ajax({
+			url: '/ItemMainGroupList/GetAllItemGroups',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const groups = res.groups;
+				const totalCount = res.totalCount;
+				let tbody = $('#ItemMainGroup tbody');
+				tbody.empty();
+				if (groups.length === 0) {
+					tbody.append('<tr><td colspan="8" class="text-center text-muted">No item groups found.</td></tr>');
+				}
+
+				$.each(groups, function (index, group) {
+					 const statusHtml = group.active === 1
+	? `<span class="text-success fw-bold">Active</span>`
+	: `<span class="text-danger fw-bold">Inactive</span>`;
+					tbody.append(`
+						<tr>
+							<td>${group.name}</td>
+							<td>${group.shortname}</td>
+							<td>${group.mgrouP_TYPE}</td>
+							<td>${group.planninG_METHOD}</td>
+							<td>${group.procuremenT_METHOD}</td>
+							<td>${group.valuatioN_METHOD}</td>
+							<td>${statusHtml}</td>
+							<td>
+								
+								${canEdit ? `<i class="fa fa-edit btn-edit" data-doc="${group.code}" title="Edit"></i>` : ''}
+								<i class="fa fa-eye btn-view" data-doc="${group.code}" title="View"></i>
+								${canDelete ? `<i class="fa fa-trash btn-delete" data-doc="${group.code}" title="Delete"></i>` : ''}
+								${canDocDetail ? `<i class="fa fa-file btn-details btn-document" data-doc="${group.code}" title="Details"></i>` : ''}
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading item group list: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+
+		paginationContainer.empty();
+
+		if (total === 0) {
+			paginationContainer.html('<span class="text-muted"></span>');
+			return;
+		}
+
+		if (totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) {
+			endPage = Math.min(5, totalPages);
+		}
+		if (currentPage >= totalPages - 2) {
+			startPage = Math.max(totalPages - 4, 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllItemMainGroups();
+	}
+
+	$('#tableSearch').on('keyup', function () {
+		currentPage = 1;
+		loadAllItemMainGroups();
+	});
+
+
+	$(document).on('click', '.btn-edit', function() {
+		const rowId = $(this).data('doc');
+		AddOrEditFunction(rowId);
+	});
+
+	$(document).on('click', '.btn-view', function() {
+		const rowId = $(this).data('doc');
+		viewMenuDetails(rowId);
+	});
+
+	$(document).on('click', '.btn-delete', function() {
+		const code = $(this).data('doc');
+		deleteItemMainGroup(code);  // Make sure this function exists
+	});
+
+	$(document).on('click', '.btn-details', function() {
+		const docCode = $(this).data('doc');
+		showDocumentPopup(docCode);  // Your popup function
+	});
+
+
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/ItemMainGroup/Index?id=' + encodeURIComponent(rowId);
+	}
+	function viewMenuDetails(rowId) {
+		window.location.href = '/ItemMainGroup/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+	function deleteItemMainGroup(code) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This action will permanently delete the item main group.",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/ItemMainGroup/DeleteItemMainGroup',
+					type: 'POST',
+					data: { code: code },
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllItemMainGroups();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function (xhr, status, error) {
+						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+					}
+				});
+			}
+		});
+	}
+
+
+	function exportToExcel() {
+			fetch('/ItemMainGroupList/ExportAllDocs')
+				.then(response => {
+					if (!response.ok) throw new Error("Network response was not ok");
+					return response.json();
+				})
+				.then(data => {
+					const filteredData = data.map(item => ({
+					Code: item.code,
+					Name: item.name,
+					ShortName: item.shortname,
+					MainType: item.group_TYPE,
+					PlanningMethod: item.print_NAME,
+					ProcurementMethod: item.sale_GROUP,
+					ValuationMethod: item.sauda_Required,
+					Status: item.active
+					}));
+					const worksheet = XLSX.utils.json_to_sheet(filteredData);
+					const workbook = XLSX.utils.book_new();
+					XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+					const pageName = "Item Main Group Master";
+					const now = new Date();
+					const pad = n => String(n).padStart(2, '0');
+					const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+					const fileName = `${pageName}_${timestamp}.xlsx`;
+					XLSX.writeFile(workbook, fileName);
+				})
+				.catch(error => {
+					console.error("Export failed:", error);
+					toastr.error("Failed to export data.");
+				});
+		}
+	function callGetReportAsPdf() {
+		var reportName = "Rpt_ItemMGroupMaster";
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+			type: 'GET',
+			data: { Reportname: reportName },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
+	function showDocumentPopup(docCode) {
+		$.ajax({
+			url: '/ItemMainGroupList/DocDetailsCode',
+			type: 'POST',
+			dataType: 'json',  // important
+			data: { docCode: docCode },
+			success: function(response) {
+				if(response.success) {
+					showDocumentPopupjQuery(response.data, docCode);
+				} else {
+					toastr.error("Failed to get document details.");
+				}
+			},
+			error: function() {
+				toastr.error("An error occurred while fetching document details.");
+			}
+		});
+	}
+
+</script>

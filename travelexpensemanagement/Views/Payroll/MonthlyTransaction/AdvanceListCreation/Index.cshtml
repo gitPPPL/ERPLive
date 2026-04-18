@@ -1,0 +1,893 @@
+﻿@{
+    ViewBag.Title = "Advance List Creation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .checkbox-container {
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: #e5e5e5;
+        padding: 4px 6px;
+        border-radius: 5px;
+    }
+
+        .checkbox-container .form-row {
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            margin-bottom: 0px !important;
+        }
+
+        .checkbox-container .checkbox-label {
+            margin-left: 0px;
+            font-weight: 400;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-top: 2px;
+        }
+
+    .bank-label {
+        background-color: #122f4d;
+        color: #fff !important;
+        width: 100%;
+        padding: 6px;
+        font-size: 14px !important
+    }
+</style>
+<fieldset>
+    <legend class="legend-field">Advance List Creation</legend>
+    <form id="AdvanceListCreationForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ddlDocType">Doc Type</label>
+                            <select class="form-control" id="ddlDocType">
+                                @* <option value="">Select Doc Type</option> *@
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="NumDocNo">Doc No</label>
+                            <input type="number" class="form-control" id="NumDocNo" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="DtDocDate">Doc Date</label>
+                            <input type="date" class="form-control" id="DtDocDate" />
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="form-group">
+                            <div class="form-row btn-mt">
+                                <input type="checkbox" id="chkRate">
+                                <label class="checkbox-label" for="chkAppendPOModal">% Rate</label>
+                                <input type="text" class="form-control" id="TxtRate" oninput="allowOnlyNumbers(this)" style="width:100px;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ddlDepartment">Department</label>
+                            <select class="form-control" id="ddlDepartment">
+                                <option value="">Select Department</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="TxtSort" style="font-weight:600;">Sort By</label>
+                            <div class="form-row">
+                                <input type="checkbox" id="chkDepartment">
+                                <label class="checkbox-label" for="chkDepartment">Department</label>
+                            </div>
+                            <div class="form-row">
+                                <input type="checkbox" id="chkDesignation">
+                                <label class="checkbox-label" for="chkDesignation">Designation</label>
+                            </div>
+                            <div class="form-row">
+                                <input type="checkbox" id="chkEmpcode">
+                                <label class="checkbox-label" for="chkEmpcode">Emp Code</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="btn-mt">
+                            <button id="btn_Load" type="button" class="btn btn-success"><i class="fa fa-download"></i>Load</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ddlEmpName">Employee Name</label>
+                            <select class="form-control" id="ddlEmpName">
+                                <option value="">Select Employee Name</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ddlBank">Bank</label>
+                            <select class="form-control" id="ddlBank">
+                                <option value="">Select Bank</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div class="card" style="max-height: 300px;margin-bottom: 5px;">
+                    <div class="table-responsive">
+                        <table id="tblAdvanceListCreation" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th>Serial No</th>
+                                    <th>Employee Code</th>
+                                    <th>Employee Name</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>WDay</th>
+                                    <th>Gross</th>
+                                    <th>Wages</th>
+                                    <th>Advance</th>
+                                    <th>Sanction</th>
+                                    <th>Remarks</th>
+                                    <th>Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination container -->
+                    @* <div class="row">
+                        <div class="col-md-12">
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                    </div> *@
+                </div>
+            </div>
+            <div class="col-md-3">
+                <!-- Bank Names with Checkboxes -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="bankNames" class="bank-label">Bank Name</label>
+                            <div class="checkbox-container">
+                                <!-- "Select All" Checkbox -->
+                                <div class="form-row">
+                                    <input type="checkbox" id="selectAll" onclick="toggleAllBanks(this)">
+                                    <label class="checkbox-label" for="selectAll">Select All Banks</label>
+                                </div>
+                                <div id="bankListContainer"></div>
+                                @*  <!-- Individual Bank Checkboxes -->
+                            <div class="form-row">
+                                <input type="checkbox" class="bankCheckbox" id="bank1" name="bankName" value="Abhyudaya Co Operative Bank Ltd">
+                                <label class="checkbox-label" for="bank1">Abhyudaya Co Operative Bank Ltd</label>
+                            </div>
+                            <div class="form-row">
+                                <input type="checkbox" class="bankCheckbox" id="bank2" name="bankName" value="Airtel Payments Bank">
+                                <label class="checkbox-label" for="bank2">Airtel Payments Bank</label>
+                            </div>
+                            <div class="form-row">
+                                <input type="checkbox" class="bankCheckbox" id="bank3" name="bankName" value="ALLAHABAD BANK">
+                                <label class="checkbox-label" for="bank3">ALLAHABAD BANK</label>
+                            </div>
+                            <div class="form-row">
+                                <input type="checkbox" class="bankCheckbox" id="bank4" name="bankName" value="ALLAHABAD UP GRAMIN BANK">
+                                <label class="checkbox-label" for="bank4">ALLAHABAD UP GRAMIN BANK</label>
+                            </div>
+                            <div class="form-row">
+                                <input type="checkbox" class="bankCheckbox" id="bank5" name="bankName" value="ALMORA URBAN CO OPERATIVE BANK LTD">
+                                <label class="checkbox-label" for="bank5">ALMORA URBAN CO OPERATIVE BANK LTD</label>
+                            </div> *@
+                                <!-- Add more banks as needed -->
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-mt">
+                            <button id="btn_Banksheet" type="button" class="btn btn-primary"><i class="fa fa-save"></i>Bank Sheet</button>
+                            <button id="btn_CancelSheet" type="button" class="btn btn-danger" style="width:50%;"><i class="fa fa-close"></i>Cancel Sheet</button>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-mt button-right">
+                            <button id="btn_ExcelSheet" type="button" class="btn btn-success"><i class="fa fa-file-excel"></i>Excel Export</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-6 col-md-6">
+                <div class="button-right">
+                   
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "AdvanceListCreationList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+<script>
+
+    const allFieldIds = [
+    "TxtDocId",
+    "ddlDocType",
+    "NumDocNo",
+    "DtDocDate"
+    ];
+
+    const itemRecords = [
+        'TxtEmpId',
+        'ddlEmpname',
+        'ddlDepartment',
+        'ddlOutType',
+        'dtDate',
+        'ddlShift',
+        'TxtRemark'
+    ];
+
+    let docId = "", readOnly;
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await fillBanknameDynamic();
+        await handleDocLoad();
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+        try {
+          const data = await collectFormData();
+          if(data.payAdvanceLists.length === 0){
+            toastr.error("Please add at least one record in the table.");
+            return;
+          }
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+      });
+
+      $(document).on('click', '#btn_Load', function() {
+        var departmentId = $('#ddlDepartment').val();
+        var Vdate = $('#DtDocDate').val();
+        var chkDepartmentValue = $('#chkDepartment').prop('checked') ? 1 : 0;
+        var chkDesignationValue = $('#chkDesignation').prop('checked') ? 1 : 0;
+        var chkEmployeeValue = $('#chkEmpcode').prop('checked') ? 1 : 0;
+
+        $.ajax({
+            url: "/AdvanceListCreation/GetFilteredData",
+            type: 'GET',
+            data: {
+                vdate: Vdate,
+                departmentId: departmentId,
+                cbDeptId: chkDepartmentValue,
+                cbDesignId: chkDesignationValue,
+                cbEmplId: chkEmployeeValue
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status) {
+                    const data = response.data;
+                    fillTableBasedOnFilter(data);
+                }
+            },
+            error: function(error) {
+                toastr.error("Error loading filtered data: " + error);
+            }
+        });
+    });
+
+
+    }
+
+</script>
+
+<script>
+
+    async function fillBanknameDynamic() {
+        try {
+            let response = await $.ajax({
+                url: '/AdvanceListCreation/GetBankList',
+                type: 'GET'
+            });
+
+            // Check if the response contains a property like "data"
+            let bankNames = Array.isArray(response) ? response : response.data;
+            if (!Array.isArray(bankNames)) {
+                console.error('Bank list is not an array:', bankNames);
+                return;
+            }
+
+            const container = document.getElementById('bankListContainer');
+            container.innerHTML = ''; // clear existing items
+
+            bankNames.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('form-row');
+
+            div.innerHTML = `
+                <input type="checkbox" class="bankCheckbox" id="bank${item.CODE}" name="bankName" value="${item.NAME}">
+                <label class="checkbox-label" for="bank${item.CODE}">${item.NAME}</label>
+            `;
+            container.appendChild(div);
+        });
+
+        } catch (error) {
+            console.error('Error loading bank names:', error);
+        }
+    }
+
+
+    function toggleAllBanks(selectAllCheckbox) {
+        const checkboxes = document.querySelectorAll('.bankCheckbox');
+        checkboxes.forEach(chk => chk.checked = selectAllCheckbox.checked);
+    }
+
+    function fillTableBasedOnFilter(data) {
+        $('#tblAdvanceListCreation tbody').empty();
+
+        data.forEach(function (item, index) {
+            const gross = parseFloat(item.Gross) || 0;
+            const wday  = parseFloat(item.Wday) || 0;
+            const rate  = parseFloat($('#TxtRate').val()) || 0;
+            const wages = parseFloat(((gross / 26) * wday).toFixed(2));
+
+            let advnamt = 0;
+            if ($('#chkRate').is(':checked')) {
+                advnamt = parseFloat((wages * rate * 0.01).toFixed(2));
+            } else {
+                advnamt = parseFloat((wday * rate).toFixed(2));
+            }
+            const sancamt = 0;
+
+            const row = $('<tr></tr>');
+
+            row.append('<td id="rowIndex' + index + '">' + (index + 1) + '</td>');
+            row.append('<td id="empCode' + index + '">' + (item.CODE ?? '') + '</td>');
+            row.append('<td id="empName' + index + '">' + (item.NAME ?? '') + '</td>');
+            row.append('<td id="empDept' + index + '">' + (item.Dept ?? '') + '</td>');
+            row.append('<td id="empDesg' + index + '">' + (item.Desg ?? '') + '</td>');
+            row.append('<td id="empWday' + index + '">' + wday.toFixed(2) + '</td>');
+            row.append('<td id="empGross' + index + '">' + gross.toFixed(2) + '</td>');
+            row.append('<td id="empWages' + index + '">' + wages.toFixed(2) + '</td>');
+            row.append('<td id="empAdvNamT' + index + '">' + advnamt.toFixed(2) + '</td>');
+            row.append('<td id="empSancAmt' + index + '">' + sancamt.toFixed(2) + '</td>');
+            row.append('<td id="empRemark' + index + '">' + (item.REMARK ?? '') + '</td>');
+            row.append('<td id="empRate' + index + '">' + rate.toFixed(2) + '</td>');
+
+            // Append the row to the table body
+            $('#tblAdvanceListCreation tbody').append(row);
+        });
+    }
+
+    async function handleDocLoad() {
+            docId = getQueryParam('id');
+            readOnly = getQueryParam('readOnly');
+            if (docId) {
+                $('#ddlDocType').prop('disabled', true);
+                await GetDocData(docId, readOnly);
+
+            } else {
+                 await GetDocTypeAsync();
+                const ddlDocType = $('#ddlDocType');
+                if (!ddlDocType.val()) {
+                ddlDocType.prop('selectedIndex', 0);
+                }
+               const Doctypeval = ddlDocType.val();
+                GetDocid(Doctypeval);
+                const today = new Date();
+                const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+                    $('#DtDocDate').val(todayDate);
+                    GetDepartmentList();
+                   GetBankList();
+                   GetEmployeeList();
+                  // addItemRecordRow();
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateAdvanceListCreationEntry", "AdvanceListCreation")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/AdvanceListCreationList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateAdvanceListCreationEntry", "AdvanceListCreation")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");
+                    // showFlashMessageByKey('update', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/AdvanceListCreationList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillHeaderData(headdata) {
+        const data = headdata[0];
+        console.log(data);
+        $("#TxtDocId").val(data.DOC_ID ?? "");
+        $("#NumDocNo").val(data.V_NO ?? 0);
+        $("#DtDocDate").val(data.V_DATE ? data.V_DATE.substring(0, 10) : '');         
+        await GetDocTypeAsync(data.V_TYPE ?? "");
+    }
+
+    async function fillItemDetailTable(itemsData) {
+        const data = itemsData;
+         $('#tblAdvanceListCreation tbody').empty();
+
+        data.forEach(function (item, index) {
+            // Creating a new table row with assigned IDs for easier access
+            const row = $('<tr></tr>');
+
+            row.append('<td id="rowIndex' + index + '">' + (index + 1) + '</td>');
+            row.append('<td id="empCode' + index + '">' + (item.EMP_CODE ?? '') + '</td>');
+            row.append('<td id="empName' + index + '">' + (item.EMP_NAME ?? '') + '</td>');
+            row.append('<td id="empDept' + index + '">' + (item.DEPARTMENT ?? '') + '</td>');
+            row.append('<td id="empDesg' + index + '">' + (item.DESIGNATION ?? '') + '</td>');
+            row.append('<td id="empWday' + index + '">' + (item.WDAY ?? '') + '</td>');
+            row.append('<td id="empGross' + index + '">' + (item.GROSS ?? '') + '</td>');
+            row.append('<td id="empWages' + index + '">' + (item.WAGES ?? '') + '</td>');
+            row.append('<td id="empAdvNamT' + index + '">' + (item.ADVNAMT ?? '') + '</td>');
+            row.append('<td id="empSancAmt' + index + '">' + (item.SANCAMT ?? '') + ' </td>');
+            row.append('<td id="empRemark' + index + '">' + (item.REMARK ?? '') + '</td>');
+            row.append('<td id="empRate' + index + '">' + (item.RATE ?? '') + '</td>');
+            // Append the row to the table body
+            $('#tblAdvanceListCreation tbody').append(row);
+        });
+ 
+    }
+     
+    function collectFormData() {
+        
+        const payAdvanceList = {
+            VType: $('#ddlDocType').val(),
+            VNo: $('#NumDocNo').val(),
+            VDate: $('#DtDocDate').val(),
+            SaveOrUpdate: docId ? 'Update' : 'Save',
+            payAdvanceLists: []
+        };
+
+       
+        $('#tblAdvanceListCreation tbody tr').each(function (index) {
+            const row = $(this);  
+            const payAdvanceListDT = {
+                EmpCode: row.find('#empCode' + index).text() || '',  // Employee Code
+                SNo: index + 1,  // Serial number from the row index
+                WDay: parseFloat(row.find('#empWday' + index).text()) || 0,  // Working Days
+                Gross: parseFloat(row.find('#empGross' + index).text()) || 0,  // Gross Amount
+                Wages: parseFloat(row.find('#empWages' + index).text()) || 0,  // Wages
+                AdvNamT: parseFloat(row.find('#empAdvNamT' + index).text()) || 0,  // Advance Amount
+                SancAmt: parseFloat(row.find('#empSancAmt' + index).text()) || 0,  // Sanction Amount
+                Remark: row.find('#empRemark' + index).text() || '',  // Remark
+                BankCh: 0,   
+                Rate: parseFloat($('#TxtRate').val()) || 0,  // Rate from the textbox outside the table
+                PerFlg: $('#chkRate').is(':checked') ? 1 : 0  // Flag if Rate checkbox is checked
+            };
+ 
+            payAdvanceList.payAdvanceLists.push(payAdvanceListDT);
+        });
+     
+        return payAdvanceList;
+    }
+
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "AdvanceListCreation")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDepartmentList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDepartmentMast", "AdvanceListCreation")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlDepartment');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Department Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetDesignationList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDesignationList", "AdvanceListCreation")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#chkDesignation');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Designation Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Transport Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Name Load failed", error);
+            }
+        });
+    }
+
+     function GetBankList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetBankList", "AdvanceListCreation")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlBank');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Bank Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetEmployeeList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetEmployeeList", "AdvanceListCreation")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlEmpName');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Employee Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetDocid(Doctypeval) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "AdvanceListCreation")',
+            type: 'GET',
+            data:{vtype:Doctypeval},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#NumDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/AdvanceListCreation/GetAdvanceListCreationForUpdate',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                console.log(response.data);
+                await fillHeaderData(response.data);
+                await fillItemDetailTable(response.data);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+ 
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+     
+
+</script>
+

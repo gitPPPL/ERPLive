@@ -1,0 +1,543 @@
+﻿@{
+	ViewBag.Title = "Machine Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Machine Master</legend>
+	<div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "MachineMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+            </div>
+		</div>
+	</div>
+	<form id="MachineMasterform"> 
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+        
+            <!-- Row 1 -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="TxtName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="TxtShortName" class="form-label">Short Name</label>
+                        <input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Enter Short Name">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlPlac" class="form-label">Plac</label>
+                        <select class="form-control" id="ddlPlac" name="Plac">
+                        <option value="">-- Select Plac --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlDepartment" class="form-label">Department</label>
+                        <select class="form-control" id="ddlDepartment" name="Department">
+                            <option value="">-- Select Department --</option>
+                           
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlMachineSub" class="form-label">Machine Sub Group</label>
+                        <select class="form-control" id="ddlMachineSub" name="MachineSub">
+                            <option value="">-- Select Sub Group --</option>
+                            
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlMachineMain" class="form-label">Machine Main Group</label>
+                        <select class="form-control" id="ddlMachineMain" name="MachineMainGroup">
+                            <option value="">-- Select Main Group --</option>
+                            
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <fieldset class="sub-fieldset">
+                <legend class="sub-legend">Loom Detail</legend>
+            <!-- Row 3 -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlMachineType" class="form-label">Machine Type</label>
+                        <select class="form-control" id="ddlMachineType" name="MachineType">
+                            <option value="">-- Select Machine Type --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlMakeType" class="form-label">Make Type</label>
+                        <select class="form-control" id="ddlMakeType" name="MakeType">
+                            <option value="">-- Select Make Type --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlRunningQuality" class="form-label">Running Quality</label>
+                        <select class="form-control" id="ddlRunningQuality" name="RunningQuality">
+                            <option value="">-- Select Quality --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtBlock" class="form-label">Block</label>
+                        <input type="text" class="form-control" id="TxtBlock" name="Block" placeholder="Enter Block">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtPPM" class="form-label">Std PPM</label>
+                        <input type="text" class="form-control" id="TxtPPM" name="PPM" placeholder="PPM">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumEfficiency" class="form-label">Efficiency %</label>
+                        <input type="number" class="form-control" id="NumEfficiency" name="Efficiency" placeholder="Efficiency %">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlBlockType" class="form-label">Block Type</label>
+                        <input type="text" class="form-control" id="TxtBlockType" name="TxtBlockType" placeholder="Enter Block Type">
+
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlStatus" class="form-label">Status</label>
+                        <select class="form-control" id="ddlStatus" name="Status">
+                            <option value="">-- Select Status --</option>
+                            <option value="Top Priority">Top Priority</option>
+                            <option value="Priority">Priority</option>
+                            <option value="Running">Running</option>
+                            <option value="Stop">Stop</option>
+                            <option value="NA">NA</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 5 -->
+            <div class="row">
+               
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlConversionQuality" class="form-label">Conversion Quality</label>
+                        <select class="form-control" id="ddlConversionQuality" name="ConversionQuality">
+                            <option value="">-- Select Conversion Quality --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtRemarks" class="form-label">Remarks</label>
+                        <textarea type="text" class="form-control" id="TxtRemarks" name="Remarks" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtConvertDate" class="form-label">Convert Date</label>
+                        <input type="date" class="form-control" id="DtConvertDate" name="ConvertDate">
+                    </div>
+                </div>
+            </div>
+
+            </fieldset>
+
+            <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                            <span class="slider"></span>
+                        </label>
+                    <span class="label-status" id="statusText">Active</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+                </div>
+            </div> 
+	</form>
+
+</fieldset>
+<script>
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = parseInt(urlParams.get('id'));
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadMachineById(rowId);
+
+                if (isReadOnly) {
+                    setMachineFormReadOnly();
+                }
+            }
+        });
+
+        loadDepartmentList();
+        loadMainGroupList();
+        loadSubMainGroupList();
+        loadMakeTypeList();
+        loadMachineTypeList();
+        loadRunningQualityList();
+        loadConviersionQualityList();
+        loadPlaceMasterList();
+
+        $('#cancelBtn').on('click', function () {
+            window.location.href = '/MachineMainGroupList/Index';
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    function loadDepartmentList() {
+        $.ajax({
+            url: '/MachineMaster/GetDepartmentList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDepartment');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Department --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadMainGroupList() {
+        $.ajax({
+            url: '/MachineMaster/GetMachineSubGroupList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlMachineSub');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Machine Sub --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadSubMainGroupList() {
+        $.ajax({
+            url: '/MachineMaster/GetMachineMainGroupList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlMachineMain');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Main Group --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadMakeTypeList() {
+        $.ajax({
+            url: '/MachineMaster/GetMakeTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dropdown = $('#ddlMakeType');
+                dropdown.empty();
+                dropdown.append('<option value="">-- Select Make Type --</option>');
+
+                $.each(data, function (index, value) {
+                    dropdown.append(`<option value="${value}">${value}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Failed to load group types:", error);
+            }
+        });
+    }
+    function loadMachineTypeList() {
+        $.ajax({
+            url: '/MachineMaster/GetMachineTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dropdown = $('#ddlMachineType');
+                dropdown.empty();
+                dropdown.append('<option value="">-- Select Machine Type --</option>');
+
+                $.each(data, function (index, value) {
+                    dropdown.append(`<option value="${value}">${value}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Failed to load group types:", error);
+            }
+        });
+    }
+    function loadRunningQualityList() {
+        $.ajax({
+            url: '/MachineMaster/GetRunningQualityList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlRunningQuality');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Running Quality --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadConviersionQualityList() {
+        $.ajax({
+            url: '/MachineMaster/GetConviersionQualityList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlConversionQuality');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Conversion Quality --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadPlaceMasterList() {
+        $.ajax({
+            url: '/MachineMaster/GetPlaceMastList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlPlac');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Place --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+
+    function LoadMachineById(code) {
+        $.ajax({
+            url: '/MachineMasterList/GetMachineByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (response) {
+                console.log(response);
+                const data = response.data;
+                if (!data) {
+                    toastr.warning("No data found.");
+                    return;
+                }
+
+                $('#CODE').val(data.code);
+                $('#TxtName').val(data.name);
+                $('#TxtShortName').val(data.shortname);
+                $('#ddlPlac').val(data.placE_CODE);
+                $('#ddlDepartment').val(data.depT_CODE);
+                $('#ddlMachineSub').val(data.machsgrp);
+                $('#ddlMachineMain').val(data.machmgrp);
+                $('#ddlMachineType').val(data.type);
+                $('#ddlMakeType').val(data.makE_TYPE);
+                $('#ddlRunningQuality').val(data.proD_CODE);
+                $('#TxtBlock').val(data.block);
+                $('#TxtPPM').val(data.stD_PPM);
+                $('#NumEfficiency').val(data.eff);
+                $('#TxtBlockType').val(data.blocK_TYPE);
+                $('#ddlStatus').val(data.status);
+                $('#ddlConversionQuality').val(data.cproD_CODE);
+                $('#TxtRemarks').val(data.remark);
+                $('#DtConvertDate').val(data.cproD_DATE?.split('T')[0]); // Assuming ISO date
+                $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading Machine by ID:", status, error);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    $('#MachineMasterform').on('submit', function (e) {
+        e.preventDefault();
+
+        const code = parseInt($('#CODE').val()) || 0;
+        const formValues = {
+            CODE: code,
+            Name: $('#TxtName').val().trim(),
+            ShortName: $('#TxtShortName').val().trim(),
+            Plac: $('#ddlPlac').val(),
+            Department: $('#ddlDepartment').val(),
+            MachineSub: $('#ddlMachineSub').val(),
+            MachineMainGroup: $('#ddlMachineMain').val(),
+            MachineType: $('#ddlMachineType').val(),
+            MakeType: $('#ddlMakeType').val(),
+            RunningQuality: $('#ddlRunningQuality').val(),
+            Block: $('#TxtBlock').val().trim(),
+            PPM: $('#TxtPPM').val(),
+            Efficiency: $('#NumEfficiency').val(),
+            BlockType: $('#TxtBlockType').val(),
+            Status: $('#ddlStatus').val(),
+            ConversionQuality: $('#ddlConversionQuality').val(),
+            Remarks: $('#TxtRemarks').val().trim(),
+            ConvertDate: $('#DtConvertDate').val(),
+            ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0
+        };
+
+        // Basic validation (extend as needed)
+        if (!formValues.Name) {
+            toastr.warning('Please enter Name.');
+            $('#TxtName').focus();
+            return;
+        }
+
+        if (!formValues.ShortName) {
+            toastr.warning('Please enter Short Name.');
+            $('#TxtShortName').focus();
+            return;
+        }
+
+        const payload = {
+            COMP_CODE: 1,
+            CODE: formValues.CODE,
+            NAME: formValues.Name,
+            SHORTNAME: formValues.ShortName,
+            LDMS_CODE: parseInt(formValues.RunningQuality) || 0,
+            DEPT_CODE: parseInt(formValues.Department) || 0,
+            MACHSGRP: parseInt(formValues.MachineSub) || 0,
+            MACHMGRP: parseInt(formValues.MachineMainGroup) || 0,
+            SORT_SR: 0, 
+            BLOCK: formValues.Block,
+            TYPE: formValues.MachineType,
+            MAKE_TYPE: formValues.MakeType,
+            BLOCK_TYPE: formValues.BlockType,
+            PLACE_CODE: parseInt(formValues.Plac) || 0,
+            PROD_CODE: parseInt(formValues.RunningQuality) || 0,
+            PROD_GRAM: 0, 
+            PROD_TYPE: '', 
+            PROD_SIZE: 0, 
+            PROD_COLOR: '',
+            CPROD_CODE: parseInt(formValues.ConversionQuality) || 0,
+            CPROD_DATE: formValues.ConvertDate ? new Date(formValues.ConvertDate).toISOString() : new Date().toISOString(),
+            PROD_CODE1: 0, 
+            REMARK: formValues.Remarks,
+            OLD_NAME: '',
+            REPORT_FILTER: 0, 
+            STD_PPM: parseInt(formValues.PPM) || 0,
+            UUSER: 1,
+            UDATE: new Date().toISOString(),
+            EUSER: 1,
+            EDATE: new Date().toISOString(),
+            AED: formValues.CODE > 0 ? "U" : "A",
+            WSID: "WEB",
+            STATUS: formValues.Status,
+            ACTIVE: formValues.ACTIVE,
+            SRNO: 0, 
+            LIP: "127.0.0.1",
+            LID: "WEB",
+            EFF: parseFloat(formValues.Efficiency) || 0,
+            COSTCAT_CODE: 0, 
+            ACTION: formValues.CODE > 0 ? "UPDATE" : "INSERT"
+        };
+
+        $.ajax({
+            url: '/MachineMaster/SaveMachine',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Machine saved successfully!");
+                    $('#MachineMasterform')[0].reset();
+                    setTimeout(function () {
+                        window.location.href = '/MachineMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning(response.message || "Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function setMachineFormReadOnly() {
+        const form = $('#MachineMasterform');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        $('#ACTIVE').prop('disabled', true);
+        $('#statusText').addClass('text-muted');
+    }
+
+</script>
+

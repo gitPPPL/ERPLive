@@ -1,0 +1,645 @@
+﻿@{
+    ViewBag.Title = "Sales Discount Group";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+   
+    
+}
+<fieldset>
+    <legend class="legend-field">Sales Discount Group</legend>
+    <form id="SalesDiscountGroupForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right">
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName">Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtName" name="NAME" required>
+                </div>
+            </div>            
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button id="btn_Loadmaster" type="button" class="btn btn-primary"><i class="fa fa-spinner fa-spin"></i>Load Master</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblSalesDiscountGroup" class="table-width">
+                    <thead class="table-head">
+                        <tr>                         
+                            <th>Color Name</th>
+                            <th>Rate</th>
+                            <th>Size</th>
+                            <th>Rate</th>
+                            <th>Gram</th>
+                            <th>Rate</th>
+                            <th>Mesh Name</th>
+                            <th>Rate</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+           @*  <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div> *@
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "SalesDiscountList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+
+    const allFieldIds = [
+        'ddlDocType',
+        'NumDocNo'         
+    ];
+
+    let docId = "", readOnly;
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+    $(document).ready(function () {     
+      addItemRecordRow();
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await handleDocLoad();
+        // setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {                      
+
+       $(document).on('input', '#TxtName' ,function() {
+        var thisValue = $(this).val();
+        console.log(thisValue);
+        if (thisValue) {
+            $(this).removeAttr("style");
+        }
+       });
+
+    
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+         if (!validateRequiredField('#TxtName','Name')){
+                 $("#TxtName").attr("style", "border-color:red !important;").focus();
+                return;
+         }
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+      });
+
+
+    $('#btn_Loadmaster').on('click', async function () {
+        try {
+            var response = await $.ajax({
+                url: '@Url.Action("GetSalesDiscountGroup", "SalesDiscountGroup")', 
+                type: 'GET',  
+                dataType: 'json'  
+            });
+            console.log(response);
+            if (response.status) {  
+              await  populateDropdownsForAllRows(response.colorList, response.sizeList, response.gramList, response.meshList);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);  
+        }
+    });
+
+      
+    }
+
+</script>
+
+<script>
+
+    async function populateDropdownsForAllRows(colorList, sizeList, gramList, meshList) {
+        $('#tblSalesDiscountGroup tbody').empty();
+
+        for (let index = 0; index < colorList.length; index++) {
+            const item = colorList[index];
+            const idx = index + 1; // Row index
+
+            addItemRecordRow();
+            await bindDropdownData(idx);
+            console.log(item.code);
+            $(`#ddlColor${idx}`).val(item.code).trigger('change');
+            $(`#TxtColorRate${idx}`).val(item.COLOR_DIFF ?? '');
+        }
+
+        for (let index = 0; index < sizeList.length; index++) {
+            const item = sizeList[index];
+            const idx = index + 1; // Row index
+
+            if (idx <= colorList.length) {
+                $(`#ddlSize${idx}`).val(item.code).trigger('change');
+                $(`#TxtSizeRate${idx}`).val(item.SIZE_DIFF ?? '');
+            } else {
+                addItemRecordRow();
+                await bindDropdownData(idx);
+
+                $(`#ddlSize${idx}`).val(item.code).trigger('change');
+                $(`#TxtSizeRate${idx}`).val(item.SIZE_DIFF ?? '');
+            }
+        }
+
+        for (let index = 0; index < gramList.length; index++) {
+            const item = gramList[index];
+            const idx = index + 1;  
+            if (idx <= colorList.length) {
+                $(`#ddlGram${idx}`).val(item.code).trigger('change');
+                $(`#TxtGramRate${idx}`).val(item.GRAM_DIFF ?? '');
+            } else {
+                addItemRecordRow();
+                await bindDropdownData(idx);
+
+                $(`#ddlGram${idx}`).val(item.code).trigger('change');
+                $(`#TxtGramRate${idx}`).val(item.GRAM_DIFF ?? '');
+            }
+        }
+
+        for (let index = 0; index < meshList.length; index++) {
+            const item = meshList[index];
+            const idx = index + 1; 
+            if (idx <= colorList.length) {
+                $(`#ddlmesh${idx}`).val(item.code).trigger('change');
+                $(`#TxtMeshRate${idx}`).val(item.MESH_DIFF ?? '');
+            } else {
+                addItemRecordRow();
+                await bindDropdownData(idx);
+
+                $(`#ddlmesh${idx}`).val(item.code).trigger('change');
+                $(`#TxtMeshRate${idx}`).val(item.MESH_DIFF ?? '');
+            }
+        }
+    }
+ 
+    function convertTimeToDate(time) {
+        var timeParts = time.split(":");
+        var date = new Date();
+        date.setHours(timeParts[0], timeParts[1], 0, 0);
+        return date;
+    }
+
+    async function handleDocLoad() {
+            docId = getQueryParam('id');
+            readOnly = getQueryParam('readOnly');
+            if (docId) {                
+                await GetDocData(docId, readOnly);
+            }           
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateSalesDiscountMast", "SalesDiscountGroup")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/SalesDiscountList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateSalesDiscountMast", "SalesDiscountGroup")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");
+                    // showFlashMessageByKey('update', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/SalesDiscountList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillHeaderData(data) {
+         const dataHeader=data[0]; 
+         $('#TxtCode').val(dataHeader.CODE);
+         $('#TxtName').val(dataHeader.NAME ?? '');
+         $('#tblSalesDiscountGroup tbody').empty();
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1; 
+            addItemRecordRow();
+            await bindDropdownData(idx);
+   
+        $(`#ddlColor${idx}`).val(item.COLOR_CODE).trigger('change');
+        $(`#TxtColorRate${idx}`).val(item.COLOR_DIFF ?? '');
+        $(`#ddlSize${idx}`).val(item.SIZE_CODE).trigger('change');
+        $(`#TxtSizeRate${idx}`).val(item.SIZE_DIFF ?? '');
+        $(`#ddlGram${idx}`).val(item.GRAM_CODE).trigger('change');
+        $(`#TxtGramRate${idx}`).val(item.GRAM_DIFF ?? '');
+        $(`#ddlmesh${idx}`).val(item.MESH_CODE).trigger('change');
+        $(`#TxtMeshRate${idx}`).val(item.MESH_DIFF ?? '');
+        }         
+    }
+
+
+    async function collectFormData() {
+        const DOC_ID = toNullableInt(document.getElementById("TxtCode")?.value);
+        const salesDiscountMastDetails = [];
+
+        $('#tblSalesDiscountGroup tbody tr').each(function(index, row) {
+            const rowCount = index + 1; 
+
+            const colorCode = $(`#ddlColor${rowCount}`).val();
+            const colorDiff = $(`#TxtColorRate${rowCount}`).val();
+            const sizeCode = $(`#ddlSize${rowCount}`).val();
+            const sizeDiff = $(`#TxtSizeRate${rowCount}`).val();
+            const gramCode = $(`#ddlGram${rowCount}`).val();
+            const gramDiff = $(`#TxtGramRate${rowCount}`).val();
+            const meshCode = $(`#ddlmesh${rowCount}`).val();
+            const meshDiff = $(`#TxtMeshRate${rowCount}`).val();
+
+            if(colorCode || sizeCode || gramCode || meshCode){
+            const salesDiscountMastDetail = {
+                COLOR_CODE: colorCode || null,
+                COLOR_DIFF: parseFloat(colorDiff) || null,
+                SIZE_CODE: sizeCode || null,
+                SIZE_DIFF: parseFloat(sizeDiff) || null,
+                GRAM_CODE: gramCode || null,
+                GRAM_DIFF: parseFloat(gramDiff) || null,
+                MESH_CODE: meshCode || null,
+                MESH_DIFF: parseFloat(meshDiff) || null
+            };
+            salesDiscountMastDetails.push(salesDiscountMastDetail);
+
+            }  
+
+        });
+
+        const data = {
+            CODE: DOC_ID ?? 0,
+            NAME:$('#TxtName').val() || null,
+            SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update",
+            salesDiscountMastDetails: salesDiscountMastDetails
+        };
+        return data;
+    }
+
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "SalesDiscountGroup")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid(Doctypeval) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "SalesDiscountGroup")',
+            type: 'GET',
+            data:{vtype:Doctypeval},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtCode').val(response.data.docId || '');
+                } else {
+                    $('#NumDocNo').val('');
+                    $('#TxtCode').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/SalesDiscountGroup/GetSalesDiscountMastForUpdate',
+                type: 'GET',
+                data: { code: MasterTblId }
+            });
+            if (response.status) {
+                console.log(response.data);
+                await fillHeaderData(response.data);
+                // await fillItemDetailTable(response.data);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblSalesDiscountGroup tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+            <tr class="no-border-input" id="row${rowCount}">                 
+                <td>
+                    <select class="form-control" id="ddlColor${rowCount}">
+                        <option value="">Select From</option>
+                    </select>
+                </td>
+                <td><input type="text" oninput="allowOnlyDecimal(this)" maxlength="10" class="form-control" id="TxtColorRate${rowCount}" /></td>
+                <td>
+                    <select class="form-control" id="ddlSize${rowCount}">
+                        <option value="">Select To</option>
+                    </select>
+                </td>
+                <td><input type="text" oninput="allowOnlyDecimal(this)" maxlength="10" class="form-control" id="TxtSizeRate${rowCount}" /></td>
+                <td>
+                    <select class="form-control" id="ddlGram${rowCount}">
+                        <option value="">Select Item</option>
+                    </select>
+                </td>
+                  <td><input type="text" oninput="allowOnlyDecimal(this)" maxlength="10" class="form-control" id="TxtGramRate${rowCount}" /></td>
+                 <td>
+                    <select class="form-control" id="ddlmesh${rowCount}">
+                        <option value="">Select Item</option>
+                    </select>
+                </td>
+                <td><input type="text" oninput="allowOnlyDecimal(this)" maxlength="10" class="form-control" id="TxtMeshRate${rowCount}" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+
+        tbody.append(newRow);               
+        bindDropdownData(rowCount);
+        
+     }
+      
+    function bindDropdownData(rowCount) {
+        const colorSelect = $(`#ddlColor${rowCount}`);
+        const sizeSelect = $(`#ddlSize${rowCount}`);
+        const gramSelect = $(`#ddlGram${rowCount}`);
+        const meshSelect = $(`#ddlmesh${rowCount}`);
+
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: defaultText
+                                })
+                            );
+
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '300px',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: 0
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} load failed`);
+                            resolve();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(`Error loading ${defaultText}: ${error}`);
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+        return Promise.all([
+            loadDropdown(
+                '@Url.Action("GetColorList", "SalesDiscountGroup")',
+                colorSelect,
+                "- Select From Place -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetSizeList", "SalesDiscountGroup")',
+                sizeSelect,
+                "- Select To Place -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetGramList", "SalesDiscountGroup")',
+                gramSelect,
+                "- Select Item -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetMeshList", "SalesDiscountGroup")',
+                meshSelect,
+                "- Select To Place -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            )
+        ]);
+    }
+
+
+
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+
+</script>
+

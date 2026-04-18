@@ -1,0 +1,260 @@
+﻿@{
+	ViewBag.Title = "Posting Parameter Salary";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend>Posting Parameter Salary</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "PostingParameterSalaryList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+		@* <fieldset class="form-text">
+			<div class="row g-2 align-items-center">
+				<div class="col-auto">
+					<label class="form-label">Voucher Type</label>
+					<select class="form-select form-control" id="VOUCHER" name="VOUCHER">
+						<option value="">-- Select --</option>
+					</select>
+				</div>
+
+				<div class="col-auto">
+					<label class="form-label">Doc Type</label>
+					<select class="form-select form-control" id="DOCTYPE" name="DOCTYPE">
+						<option value="">-- Select --</option>
+					</select>
+				</div>
+			</div>
+		</fieldset> *@
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Salary A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Salary A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Salary Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Salary Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">HRA A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select HRA A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Conveyence A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Conveyence A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Other A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Other A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Washing A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Washing A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Special A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Special A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Employee Con. to PF A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Employee Con. to PF A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Employee Con. to ESI A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Employee Con. to ESI A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Employers Con. to PF A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Employers Con. to PF A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Employers Con. to ESI A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Employers Con. to ESI A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Advance A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Advance A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">TDS Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select TDS Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Admin Charges A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Admin Charges A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Family Pension A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Family Pension A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">EPF Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select EPF Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">ESI Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select ESI Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Wages A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Wages A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Wages Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Wages Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Production Incentive A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Production Incentive A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Production Inc. Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Production Inc. Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Ex Gratia A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Ex Gratia A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Ex-Gratia Payable A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Ex-Gratia Payable A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Other Monthly Deduction A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Other Monthly Deduction A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Loan A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Loan A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 mt-3 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+</fieldset>
+
+
+

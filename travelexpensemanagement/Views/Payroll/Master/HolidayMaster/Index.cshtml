@@ -1,0 +1,361 @@
+﻿@{
+    ViewBag.Title = "Holiday Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+}
+
+<fieldset>
+    <legend class="legend-field">Holiday Master</legend>
+
+    <div class="row">
+        <div class="offset-md-4 col-md-8">
+            <div class="button-right mb-2">
+                @if (canPrint)
+                {
+                    <button class="btn btn-print">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+
+                @if (canApproval)
+                {
+                    <button class="btn btn-send">
+                    <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                 }
+
+
+                @if (canApproval)
+                {
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <form id="HolidayMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="name">Name <span style="color:red">*</span></label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name" maxlength="30">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtHolidayDate">Holiday Date<span style="color:red">*</span></label>
+                    <input type="date" class="form-control" id="DtHolidayDate" name="HolidayDate" placeholder="Enter Holiday Date">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtBeforeDate">Before Date <span style="color:red">*</span></label>
+                    <input type="date" class="form-control" id="DtBeforeDate" name="BeforeDate" placeholder="Enter Before Date">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtAfterDate">After Date <span style="color:red">*</span> </label>
+                    <input type="date" class="form-control" id="DtAfterDate" name="AfterDate" placeholder="Enter After Date">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlNationalHoliday">National Holiday<span style="color:red">*</span></label>
+                    <select class="form-control" id="ddlNationalHoliday" name="NationalHoliday">
+                        <option value="">--Select National Holiday--</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <button onclick="window.location.href='@Url.Action("Index", "HolidayMasterList")'" type="button" class="btn btn-draft" id="BacktolistID">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+            <div class="offset-md-5 col-md-3">
+                <div class="button-right">
+                    <button id="btnSaves" type="Save" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+
+<script>
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const mode = urlParams.get('mode');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+         
+        $('#ACTIVE').on('change', function () {
+            const isChecked = $(this).is(':checked');
+            $('#statusText')
+                .text(isChecked ? 'Active' : 'Inactive')
+                .removeClass('active inactive')
+                .addClass(isChecked ? 'active' : 'inactive');
+        });
+
+        $("#TxtName, #DtHolidayDate, #DtBeforeDate, #DtAfterDate, #ddlNationalHoliday").on('change keyup', function () {
+         
+            if ($(this).val().trim() !== "") {
+                $(this).removeAttr('style');
+            }
+        });
+
+ 
+        if (!isNaN(rowId) && rowId > 0) {
+            loadHolidayMasterById(rowId);
+            if (mode === "view") {
+                setFormReadOnly();
+            }
+        }
+
+
+        $("#TxtName").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                $.ajax({
+                    url: "/HolidayMaster/SearchHolidayNames",
+                    type: "GET",
+                    data: { term: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                $("#TxtName").val(ui.item.value);
+            }
+        });
+
+
+        $("#btnSaves").click(function (e) {
+            e.preventDefault();
+
+            var Name = $("#TxtName").val().trim();
+            var HolidayDate = $("#DtHolidayDate").val().trim();
+            var BeforeDate = $("#DtBeforeDate").val().trim();
+            var AfterDate = $("#DtAfterDate").val().trim();
+            var NationalHoliday = $("#ddlNationalHoliday").val().trim();
+            var nationalHolidayValue = (NationalHoliday === "Yes") ? 1 : 0;
+            var CODE = $("#CODE").val().trim();
+            var isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+            var action = (!CODE || isNaN(CODE) || CODE <= 0) ? "INSERT" : "UPDATE";
+
+            if (!CODE) {
+                getHolidayCode().then(code => {
+                    CODE = code;
+                    saveData();
+                });
+            } else {
+                saveData();
+            }
+
+ 
+            function saveData() {
+              
+                if (!Name) {
+                    toastr.warning("Please enter a Name.");
+                    $("#TxtName").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+                if (!HolidayDate) {
+                    toastr.warning("Please select a Holiday Date.");
+                    $("#DtHolidayDate").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+                if (!BeforeDate) {
+                    toastr.warning("Please select a Before Date.");
+                    $("#DtBeforeDate").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+                if (!AfterDate) {
+                    toastr.warning("Please select an After Date.");
+                    $("#DtAfterDate").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+                if (!NationalHoliday) {
+                    toastr.warning("Please select National Holiday status.");
+                    $("#ddlNationalHoliday").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+                var holiday = new Date(HolidayDate);
+                var before = new Date(BeforeDate);
+                var after = new Date(AfterDate);
+
+                if (before >= holiday) {
+                    toastr.warning("Before Date must be less than Holiday Date.");
+                    $("#DtBeforeDate").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+                if (after <= holiday) {
+                    toastr.warning("After Date must be greater than Holiday Date.");
+                    $("#DtAfterDate").attr("style", "border-color:red !important;").focus();
+                    return;
+                }
+
+    
+                var formData = {
+                    Code: CODE ? parseInt(CODE) : null,
+                    Name: Name,
+                    HolidayDate: HolidayDate,
+                    BeforeDate: BeforeDate,
+                    AfterDate: AfterDate,
+                    NationalHoliday: nationalHolidayValue,
+                    Active: isActive,
+                    action: action
+                };
+
+                $("#btnSaves").prop("disabled", true);
+                            
+                $.ajax({
+                    url: '/HolidayMaster/SaveTempMaster',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success("Data saved successfully.");
+                            window.location.href = '/HolidayMaster/Index?id=' +
+                                encodeURIComponent(CODE) + '&mode=view';
+                        } else {
+                            toastr.error(response.message || "An error occurred.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong while saving the data.");
+                    },
+                    complete: function () {
+                        $("#btnSaves").prop("disabled", false);
+                    }
+                });
+            }
+        });
+
+    });
+
+    function loadHolidayMasterById(code) {
+        $.ajax({
+            url: '/HolidayMasterList/GetHolidayCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No Holiday Master found for the given ID.");
+                    return;
+                }
+                populateForm(res.data);
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    function populateForm(data) {
+        $("#TxtName").val($.trim(data.name));
+        $("#DtHolidayDate").val(formatDate(data.holidayDate));
+        $("#DtBeforeDate").val(formatDate(data.beforeDate));
+        $("#DtAfterDate").val(formatDate(data.afterDate));
+        $("#ddlNationalHoliday").val(data.nationalHoliday === 1 ? "Yes" : "No");
+        $("#CODE").val($.trim(data.code));
+
+        const isActive = data.active === 1;
+        $('#ACTIVE').prop('checked', isActive);
+        $('#statusText')
+            .text(isActive ? 'Active' : 'Inactive')
+            .removeClass('active inactive')
+            .addClass(isActive ? 'active' : 'inactive');
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function setFormReadOnly() {
+        const form = $('#HolidayMasterForm');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        $('#BacktolistID').prop('disabled', false);
+    }
+
+    
+    function getHolidayCode() {
+        return fetch('/HolidayMaster/Getcode')
+        .then(response => response.json())
+        .then(data => data.code)
+        .catch(() => null);
+    }
+
+</script>

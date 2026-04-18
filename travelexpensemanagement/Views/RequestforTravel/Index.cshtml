@@ -1,0 +1,849 @@
+﻿@{
+	ViewBag.Title = "Master Insert";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentMenu = ViewBag.CurrentMenu as string;
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<style>
+		.form-control {
+			font-size: 12px;
+		}
+		.trip-block {
+			display: none;
+		}
+		.btn.active-btn {
+			background-color: #28a745 !important;
+			border-color: #28a745 !important;
+			color: white !important;
+		}
+		a {
+			font-size: 14px;
+			color: #007bff;
+		}
+		.row-container {
+			display: flex;
+			align-items: center;
+			gap: 10px; /* Spacing between columns */
+			margin-bottom: 10px;
+		}
+			.row-container input {
+				width: 150px; /* Set consistent input width */
+			}
+		.removeRow {
+			background-color: red;
+			color: white;
+			border: none;
+			padding: 5px 10px;
+			cursor: pointer;
+			border-radius: 5px;
+		}
+		.rowContainerReturn {
+			display: flex;
+			align-items: center;
+			gap: 10px; /* Spacing between columns */
+			margin-bottom: 10px;
+		}
+			.rowContainerReturn input {
+				width: 150px; /* Set consistent input width */
+			}
+		.removeRowReturn {
+			background-color: red;
+			color: white;
+			border: none;
+			padding: 5px 10px;
+			cursor: pointer;
+			border-radius: 5px;
+		}
+		#rowContainerReturn {
+			border: none;
+			outline: 2px solid #ccc;
+			padding: 15px;
+			margin-top: 10px;
+		}
+		#rowContainer {
+			border: none;
+			outline: 2px solid #ccc;
+			padding: 15px;
+			margin-top: 10px;
+		}
+
+		.main-body {
+			border: none;
+			outline: 2px solid #ccc;
+			padding: 10px;
+			margin-top: 10px;
+		}
+	</style>
+	<script>
+		function redirectToDashboard() {
+			window.location.href = '@Url.Action("Index", "Dashboard")';
+		}
+	</script>
+}
+@* check start *@
+
+<div class="row align-items-center">
+	<div class="col-md-4">
+		<nav class="breadcrumb mb-0">
+			<span class="active" onclick="redirectToDashboard()" style="cursor: pointer;">Dashboard</span>
+			<span> &gt; </span>
+			<a href="#">Request for Travel</a>
+		</nav>
+	</div>
+	<div class="col-md-8 d-flex justify-content-end align-items-center gap-3">
+		<!-- increased gap -->
+		@foreach (var permission in Model.UserMenuPermissions)
+		{
+			if (permission.MENU_NAME == currentMenu)
+			{
+				<div class="button-toolbar">
+					@if (permission._ADD == 1)
+					{
+						<button class="btn btn-primary trip-btn" style="font-size: 9px; height: 28px; margin-right: 10px; line-height: 0px;" data-trip="one-way">
+							One Way
+						</button>
+					}
+				</div>
+			}
+		}
+
+		
+		<button class="btn btn-primary trip-btn" style="font-size: 9px; height: 28px; margin-right: 10px; line-height: 0px;" data-trip="round-trip">
+			Return Date
+		</button>
+		<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "RequestforTravelDetailsList")'" type="button" class="btn btn-primary" style="font-size: 9px; height: 28px; line-height: 0px;">
+			Request Travel List
+		</button>
+	</div>
+</div>
+
+<!-- one-way Trip Blocks Start -->
+<div id="one-way" class="trip-blockOne">
+	<div class="mt-3">
+		<div id="rowContainer">
+			<div class="row">
+				<label style="font-size: 13px; padding-left: 3px;"><b>One Way</b></label>
+			</div>
+			<div class="row">
+				<div class="col-md-1" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Employee</b><span style="color:red">*</span></label>
+					@* <input type="text" class="form-control" id="Employeeoneway" placeholder="Employee" /> *@
+					<select id="Employeeoneway" style="height:33px!important;" name="From" class="form-control">
+						<option value="">-- Select From --</option>
+					</select>
+				</div>
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>From</b><span style="color:red">*</span></label>
+					<select id="FromonewayddlHeader" style="height:33px!important;" name="From" class="form-control">
+						<option value="">-- Select From --</option>
+					</select>
+				</div>
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>To</b><span style="color:red">*</span></label>
+					<select id="ToonewayddlHeader" name="To" style="height:33px!important;" class="form-control">
+						<option value="">-- Select To --</option>
+					</select>
+				</div>
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Travel Date</b><span style="color:red">*</span></label>
+					<input type="datetime-local" class="form-control" id="TravelDateoneway" placeholder="Travel Date" />
+				</div>
+				<div class="col-md-1" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Cost</b><span style="color:red">*</span></label>
+					<input type="text" class="form-control" id="Costoneway" name="Cost" placeholder="Cost" />
+				</div>
+
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Travel Type</b><span style="color:red">*</span></label>
+					@* <input type="text" class="form-control" id="Costoneway" placeholder="Cost" /> *@
+					<select name="TransportationModeMasterOneway" style="height:33px!important;" id="TravelTypeoneway" class="form-control">
+						<option value="">Select Travel</option>
+					</select>
+				</div>
+
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Purpose</b><span style="color:red">*</span></label>
+					<input type="text" class="form-control" id="Purposeoneway" placeholder="Purpose" />
+				</div>
+				<div class="row" style="margin-top: 10px;">
+					<div class="col-md-12">
+						<label style="font-size: 13px; padding-left: 4px;"><b>Journey Details</b></label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<button id="btnSaveOneway" style="font-size:12px; margin-top:10px;" class="btn btn-primary">Submit</button>
+		<input type="hidden" id="hiddenEmpID" />
+		<br />
+	</div>
+</div>
+
+<!-- one-way Trip Blocks End -->
+<div id="round-trip" class="trip-blockround">
+	@* ========================Round Trip Start ========================  *@
+	<div class="mt-3">
+		<div id="rowContainerReturn">
+			<div class="row">
+				<label style="font-size: 13px; padding-left: 3px;"><b>Return Date</b></label>
+		    </div>
+			<div class="row">
+				
+				<div class="col-md-1" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Employee</b><span style="color:red">*</span></label>
+					<input type="text" class="form-control" id="EmployeeHeaderReturn" placeholder="Employee" />
+				</div>
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>To</b><span style="color:red">*</span></label>
+					<select id="ToddlHeaderReturn" style="height:33px!important;" name="To" class="form-control">
+						<option value="">-- Select To --</option>
+					</select>
+				</div>
+
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>From</b><span style="color:red">*</span></label>
+					<select id="FromddlHeaderReturn" style="height:33px!important;" name="From" class="form-control">
+						<option value="">-- Select From --</option>
+					</select>
+				</div>
+				
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Travel Date</b><span style="color:red">*</span></label>
+					<input type="datetime-local" class="form-control" id="TravelDateHeaderReturn" placeholder="Travel Date" />
+				</div>
+				<div class="col-md-1" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Cost</b><span style="color:red">*</span></label>
+					<input type="text" class="form-control" id="CostHeaderReturn" placeholder="Cost" />
+				</div>
+
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Travel Type</b><span style="color:red">*</span></label>
+					@* <select name="TransportationModeMasterOneway" id="TravelTypeoneway" class="form-control">
+						<option value="">Select Travel</option>
+					</select> *@
+					<select name="TransportationModeMasterReturn" style="height:33px!important;" id="TravelTypeReturn" class="form-control">
+						<option value="">Select Travel</option>
+					</select>
+				</div>
+
+				<div class="col-md-2" style="padding:4px;">
+					<label style="font-size: 13px;"><b>Purpose</b><span style="color:red">*</span></label>
+					<input type="text" class="form-control" id="PurposeHeaderReturn" placeholder="Purpose" />
+				</div>
+				<div class="row" style="margin-top: 10px;">
+					<div class="col-md-12">
+						<label style="font-size: 13px; padding-left: 4px;"><b>Journey Details</b></label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<button id="btnSaveReturn" style="font-size:12px; margin-top:10px;" class="btn btn-primary">Submit</button>
+		<input type="hidden" id="hiddenEmpIDReturn" />
+	</div>
+	@* ========================Round Trip End ========================  *@
+</div>
+@* check End *@
+<script>
+	$(document).ready(function () {
+		// Show only "one-way" on load
+		$('#one-way').show();
+		$('#round-trip').hide();
+
+		$('.trip-btn').click(function () {
+			var selectedTrip = $(this).data('trip');
+			if (selectedTrip === 'one-way') {
+				$('#one-way').fadeIn();
+				$('#round-trip').hide();
+				
+			} else if (selectedTrip === 'round-trip') {
+				$('#round-trip').fadeIn();
+				$('#one-way').hide();
+			}
+			$('.trip-btn').removeClass('active-btn');
+			$(this).addClass('active-btn');
+		});
+		 var now = new Date();
+	now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust timezone for accurate ISO format
+	var minDateTime = now.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:MM"
+
+	$('#TravelDateoneway').attr('min', minDateTime);
+
+
+	});
+</script>
+
+@* ========================One Way Start ======================== *@
+<script>
+	$(document).ready(function () {
+		 ddlCitylist();
+		 ddlUserMaster();
+		 bindTransportationModeMaster($('select[name="TransportationModeMasterOneway"]'));
+	// Get Employee start
+		$.ajax({
+		url: '/RequestforTravel/GetUserNameEmailAndTravelData',
+		type: 'GET',
+		success: function (response) {
+			if (response.success) {
+				$('#Employeeoneway').val(response.userName);
+				
+				$('#hiddenEmpID').val(response.empId);
+				if (response.travelRequests && response.travelRequests.length > 0) {
+					var travel = response.travelRequests[0];
+					$('#FromonewayddlHeader').val('');         
+					$('#ToonewayddlHeader').val('');           
+					$('#TravelDateoneway').val('');           
+					$('#Costoneway').val('');                 
+					$('#Purposeoneway').val('');               
+					$('#TravelTypeoneway').val('');            
+					$('#FromonewayddlHeader').val(travel.travelFrom);
+					$('#ToonewayddlHeader').val(travel.travelTo);
+					$('#TravelDateoneway').val(travel.travelDate + 'T09:00');
+					$('#Costoneway').val(travel.totalCost);
+					$('#Purposeoneway').val(travel.purpose);
+					$('#TravelTypeoneway').val(travel.travelType);
+
+				}
+			} else {
+				toastr.error(response.message);
+			}
+		},
+		error: function () {
+			alert("An error occurred while fetching user details.");
+		}
+	});
+		var defaultRow = `
+		<div class="row mt-2 travel-row">
+			<div class="col-md-2" style="padding:4px;">
+			<label style="font-size: 11px;"><b>From</b></label>
+				<select name="FromOneWay" style="height:33px!important;" class="form-control">
+			<option value="">Select From</option>
+		</select>
+			</div>
+			<div class="col-md-2" style="padding:4px;">
+			<label style="font-size: 11px;"><b>TO</b></label>
+				<select name="ToOneWay" style="height:33px!important;" class="form-control">
+			<option value="">Select To</option>
+		</select>
+			</div>
+			<div class="col-md-2" style="padding:4px;">
+			<label style="font-size: 11px;"><b>Travel Date</b></label>
+				<input type="datetime-local" name="TravelDate" class="form-control TravelDate" placeholder="Travel Date" />
+			</div>
+			<div class="col-md-1" style="padding:4px;">
+			<label style="font-size: 11px;"><b>Expense </b></label>
+				<select name="ExpenseCategoryMaster" style="height:33px!important;" class="form-control">
+					<option value="">Select Category</option>
+				</select>
+			</div>
+			<div class="col-md-1" style="padding:4px;">
+			<label style="font-size: 11px;"><b>Cost</b></label>
+				<input type="text" name="Cost" class="form-control cost" placeholder="Cost" />
+			</div>
+			<div class="col-md-2" style="padding:4px;">
+			<label style="font-size: 11px;"><b>Transportation Master</b></label>
+				<select name="TransportationModeMaster" style="height:33px!important;" class="form-control">
+					<option value="">Select Category</option>
+				</select>
+			</div>
+			<div class="col-md-1" style="padding:4px;">
+			<label style="font-size: 11px;"><b>Purpose</b></label>
+				<input type="text" name="Purpose" class="form-control" placeholder="Purpose" />
+			</div>
+			<div class="col-md-1 d-flex justify-content-between" style="padding:1px;">
+			<label style="font-size: 11px; display:none;"><b>Purpose</b></label>
+				<button class="btn btn-primary btnAddRow" style="padding: 3px 10px; height: 32px; margin-right: 5px; margin-top: 32px;">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+						<path d="M8 4a.5.5 0 0 1 .5.5V7.5H12a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8.5H4a.5.5 0 0 1 0-1h3.5V4.5A.5.5 0 0 1 8 4z" />
+					</svg>
+				</button>
+				<label style="font-size: 11px; display:none;"><b>Purpose</b></label>
+				<button class="btn btn-danger removeRow" style="padding: 3px 10px; height: 32px; margin-right: 5px; margin-top: 32px;">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+						<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+						<path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+					</svg>
+				</button>
+			</div>
+		</div>`;
+		// Add first row on page load
+		var firstRow = $(defaultRow);
+		$("#rowContainer").append(firstRow);
+		bindExpenseCategoryTo(firstRow.find('select[name="ExpenseCategoryMaster"]'));
+		bindTransportationModeMaster(firstRow.find('select[name="TransportationModeMaster"]'));
+		ddlCitylistJourneyDetailsFrom(firstRow.find('select[name="FromOneWay"]'));
+		ddlCitylistJourneyDetailsTo(firstRow.find('select[name="ToOneWay"]'));
+		// Add new row
+		$(document).on("click", ".btnAddRow", function () {
+			var newRow = $(defaultRow);
+			$("#rowContainer").append(newRow);
+			bindExpenseCategoryTo(newRow.find('select[name="ExpenseCategoryMaster"]'));
+			bindTransportationModeMaster(newRow.find('select[name="TransportationModeMaster"]'));
+			ddlCitylistJourneyDetailsFrom(newRow.find('select[name="FromOneWay"]'));
+			ddlCitylistJourneyDetailsTo(newRow.find('select[name="ToOneWay"]'));
+		});
+		// Remove row
+		$(document).on("click", ".removeRow", function () {
+			if ($("#rowContainer .row").length > 1) {
+				$(this).closest(".row").remove();
+			} else {
+				alert("Aap pehli row delete nahi kar sakte!");
+			}
+		});
+
+		// Save button click
+	
+	$("#btnSaveOneway").click(function () {
+		var empId = $('#hiddenEmpID').val() || null;
+		var employee = $("#Employeeoneway").val() || null;
+		var from = $("#FromonewayddlHeader").val() || null;
+		var to = $("#ToonewayddlHeader").val() || null;
+		var travelDate = $("#TravelDateoneway").val() || null;
+		// var cost = $("#Costoneway").val() || null;
+		var cost = parseFloat($('#Costoneway').val()) || 0;
+		var purpose = $("#Purposeoneway").val() || null;
+		var travelType = $("#TravelTypeoneway").val() || null;
+		// var totalCost = parseFloat($('#Costoneway').val()) || 0;
+
+		var travelData = [];
+		$(".travel-row").each(function () {
+			var row = $(this);
+			var rowData = {
+				FromOneWay: parseInt(row.find('select[name="FromOneWay"]').val()) || null,
+				ToOneWay: parseInt(row.find('select[name="ToOneWay"]').val()) || null,
+				TravelDate: row.find('input[name="TravelDate"]').val() || null,
+				ExpenseCategoryMaster: parseInt(row.find('select[name="ExpenseCategoryMaster"]').val()) || null,
+				Cost: parseFloat(row.find('input[name="Cost"]').val()) || null,
+				TransportationModeMaster: parseInt(row.find('select[name="TransportationModeMaster"]').val()) || null,
+				Purpose: row.find('input[name="Purpose"]').val() || null
+			};
+			travelData.push(rowData);
+		});
+
+		var finalData = {
+			EmpID: empId,
+			Employee: employee,
+			From: from,
+			To: to,
+			TravelDate: travelDate,
+			Cost: cost,
+			Purpose: purpose,
+			TravelType: travelType,
+			TravelDetails: travelData,
+			RequestType: "Wrapper"
+		};
+
+		$.ajax({
+			url: '/RequestforTravel/SaveTravelExpenses',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(finalData),
+			success: function (response) {
+				alert(response.message);
+			},
+			error: function (xhr) {
+				alert("Error: " + xhr.responseText);
+			}
+		});
+	});
+	});
+	// Populate Expense Categories
+	function bindExpenseCategoryTo($dropdown) {
+		$.ajax({
+			url: '/RequestforTravel/GetExpenseCategories',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				$dropdown.empty();
+				$dropdown.append('<option value="">Select Categories</option>');
+				$.each(data, function (index, item) {
+					$dropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading Categories: ' + error);
+			}
+		});
+	}
+	// Populate Transportation Modes
+	function bindTransportationModeMaster($dropdown) {
+		$.ajax({
+			url: '/RequestforTravel/GetTransportationModeMaster',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				$dropdown.empty();
+				$dropdown.append('<option value="">Select Transportation Mode</option>');
+				$.each(data, function (index, item) {
+					$dropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading Transportation Modes: ' + error);
+			}
+		});
+	}
+	//ddl from dropdown List banding start block
+	function ddlCitylist() {
+		$.ajax({
+			url: '/RequestforTravel/GetFromCityMasterddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var FromonewayddlHeader = $('#FromonewayddlHeader');
+				var ToonewayddlHeader = $('#ToonewayddlHeader');
+				var FromOneWay = $('#FromOneWay');
+				var ToOneWay = $('#ToOneWay');
+
+				FromonewayddlHeader.empty();
+				ToonewayddlHeader.empty();
+				FromOneWay.empty();
+				ToOneWay.empty();
+
+				// Add default option
+				FromonewayddlHeader.append('<option value="">-- Select From --</option>');
+				ToonewayddlHeader.append('<option value="">-- Select To --</option>');
+				FromOneWay.append('<option value="">-- From --</option>');
+				ToOneWay.append('<option value="">-- To --</option>');
+
+				// Add new options to both dropdowns
+				$.each(data, function (index, item) {
+					var option = '<option value="' + item.value + '">' + item.text + '</option>';
+					FromonewayddlHeader.append(option);
+					ToonewayddlHeader.append(option);
+					FromOneWay.append(option);
+					ToOneWay.append(option);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading City: ' + error);
+			}
+		});
+	}
+
+
+	function ddlCitylistJourneyDetailsTo($dropdown) {
+		$.ajax({
+			url: '/RequestforTravel/GetFromCityMasterddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				$dropdown.empty();
+				$dropdown.append('<option value="">-- Select To --</option>');
+				$.each(data, function (index, item) {
+					$dropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading cities: ' + error);
+			}
+		});
+	}
+	function ddlCitylistJourneyDetailsFrom($dropdown) {
+		$.ajax({
+			url: '/RequestforTravel/GetFromCityMasterddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				$dropdown.empty();
+				$dropdown.append('<option value="">-- Select From --</option>');
+				$.each(data, function (index, item) {
+					$dropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading cities: ' + error);
+			}
+		});
+	}
+
+	function ddlUserMaster() {
+		var $dropdown = $('#Employeeoneway');
+		$.ajax({
+			url: '/RequestforTravel/GetUserMaster',
+			type: 'GET',
+			dataType: 'json',
+			success: function (response) {
+				console.log(response);
+
+				$dropdown.empty();
+				$dropdown.append('<option value="">-- Select From --</option>');
+
+				$.each(response.users, function (index, item) {
+					$dropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+
+				// Preselect user if session value exists
+				if (response.selectedUser) {
+					$dropdown.val(response.selectedUser);
+				}
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading cities: ' + error);
+			}
+		});
+	}
+	$(document).ready(function () {
+		let costValue = 0;  // This is the value from #Costoneway input
+		let totalCost = 0;  // This is the sum of .cost fields
+		$('#Costoneway').on('change', function () {
+			costValue = parseFloat($(this).val()) || 0;
+			calculateTotalCost();
+		});
+		$(document).on('keyup', '.cost', function () {
+			calculateTotalCost();
+		});
+
+		function calculateTotalCost() {
+			totalCost = 0;
+
+			$('.cost').each(function () {
+				let cost = parseFloat($(this).val()) || 0;
+				totalCost += cost;
+			});
+			let totalWithManualCost = totalCost + costValue;
+			$('#Costoneway').val(totalWithManualCost.toFixed(2));
+			$('#TotalCostDisplay').text(totalWithManualCost.toFixed(2));
+		}
+	});
+
+
+
+
+
+
+
+
+
+
+
+</script>
+@* ========================One Way End ======================== *@
+
+@* Request for Journey (To & From) start block *@
+<script>
+	$(document).ready(function () {
+		ddlCitylistReturn();
+		bindTransportationModeMasterReturn($('select[name="TransportationModeMasterReturn"]'));
+
+		// Fetch employee & travel data
+		$.ajax({
+			url: '/RequestforTravel/GetUserNameEmailAndTravelDataReturn',
+			type: 'GET',
+			success: function (response) {
+				console.log(response)
+				if (response.success) {
+					$('#EmployeeHeaderReturn').val(response.userName);
+					$('#hiddenEmpIDReturn').val(response.empId);
+					if (response.travelRequests && response.travelRequests.length > 0) {
+						var travel = response.travelRequests[0];
+						$('#FromddlHeaderReturn').val('');          
+						$('#ToddlHeaderReturn').val('');            
+						$('#TravelDateHeaderReturn').val('');       
+						$('#CostHeaderReturn').val('');             
+						$('#PurposeHeaderReturn').val('');         
+						$('#TravelTypeReturn').val('');
+						$('#FromddlHeaderReturn').val(travel.travelFrom);
+						$('#ToddlHeaderReturn').val(travel.travelTo);
+						$('#TravelDateHeaderReturn').val(travel.travelDate + 'T09:00');
+						$('#CostHeaderReturn').val(travel.totalCost);
+						$('#PurposeHeaderReturn').val(travel.purpose);
+						$('#TravelTypeReturn').val(travel.travelType);
+					}
+				} else {
+					toastr.error(response.message);
+				}
+			},
+			error: function () {
+				alert("An error occurred while fetching user details.");
+			}
+		});
+
+		// Template row
+		var defaultRow = `
+		<div class="row mt-2 travel-rowReturn">
+			<div class="col-md-2" style="padding:4px;"><select name="FromReturn" class="form-control"><option value="">Select From</option></select></div>
+			<div class="col-md-2" style="padding:4px;"><select name="ToReturn" class="form-control"><option value="">Select To</option></select></div>
+			<div class="col-md-2" style="padding:4px;"><input type="datetime-local" name="TravelDateReturn" class="form-control" /></div>
+			<div class="col-md-1" style="padding:4px;"><select name="ExpenseCategoryMasterReturn" class="form-control"><option value="">Select Category</option></select></div>
+			<div class="col-md-1" style="padding:4px;"><input type="text" name="CostReturn" class="form-control" placeholder="Cost" /></div>
+			<div class="col-md-2" style="padding:4px;"><select name="TransportationModeMasterReturn" class="form-control"><option value="">Select Transportation</option></select></div>
+			<div class="col-md-1" style="padding:4px;"><input type="text" name="PurposeReturn" class="form-control" placeholder="Purpose" /></div>
+
+			<div class="col-md-1 d-flex justify-content-between" style="padding:1px;">
+				<button class="btn btn-primary btnAddRowReturn" style="padding: 3px 10px; height: 32px; margin-right: 5px; margin-top: 4px;">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+						<path d="M8 4a.5.5 0 0 1 .5.5V7.5H12a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0V8.5H4a.5.5 0 0 1 0-1h3.5V4.5A.5.5 0 0 1 8 4z" />
+					</svg>
+				</button>
+				<button class="btn btn-danger removeRowReturn" style="padding: 3px 10px; height: 32px; margin-right: 5px; margin-top: 4px;">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+						<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+						<path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+					</svg>
+				</button>
+			</div>
+
+
+		</div>`;
+
+		// Append first row
+		var firstRow = $(defaultRow);
+		$("#rowContainerReturn").append(firstRow);
+		bindRowDropdowns(firstRow);
+
+		// Add row
+		$(document).on("click", ".btnAddRowReturn", function () {
+			var newRow = $(defaultRow);
+			$("#rowContainerReturn").append(newRow);
+			bindRowDropdowns(newRow);
+		});
+
+		// Remove row
+		$(document).on("click", ".removeRowReturn", function () {
+			if ($(".travel-rowReturn").length > 1) {
+				$(this).closest(".travel-rowReturn").remove();
+			} else {
+				alert("Aap pehli row delete nahi kar sakte!");
+			}
+		});
+
+		// Save button
+		$("#btnSaveReturn").click(function () {
+			var travelDataReturn = [];
+			$(".travel-rowReturn").each(function () {
+				var row = $(this);
+				travelDataReturn.push({
+					FromOneWay: parseInt(row.find('select[name="FromReturn"]').val()) || null,
+					ToOneWay: parseInt(row.find('select[name="ToReturn"]').val()) || null,
+					TravelDate: row.find('input[name="TravelDateReturn"]').val() || null,
+					ExpenseCategoryMaster: parseInt(row.find('select[name="ExpenseCategoryMasterReturn"]').val()) || null,
+					Cost: parseFloat(row.find('input[name="CostReturn"]').val()) || null,
+					TransportationModeMaster: parseInt(row.find('select[name="TransportationModeMasterReturn"]').val()) || null,
+					Purpose: row.find('input[name="PurposeReturn"]').val() || null
+				});
+			});
+
+			var finalData = {
+				EmpID: $('#hiddenEmpIDReturn').val() || null,
+				Employee: $("#EmployeeHeaderReturn").val() || null,
+				From: $("#FromddlHeaderReturn").val() || null,
+				To: $("#ToddlHeaderReturn").val() || null,
+				TravelDate: $("#TravelDateHeaderReturn").val() || null,
+				Cost: $("#CostHeaderReturn").val() || null,
+				Purpose: $("#PurposeHeaderReturn").val() || null,
+				TravelType: $("#TravelTypeReturn").val() || null,
+				TravelDetails: travelDataReturn,
+				RequestType: "Wrapper"
+			};
+
+			console.log(finalData);
+
+			$.ajax({
+				url: '/RequestforTravel/SaveTravelExpensesReturn',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(finalData),
+				success: function (response) {
+					alert(response.message);
+				},
+				error: function (xhr, status, error) {
+					console.error("Error:", error);
+					alert("Failed to save data.");
+				}
+			});
+		});
+
+		// Helper functions
+		function bindRowDropdowns($row) {
+			bindExpenseCategoryToReturn($row.find('select[name="ExpenseCategoryMasterReturn"]'));
+			bindTransportationModeMasterReturn($row.find('select[name="TransportationModeMasterReturn"]'));
+			ddlCitylistJourneyDetailsFromReturn($row.find('select[name="FromReturn"]'));
+			ddlCitylistJourneyDetailsToReturn($row.find('select[name="ToReturn"]'));
+		}
+
+		function bindExpenseCategoryToReturn($dropdown) {
+			$.ajax({
+				url: '/RequestforTravel/GetExpenseCategories',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					$dropdown.empty().append('<option value="">Select Category</option>');
+					$.each(data, function (i, item) {
+						$dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+					});
+				}
+			});
+		}
+
+		function bindTransportationModeMasterReturn($dropdown) {
+			$.ajax({
+				url: '/RequestforTravel/GetTransportationModeMaster',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					$dropdown.empty().append('<option value="">Select Mode</option>');
+					$.each(data, function (i, item) {
+						$dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+					});
+				}
+			});
+		}
+
+		function ddlCitylistReturn() {
+			$.ajax({
+				url: '/RequestforTravel/GetFromCityMasterddlReturn',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					var fromDropdown = $('#FromddlHeaderReturn');
+					var toDropdown = $('#ToddlHeaderReturn');
+					fromDropdown.empty().append('<option value="">-- Select From --</option>');
+					toDropdown.empty().append('<option value="">-- Select To --</option>');
+					$.each(data, function (index, item) {
+						var option = `<option value="${item.value}">${item.text}</option>`;
+						fromDropdown.append(option);
+						toDropdown.append(option);
+					});
+				}
+			});
+		}
+
+		function ddlCitylistJourneyDetailsFromReturn($dropdown) {
+			$.ajax({
+				url: '/RequestforTravel/GetFromCityMasterddl',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					$dropdown.empty().append('<option value="">-- Select From --</option>');
+					$.each(data, function (i, item) {
+						$dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+					});
+				}
+			});
+		}
+
+		function ddlCitylistJourneyDetailsToReturn($dropdown) {
+			$.ajax({
+				url: '/RequestforTravel/GetFromCityMasterddl',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					$dropdown.empty().append('<option value="">-- Select To --</option>');
+					$.each(data, function (i, item) {
+						$dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+					});
+				}
+			});
+		}
+	});
+</script>
+
+@* Request for Journey (To & From) End block *@
+
+
+
+

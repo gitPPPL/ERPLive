@@ -1,0 +1,623 @@
+﻿@{
+    ViewBag.Title = "Master Insert";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Company Master</legend>
+
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button onclick="window.location.href='@Url.Action("Index", "CompanyMaster")'" type="submit" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="companyForm">
+
+        <input type="hidden" class="form-control" name="CODE" id="CODE">
+        <!-- Company Basic Info -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="Company Name">Company Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" data-required="true" data-error="Name is required" name="NAME" id="NAME" placeholder="Enter Name" maxlength="100">
+                </div>
+            </div>
+        </div>
+        <!-- Address Info -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Address 1">Address Line 1<span class="required">*</span></label>
+                    <textarea type="text" class="form-control" name="ADD1" id="ADD1" placeholder="Enter Address 1" maxlength="100"></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Address 2">Address Line 2<span class="required">*</span></label>
+                    <textarea type="text" class="form-control" name="ADD2" id="ADD2" placeholder="Enter Address 2" maxlength="100"></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Address 3">Address Line 3</label>
+                    <textarea type="text" class="form-control" name="ADD3" id="ADD3" placeholder="Enter Address 3" maxlength="100"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="City">City</label>
+                    <select class="form-control" id="CITY_CODE" name="CITY_CODE">
+                        <option value="">-- Select City --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="State">State</label>
+                    <select class="form-control" id="STATE_CODE" name="STATE_CODE" disabled>
+                        <option value="">-- Select State --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Country">Country</label>
+                    <select class="form-control" id="COUNTRY_CODE" name="COUNTRY_CODE" disabled>
+                        <option value="">-- Select Country --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Pincode">Pincode</label>
+                    <input type="text" class="form-control" name="PINCODE" id="PINCODE" placeholder="Enter Pincode" maxlength="20">
+                </div>
+            </div>
+
+            <!-- Registered Address -->
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Registered Address 1">Registered Address 1</label>
+                    <textarea class="form-control" name="REGADD1" rows="2" id="REGADD1" placeholder="Enter Register Address 1" maxlength="100"></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Registered Address 2">Registered Address 2</label>
+                    <textarea class="form-control" name="REGADD2" rows="2" id="REGADD2" placeholder="Enter Register Address 2" maxlength="100"></textarea>
+                </div>
+            </div>
+        </div>
+        <!-- Contact Info -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Phone">Phone</label>
+                    <input type="number" class="form-control" name="PHONE" id="PHONE" placeholder="Enter Phone Number" maxlength="100">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Fax">Fax</label>
+                    <input type="text" class="form-control" name="FAX" id="FAX" placeholder="Enter Fax" maxlength="100">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Email">Email</label>
+                    <input type="email" class="form-control" name="EMAIL" id="EMAIL" placeholder="Enter Email Id" maxlength="100">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Website">Website</label>
+                    <input type="text" class="form-control" name="WEBSITE" id="WEBSITE" placeholder="Enter Website" maxlength="100">
+                </div>
+            </div>
+
+            <!-- Tax Info -->
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="PAN">PAN</label>
+                    <input type="text" class="form-control" name="PAN" id="PAN" placeholder="Enter Pan Number" maxlength="100">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="GSTIN">GSTIN</label>
+                    <input type="text" class="form-control" name="GSTIN" id="GSTIN" placeholder="Enter Gstin Number" maxlength="100">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="CIN No">CIN No</label>
+                    <input type="text" class="form-control" name="CINNO" id="CINNO" placeholder="Enter Cinno" maxlength="50">
+                </div>
+            </div>
+
+            <!-- IEC, Excise, Service Tax -->
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="IEC">IEC</label>
+                    <input type="text" class="form-control" name="IEC" id="IEC" placeholder="Enter Iec" maxlength="50">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Excise">Excise</label>
+                    <input type="text" class="form-control" name="EXCISE" id="EXCISE" placeholder="Enter Exicse" maxlength="100">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Service Tax">Service Tax</label>
+                    <input type="text" class="form-control" name="SERVICETAX" id="SERVICETAX" placeholder="Enter Service Tax" maxlength="100">
+                </div>
+            </div>
+
+            <!-- Store Contact -->
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Store Phone">Store Phone</label>
+                    <input type="number" class="form-control" name="STORE_PHONE" id="STORE_PHONE" placeholder="Enter Store Phone" maxlength="50">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Store Email">Store Email</label>
+                    <input type="email" class="form-control" name="STORE_EMAIL" data-validate="email" data-required="true" data-error="Store Valid email is required" id="STORE_EMAIL" placeholder="Enter Store Email" maxlength="100">
+                </div>
+            </div>
+        </div>
+        <!-- Bank Info -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Bank Name">Bank Name</label>
+                    <select class="form-select form-control" id="BANK_CODE" name="BANK_CODE">
+                        <option value="">-- Select Bank --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Bank IFSC">Bank IFSC</label>
+                    <input type="text" class="form-control" name="BANK_IFSC" id="BANK_IFSC" placeholder="Enter Bank Ifsc" maxlength="50">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Bank Account">Bank Account</label>
+                    <input type="text" class="form-control" name="BANK_AC" id="BANK_AC" placeholder="Enter Bank Account" maxlength="50">
+                </div>
+            </div>
+        </div>
+        <!-- Other Info -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Bank Address 1">Bank Address 1</label>
+                    <textarea type="text" class="form-control" name="BANK_ADD1" id="BANK_ADD1" placeholder="Enter Bank Address 1" maxlength="100"></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Bank Address 2">Bank Address 2</label>
+                    <textarea type="text" class="form-control" name="BANK_ADD2" id="BANK_ADD2" placeholder="Enter Bank Address 2" maxlength="100"></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Business Type">Business Type</label>
+                    <input type="text" class="form-control" name="BUSINESS_TYPE" id="BUSINESS_TYPE" placeholder="Enter Business Type" maxlength="50">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Address -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Valuation Method">Valuation Method</label>
+                    <input type="text" class="form-control" name="VALUATION_METHOD" id="VALUATION_METHOD" placeholder="Enter Valuation Method" maxlength="50">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Depreciation Method">Depreciation Method</label>
+                    <input type="text" class="form-control" name="DEPRECIATION_METHOD" id="DEPRECIATION_METHOD" placeholder="Enter Debrecation Method" maxlength="50">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Currency">Currency</label>
+                    <select class="form-select form-control" id="CURRENCY_CODE" name="CURRENCY_CODE">
+                        <option value="">-- Select Currency --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Language Code">Language Code</label>
+                    <select class="form-select form-control" id="LANGUAGE_CODE" name="LANGUAGE_CODE">
+                        <option value="">-- Select Languange --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Currency Logo">Currency Logo</label>
+                    <input type="file" class="form-control" name="COMP_LOGO" id="COMP_LOGO">
+
+                    <!-- Add this to show image preview -->
+                    <div id="logoPreviewContainer" class="mt-2"></div>
+
+                    <!-- Hidden input to carry existing logo if user doesn't upload new -->
+                    <input type="hidden" name="COMP_LOGO_BASE64" id="COMP_LOGO_BASE64" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-8 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="status-label active" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-last">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+        $(function () {
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadCompanyByID(rowId);
+                if (isReadOnly) {
+                    setCompanyFormReadOnly();
+                }
+            } else {
+                // Only load these when not editing an existing record
+                loadCitiesList();
+                loadStates();
+                loadCountries();
+            }
+
+            loadLanguage();
+            loadCurrency();
+            loadBankList();
+        });
+    });
+
+    function LoadCompanyByID(rowId) {
+        if (!rowId) {
+            toastr.warning("Invalid Company ID.");
+            return;
+        }
+
+        $.ajax({
+            url: '/CompanyMaster/GetCompanyById',
+            type: 'GET',
+            data: { RowId: rowId },
+            success: function (data) {
+                console.log(data);
+
+                if (!data) {
+                    toastr.warning("No data found for the specified company.");
+                    return;
+                }
+
+                // Set basic form fields
+                $('#CODE').val(rowId);
+                $('#NAME').val(data.name);
+                $('#ADD1').val(data.adD1);
+                $('#ADD2').val(data.adD2);
+                $('#ADD3').val(data.adD3);
+                $('#PINCODE').val(data.pincode);
+                $('#REGADD1').val(data.regadD1);
+                $('#REGADD2').val(data.regadD2);
+                $('#PHONE').val(data.phone);
+                $('#FAX').val(data.fax);
+                $('#EMAIL').val(data.email);
+                $('#WEBSITE').val(data.website);
+                $('#PAN').val(data.pan);
+                $('#GSTIN').val(data.gstin);
+                $('#CINNO').val(data.cinno);
+                $('#IEC').val(data.iec);
+                $('#EXCISE').val(data.excise);
+                $('#SERVICETAX').val(data.servicetax);
+                $('#STORE_PHONE').val(data.storE_PHONE);
+                $('#STORE_EMAIL').val(data.storE_EMAIL);
+                $('#BANK_CODE').val(data.banK_CODE);
+                $('#BANK_IFSC').val(data.banK_IFSC);
+                $('#BANK_AC').val(data.banK_AC);
+                $('#VALUATION_METHOD').val(data.valuatioN_METHOD);
+                $('#DEPRECIATION_METHOD').val(data.depreciatioN_METHOD);
+                $('#BUSINESS_TYPE').val(data.businesS_TYPE);
+                $('#BANK_ADD1').val(data.banK_ADD1);
+                $('#BANK_ADD2').val(data.banK_ADD2);
+                $('#CURRENCY_CODE').val(data.currencY_CODE).trigger('change');
+                $('#LANGUAGE_CODE').val(data.languagE_CODE).trigger('change');
+
+                $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+
+                loadCountries().then(() => {
+                    $('#COUNTRY_CODE').val(data.countrY_CODE).trigger('change');
+                    return loadStates(data.countrY_CODE);
+                }).then(() => {
+                    $('#STATE_CODE').val(data.statE_CODE).trigger('change');
+                    return loadCities(data.statE_CODE);
+                }).then(() => {
+                    $('#CITY_CODE').val(data.citY_CODE).trigger('change');
+                }).catch(err => {
+                    console.error("Error loading cascading dropdowns:", err);
+                });
+
+                // Show logo
+                if (data.comP_LOGO) {
+                    const base64 = data.comP_LOGO;
+                    $('#COMP_LOGO_BASE64').val(base64);
+
+                    const logoPreview = `
+                        <div style="margin-top:10px; border:1px solid #ddd; border-radius:6px; background-color:#f9f9f9; max-width:50px;">
+                            <img src="data:image/jpeg;base64,${base64}"
+                                 style="width:100%; max-width:250px; height:auto; display:block; margin:0 auto;" />
+                        </div>
+                    `;
+                    $('#logoPreviewContainer').html(logoPreview);
+                }
+
+                // Handle read-only mode
+                if (typeof isReadOnly !== 'undefined' && isReadOnly === 'true') {
+                    MakeFormReadOnly('#companyForm');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading Company by ID:", status, error);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    $('#companyForm').on('submit', function (e) {
+        e.preventDefault();
+
+    if (!validateRequiredField('#NAME', 'Company Name')) return;
+    if (!validateRequiredField('#ADD1', 'Address Line 1')) return;
+    if (!validateRequiredField('#ADD2', 'Address Line 2')) return;
+
+    if (!isValid) return;
+
+        // Temporarily enable to read value
+        $('#STATE_CODE').prop('disabled', false);
+        $('#COUNTRY_CODE').prop('disabled', false);
+
+        var code = parseInt($('#CODE').val()) || 0;
+        const companyData = {
+            CODE: code,
+            NAME: name,
+            ADD1: add1,
+            ADD2: add2,
+            ADD3: $('#ADD3').val(),
+            COUNTRY_CODE: parseInt($('#COUNTRY_CODE').val()) || 0,
+            STATE_CODE: parseInt($('#STATE_CODE').val()) || 0,
+            CITY_CODE: parseInt($('#CITY_CODE').val()) || 0,
+            PINCODE: $('#PINCODE').val(),
+            REGADD1: $('#REGADD1').val(),
+            REGADD2: $('#REGADD2').val(),
+            PHONE: $('#PHONE').val(),
+            FAX: $('#FAX').val(),
+            EMAIL: $('#EMAIL').val(),
+            WEBSITE: $('#WEBSITE').val(),
+            PAN: $('#PAN').val(),
+            GSTIN: $('#GSTIN').val(),
+            CINNO: $('#CINNO').val(),
+            IEC: $('#IEC').val(),
+            EXCISE: $('#EXCISE').val(),
+            SERVICETAX: $('#SERVICETAX').val(),
+            STORE_PHONE: $('#STORE_PHONE').val(),
+            STORE_EMAIL: $('#STORE_EMAIL').val(),
+            BANK_CODE: parseInt($('#BANK_CODE').val()) || null,
+            BANK_IFSC: $('#BANK_IFSC').val(),
+            BANK_AC: $('#BANK_AC').val(),
+            VALUATION_METHOD: $('#VALUATION_METHOD').val(),
+            DEPRECIATION_METHOD: $('#DEPRECIATION_METHOD').val(),
+            BUSINESS_TYPE: $('#BUSINESS_TYPE').val(),
+            BANK_ADD1: $('#BANK_ADD1').val(),
+            BANK_ADD2: $('#BANK_ADD2').val(),
+            CURRENCY_CODE: parseInt($('#CURRENCY_CODE').val()) || 0,
+            LANGUAGE_CODE: parseInt($('#LANGUAGE_CODE').val()) || 0,
+            COMP_LOGO_BASE64: $('#COMP_LOGO_BASE64').val(),
+            ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+
+            // System Metadata
+            COMP_CODE: 1,
+            UUSER: 1,
+            EUSER: 1,
+            UDATE: new Date().toISOString(),
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? "U" : "A",
+            WSID: "WEB",
+            LIP: "127.0.0.1",
+            LID: "WEB",
+            ACTION: code > 0 ? "UPDATE" : "INSERT"
+        };
+
+        $.ajax({
+            url: '/CompanyMaster/SaveCompany',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(companyData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Company saved successfully!");
+                    setTimeout(() => window.location.href = '/CompanyMaster/Index', 1000);
+                } else {
+                    const message = response.message || "Something went wrong while saving.";
+                    toastr.warning(message);
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "Server error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    //ONCHANGE FOR COUNTRY,CITY,STATE.......
+    $('#CITY_CODE').change(function () {
+        const cityCode = $(this).val();
+
+        if (cityCode) {
+            $.ajax({
+                url: '/CompanyMaster/GetStateCountryByCity', // Adjust controller name
+                type: 'GET',
+                data: { cityCode: cityCode },
+                success: function (data) {
+                    if (data) {
+                        $('#STATE_CODE').html(`<option value="${data.stateCode}">${data.stateName}</option>`);
+                        $('#COUNTRY_CODE').html(`<option value="${data.countryCode}">${data.countryName}</option>`);
+                    }
+                }
+            });
+        } else {
+            resetDropdown('#STATE_CODE', '-- Select State --');
+            resetDropdown('#COUNTRY_CODE', '-- Select Country --');
+        }
+    });
+
+    function loadCountries() {
+        return $.ajax({
+            url: '@Url.Action("GetCountryList", "CompanyMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select Country</option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                });
+                $('#COUNTRY_CODE').html(options);
+            }
+        });
+    }
+    function loadStates() {
+        return $.ajax({
+            url: '@Url.Action("GetStateList", "CompanyMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select State</option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                });
+                $('#STATE_CODE').html(options);
+            }
+        });
+    }
+    function loadCities(stateCode) {
+        return $.ajax({
+            url: '/CompanyMaster/GetCityList',
+            data: { stateCode: stateCode },
+            type: 'GET'
+        }).then(function (data) {
+            let options = '<option value="">Select City</option>';
+            $.each(data, function (i, city) {
+                options += `<option value="${city.value}">${city.text}</option>`;
+            });
+            $('#CITY_CODE').html(options);
+        });
+    }
+        function loadLanguage(callback) {
+        $.ajax({
+            url: '@Url.Action("GetLanguageList", "CompanyMaster")',
+            type: 'GET',
+            success: function (data) {
+                populateDropdown('#LANGUAGE_CODE', data, '-- Select Language --');
+                if (callback) callback();
+            }
+        });
+    }
+    function loadCurrency(callback) {
+        $.ajax({
+            url: '@Url.Action("GetCurrencyList", "CompanyMaster")',
+            type: 'GET',
+            success: function (data) {
+                populateDropdown('#CURRENCY_CODE', data, '-- Select Currency --');
+                if (callback) callback();
+            }
+        });
+    }
+    function loadBankList() {
+        return $.ajax({
+            url: '@Url.Action("GetBankList", "CompanyMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select Bank</option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                });
+                $('#BANK_CODE').html(options);
+            }
+        });
+    }
+
+    function populateDropdown(selector, data, defaultText) {
+        let options = `<option value="">${defaultText}</option>`;
+        $.each(data, function (index, item) {
+            options += `<option value="${item.value}">${item.text}</option>`;
+        });
+        $(selector).html(options);
+    }
+    function resetDropdown(selector, defaultText) {
+        $(selector).html(`<option value="">${defaultText}</option>`);
+    }
+
+    //To make form Readonly......
+    function setCompanyFormReadOnly() {
+        const form = $('#companyForm');
+        form.find('input[type="text"], input[type="email"], input[type="url"], input[type="number"], input[type="file"], select, textarea').prop('disabled', true);
+        form.find('input[type="checkbox"]').prop('disabled', true);
+        form.find('button').prop('disabled', true);
+        form.find('#customToggle').addClass('disabled');
+        form.find('#customToggle').off('click'); // prevent toggle click action
+    }
+
+
+</script>
+
+
+
+

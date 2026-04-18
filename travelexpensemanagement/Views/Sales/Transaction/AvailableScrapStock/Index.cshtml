@@ -1,0 +1,846 @@
+﻿@{
+    ViewBag.Title = "Available Scrap Stock"; 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var logindate = Convert.ToDateTime(TempData["loginDate"]).ToString("yyyy-MM-dd");
+    var currentMenu = ViewBag.CurrentMenu as string;    
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {            
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+}
+<fieldset>
+    <legend class="legend-field">Available Scrap Stock</legend>
+    <form id="AvailableScrapStockForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="offset-lg-6 col-lg-6">
+                <div class="btn-rightalign">
+                    @if (canApproval)
+                    {
+                        <button class="btn btn-send">
+                            <i class="fa fa-paper-plane"></i> Approval Send
+                        </button>
+                    }
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <input type="hidden" id="TxtDocId" />
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDocType">
+                       @*  <option value=""></option> *@
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocDate" value="@logindate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlStatus">Status <span class="required">*</span></label>
+                    <select class="form-control" id="ddlStatus">
+                        <option value="" selected disabled>Select Status</option>
+                        <option value="1">Open</option>
+                        <option value="2">Cancel</option>
+                        <option value="0">Close</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtPeriodFrom">Period From</label>
+                    <input type="date" class="form-control" id="DtPeriodFrom">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtPeriodTo">Period To</label>
+                    <input type="date" class="form-control" id="DtPeriodTo">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRequester">Requester</label>
+                    <input type="text" class="form-control" id="TxtRequester" placeholder="Enter Requester">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea class="form-control" id="TxtRemarks" rows="3"  placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblAvailableScrapStockEntry" class="table-width">
+                    <colgroup>
+                        <col style="width:80px; display:none;" />  <!-- Code -->
+                        <col style="width:120px;" />               <!-- lcode -->
+                        <col style="width:250px;" />               <!-- Item Name -->
+                        <col style="width:80px;" />                <!-- Unit -->
+                        <col style="width:120px;" />               <!-- Item Type -->
+                        <col style="width:70px;" />                <!-- Nos -->
+                        <col style="width:100px;" />               <!-- Quantity -->
+                        <col style="width:150px;" />               <!-- Item Source -->
+                        <col style="width:180px;" />               <!-- Remarks -->
+                        <col style="width:100px;" />               <!-- Qc No -->
+                        <col style="width:200px;" />               <!-- As It Consumed In Unit -->
+                        <col style="width:100px;" />               <!-- Quantity -->
+                        <col style="width:220px;" />               <!-- After Process Consumed In Unit -->
+                        <col style="width:100px;" />               <!-- Quantity -->
+                        <col style="width:200px;" />               <!-- As It Reuse In Our Unit -->
+                        <col style="width:240px;" />               <!-- After Process Reuse In Our Unit -->
+                        <col style="width:150px;" />               <!-- Sold To Market -->
+                        <col style="width:120px;" />               <!-- Hold Quantity -->
+                        <col style="width:130px;" />               <!-- Balance Quantity -->
+                        <col style="width:180px;" />               <!-- File Name -->
+                        <col style="width:100px;" />               <!-- Action -->
+                    </colgroup>
+
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>Unit</th>
+                            <th>Item Type</th>
+                            <th>Nos</th>
+                            <th>Quantity</th>
+                            <th>Item Source</th>
+                            <th>Remarks</th>
+                            <th>Qc No</th>
+                            <th>As It Consumed In Unit</th>
+                            <th>Quantity</th>
+                            <th>After Process Consumed In Unit</th>
+                            <th>Quantity</th>
+                            <th>As It Reuse In Our Unit</th>
+                            <th>After Process Reuse In Our Unit</th>
+                            <th>Sold To Market</th>
+                            <th>Hold Quantity</th>
+                            <th>Balance Quantity</th>
+                            <th>File Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "AvailableScrapStockList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
+
+
+<script>
+    const AllFieldsId = [
+        "ddlDocType",
+        "DtDocDate",
+        "NumDocNo",
+        "ddlStatus",
+        "DtPeriodFrom",
+        "DtPeriodTo",
+        "TxtRequester",
+        "TxtRemarks"
+    ];
+
+    let itemRecords = [
+        'TxtCode',
+        'ddlItemname',
+        'ddlUnit',
+        'ddlItemType',
+        'TxtNos',
+        'TxtQuantity',
+        'ddlItemSource',
+        'TxtRemarks',
+        'TxtQcNo',
+        'TxtAsConsumedInUnit',
+        'TxtQuantityConsumedUnit',
+        'TxtAfterProcessConsumedInUnit',
+        'TxtQuantityAfterProcess',
+        'TxtAsReuseInOurUnit',
+        'TxtAfterProcessReuseInOurUnit',
+        'TxtSoldToMarket',
+        'TxtHoldQuantity',
+        'TxtBalanceQuantity',
+        'TxtFileName'
+    ];
+
+
+    var LoginDate=@logindate;
+    console.log(LoginDate);
+    let docId = "";
+    let readOnly;
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    $(async function () {
+        try {
+            await GetDocTypeAsync();
+            await handleDocLoad();
+        } catch (error) {
+            toastr.error('Failed to load document types: ' + error);
+        }
+    });
+
+    $(document).ready(function () {   
+    addItemRecordRow();
+    $('#DtDocDate').attr('max', LoginDate);
+    setEnterKeyFocus(AllFieldsId);
+
+    $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        var tbody = $(this).closest('tbody');
+        var rowCount = tbody.find('tr').length;
+
+        if (rowCount > 1) {
+            $(this).closest('tr').remove();
+        } else {
+            alert('Cannot delete the first row.');
+        }
+    });
+
+    $('#btn-save').on('click', async function (e) {
+        e.preventDefault();
+
+          if (!validateRequiredField('#ddlDocType', 'Document Type')) return;
+          if (!validateRequiredField('#DtDocDate', 'Document Date')) return;
+          if (!validateRequiredField('#NumDocNo', 'Document No.')) return;
+          if (!validateRequiredField('#ddlStatus', 'Status')) return;
+
+        try
+        {
+            const tableData = await collectFormData();
+            console.log(tableData);
+            if (docId) {
+                UpdateData(tableData);
+            } else {
+                SaveData(tableData);
+            }
+        } catch (error) {
+            toastr.error('An error occurred while saving the data.');
+        }
+    });
+      
+
+    $(document).on('click', '.btn-add-action, .btn-add-row', function () {
+    addItemRecordRow();
+    });
+
+    $(document).on('change', '[id^=ddlItemname]', function () {
+        const $select = $(this);
+        const selectedOption = $select.find('option:selected');
+
+        const unit = selectedOption.data('unitcd') || '';
+        console.log(unit);
+        const itemCode = $select.val();
+        const rowId = this.id.replace('ddlItemname', '');
+
+        $('#TxtCode' + rowId).val(itemCode);
+        $('#ddlUnit' + rowId).val(unit).trigger('change');
+
+    });
+
+
+    });
+
+</script>
+
+<script>
+
+    async function handleDocLoad() {
+          docId = getQueryParam('id');
+          readOnly = getQueryParam('readOnly');
+
+        if (docId) {
+            $('#SaudaDetail').show();
+            $('#ddlStatus').prop('disabled', false);
+            await GetDocData(docId, readOnly);
+        } else {
+           var todayDate= getTodayDt();
+           $('#DtPeriodFrom').val(todayDate);
+           $('#DtPeriodTo').val(todayDate);
+           document.getElementById("ddlStatus").value = "1";
+           GetDocid($('#ddlDocType').val());
+        }
+    }
+
+    function getTodayDt()
+    {
+         const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+            return todayDate;
+    }
+
+    async function fillItemDetailsTable(data) {
+        const $tbody = $('#tblAvailableScrapStockEntry tbody');
+        $tbody.empty();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            toastr.warning("No item data found");
+            return;
+        }
+
+        for (let index = 0; index < data.length; index++) {
+
+            const item = data[index];
+            const rowNo = index + 1;
+
+            // 1️⃣ Add new row
+            addItemRecordRow();
+
+            // 2️⃣ Bind dropdowns
+            await bindDropdownData(rowNo);
+
+            // 3️⃣ Fill values safely
+            $(`#TxtCode${rowNo}`).val(item.ITEM_CODE ?? "");
+            $(`#ddlItemname${rowNo}`).val(item.ITEM_CODE).trigger('change');
+            $(`#ddlUnit${rowNo}`).val(item.UNIT_CODE).trigger('change');
+            $(`#ddlItemType${rowNo}`).val(item.ITEM_TYPE ?? "");
+
+            $(`#TxtNos${rowNo}`).val(item.NOS ?? "");
+            $(`#TxtQuantity${rowNo}`).val(item.QTY ?? "");
+            $(`#TxtRemarks${rowNo}`).val(item.REMARKS ?? "");
+
+            $(`#TxtQuantityAfterProcess${rowNo}`).val(item.AFTER_QTY ?? "");
+            $(`#TxtAfterProcessReuseInOurUnit${rowNo}`).val(item.AFTER_REUSERQTY ?? "");
+            $(`#TxtSoldToMarket${rowNo}`).val(item.SOLD_QTY ?? "");
+            $(`#TxtHoldQuantity${rowNo}`).val(item.HOLD_QTY ?? "");
+            $(`#TxtBalanceQuantity${rowNo}`).val(item.BAL_QTY ?? "");
+        }
+    }
+
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/AvailableScrapStock/GetAvailScrapForUpdate',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+
+            if (response.status) {
+                if (readOnly === 'true') {
+                    disableAllFields();
+                    $('.btn-add-row-last').hide();
+                    $('#btn-save, #cancelBtn').hide();
+                } else {
+                    enableAllFields();
+                    $('#btn-save, #cancelBtn').show();
+                    $('.btn-add-row-last').show();
+
+                }
+                console.log(response.header,response.detail);
+                await fillFormFields(response.header);
+                await fillItemDetailsTable(response.detail);
+
+
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            toastr.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateAvailScrapStock", "AvailableScrapStock")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert Successfully");
+                            // resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/AvailableScrapStockList/Index';
+                            }, 500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateAvailScrapStock", "AvailableScrapStock")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    showFlashMessageByKey('update', 'success');
+                    // resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/AvailableScrapStockList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillFormFields(data) {
+        if (!Array.isArray(data) || data.length === 0) {
+            toastr.error("Invalid or empty data array");
+            return;
+        }
+
+        const row = data[0];
+        const formatDate = (dateStr) => {
+            if (!dateStr) return "";
+            return dateStr.split("T")[0]; 
+        };
+
+        const fieldMappings = {
+            ddlDocType: row.V_TYPE,
+            DtDocDate: formatDate(row.V_DATE),
+            NumDocNo: row.V_NO,
+            ddlStatus: row.STATUS,
+            DtPeriodFrom: formatDate(row.FROM_DATE),
+            DtPeriodTo: formatDate(row.TO_DATE),
+            TxtRequester: row.REQUEST_BY || "",
+            TxtRemarks: row.REMARKS || ""
+        };
+
+        Object.keys(fieldMappings).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = fieldMappings[id];
+            } else {
+                console.warn(`Element with ID '${id}' not found`);
+            }
+        });
+    }
+
+    async function collectFormData() {
+        // const docId = toNullableString(document.getElementById("TxtDocId")?.value);
+        const itemDetailData=await collectAvailScrap2Items();
+        return {
+            VType: toNullableString(document.getElementById("ddlDocType")?.value),
+            VNo: parseIntSafe(document.getElementById("NumDocNo")?.value),
+            VDate: toNullableDate(document.getElementById("DtDocDate")?.value),
+            DocId: toNullableString(document.getElementById("TxtDocId")?.value),
+            RequestBy: toNullableString(document.getElementById("TxtRequester")?.value),
+            Remarks: toNullableString(document.getElementById("TxtRemarks")?.value),
+            Status: parseIntSafe(document.getElementById("ddlStatus")?.value),
+            FromDate: toNullableDate(document.getElementById("DtPeriodFrom")?.value),
+            ToDate: toNullableDate(document.getElementById("DtPeriodTo")?.value),
+            FaProvStatus: null,
+            FaProvRemarks: null,
+            availScrapStk2list: itemDetailData,
+            SaveOrUpdate: (!docId || docId === "0") ? "Save" : "Update"
+        };
+    }
+
+    async  function collectAvailScrap2Items() {
+        const items = [];
+
+        $('#tblAvailableScrapStockEntry tbody tr').each(function (index) {
+            const idx = index + 1;
+            console.log('a', idx);
+            items.push({
+                Sno: idx,
+                ItemCode: parseIntSafe($(`#TxtCode${idx}`).val()),
+                ItemName: $(`#ddlItemname${idx} option:selected`).text(),
+                UnitCode:parseIntSafe($(`#ddlUnit${idx}`).val()),
+                Nos: $(`#TxtNos${idx}`).val(),
+                Qty: $(`#TxtQuantity${idx}`).val(),
+                Remarks: $(`#TxtRemarks${idx}`).val(),
+                GivenTo: null,
+                GivenFor:null,
+                StatusQSisterConcern: parseIntSafe($(`#TxtAsConsumedInUnit${idx}`).val()),
+                StatusQQty: parseFloatSafe($(`#TxtQuantityConsumedUnit${idx}`).val()),
+                AfterSisterConcern: parseIntSafe($(`#TxtAfterProcessConsumedInUnit${idx}`).val()),
+                AfterQty: parseFloatSafe($(`#TxtQuantityAfterProcess${idx}`).val()),
+                StatusQReuseQty: parseFloatSafe($(`#TxtAsReuseInOurUnit${idx}`).val()),
+                AfterReuseQty: parseFloatSafe($(`#TxtAfterProcessReuseInOurUnit${idx}`).val()),
+                SoldQty: parseFloatSafe($(`#TxtSoldToMarket${idx}`).val()),
+                HoldQty: parseFloatSafe($(`#TxtHoldQuantity${idx}`).val()),
+                BalQty: parseFloatSafe($(`#TxtBalanceQuantity${idx}`).val()),
+                ItemType: toNullableString($(`#ddlItemType${idx}`).val()),
+                DeptCode: null
+            });
+        });
+        console.log(items);
+        return items;
+    }
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "AvailableScrapStock")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid(vtype) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "AvailableScrapStock")',
+            type: 'GET',
+            data:{V_type:vtype},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    console.log(response.data);
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#NumDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblAvailableScrapStockEntry tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+        <tr>
+            <td>
+                <input type="text" class="form-control" id="TxtCode${rowCount}" />
+            </td>
+            <td>
+                <select class="form-control" id="ddlItemname${rowCount}">
+                    <option value="">-select item Name-</option>
+                </select>
+            </td>
+            <td>
+               <select class="form-control" id="ddlUnit${rowCount}">
+                    <option value="">-select-</option>
+                </select>                 
+            </td>
+            <td>
+               <select class="form-control" id="ddlItemType${rowCount}">
+                    <option value="">-select item type-</option>
+                    <option>Store</option>
+                    <option>Fuel</option>
+                    <option>Scrap</option>
+                    <option>Waste</option>
+                    <option>Other</option>              
+                </select>
+            </td>
+            <td>
+                <input type="number" class="form-control" id="TxtNos${rowCount}" />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtQuantity${rowCount}" />
+            </td>
+            <td>
+               <select class="form-control" id="ddlItemSource${rowCount}">
+                    <option value="">-select item source-</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control" id="TxtRemarks${rowCount}" />
+            </td>
+            <td>
+                <input type="text" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtQcNo${rowCount}" />
+            </td>
+            <td>
+                <input type="number" class="form-control" id="TxtAsConsumedInUnit${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtQuantityConsumedUnit${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="number" class="form-control" id="TxtAfterProcessConsumedInUnit${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtQuantityAfterProcess${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtAsReuseInOurUnit${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtAfterProcessReuseInOurUnit${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtSoldToMarket${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtHoldQuantity${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtBalanceQuantity${rowCount}" readonly />
+            </td>
+            <td>
+                <input type="text" class="form-control" id="TxtFileName${rowCount}" />
+            </td>
+            <td>
+                <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+            </td>
+        </tr>
+        `;
+
+        tbody.append(newRow);
+        bindDropdownData(rowCount);
+        setEnterKeyFocusOnTable(itemRecords, rowCount);
+    }
+
+    function bindDropdownData(rowCount) {
+        const itemnameSelect =$(`#ddlItemname${rowCount}`);        
+        const itemsorceSelect=$(`#ddlItemSource${rowCount}`);
+        const unitSelect=$(`#ddlUnit${rowCount}`);
+
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(`<option value="">${defaultText}</option>`);
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '300px',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: selectElem.is(itemnameSelect) ? 0 : -1
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} Load failed`);
+                            resolve();
+                        }
+                    },
+                    error: reject
+                });
+            });
+        };
+        return Promise.all([
+            loadDropdown('@Url.Action("GetUnitList", "AvailableScrapStock")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            ,loadDropdown('@Url.Action("GetItemSource", "AvailableScrapStock")', itemsorceSelect, "- Select -", item => `<option value="${item.CODE}">${item.NAME}</option>`)
+            ,loadDropdown('@Url.Action("GetItemList", "AvailableScrapStock")',
+                itemnameSelect,
+                "- Select Item -",
+                item => `<option
+                    data-unitCd="${item.UNIT_CODE}"
+                    data-unitname="${item.UNIT_NAME}"
+                    value="${item.CODE}">${item.NAME}</option>`
+            )
+        ]);
+    }
+
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : date.toISOString(); // if server expects ISO string
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function setFieldsEnabled(enabled) {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+     function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+     }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+
+
+</script>
+
+
+
+

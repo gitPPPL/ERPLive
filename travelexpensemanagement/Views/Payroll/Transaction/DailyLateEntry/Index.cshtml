@@ -1,0 +1,770 @@
+﻿@{
+    ViewBag.Title = "Daily Late Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #tblExtraDutyEntry td,
+    #tblExtraDutyEntry th {
+        min-width: 70px;
+        max-width: 150px;
+        word-wrap: break-word;
+    }
+
+</style>
+<fieldset>
+    <legend class="legend-field">Daily Late Entry</legend>
+    <form id="DailyLateEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        @* <option value="">Select Doc Type</option> *@
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3"> 
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />   
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary" id="btnAddRow">Add Row</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-6 col-md-3">
+                <label class="checkbox-input-mt">
+                    <input type="checkbox" id="ChkMachineData" />
+                    Machine Data
+                </label>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt button-right">
+                    <button id="btn_Late" type="button" class="btn btn-success"><i class="fa fa-download"></i>Late</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblExtraDutyEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Shift</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                            <th>Reason</th>
+                            <th>HOD Name</th>
+                            <th>Auth.By</th>
+                            <th>Deduct</th>
+                            <th>Remarks</th>
+                            <th>Dur</th>
+                            <th>Mac Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="button" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+    
+    const reasonList = ["Company Work", "Late Come", "Personal Work"];
+    const deductList = ["Yes", "No"];
+
+    let empMap = {};
+    let hodMap = {};
+    let shiftList = [];
+    let debounceTimer;
+
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+        $('#DtDocDate').val(today);
+        loadNextDocNo(yearCode);
+        loadDocTypeList();
+
+        let shiftPromise = bindShiftList(compCode);
+        let hodPromise = bindHodList(compCode);
+        let empPromise = loadEmployeeList(compCode);
+           
+        $.when(shiftPromise, hodPromise, empPromise).done(function () {
+            addEmptyEditableRow();
+        });
+    });
+
+    function addEmptyEditableRow() {
+        const shiftOptions = shiftList.map(s => `<option value="${s}">${s}</option>`).join('');
+        const reasonOptions = reasonList.map(r => `<option value="${r}">${r}</option>`).join('');
+        const deductOptions = deductList.map(d => `<option value="${d}" ${d === "Yes" ? "selected" : ""}>${d}</option>`).join('');
+        const hodOptions = Object.entries(hodMap).map(([code, name]) => `<option value="${code}">${name}</option>`).join('');
+        const empOptions = Object.entries(empMap).map(([code, name]) => `<option value="${code}">${code} - ${name}</option>`).join('');
+
+        const tdStyle = `style="min-width:70px; max-width:150px;"`;
+
+        const row = `
+        <tr>
+            <td style="display:none;"></td>
+            <td ${tdStyle}>
+                <select class="form-control emp-code-select">
+                    <option value="">Select Employee</option>
+                    ${empOptions}
+                </select>
+            </td>
+            <td ${tdStyle}><input type="text" class="form-control emp-name-input" readonly /></td>
+            <td ${tdStyle}><input type="text" class="form-control bhrs-input" /></td>
+            <td ${tdStyle}><input type="text" class="form-control ahrs-input" /></td>
+                <td ${tdStyle}>
+                <select class="form-control shift-select">
+                    ${shiftOptions}
+                </select>
+            </td>
+            <td ${tdStyle}><input type="time" class="form-control in-time-input" /></td>
+            <td ${tdStyle}><input type="time" class="form-control out-time-input" /></td>
+            <td ${tdStyle}>
+                <select class="form-control reason-select">
+                    ${reasonOptions}
+                </select>
+            </td>
+            <td ${tdStyle}>
+                <select class="form-control hod-select">
+                    ${hodOptions}
+                </select>
+            </td>
+            <td ${tdStyle}><input type="text" class="form-control auth-by-input" readonly /></td>
+            <td ${tdStyle}>
+                <select class="form-control deduct-select">
+                    ${deductOptions}
+                </select>
+            </td>
+            <td ${tdStyle}><input type="text" class="form-control remark-input" /></td>
+            <td ${tdStyle}><input type="text" class="form-control extra1-input" /></td>
+            <td ${tdStyle}><input type="text" class="form-control extra2-input" /></td>
+            <td ${tdStyle}>
+                <button type="button" class="btn btn-sm btn-danger btn-delete-row">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        `;
+
+        $('#tblExtraDutyEntry tbody').append(row);
+    }
+
+    // function addEmptyEditableRow() {
+    //     const shiftOptions = shiftList.map(s => `<option value="${s}">${s}</option>`).join('');
+    //     const reasonOptions = reasonList.map(r => `<option value="${r}">${r}</option>`).join('');
+    //     const deductOptions = deductList.map(d => `<option value="${d}" ${d === "Yes" ? "selected" : ""}>${d}</option>`).join('');
+    //     const hodOptions = Object.entries(hodMap).map(([code, name]) => `<option value="${code}">${name}</option>`).join('');
+    //     const empOptions = Object.entries(empMap)
+    //         .map(([code, name]) => `<option value="${code}">${code} - ${name}</option>`)
+    //         .join('');
+
+    //     const row = `
+    //     <tr>
+    //         <td style="display:none;"></td>
+    //         <td>
+    //             <select class="form-control emp-code-select">
+    //                 <option value="">Select Employee</option>
+    //                 ${empOptions}
+    //             </select>
+    //         </td>
+    //         <td><input type="text" class="form-control emp-name-input" readonly /></td>
+    //         <td><input type="text" class="form-control date-input" /></td>
+    //         <td><input type="text" class="form-control time-input" /></td>
+    //         <td>
+    //             <select class="form-control shift-select">
+    //                 ${shiftOptions}
+    //             </select>
+    //         </td>
+    //         <td><input type="time" class="form-control in-time-input" /></td>
+    //         <td><input type="time" class="form-control out-time-input" /></td>
+    //         <td>
+    //             <select class="form-control reason-select">
+    //                 ${reasonOptions}
+    //             </select>
+    //         </td>
+    //         <td>
+    //             <select class="form-control hod-select">
+    //                 ${hodOptions}
+    //             </select>
+    //         </td>
+    //         <td><input type="text" class="form-control auth-by-input" readonly /></td>
+    //         <td>
+    //             <select class="form-control deduct-select">
+    //                 ${deductOptions}
+    //             </select>
+    //         </td>
+    //         <td><input type="text" class="form-control remark-input" /></td>
+    //         <td><input type="text" class="form-control extra1-input" /></td>
+    //         <td><input type="text" class="form-control extra2-input" /></td>
+    //         <td>
+    //             <button type="button" class="btn btn-sm btn-danger btn-delete-row">
+    //                 <i class="fa fa-trash"></i>
+    //             </button>
+    //         </td>
+    //     </tr>
+    //     `;
+
+    //     $('#tblExtraDutyEntry tbody').append(row);
+    // }
+
+
+    $('#tblExtraDutyEntry').on('change', '.emp-code-select', function () {
+        const empCode = $(this).val();
+        const empName = empMap[empCode] || '';
+        $(this).closest('tr').find('.emp-name-input').val(empName);
+    });
+
+    $('#tblExtraDutyEntry').on('change', '.hod-select', function () {
+        const selectedCode = $(this).val();
+        const hodName = hodMap[selectedCode] || '';
+        $(this).closest('tr').find('.auth-by-input').val(hodName);
+    });
+
+    function loadNextDocNo(yearC){
+        $.ajax({
+            url: '/DailyLateEntry/GetNextV_NO',
+            type: 'GET',
+            data: { yearCode : yearC },
+            success: function (response) {
+                $('#NumDocNo').val(response);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    }
+
+    function loadDocTypeList() {
+        docTypeMap = {};
+        return $.ajax({
+            url: '/DailyLateEntry/GetDocTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDocType');
+                ddl.empty();
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    docTypeMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading DocType list: ' + error);
+            }
+        });
+    }
+
+    function bindShiftList(compCode) {
+        return $.ajax({
+            url: '/DailyLateEntry/shiftList',
+            type: 'GET',
+            data: { cCode: compCode },
+            success: function (data) {
+                shiftList = data.map(item => item.value);
+
+                var $ddl = $('#ddlShift');
+                if ($ddl.length) {
+                    $ddl.empty();
+                    $ddl.append($('<option>').val('').text('Select Shift'));
+                    $.each(data, function (i, item) {
+                        $ddl.append($('<option>').val(item.value).text(item.text));
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading shift list:', error);
+            }
+        });
+    }
+
+    function bindHodList(compCode) {
+        return $.ajax({
+            url: '/DailyLateEntry/HodList',
+            type: 'GET',
+            data: { cCode: compCode },
+            success: function (data) {
+                hodMap = {};
+                data.forEach(item => {
+                    hodMap[item.value] = item.text;
+                });
+
+                var $ddl = $('#ddlHod');
+                if ($ddl.length) {
+                    $ddl.empty();
+                    $ddl.append($('<option>').val('').text('Select HOD'));
+                    $.each(data, function (i, item) {
+                        $ddl.append($('<option>').val(item.value).text(item.text));
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading HOD list:', error);
+            }
+        });
+    }
+
+    function loadEmployeeList(cCode) {
+        return $.ajax({
+            url: '/DailyLateEntry/empList',
+            type: 'GET',
+            data: { cCode: cCode },
+            success: function(data) {
+                empMap = {};  
+
+                let options = '<option value="">Select Employee</option>';
+                data.forEach(function(emp) {
+                    empMap[emp.value] = emp.text;
+                    options += `<option value="${emp.value}">${emp.value}}</option>`;
+                });
+
+                $('.emp-code-select').each(function () {
+                    $(this).html(options);
+                });
+
+                $('#ddlEmployee').html(options);
+            },
+            error: function() {
+                alert('Failed to load employee list.');
+            }
+        });
+    }
+
+    $('#tblExtraDutyEntry').on('input', '.emp-code-input', function () {
+        const $this = $(this);
+        const empCode = $this.val().trim();
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (!empCode) {
+                $this.closest('tr').find('.emp-name-input').val('');
+                return;
+            }
+
+            $.ajax({
+                url: '/DailyLateEntry/GetEmployeeNameByCode',
+                type: 'GET',
+                data: { empCode: empCode, compCode: compCode },
+                success: function (response) {
+                    const empName = response?.Name || '';
+                    $this.closest('tr').find('.emp-name-input').val(empName);
+                },
+                error: function () {
+                    console.error("Failed to fetch employee name");
+                    $this.closest('tr').find('.emp-name-input').val('');
+                }
+            });
+        }, 300); 
+    });
+
+    $('#btn_Late').on('click', function () {
+        loadGatePassData();
+    });
+
+    function loadGatePassData() {
+        var docDate = $('#DtDocDate').val();
+        var docNo = $('#NumDocNo').val();
+        var docType = $('#ddlDocType').val();
+
+        if (!docDate || !docNo || !docType) {
+            toastr.warning("Please select Doc Type, Doc No and Doc Date.");
+            return;
+        }
+
+        $.ajax({
+            url: '/DailyLateEntry/GetGatePassList',
+            type: 'GET',
+            data: {
+                docDate: docDate,
+                docNo: docNo,
+                docType: docType
+            },
+            success: function (data) {
+                console.log(data);
+                populateGatePassTable(data);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Failed to load GatePass data: ' + error);
+            }
+        });
+    }
+
+    function populateGatePassTable(data) {
+        const tdStyle = `style="min-width:70px; max-width:150px;"`;
+        const tbody = $('#tblExtraDutyEntry tbody');
+        tbody.empty();
+
+        if (!data || data.length === 0) {
+            addEmptyEditableRow();
+            return;
+        }
+
+        // Dropdown option lists
+        const shiftOptions = shiftList.map(s =>
+            `<option value="${s}">${s}</option>`).join('');
+
+        const reasonOptions = reasonList.map(r =>
+            `<option value="${r}">${r}</option>`).join('');
+
+        const deductOptions = deductList.map(d =>
+            `<option value="${d}">${d}</option>`).join('');
+
+        const hodOptions = Object.entries(hodMap).map(([code, name]) =>
+            `<option value="${code}">${name}</option>`).join('');
+
+        const empOptions = Object.entries(empMap).map(([code, name]) =>
+            `<option value="${code}">${code} - ${name}</option>`).join('');
+
+        $.each(data, function (index, item) {
+            const macTime = (item.maC_IN || item.maC_OUT)
+                ? `${item.maC_IN || 'N/A'} - ${item.maC_OUT || 'N/A'}`
+                : '';
+
+            const row = `
+                <tr>
+                    <td style="display:none;">${item.sno || ''}</td>
+                    
+                    <!-- Employee Code dropdown -->
+                    <td ${tdStyle}>
+                        <select class="form-control emp-code-select">
+                            <option value="">Select</option>
+                            ${empOptions}
+                        </select>
+                    </td>
+
+                    <!-- Employee Name (readonly) -->
+                    <td ${tdStyle}><input type="text" class="form-control emp-name-input" value="${item.emP_NAME || ''}" readonly /></td>
+
+                    <!-- Before Hours -->
+                    <td ${tdStyle}><input type="number" step="0.01" class="form-control bhrs-input" value="${item.bhrs ?? '0'}" /></td>
+
+                    <!-- After Hours -->
+                    <td ${tdStyle}><input type="number" step="0.01" class="form-control ahrs-input" value="${item.ahrs ?? '0'}" /></td>
+
+                    <!-- Shift dropdown -->
+                    <td ${tdStyle}>
+                        <select class="form-control shift-select">
+                            ${shiftOptions}
+                        </select>
+                    </td>
+
+                    <!-- In Time -->
+                    <td ${tdStyle}><input type="time" class="form-control in-time-input" value="${item.iN_TIME || ''}" /></td>
+
+                    <!-- Out Time -->
+                    <td ${tdStyle}><input type="time" class="form-control out-time-input" value="${item.ouT_TIME || ''}" /></td>
+
+                    <!-- Reason dropdown -->
+                    <td ${tdStyle}>
+                        <select class="form-control reason-select">
+                            ${reasonOptions}
+                        </select>
+                    </td>
+
+                    <!-- HOD dropdown -->
+                    <td ${tdStyle}>
+                        <select class="form-control hod-select">
+                            ${hodOptions}
+                        </select>
+                    </td>
+
+                    <!-- Auth By (readonly) -->
+                    <td ${tdStyle}><input type="text" class="form-control auth-by-input" value="${item.autH_BY || ''}" readonly /></td>
+
+                    <!-- Deduct dropdown -->
+                    <td ${tdStyle}>
+                        <select class="form-control deduct-select">
+                            ${deductOptions}
+                        </select>
+                    </td>
+
+                    <!-- Remark -->
+                    <td ${tdStyle}><input type="text" class="form-control remark-input" value="${item.remark || ''}" /></td>
+
+                    <!-- Duration -->
+                    <td ${tdStyle}><input type="text" class="form-control extra1-input" value="${item.dur ?? '0'}" /></td>
+
+                    <!-- Mac Time -->
+                    <td ${tdStyle}><input type="text" class="form-control extra2-input" value="${macTime}" /></td>
+                    <td ${tdStyle}>
+                        <button type="button" class="btn btn-sm btn-danger btn-delete-row">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            tbody.append(row);
+
+            const $lastRow = tbody.find('tr').last();
+            $lastRow.find('.emp-code-select').val(item.emP_CODE);
+            $lastRow.find('.shift-select').val(item.shift || '');
+            $lastRow.find('.reason-select').val(item.reason || '');
+            $lastRow.find('.hod-select').val(item.hoD_CODE || '');
+            $lastRow.find('.deduct-select').val(item.deduct || 'No');
+        });
+    }
+
+    $('#tblExtraDutyEntry').on('click', '.btn-delete-row', function () {
+        $(this).closest('tr').remove();
+    });
+
+
+    $('#tblExtraDutyEntry').on('input', '.emp-code-input', function () {
+        const empCode = $(this).val().trim();
+        const empName = empMap[empCode] || '';
+        $(this).closest('tr').find('.emp-name-input').val(empName);
+    });
+
+    $('#tblExtraDutyEntry').on('change', '.hod-select', function () {
+        const selectedCode = $(this).val();
+        const hodName = hodMap[selectedCode] || '';
+        $(this).closest('tr').find('.auth-by-input').val(hodName);
+    });
+
+    $('#btnAddRow').on('click', function () {
+        debugger;
+        var newRow = $('#tblExtraDutyEntry tbody tr:first').clone();
+        newRow.find('input').val('');
+        $('#tblExtraDutyEntry tbody').append(newRow);
+    });
+
+    $('#btn-save').on('click', function () {
+        saveLateDaily();
+    });
+
+    function saveLateDaily() {
+        function parseDecimal(value) {
+            const n = parseFloat(value);
+            return isNaN(n) ? null : n;
+        }
+
+        var gatePassList = [];
+
+        $('#tblExtraDutyEntry tbody tr').each(function () {
+            const $row = $(this);
+            const item = {
+                V_TYPE: $('#ddlDocType').val() || "",
+                V_DATE: $('#DtDocDate').val(),
+                V_NO: $('#NumDocNo').val(),
+                EMP_CODE: $row.find('.emp-code-select').val() || "",
+                EMP_NAME: $row.find('.emp-name-input').val() || "",
+                BHRS: parseDecimal($row.find('.bhrs-input').val()),
+                AHRS: parseDecimal($row.find('.ahrs-input').val()),
+                SHIFT: $row.find('.shift-select').val() || "",
+                IN_TIME: $row.find('.in-time-input').val() || "",
+                OUT_TIME: $row.find('.out-time-input').val() || "",
+                REASON: $row.find('.reason-select').val() || "",
+                HOD_CODE: $row.find('.hod-select').val() || "",
+                AUTH_BY: $row.find('.auth-by-input').val() || "",
+                DEDUCT: $row.find('.deduct-select').val() || "",
+                REMARK: $row.find('.remark-input').val() || "",
+                DUR: $row.find('.extra1-input').val() || "",
+
+                MAC_IN: ($row.find('.extra2-input').val() || "").substring(0, 8),
+                MAC_OUT: ($row.find('.extra3-input').val() || "").substring(0, 8)
+            };
+            gatePassList.push(item);
+        });
+
+        console.log(gatePassList);
+
+        $.ajax({
+            url: '/DailyLateEntry/SaveGatePassList',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(gatePassList),
+            success: function (response) {
+                toastr.success('Saved successfully');
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            },
+            error: function (xhr) {
+                toastr.error('Save failed: ' + xhr.responseText);
+            }
+        });
+    }
+
+
+    // function saveLateDaily() {
+    //     function parseDecimal(value) {
+    //         const n = parseFloat(value);
+    //         return isNaN(n) ? null : n;
+    //     }
+
+    //     var gatePassList = [];
+
+    //     $('#tblExtraDutyEntry tbody tr').each(function () {
+    //         const $row = $(this);
+    //         const item = {
+    //             V_TYPE: $('#ddlDocType').val() || "",
+    //             V_DATE: $('#DtDocDate').val(),
+    //             V_NO: $('#NumDocNo').val(),
+    //             EMP_CODE: $row.find('.emp-code-select').val() || "",
+    //             EMP_NAME: $row.find('.emp-name-input').val() || "",
+    //             BHRS: parseDecimal($row.find('.date-input').val()),  // modified here
+    //             AHRS: parseDecimal($row.find('.time-input').val()),  // modified here
+    //             SHIFT: $row.find('.shift-select').val() || "",
+    //             IN_TIME: $row.find('.in-time-input').val() || "",
+    //             OUT_TIME: $row.find('.out-time-input').val() || "",
+    //             REASON: $row.find('.reason-select').val() || "",
+    //             HOD_CODE: $row.find('.hod-select').val() || "",
+    //             AUTH_BY: $row.find('.auth-by-input').val() || "",
+    //             DEDUCT: $row.find('.deduct-select').val() || "",
+    //             REMARK: $row.find('.remark-input').val() || "",
+    //             DUR: $row.find('.extra1-input').val() || "",
+    //             MAC_IN: $row.find('.extra2-input').val() || ""
+    //         };
+    //         gatePassList.push(item);
+    //     });
+
+    //     console.log(gatePassList);
+
+    //     $.ajax({
+    //         url: '/DailyLateEntry/SaveGatePassList',
+    //         type: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify(gatePassList),
+    //         success: function (response) {
+    //             toastr.success('Saved successfully');
+
+    //             setTimeout(() => {
+    //                 location.reload();
+    //             }, 2000);
+    //         },
+    //         error: function (xhr) {
+    //             toastr.error('Save failed: ' + xhr.responseText);
+    //         }
+    //     });
+    // }
+
+
+    // function saveLateDaily() {
+    //     var gatePassList = [];
+
+    //     $('#tblExtraDutyEntry tbody tr').each(function () {
+    //         const $row = $(this);
+    //         const item = {
+    //             V_TYPE: $('#ddlDocType').val() || "",
+    //             V_DATE: $('#DtDocDate').val(),
+    //             EMP_CODE: $row.find('.emp-code-select').val() || "",
+    //             EMP_NAME: $row.find('.emp-name-input').val() || "",
+    //             BHRS: $row.find('.date-input').val() || "",
+    //             AHRS: $row.find('.time-input').val() || "",
+    //             SHIFT: $row.find('.shift-select').val() || "",
+    //             IN_TIME: $row.find('.in-time-input').val() || "",
+    //             OUT_TIME: $row.find('.out-time-input').val() || "",
+    //             REASON: $row.find('.reason-select').val() || "",
+    //             HOD_CODE: $row.find('.hod-select').val() || "",
+    //             AUTH_BY: $row.find('.auth-by-input').val() || "",
+    //             DEDUCT: $row.find('.deduct-select').val() || "",
+    //             REMARK: $row.find('.remark-input').val() || "",
+    //             DUR: $row.find('.extra1-input').val() || "",
+    //             MAC_IN: $row.find('.extra2-input').val() || ""
+    //         };
+    //         gatePassList.push(item);
+    //     });
+    //     console.log(gatePassList);
+
+    //     $.ajax({
+    //         url: '/DailyLateEntry/SaveGatePassList',
+    //         type: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify(gatePassList),
+    //         success: function (response) {
+    //             toastr.success('Saved successfully');
+
+    //             // ⏱️ Set timeout before reload (2 seconds)
+    //             setTimeout(() => {
+    //                 location.reload(); // 🔁 Reloads the page
+    //             }, 2000);
+    //         },
+    //         error: function (xhr) {
+    //             toastr.error('Save failed: ' + xhr.responseText);
+    //         }
+    //     });
+    // }
+
+
+    // function saveLateDaily() {
+    //     var gatePassList = [];
+
+    //     $('#tblExtraDutyEntry tbody tr').each(function () {
+    //         const $row = $(this);
+    //         const item = {
+    //             V_TYPE: $('#ddlDocType').val() || "",
+    //             V_DATE: $('#DtDocDate').val(),
+    //             EMP_CODE: $row.find('.emp-code-select').val() || "",
+    //             EMP_NAME: $row.find('.emp-name-input').val() || "",
+    //             DATE: $row.find('.date-input').val() || "",
+    //             TIME: $row.find('.time-input').val() || "",
+    //             SHIFT: $row.find('.shift-select').val() || "",
+    //             IN_TIME: $row.find('.in-time-input').val() || "",
+    //             OUT_TIME: $row.find('.out-time-input').val() || "",
+    //             REASON: $row.find('.reason-select').val() || "",
+    //             HOD_CODE: $row.find('.hod-select').val() || "",
+    //             AUTH_BY: $row.find('.auth-by-input').val() || "",
+    //             DEDUCT: $row.find('.deduct-select').val() || "",
+    //             REMARK: $row.find('.remark-input').val() || "",
+    //             DUR: $row.find('.extra1-input').val() || "",
+    //             MAC_IN: $row.find('.extra2-input').val() || ""
+    //         };
+    //         gatePassList.push(item);
+    //     });
+    //     console.log(gatePassList);
+
+    //     $.ajax({
+    //         url: '/DailyLateEntry/SaveGatePassList',
+    //         type: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify(gatePassList),
+    //         success: function (response) {
+    //             toastr.success('Saved successfully');
+                
+    //         },
+    //         error: function (xhr) {
+    //             toastr.error('Save failed: ' + xhr.responseText);
+    //         }
+    //     });
+    // }
+
+</script>

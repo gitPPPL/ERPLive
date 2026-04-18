@@ -1,0 +1,377 @@
+﻿@{
+    ViewBag.Title = "Salary Structure Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Salary Structure Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "SalaryStructureMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="SalaryStructureMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlDepartment">Department <span class="required">*</span></label>
+                    <div class="form-control-flex">
+                        <select class="form-control" id="ddlDepartment" name="Department">
+                            <option>--Select Department--</option>
+                        </select>
+                        <input type="text" class="form-control" id="TxtDptName" name="" placeholder="">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlDesignation">Designation <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDesignation" name="Designation">
+                        <option>--Select Designation--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumFromSalary">From Salary</label>
+                    <input type="text" class="form-control" id="NumFromSalary" oninput="allowOnlyNumbers(this)" maxlength="8" placeholder="Enter From Salary">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumToSalary">To Salary</label>
+                    <input type="text" class="form-control" id="NumToSalary" oninput="allowOnlyNumbers(this)" maxlength="8" placeholder="Enter To Salary">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                @* <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div> *@
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+    const inputSequence = [
+    'ddlDepartment',
+    'ddlDesignation',
+    'NumFromSalary',
+    'NumToSalary' 
+    ];
+
+     let PreviousDepartment;
+    let	previousDesignation;
+    let MasterTblId ;
+    let readOnly;
+
+    $(document).ready(function () {
+ 
+    GetDepartmentList();
+    getDesignation();
+
+        MasterTblId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+
+        if (MasterTblId) {
+            GetMasterDataList(MasterTblId, readOnly);
+        }
+
+        inputSequence.forEach((id, index) => {
+        $(`#${id}`).on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (index + 1 < inputSequence.length) {
+                    $(`#${inputSequence[index + 1]}`).focus();
+                }
+            }
+        });
+       });
+
+      
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            const masterData = collectFormData();
+            console.log(masterData);
+            if (!masterData.Department || !masterData.Designation) {
+                toastr.warning("Please fill all required fields");
+                return;
+            }
+
+            if (MasterTblId) {
+                EditMasterData(masterData);
+            } else {
+                SaveMasterData(masterData);
+            }
+        });
+    });
+
+      function SaveMasterData(masterData) {
+        
+        checkExistOrNot(masterData.Department, masterData.Designation)
+            .done(function (data) {
+                if (data?.status && data?.exists) {
+                    toastr.warning("Duplicate Salary Structure  Name");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveSalaryStructMast", "SalaryStructureMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(masterData),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success('Data saved successfully.');
+                            resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/SalaryStructureMasterList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+            })
+            .fail(function () {
+                toastr.error("Error while checking Salary Structure  name.");
+            });
+    }
+
+    function EditMasterData(masterData) {
+        console.log(PreviousDepartment , masterData.Department , previousDesignation, masterData.Designation);
+        if (PreviousDepartment !== masterData.Department || previousDesignation!==masterData.Designation) {
+            checkExistOrNot(masterData.Department , masterData.Designation)
+                .done(function (data) {
+                    if (data?.status && data?.exists) {
+                        toastr.warning("Duplicate Salary Structure  Name");
+                        return;
+                    }
+                    UpdateMasterData(masterData);
+                })
+                .fail(function () {
+                    toastr.error("Error while checking Salary Structure  Name.");
+                });
+        } else {
+            UpdateMasterData(masterData);
+        }
+    }
+
+    function UpdateMasterData(masterData) {
+        $.ajax({
+            url: '/SalaryStructureMaster/UpdateSalaryStructMast',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(masterData),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success('Data updated successfully.');
+                    resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/SalaryStructureMasterList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+
+    function GetMasterDataList(MasterTblId, readOnly) {
+        $.ajax({
+            url: '/SalaryStructureMaster/GetSalaryStructDetailsById',
+            type: 'GET',
+            data: { id: MasterTblId },
+            success: function (res) {
+                if (res.status && res.data) {
+                    console.log(res.data);
+                    fillFormFields(res.data);
+                    if (readOnly === 'true') {
+                        $('input, #ddlDepartment, #ddlDesignation').prop('disabled', true);
+                        $('#btn-save, #cancelBtn').hide();
+                    } else {
+                        $('input, #ddlDepartment, #ddlDesignation').prop('disabled', false);
+                        $('#btn-save, #cancelBtn').show();
+                    }
+                } else {
+                    toastr.warning('No data found for this ID.');
+                }
+            },
+            error: function () {
+                toastr.error('Failed to load data.');
+            }
+        });
+    }
+
+    function resetFields() {
+        $('#TxtCode, #NumToSalary, #NumFromSalary').val('');
+        $('#ddlDepartment, #ddlDesignation').prop('selectedIndex', 0);
+       
+    }
+
+    function fillFormFields(dt) {
+        console.log(dt);
+        $('#TxtCode').val(dt.code);
+        $('#NumToSalary').val(dt.MIN_SALARY);
+        $('#NumFromSalary').val(dt.MAX_SALARY);
+
+        getDesignation();
+        setTimeout(function () {
+        $('#ddlDesignation option').filter(function () {
+            return $(this).text().trim().toLowerCase() === dt.designation.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+
+        GetDepartmentList();
+         setTimeout(function () {
+        $('#ddlDepartment option').filter(function () {
+            return $(this).text().trim().toLowerCase() === dt.department.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+             
+        PreviousDepartment= dt.DEPT_CODE;
+        previousDesignation=dt.DESG_CODE;
+    }
+
+    function collectFormData() {
+        return {
+            Code: toNullableInt($('#TxtCode').val()),
+            Department: toNullableInt($('#ddlDepartment').val()),
+            Designation: toNullableInt($('#ddlDesignation').val()),
+            MaxSalary: toNullableInt($('#NumFromSalary').val()),
+            MinSalary: toNullableInt($('#NumToSalary').val())            
+        };
+    }
+
+     function checkExistOrNot(Department, designationCd) {
+        return $.ajax({
+            url: '/SalaryStructureMaster/getExistOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: { Department: Department , designation:designationCd}
+        });
+    }
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+                if (MasterTblId) {
+                    GetMasterDataList(MasterTblId, readOnly);
+                } else {
+                    resetFields();
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+            }
+        });
+    });
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+    function allowOnlyNumbers(input) {
+             input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function getDesignation(){
+        $.ajax({
+            url: '@Url.Action("DesignationList", "NewEmployeeRequirement")',
+            type:'Get',
+            datatype:'json',
+            success:function(response){
+                if(response.status==true){
+                var $designationDropdown=$('#ddlDesignation');
+                $designationDropdown.empty();
+                $designationDropdown.append('<option selected disabled>- Select Designation Name-</option>');
+                $.each(response.data, function(index, item){
+                    $designationDropdown.append('<option value="'+ item.CODE +'">'+ item.NAME +'</option>');
+                });
+                }else{
+                    toastr.error("Country Name Load failed");
+                }
+            },
+            error:function(xhr,status, error){
+            toastr.error("Country Name Load failed", xhr.error);
+            }
+
+        });
+    }
+
+    function GetDepartmentList()
+    {
+        $.ajax({
+            url: '@Url.Action("DepartmentList", "NewEmployeeRequirement")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $departmentDropdown = $('#ddlDepartment');
+                    $departmentDropdown.empty();
+                    $departmentDropdown.append('<option selected disabled>- Select Department Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $departmentDropdown.append('<option value="' + item.CODE + '">' + item.NAME + '</option>');
+                    });
+                } else {
+                    toastr.error("Department Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Department Name Load failed", xhr.error);
+            }
+        });
+    }
+
+
+</script>

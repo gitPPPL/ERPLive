@@ -1,0 +1,422 @@
+﻿@{
+	ViewBag.Title = "Document Type Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentMenu = ViewBag.CurrentMenu as string;
+
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;  // Exit loop once found current menu permission
+		}
+	}
+}
+<fieldset>
+	<legend class="legend-field">Document Type Master List</legend>
+
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchInput" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				@if (canAdd)
+				{
+					<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "DocumentTypeMaster")'" type="submit" class="btn btn-add">
+						<i class="fa fa-plus"></i>Add
+					</button>
+				}
+				@if (canPrint)
+				{
+					<button class="btn btn-print" onclick="callGetReportAsPdf()">
+						<i class="fa fa-print"></i> Print
+					</button>
+				}
+				@if (canExport)
+				{
+					<button class="btn btn-export" onclick="exportToExcel()">
+						<i class="fas fa-file-export"></i> Export
+					</button>
+				}
+				@if (canMail)
+				{
+					<button class="btn btn-mail">
+						<i class="fa fa-envelope"></i> Mail
+					</button>
+				}
+				@if (canApproval)
+				{
+					<button class="btn btn-approved">
+						<i class="fa fa-check"></i> Approve
+					</button>
+				}
+			</div>
+		</div>
+
+	</div>
+
+
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tabledt" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Document Type</th>
+						<th>Stock</th>
+						<th>Sno</th>
+						<th>Transaction Type</th>
+						<th>Active</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="pagination"></div>
+				</div>
+			</div>
+		</div>
+		@* <nav>
+			<ul class="pagination justify-content-center mt-2" id="pagination"></ul>
+		</nav> *@
+	</div>
+</fieldset>
+<script>
+	var canAdd = @canAdd.ToString().ToLower();
+	var canEdit = @canEdit.ToString().ToLower();
+	var canDelete = @canDelete.ToString().ToLower();
+	var canPrint = @canPrint.ToString().ToLower();
+	var canExport = @canExport.ToString().ToLower();
+	var canMail = @canMail.ToString().ToLower();
+	var canApproval = @canApproval.ToString().ToLower();
+	var canDocDetail = @canDocDetail.ToString().ToLower();
+
+	let allMastData = [];
+	let filteredData = [];
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	var DocTypeMastDt=[];
+
+	// Fetch data on page load
+	$(document).ready(function () {
+		getDocTypeMastDt();
+		$(document).on('click', '.page-link', function (e) {
+				e.preventDefault();
+				const page = parseInt($(this).data('page'));
+				const totalPages = Math.ceil(allMastData.length / rowsPerPage);
+
+				if (page >= 1 && page <= totalPages) {
+					currentPage = page;
+					renderYearMasterTable();
+					renderYearMasterPagination();
+				}
+			});
+		$('#searchInput').on('input', function () {
+				const keyword = $(this).val().toLowerCase();
+
+				filteredData = allMastData.filter(item => {
+					return Object.values(item).some(val =>
+						String(val).toLowerCase().includes(keyword)
+					);
+				});
+
+				currentPage = 1;
+				renderYearMasterTable();
+				renderYearMasterPagination();
+			});
+		$(document).on('click', '.btn-edit', function () {
+		const $row = $(this).closest('tr');
+		getDataOfRow($row);		 
+		localStorage.setItem('editDocTypeMast', JSON.stringify(DocTypeMastDt));
+		localStorage.setItem('Mode', 'Edit');
+		window.location.href = '/DocumentTypeMaster/Index';
+	});
+		$(document).on('click', '.btn-view', function () {
+		const $row = $(this).closest('tr');
+		getDataOfRow($row);
+		localStorage.setItem('editDocTypeMast', JSON.stringify(DocTypeMastDt));
+		localStorage.setItem('Mode', 'View');
+		window.location.href = '/DocumentTypeMaster/Index';
+	});
+		$(document).on('click', '.btn-details', function() {
+		const docCode = $(this).data('doc');  // gets the data-doc attribute
+		console.log('Details clicked for doc:', docCode);
+		showDocumentPopup(docCode)
+
+	});
+		$(document).on('click', '.btn-delete', function() {
+				const $row = $(this).closest('tr');
+				const CodeforDel = $row.find('.code').data('code');
+				Swal.fire({
+					title: 'Are you sure you want to delete?',
+					text: "This action cannot be undone.",
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Yes, delete it!',
+					cancelButtonText: 'No, cancel!',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						$.ajax({
+							url: '/DocumentTypeMasterList/DelDocumentMastDt',
+							type: 'DELETE',
+							data: { code: CodeforDel },
+							success: function(data) {
+								if (data.status === true) {
+									Swal.fire(
+										'Deleted!',
+										'Your data has been deleted.',
+										'success'
+									);
+									$row.remove();
+									getDocTypeMastDt();
+								} else {
+									Swal.fire(
+										'Error!',
+										'There was an issue deleting the data.',
+										'error'
+									);
+								}
+							},
+							error: function(xhr, status, error) {
+								Swal.fire(
+									'Error!',
+									'Data could not be deleted: ' + error,
+									'error'
+								);
+							}
+						});
+					}
+				});
+			});
+	});
+	function getDataOfRow($row) {
+	   DocTypeMastDt = {
+			code: $row.find('.code').data('code'),
+			documentType: $row.find('.documentType').text().trim(),
+			stock: $row.find('.stock').text().trim(),
+			sno: $row.find('.sno').text().trim(),
+			transactionType: $row.find('.transactionType').text().trim(),
+			active: $row.find('.active').data('active')
+		};
+	}
+	function getDocTypeMastDt() {
+				debugger;
+				$.ajax({
+					url: '@Url.Action("getDocumentMaster", "DocumentTypeMasterList")',
+					type: 'GET',
+					dataType: 'json',
+					success: function (data) {
+						if (data.status === true) {
+							 allMastData = data.data;
+							filteredData=allMastData;
+							console.log(filteredData);
+							currentPage = 1;
+							renderYearMasterTable();
+							renderYearMasterPagination();
+
+						} else {
+							alert("Data Load Failed");
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error('Error: ' + xhr.responseText);
+						alert('Data Load Failed: ' + error);
+					}
+				});
+			}
+    function renderYearMasterTable() {
+				const tbody = $('#tabledt tbody');
+				tbody.empty();
+				const start = (currentPage - 1) * rowsPerPage;
+				const end = start + rowsPerPage;
+				const pageData = filteredData.slice(start, end);
+				pageData.forEach(item => {
+					const row = `<tr>
+							 <td class="code d-none" data-code="${item.code}">${item.code}</td>
+								<td class="documentType">${item.documentType}</td>
+								<td class="stock">${item.stock}</td>
+								<td class="sno">${item.sno}</td>
+								<td class="transactionType">${item.transactionType}</td>
+								<td class="active" data-active="${item.active=='Yes'? 1 : 0 }">${item.active}</td>
+									<td>
+									
+									 ${canEdit ? `<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit"></i>` : ''}
+									<i class="fa fa-eye btn-view" data-bs-toggle="tooltip" title="View"></i>
+									${canDelete ? `<i class="fa fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete"></i>` : ''}
+									${canDocDetail ? `<i class="fa fa-file btn-details btn-document" data-doc="${item.code}" title="Details"></i>` : ''}
+
+									</td>
+
+
+					</tr>`;
+					tbody.append(row);
+				});
+			}
+    function renderYearMasterPagination() {
+				const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+				const pagination = $('#pagination');
+				pagination.empty();
+
+				if (totalPages <= 1) return;
+
+				const maxVisiblePages = 7; // Adjust as needed
+				const ellipsis = '<li class="page-item disabled"><span class="page-link">...</span></li>';
+
+				// Previous button
+				pagination.append(`<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+					<a class="page-link" href="#" data-page="${currentPage - 1}">Prev</a>
+				</li>`);
+
+				let startPage = Math.max(1, currentPage - 2);
+				let endPage = Math.min(totalPages, currentPage + 2);
+
+				if (currentPage <= 4) {
+					startPage = 1;
+					endPage = Math.min(totalPages, maxVisiblePages - 2);
+				} else if (currentPage >= totalPages - 3) {
+					startPage = Math.max(1, totalPages - (maxVisiblePages - 3));
+					endPage = totalPages;
+				}
+
+				if (startPage > 1) {
+					pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`);
+					if (startPage > 2) pagination.append(ellipsis);
+				}
+
+				for (let i = startPage; i <= endPage; i++) {
+					pagination.append(`<li class="page-item ${i === currentPage ? 'active' : ''}">
+						<a class="page-link" href="#" data-page="${i}">${i}</a>
+					</li>`);
+				}
+
+				if (endPage < totalPages) {
+					if (endPage < totalPages - 1) pagination.append(ellipsis);
+					pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`);
+				}
+
+				// Next button
+				pagination.append(`<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+					<a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+				</li>`);
+			}
+	function exportToExcel() {
+		fetch('/DocumentTypeMasterList/ExportAllDocs')
+			.then(response => {
+				if (!response.ok) throw new Error("Network response was not ok");
+				return response.json();
+			})
+			.then(data => {
+				// Map the API response to the format we want to export
+				console.log('show data ',data)
+				const filteredData = data.map(item => ({
+					SNO: item.sno,
+					DOC_CODE: item.code,
+					DOC_NAME: item.name,
+					SHORT_NAME: item.shortName,
+					CURR_CODE: item.currCode,
+					ACTIVE: item.Active ? "Yes" : "No"
+				}));
+				console.log(filteredData)
+
+				// Convert JSON to worksheet
+				const worksheet = XLSX.utils.json_to_sheet(filteredData);
+
+				// Create a new workbook and append the worksheet
+				const workbook = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+				// Generate filename with timestamp
+				const pageName = "Document Type Master";
+				const now = new Date();
+				const pad = n => String(n).padStart(2, '0');
+				const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+				const fileName = `${pageName}_${timestamp}.xlsx`;
+
+				// Trigger file download
+				XLSX.writeFile(workbook, fileName);
+			})
+			.catch(error => {
+				console.error("Export failed:", error);
+				toastr.error("Failed to export data.");
+			});
+	}
+	function callGetReportAsPdf() {
+		var reportName = "DOCTYPE_MAST";
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+			type: 'GET',
+			data: { Reportname: reportName },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
+	function showDocumentPopup(docCode) {
+		$.ajax({
+			url: '/DocumentTypeMasterList/DocDetailsCode',
+			type: 'POST',
+			dataType: 'json',  // important
+			data: { docCode: docCode },
+			success: function(response) {
+				if(response.success) {
+					showDocumentPopupjQuery(response.data, docCode);
+				} else {
+					toastr.error("Failed to get document details.");
+				}
+			},
+			error: function() {
+				toastr.error("An error occurred while fetching document details.");
+			}
+		});
+	}
+
+</script>

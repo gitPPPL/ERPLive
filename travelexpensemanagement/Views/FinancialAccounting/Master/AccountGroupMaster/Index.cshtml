@@ -1,0 +1,364 @@
+﻿@{
+	ViewBag.Title = "Account Group Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>	
+	<legend>Account Group Master</legend>
+	<div class="row">
+
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "AccountGroupMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="AccountGroupMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="GROUP_NAME" class="form-label">Group Name<span class="required">*</span></label>
+					<input type="text" class="form-control" id="GROUP_NAME" name="GROUP_NAME" placeholder="Enter Group Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="SHORT_NAME" class="form-label">Short Name<span class="required">*</span></label>
+					<input type="text" class="form-control" id="SHORT_NAME" name="SHORT_NAME" placeholder="Enter Short Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="TYPE" class="form-label">Main Group Name<span class="required">*</span></label>
+					<select class="form-control" id="MAIN_GROUP_NAME">
+						<option value="">-- Select Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="TYPE" class="form-label">Nature<span class="required">*</span></label>
+					<select class="form-control" id="NATURE" name="NATURE">
+						<option value="">-- Select Nature --</option>
+						<option value="1">Bank</option>
+						<option value="2">Broker</option>
+						<option value="3">Case</option>
+						<option value="4">Customer</option>
+						<option value="5">Employee</option>
+						<option value="6">Others</option>
+						<option value="5">Supplier</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="TYPE" class="form-label">Schedule Grouping<span class="required">*</span></label>
+					<select class="form-control" id="SCHEDULE_GROUPING" name="SCHEDULE_GROUPING">
+						<option value="">-- Select Schedule Grouping --</option>
+						<option value="1">GRP</option>
+						<option value="2">NA</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="TYPE" class="form-label">Sub Schedule Name<span class="required">*</span></label>
+					<select class="form-control" id="SUB_SCHEDULE_NAME" name="SUB_SCHEDULE_NAME">
+						<option value="">-- Select Sub Schedule Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+                    <label for="TYPE" class="form-label">Main Schedule Name<span class="required">*</span></label>
+					<select class="form-control" id="MAIN_SCHEDULE_NAME" name="MAIN_SCHEDULE_NAME">
+						<option value="">-- Select Main Schedule Name --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="row">
+				<div class="col-md-3">
+					<div class="form-group">
+						<div class="form-row">
+							<input type="checkbox" id="chkGROUPINGONTRAIL">
+							<label class="checkbox-label" for="chkGROUPINGONTRAIL">Grouping on Trail</label>
+						</div>
+					</div>
+				</div>
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+                <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
+                <button type="button" id="btnUpdate" class="btn btn-primary">Save</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        $("#btnUpdate").hide();
+        ddlMAINGROUPNAME();
+        ddlSUBSCHEDULENAME();
+        ddlMAINSCHEDULENAME();
+
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        const code = getQueryParam('id');
+        const mode = getQueryParam("mode");
+
+        $('#ACTIVE').on('change', function () {
+            $('#statusText').text($(this).is(':checked') ? 'Active' : 'Inactive');
+        });
+
+        // Insert
+        $('#btnSubmit').on('click', function (e) {
+            e.preventDefault();
+
+            if (!validateRequiredField('#GROUP_NAME', 'Group Name')) return;
+            if (!validateRequiredField('#SHORT_NAME', 'Short Name')) return;
+            if (!validateRequiredField('#MAIN_GROUP_NAME', 'Main Group Name')) return;
+            if (!validateRequiredField('#NATURE', 'Nature')) return;
+            if (!validateRequiredField('#SCHEDULE_GROUPING', 'Schedule Grouping')) return;
+            if (!validateRequiredField('#SUB_SCHEDULE_NAME', 'Sub Schedule Name')) return;
+            if (!validateRequiredField('#MAIN_SCHEDULE_NAME', 'Main Schedule Name')) return;
+
+            const getSelectedText = (selector) => {
+                const text = $(selector).find('option:selected').text();
+                return text.includes('-- Select') ? null : text;
+            };
+
+            let mainGroupName = parseInt($('#MAIN_GROUP_NAME').val()) || null;
+
+            let formData = {
+                GROUP_NAME: $('#GROUP_NAME').val() || null,
+                SHORT_NAME: $('#SHORT_NAME').val() || null,
+                MAIN_GROUP_NAME: mainGroupName,
+                NATURE: getSelectedText('#NATURE'),
+                SCHEDULE_GROUPING: getSelectedText('#SCHEDULE_GROUPING'),
+                SUB_SCHEDULE_NAME: parseInt($('#SUB_SCHEDULE_NAME').val()) || null,
+                MAIN_SCHEDULE_NAME: parseInt($('#MAIN_SCHEDULE_NAME').val()) || null,
+                GROUPING_ON_TRAIL: $('#chkGROUPINGONTRAIL').is(':checked'),
+                ACTIVE: $('#ACTIVE').is(':checked')
+            };
+             $.ajax({
+                  url: '/AccountGroupMaster/SaveAccountGroupMaster',
+                  type: 'POST',
+                  contentType: 'application/json',
+                  data: JSON.stringify(formData),
+                  success: function (response) {
+
+                      if (response.success === true) {
+                          toastr.success(response.message || 'Saved successfully!');
+                           setSubGroupFormReadOnly();
+                          // $('#groupForm')[0].reset();
+                          $('#statusText').text('Inactive');
+                      } else {
+                          toastr.warning(response.message || 'Something went wrong!');
+                      }
+                  },
+                  error: function (xhr) {
+                      toastr.error('Error: ' + xhr.responseText);
+                  }
+             });
+        });
+
+        // Update
+        $('#btnUpdate').on('click', function (e) {
+            e.preventDefault();
+
+            const getSelectedText = (selector) => {
+                const text = $(selector).find('option:selected').text();
+                return text.includes('-- Select') ? null : text;
+            };
+            let mainGroupName = parseInt($('#MAIN_GROUP_NAME').val()) || null;
+            let formData = {
+                CODE: code || null,
+                GROUP_NAME: $('#GROUP_NAME').val() || null,
+                SHORT_NAME: $('#SHORT_NAME').val() || null,
+                MAIN_GROUP_NAME: mainGroupName,
+                NATURE: getSelectedText('#NATURE'),
+                SCHEDULE_GROUPING: getSelectedText('#SCHEDULE_GROUPING'),
+                SUB_SCHEDULE_NAME: parseInt($('#SUB_SCHEDULE_NAME').val()) || null,
+                MAIN_SCHEDULE_NAME: parseInt($('#MAIN_SCHEDULE_NAME').val()) || null,
+                GROUPING_ON_TRAIL: $('#chkGROUPINGONTRAIL').is(':checked'),
+                ACTIVE: $('#ACTIVE').is(':checked')
+            };
+
+            $.ajax({
+                url: '/AccountGroupMaster/UpdateAccountGroupMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    // alert(response.message || 'Saved successfully!');
+                   
+                    if (response.success === true) {
+                          toastr.success(response.message || ' Account Group updated successfully.');
+
+                          $('#groupForm')[0].reset();
+                          $('#statusText').text('Inactive');
+                      } else {
+                          toastr.error(response.message || 'Something went wrong!');
+                      }
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        });
+
+        // Edit Mode
+        if (code) {
+            $("#btnSubmit").hide();
+            $("#btnUpdate").show();
+
+            $.ajax({
+                url: '/AccountGroupMaster/GetAccountByCode',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ code: parseInt(code) }),
+                success: function (response) {
+                    bindItemDeptForm(response);
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        }
+
+        // View-only Mode
+        if (mode === "view") {
+            setSubGroupFormReadOnly();
+            $('#AccountGroupMasterForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
+        function bindItemDeptForm(data) {
+            $('#GROUP_NAME').val(data.grouP_NAME);
+            $('#SHORT_NAME').val(data.shorT_NAME);
+
+            ddlMAINGROUPNAME(function () {
+                $('#MAIN_GROUP_NAME').val(data.maiN_GROUP_NAME);
+            });
+
+            $('#NATURE').val(getNatureValue(data.nature));
+            $('#SCHEDULE_GROUPING').val(getScheduleGroupingValue(data.schedulE_GROUPING));
+
+            ddlSUBSCHEDULENAME(function () {
+                $('#SUB_SCHEDULE_NAME').val(data.suB_SCHEDULE_NAME);
+            });
+
+            ddlMAINSCHEDULENAME(function () {
+                $('#MAIN_SCHEDULE_NAME').val(data.maiN_SCHEDULE_NAME);
+            });
+
+            $('#chkGROUPINGONTRAIL').prop('checked', data.groupinG_ON_TRAIL === true);
+            $('#ACTIVE').prop('checked', data.active === true);
+            $('#statusText').text(data.active ? 'Active' : 'Inactive');
+        }
+        function getNatureValue(text) {
+            const map = {
+                'Bank': '1',
+                'Broker': '2',
+                'Case': '3',
+                'Customer': '4',
+                'Employee': '5',
+                'Supplier': '6',
+                'Others': '7'
+            };
+            return map[text] || '';
+        }
+        function getScheduleGroupingValue(text) {
+            const map = {
+                'GRP': '1',
+                'NA': '2'
+            };
+            return map[text] || '';
+        }
+        function ddlMAINGROUPNAME(callback) {
+            $.ajax({
+                url: '/AccountGroupMaster/GetddlMAINGROUPNAME',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#MAIN_GROUP_NAME');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading MAIN_GROUP_NAME:", xhr.responseText);
+                }
+            });
+        }
+
+        function ddlSUBSCHEDULENAME(callback) {
+            $.ajax({
+                url: '/AccountGroupMaster/GetddlSUBSCHEDULENAME',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#SUB_SCHEDULE_NAME');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading SUB_SCHEDULE_NAME:", xhr.responseText);
+                }
+            });
+        }
+        function ddlMAINSCHEDULENAME(callback) {
+            $.ajax({
+                url: '/AccountGroupMaster/GetddlMAINSCHEDULENAME',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#MAIN_SCHEDULE_NAME');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading MAIN_SCHEDULE_NAME:", xhr.responseText);
+                }
+            });
+        }
+        function setSubGroupFormReadOnly() {
+        const form = $('#AccountGroupMasterForm');
+        form.find('input, select, textarea').prop('disabled', true);
+        form.find('.toggle-switch input').prop('disabled', true);
+
+        // Disable buttons also
+        form.find('button').prop('disabled', true);
+
+        // Optional styling
+        form.addClass('disabled-form');
+    } 
+    });
+</script>
+
+

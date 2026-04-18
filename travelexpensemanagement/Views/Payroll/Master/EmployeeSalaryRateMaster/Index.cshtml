@@ -1,0 +1,569 @@
+﻿@{
+    ViewBag.Title = "Employee Salary Rate Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Employee Salary Rate Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "EmployeeSalaryRateMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div> 
+
+    <form id="EmployeeSalaryRateMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtCode">Code</label>
+                    <input type="text" id="TxtCode" class="form-control" name="TxtCode" placeholder="Search Employee previous Salary structure by Code">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtEffectiveDate">Effective Date</label>
+                    <input type="date" id="DtEffectiveDate" class="form-control" name="EffectiveDate" placeholder="dd/mm/yyyy">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtLastEffDate">Last Effective Date</label>
+                    <input type="date" id="DtLastEffDate" class="form-control" name="LastEffDate" placeholder="dd/mm/yyyy" disabled>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlEmpName">Emp Name</label>
+                    <select id="ddlEmpName" class="form-control" name="EmpName">
+                        <option value="">Select Employee</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlDesign">Design.</label>
+                    <select id="ddlDesign" class="form-control" name="Design" disabled>
+                        <option value="">Select Designation</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlDeptt">Deptt</label>
+                    <select id="ddlDeptt" class="form-control" name="Deptt" disabled>
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+            </div>
+          
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlGrade">Grade</label>
+                    <select id="ddlGrade" class="form-control" name="Grade">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumBasic">Basic</label>
+                    <input type="number" id="NumBasic" class="form-control" placeholder="Enter Basic Salary">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumHRA">HRA</label>
+                    <input type="number" id="NumHRA" class="form-control" placeholder="Enter HRA">
+                </div>
+            </div>
+        </div>
+        <!-- Row 3 -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumConveyance">Conveyance</label>
+                    <input type="number" id="NumConveyance" class="form-control"  placeholder="Enter Conveyance">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumOthersAllowance">Others/Spl. Allowance</label>
+                    <input type="number" id="NumOthersAllowance" class="form-control" placeholder="Enter Other Allowance">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumUniformGW">Uniform GW</label>
+                    <input type="number" id="NumUniformGW" class="form-control" placeholder="Enter Uniform GW">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumWashingAllowance">Washing Allowance</label>
+                    <input type="number" id="NumWashingAllowance" class="form-control"  placeholder="Enter Washing Allowance">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumUniformSal">Uniform Sal.</label>
+                    <input type="number" id="NumUniformSal" class="form-control" placeholder="Enter Uniform Salary">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumMobileAllowance">Mobile Allowance</label>
+                    <input type="number" id="NumMobileAllowance" class="form-control" placeholder="Enter Mobile Allowance">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumMedicalAmt">Medical Amt</label>
+                    <input type="number" id="NumMedicalAmt" class="form-control" placeholder="Enter Medical Amount">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumSplAllowance2">Spl. Allowance2</label>
+                    <input type="number" id="NumSplAllowance2" class="form-control" placeholder="Enter Special Allowance 2">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumTotalSalary">Total Salary</label>
+                    <input type="number" id="NumTotalSalary" class="form-control" readonly placeholder="Enter Total Salary">
+                </div>
+            </div>
+          
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumGWSalary">GW Salary</label>
+                    <input type="number" id="NumGWSalary" class="form-control" readonly placeholder="Enter GW Salary">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumVPFContri">VPF Contri.</label>
+                    <input type="number" id="NumVPFContri" class="form-control" placeholder="Enter VPF Contribution">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlDutyHrs">Duty Hrs</label>
+                    <select id="ddlDutyHrs" class="form-control">
+                        <option value="">Select Duty Hours</option>
+                        <option>12</option>
+                        <option>8</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!-- Row 6 -->
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtInTime">In Time</label>
+                    <input type="time" class="form-control" id="TxtInTime" name="InTime" placeholder="Enter In Time">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtOutTime">Out Time</label>
+                    <input type="time" class="form-control" id="TxtOutTime" name="OutTime" placeholder="Enter Out Time">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = parseInt(urlParams.get('id'));
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadEmployeeSalaryRateById(rowId);
+
+                if (isReadOnly) {
+                    setEmployeeSalaryRateFormReadOnly();
+                }
+            }
+        });
+        loadEmpList();
+        loadDeptList();
+        loadDesgList();
+        loadGradeList();
+    });
+
+    $('#TxtCode').on('change', function () {
+        const code = $(this).val();
+        if (code) {
+            $.ajax({
+                url: '/EmployeeSalaryRateMaster/GetDetailsByCode',
+                type: 'GET',
+                data: { code: code },
+                success: function (data) {
+                    if (!data) {
+                        toastr.warning("No data found for the entered code.");
+                        return;
+                    }
+                    $.when(loadEmpList(), loadGradeList()).done(function () {
+                        $('#ddlEmpName').val(data.empCode || '').trigger('change');
+                        $('#ddlGrade').val(data.gradeCode || '');
+                    });
+
+                    // Load department/designation
+                    loadDeptAndDesignByEmpCode(data.empCode);
+
+                    if (data.lastEffDate) {
+                        const dateObj = new Date(data.lastEffDate);
+                        const formatted = dateObj.toISOString().split('T')[0];
+                        $('#DtLastEffDate').val(formatted);
+                    } else {
+                        $('#DtLastEffDate').val('');
+                    }
+
+                    loadAlreadyExistEmpSalaryData(data.gradeCode);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading details by code:", error);
+                    toastr.error("Could not load data for the entered code.");
+                }
+            });
+        }
+    });
+
+    function loadEmpList() {
+        return $.ajax({
+            url: '/EmployeeSalaryRateMaster/GetEmpList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlEmpName');
+                ddl.empty();
+                ddl.append('<option value="">-- Select User --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading employees: ", xhr.responseText);
+                toastr.error('Error loading employees: ' + error);
+            }
+        });
+    }
+
+    $('#ddlEmpName').change(function () {
+        const empCode = $(this).val();
+        loadDeptAndDesignByEmpCode(empCode);
+    });
+    function loadDeptAndDesignByEmpCode(empCode){
+         if (empCode) {
+            $.ajax({
+                url: '/EmployeeSalaryRateMaster/GetDepartmentAndDesignationByUserName',
+                type: 'GET',
+                data: { empCode: empCode },
+                success: function (data) {
+                    // Set the Department and Designation dropdowns
+                    $('#ddlDeptt').val(data.depT_NAME || '');
+                    $('#ddlDesign').val(data.desG_NAME || '');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching department/designation:", xhr.responseText);
+                    toastr.error("Could not fetch department/designation.");
+                }
+            });
+        } else {
+            // Clear selection if no employee selected
+            $('#ddlDeptt').val('');
+            $('#ddlDesign').val('');
+        }
+    }
+
+    function loadDeptList() {
+        return $.ajax({
+            url: '/EmployeeSalaryRateMaster/GetDeptList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDeptt');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Department --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading departments: ", xhr.responseText);
+                toastr.error('Error loading departments: ' + error);
+            }
+        });
+    }
+    function loadDesgList() {
+        return $.ajax({
+            url: '/EmployeeSalaryRateMaster/GetDesgList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDesign');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Designation --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading designations: ", xhr.responseText);
+                toastr.error('Error loading designations: ' + error);
+            }
+        });
+    } 
+    function loadGradeList() {
+        $.ajax({
+            url: '/EmployeeSalaryRateMaster/GetGradeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlGrade');
+                ddl.empty();
+                ddl.append('<option value="">-- Select User --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    $('#ddlGrade').change(function () {
+        var gradeCode = $(this).val();
+        loadAlreadyExistEmpSalaryData(gradeCode);
+    });
+    function loadAlreadyExistEmpSalaryData(gradeCode){
+        if (gradeCode) {
+            $.ajax({
+                url: '/EmployeeSalaryRateMaster/GetSalaryByGrade',
+                type: 'GET',
+                data: { gradeCode: gradeCode },
+                success: function (data) {
+                    console.log(data);
+                    if (data) {
+                        // Fill the corresponding fields with returned data
+                        $('#NumBasic').val(data.basic || '');
+                        $('#NumHRA').val(data.hra || '');
+                        $('#NumConveyance').val(data.conv || '');
+                        $('#NumOthersAllowance').val(data.others || '');
+                        $('#NumTotalSalary').val(data.tot_Amt || '');
+                        $('#NumGWSalary').val(data.gw_Amt || '');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching salary details: ", xhr.responseText);
+                    toastr.error('Failed to load salary details: ' + error);
+                }
+            });
+        } else {
+            // Clear salary-related fields if no grade is selected
+            $('#NumBasic').val('');
+            $('#NumHRA').val('');
+            $('#NumConveyance').val('');
+            $('#NumOthersAllowance').val('');
+            $('#NumTotalSalary').val('');
+            $('#NumGWSalary').val('');
+        }
+    }
+
+    $('#EmployeeSalaryRateMasterForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const code = parseInt($('#CODE').val()) || 0;
+
+        // Get values
+        const empName = $('#ddlEmpName').val();
+        const effDate = $('#DtEffectiveDate').val();
+
+        // Validation
+        if (!empName) {
+            toastr.warning("Please select an employee.");
+            $('#ddlEmpName').focus();
+            return;
+        }
+
+        if (!effDate) {
+            toastr.warning("Please enter Effective Date.");
+            $('#DtEffectiveDate').focus();
+            return;
+        }
+
+        const salaryData = {
+            COMP_CODE: 1,
+            EFF_DATE: $('#DtEffectiveDate').val(),
+            EMP_CODE: parseInt($('#ddlEmpName').val()) || 0,   
+            M_TYPE: null,                                     
+
+            CODE: $('#TxtCode').val(),
+            EMP_NAME: $('#ddlEmpName option:selected').text(),
+            BASIC: parseFloat($('#NumBasic').val()) || 0,
+            HRA: parseFloat($('#NumHRA').val()) || 0,
+            SPL_ALLOW: parseFloat($('#NumUniformGW').val()) || 0,
+            SPL_ALLOW2: parseFloat($('#NumSplAllowance2').val()) || 0,
+            OTHERS: parseFloat($('#NumOthersAllowance').val()) || 0,
+            CONVEYANCE: parseFloat($('#NumConveyance').val()) || 0,
+            UNIFORM: 0,                                      
+            SECURITY: parseFloat($('#NumWashingAllowance').val()) || 0,
+            COMMUITY: 0,
+            INSURANCE: parseFloat($('#NumMedicalAmt').val()) || 0,
+            MOBILE_ALLOW: parseFloat($('#NumMobileAllowance').val()) || 0,
+            TOT_SALARY: parseFloat($('#NumTotalSalary').val()) || 0,
+            GW_SALARY: parseFloat($('#NumGWSalary').val()) || 0,
+            DUTY: parseInt($('#ddlDutyHrs').val()) || 0,
+            GRADE_CODE: parseInt($('#ddlGrade').val()) || 0,
+            DESG_CODE: parseInt($('#ddlDesign').val()) || 0,
+            DESG_NAME: $('#ddlDesign option:selected').text(),
+            DEPT_NAME: $('#ddlDeptt option:selected').text(),
+
+            IN_TIME: $('#TxtInTime').val(),
+            OUT_TIME: $('#TxtOutTime').val(),
+
+            OLD_GW_SALARY: parseFloat($('#NumUniformSal').val()) || 0,
+            VPF: parseFloat($('#NumVPFContri').val()) || 0,
+
+            ACTIVE: 1,                                      
+            UUSER: 1,
+            UDATE: new Date().toISOString(),
+            EUSER: 1,
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? "E" : "A",
+            WSID: "WEB",
+            LIP: "127.0.0.1",
+            LID: "WEB",
+            ACTION: code > 0 ? "UPDATE" : "INSERT"
+        };
+
+
+        $.ajax({
+            url: '/EmployeeSalaryRateMaster/SaveSalaryRate',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(salaryData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Salary record saved successfully!");
+                    $('#EmployeeSalaryRateMasterForm')[0].reset();
+                    setTimeout(() => {
+                        window.location.href = '/EmployeeSalaryRateMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning(response.message || "Could not save the record.");
+                }
+            },
+            error: function (xhr) {
+                const errMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errMsg);
+            }
+        });
+    });
+
+    function LoadEmployeeSalaryRateById(code) {
+        $.ajax({
+            url: '/EmployeeSalaryRateMasterList/GetEmployeeSalaryRateByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (data) {
+                if (!data) {
+                    toastr.warning("No data found.");
+                    return;
+                }
+
+                $('#CODE').val(data.code);
+                $('#TxtCode').val(data.code);
+                $('#TxtCode').attr('disabled',true);
+                $('#ddlEmpName').attr('disabled',true);
+
+                $('#DtEffectiveDate').val(data.efF_DATE ? data.efF_DATE.split('T')[0] : '');
+                $('#DtLastEffDate').val(data.lastEffectiveDate ? data.lastEffectiveDate.split('T')[0] : '');
+
+                $('#ddlEmpName').val(data.emP_CODE || '').trigger('change');
+                loadDeptAndDesignByEmpCode(data.emP_CODE);
+
+                $('#ddlGrade').val(data.gradE_CODE || '');
+
+                $('#NumBasic').val(data.basic || '');
+                $('#NumHRA').val(data.hra || '');
+                $('#NumConveyance').val(data.conveyance || '');
+                $('#NumOthersAllowance').val(data.others || '');
+                $('#NumUniformGW').val(data.uniform || '');
+                $('#NumWashingAllowance').val(data.security || '');
+                $('#NumUniformSal').val(data.spL_ALLOW || '');
+                $('#NumMobileAllowance').val(data.mobilE_ALLOW || '');
+                $('#NumMedicalAmt').val(data.medicalAmount || '');
+                $('#NumSplAllowance2').val(data.spL_ALLOW2 || '');
+                $('#NumTotalSalary').val(data.toT_SALARY || '');
+                $('#NumGWSalary').val(data.gW_SALARY || '');
+                $('#NumVPFContri').val(data.vpf || '');
+                $('#ddlDutyHrs').val(data.duty || '');
+
+                function formatTime(t) {
+                    if (!t) return '';
+                    let parts = t.split(':');
+                    if (parts.length >= 2) {
+                        return parts[0].padStart(2, '0') + ':' + parts[1].padStart(2, '0');
+                    }
+                    return '';
+                }
+                $('#TxtInTime').val(formatTime(data.iN_TIME));
+                $('#TxtOutTime').val(formatTime(data.ouT_TIME));
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading employee salary rate:", status, error);
+                toastr.error("Error: " + xhr.responseText);
+            }
+        });
+    }
+
+    function setEmployeeSalaryRateFormReadOnly() {
+        const form = $('#EmployeeSalaryRateMasterForm');
+        form.find('input, select, textarea').prop('disabled', true);
+        form.find('button').prop('disabled', true);
+    }
+
+</script>
+

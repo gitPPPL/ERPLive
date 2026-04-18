@@ -1,0 +1,353 @@
+﻿@{
+	ViewBag.Title = "TaxCodeList";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Item Master Group</legend>
+
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "ItemMainGroupList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+			</div>
+		</div>
+	</div>
+	 
+	 
+<form id="ItemMasterGroup">
+	<input type="hidden" class="form-control" name="CODE" id="CODE">
+	<div class="row">
+			<div class="col-md-4">
+				<div class="form-group"> 
+				<label>Name<span class="required">*</span></label>
+				<input type="text" class="form-control" name="Name" id="Name" placeholder="Enter Name">
+			</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Short Name</label>
+			<input type="text" class="form-control" name="SHORT_NAME" id="SHORT_NAME" placeholder="Enter Short Name">
+		</div>
+		</div>
+		<div class="col-md-4">
+		   <div class="form-group">
+			<label>Main group type</label>
+			<select class="form-control" id="MAIN_GROUP_TYPE" name="MAIN_GROUP_TYPE">
+				<option value="">-- Select Option --</option>
+			</select>
+		</div>
+	</div>
+	</div>
+		
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Planning Method</label>
+			<select class="form-control" id="PLANNING_METHOD" name="PLANNING_METHOD">
+				<option value="">-- Select Option --</option>
+			</select>
+		</div>
+	</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Procedure Method</label>
+			<select class="form-control" id="PROCEDURE_METHOD" name="PROCEDURE_METHOD">
+				<option value="">-- Select Option --</option>
+			</select>
+		</div>
+	</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Validation Method</label>
+			<select class="form-control" id="VALIDATION_METHOD" name="VALIDATION_METHOD">
+				<option value="">-- Select Option --</option>
+			</select>
+		</div>
+	</div>
+		</div>
+			
+		<div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+				<div class="btn-last">
+				<button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+			</div>
+			</div>
+		</div>
+		
+</form>
+
+</fieldset>
+
+
+<script>
+	$(document).ready(function () {
+		$(function () {
+			const urlParams = new URLSearchParams(location.search);
+			const rowId = parseInt(urlParams.get('id'));
+			const isReadOnly = urlParams.get('readOnly') === 'true';
+			if (!isNaN(rowId) && rowId > 0) {
+				LoadItemMasterGroupById(rowId);
+
+				if (isReadOnly) {
+					setFormReadOnly(); 
+				}
+			}
+		});
+
+		loadMainGroupTypes();
+		loadPlanningMethodList();
+		loadProcedurmentMethodList();
+		loadValuationMethodList();
+		$('#ACTIVE').on('change', function () {
+            const status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+	});
+
+	function loadMainGroupTypes() {
+		$.ajax({
+			url: '/ItemMainGroup/GetMainGroupTypesList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#MAIN_GROUP_TYPE');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+	
+	function loadPlanningMethodList() {
+		$.ajax({
+			url: '/ItemMainGroup/GetPlanningMethodList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#PLANNING_METHOD');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+	
+	function loadProcedurmentMethodList() {
+		$.ajax({
+			url: '/ItemMainGroup/GetProcedurmentMethodList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#PROCEDURE_METHOD');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+	
+	function loadValuationMethodList() {
+		$.ajax({
+			url: '/ItemMainGroup/GetValuationMethodList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#VALIDATION_METHOD');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+	$('#ItemMasterGroup').on('submit', function (e) {
+		e.preventDefault();
+		if (!validateRequiredField('#Name', 'Name')) return;
+		
+		var code = parseInt($('#CODE').val()) || 0;
+		var itemGroupData = {
+		    CODE: code, 
+		    COMP_CODE: 1, 
+		    NAME: $('#Name').val(),
+		    SHORTNAME: $('#SHORT_NAME').val(),
+		    MAIN_TYPE: $('#MAIN_GROUP_TYPE').val(),
+		    MGROUP_TYPE: $('#MAIN_GROUP_TYPE').val(),
+		    PLANNING_METHOD: $('#PLANNING_METHOD').val(),
+		    PROCUREMENT_METHOD: $('#PROCEDURE_METHOD').val(),
+		    VALUATION_METHOD: $('#VALIDATION_METHOD').val(),
+            ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+		    UUSER: 1,
+		    UDATE: new Date().toISOString(),
+		    EUSER: 1,
+		    EDATE: new Date().toISOString(),
+		    AED: "A",
+		    WSID: "WEB",
+		    LIP: "127.0.0.1",
+		    LID: "WEB",
+		    ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+
+		$.ajax({
+		    url: '/ItemMainGroup/SaveItemMainGroup', // Make sure this matches your backend route
+		    type: 'POST',
+		    contentType: 'application/json',
+		    data: JSON.stringify(itemGroupData),
+		    success: function (response) {
+				if (response.success) {
+					toastr.success("Saved successfully!");
+					$('#ItemMasterGroup')[0].reset();
+					setTimeout(function () {
+						window.location.href = '/ItemMainGroupList/Index';
+					}, 1000);
+				} else {
+					const message = response.message || "Something went wrong while saving.";
+					toastr.warning(message);				
+				}
+		    },
+		    error: function (xhr) {
+				const message = response.message || "Something went wrong while saving.";
+				toastr.warning(message);				
+		    }
+		});
+	});
+
+	function LoadItemMasterGroupById(code) {
+		$.ajax({
+		    url: '/ItemMainGroup/GetItemMasterGroupByCode', // Update URL if needed
+		    type: 'GET',
+		    data: { code: code },
+		    success: function (data) {
+		        // Fill form fields with returned data
+		        $('input[name="CODE"]').val(data.code);
+		        $('#Name').val(data.name);
+		        $('#SHORT_NAME').val(data.shortname);
+		        $('#MAIN_GROUP_TYPE').val(data.mgrouP_TYPE).trigger('change');
+		        $('#PLANNING_METHOD').val(data.planninG_METHOD).trigger('change');
+		        $('#PROCEDURE_METHOD').val(data.procuremenT_METHOD).trigger('change');
+		        $('#VALIDATION_METHOD').val(data.valuatioN_METHOD).trigger('change');
+				$('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+
+		    },
+		    error: function (xhr, status, error) {
+		        console.error("Error loading ItemMasterGroup by ID:", status, error);
+		        toastr.error('Error: ' + xhr.responseText);
+		    }
+		});
+	}
+
+	function setFormReadOnly() {
+		const form = $('#ItemMasterGroup');
+		form.find('input[type="text"], select, textarea').prop('disabled', true);
+		form.find('input[type="checkbox"]').prop('disabled', true);
+		form.find('button').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled'); // optional, for visual feedback
+	}
+	
+</script>
+
+
+
+
+@* Cancel Button Popup *@
+<script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+
+	</Script>
+@* Status Check end *@

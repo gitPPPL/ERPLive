@@ -1,0 +1,364 @@
+﻿@{
+    ViewBag.Title = "Parameter Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Parameter Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "ParameterMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <form id="QCParameterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <div class="row">
+            <!-- QC Parameter Name -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtQCParameterName">QC Parameter Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtQCParameterName" maxlength="30" name="QCParameterName" placeholder="Enter QC Parameter Name">
+                </div>
+            </div>
+
+            <!-- Short Name -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName">Short Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtShortName" maxlength="30" name="ShortName" placeholder="Enter Short Name">
+                </div>
+            </div>
+
+            <!-- QC Unit -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlQCUnit">QC Unit</label>
+                    <select class="form-control" id="ddlQCUnit" name="QCUnit">
+                        <option selected disabled>--Select Unit Name--</option>                       
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quantity -->
+            <div class="col-md-3">
+                <div class="form-group form-check mt-4">
+                    <input type="checkbox" class="form-check-input" id="ChkQuantity" value="0" name="Quantity">
+                    <label class="form-check-label" for="ChkQuantity">Quantity</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+						<input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+   </form>
+</fieldset>
+
+
+<script>
+	let PreviousInputDt = "";
+	let MasterTblId ;
+	let readOnly;
+
+	$(document).ready(function () {
+		getUnitList();
+		 
+		MasterTblId = getQueryParam('id');
+		readOnly = getQueryParam('readOnly');
+
+		if (MasterTblId) {
+			GetMasterDataList(MasterTblId, readOnly);
+		}
+
+		 
+		$('#TxtQCParameterName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtShortName').focus();
+			}
+		});
+		 
+		$('#TxtShortName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#btn-save').focus();
+			}
+		});
+
+	 $('#ChkQuantity').on('change', function () {
+		var quantityValue = $(this).is(':checked') ? 1 : 0;	
+	     $(this).val(quantityValue);
+	});
+
+		$('#DdActive').on('change', function () {
+			let isChecked = $(this).is(':checked');
+			let status = isChecked ? 'Active' : 'Inactive';
+			let value = isChecked ? 1 : 0;
+			$('#statusText').text(status);
+			$(this).val(value);
+		});
+
+		$('#btn-save').on('click', function (e) {
+			e.preventDefault();
+			const masterData = collectFormData();
+
+			if (!masterData.Name || !masterData.ShortName) {
+				toastr.warning("Please fill all required fields");
+				return;
+			}
+
+			if (MasterTblId) {
+				EditMasterData(masterData);
+			} else {
+				SaveMasterData(masterData);
+			}
+		});
+	});
+
+	function SaveMasterData(masterData) {
+		const Namee = masterData?.Name?.trim();
+		console.log(masterData);
+		if (!Namee) {
+			toastr.warning("Parameter Name is required.");
+			return;
+		}
+		checkExistOrNot(Namee)
+			.done(function (data) {
+				if (data?.status && data?.exists) {
+					toastr.warning("Duplicate Parameter Name");
+					return;
+				}
+
+				$.ajax({
+					url: '@Url.Action("SaveQParamMast", "ParameterMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(masterData),
+					success: function (response) {
+						if (response?.status) {
+							toastr.success('Data saved successfully.');
+							resetFields();
+							setTimeout(() => {
+								window.location.href = '/ParameterMasterList/Index';
+							}, 1500);
+						} else {
+							toastr.error(response?.message || "Save failed. Please try again.");
+						}
+					},
+					error: function () {
+						toastr.error("Error occurred while saving. Please contact admin.");
+					}
+				});
+			})
+			.fail(function () {
+				toastr.error("Error while checking Parameter name.");
+			});
+	}
+
+	function EditMasterData(masterData) {
+		if (PreviousInputDt !== masterData.Name) {
+			checkExistOrNot(masterData.Name)
+				.done(function (data) {
+					if (data?.status && data?.exists) {
+						toastr.warning("Duplicate Parameter Name");
+						return;
+					}
+					UpdateMasterData(masterData);
+				})
+				.fail(function () {
+					toastr.error("Error while checking Parameter Name.");
+				});
+		} else {
+			UpdateMasterData(masterData);
+		}
+	}
+
+	function UpdateMasterData(masterData) {
+		$.ajax({
+			url: '/ParameterMaster/UpdateQParameterMast',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(masterData),
+			dataType: 'json',
+			success: function (response) {
+				if (response?.status) {
+					toastr.success('Data updated successfully.');
+					resetFields();
+					setTimeout(() => {
+						window.location.href = '/ParameterMasterList/Index';
+					}, 1500);
+				} else {
+					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error("Data not updated: " + error);
+			}
+		});
+	}
+
+	function GetMasterDataList(MasterTblId, readOnly) {
+		$.ajax({
+			url: '/ParameterMaster/GetQParameterDetailsById',
+			type: 'GET',
+			data: { id: MasterTblId },
+			success: function (res) {
+				if (res.status && res.data) {
+					console.log(res.data);
+					fillFormFields(res.data);
+					if (readOnly === 'true') {
+						$('input, #ddlQCUnit, #ChkQuantity, #DdActive').prop('disabled', true);
+						$('#btn-save, #cancelBtn').hide();
+					} else {
+						$('input, #ddlQCUnit, #ChkQuantity, #DdActive').prop('disabled', false);
+						$('#btn-save, #cancelBtn').show();
+					}
+				} else {
+					toastr.warning('No data found for this ID.');
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load data.');
+			}
+		});
+	}
+
+	function resetFields() {
+		$('#TxtCode, #TxtQCParameterName, #TxtShortName, #searchInput').val('');
+		$('#ddlQCUnit').prop('selectedIndex', 0);
+		setActiveStatus(1);
+		setCheckboxValue(0);
+	}
+
+	function fillFormFields(dt) {
+		console.log(dt);
+		$('#ddlQCUnit').val(dt.QUNIT_CODE);
+		$('#TxtCode').val(dt.CODE);
+		$('#TxtQCParameterName').val(dt.NAME);
+		$('#TxtShortName').val(dt.SHORTNAME);
+		setCheckboxValue(dt.QTY);
+		setActiveStatus(dt.ACTIVE);
+		PreviousInputDt = dt.NAME;
+	}
+
+	function collectFormData() {
+		return {
+			code: toNullableInt($('#TxtCode').val()),			 
+			Name: toNullableString($('#TxtQCParameterName').val()),
+			ShortName: toNullableString($('#TxtShortName').val()),
+			QUnitCd: toNullableString($('#ddlQCUnit').val()),
+			Qty : $('#ChkQuantity').val(),
+			active: $('#DdActive').val()
+		};
+	}
+
+	function checkExistOrNot(inputData) {
+		return $.ajax({
+			url: '/ParameterMaster/getExistOrNot',
+			type: 'GET',
+			dataType: 'json',
+			data: { inputData: inputData }
+		});
+	}
+
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "Do you want to cancel all the changes?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, cancel it!',
+			cancelButtonText: 'No, keep it',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+				if (MasterTblId) {
+					GetMasterDataList(MasterTblId, readOnly);
+				} else {
+					resetFields();
+				}
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+			}
+		});
+	});
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+	function setActiveStatus(input) {
+		let isActive = input == 1;
+		$('#DdActive').prop('checked', isActive);
+		$('#DdActive').val(isActive ? 1 : 0);
+		$('#statusText').text(isActive ? 'Active' : 'Inactive');
+	}
+
+	function setCheckboxValue(value) {
+		if (value == 1) {
+			$('#ChkQuantity').prop('checked', true);
+		} else {
+			$('#ChkQuantity').prop('checked', false);
+		}
+	}
+
+	function getUnitList() {
+		$.ajax({
+			url: '@Url.Action("GetUnit", "ParameterMaster")',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				if (data.status === true && Array.isArray(data.data)) {
+					console.log(data.data);
+					var $colorGrpList = $('#ddlQCUnit');
+					$colorGrpList.empty();
+					$colorGrpList.append($('<option selected disabled>').val('').text('Select Parameter Group'));
+					data.data.forEach(function (item) {
+						$colorGrpList.append($('<option>').val(item.CODE).text(item.NAME));
+					});
+				} else {
+					toastr.warning("No data found");
+				}
+			},
+			error: function (xhr) {
+				toastr.error("Data load failed");
+			}
+		});
+	}
+
+	 
+
+
+</script>

@@ -1,0 +1,874 @@
+﻿@{
+    ViewBag.Title = "Employee Current Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Employee Current Status</legend>
+    <form id="EmployeeCurrentStatusForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        @* <option value="">Select Doc Type</option> *@
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+        </div>
+        <fieldset>
+            <legend class="sub-legend">Filter By</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlDepartment">Department</label>
+                        <select class="form-control" id="ddlDepartment">
+                            <option value="">Select Department</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlCategoryPlace">Category/Place</label>
+                        <select class="form-control" id="ddlCategoryPlace">
+                            <option value="">Select Category/Place</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtDate">Date</label>
+                        <input type="date" class="form-control" id="DtDate" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlShift">Shift</label>
+                        <select class="form-control" id="ddlShift">
+                            <option value="">Select Shift</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-8 col-md-4">
+                    <div class="btn-mt button-right">
+                        <button id="btn_LoadData" type="button" class="btn btn-success"><i class="fa fa-download"></i>Load Data</button>
+                        <button id="btn_Print" type="button" class="btn btn-primary"><i class="fa fa-print"></i>Print</button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblEmployeeCurrentStatus" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Employee code</th>
+                            <th>Employee Name</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>InTime</th>
+                            <th>Present Status</th>
+                            <th>Remarks</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "EmployeeCurrentStatusList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+
+    const allFieldIds = [
+         "ddlDocType",
+         "NumDocNo",
+         "DtDocDate",
+         "ddlDepartment",
+         "ddlCategoryPlace",
+         "DtDate",
+         "ddlShift"
+    ];
+ 
+    const itemRecords = [
+        "txtEmployeeCode",
+        "ddlEmployee",
+        "ddlDepartment",
+        "ddlDesignation",
+        "txtInTime",
+        "ddlPresentStatus",
+        "txtRemarks"
+    ];
+
+    let docId = "", readOnly;
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await GetDocTypeAsync();
+        await handleDocLoad();        
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+      
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();   
+
+      if (!validateRequiredField('#ddlDocType','Doc Type') ||
+            !validateRequiredField('#NumDocNo','Doc No') ||
+            !validateRequiredField('#DtDocDate','Doc Date')) return;                  
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          if(data.payEmpStatusDetails.length === 0){
+              toastr.error("No item details to save.");
+              return;
+          }
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+      });
+
+      $('#ddlDocType').on('change', () => {
+        const val = $('#ddlDocType').val();
+        if (val) GetDocid(val);
+      });
+
+      $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        const tbody = $(this).closest('tbody');
+        if (tbody.find('tr').length > 1) {
+          $(this).closest('tr').remove();
+        } else {
+          alert('Cannot delete the first row.');
+        }
+      });
+
+      $(document).on('click', '#btn_LoadData', function(){
+          var departmentID= $('#ddlDepartment').val();
+          var categoryID= $('#ddlCategoryPlace').val();
+          var date= $('#DtDate').val();
+          var shift= $('#ddlShift').val();
+            if(!departmentID){
+                toastr.error("Please select Department");
+                return;
+            }
+            if(!date){
+                toastr.error("Please select Date");
+                return;
+            }
+        
+          const $tbody = $('#tblEmployeeCurrentStatus tbody');
+          $tbody.empty();
+          fillDataTableByFilter(departmentID, categoryID, date, shift);
+
+      });
+
+        
+    }
+
+</script>
+
+<script>
+
+    async function fillDataTableByFilter(departmentID, categoryID, date, shift) {
+        try {
+            const response = await $.ajax({
+                url: '@Url.Action("LoaddataByFilter", "EmployeeCurrentStatus")',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    departmentId: departmentID,
+                    categoryId: categoryID,
+                    date: date,
+                    shiftData: shift
+                }
+            });
+
+            if (response.status === true && response.data && response.data.length > 0) {
+                const itemsData = response.data; 
+                for (let index = 0; index < itemsData.length; index++) {
+                    const item = itemsData[index];
+                    const idx = index + 1; 
+                    addItemRecordRow(idx);
+                    if (typeof bindDropdownData === 'function') {
+                        await bindDropdownData(idx); 
+                    }
+
+                   $(`#txtEmployeeCode${idx}`).val(item.Emp_code ?? "");
+                   $(`#ddlEmployee${idx}`).val(item.Emp_code ?? "").trigger('change');
+                   $(`#ddlDepartment${idx}`).val(item.Dept_Code ?? "").trigger('change');
+                   $(`#ddlDesignation${idx}`).val(item.Desg_Code ?? "").trigger('change');                  
+                    $(`#txtInTime${idx}`).val(formatTime(item.In_Time));
+                    $(`#ddlPresentStatus${idx}`).val("Yes").trigger('change');  
+                    $(`#txtRemarks${idx}`).val(item.Remarks || "");
+                }
+
+            } else {
+                toastr.warning("No records found.");
+            }
+        } catch (error) {
+            console.error("AJAX Error:", error);
+            toastr.error("Error fetching data: " + error);
+        }
+    }
+
+    function formatTime(timeStr) {
+        // Ensure timeStr is 4 characters and all digits
+        if (!timeStr || timeStr.length !== 4 || isNaN(timeStr)) return "";
+
+        const hours = timeStr.substring(0, 2);
+        const minutes = timeStr.substring(2, 4);
+        return `${hours}:${minutes}`;
+    }
+
+
+    async function handleDocLoad() {
+             docId = getQueryParam('id');
+             readOnly = getQueryParam('readOnly');
+            if (docId) {
+                console.log('a');
+                await GetDocData(docId, readOnly);
+
+
+            } else {
+                $('#ddlDocType').prop('selectedIndex', 0);
+                const Vtype = $('#ddlDocType').val();
+                if(Vtype)
+                {
+                  GetDocid(Vtype);
+                }               
+                const today = new Date();
+                const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+                    $('#DtDocDate').val(todayDate);
+                    $('#DtDate').val(todayDate);
+                  GetShiftList();                 
+                  GetDepartmentList();
+                  GetCategorytList();           
+            
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateEmpCurrentStatusEntry", "EmployeeCurrentStatus")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/EmployeeCurrentStatusList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateEmpCurrentStatusEntry", "EmployeeCurrentStatus")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");
+                    // showFlashMessageByKey('update', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/EmployeeCurrentStatusList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillHeaderData(headdata) {
+       if (!Array.isArray(headdata) || headdata.length === 0) {
+        console.error("Invalid or empty header data:", headdata);
+        toastr.error("No header data found to populate the form.");
+        return;
+       }
+        const data = headdata[0];
+        $("#TxtDocId").val(data.DOC_ID ?? "");
+        $("#ddlDocType").val(data.V_TYPE ?? "");
+        $("#NumDocNo").val(data.V_NO ?? "");
+        $("#DtDocDate").val((data.V_DATE || '').substring(0, 10));
+        $("#DtDate").val((data.V_DATE || '').substring(0, 10));
+        $("#ddlShift").val(data.SHIFT ?? "").trigger('change');
+        
+    }
+
+    async function collectFormData() {
+        const detailTableData = await collectItemsDetail();        
+        return {
+            V_TYPE: toNullableString($("#ddlDocType").val()),
+            V_NO: parseIntSafe($("#NumDocNo").val()),
+            DOC_ID: toNullableString(document.getElementById("TxtDocId")?.value),
+            V_DATE: toNullableDate($("#DtDocDate").val()),
+            SHIFT: toNullableString($("#ddlShift").val()),
+            SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update",
+            payEmpStatusDetails: detailTableData
+        };
+    }
+
+
+    async function collectItemsDetail() {
+        const items = [];
+
+        $('#tblEmployeeCurrentStatus tbody tr').each(function () {
+            const idx = this.id.replace('row', '');
+            const $r = $(this);
+
+            items.push({
+                SNO: parseIntSafe(idx),
+                EMP_CODE: parseIntSafe($r.find(`#txtEmployeeCode${idx}`).val()),
+                EMP_NAME: $r.find(`#ddlEmployee${idx} option:selected`).text() || null,
+                DEPT_CODE: parseIntSafe($r.find(`#ddlDepartment${idx}`).val()),
+                DESG_CODE: parseIntSafe($r.find(`#ddlDesignation${idx}`).val()),
+                TDEPT_CODE: parseIntSafe($r.find(`#ddlDepartment${idx}`).val()),
+                IN_DATE: toNullableDate($('#txtDate').val()), 
+                IN_TIME: toNullableTime($r.find(`#txtInTime${idx}`).val()),
+                STATUS: $r.find(`#ddlPresentStatus${idx}`).val() || null,
+                REMARKS: $r.find(`#txtRemarks${idx}`).val() || null
+            });
+        });
+
+        return items;
+    }
+
+
+    async function fillItemDetailTable(itemsData) {
+        const $tbody = $('#tblEmployeeCurrentStatus tbody');
+        $tbody.empty();
+        console.log(itemsData, itemsData.length);
+
+        for (let index = 0; index < itemsData.length; index++) {
+            const item = itemsData[index];
+            const idx = index + 1;
+
+            addItemRecordRow();                
+            await bindDropdownData(idx);   
+            $(`#txtEmployeeCode${idx}`).val(item.EMP_CODE ?? "");
+            if (item.EMP_CODE) {
+                $(`#ddlEmployee${idx}`).val(item.EMP_CODE).trigger('change');
+            }
+            $(`#ddlDepartment${idx}`).val(item.DEPT_CODE ?? "").trigger('change');
+            $(`#ddlDesignation${idx}`).val(item.DESG_CODE ?? "").trigger('change');
+            $(`#txtInTime${idx}`).val(formatTime(item.IN_TIME ?? ""));
+            $(`#ddlPresentStatus${idx}`).val(item.STATUS ?? "").trigger('change');
+            $(`#txtRemarks${idx}`).val(item.REMARKS ?? "");
+        }
+
+        // Set common IN_DATE (same for all rows)
+        if (itemsData.length > 0 && itemsData[0].IN_DATE) {
+            $('#txtDate').val(formatDate(itemsData[0].IN_DATE));
+        }
+    }
+
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                   url: '@Url.Action("GetDocType", "EmployeeCurrentStatus")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid(VType) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "EmployeeCurrentStatus")',
+            type: 'GET',
+            data:{V_type:VType},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function GetShiftList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetshiftList", "EmployeeCurrentStatus")',
+            type: 'GET',
+            dataType: 'json',           
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlShift');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Shift -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.NAME}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Shift Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Shift Load failed", error);
+            }
+        });
+    }
+
+    function GetDepartmentList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDepartmentMast", "EmployeeCurrentStatus")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlDepartment');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Department Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Transport Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Name Load failed", error);
+            }
+        });
+    }
+     function GetCategorytList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDepartmentMast", "EmployeeCurrentStatus")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlCategoryPlace');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Category Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Transport Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Name Load failed", error);
+            }
+        });
+    }
+
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableTime(val) {
+        if (!val) return null;
+        return val.replace(":", ""); 
+    }
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/EmployeeCurrentStatus/GetEmpCurrentStatusById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                console.log(response.data);
+                await fillHeaderData(response.data);
+                await fillItemDetailTable(response.data);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblEmployeeCurrentStatus tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+        <tr class="no-border-input" id="row${rowCount}">
+                    
+             <td>
+                <input type="text" class="form-control" id="txtEmployeeCode${rowCount}" readonly />
+            </td>
+           <td>
+                <select class="form-control" id="ddlEmployee${rowCount}">
+                    <option value="">- Select Employee -</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="form-control" id="ddlDepartment${rowCount}">
+                    <option value="">- Select Department -</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="form-control" id="ddlDesignation${rowCount}">
+                    <option value="">- Select Designation -</option>
+                </select>
+            </td>
+
+            <td>
+                <input type="time" class="form-control" id="txtInTime${rowCount}" />
+            </td>
+            <td>
+                <select class="form-control" id="ddlPresentStatus${rowCount}">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control" id="txtRemarks${rowCount}" maxlength="300" />
+            </td>
+            <td style="display:none;">
+                <i class="fa fa-plus btn-add-action btn-Itemadd-action" title="Add Row"></i>
+                <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
+            </td>
+        </tr>
+        `;
+
+        tbody.append(newRow);
+        bindDropdownData(rowCount);
+        // setEnterKeyFocusOnTable?.(itemRecords, rowCount);
+
+    }
+
+    function bindDropdownData(rowCount) {
+        const employeeSelect = $(`#ddlEmployee${rowCount}`);
+        const departSelect = $(`#ddlDepartment${rowCount}`);
+        const designSelect = $(`#ddlDesignation${rowCount}`);
+
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: defaultText,
+                                    disabled: true,
+                                    selected: true
+                                })
+                            );
+
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '100%',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: 0
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} load failed`);
+                            resolve();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(`Error loading ${defaultText}: ${error}`);
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+        return Promise.all([
+            loadDropdown(
+                '@Url.Action("GetEmployeeMast", "EmployeeCurrentStatus")',
+                employeeSelect,
+                "- Select Employee -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetDepartmentMast", "EmployeeCurrentStatus")',
+                departSelect,
+                "- Select Department -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetDesignMastList", "EmployeeCurrentStatus")',
+                designSelect,
+                "- Select Designation -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            )
+        ]);
+    }
+
+    function convertTo24HourFormat(timeStr) {
+        if (!timeStr) return '';
+
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
+            return timeStr.substring(0, 5);
+        }
+
+        const [time, modifier] = timeStr.split(' ');
+        if (!time || !modifier) return '';
+
+        let [hours, minutes] = time.split(':');
+
+        if (modifier.toUpperCase() === 'PM' && hours !== '12') {
+            hours = String(Number(hours) + 12);
+        } else if (modifier.toUpperCase() === 'AM' && hours === '12') {
+            hours = '00';
+        }
+
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+
+</script>
+
+
+

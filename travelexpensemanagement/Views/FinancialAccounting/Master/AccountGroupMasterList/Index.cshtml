@@ -1,0 +1,238 @@
+﻿@{
+    ViewBag.Title = "Account Group Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Account Group Master List</legend>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="button-right">
+
+            <button  onclick="window.location.href='@Url.Action("Index", "AccountGroupMaster")'" type="submit" class="btn btn-add">
+                <i class="fa fa-plus"></i>Add
+            </button>
+            <button class="btn btn-print">
+                <i class="fa fa-print"></i> Print
+            </button>
+            <button class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+            <button class="btn btn-mail">
+                <i class="fa fa-envelope"></i> Mail
+            </button>
+            <button class="btn btn-send">
+                <i class="fa fa-paper-plane"></i> Approval Send
+            </button>
+            <button class="btn btn-approved">
+                <i class="fa fa-check"></i> Approved
+            </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mt-1">
+        <div class="table-responsive">
+            <table id="ItemAccountMain" class="table table-striped table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th>Code</th>
+                        <th>Group Name</th>
+                        <th>Short Name</th>
+                        <th>Main Group Name</th>
+                        <th>Nature</th>
+                        <th>Schedule Grouping</th>
+                        <th>Sub Schedule Name</th>
+                        <th>Main Schedule Name</th>
+                        <th>Grouping on Trail</th>
+                        <th>Active</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- Pagination container -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function () {
+      loadAllAccountMain(currentPage);
+      $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadAllAccountMain(currentPage);
+      });
+    });
+
+    function loadAllAccountMain(page) {
+      currentPage = page || 1;
+      const searchTerm = $('#searchBox').val().trim();
+      $.ajax({
+        url: '/AccountGroupMasterList/GetAccountGroupMasterList',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+          pageNumber: currentPage,
+          pageSize: pageSize,
+          searchTerm: searchTerm
+        },
+        success: function (res) {
+          if (res.error) {
+            alert('Error: ' + res.message);
+            return;
+          }
+          const groups = res.groups;
+          console.log(groups)
+          const totalCount = res.totalCount;
+          let tbody = $('#ItemAccountMain tbody');
+          tbody.empty();
+
+          if (!groups || groups.length === 0) {
+            tbody.append('<tr><td colspan="6" class="text-center text-muted">No item groups found.</td></tr>');
+            renderPagination(0, pageSize, currentPage);
+            return;
+          }
+          groups.forEach(group => {
+            tbody.append(`
+              <tr>
+                <td>${group.code}</td>
+                <td>${group.grouP_NAME}</td>
+                <td>${group.shorT_NAME}</td>
+                <td>${group.maiN_GROUP_NAME}</td>
+                <td>${group.nature}</td>
+                <td>${group.schedulE_GROUPING || 'NA'}</td>
+                <td>${group.suB_SCHEDULE_NAME}</td>
+                <td>${group.maiN_SCHEDULE_NAME}</td>
+                <td>${group.groupinG_ON_TRAIL ? 'Yes' : 'No'}</td>
+                <td>${group.active ? 'Active' : 'Inactive'}</td>
+                <td>
+                  <i class="fa fa-edit btn-edit"  title="Edit" onclick="AddOrEditItemGroup(${group.code})"></i>
+                  <i class="fa fa-eye btn-view"  title="View" onclick="viewItemGroupDetails(${group.code})"></i>
+                  <i class="fa fa-trash btn-delete"  title="Delete" onclick="Delete(${group.code})"></i>
+                </td>
+              </tr>
+            `);
+          });
+          renderPagination(totalCount, pageSize, currentPage);
+        },
+        error: function (xhr) {
+          alert('Error: ' + xhr.responseText);
+        }
+      });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+      const totalPages = Math.ceil(total / pageSize);
+      const container = $('#tablePagination');
+      container.empty();
+
+      if (total === 0 || totalPages <= 1) return;
+      let html = '';
+      if (currentPage > 1) {
+        html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+        html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+      }
+
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
+
+      if (currentPage <= 3) endPage = Math.min(5, totalPages);
+      if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+      }
+      if (currentPage < totalPages) {
+        html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+        html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+      }
+      container.html(html);
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      loadAllAccountMain(currentPage);
+    }
+
+    function AddOrEditItemGroup(id) {
+      window.location.href = '/AccountGroupMaster/Index?id=' + id;
+    }
+    function viewItemGroupDetails(id) {
+      window.location.href = '/AccountGroupMaster/Index?id=' + id + '&mode=view';
+    }
+    // function Delete(id) {
+    //     if (!confirm("Are you sure you want to delete this record?")) return;
+
+    //     $.ajax({
+    //         url: '/AccountGroupMasterList/DeleteID',
+    //         type: 'POST',    // 👉 Use POST
+    //         dataType: 'json',
+    //         data: { ID: id },  // 👉 Parameter must match action argument (ID)
+    //         success: function (res) {
+    //             if (res.success) {
+    //                 toastr.success(res.message || "Record deleted successfully!");
+    //                 loadAllAccountMain(1);
+    //             } else {
+    //                 toastr.error(res.message || "Unable to delete record!");
+    //             }
+    //         },
+    //         error: function (xhr) {
+    //             toastr.error("Error: " + xhr.responseText);
+    //         }
+    //     });
+    // }
+
+        function Delete(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action will permanently delete the subgroup.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/AccountGroupMasterList/DeleteID',
+                    type: 'POST',
+                    data: { ID: id }, // 🔥 MUST MATCH CONTROLLER
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success')
+                                .then(() => loadAllAccountMain());
+                        } else {
+                            Swal.fire('Failed', response.message, 'warning');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'An error occurred during deletion.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+
+
+</script>
+

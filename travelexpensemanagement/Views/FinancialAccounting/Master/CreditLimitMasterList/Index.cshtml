@@ -1,0 +1,381 @@
+﻿@{
+    ViewBag.Title = "Credit Limit Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+}
+<fieldset>
+    <legend class="legend-field">Credit Limit Master List</legend>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+            </div>
+        </div>
+
+        <div class="">
+            @foreach (var permission in Model.UserMenuPermissions)
+            {
+                if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+                {
+                    <div class="">
+                        <div class="col-md-12">
+                            @* Add Button *@
+                            @if (Model.UserLevel == 1 || permission._ADD == 1)
+                            {
+                                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "CreditLimitMaster")'" type="submit" class="btn btn-primary">
+                                    <i class="fa fa-plus"></i>Add
+                                </button>
+                            }
+                            @* Edit Button *@
+                            @* Print Button *@
+                            @if (Model.UserLevel == 1 || permission._PRINT == 1)
+                            {
+                                <button class="btn btn-secondary">
+                                    <i class="fa fa-print"></i> Print
+                                </button>
+                            }
+                            @* Export Button *@
+                            @if (Model.UserLevel == 1 || permission._EXPORT == 1)
+                            {
+                                <button class="btn btn-success">
+                                    <i class="fa fa-file-excel-o"></i> Export
+                                </button>
+                            }
+                            @* Mail Button *@
+                            @if (Model.UserLevel == 1 || permission._MAIL == 1)
+                            {
+                                <button class="btn btn-info">
+                                    <i class="fa fa-envelope"></i> Mail
+                                </button>
+                            }
+                            @* Approval Button *@
+                            @if (Model.UserLevel == 1 || permission._APPROVAL == 1)
+                            {
+                                <button class="btn btn-dark">
+                                    <i class="fa fa-check"></i> Approve
+                                </button>
+                            }
+                            @* Doc Detail Button *@
+                            @if (Model.UserLevel == 1 || permission._DOCDETAIL == 1)
+                            {
+                                <button class="btn btn-primary">
+                                    <i class="fa fa-file-text"></i> Doc Detail
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mt-1">
+        <div class="table-responsive">
+            <table id="tblcreditlimit" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">Code</th>
+                        <th>Eff From</th>
+                        <th>Party Name</th>
+                        <th>Group Name</th>
+                        <th>CR Limit</th>
+                        <th>Insu. CRDays</th>
+                        <th>Approval Type</th>
+                        <th>Our Approval</th>
+                        <th>V NO</th>
+                        <th>Remarks</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Pagination container -->
+        <div class="row p-3">
+            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+        </div>
+    </div>
+</fieldset>
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+    let partyMap = {};
+    let groupMap = {};
+
+    $(document).ready(function () {
+        $.when(loadPartyList(), loadGroupList()).done(function () {
+            loadCreditLimitList();
+        });
+    });
+
+    function loadPartyList() {
+        partyMap = {};
+        return $.ajax({ 
+            url: '/CreditLimitMaster/GetPartyList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log('PARTY LIST:', data);
+                $.each(data, function (index, item) {
+                    partyMap[item.code] = item.name;
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading parties:", xhr.responseText);
+                toastr.error('Error loading parties: ' + error);
+            }
+        });
+    }
+
+
+    function loadGroupList() {
+        return $.ajax({
+            url: '/CreditLimitMaster/GetGroupList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log('group LIST:', data);
+
+                data.forEach(item => {
+                    var code = item.code || item.value;
+                    var name = item.name || item.text;
+                    groupMap[code] = name;
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading group list: ", xhr.responseText);
+                toastr.error('Error loading group list: ' + error);
+            }
+        });
+    }
+
+
+    // function loadCreditLimitList() {
+    //     const searchTerm = $('#searchBox').val();
+
+    //     $.ajax({
+    //         url: '/CreditLimitMasterList/GetCreditLimits',
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         data: {
+    //             searchTerm: searchTerm,
+    //             pageNumber: currentPage,
+    //             pageSize: pageSize
+    //         },
+    //         success: function (res) {
+    //             const lists = res.lists;
+
+    //             console.log('kksdfsdf',lists)
+
+    //             const totalCount = res.totalCount;
+
+    //             const tbody = $('#tblcreditlimit tbody');
+    //             tbody.empty();
+
+    //             if (!lists || lists.length === 0) {
+    //                 tbody.append('<tr><td colspan="10" class="text-center text-muted">No records found.</td></tr>');
+    //                 renderPagination(0, pageSize, currentPage);
+    //                 return;
+    //             }
+
+    //             lists.forEach(item => {
+    //                 tbody.append(`
+    //                     <tr>
+    //                         <td style="display:none;">${item.code}</td>
+    //                         <td>${item.efF_FROM || ''}</td>
+    //                         <td>${partyMap[item.partY_CODE] || item.partY_CODE || ''}</td>
+    //                         <td>${groupMap[item.gR_CODE] || item.gR_CODE || ''}</td>
+    //                         <td>${item.cR_LIMIT || ''}</td>
+    //                         <td>${item.ourcR_DAYS || ''}</td>
+    //                         <td>${item.faproV_REMARKS || ''}</td>
+    //                         <td>${item.faproV_STATUS || ''}</td>
+    //                         <td>${item.v_NO || ''}</td>
+    //                         <td>${item.remarks || ''}</td>
+    //                         <td>
+    //                             <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editCreditLimit(${item.v_NO})"></i>
+    //                             <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewCreditLimitDetails(${item.v_NO})"></i>
+    //                             <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteCreditLimit(${item.v_NO})"></i>
+    //                         </td>
+    //                     </tr>
+    //                 `);
+    //             });
+
+    //             renderPagination(totalCount, pageSize, currentPage);
+    //         },
+    //         error: function (xhr) {
+    //             console.error("Error loading credit limits:", xhr.responseText);
+    //             toastr.error('Error loading credit limits: ' + xhr.responseText);
+    //         }
+    //     });
+    // }
+
+        function loadCreditLimitList() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/CreditLimitMasterList/GetCreditLimits',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                const lists = res.lists;
+
+                console.log('kksdfsdf', lists);
+
+                const totalCount = res.totalCount;
+
+                const tbody = $('#tblcreditlimit tbody');
+                tbody.empty();
+
+                if (!lists || lists.length === 0) {
+                    tbody.append('<tr><td colspan="10" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                lists.forEach(item => {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${item.code}</td>
+                            <td>${formatDate(item.efF_FROM)}</td>
+                            <td>${partyMap[item.partY_CODE] || item.partY_CODE || ''}</td>
+                            <td>${groupMap[item.gR_CODE] || item.gR_CODE || ''}</td>
+                            <td>${item.cR_LIMIT || ''}</td>
+                            <td>${item.ourcR_DAYS || ''}</td>
+                            <td>${item.faproV_REMARKS || ''}</td>
+                            <td>${item.faproV_STATUS || ''}</td>
+                            <td>${item.v_NO || ''}</td>
+                            <td>${item.remarks || ''}</td>
+                            <td>
+                                <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editCreditLimit(${item.v_NO})"></i>
+                                <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewCreditLimitDetails(${item.v_NO})"></i>
+                                <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteCreditLimit(${item.v_NO})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                console.error("Error loading credit limits:", xhr.responseText);
+                toastr.error('Error loading credit limits: ' + xhr.responseText);
+            }
+        });
+    }
+
+
+     function formatDate(dateString) {
+        if (!dateString) return "";
+
+        const date = new Date(dateString);
+        if (isNaN(date)) return "";
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
+    
+    
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadCreditLimitList();
+    }
+
+    $('#searchBox').on('keyup', function () {
+           currentPage = 1;
+           loadCreditLimitList();
+    });
+    function editCreditLimit(code) {
+        window.location.href = `/CreditLimitMaster/Index?id=${encodeURIComponent(code)}`;
+    }
+    function viewCreditLimitDetails(code) {
+        window.location.href = `/CreditLimitMaster/Index?id=${encodeURIComponent(code)}&readOnly=true`;
+    }
+    function deleteCreditLimit(code) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action will permanently delete the credit limit.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/CreditLimitMaster/DeleteCreditLimitById',
+                    type: 'POST',
+                    data: { vNo: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                loadCreditLimitList();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Failed',
+                                response.message,
+                                'warning'
+                            );
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the credit limit.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+</script>

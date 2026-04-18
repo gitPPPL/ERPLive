@@ -1,0 +1,525 @@
+﻿@{
+    ViewBag.Title = "Document Numbering";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Document Numbering</legend>
+
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="btn-align">
+                <button id="btnBackToList" onclick="window.location.href='@Url.Action("Index", "DocumentNumberingList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i> Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="DocumentNumberingForm">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DdYearCode">Year <span class="text-danger">*</span></label>
+                    <select id="DdYearCode" class="form-control">
+                        <option selected disabled>- Select Year Code -</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DdVoucherType">Document Type <span class="text-danger">*</span></label>
+                    <select id="DdVoucherType" class="form-control">
+                        <option selected disabled>- Select Voucher Type -</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtPrefix">Prefix </label>
+                    <input type="text" id="TxtPrefix" readonly class="form-control" placeholder="Enter Prefix" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtFromNo">From Number </label>
+                    <input type="text" id="TxtFromNo" class="form-control" oninput="allowOnlyNumbers(this);" maxlength="5" placeholder="Enter From No" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtToNo">To Number</label>
+                    <input type="text" id="TxtToNo" class="form-control" oninput="allowOnlyNumbers(this);" maxlength="10" placeholder="Enter To Number" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="PreviewVNoRange">
+                        <a href="#" id="linkPreVno" onclick="generateVNoRange()" style="color:blue;">Preview VNo Range</a>
+                    </label>
+                    <input type="text" id="TxtPreVnoRng" readonly class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="PreviewDocIDRange">
+                        <a href="#" id="linkPreDocId" onclick="generateDocidRange()" style="color:blue;">Preview Doc ID Range</a>
+                    </label>
+                    <input type="text" id="TxtPreDocIdRng" readonly class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+                <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+
+        let DocNumberCd=0;
+        let PreviousInputDt = "";
+        let PreviousYear = 0;
+        let PreviousPrefix = "";
+        let allMastData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let ModeOfControl="";
+        let getDocNumberDt=[];
+
+
+        $(document).ready(function(){
+            VoucherPrefixBind();
+            YearCodeBind();
+
+        const storedData = localStorage.getItem('editDocNumber');
+        ModeOfControl = localStorage.getItem('Mode');
+        localStorage.removeItem('Mode');
+        console.log(storedData);
+
+
+        if (storedData && ModeOfControl === 'Edit') {
+         getDocNumberDt = JSON.parse(storedData);
+         DocNumberCd = getDocNumberDt.code;
+          PreviousYear = getDocNumberDt.yearcode;
+          PreviousPrefix = getDocNumberDt.Prefix;
+
+         fillTextFields();
+         $('input').prop('readonly', false);
+        $('#DdYearCode, #DdVoucherType').prop('disabled', false);
+          $('#btn-save').show();
+          $('#cancelBtn').show();
+          localStorage.removeItem('editDocNumber');
+
+        }
+        else if (storedData && ModeOfControl === 'View') {
+            $('#btn-save').hide();
+            $('#cancelBtn').hide();
+            getDocNumberDt = JSON.parse(storedData);
+           fillTextFields();
+           $('input').prop('readonly', true);
+           $('#DdYearCode, #DdVoucherType').prop('disabled', true);
+          localStorage.removeItem('editDocNumber');
+
+        }
+
+        $('#DdYearCode').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#DdVoucherType').focus();
+                }
+            });
+            $('#DdVoucherType').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#TxtPrefix').focus();
+                }
+            });
+
+            $('#TxtPrefix').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#TxtFromNo').focus();
+
+                }
+            });
+             $('#TxtFromNo').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#TxtToNo').focus();
+
+                }
+            });
+
+            $('#TxtToNo').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#btn-save').focus();
+                }
+            });
+
+
+              $('#DdVoucherType').on('change', function () {
+            var selectedOption = $(this).find('option:selected');
+            var prefix = selectedOption.data('prefix');
+            $('#TxtPrefix').val(prefix);
+           });
+
+           $(document).on('change', '.doctype-select', function () {
+            const $selectedOption = $(this).find('option:selected');
+            const selectedPrefix = $selectedOption.attr('doctypedata-prefix');
+            const $row = $(this).closest('tr');
+            $row.find('.Prefix input').val(selectedPrefix);
+        });
+
+        });
+
+     $('#btn-save').on('click', function (e) {
+        e.preventDefault();
+        if (!validateRequiredField('#DdYearCode', 'Years')) return;
+    if (!validateRequiredField('#DdVoucherType', 'Document Type')) return;
+
+                var updatedCode=toNullableString(DocNumberCd);
+                var YearCode = toNullableString($('#DdYearCode').val());
+                var VoucherType = toNullableString($('#DdVoucherType').val());
+                var Prefix= toNullableString($('#TxtPrefix').val());
+                var FromNo = toNullableInt($('#TxtFromNo').val());
+                var ToNo = toNullableInt($('#TxtToNo').val());
+
+        if(ModeOfControl=='Edit')
+        {
+
+            var documentNumberDt = {
+                    code: updatedCode,
+                    YearCode: YearCode,
+                    docType: VoucherType,
+                    Prefix:Prefix,
+                    VoucherType:Prefix,
+                    FromNo: FromNo,
+                    ToNo:ToNo
+
+                };
+             editdocNumberDt(documentNumberDt, YearCode,Prefix)
+        }
+        else
+        {
+
+            var documentNumberDt = {
+                    YearCode: YearCode,
+                    docType: VoucherType,
+                    Prefix:Prefix,
+                    VoucherType:Prefix,
+                    FromNo: FromNo,
+                    ToNo:ToNo
+
+                };
+
+         saveDocNumber(documentNumberDt, YearCode,Prefix);
+        }
+    });
+
+     function saveDocNumber(documentNumberDt, YearCode,Prefix)
+    {
+        checkExistOrNot(YearCode,Prefix)
+              .done(function (data) {
+               if (data.status === true && data.exists === true) {
+                toastr.warning("Duplicate Document Serial Name");
+                return;
+               }
+
+                $.ajax({
+                    url:'@Url.Action("SaveDocumentSerial", "DocumentNumbering")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(documentNumberDt),
+                    success: function (response) {
+                        if (response.status === true) {
+                            toastr.success('Data Save Successfully.');
+                            resetFields();
+                            setTimeout(function () {
+                                  window.location.href ='/DocumentNumberingList/Index';
+                                }, 1500);
+
+                        } else {
+                            toastr.error(response.message || "Save failed");
+                        }
+                    },
+                    error: function (xhr, error) {
+                        console.error(xhr.responseText);
+                        toastr.error("Error occurred while saving.");
+                    }
+                });
+              })
+            .fail(function (xhr, status, error) {
+            console.error("Check Document Serial failed:", error);
+            toastr.error("Error while checking Document Serial type.");
+            });
+    }
+
+
+    function editdocNumberDt(documentNumberDt, YearCode,Prefix){
+        if(PreviousYear!=YearCode || PreviousPrefix!=Prefix){
+        // if (PreviousInputDt != name) {
+                  checkExistOrNot(YearCode,Prefix)
+                      .done(function (data) {
+                       if (data.status === true && data.exists === true) {
+                        toastr.warning("Duplicate Document Serial Name");
+                        return;
+                       }
+                        updateCurrencyData(documentNumberDt);
+                      })
+                    .fail(function (xhr, status, error) {
+                    console.error("Check Document Serial failed:", error);
+                    toastr.error("Error while checking Document Serial type.");
+                    });
+                 }
+                 else{
+                     updateCurrencyData(documentNumberDt);
+                 }
+
+    }
+
+        function updateCurrencyData(documentNumberDt) {
+            $.ajax({
+                url: '/DocumentNumbering/updateDocNumber',
+                type: 'POST',
+                data:JSON.stringify(documentNumberDt),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === true) {
+                         toastr.success('Data update Successfully.');
+                         resetFields();
+                   setTimeout(function () {
+                                  window.location.href ='/DocumentNumberingList/Index';
+                                }, 1500);
+                    } else {
+                        toastr.error("Update failed: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error occurred:", xhr.responseText);
+                    toastr.error("Data not updated: " + error);
+                }
+            });
+        }
+
+    function resetFields() {
+            $('#TxtPrefix').val('');
+            $('#TxtFromNo').val('');
+            $('#TxtToNo').val('');
+            $('#TxtPreVnoRng').val('');
+            $('#TxtPreDocIdRng').val('');
+            $('#DdYearCode').val($('#DdYearCode option:first').val());
+            $('#DdVoucherType').val($('#DdVoucherType option:first').val());
+             $('#searchInput').val('');
+        }
+
+      function checkExistOrNot(inputData)
+       {
+           return $.ajax({
+           url: '/DocumentNumbering/getExitOrNot',
+           type: 'GET',
+           dataType: 'json',
+           data: { inputData: inputData }
+       });
+       }
+
+
+      document.getElementById("cancelBtn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel all the changes?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Cancelled!',
+            'Your action has been cancelled.',
+            'success'
+          )
+           if(ModeOfControl=='Edit')
+         {
+          fillTextFields();
+
+    }
+    else
+    {
+    resetFields();
+    }
+
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire(
+            'Resumed',
+            'Your action is still in progress.',
+            'info'
+          )
+        }
+      });
+    });
+
+
+            function YearCodeBind() {
+            $.ajax({
+                url: '/DocumentNumbering/GetYearDt',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.status) {
+                        yearCodedata=data.data
+                        var ddYearCd = $('#DdYearCode');
+                        ddYearCd.empty().append('<option selected disabled> - Select Year Code - </option>');
+                        $.each(data.data, function(index, item) {
+                            ddYearCd.append('<option value="' + item.CODE + '" data-name="' + item.YearCd + '">' + item.YearCd + '</option>');
+                        });
+                    } else {
+                        toastr.error("Failed to load year code.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error('Error loading year code.');
+                }
+            });
+        }
+
+        function VoucherPrefixBind() {
+            $.ajax({
+                url: '/DocumentNumbering/GetVoucherPrefixDt',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.status) {
+                        DoctypeData=data.data;
+                        var ddVtype = $('#DdVoucherType');
+                        ddVtype.empty().append('<option selected disabled> - Select Voucher Type - </option>');
+                        $.each(data.data, function(index, item) {
+                            ddVtype.append('<option value="' + item.V_type + '" data-prefix="' + item.Prefix + '">' + item.V_type + '</option>');
+                        });
+                    } else {
+                        toastr.error("Failed to load voucher type.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error('Error loading voucher type.');
+                }
+            });
+        }
+
+
+        function getStratNo(fromNo, toNo) {
+            return '0'.repeat(Math.max(toNo.length - 1, 0)) + fromNo;
+        }
+
+        function allowOnlyNumbers(input) {
+               input.value = input.value.replace(/[^0-9]/g, '');
+        }
+
+        function generateVNoRange() {
+            const fromNo = document.getElementById('TxtFromNo').value.trim();
+            const toNo = document.getElementById('TxtToNo').value.trim();
+
+
+            const yearDropdown = document.getElementById('DdYearCode');
+            const selectedOption = yearDropdown.options[yearDropdown.selectedIndex];
+            const yearCode = selectedOption.getAttribute('data-name').trim(); // YearCd
+
+            if (!fromNo || !toNo || !yearCode) {
+                toastr.warning("Please fill all required fields to preview VNo range.");
+                return;
+            }
+
+            const stratno = getStratNo(fromNo, toNo);
+            const vnoPreview = `${yearCode}${stratno} TO ${yearCode}${toNo}`;
+            document.getElementById('TxtPreVnoRng').value = vnoPreview;
+        }
+
+        function checkExistOrNot(yearCd,vPrefix)
+        {
+             return $.ajax({
+            url: '/DocumentNumbering/getvoucherTypeExitOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: { yearcd:yearCd, Vprefix: vPrefix }
+        });
+        }
+
+        function generateDocidRange() {
+            const fromNo = document.getElementById('TxtFromNo').value.trim();
+            const toNo = document.getElementById('TxtToNo').value.trim();
+            const vType=document.getElementById('TxtPrefix').value.trim();
+            const yearDropdown = document.getElementById('DdYearCode');
+            const selectedOption = yearDropdown.options[yearDropdown.selectedIndex];
+            const yearCode = selectedOption.getAttribute('data-name').trim(); // YearCd
+            if (!fromNo || !toNo || !vType || !yearCode) {
+                toastr.warning("Please fill all required fields to preview Doc ID.");
+                return;
+            }
+
+            const stratno = getStratNo(fromNo, toNo);
+            const docId = `${vType}${yearCode}${stratno} TO ${vType}${yearCode}${toNo}`;
+            document.getElementById('TxtPreDocIdRng').value = docId;
+
+        }
+
+       function fillTextFields()
+       {
+           $('#TxtPrefix').val(getDocNumberDt.Prefix);
+            $('#TxtFromNo').val(getDocNumberDt.FromNo);
+            $('#TxtToNo').val(getDocNumberDt.ToNo);
+            $('#TxtPreVnoRng').val('');
+            $('#TxtPreDocIdRng').val('');
+
+        VoucherPrefixBind();
+        setTimeout(function () {
+        $('#DdVoucherType option').filter(function () {
+            return $(this).text().trim().toLowerCase() === getDocNumberDt.DOCTYPE.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+
+            YearCodeBind();
+        setTimeout(function () {
+        $('#DdYearCode option').filter(function () {
+            return $(this).text().trim().toLowerCase() === getDocNumberDt.year.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+
+       }
+
+       function allowOnlyNumbers(input) {
+              input.value = input.value.replace(/[^0-9]/g, '');
+       }
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+        function setActiveStatus(input)
+        {
+        let isActive = input == 1;
+        $('#DdActive').prop('checked', isActive);
+        $('#DdActive').val(isActive ? 1 : 0);
+        $('#statusText').text(isActive ? 'Active' : 'Inactive');
+        }
+
+
+</script>

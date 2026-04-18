@@ -1,0 +1,2510 @@
+﻿@{
+    ViewBag.Title = "Employee Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Employee Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "EmployeeMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="EmployeeMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="navtab-form">
+            <ul class="nav nav-tabs" id="formTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Employee Details</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Experience & Qualification</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Attachment & Family</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Relatives List</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- tab 1 -->
+                <div class="tab-pane fade show active" id="tab1" role="tabpanel">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Employee Identity</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Emp. Code <span class="required">*</span></label>
+                                    <div class="input-icon-wrapper">
+                                        <input type="text" oninput="allowOnlyNumbers(this)" class="form-control" id="txtEmpCode" maxlength="8" placeholder="Enter Emp code">
+                                        <span class="input-icon"><i class="fa fa-search"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Title<span class="required">*</span></label>
+                                    <select class="form-control" id="ddlTitle">
+                                        <option>Mr</option>
+                                        <option>Mrs</option>
+                                        <option>Ms</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>First Name <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtFirstName" maxlength="20" placeholder="Enter First name">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Middle Name</label>
+                                    <input type="text" class="form-control" id="txtMiddleName" maxlength="20" placeholder="Enter Middle name">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Last Name</label>
+                                    <input type="text" class="form-control" id="txtLastName" maxlength="20" placeholder="Enter Last name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Employee Name<span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtEmpName" maxlength="50" placeholder="Full name">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Father/Husband <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtFatherHusband" maxlength="30" placeholder="Father or Husband name">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Personal Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Personal Details</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Date of Birth <span class="required">*</span></label>
+                                    <input type="date" class="form-control" id="txtDOB">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Age</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="3" class="form-control" id="NumAge" placeholder="Age">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Gender <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlGender">
+                                        <option value="">--Select Gender--</option>
+                                        <option>Male</option>
+                                        <option>Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Date of Marriage<span class="required">*</span></label>
+                                    <input type="date" class="form-control" id="DtDOM">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Marital Status</label>
+                                    <select class="form-control" id="ddlMaritalStatus">
+                                        <option value="">--Select Marital Status--</option>
+                                        <option>Unmarried</option>
+                                        <option>Married</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Contact Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Contact Details</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Contact No <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="NumContact" placeholder="Enter Phone number">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Mobile No <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="NumMobile" placeholder="Enter Mobile number">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Blood Group</label>
+                                    <select class="form-control" id="ddlBloodGroup">
+                                        <option value="">--Select Blood Group--</option>
+                                        <option>A-</option>
+                                        <option>B-</option>
+                                        <option>O-</option>
+                                        <option>AB-</option>
+
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Religion</label>
+                                    <input type="text" class="form-control" id="txtReligion" maxlength="30" placeholder="Religion">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Email ID</label>
+                                    <input type="email" class="form-control" id="txtEmail" maxlength="50" placeholder="Email address">
+                                    @*  <div id="emailError" class="invalid-feedback" style="display:none;">Invalid email format</div> *@
+                                </div>
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                    <!-- Address Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Address Details</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Permanent Address 1<span class="required">*</span></label>
+                                    <textarea class="form-control" id="txtPermAddress1" maxlength="50" placeholder="Enter Permanent address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Permanent Address 2<span class="required">*</span></label>
+                                    <textarea class="form-control" id="txtPermAddress2" maxlength="50" placeholder="Enter Permanent address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Permanent Address 3</label>
+                                    <textarea class="form-control" id="txtPermAddress3" maxlength="50" placeholder="Enter Permanent address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Permanent City <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlPermCity">
+                                        <option value="">--Select Permanent City--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Temporary Address 1</label>
+                                    <textarea class="form-control" id="txtTemporaryAddress1" maxlength="50" placeholder="Enter Temporary address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Temporary Address 2</label>
+                                    <textarea class="form-control" id="txtTemporaryAddress2" maxlength="50" placeholder="Enter Temporary address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Temporary Address 3</label>
+                                    <textarea class="form-control" id="txtTemporaryAddress3" maxlength="50" placeholder="Enter Temporary address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Temporary City</label>
+                                    <select class="form-control" id="ddlTempCity">
+                                        <option value="">--Select Temporary City--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Spouse Name</label>
+                                    <input type="text" class="form-control" id="txtSpouseName" maxlength="30" placeholder="Spouse name">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Official Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Official Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Rejoin Code</label>
+                                    <input type="text" class="form-control" id="txtRejoinCode" maxlength="8" placeholder="Enter Rejoin Code">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Designation <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlDesignation">
+                                        <option value="">--Select Designation--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Place</label>
+                                    <select class="form-control" id="ddlPlace">
+                                        <option value="">--Select Place--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Cader</label>
+                                    <select class="form-control" id="ddlCader">
+                                        <option value="">--Select Cader--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Grade</label>
+                                    <select class="form-control" id="ddlGrade">
+                                        <option value="">--Select Grade--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Job Responsibility</label>
+                                    <select class="form-control" id="ddlJobResponsibility">
+                                        <option value="">--Select Job Responsibility--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Department<span class="required">*</span></label>
+                                    <select class="form-control" id="ddlDepartment">
+                                        <option value="">--Select Department--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Type <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlType">
+                                        <option value="">--Select Type--</option>
+                                        <option>Worker</option>
+                                        <option>Staff</option>
+                                        <option>Others</option>
+                                        <option>Semi Staff</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Incentive Place</label>
+                                    <select class="form-control" id="ddlIncentive">
+                                        <option value="">--Select Incentive Place--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Category/WPlace <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlCategoryWPlace">
+                                        <option value="">--Select Category/WPlace--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Join Date <span class="required">*</span></label>
+                                    <input type="date" class="form-control" id="dtJoinDate">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Resignation Date</label>
+                                    <input type="date" class="form-control" id="dtResignDate">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Experience & Benefits -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Experience & Benefits</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Permanent Date</label>
+                                    <input type="date" class="form-control" id="dtPermanentDate">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Experience</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" class="form-control" id="txtExperience" maxlength="5" placeholder="Enter Experience">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>PF Appl.</label>
+                                    <select class="form-control" id="ddlPfAppl">
+                                        <option value="">N/A</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>ESI Appl.</label>
+                                    <select class="form-control" id="ddlEsiAppl">
+                                        <option value="">N/A</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>VPF Appl.</label>
+                                    <select class="form-control" id="ddlVPFAppl">
+                                        <option value="">N/A</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>PF Dt</label>
+                                    <input type="date" class="form-control" id="dtPFDate">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>ESI Dt</label>
+                                    <input type="date" class="form-control" id="dtESIDate">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>VPF Dt</label>
+                                    <input type="date" class="form-control" id="dtVPFDt">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>PF No</label>
+                                    <input type="text" class="form-control" id="dtPFNo" maxlength="30" placeholder="Enter PF No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>ESI No</label>
+                                    <input type="text" class="form-control" id="dtESINo" maxlength="30" placeholder="Enter ESI No">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Identity Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Identity & Personal Info</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Offday</label>
+                                    <select class="form-control" id="ddlOffday">
+                                        <option value="">Select Offday</option>
+                                        <option value="Sun">Sun</option>
+                                        <option value="Mon">Mon</option>
+                                        <option value="Tue">Tue</option>
+                                        <option value="Wed">Wed</option>
+                                        <option value="Thu">Thu</option>
+                                        <option value="Fri">Fri</option>
+                                        <option value="Sat">Sat</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Risk Zone</label>
+                                    <select class="form-control" id="ddlRiskZone">
+                                        <option value="">N/A</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>UAN</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="12" class="form-control" id="NumUAN" placeholder="Enter UAN">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Aadhar No <span class="required">*</span></label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="12" class="form-control" id="txtAadhar" placeholder="Enter Aadhar No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Driving Licence</label>
+                                    <input type="text" maxlength="16" class="form-control" id="txtDL" placeholder="Enter Driving Licence">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Shift <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlShift">
+                                        <option value="">Select Shift</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Referred By</label>
+                                    <input type="text" class="form-control" id="txtReferred" maxlength="100" placeholder="Enter Referred By">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>PAN</label>
+                                    <input type="text" maxlength="10" class="form-control" id="txtPAN" placeholder="Enter PAN">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Voter ID</label>
+                                    <input type="text" maxlength="10" pattern="[A-Z]{3}[0-9]{7}" class="form-control" id="txtVoterID" placeholder="Enter Voter ID">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Card No</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="20" class="form-control" id="NumCardNo" placeholder="Enter Card No">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Bank Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Bank Details</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Bank <span class="required">*</span></label>
+                                    <select class="form-control" id="ddlBank">
+                                        <option value="">Select Bank</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Account No <span class="required">*</span></label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="17" class="form-control" id="NumAccountNo" placeholder="Enter Account No">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Account Type</label>
+                                    <input type="text" class="form-control" id="txtAccountType" maxlength="30" placeholder="Enter Account Type">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Branch <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtBranch" maxlength="50" placeholder="Enter Branch">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>IFSC Code <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtIFSC" maxlength="11" placeholder="Enter IFSC Code">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Bank Verified</label>
+                                    <select class="form-control" id="ddlBankVerified">
+                                        <option value="">Select Bank Verified</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Other Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Other Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Leave Appl.</label>
+                                    <select class="form-control" id="ddlLeaveAppl">
+                                        <option value="">Select Leave Appl.</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Bonus Appl.</label>
+                                    <select class="form-control" id="ddlBonusAppl">
+                                        <option value="">Select Bonus Appl.</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Colony Appl.</label>
+                                    <select class="form-control" id="ddlColonyApp">
+                                        <option value="">Select Colony Appl.</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Holiday Apply</label>
+                                    <select class="form-control" id="ddlHolidayApply">
+                                        <option value="">Select Holiday Apply</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>ABRY Scheme</label>
+                                    <select class="form-control" id="ddlABRY">
+                                        <option value="">Select ABRY Scheme</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Room No.</label>
+                                    <input type="text" maxlength="10" class="form-control" id="NumRoomNo" placeholder="Enter Room No.">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Remarks</label>
+                                    <textarea class="form-control" id="txtRemarks" maxlength="1000" placeholder="Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Upload Document</label>
+                                    <input type="file" class="form-control" id="fileInput">
+                                </div>
+                            </div>
+                            <div class="col-md-2" id="preview-container" style="padding-top: 32px;"></div>
+
+                        </div>
+
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">CTC Includes</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkProdIncentive" value="0">
+                                    <label class="form-check-label" for="chkProdIncentive">Prod. Incentive</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkOtherAllow" value="0">
+                                    <label class="form-check-label" for="chkOtherAllow">Other Allow.</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkMiscBenefits" value="0">
+                                    <label class="form-check-label" for="chkMiscBenefits">Misc. Benefits and Rewards</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkCarBenefits" value="0">
+                                    <label class="form-check-label" for="chkCarBenefits">Car Benefits</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkRentReim" value="0">
+                                    <label class="form-check-label" for="chkRentReim">Rent Reimbursement</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkMobileExp" value="0">
+                                    <label class="form-check-label" for="chkMobileExp">Mobile Expense</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <input class="form-check-input ctc-checkbox" type="checkbox" id="chkTeaExp" value="0">
+                                    <label class="form-check-label" for="chkTeaExp">Tea Expense</label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Buttons -->
+                    <div class="row">
+                        <div class="offset-md-7 col-md-2">
+                            <div class="active-toggle btn-align">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="label-status" id="statusText">Active</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-last">
+                                <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                                <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- tab 2 -->
+                <div class="tab-pane fade" id="tab2">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Employee Experience</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtPreviousEmployer">Previous Employer <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="TxtPreviousEmployer" maxlength="30" placeholder="Enter Previous Employer">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <textarea class="form-control" id="txtAddress" maxlength="100" placeholder="Enter address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Date of Joining</label>
+                                    <input type="date" class="form-control" id="DtJoining">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Date of Resign</label>
+                                    <input type="date" class="form-control" id="DtResign">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Period</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" class="form-control" id="NumPeriod" maxlength="6" placeholder="Enter Period">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Last Salary</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" class="form-control" id="NumLastSalary" maxlength="10" placeholder="Enter Last Salary">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Department <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtDepartment" maxlength="50" placeholder="Enter Department">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Designation <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtDesignation" maxlength="50" placeholder="Enter Designation">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Job Profile</label>
+                                    <input type="text" class="form-control" id="txtJobProfile" maxlength="300" placeholder="Enter Job Profile">
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-success-plus" id="btnExperience"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblEmployeeExperience" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Previous Employer</th>
+                                            <th>Address</th>
+                                            <th>Date of Joining</th>
+                                            <th>Date of Resign</th>
+                                            <th>Period</th>
+                                            <th>Last Salary</th>
+                                            <th>Department</th>
+                                            <th>Designation</th>
+                                            <th>Job Profile</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Qualification Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Qualification <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="TxtQualification" maxlength="50" placeholder="Enter Qualification">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Board/University <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="txtBoard" maxlength="50" placeholder="Enter Board/University">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="ddlYear">Year of Passing <span class="required">*</span></label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" class="form-control" maxlength="4" id="TxtYear" placeholder="Enter Year of passing" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Marks Obt.</label>
+                                    <input type="text" class="form-control" id="NumJobProfile" maxlength="20" placeholder="Enter Marks Obt.">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Remarks</label>
+                                    <textarea class="form-control" id="txtQualificationRemarks" maxlength="100" placeholder="Enter Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-success-plus" id="btnQualification"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblQualificationDetails" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Qualification</th>
+                                            <th>Board/University</th>
+                                            <th>Year of Passing</th>
+                                            <th>Marks Obt.</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @* <div class="pagination-wrapper">
+                            <ul class="pagination" id="tablePaginationQualDet"></ul>
+                        </div> *@
+                    </fieldset>
+                </div>
+                <!-- tab 3 -->
+                <div class="tab-pane fade" id="tab3">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Employee Attachment</legend>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Upload Document</label>
+                                    <input type="file" class="form-control" id="fileInput1">
+                                    @* <div id="preview-container1"></div> *@
+                                </div>
+                            </div>
+                            <div class="col-md-2" id="preview-container1" style="padding-top: 32px;"></div>
+                            <div class="col-md-1">
+                                <button class="btn btn-success-plus" id="btnAttached"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblEmployeeAttachment" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>File Name</th>
+                                            <th>Preview</th>                                           
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Family Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Member Name <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="TxtMember" maxlength="50" placeholder="Enter Member Name">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Age</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="3" class="form-control" id="NumMemAge" placeholder="Enter Age">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Contact No.<span class="required">*</span></label>
+                                    <input type="text" maxlength="10" class="form-control" id="NumContactNo" placeholder="Enter Contact No.">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Relation <span class="*">*</span></label>
+                                    <input type="Text" class="form-control" id="TxtRelation" maxlength="30" placeholder="Enter Relation">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Minor Y/N</label>
+                                    <select class="form-control" id="ddlMinor">
+                                        <option value="">Select Minor Y/N</option>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Nominee <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="TxtNominee" maxlength="3" placeholder="Enter Nominee">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Share %</label>
+                                    <input type="number" class="form-control" id="NumShare" maxlength="7" placeholder="Enter Share %">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <textarea type="text" class="form-control" id="TxtAddressFD" maxlength="200" placeholder="Enter Address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Remarks</label>
+                                    <textarea type="Text" class="form-control" id="TxtRemarksFD" maxlength="200" placeholder="Enter Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-success-plus" id="btnFamily"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblFamilyDetails" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Member Name</th>
+                                            <th>Age</th>
+                                            <th>Contact No.</th>
+                                            <th>Relation</th>
+                                            <th>Minor Y/N</th>
+                                            <th>Nominee</th>
+                                            <th>Share %</th>
+                                            <th>Address</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @* <div class="pagination-wrapper">
+                            <ul class="pagination" id="tablePaginationQualDet"></ul>
+                        </div> *@
+                    </fieldset>
+                </div>
+                <!-- tab 4 -->
+                <div class="tab-pane fade" id="tab4">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Relative Details</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Name <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="TxtNameRD" maxlength="50" placeholder="Enter Name">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Department <span class="required">*</span></label>
+                                    <select class="form-control" id="DdlRelativeDepartment">
+                                        <option selected disabled>- select Department -</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Contact No. <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="NumContactNoRD" placeholder="Enter Contact No.">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Relation <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="TxtRelationRD" maxlength="30" placeholder="Enter Relation">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <textarea type="text" class="form-control" id="TxtAddressRD" maxlength="200" placeholder="Enter Address"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Remarks</label>
+                                    <textarea type="text" class="form-control" id="TxtRemarksRD" maxlength="200" placeholder="Enter Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-success-plus" id="btnRelative"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblRelativeDetails" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Department</th>
+                                            <th>Contact No.</th>
+                                            <th>Relation</th>
+                                            <th>Address</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @* <div class="pagination-wrapper">
+                            <ul class="pagination" id="tablePaginationQualDet"></ul>
+                        </div> *@
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</fieldset>
+
+<script src="~/js/GlobalFunction.js" type="text/javascript"></script>
+ 
+<script>
+
+     const empdetailSequence = [
+      'txtEmpCode', 'ddlTitle', 'txtFirstName', 'txtMiddleName', 'txtLastName', 'txtEmpName', 'txtFatherHusband',
+      'txtDOB','NumAge','ddlGender','DtDOM','ddlMaritalStatus','NumContact', 'NumMobile', 'ddlBloodGroup',
+      'txtReligion', 'txtEmail', 'txtPermAddress1', 'txtPermAddress2', 'txtPermAddress3', 'ddlPermCity', 'txtTemporaryAddress1', 'txtTemporaryAddress2', 'txtTemporaryAddress3', 'ddlTempCity',
+      'txtSpouseName', 'txtRejoinCode', 'ddlDesignation', 'ddlPlace', 'ddlCader', 'ddlGrade', 'ddlJobResponsibility', 'ddlDepartment', 'ddlType', 'ddlIncentive', 'ddlCategoryWPlace',
+      'dtJoinDate', 'dtResignDate', 'dtPermanentDate', 'txtExperience', 'ddlPfAppl', 'ddlEsiAppl', 'ddlVPFAppl', 'dtPFDate', 'dtESIDate', 'dtVPFDt', 'dtPFNo', 'dtESINo',
+      'ddlOffday', 'ddlRiskZone', 'NumUAN', 'txtAadhar', 'txtDL', 'ddlShift', 'txtReferred', 'txtPAN', 'txtVoterID', 'NumCardNo', 'ddlBank', 'NumAccountNo',
+      'txtAccountType', 'txtBranch', 'txtIFSC', 'ddlBankVerified', 'ddlLeaveAppl', 'ddlBonusAppl', 'ddlColonyApp', 'ddlHolidayApply', 'ddlABRY', 'NumRoomNo', 'txtRemarks'
+    ];
+    const experiencesequence2 = ['TxtPreviousEmployer', 'txtAddress', 'DtJoining', 'DtResign', 'NumPeriod','NumLastSalary', 'txtDepartment', 'txtDesignation', 'txtJobProfile'];
+    const qualificationsequence2 = [ 'tblEmployeeExperience','TxtQualification', 'txtBoard', 'TxtYear', 'NumJobProfile', 'txtQualificationRemarks'];
+    const familysequence3 = ['TxtMember', 'NumMemAge', 'NumContactNo', 'TxtRelation', 'ddlMinor', 'TxtNominee', 'NumShare', 'TxtAddressFD', 'TxtRemarksFD'];
+    const relativesequence4 = ['TxtNameRD', 'DdlRelativeDepartment', 'NumContactNoRD', 'TxtRelationRD', 'TxtAddressRD', 'TxtRemarksRD'];
+
+
+    const allFieldIds = [
+      ...empdetailSequence,
+      ...experiencesequence2,
+      ...qualificationsequence2,
+      ...familysequence3,
+      ...relativesequence4
+    ];
+    let PreviousEmpCode=0;
+    let MasterTblId ;
+    let readOnly;
+
+    $(document).ready(function () {
+
+
+        GetDesignationList();
+        GetCaderList();
+        GetGradeList();
+        GetJobResponsbilityList();
+        GetCategoryList();
+        GetShiftList();
+        GetBankList();
+        GetCityList('#ddlTempCity');
+        GetCityList('#ddlPermCity');
+        GetCityList();
+        GetPlaceList('#ddlPlace');
+        GetPlaceList('#ddlIncentive');
+        GetDepartmentList('#DdlRelativeDepartment');
+        GetDepartmentList('#ddlDepartment');
+
+
+        setEnterKeyFocus(empdetailSequence);
+        setEnterKeyFocus(experiencesequence2);
+        setEnterKeyFocus(qualificationsequence2);
+        setEnterKeyFocus(familysequence3);
+        setEnterKeyFocus(relativesequence4);
+
+        function setEnterKeyFocus(sequence) {
+            sequence.forEach((id, index) => {
+                $(`#${id}`).on('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (index + 1 < sequence.length) {
+                            $(`#${sequence[index + 1]}`).focus();
+                        }
+                    }
+                });
+            });
+        }
+
+
+        const MasterTblId = getQueryParam('id');
+        const readOnly = getQueryParam('readOnly');
+
+        if (MasterTblId) {
+            GetMasterDataList(MasterTblId, readOnly);
+        }
+
+        $('.ctc-checkbox').on('change', function () {
+        $(this).val($(this).is(':checked') ? 1 : 0);
+        });
+        $('#DdActive').on('change', function () {
+            let isChecked = $(this).is(':checked');
+            let status = isChecked ? 'Active' : 'Inactive';
+            let value = isChecked ? 1 : 0;
+            $('#statusText').text(status);
+            $(this).val(value);
+        });
+
+         $('#btnExperience').click(function (e) {
+            e.preventDefault();
+            let employer = $('#TxtPreviousEmployer').val().trim();
+            let address = $('#txtAddress').val().trim();
+            let doj = $('#DtJoining').val().trim();
+            let dor = $('#DtResign').val().trim();
+            let period = $('#NumPeriod').val().trim();
+            let lastSalary = $('#NumLastSalary').val().trim();
+            let department = $('#txtDepartment').val().trim();
+            let designation = $('#txtDesignation').val().trim();
+            let jobProfile = $('#txtJobProfile').val().trim();
+
+            if (!employer && !address && !doj && !dor && !period && !lastSalary && !department && !designation && !jobProfile) {
+                alert('Please enter at least one value before adding.');
+                return;
+            }
+            let missingFields = [];
+            if (!employer) missingFields.push("Previous Employer");
+            if (!department) missingFields.push("Department");
+            if (!designation) missingFields.push("Designation");
+
+            if (missingFields.length > 0) {
+                alert("Please fill required fields: " + missingFields.join(", "));
+                return;
+            }
+
+            let newRow = `<tr>
+                <td>${employer}</td>
+                <td>${address}</td>
+                <td>${doj}</td>
+                <td>${dor}</td>
+                <td>${period}</td>
+                <td>${lastSalary}</td>
+                <td>${department}</td>
+                <td>${designation}</td>
+                <td>${jobProfile}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveExperience"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+
+            $('#tblEmployeeExperience tbody').append(newRow);
+            $('#TxtPreviousEmployer, #txtAddress, #DtJoining, #DtResign, #NumPeriod, #NumLastSalary, #txtDepartment, #txtDesignation, #txtJobProfile').val('');
+        });
+
+        $(document).on('click', '.btnRemoveExperience', function () {
+        $(this).closest('tr').remove();
+        });
+
+        $('#btnQualification').click(function (e) {
+        e.preventDefault();
+
+        const qualification = $('#TxtQualification');
+        const board = $('#txtBoard');
+        const year = $('#TxtYear');
+        const marksObtained = $('#NumJobProfile');
+        const remarks = $('#txtQualificationRemarks');
+        if (!qualification.val().trim() || !board.val().trim() || !year.val().trim()) {
+            alert('Qualification, Board/University, and Year of Passing are required.');
+            return;
+        }
+        if (!/^\d{4}$/.test(year.val().trim())) {
+            alert('Year of Passing must be a valid 4-digit year.');
+            return;
+        }
+        $('#tblQualificationDetails tbody').append(`
+            <tr>
+                <td>${qualification.val().trim()}</td>
+                <td>${board.val().trim()}</td>
+                <td>${year.val().trim()}</td>
+                <td>${marksObtained.val().trim()}</td>
+                <td>${remarks.val().trim()}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveQualification"><i class="fa fa-trash"></i></button></td>
+            </tr>`);
+
+        $('#TxtQualification, #txtBoard, #TxtYear, #NumJobProfile, #txtQualificationRemarks').val('');
+     });
+
+       $(document).on('click', '.btnRemoveQualification', function () {
+        $(this).closest('tr').remove();
+    });
+
+    $('#btnAttached').on('click', function (e) {
+        e.preventDefault();
+
+        const fileInput = $('#fileInput1')[0];
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const base64String = event.target.result;
+            const fileName = file.name;
+
+            const newRow = $(`
+                <tr>
+                    <td>
+                        <img src="${base64String}" style="height: 40px; width: 40px;" class="img-thumbnail me-2" />
+                    </td>
+                    <td>${fileName}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm btnRemoveAttachment">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `);
+
+            newRow.data('base64', base64String);
+            newRow.data('filename', fileName);
+
+            $('#tblEmployeeAttachment tbody').append(newRow);
+            $('#fileInput1').val('');
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+
+       $(document).on('click', '.btnRemoveAttachment', function () {
+        $(this).closest('tr').remove();
+    });
+
+    $('#btnFamily').click(function (e) {
+        e.preventDefault();
+        const memberName = $('#TxtMember').val().trim();
+        const age = $('#NumMemAge').val().trim();
+        const contactNo = $('#NumContactNo').val().trim();
+        const relation = $('#TxtRelation').val().trim();
+        const isMinor = $('#ddlMinor').val().trim();
+        const nominee = $('#TxtNominee').val().trim();
+        const sharePercent = $('#NumShare').val().trim();
+        const address = $('#TxtAddressFD').val().trim();
+        const remarks = $('#TxtRemarksFD').val().trim();
+        console.log(memberName, age, contactNo, relation, isMinor);
+        if (!memberName || !contactNo || !relation || !nominee) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+        const row = `
+            <tr>
+                <td>${memberName}</td>
+                <td>${age}</td>
+                <td>${contactNo}</td>
+                <td>${relation}</td>
+                <td>${isMinor}</td>
+                <td>${nominee}</td>
+                <td>${sharePercent}</td>
+                <td>${address}</td>
+                <td>${remarks}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveFamily"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+
+        $('#tblFamilyDetails tbody').append(row);
+        $('#TxtMember, #NumMemAge, #NumContactNo, #TxtRelation, #ddlMinor, #TxtNominee, #NumShare, #TxtAddressFD, #TxtRemarksFD').val('');
+    });
+
+    $(document).on('click', '.btnRemoveFamily', function () {
+        $(this).closest('tr').remove();
+    });
+
+     $('#btnRelative').click(function (e) {
+        e.preventDefault();
+        const relativeName = $('#TxtNameRD').val().trim();
+        const department = $('#DdlRelativeDepartment').val();
+        const contactNo = $('#NumContactNoRD').val().trim();
+        const relation = $('#TxtRelationRD').val().trim();
+        const address = $('#TxtAddressRD').val().trim();
+        const remarks = $('#TxtRemarksRD').val().trim();
+        if (!relativeName || !department || !contactNo || !relation) {
+            alert('Please fill in all required fields (Name, Department, Contact No., Relation).');
+            return;
+        }
+        const newRow = `
+            <tr>
+                <td>${relativeName}</td>
+                <td>${department}</td>
+                <td>${contactNo}</td>
+                <td>${relation}</td>
+                <td>${address}</td>
+                <td>${remarks}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveRelative"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+
+        $('#tblRelativeDetails tbody').append(newRow);
+        $('#TxtNameRD, #NumContactNoRD, #TxtRelationRD, #TxtAddressRD, #TxtRemarksRD').val('');
+        $('#DdlRelativeDepartment').prop('selectedIndex', 0);
+        });
+
+        $(document).on('click', '.btnRemoveRelative', function () {
+        $(this).closest('tr').remove();
+        });
+
+        $('#fileInput').on('change', function (e) {
+        const file = e.target.files[0];
+        const previewContainer = $('#preview-container');
+        previewContainer.empty();
+
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = $('<img>', {
+                    src: event.target.result,
+                    class: 'img-thumbnail',
+                    style: 'width: 38px; height: 38px; object-fit: cover; display: inline-block;'
+                });
+                previewContainer.append(img);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.html('<p class="text-danger">Please select a valid image file.</p>');
+        }
+    });
+
+    $('#fileInput1').on('change', function (e) {
+        const file = e.target.files[0];
+        const previewContainer = $('#preview-container1');
+        previewContainer.empty();
+
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = $('<img>', {
+                    src: event.target.result,
+                    class: 'img-thumbnail',
+                    style: 'width: 38px; height: 38px; object-fit: cover;'
+                });
+                previewContainer.append(img);
+
+                // Store temporarily for use on button click
+                $('#fileInput1').data('fileName', file.name);
+                $('#fileInput1').data('base64', event.target.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.html('<p class="text-danger">Please select a valid image file.</p>');
+        }
+    });
+
+        $('#btn-save').on('click', async function (e) {
+        e.preventDefault();
+
+        // Validations
+        if (!validateRequiredField('#txtEmpCode', 'Employee ID')) return;
+        if (!validateRequiredField('#ddlTitle', 'Title')) return;
+        if (!validateRequiredField('#txtFirstName', 'First Name')) return;
+        if (!validateRequiredField('#txtEmpName', 'Full Name')) return;
+        if (!validateRequiredField('#txtFatherHusband', 'Father/Husband')) return;
+        if (!validateRequiredField('#txtDOB', 'Date of Birth')) return;
+        if (!validateRequiredField('#ddlGender', 'Gender')) return;
+        if (!validateRequiredField('#DtDOM', 'Date of Marriage')) return;
+        if (!validateRequiredField('#NumContact', 'Contact No')) return;
+        if (!validateRequiredField('#NumMobile', 'Mobile No')) return;
+        if (!validateRequiredField('#txtPermAddress1', 'Permanent Address 1')) return;
+        if (!validateRequiredField('#txtPermAddress2', 'Permanent Address 2')) return;
+        if (!validateRequiredField('#ddlPermCity', 'Permanent City')) return;
+        if (!validateRequiredField('#ddlDesignation', 'Designation')) return;
+        if (!validateRequiredField('#ddlDepartment', 'Department')) return;
+        if (!validateRequiredField('#ddlType', 'Type')) return;
+        if (!validateRequiredField('#ddlCategoryWPlace', 'Category/WPlace')) return;
+        if (!validateRequiredField('#dtJoinDate', 'Join Date')) return;
+        if (!validateRequiredField('#txtAadhar', 'Aadhar No')) return;
+        if (!validateRequiredField('#ddlShift', 'Shift')) return;
+        if (!validateRequiredField('#ddlBank', 'Bank')) return;
+        if (!validateRequiredField('#NumAccountNo', 'Account No')) return;
+        if (!validateRequiredField('#txtBranch', 'Branch')) return;
+        if (!validateRequiredField('#txtIFSC', 'IFSC Code')) return;
+
+        const email = $('#txtEmail').val();
+        if (email && !validateEmail(email)) {
+            toastr.error('Please enter a valid email address.');
+            return;
+        }
+
+        const contact = $('#NumContact').val();
+        const mobile = $('#NumMobile').val();
+
+        if (contact && !validatePhone(contact)) {
+            toastr.error('Please enter valid 10-digit phone number.');
+            return;
+        }
+        if (mobile && !validatePhone(mobile)) {
+            toastr.error('Please enter valid 10-digit phone number.');
+            return;
+        }
+
+        try {
+            const masterData = await collectFormData();
+            console.log(masterData, PreviousEmpCode);
+
+            if (MasterTblId) {
+                EditMasterData(masterData);
+            } else {
+                SaveMasterData(masterData);
+            }
+        } catch (error) {
+            console.error('Error during form processing:', error);
+            toastr.error('An error occurred while saving the data.');
+        }
+    });
+
+
+
+        });
+
+    function getEmployeeAttachments() {
+        return attachments;
+    }
+
+    function SaveMasterData(masterData) {
+        checkExistOrNot(masterData.EmpId)
+            .done(function (data) {
+                if (data?.status && data?.exists) {
+                    toastr.warning("Duplicate Employee Code");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateEmployeeMast", "EmployeeMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(masterData),
+                    success: function (response) {
+                        if (response?.status) {
+                            // toastr.success('Data saved successfully.');
+                             showFlashMessageByKey('insert', 'success');
+                            resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/EmployeeMasterList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+            })
+            .fail(function () {
+                toastr.error("Error while checking Employee Code.");
+            });
+    }
+
+    function EditMasterData(masterData) {
+        console.log(PreviousEmpCode,masterData);
+        if (PreviousEmpCode != masterData.EmpId) {
+            checkExistOrNot(masterData.EmpId)
+                .done(function (data) {
+                    if (data?.status && data?.exists) {
+                        toastr.warning("Duplicate Employee ID");
+                        return;
+                    }
+                    UpdateMasterData(masterData);
+                })
+                .fail(function () {
+                    toastr.error("Error while checking Employee Code.");
+                });
+        } else {
+            UpdateMasterData(masterData);
+        }
+    }
+
+    function UpdateMasterData(masterData) {
+        $.ajax({
+            url: '/EmployeeMaster/SaveOrUpdateEmployeeMast',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(masterData),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    // toastr.success('Data updated successfully.');
+                    showFlashMessageByKey('update', 'success');
+                    resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/EmployeeMasterList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    function GetMasterDataList(MasterTblId, readOnly) {
+        $.ajax({
+            url: '/EmployeeMaster/GetEmpMastDetailsById',
+            type: 'GET',
+            data: { id: MasterTblId },
+            success: function (res) {
+                if (res.status) {
+                    fillFormFields(res.header);
+                    fillExperienceTable(res.experience);
+                    fillFamilyTable(res.family);
+                    fillQualificationTable(res.qualification);
+                    fillRelativesTable(res.relatives);
+                    fillAttachmentTable(res.attachments);
+
+                    if (readOnly === 'true') {
+                         disableAllFields();
+                         $('#DdActive').prop('disabled', true);
+                         $('#chkProdIncentive, #chkMiscBenefits, #chkOtherAllow, #chkCarBenefits, #chkMobileExp, #chkRentReim, #chkTeaExp').prop('disabled', true);
+                         $('.btnRemoveExperience, .btnRemoveQualification, .btnRemoveAttachment, .btnRemoveFamily, .btnRemoveRelative')
+                         .prop('disabled', true);
+                         $('#btn-save, #cancelBtn').hide();
+                    } else {
+                        enableAllFields();
+                        $('#DdActive').prop('disabled', false);
+                        $('#chkProdIncentive, #chkMiscBenefits, #chkOtherAllow, #chkCarBenefits, #chkMobileExp, #chkRentReim, #chkTeaExp').prop('disabled', false);
+                         $('.btnRemoveExperience, .btnRemoveQualification, .btnRemoveAttachment, .btnRemoveFamily, .btnRemoveRelative')
+                         .prop('disabled', false);
+                        $('#btn-save, #cancelBtn').show();
+                    }
+
+                }
+            },
+            error: function () {
+                toastr.error('Failed to load data.');
+            }
+        });
+    }
+
+    function resetFields() {
+      empdetailSequence.forEach(id => {
+        const $el = $('#' + id);
+        if ($el.is('select')) {
+          $el.prop('selectedIndex', 0);
+        } else if ($el.is(':checkbox') || $el.is(':radio')) {
+          $el.prop('checked', false);
+        } else {
+          $el.val('');
+        }
+      });
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function fillFormFields(data) {
+    PreviousEmpCode=data.CODE;
+    document.getElementById('TxtCode').value = data.CODE;
+    document.getElementById('txtEmpCode').value = data.CODE;
+    document.getElementById('ddlTitle').value = data.TITLE;
+    document.getElementById('txtFirstName').value = data.FIRSTNAME;
+    document.getElementById('txtMiddleName').value = data.MIDDLENAME;
+    document.getElementById('txtLastName').value = data.LASTNAME;
+    document.getElementById('txtEmpName').value = data.NAME;
+    document.getElementById('txtFatherHusband').value = data.FATHER_NAME;
+      let DOB = (data.DOB).substring(0, 10);
+    document.getElementById('txtDOB').value = DOB;
+    document.getElementById('NumAge').value = data.AGE;
+    document.getElementById('ddlGender').value = data.SEX;
+     let DOM = (data.DOM).substring(0, 10);
+    document.getElementById('DtDOM').value = DOM;
+    document.getElementById('ddlMaritalStatus').value = data.M_STATUS;
+    document.getElementById('NumContact').value = data.CONTACT;
+    document.getElementById('NumMobile').value = data.MOBILE;
+    document.getElementById('ddlBloodGroup').value = data.BLOOD_GROUP;
+    document.getElementById('txtReligion').value = data.RELIGION;
+    document.getElementById('txtEmail').value = data.EMAIL;
+    document.getElementById('txtPermAddress1').value = data.PADD1;
+    document.getElementById('txtPermAddress2').value = data.PADD2;
+    document.getElementById('txtPermAddress3').value = data.PADD3;
+    // document.getElementById('ddlPermCity').value = data.PCITY_CODE;
+    GetCityList('#ddlTempCity', data.PCITY_CODE);
+    GetCityList('#ddlPermCity', data.TCITY_CODE);
+    document.getElementById('txtTemporaryAddress1').value = data.TADD1;
+    document.getElementById('txtTemporaryAddress2').value = data.TADD2;
+    document.getElementById('txtTemporaryAddress3').value = data.TADD3;
+    // document.getElementById('ddlTempCity').value = data.TCITY_CODE;
+    document.getElementById('txtSpouseName').value = data.SPOUSE;
+    document.getElementById('txtRejoinCode').value = data.REJOIN_CODE;
+     document.getElementById('ddlType').value = data.TYPE;
+    // document.getElementById('ddlDesignation').value = data.DESG_CODE;
+    // document.getElementById('ddlPlace').value = data.PLACE_CODE;
+    // document.getElementById('ddlCader').value = data.CADER_CODE;
+    // document.getElementById('ddlGrade').value = data.GRADE_CODE;
+    // document.getElementById('ddlJobResponsibility').value = data.JOB_RES;
+    // document.getElementById('ddlDepartment').value = data.DEPT_CODE;
+    // document.getElementById('ddlIncentive').value = data.INCPLACE_CODE;
+    // document.getElementById('ddlCategoryWPlace').value = data.CAT_CODE;
+    GetDepartmentList('#ddlDepartment', data.DEPT_CODE);
+    GetDesignationList(data.DESG_CODE);
+    GetCaderList(data.CADER_CODE);
+    GetGradeList(data.GRADE_CODE);
+    GetJobResponsbilityList(data.JOB_RES);
+    GetCategoryList(data.CAT_CODE);
+    GetPlaceList('#ddlPlace', data.PLACE_CODE);
+    GetPlaceList('#ddlIncentive', data.INCPLACE_CODE);
+
+    let JoinDt=(data.JOIN_DATE).substring(0, 10);
+    let ResignDt=(data.RESIGN_DATE).substring(0, 10);
+    let PermanentDt=(data.PERMANENT_DATE).substring(0, 10);
+    document.getElementById('dtJoinDate').value = JoinDt;
+    document.getElementById('dtResignDate').value = ResignDt;
+    document.getElementById('dtPermanentDate').value = PermanentDt;
+    document.getElementById('txtExperience').value = data.EXPERIENCE;
+    document.getElementById('ddlPfAppl').value = data.PF_APPL;
+    document.getElementById('ddlEsiAppl').value = data.ESI_APPL;
+    document.getElementById('ddlVPFAppl').value = data.VPF_APPL;
+    let PF_DATE=(data.PF_DATE).substring(0, 10);
+    let ESI_DATE=(data.ESI_DATE).substring(0, 10);
+    let VPF_DATE=(data.VPF_DATE).substring(0, 10);
+    document.getElementById('dtPFDate').value = PF_DATE;
+    document.getElementById('dtESIDate').value = ESI_DATE;
+    document.getElementById('dtVPFDt').value = VPF_DATE;
+    document.getElementById('dtPFNo').value = data.PF_NO;
+    document.getElementById('dtESINo').value = data.ESI_NO;
+    document.getElementById('ddlOffday').value = data.OFFDAY;
+    document.getElementById('ddlRiskZone').value = data.RIS_ZONE;
+    document.getElementById('NumUAN').value = data.UAN;
+    document.getElementById('txtAadhar').value = data.AADAR;
+    document.getElementById('txtDL').value = data.DL;
+    // document.getElementById('ddlShift').value = data.SHIFT;
+    GetShiftList(data.SHIFT);
+    document.getElementById('txtReferred').value = data.REF_BY;
+    document.getElementById('txtPAN').value = data.PAN;
+    document.getElementById('txtVoterID').value = data.VOTORID;
+    document.getElementById('NumCardNo').value = data.CARD_NO;
+    // document.getElementById('ddlBank').value = data.BANK_CODE;
+    GetBankList(data.BANK_CODE);
+    document.getElementById('NumAccountNo').value = data.AC_NO;
+    document.getElementById('txtAccountType').value = data.AC_TYPE;
+    document.getElementById('txtBranch').value = data.BRANCH;
+    document.getElementById('txtIFSC').value = data.IFSC_CODE;
+    document.getElementById('ddlBankVerified').value = data.BANK_VERIFY;
+    document.getElementById('ddlLeaveAppl').value = data.LEAVE_APPL;
+    document.getElementById('ddlBonusAppl').value = data.BONUS_APPL;
+    document.getElementById('ddlColonyApp').value = data.COLONY_APPL;
+    document.getElementById('ddlHolidayApply').value = data.HOLIDAY_APPL;
+    document.getElementById('ddlABRY').value = data.ABRY;
+    document.getElementById('NumRoomNo').value = data.ROOM_NO;
+    document.getElementById('txtRemarks').value = data.REMARKS;
+    setCheckboxValue('chkProdIncentive', data.CTC_PROD_INC);
+    setCheckboxValue('chkOtherAllow', data.CTC_OTHER_ALLOW);
+    setCheckboxValue('chkMiscBenefits', data.CTC_MISC_BENEFITS);
+    setCheckboxValue('chkCarBenefits', data.CTC_CAR_BENEFITS);
+    setCheckboxValue('chkRentReim', data.CTC_RENT_REIMB);
+    setCheckboxValue('chkMobileExp', data.CTC_MOB_EXPS);
+    setCheckboxValue('chkTeaExp', data.CTC_TEA_EXPS);
+    setActiveStatus(data.ACTIVE);
+    }
+
+    function fillExperienceTable(data) {
+        let tableBody = $('#tblEmployeeExperience tbody');
+        tableBody.empty();
+        console.log(data);
+       if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+        data.forEach(item => {
+            let row = `<tr>
+                <td>${item.EMPLOYER}</td>
+                <td>${item.ADDRESS}</td>
+                <td>${item.DOJ}</td>
+                <td>${item.DOR}</td>
+                <td>${item.PERIOD}</td>
+                <td>${item.LAST_SALARY}</td>
+                <td>${item.DEPT}</td>
+                <td>${item.DESG}</td>
+                <td>${item.JOB_PROFILE}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveExperience"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+            tableBody.append(row);
+        });
+    }
+
+    function fillFamilyTable(data) {
+        let tableBody = $('#tblFamilyDetails tbody');
+        tableBody.empty();
+        if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+        data.forEach(item => {
+            let row = `<tr>
+                <td>${item.MEMBER}</td>
+                <td>${item.AGE}</td>
+                <td>${item.CONTACT}</td>
+                <td>${item.RELATION}</td>
+                <td>${item.MINOR}</td>
+                <td>${item.NOMINEE}</td>
+                <td>${item.SHARE}</td>
+                <td>${item.ADDRESS}</td>
+                <td>${item.REMARKS}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveFamily"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+            tableBody.append(row);
+        });
+    }
+
+    function fillQualificationTable(data) {
+        let tableBody = $('#tblQualificationDetails tbody');
+        tableBody.empty();
+          if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+        data.forEach(item => {
+            let row = `<tr>
+                <td>${item.DEGREE}</td>
+                <td>${item.BOARD}</td>
+                <td>${item.YEAR}</td>
+                <td>${item.MARKS}</td>
+                <td>${item.REMARKS}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveQualification"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+            tableBody.append(row);
+        });
+    }
+
+    function fillRelativesTable(data) {
+        let tableBody = $('#tblRelativeDetails tbody');
+        tableBody.empty();
+        if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+        data.forEach(item => {
+            let row = `<tr>
+                <td>${item.NAME}</td>
+                <td>${item.DEPT_CODE}</td>
+                <td>${item.CONTACT}</td>
+                <td>${item.RELATION}</td>
+                <td>${item.ADDRESS}</td>
+                <td>${item.REMARKS}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveRelative"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+            tableBody.append(row);
+        });
+    }
+     
+    function fillAttachmentTable(data) {
+        let tableBody = $('#tblEmployeeAttachment tbody');
+        tableBody.empty();
+        if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+        data.forEach(item => {
+            let row = `<tr>
+                <td>${item.FILENAME}</td>
+                <td><button class="btn btn-danger btn-sm btnRemoveAttachment"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+            tableBody.append(row);
+        });
+    }
+    
+
+    async function collectFormData() {
+      const fileData = await getOnlyBase64();
+     var id = toNullableInt(MasterTblId);
+
+      return {
+        Code: toNullableInt($('#TxtCode').val()),
+        EmpId: toNullableString($('#txtEmpCode').val()),
+        Title: toNullableString($('#ddlTitle').val()),
+        FirstName: toNullableString($('#txtFirstName').val()),
+        MiddleName: toNullableString($('#txtMiddleName').val()),
+        LastName: toNullableString($('#txtLastName').val()),
+        Name: toNullableString($('#txtEmpName').val()),
+        FatherName: toNullableString($('#txtFatherHusband').val()),
+        Dob: toNullableDate($('#txtDOB').val()),
+        Age: toNullableInt($('#NumAge').val()),
+        Sex: toNullableString($('#ddlGender').val()),
+        Dom: toNullableDate($('#DtDOM').val()),
+        MStatus: toNullableString($('#ddlMaritalStatus').val()),
+        Contact: toNullableString($('#NumContact').val()),
+        Mobile: toNullableString($('#NumMobile').val()),
+        BloodGroup: toNullableString($('#ddlBloodGroup').val()),
+        Religion: toNullableString($('#txtReligion').val()),
+        Email: toNullableString($('#txtEmail').val()),
+        PAdd1: toNullableString($('#txtPermAddress1').val()),
+        PAdd2: toNullableString($('#txtPermAddress2').val()),
+        PAdd3: toNullableString($('#txtPermAddress3').val()),
+        PCityCode: toNullableInt($('#ddlPermCity').val()),
+        TAdd1: toNullableString($('#txtTemporaryAddress1').val()),
+        TAdd2: toNullableString($('#txtTemporaryAddress2').val()),
+        TAdd3: toNullableString($('#txtTemporaryAddress3').val()),
+        TCityCode: toNullableInt($('#ddlTempCity').val()),
+        Spouse: toNullableString($('#txtSpouseName').val()),
+        RejoinCode: toNullableInt($('#txtRejoinCode').val()),
+        DesgCode: toNullableInt($('#ddlDesignation').val()),
+        PlaceCode: toNullableInt($('#ddlPlace').val()),
+        CaderCode: toNullableInt($('#ddlCader').val()),
+        GradeCode: toNullableInt($('#ddlGrade').val()),
+        JobRes: toNullableString($('#ddlJobResponsibility').val()),
+        DeptCode: toNullableInt($('#ddlDepartment').val()),
+        Type: toNullableString($('#ddlType').val()),
+        IncPlaceCode: toNullableInt($('#ddlIncentive').val()),
+        CatCode: toNullableInt($('#ddlCategoryWPlace').val()),
+        JoinDate: toNullableDate($('#dtJoinDate').val()),
+        ResignDate: toNullableDate($('#dtResignDate').val()),
+        PermanentDate: toNullableDate($('#dtPermanentDate').val()),
+        Experience: toNullableInt($('#txtExperience').val()),
+        PfAppl: toNullableString($('#ddlPfAppl').val()),
+        EsiAppl: toNullableString($('#ddlEsiAppl').val()),
+        VpfAppl: toNullableString($('#ddlVPFAppl').val()),
+        PfDate: toNullableDate($('#dtPFDate').val()),
+        EsiDate: toNullableDate($('#dtESIDate').val()),
+        VpfDate: toNullableDate($('#dtVPFDt').val()),
+        PfNo: toNullableString($('#dtPFNo').val()),
+        EsiNo: toNullableString($('#dtESINo').val()),
+        OffDay: toNullableString($('#ddlOffday').val()),
+        RisZone: toNullableString($('#ddlRiskZone').val()),
+        Uan: toNullableString($('#NumUAN').val()),
+        Aadar: toNullableString($('#txtAadhar').val()),
+        Dl: toNullableString($('#txtDL').val()),
+        Shift: toNullableString($('#ddlShift').val()),
+        RefBy: toNullableString($('#txtReferred').val()),
+        Pan: toNullableString($('#txtPAN').val()),
+        VotorId: toNullableString($('#txtVoterID').val()),
+        CardNo: toNullableString($('#NumCardNo').val()),
+        BankCode: toNullableInt($('#ddlBank').val()),
+        AcNo: toNullableString($('#NumAccountNo').val()),
+        AcType: toNullableString($('#txtAccountType').val()),
+        Branch: toNullableString($('#txtBranch').val()),
+        IfscCode: toNullableString($('#txtIFSC').val()),
+        BankVerify: toNullableString($('#ddlBankVerified').val()),
+        LeaveAppl: toNullableString($('#ddlLeaveAppl').val()),
+        BonusAppl: toNullableString($('#ddlBonusAppl').val()),
+        ColonyAppl: toNullableString($('#ddlColonyApp').val()),
+        HolidayAppl: toNullableString($('#ddlHolidayApply').val()),
+        Abry: toNullableString($('#ddlABRY').val()),
+        RoomNo: toNullableString($('#NumRoomNo').val()),
+        Remarks: toNullableString($('#txtRemarks').val()),
+        SaveOrUpdate: (!id || id === 0) ? 'Save' : 'Update',
+        // Image
+        ImagePath: fileData?.fileName || null,
+        ImageByteBase64: fileData?.base64 || null,
+
+        // CTC checkboxes
+       CtcProdInc :  toNullableInt($('#chkProdIncentive').val()),
+       CtcOtherAllow :  toNullableInt($('#chkOtherAllow').val()),
+       CtcMiscBenefits :  toNullableInt($('#chkMiscBenefits').val()),
+       CtcCarBenefits :  toNullableInt($('#chkCarBenefits').val()),
+       CtcRentReimb :  toNullableInt($('#chkRentReim').val()),
+       CtcMobExps : toNullableInt($('#chkMobileExp').val()),
+       CtcTeaExps : toNullableInt($('#chkTeaExp').val()),
+       active: toNullableInt($('#DdActive').val()),
+
+        // Collections
+        Experiences: getEmployeeExperiences(),
+        Qualifications: getQualificationDetails(),
+        Family: getFamilyDetails(),
+        Relatives: getRelativeDetails(),
+        Attachments: getEmployeeAttachments()
+      };
+    }
+
+
+    function getOnlyBase64() {
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
+
+        return new Promise((resolve, reject) => {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const base64String = e.target.result.split(',')[1];
+                    resolve({
+                        base64: base64String,
+                        fileName: file.name
+                    });
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            } else {
+                resolve({ base64: "", fileName: "" });
+            }
+        });
+    }
+
+    
+    function getEmployeeAttachments() {
+        const attachments = [];
+
+        $('#tblEmployeeAttachment tbody tr').each(function () {
+            const base64 = $(this).data('base64');
+            const fileName = $(this).data('filename');
+
+            if (fileName && base64) {
+                attachments.push({
+                    AttachId: null,
+                    FileName: fileName,
+                    FilePath: base64, // Or: base64.split(',')[1] for raw data
+                    FileBase64: base64, // If your backend uses this
+                    AttachDate: null,
+                    FileRData: null
+                });
+            }
+        });
+
+        return attachments;
+    }
+
+
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // function getEmployeeAttachments() {
+    //     const attachments = [];
+    //     $('#tblEmployeeAttachment tbody tr').each(function () {
+    //         const base64 = $(this).data('base64');
+    //         const fileName = $(this).data('filename');
+
+    //         attachments.push({
+    //             FileName: fileName,
+    //             FileBase64: base64
+    //         });
+    //     });
+    //     return attachments;
+    // }
+
+    function getEmployeeExperiences() {
+        const experiences = [];
+
+        $('#tblEmployeeExperience tbody tr').each(function () {
+            const $row = $(this);
+            const experience = {
+                Employer: $row.find('td:eq(1)').text().trim(),
+                Address: $row.find('td:eq(2)').text().trim(),
+                Doj: parseDate($row.find('td:eq(3)').text().trim()),
+                Dor: parseDate($row.find('td:eq(4)').text().trim()),
+                Period: $row.find('td:eq(5)').text().trim(),
+                LastSalary: parseIntSafe($row.find('td:eq(6)').text().trim()),
+                Dept: $row.find('td:eq(7)').text().trim(),
+                Desg: $row.find('td:eq(8)').text().trim(),
+                JobProfile: $row.find('td:eq(9)').text().trim()
+            };
+            experiences.push(experience);
+        });
+
+        return experiences;
+    }
+
+    function getQualificationDetails() {
+        const qualifications = [];
+
+        $('#tblQualificationDetails tbody tr').each(function () {
+            const $row = $(this);
+            const qualification = {
+                Degree: $row.find('td:eq(1)').text().trim(),
+                Board: $row.find('td:eq(2)').text().trim(),
+                Year: $row.find('td:eq(3)').text().trim(),
+                Marks: $row.find('td:eq(4)').text().trim(),
+                Remarks: $row.find('td:eq(5)').text().trim()
+            };
+            qualifications.push(qualification);
+        });
+
+        return qualifications;
+    }
+
+    function getEmployeeAttachments() {
+        const attachments = [];
+
+        $('#tblEmployeeAttachment tbody tr').each(function () {
+            const $row = $(this);
+            const attachment = {
+                AttachId: parseIntSafe($row.find('td:eq(0)').text().trim()) || null, // if hidden code exists
+                FileName: $row.find('td:eq(1)').text().trim(),
+                FilePath: $row.data('filepath') || null,        // stored as data-filepath
+                AttachDate: $row.data('attachdate') || null,    // optional
+                FileRData: null // can't serialize byte[] from client, should be uploaded separately
+            };
+
+            attachments.push(attachment);
+        });
+
+        return attachments;
+    }
+
+    function getFamilyDetails() {
+        const familyDetails = [];
+
+        $('#tblFamilyDetails tbody tr').each(function () {
+            const $row = $(this);
+
+            const familyMember = {
+                Member: $row.find('td:eq(1)').text().trim(),
+                Age: $row.find('td:eq(2)').text().trim(),
+                Contact: $row.find('td:eq(3)').text().trim(),
+                Relation: $row.find('td:eq(4)').text().trim(),
+                Minor: $row.find('td:eq(5)').text().trim(),
+                Nominee: $row.find('td:eq(6)').text().trim(),
+                Share: parseIntSafe($row.find('td:eq(7)').text().trim()) || null,
+                Address: $row.find('td:eq(8)').text().trim(),
+                Remarks: $row.find('td:eq(9)').text().trim()
+            };
+
+            familyDetails.push(familyMember);
+        });
+
+        return familyDetails;
+    }
+
+    function getRelativeDetails() {
+        const relativeDetails = [];
+
+        $('#tblRelativeDetails tbody tr').each(function () {
+            const $row = $(this);
+
+            const relative = {
+                Name: $row.find('td:eq(1)').text().trim(),
+                DeptCode: parseIntSafe($row.find('td:eq(2)').text().trim()) || null,
+                Contact: $row.find('td:eq(3)').text().trim(),
+                Relation: $row.find('td:eq(4)').text().trim(),
+                Address: $row.find('td:eq(5)').text().trim(),
+                Remarks: $row.find('td:eq(6)').text().trim()
+            };
+
+            relativeDetails.push(relative);
+        });
+
+        return relativeDetails;
+    }
+
+
+    function checkExistOrNot(code) {
+        return $.ajax({
+            url: '/EmployeeMaster/getExistOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: {inputdata :code}
+        });
+    }
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        confirmAction().then((confirmed) => {
+            if (!confirmed) return;
+            if (MasterTblId) {
+                GetMasterDataList(MasterTblId, readOnly);
+            } else {
+                resetFields();
+            }
+        });
+    });
+
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseDecimal(value) {
+        if (!value) return null;
+        const cleanedValue = value.replace(/,/g, '');
+        const parsed = parseFloat(cleanedValue);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function toNullableInt(val) {
+      const parsed = parseInt(val);
+      return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+      const date = new Date(val);
+      return isNaN(date.getTime()) ? null : val;
+    }
+
+     function allowOnlyNumbers(input) {
+         input.value = input.value.replace(/[^\d]/g, '');
+     }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function setCheckboxValue(id, value) {
+        const isChecked = value == 1;
+        $('#' + id).prop('checked', isChecked).val(isChecked ? 1 : 0);
+    }
+
+
+     function setActiveStatus(input) {
+         let isActive = input == 1;
+         $('#DdActive').prop('checked', isActive);
+         $('#DdActive').val(isActive ? 1 : 0);
+         $('#statusText').text(isActive ? 'Active' : 'Inactive');
+     }
+
+    function GetDepartmentList(dropdownSelector, selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetDepartmentList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                      var $DropdownId = $(dropdownSelector);
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Department -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Department  Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Department Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetDesignationList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetDesignationList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlDesignation');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Designation -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Designation  Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Designation Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetCaderList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetCaderList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlCader');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Cader -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Cader  Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Cader Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetGradeList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetGradeList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlGrade');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Grade -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Grade  Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Grade Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetJobResponsbilityList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetPlaceList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlJobResponsibility');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Job Responsibility -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Job Responsibility  Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Job Responsibility Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetCategoryList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetCategoryList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlCategoryWPlace');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select CategoryWPlace -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("CategoryWPlace Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("CategoryWPlace Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetShiftList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetShiftList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlShift');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Employee -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Shif Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Employee Load failed", xhr.error);
+             }
+         });
+    }
+
+    function GetBankList(selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetbankList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $('#ddlBank');
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Bank -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Bank Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Bank Load failed", xhr.error);
+             }
+         });
+    }
+
+     function GetCityList(dropdownSelector, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetCityList", "EmployeeMaster")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $dropdown = $(dropdownSelector);
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled>- Select City -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+
+                } else {
+                    toastr.error("City Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("City Load failed", xhr.error);
+            }
+        });
+    }
+
+    function GetPlaceList(dropdownSelector, selectedvalue=null)
+    {
+         $.ajax({
+             url: '@Url.Action("GetPlaceList", "EmployeeMaster")',
+             type: 'GET',
+             dataType: 'json',
+             success: function (response) {
+                 if (response.status) {
+                     var $DropdownId = $(dropdownSelector);
+                     $DropdownId.empty();
+                     $DropdownId.append('<option selected disabled>- Select Place -</option>');
+                     $.each(response.data, function (index, item) {
+                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                     });
+
+                   if (selectedvalue && $DropdownId.find(`option[value="${selectedvalue}"]`).length > 0) {
+                   $DropdownId.val(selectedvalue).trigger('change');
+                   } else {
+                   $DropdownId.prop('selectedIndex', 0);
+                   }
+
+                 } else {
+                     toastr.error("Place  Load failed");
+                 }
+             },
+             error: function (xhr, status, error) {
+                 toastr.error("Place Load failed", xhr.error);
+             }
+         });
+    }
+
+
+
+
+</script>
+
+

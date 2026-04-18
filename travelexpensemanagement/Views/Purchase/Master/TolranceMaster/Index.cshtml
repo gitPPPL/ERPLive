@@ -1,0 +1,219 @@
+﻿@{
+	ViewBag.Title = "Tolrance Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Tolrance Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnBack"
+					onclick="window.location.href='@Url.Action("Index", "TolranceMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="TolranceMasterform">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlVType" class="form-label">V Type</label>
+					<select class="form-control" id="ddlVType" name="VType">
+						<option value="">-- Select Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtQty" class="form-label">Qty</label>
+                    <input type="number" class="form-control" id="TxtQty" name="Qty" placeholder="Enter Qty" maxlength="20">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtTolranceQty" class="form-label">Tolrance Qty</label>
+                    <input type="number" class="form-control" id="TxtTolranceQty" name="TolranceQty" placeholder="Enter Tolrance Qty" maxlength="20" />
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+
+@* Cancel Button Popup *@
+<script>
+		document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@
+
+<script>
+        $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        if (!isNaN(rowId) && rowId > 0) {
+            loadToleranceById(rowId);
+            if (isReadOnly) {
+                setFormReadOnly();
+            }
+        }
+
+        loadVTypes();
+
+        // Save button click
+        $("#btnSave").click(function (e) {
+            e.preventDefault();
+
+            var vType = $("#ddlVType").val();
+            var qty = $("#TxtQty").val().trim();
+            var toleranceQty = $("#TxtTolranceQty").val().trim();
+            var CODE = $("#CODE").val().trim();
+            var action = (isNaN(CODE) || CODE <= 0) ? 'INSERT' : 'UPDATE';  // Ensure CODE is valid
+
+            // Validation
+            if (!vType) {
+                toastr.warning("Please select a Vehicle Type.");
+                $("#ddlVType").focus();
+                return;
+            }
+
+            if (!qty || isNaN(qty)) {
+                toastr.warning("Please enter a valid Quantity.");
+                $("#TxtQty").focus();
+                return;
+            }
+
+            if (!toleranceQty || isNaN(toleranceQty)) {
+                toastr.warning("Please enter a valid Tolerance Quantity.");
+                $("#TxtTolranceQty").focus();
+                return;
+            }
+
+            var formData = {
+                V_TYPE: vType || '',
+                QTY: parseFloat(qty) || 0,
+                TOLRANCE_QTY: parseFloat(toleranceQty) || 0,
+                CODE: (CODE && !isNaN(CODE)) ? CODE : null,  // Pass null if CODE is undefined or invalid
+                ACTION: action || ''
+            }
+
+            console.log("Submitting: ", formData);
+            $("#btnSave").prop("disabled", true); // Prevent double-click
+
+            $.ajax({
+                url: '/TolranceMaster/SaveCostCatMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    toastr.success(response.message || "Saved successfully!");
+                    $("#TolranceMasterform")[0].reset();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error("Something went wrong.");
+                },
+                complete: function () {
+                    $("#btnSave").prop("disabled", false);
+                }
+            });
+        });
+    });
+
+    // Load vehicle types into dropdown
+    function loadVTypes(callback) {
+        $.ajax({
+            url: '/TolranceMaster/VType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlVType');
+                ddl.empty();
+                ddl.append('<option value="" selected>-- Select Vehicle Type --</option>'); // Set default selected
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading vehicle types: ", xhr.responseText);
+                alert('Error loading Vehicle Types: ' + error);
+            }
+        });
+    }
+
+    // Load tolerance data by ID
+    function loadToleranceById(code) {
+        $.ajax({
+            url: '/TolranceMasterList/GetTolrencesCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No Tolerance found for the given ID.");
+                    return;
+                }
+
+                const data = res.data;
+                console.log(data);
+                $('#CODE').val($.trim(data.code));
+                $('#TxtQty').val($.trim(data.qty));
+                $('#TxtTolranceQty').val($.trim(data.tolrancE_QTY));
+
+                // Populate dropdown and set selected value
+                loadVTypes(function () {
+                    $('#ddlVType').val(data.v_TYPE);
+                });
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    // Set form to read-only
+    function setFormReadOnly() {
+        const form = $('#TolranceMasterform');
+        form.find('input, select, textarea, button').prop('disabled', true);
+    }
+
+</script>
+
+

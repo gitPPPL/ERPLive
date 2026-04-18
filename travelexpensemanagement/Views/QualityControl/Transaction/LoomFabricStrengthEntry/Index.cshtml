@@ -1,0 +1,327 @@
+﻿@{
+    ViewBag.Title = "Loom Fabric Strength Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Loom Fabric Strength Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "LoomFabricStrengthEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="LoomFabricStrengthEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <!-- First Row -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumTotalRec">Total Rec</label>
+                    <input type="number" class="form-control" id="NumTotalRec" placeholder="Enter Total Rec">
+                </div>
+            </div>
+        </div>
+        <!-- Second Row -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlShift">Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtPlace">Place</label>
+                    <input type="text" class="form-control" id="TxtPlace" placeholder="Enter Place">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtInspectedBy">Inspected By</label>
+                    <input type="text" class="form-control" id="TxtInspectedBy" placeholder="Enter Inspector Name">
+                </div>
+            </div>
+        </div>
+        <!-- Third Row -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea class="form-control" id="TxtRemarks" rows="2" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>   
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblFabricStrengthEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>LID</th>
+                            <th>Loom</th>
+                            <th>Item Name</th>
+                            <th>Type</th>
+                            <th>Width</th>
+                            <th>Gram</th>
+                            <th>Color</th>
+                            <th>DNR</th>
+                            <th>WarpWay</th>
+                            <th>WeftWay</th>
+                            <th>Strength</th>
+                            <th>Warp Elong</th>
+                            <th>Weft Elong</th>
+                            <th>Warp Mesh</th>
+                            <th>Weft Mesh</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        const $tbody = $('#tblFabricStrengthEntry tbody');
+
+        function addRow(data = {}) {
+            // Remove plus icon from previous rows
+            $tbody.find('.btn-add-action').remove();
+
+            const row = `
+                <tr class="no-border-input">
+                    <td style="display:none;">${data.code || ''}</td>
+                    <td><input type="text" class="form-control" value="${data.lid || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.loom || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.itemName || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.type || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.width || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.gram || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.color || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.dnr || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.warpWay || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.weftWay || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.strength || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.warpElong || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.weftElong || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.warpMesh || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.weftMesh || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.remarks || ''}" /></td>
+                    <td>
+                        <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+                </tr>
+            `;
+            $tbody.append(row);
+        }
+
+        // Initial row
+        addRow();
+
+        // Add row on plus icon / Add New Row button
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addRow();
+        });
+
+        // Delete row
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+            $row.remove();
+
+            // If last row deleted, add plus icon on new last row
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+    });
+</script>
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadDocumentStages();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadDocumentStages();
+        });
+    });
+
+    //Load main grid...............
+    function loadDocumentStages() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ApprovalStageMasterList/GetAllDocs',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const docs = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#tblApprovalStageMaster tbody');
+                tbody.empty();
+
+                if (docs.length === 0) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_NAME || ''}</td>
+                            <td>${doc.useR_NO || '0'}</td>
+                            <td>
+                              <div class="action-icons">
+                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
+                               <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
+                              </div>
+
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+            }
+        });
+    }
+
+        function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        pagination.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadDocumentStages();
+    }
+
+    function editDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+    }
+
+    function viewDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+    }
+
+    function deleteDocStage(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ApprovalStageMasterList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+
+
+
+</script>

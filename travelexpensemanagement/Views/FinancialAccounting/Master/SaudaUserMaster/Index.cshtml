@@ -1,0 +1,61 @@
+﻿@{
+	ViewBag.Title = "Sauda User Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Sauda User Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "SaudaUserMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ITEM_TYPE" class="form-label">Item Type</label>
+					<select class="form-control" id="ddlITEM_TYPE" name="ITEM_TYPE">
+						<option value="">-- Select Item Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="EMP_NAME" class="form-label">Emp Name</label>
+					<select class="form-control" id="ddlEMP_NAME" name="EMP_NAME">
+						<option value="">-- Select Emp Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SAUDA_TYPE" class="form-label">Sauda Type</label>
+					<select class="form-control" id="ddlSAUDA_TYPE" name="SAUDA_TYPE">
+						<option value="">-- Select Sauda Type --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+</script>

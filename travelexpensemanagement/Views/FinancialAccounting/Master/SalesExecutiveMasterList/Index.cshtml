@@ -1,0 +1,322 @@
+﻿@{
+	ViewBag.Title = "Sales Executive Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Sales Executive Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "SalesExecutiveMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Sales Executive
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card shadow-sm border-0 mt-1">
+		<div class="table-responsive">
+			<table id="tabledt" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th>SNo</th>
+						<th>Code</th>
+						<th>Name</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<!-- Pagination container -->
+		<div class="row p-3">
+			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+		</div>
+	</div>
+</fieldset>
+
+<script>
+
+	let allMastData = [];
+	let filteredData = [];
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	var salesExecutivedt=[];
+
+	// Fetch data on page load
+	$(document).ready(function () {
+	getSalesExecutiveDt();
+
+			$(document).on('click', '.page-link', function (e) {
+				e.preventDefault();
+				const page = parseInt($(this).data('page'));
+				const totalPages = Math.ceil(allMastData.length / rowsPerPage);
+
+				if (page >= 1 && page <= totalPages) {
+					currentPage = page;
+					renderYearMasterTable();
+					renderYearMasterPagination();
+				}
+			});
+
+			$('#searchInput').on('input', function () {
+				const keyword = $(this).val().toLowerCase();
+
+				filteredData = allMastData.filter(item => {
+					return Object.values(item).some(val =>
+						String(val).toLowerCase().includes(keyword)
+					);
+				});
+
+				currentPage = 1;
+				renderYearMasterTable();
+				renderYearMasterPagination();
+			});
+
+
+		$(document).on('click', '.btn-edit', function () {
+		const $row = $(this).closest('tr');
+		getDataOfRow($row);
+		localStorage.setItem('editSalesExective', JSON.stringify(salesExecutivedt));
+		localStorage.setItem('Mode', 'Edit');
+		window.location.href = '/SalesExecutiveMaster/Index';
+	});
+
+		$(document).on('click', '.btn-view', function () {
+		const $row = $(this).closest('tr');
+		getDataOfRow($row);
+		localStorage.setItem('editSalesExective', JSON.stringify(salesExecutivedt));
+		localStorage.setItem('Mode', 'View');
+		window.location.href = '/SalesExecutiveMaster/Index';
+	});
+
+	   $(document).on('click', '.btn-delete', function() {
+					const $row = $(this).closest('tr');
+	const CodeforDel = $row.find('.code').text().trim();
+	const sno = $row.find('.sno').text().trim();
+	console.log(CodeforDel, sno);
+
+				Swal.fire({
+					title: 'Are you sure you want to delete?',
+					text: "This action cannot be undone.",
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Yes, delete it!',
+					cancelButtonText: 'No, cancel!',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						$.ajax({
+							url: '/SalesExecutiveMasterList/DeleteSalesExecutiveMast',
+							type: 'DELETE',
+							data: { code: CodeforDel, sno:sno },
+							success: function(data) {
+								if (data.status === true) {
+									Swal.fire(
+										'Deleted!',
+										'Your data has been deleted.',
+										'success'
+									);
+									$row.remove();
+									getSalesExecutiveDt();
+								} else {
+									Swal.fire(
+										'Error!',
+										'There was an issue deleting the data.',
+										'error'
+									);
+								}
+							},
+							error: function(xhr, status, error) {
+								Swal.fire(
+									'Error!',
+									'Data could not be deleted: ' + error,
+									'error'
+								);
+							}
+						});
+					}
+				});
+			});
+
+
+	});
+	// 	$(document).on('click', '.btn-delete', function () {
+	// 	const $row = $(this).closest('tr');
+	// 	const CodeforDel = $row.find('.code').text().trim();
+	// 	const sno = $row.find('.sno').text().trim();
+	// 	console.log(CodeforDel, sno);
+
+	// 	Swal.fire({
+	// 		title: 'Are you sure you want to delete?',
+	// 		text: "This action cannot be undone.",
+	// 		icon: 'warning',
+	// 		showCancelButton: true,
+	// 		confirmButtonText: 'Yes, delete it!',
+	// 		cancelButtonText: 'No, cancel!',
+	// 		reverseButtons: true
+	// 	}).then((result) => {
+	// 		if (result.isConfirmed) {
+	// 			$.ajax({
+	// 				url: '/SalesExecutiveMasterList/DeleteSalesExecutiveMast',
+	// 				type: 'DELETE',
+	// 				data: { code: CodeforDel, sno: sno },
+	// 				success: function (data) {
+	// 					if (data.status === true) {
+	// 						Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
+	// 						$row.remove();
+	// 						getSalesExecutiveDt(); // Refresh data
+	// 					} else {
+	// 						Swal.fire('Error!', 'There was an issue deleting the data.', 'error');
+	// 					}
+	// 				},
+	// 				error: function (xhr, status, error) {
+	// 					Swal.fire('Error!', 'Data could not be deleted: ' + error, 'error');
+	// 				}
+	// 			});
+	// 		}
+	// 	});
+	// });
+
+	function getDataOfRow($row) {
+	   salesExecutivedt = {
+			sno: $row.find('.sno').text().trim(),
+			code: $row.find('.code').text().trim(),
+			name: $row.find('.name').text().trim()
+
+		};
+
+	}
+
+			function getSalesExecutiveDt() {
+				debugger;
+				$.ajax({
+					url:'@Url.Action("GetSaleExecutiveMast", "SalesExecutiveMasterList")',
+					type: 'GET',
+					dataType: 'json',
+					success: function (data) {
+						if (data.status === true) {
+							 allMastData = data.data;
+							filteredData=allMastData;
+							currentPage = 1;
+							renderYearMasterTable();
+							renderYearMasterPagination();
+
+						} else {
+							alert("Data Load Failed");
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error('Error: ' + xhr.responseText);
+						alert('Data Load Failed: ' + error);
+					}
+				});
+			}
+			function renderYearMasterTable() {
+				const tbody = $('#tabledt tbody');
+				tbody.empty();
+				const start = (currentPage - 1) * rowsPerPage;
+				const end = start + rowsPerPage;
+				const pageData = filteredData.slice(start, end);
+				pageData.forEach(item => {
+					const row = `<tr>
+									<td class="sno">${item.Sno}</td>
+									<td class="code">${item.code}</td>
+									<td class="name">${item.NAME}</td>
+									<td>
+									<button class="btn btn-sm btn-light btn-edit">
+									<i class='fas fa-edit text-primary'></i>
+									</button>
+									<button class="btn btn-sm btn-light btn-view">
+									<i class="fas fa-eye"></i>
+									</button>
+									<button class="btn btn-sm btn-light btn-delete">
+									<i class='fas fa-trash text-danger'></i>
+									</button>
+									</td>
+					</tr>`;
+					tbody.append(row);
+				});
+			}
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+
+		// Clear previous pagination
+		paginationContainer.empty();
+
+			function renderYearMasterPagination() {
+				const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+				const pagination = $('#tablePagination');
+				pagination.empty();
+
+		// Don't render pagination if only one page
+				if (totalPages <= 1) return;
+
+				const maxVisiblePages = 7;
+				const ellipsis = '<li class="page-item disabled"><span class="page-link">...</span></li>';
+
+				pagination.append(`<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+					<a class="page-link" href="#" data-page="${currentPage - 1}">Prev</a>
+				</li>`);
+
+				let startPage = Math.max(1, currentPage - 2);
+				let endPage = Math.min(totalPages, currentPage + 2);
+
+				if (currentPage <= 4) {
+					startPage = 1;
+					endPage = Math.min(totalPages, maxVisiblePages - 2);
+				} else if (currentPage >= totalPages - 3) {
+					startPage = Math.max(1, totalPages - (maxVisiblePages - 3));
+					endPage = totalPages;
+				}
+
+				if (startPage > 1) {
+					pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`);
+					if (startPage > 2) pagination.append(ellipsis);
+				}
+
+				for (let i = startPage; i <= endPage; i++) {
+					pagination.append(`<li class="page-item ${i === currentPage ? 'active' : ''}">
+						<a class="page-link" href="#" data-page="${i}">${i}</a>
+					</li>`);
+				}
+
+				if (endPage < totalPages) {
+					if (endPage < totalPages - 1) pagination.append(ellipsis);
+					pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`);
+				}
+	$('#searchBox').on('keyup', function () {
+		currentPage = 1;
+		loadAllMenus();
+	});
+	//Load Full LIST END
+
+
+
+				// Next button
+				pagination.append(`<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+					<a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+				</li>`);
+			}
+
+</script>

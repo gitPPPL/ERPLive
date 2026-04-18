@@ -1,0 +1,882 @@
+﻿@{
+    ViewBag.Title = "Pre Incomming QC RM";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .col-color-1 {
+        background-color: #e8f7e4;
+    }
+    .col-color-2 {
+        background-color: #f0f0f0;
+    }
+    .readonly-cell {
+        display: none !important;
+    }
+    .itemValueInput::placeholder {
+        font-size: 10px !important;
+    }
+    #ItemplusModal .modal-dialog {
+        max-width: 1000px !important;
+    }
+</style>
+
+<fieldset>
+    <legend class="legend-field">Pre Incomming QC RM</legend>
+
+    <form id="PreIncommingQCRMForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <fieldset>
+            <legend class="sub-legend">Document Details</legend>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlDocType">Doc Type</label>
+                        <select class="form-control" id="ddlDocType">
+                            <option value="">Select Doc Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumDocNo">Doc No</label>
+                        <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="DtDate">Date</label>
+                        <input type="date" class="form-control" id="DtDate" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Gate No</label>
+                        <div class="input-icon-wrapper">
+                            <select class="form-control" id="ddlGateNo">
+                                <option value="0">--Select--</option>
+                            </select>
+                            <span class="input-icon" id="btn_ok">ok</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend class="sub-legend">Bill and Transport Details</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlPartyName">Party Name</label>
+                        @* <input type="text" class="form-control" id="TxtPartyName" placeholder="Enter Party Name" /> *@
+                        <select class="form-control" id="ddlPartyCode">
+                            <option value="0">--Select--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumBillNo">Bill No</label>
+                        <input type="text" class="form-control" id="NumBillNo" placeholder="Enter Bill No" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group position-relative">
+                        <label for="DtBillDate">Bill Date</label>
+                        <div class="calender-check">
+                            <input type="date" class="form-control" id="DtBillDate" style="padding-left: 30px;">
+                            <input type="checkbox" id="chkBillDate" class="checkbox-inside">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtTruckNo">Truck No</label>
+                        <input type="text" class="form-control" id="TxtTruckNo" placeholder="Enter Truck No" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtContainerNo">Container No</label>
+                        <input type="text" class="form-control" id="TxtContainerNo" placeholder="Enter Container No">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtBales">Bales</label>
+                        <input type="text" class="form-control" id="TxtBales" placeholder="Enter Bales" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtInvoiceQty">Invoice Qty</label>
+                        <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtRecordedQty">Received Qty</label>
+                        <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtShortage">Shortage</label>
+                        <input type="text" class="form-control" id="TxtShortage" placeholder="Enter Shortage" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtRemarksT">Remarks</label>
+                        <textarea typeof="text" class="form-control" id="TxtRemarksT" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlQCIncharge">QC Incharge</label>
+                        <select class="form-control" id="ddlQCIncharge">
+                            <option value="">Select QC Incharge</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlChem">Chemist</label>
+                        <select class="form-control" id="ddlChem">
+                            <option value="">Select Chem.</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtRemarks">Remarks</label>
+                        <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group" style="margin-bottom: 5px;">
+                        <label for="ddlItemName">Item Name</label>
+                        <select class="form-control" id="ddlItemName">
+                            <option value="">Select Item Name</option>
+                        </select>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row" style="display:none;">
+                <div class="col-md-3">
+                    <div class="form-group" style="display:none;">
+                        <label for="ddlPurType">Purchase Type</label>
+                        <input type="text" class="form-control" id="TxtPurType" placeholder="Enter Purchase Type">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="form-group" style="display:none;">
+                        <label for="ddlTransport">Transport</label>
+                        <input type="text" class="form-control" id="TxtTransport" placeholder="Enter Transport" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group" style="display:none;">
+                        <label for="TxtInvoiceQty">Invoice Qty</label>
+                        <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group" style="display:none;">
+                        <label for="TxtRecordedQty">Recorded Qty</label>
+                        <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
+                    </div>
+                </div>
+
+            </div>
+        </fieldset>
+
+        <div class="row btn-mt">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table id="itemDataTable" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">QC ID</th>
+                                    <th style="display:none;">QCP ID</th>
+                                    <th>Parameter</th>
+                                    <th>Unit</th>
+                                    <th>Standard Value</th>
+                                    <th style="display:none;">Quantity</th>
+                                    <th style="display:none;">Allow Amount</th>
+                                    <th style="display:none;">Deduction Amount</th>
+                                    <th style="display:none;">Deduction Narration</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                </div>
+                <div class="col-md-12">
+                    <div class="button-right">
+                        <button type="button" class="btn btn-success" id="btn_calculate"><i class="fa fa-calculator"></i>Calculate</button>
+                        <button type="button" class="btn btn-danger" id="btn_PendingQC" data-bs-toggle="modal" data-bs-target="#pendingQCModal"><i class="fa fa-hourglass-half"></i>Pending QC</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group" style="display:none;">
+                            <label for="TxtWastage">Wastage</label>
+                            <input type="text" class="form-control" id="TxtWastage" placeholder="Enter Wastage" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group position-relative" style="display:none;">
+                            <label for="DtGateDate">Gate Date</label>
+                            <div class="calender-check">
+                                <input type="date" class="form-control" id="DtGateDate" style="padding-left: 30px;">
+                                <input type="checkbox" id="chkGateDate" class="checkbox-inside">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Pending QC Modal-->
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button id=""
+                            onclick="window.location.href='@Url.Action("Index", "PreIncommingQCRMList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        ddlDocType();
+        ddlQCIncharge();
+        ddlCheme();
+        ddlItemName();
+        ddlItemItemCode();
+        const today = new Date().toISOString().split('T')[0];
+        $('#DtDate').val(today);
+        const vType = getQueryParam('vType');
+        const vNo = getQueryParam('vNo');
+        if (vNo)
+        {
+            $.ajax({
+                  url: '/PreIncommingQCRM/GetAllDatadetails',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ vNo: vNo, vType: vType }),
+                success: function (response) {
+                    const $attachmentTbody = $('#tblAttachmentPRE tbody');
+                      GetallDataPreIncommingQCRM(response);
+                },
+                error: function (xhr) {
+                        toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        }
+        // ---------- Event handlers ----------
+        $('#ddlDocType').on('change', function () {
+            const docType = $(this).val();
+            const docText = $(this).find('option:selected').text();
+            $('#NumDocNo').prop('readonly', true);
+
+            if (docType) {
+                sendDocType(docType, docText);
+            } else {
+                $('#NumDocNo').val('');
+            }
+        });
+        // Gate no change (party)
+        $('#ddlGateNo').on('change', function () {
+            const selectedNo = $(this).val();
+            const selectedText = $(this).find('option:selected').text();
+            if (selectedNo) {
+                $.ajax({
+                    url: '/PreIncommingQCRM/GetGatDetailsList',
+                    type: 'POST',
+                    data: { StrVNo: selectedNo, StrV_type: selectedText },
+                    success: function (response) {
+                        GateNochange(response);
+                    },
+                    error: function (xhr) {
+                        console.error("Error loading gate details:", xhr.responseText || xhr.statusText);
+                    }
+                });
+            }
+        });
+        $('#ddlItemName').on('change', function () {
+        const itemCode = $(this).val();
+        const itemName = $(this).find('option:selected').text().trim();
+
+        if (!itemCode) return;
+        // Change the table header “Result” column to the selected item name
+        $('#itemDataTable thead th:last').text(itemName);
+
+        const row = $(this).closest('tr');
+        const vno = parseInt(row.find('td:eq(2)').text().trim()) || 0;
+        const vtype = row.find('td:eq(3)').text().trim();
+
+        $.ajax({
+            url: '/PreIncommingQCRM/GetItemsName',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ ItemCode: itemCode, ItemName: itemName, Vno: vno, Vtype: vtype }),
+            success: function (res) {
+                if (!res || !res.success || !Array.isArray(res.data)) {
+                    alert('No data found for this item.');
+                    return;
+                }
+                populateItemDataTable(res.data, itemName);
+            },
+            error: function (xhr) {
+                console.error('Error loading item QC details:', xhr.responseText || xhr.statusText);
+                alert('Failed to load item QC details.');
+            }
+        });
+    });
+        $(document).on('click', '.deleteRowBtn', function () {
+            $(this).closest('tr').remove();
+        });
+        $('#btn-save').on('click', function (event) {
+        event.preventDefault();
+          debugger
+            // Parsers
+            function parseDecimal(val) {
+                if (!val) return null;
+                return parseFloat(val);
+            }
+            function parseIntOrNull(val) {
+                if (!val) return null;
+                return parseInt(val, 10);
+            }
+            // Build header
+            const header = {
+                docType: $('#ddlDocType').val() ,
+                docNo: $('#NumDocNo').val(),
+                date: $('#DtDate').val(),
+                gateNo: $('#ddlGateNo option:selected').text(),
+                qcIncharge: $('#ddlQCIncharge').val(),
+                chem: $('#ddlChem').val(),
+                partyName: $('#ddlPartyCode').val(),
+                transport: $('#TxtTransport').val(),
+                truckNo: $('#TxtTruckNo').val(),
+                containerNo: $('#TxtContainerNo').val(),
+                invoiceQty: parseDecimal($('#TxtInvoiceQty').val()),
+                recordedQty: parseDecimal($('#TxtRecordedQty').val()),
+                purType: $('#TxtPurType').val(),
+                shortage: parseDecimal($('#TxtShortage').val()),
+                billNo: parseIntOrNull($('#NumBillNo').val()),
+                billDate: $('#DtBillDate').val(),
+                billDateChecked: $('#chkBillDate').is(':checked'),
+                wastage: parseDecimal($('#TxtWastage').val()),
+                gateDate: $('#DtGateDate').val(),
+                gateDateChecked: $('#chkGateDate').is(':checked'),
+                bales: parseIntOrNull($('#TxtBales').val()),
+                remarks: $('#TxtRemarks').val(),
+                ACTION: vNo ? "UPDATE" : "INSERT"
+            };
+            const details = [];
+             $('#itemDataTable tbody tr').each(function (index) {
+                 const $tr = $(this);
+                 const detail = {
+                     RowIndex: index + 1,
+                     QC_CODE: $tr.find('td:eq(0)').text().trim(),
+                     QCP_CODE: $tr.find('td:eq(1)').text().trim(),
+                     Parameter: $tr.find('td:eq(2)').text().trim(),
+                     Unit: $tr.find('td:eq(3)').text().trim(),
+                     QCP_STD: $tr.find('td:eq(4)').text().trim(),
+                     Qty: parseDecimal($tr.find('td:eq(5)').text().trim()),
+                     AllowAmt: parseDecimal($tr.find('input[name="AllowAmt"]').val()),
+                     DeductAmt: parseDecimal($tr.find('input[name="DeductAmt"]').val()),
+                     DeductNarr: $tr.find('input[name="DeductNarr"]').val(),
+                     ItemValue: $tr.find('input[name="Result"]').val(),
+                     itemCode: $('#ddlItemName').val()
+                 };
+                 details.push(detail);
+             });
+            const payload = {
+                Header: header,
+                Details: details
+            };
+            console.log('payload',payload)
+            $.ajax({
+                url: '/PreIncommingQCRM/SaveAllData',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    if (res && res.success) {
+                         toastr.success(res.message);
+                        ShowQcResultList(res.v_TYPE, res.v_NO);
+                    } else {
+                        toastr.error(res.message || 'An error occurred while saving data.');
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Save failed:', xhr.responseText || xhr.statusText);
+                    alert('❌ Failed to save data: ' + (xhr.responseText || xhr.statusText));
+                }
+            });
+        });
+        function populateItemDataTable(dataArray, itemName) {
+        const $tbody = $('#itemDataTable tbody');
+        $tbody.empty();
+        dataArray.forEach(d => {
+            const rowHTML = `
+                <tr>
+                    <td style="display:none;">${escapeHtml(d.qC_CODE || '')}</td>
+                    <td style="display:none;">${escapeHtml(d.qcP_CODE || '')}</td>
+                    <td>${escapeHtml(d.parameter || '')}</td>
+                    <td>${escapeHtml(d.unit || '')}</td>
+                    <td>${escapeHtml(d.qcP_STD || '')}</td>
+                    <td style="display:none;">${escapeHtml(d.qty || '')}</td>
+                    <td style="display:none;"><input type="text" class="form-control" name="AllowAmt" value="${escapeHtml(d.allow || '')}" /></td>
+                    <td style="display:none;"><input type="text" class="form-control" name="DeductAmt" value="${escapeHtml(d.deduction || '')}" /></td>
+                    <td style="display:none;"><input type="text" class="form-control" name="DeductNarr" value="${escapeHtml(d.deductionNarr || '')}" /></td>
+                    <td><input type="text" class="form-control" name="Result" value="${escapeHtml(d.result || '')}" /></td>
+                </tr>
+            `;
+            $tbody.append(rowHTML);
+        });
+    }
+        // Called when party/gate info is returned
+        // function GateNochange(response) {
+        //     console.log('kks',response)
+        //     if (!response || response.length === 0) return;
+        //     const data = response[0];
+
+        //     const formatDate = function (dateStr) {
+        //         if (!dateStr) return "";
+        //         const parts = dateStr.split('/');
+        //         if (parts.length !== 3) return dateStr;
+        //         return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+        //     };
+
+        //     $('#DtGateDate').val(formatDate(data.v_DATE)).prop('readonly', true);
+        //     $('#TxtPartyName').val(data.partyName || '').prop('readonly', true);
+        //     $('#TxtTruckNo').val(data.trucK_NO || '').prop('readonly', true);
+        //     $('#NumBillNo').val(data.bilL_NO || '').prop('readonly', true);
+        //     $('#DtBillDate').val(formatDate(data.bilL_DATE)).prop('readonly', true);
+        //     $('#TxtInvoiceQty').val(data.qty || '').prop('readonly', true);
+        //     $('#TxtRecordedQty').val(data.qty || '').prop('readonly', true);
+        //     $('#TxtShortage').val('0');
+        //     $('#TxtWastage').val('0');
+        //     $('#TxtTransport').val('');
+        //     $('#TxtContainerNo').val('');
+        //     ddlItemItemCode(() => $('#ddlPartyCode').val(data.partY_CODE));
+        //     ddlItemName(() => $('#ddlItemName').val(data.iteM_CODE));
+
+
+        // }
+        function GateNochange(response) {
+        console.log('kks', response);
+        if (!response || response.length === 0) return;
+        const data = response[0];
+
+        const formatDate = function (dateStr) {
+            if (!dateStr) return "";
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        };
+
+        $('#DtGateDate').val(formatDate(data.v_DATE)).prop('readonly', true);
+        $('#TxtPartyName').val(data.partyName || '').prop('readonly', true);
+        $('#TxtTruckNo').val(data.trucK_NO || '').prop('readonly', true);
+        $('#NumBillNo').val(data.bilL_NO || '').prop('readonly', true);
+        $('#DtBillDate').val(formatDate(data.bilL_DATE)).prop('readonly', true);
+        $('#TxtInvoiceQty').val(data.qty || '').prop('readonly', true);
+        $('#TxtRecordedQty').val(data.qty || '').prop('readonly', true);
+        $('#TxtShortage').val('0');
+        $('#TxtWastage').val('0');
+        $('#TxtTransport').val('');
+        $('#TxtContainerNo').val('');
+
+        // Update Party Code dropdown
+        ddlItemItemCode(() => $('#ddlPartyCode').val(data.partY_CODE));
+
+        // Update Item dropdown and select item code after it loads
+        ddlItemName(() => {
+            $('#ddlItemName').val(data.iteM_CODE);  // Select the correct item based on the item code
+        });
+    }
+        // ---------- Dropdown loaders ----------
+        function ddlDocType(callback) {
+            $.ajax({
+                url: '/PreIncommingQCRM/GetddlDocType',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlDocType');
+                    ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                    $.each(data, function (i, item) {
+                        ddl.append(`<option value="${escapeHtmlAttr(item.value)}">${escapeHtml(item.text)}</option>`);
+                    });
+                    if (typeof callback === 'function') callback();
+                },
+                error: function (xhr) { console.error('Error loading ddlDocType:', xhr.responseText || xhr.statusText); }
+            });
+        }
+        function ddlQCIncharge(callback) {
+            $.ajax({
+                url: '/PreIncommingQCRM/GetddlQCIncharge',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlQCIncharge');
+                    ddl.empty().append('<option value="">-- Select QC Incharge --</option>');
+                    $.each(data, function (i, item) {
+                        ddl.append(`<option value="${escapeHtmlAttr(item.value)}">${escapeHtml(item.text)}</option>`);
+                    });
+                    if (typeof callback === 'function') callback();
+                },
+                error: function (xhr) { console.error('Error loading ddlQCIncharge:', xhr.responseText || xhr.statusText); }
+            });
+        }
+        function ddlCheme(callback) {
+            $.ajax({
+                url: '/PreIncommingQCRM/GetddlChem',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlChem');
+                    ddl.empty().append('<option value="">-- Select Chemist --</option>');
+                    $.each(data, function (i, item) {
+                        ddl.append(`<option value="${escapeHtmlAttr(item.value)}">${escapeHtml(item.text)}</option>`);
+                    });
+                    if (typeof callback === 'function') callback();
+                },
+                error: function (xhr) { console.error('Error loading ddlChem:', xhr.responseText || xhr.statusText); }
+            });
+        }
+        function ddlItemName(callback) {
+            $.ajax({
+                url: '/PreIncommingQCRM/GetddlItemName',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlItemName');
+                    ddl.empty().append('<option value="">-- Select Item --</option>');
+                    $.each(data, function (i, item) {
+                        ddl.append(`<option value="${escapeHtmlAttr(item.value)}">${escapeHtml(item.text)}</option>`);
+                    });
+                    // Initialize select2 if available (optional)
+                    if (typeof $(ddl).select2 === 'function') {
+                        if (ddl.hasClass("select2-hidden-accessible")) ddl.select2('destroy');
+                        ddl.select2({ placeholder: "-- Select Item --", allowClear: true, width: '100%' });
+                        $('.select2-selection').addClass('form-control');
+                    }
+
+                    if (typeof callback === 'function') callback();
+                },
+                error: function (xhr) { console.error('Error loading ddlItemName:', xhr.responseText || xhr.statusText); }
+            });
+        }
+        // When doc type selected, ask for next doc number and load party list
+        function sendDocType(docType, docName) {
+            $.ajax({
+                url: '/PreIncommingQCRM/GetDocNo',
+                type: 'POST',
+                data: { docType: docType, docName: docName },
+                success: function (response) {
+                    if (response && response.success) {
+                        $('#NumDocNo').val(response.nextVNo);
+                        ddlGateNo(response.nextVNo, response.docType);
+                    } else {
+                        console.warn('GetDocNo returned unexpected result', response);
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Error getting doc no:', xhr.responseText || xhr.statusText);
+                }
+            });
+        }
+        function ddlGateNo(vNo, vType1) {
+        const ddl = $('#ddlGateNo');
+        return $.ajax({
+            url: '/PreIncommingQCRM/GetddlGateNo',
+            type: 'GET',
+            dataType: 'json',
+            data: { VNo: vNo, Vtype: vType1 },
+            success: function (data) {
+                if (ddl.hasClass("select2-hidden-accessible")) {
+                    ddl.select2('destroy');
+                }
+                ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
+                data.forEach(item => {
+                    ddl.append(new Option(item.text, item.value));
+                });
+                ddl.select2({ placeholder: "-- Select Party --", allowClear: true, width: '100%' });
+                $('.select2-selection').addClass('form-control');
+            },
+            error: function (xhr) {
+                console.error("Error loading gate/party list:", xhr.responseText || xhr.statusText);
+                toastr.error('Error loading party list: ' + (xhr.statusText || ''));
+            }
+        });
+    }
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        function convertToDateInputFormat(dateStr) {
+            if (!dateStr || !dateStr.includes('/')) return '';
+            const [day, month, year] = dateStr.split('/');
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        // simple HTML escape helpers
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+        function escapeHtmlAttr(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+        // Show list when i am save then show list
+        function ShowQcResultList(vType, vNo) {
+            $.ajax({
+            url: '/PreIncommingQCRM/GetQcResultList',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                vType: vType,
+                vNo: vNo
+            }),
+            success: function (response) {
+
+                if (response && response.success) {
+                    console.log("Response success:", response.success);  // Debug response.success
+                    let dataArray = response.data;
+                    let itemName = response.data[0].itemName;  // Assuming all rows have the same item name
+                    buildQcResultTable(dataArray, itemName);
+                } else {
+                    console.error("Response failure:", response.message || "Unknown error");
+                }
+            },
+            error: function (xhr) {
+                console.error("Error loading QC result:", xhr.responseText || xhr.statusText);
+            }
+        });
+    }
+        function buildQcResultTable(dataArray, itemName) {
+        const $thead = $('#tblPreIncommingHeader');
+        const $tbody = $('#tblPreIncommingBody');
+
+        // Table Header (Dynamic column name for itemName)
+        const theadHTML = `
+            <th>QC ID</th>
+            <th>QCP ID</th>
+            <th>Parameter</th>
+            <th>Unit</th>
+            <th>Allow Amount</th>
+            <th>Deduction Amount</th>
+            <th>Deduction Narration</th>
+            <th>${escapeHtml(itemName)}</th>
+        `;
+        $thead.html(theadHTML);
+
+        let tbodyHTML = "";
+        // Loop through the dataArray to generate table rows
+        dataArray.forEach(d => {
+            tbodyHTML += `
+                <tr>
+                    <td>${escapeHtml(d.qC_CODE || '')}</td>
+                    <td>${escapeHtml(d.qcP_CODE || '')}</td>
+                    <td>${escapeHtml(d.parameter || '')}</td>
+                    <td>${escapeHtml(d.unit || '')}</td>
+                    <td>${escapeHtml(d.allowAmt || '0.00')}</td> <!-- Display Allow Amount -->
+                    <td>${escapeHtml(d.deductAmt || '0.00')}</td> <!-- Display Deduct Amount -->
+                    <td>${escapeHtml(d.deductNarr || '')}</td> <!-- Display Deduct Narration -->
+                    <td>${escapeHtml(d.itemValue || '0.00')}</td> <!-- Display Item Value -->
+                </tr>
+            `;
+        });
+
+        $tbody.html(tbodyHTML);
+    }
+        // Escape HTML function to prevent XSS attacks
+        function escapeHtml(str) {
+        return str.replace(/[&<>"'`=/]/g, function (char) {
+            return `&#${char.charCodeAt(0)};`;
+        });
+    }
+        function GetallDataPreIncommingQCRM(response) {
+            console.log('GetallDataPreIncommingQCRM', response);
+
+            const Headerdata = response.header;
+            const Itemdata = response.items;
+
+            // Check if header data exists and is valid
+            if (Headerdata && Headerdata.length > 0) {
+                const header = Headerdata[0];
+                // Populate header fields (you can update these as needed)
+                ddlDocType(() => $('#ddlDocType').val(header.V_TYPE));
+                $('#NumDocNo').val(header.DOC_ID);
+                ddlQCIncharge(() => $('#ddlQCIncharge').val(header.QC_INCHARGE));
+                ddlCheme(() => $('#ddlChem').val(header.CHEMIST));
+                // ddlItemName(() => $('#ddlItemName').val(header.ITEM_CODE)); // Ensure this is correctly populated
+                ddlGateNo(header.MRN_NO, header.V_TYPE);
+                $('#DtDate').val(convertToDateInputFormat(header.V_DATE));
+                $('#TxtTransport').val(header.TRANSPORT);
+                $('#TxtTruckNo').val(header.TRUCK_NO);
+                $('#TxtContainerNo').val(header.CONTAINER_NO);
+                $('#TxtInvoiceQty').val(header.INV_QTY);
+                $('#TxtRecordedQty').val(header.RECD_QTY);
+                $('#TxtPurType').val(header.PUR_TYPE);
+                $('#TxtShortage').val(header.SHORT_QTY);
+                $('#NumBillNo').val(header.BILL_NO);
+                $('#DtBillDate').val(convertToDateInputFormat(header.BILL_DATE));
+                $('#TxtWastage').val(header.WASTE_WGT);
+                $('#TxtRemarks').val(header.REMARKS);
+            }
+            // Table Population for Items
+            const $tbody = $('#itemDataTable tbody');
+            $tbody.empty();  // Clear existing rows
+
+            // Loop through each item in Itemdata and create a row for each item
+            if (Itemdata && Itemdata.length > 0) {
+                Itemdata.forEach((d, index) => {
+                    const rowHTML = `
+                        <tr>
+                            <td style="display:none;">${escapeHtml(d.QC_CODE || '')}</td>
+                            <td style="display:none;">${escapeHtml(d.QCP_CODE || '')}</td>
+                            <td>${escapeHtml(d.ITEM_NAME || '')}</td>
+                            <td>${escapeHtml(d.UNIT || '')}</td>
+                            <td>${escapeHtml(d.ACCEPTANCE || '')}</td>
+                            <td style="display:none;">${escapeHtml(d.qty || '')}</td>
+                            <td style="display:none;"><input type="text" class="form-control" name="AllowAmt" value="${escapeHtml(d.allow || '')}" /></td>
+                            <td style="display:none;"><input type="text" class="form-control" name="DeductAmt" value="${escapeHtml(d.deduction || '')}" /></td>
+                            <td style="display:none;"><input type="text" class="form-control" name="DeductNarr" value="${escapeHtml(d.deductionNarr || '')}" /></td>
+                            <td><input type="text" class="form-control" name="Result" value="${escapeHtml(d.RESULT || '')}" /></td>
+                        </tr>
+                    `;
+                    $tbody.append(rowHTML);  // Append the new row to the table
+                });
+            } else {
+                toastr.error('No items found.');
+            }
+        }
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        // Utility function to convert date format
+        function convertToDateInputFormat(dateStr) {
+            if (!dateStr || !dateStr.includes('/')) return '';
+            const [day, month, year] = dateStr.split('/');
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        function ddlGateNo(vNo, vType1) {
+        const ddl = $('#ddlGateNo');
+        ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
+        $.ajax({
+            url: '/PreIncommingQCRM/GetddlGateNo',
+            type: 'GET',
+            dataType: 'json',
+            data: { VNo: vNo, Vtype: vType1 },
+            success: function (data) {
+                data.forEach(item => {
+                    ddl.append(new Option(item.text, item.value));
+                });
+
+                // Disable the change event temporarily to prevent resetting table
+                preventGateChange = true;
+                ddl.val(vNo); // Set the value without triggering 'change'
+                preventGateChange = false; // Re-enable the change event
+            },
+            error: function (xhr) {
+                console.error("Error loading gate/party list:", xhr.responseText || xhr.statusText);
+                toastr.error('Error loading party list: ' + (xhr.statusText || ''));
+            }
+        });
+    }
+        function ddlItemItemCode(callback) {
+            $.ajax({
+                url: '/PreIncommingQCRM/GetddlItemItemCode',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlPartyCode');
+                    ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                    $.each(data, function (i, item) {
+                        ddl.append(`<option value="${escapeHtmlAttr(item.value)}">${escapeHtml(item.text)}</option>`);
+                    });
+                    if (typeof callback === 'function') callback();
+                },
+                error: function (xhr) { console.error('Error loading ddlPartyCode:', xhr.responseText || xhr.statusText); }
+            });
+        }
+
+    });
+</script>
+
+<script>
+    document.querySelectorAll("tr").forEach((row, index) => {
+        let typeCell = row.querySelector(".readonly-cell");
+        if (typeCell) {
+            if (index === 0) {
+                typeCell.style.display = "";
+            } else {
+                typeCell.style.display = "none";
+            }
+        }
+    });
+        $(document).on('click', '.deleteRowBtn', function () {
+        $(this).closest('tr').remove();
+    });
+</script>

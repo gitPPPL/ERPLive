@@ -1,0 +1,302 @@
+﻿@{
+    ViewBag.Title = "Debit Note Hold Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Debit Note Hold Master</legend>
+    <div class="row">
+
+        <div class="offset-md-8 col-md-4 btn-right">
+            <button onclick="window.location.href='@Url.Action("Index", "DebitNoteHoldMasterList")'" type="button" class="btn btn-primary">
+                <i class="fa fa-list"></i>Back to list
+            </button>
+        </div>
+    </div>
+    <form id="">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DdAcname" class="form-label">A/C Name <span class="required">*</span> </label>
+                    <select id="DdAcname" class="form-control">
+                        <option selected disabled>-- Select Account Name --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2 btn-align">
+                <button id="btn-save" type="submit" class="btn btn-primary">Save</button>
+                @* <button type="button" id="cancelBtn" style="display:none" class="btn btn-danger">Cancel</button> *@
+            </div>
+        </div>
+
+    </form>
+
+</fieldset>
+
+<script>
+        let DebitNoteUpdateCd=0;
+        let PreviousInputCode=0;
+        let allMastData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let ModeOfControl="";
+        let getDebitNoteDt=[];
+
+        const storedData = localStorage.getItem('editDebitNote');
+        ModeOfControl = localStorage.getItem('Mode');
+          localStorage.removeItem('Mode');
+          console.log(storedData);
+
+        $(document).ready(function(){
+          AccountNameBind();
+
+        if (storedData && ModeOfControl === 'Edit') {
+         getDebitNoteDt = JSON.parse(storedData);
+         DebitNoteUpdateCd = getDebitNoteDt.code;
+         PreviousInputDt = getDebitNoteDt.code;
+
+        AccountNameBind();
+        setTimeout(function () {
+        $('#DdAcname option').filter(function () {
+            return $(this).val() == DebitNoteUpdateCd;
+        }).prop('selected', true);
+        }, 300);
+        $('#DdAcname').prop('disabled', false);
+          $('#btn-save').show();
+          $('#cancelBtn').show();
+          localStorage.removeItem('editDebitNote');
+
+        }
+        else if (storedData && ModeOfControl === 'View') {
+            $('#btn-save').hide();
+            $('#cancelBtn').hide();
+            getDebitNoteDt = JSON.parse(storedData);
+            AccountNameBind();
+          setTimeout(function () {
+          $('#DdAcname option').filter(function () {
+              return $(this).val() == getDebitNoteDt.code;
+          }).prop('selected', true);
+          }, 300);
+         $('#DdAcname').prop('disabled', true);
+          localStorage.removeItem('editDebitNote');
+        }
+
+
+            $('#DdAcname').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#btn-save').focus();
+                }
+            });
+
+        });
+
+
+     $('#btn-save').on('click', function (e) {
+        e.preventDefault();
+          var selectedOption = $('#DdAcname option:selected');
+          var partyCode = selectedOption.val();
+          var name = selectedOption.data('name');
+          debugger;
+          if (!validateRequiredField('#DdAcname', 'A/C Name')) return;
+        // if (!name) {
+        // 	toastr.warning("Please fill required field.");
+        // 	return;
+        // }
+        console.log(ModeOfControl);
+        if(ModeOfControl=='Edit')
+        {
+             var DebitNoteDt = {
+                   partyCode: DebitNoteUpdateCd,
+                   Name: name
+               };
+             EditdebitNote(DebitNoteDt, partyCode)
+        }
+        else
+        {
+             var DebitNoteDt = {
+                   partyCode: partyCode,
+                   Name: name
+               };
+         saveDebitNoteDt(DebitNoteDt, partyCode);
+        }
+    });
+
+     function saveDebitNoteDt(DebitNoteDt, partyCode)	{
+        checkExistOrNot(partyCode)
+              .done(function (data) {
+                if (data.status === true && data.exists === true) {
+                toastr.warning("Duplicate Account Name");
+                return;
+               }
+
+                $.ajax({
+                    url:'@Url.Action("SaveDebitNoteHold", "DebitNoteHoldMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(DebitNoteDt),
+                    success: function (response) {
+                        if (response.status === true) {
+                            toastr.success('Data Save Successfully.');
+                            // resetFields();
+                            // setTimeout(function () {
+                            //       window.location.href ='/DebitNoteHoldMasterList/Index';
+                            //     }, 1500);
+                            $('#DdAcname').prop('disabled', true);
+                        } else {
+                            toastr.error(response.message || "Save failed");
+                        }
+                    },
+                    error: function (xhr, error) {
+                        console.error(xhr.responseText);
+                        toastr.error("Error occurred while saving.");
+                    }
+                });
+              })
+            .fail(function (xhr, status, error) {
+            toastr.error("Error while checking Account type.");
+            });
+    }
+
+
+    function EditdebitNote(DebitNoteDt, partyCode){
+        if (PreviousInputDt != partyCode) {
+                  checkExistOrNot(partyCode)
+                      .done(function (data) {
+                       if (data.status === true && data.exists === true) {
+                        toastr.warning("Duplicate Account Name");
+                        return;
+                       }
+                        updateCurrencyData(DebitNoteDt, partyCode);
+
+                      })
+                    .fail(function (xhr, status, error) {
+                    console.error("Check Account failed:", error);
+                    toastr.error("Error while checking Account type.");
+                    });
+                 }
+                 else{
+                     // updateCurrencyData(DebitNoteDt, partyCode);
+                     toastr.success('Data update Successfully.');
+                     resetFields();
+                   setTimeout(function () {
+                                  window.location.href ='/DebitNoteHoldMasterList/Index';
+                                }, 1500);
+                 }
+
+    }
+
+        function updateCurrencyData(DebitNoteDt, partyCode) {
+            console.log(DebitNoteDt);
+            $.ajax({
+                url: '/DebitNoteHoldMaster/UpdateDebitNoteHold',
+                type: 'POST',
+                data:JSON.stringify(DebitNoteDt),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === true) {
+                         toastr.success('Data update Successfully.');
+                         resetFields();
+                   setTimeout(function () {
+                                  window.location.href ='/DebitNoteHoldMasterList/Index';
+                                }, 1500);
+                    } else {
+                        toastr.error("Update failed: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error occurred:", xhr.responseText);
+                    toastr.error("Data not updated: " + error);
+                }
+            });
+        }
+
+
+         function resetFields() {
+            $('#DdAcname').val($('#DdAcname option:first').val());
+            $('#searchInput').val();
+
+        }
+
+      function checkExistOrNot(inputData)
+       {
+           return $.ajax({
+           url: '/DebitNoteHoldMaster/getExitOrNot',
+           type: 'GET',
+           dataType: 'json',
+           data: { inputData: inputData }
+       });
+       }
+
+
+      document.getElementById("cancelBtn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel all the changes?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Cancelled!',
+            'Your action has been cancelled.',
+            'success'
+          )
+         if(ModeOfControl=='Edit')
+         {
+         AccountNameBind();
+         setTimeout(function () {
+         $('#DdAcname option').filter(function () {
+             return $(this).val() == getDebitNoteDt.code;
+         }).prop('selected', true);
+         }, 300);
+    }
+    else
+    {
+    resetFields();
+    }
+
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire(
+            'Resumed',
+            'Your action is still in progress.',
+            'info'
+          )
+        }
+      });
+    });
+
+     function AccountNameBind(){
+           $.ajax({
+               url:'/DebitNoteHoldMaster/GetDebitNoteHoldList',
+               type:'Get',
+               datatype:'json',
+               success:function(response){
+                   if(response.status==true){
+                   console.log(response.data);
+                   var countryId=$('#DdAcname');
+                   countryId.empty();
+                   countryId.append('<option selected disabled>- Select Account Name-</option>');
+                   $.each(response.data, function(index, item){
+                       // countryId.append('<option value="'+ item.code +'">'+ item.name +'</option>');
+                       countryId.append('<option value="' + item.code + '" data-name="' + item.name + '">' + item.name + '</option>');
+                   });
+                   }else{
+                       toastr.error("Account Name Load failed");
+                   }
+               },
+               error:function(xhr,status, error){
+               toastr.error("Account Name Load failed", xhr.error);
+               }
+
+           });
+       }
+
+</script>

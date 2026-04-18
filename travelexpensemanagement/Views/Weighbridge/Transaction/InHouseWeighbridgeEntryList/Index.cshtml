@@ -1,0 +1,516 @@
+﻿@{
+	ViewBag.Title = "In House Weighbridge Entry List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.MENU_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+
+}
+  
+
+<fieldset>
+	<legend class="legend-field">In House Weighbridge Entry List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				@if (canAdd)
+				{
+					<button onclick="window.location.href='@Url.Action("Index", "InHouseWeighbridgeEntry")'" type="submit" class="btn btn-add">
+						<i class="fa fa-plus"></i>Add
+					</button>
+				}				 
+				
+				@if (canPrint)
+				{
+					<button class="btn btn-print" onclick="printCityMasterReport()">
+						<i class="fa fa-print"></i> Print
+					</button>
+				}
+				@if(canExport)
+				{
+					<button class="btn btn-export" onclick="exportToExcel()">
+						<i class="fas fa-file-export"></i> Export
+					</button>
+                }
+				@if(canMail)
+				{
+					<button class="btn btn-mail" onclick="callGetReportAsPdf()">
+						<i class="fa fa-envelope"></i> Mail
+					</button>
+                }
+                @if (canApproval)
+				{
+					<button class="btn btn-approved">
+						<i class="fa fa-check"></i> Approved
+					</button>
+				}
+				
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblInHouseWeighbridgeList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Doc Type</th>
+						<th>Doc No</th>
+						<th>Doc Date</th>
+						<th>Weight Type</th>
+						<th>Tare Slip No</th>
+						<th>Vehicle No</th>
+						<th>Gross Slip No</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+<script>
+	var permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+
+		let currentPage = 1;
+		let pageSize = 10;
+
+		$(document).ready(function () {
+			GetMasterDataList();
+			$('#searchBox').on('keyup', function () {
+				currentPage = 1;
+				GetMasterDataList();
+			});
+		});
+
+		function GetMasterDataList() {
+			const searchTerm = $('#searchBox').val().trim();
+			$.ajax({
+				url: '@Url.Action("GetInHouseWBridgeList", "InHouseWeighbridgeEntryList")',
+				type: 'GET',
+				dataType: 'json',
+				data: {
+					searchTerm: searchTerm,
+					pageNumber: currentPage,
+					pageSize: pageSize
+				},
+				success: function (res) {
+					const mastListData = res.data || [];
+					const totalCount = res.totalCount || 0;
+					let tbody = $('#tblInHouseWeighbridgeList tbody');
+					tbody.empty();
+					console.log(mastListData);
+					if (mastListData.length === 0) {
+						tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+						return;
+					}
+					$.each(mastListData, function (index, item) {
+					let actions = '';
+					if (permissions.canEdit) {
+						actions += `<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.DOC_ID}')"></i>`;
+					}
+					actions += `<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.DOC_ID}')"></i>`;
+
+					if (permissions.canDelete) {
+						actions += `<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete"></i>`;
+					}
+					if (permissions.canDocDetail) {
+						actions += `<i class="fa fa-file btn-document btn-details" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showImpExpExpensePopup('${item.DOC_ID}')"></i>`;
+					}
+					tbody.append(`
+							<tr>
+								<td class="d-none code">${item.DOC_ID}</td>
+								<td>${item.V_TYPE}</td>
+								<td>${item.V_NO}</td>
+								<td>${item.V_DATE}</td>
+								<td>${item.WB_TYPE}</td>
+								<td>${item.TARE_NO}</td>
+								<td>${item.VEHICLE_NO}</td>
+								<td>${item.GROSS_NO}</td>
+							   <td>${actions}</td>
+							</tr>
+						`);
+					});
+
+					renderPagination(totalCount, pageSize, currentPage);
+				},
+				error: function (xhr) {
+					toastr.error('Error loading Shift Data list: ' + xhr.responseText);
+				}
+			});
+		}
+
+		function renderPagination(total, pageSize, currentPage) {
+			const totalPages = Math.ceil(total / pageSize);
+			const paginationContainer = $('#tablePagination');
+			paginationContainer.empty();
+
+			if (total <= 0 || totalPages <= 1) return;
+
+			let paginationHtml = '';
+
+			if (currentPage > 1) {
+				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+			}
+
+			let startPage = Math.max(1, currentPage - 2);
+			let endPage = Math.min(totalPages, currentPage + 2);
+
+			if (currentPage <= 3) endPage = Math.min(5, totalPages);
+			if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+			for (let i = startPage; i <= endPage; i++) {
+				paginationHtml += `
+					<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+							onclick="goToPage(${i})">${i}</button>`;
+			}
+
+			if (currentPage < totalPages) {
+				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+			}
+
+			paginationContainer.html(paginationHtml);
+		}
+
+		function goToPage(page) {
+			currentPage = page;
+			GetMasterDataList();
+		}
+
+		function AddOrEditFunction(rowId) {
+			window.location.href = '/InHouseWeighbridgeEntry/Index?id=' + encodeURIComponent(rowId);
+		}
+
+		function viewMenuDetails(rowId) {
+			window.location.href = '/InHouseWeighbridgeEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+		}
+
+		$(document).on('click', '.btn-delete', function() {
+			const $row = $(this).closest('tr');
+			const CodeforDel = $row.find('.code').text().trim();
+			confirmAction().then((confirmed) => {
+				if (!confirmed) return;
+				$.ajax({
+					url: '/InHouseWeighbridgeEntryList/DeleteInHouseWBridgeEntry',
+					type: 'delete',
+					data: { docid: CodeforDel },
+					success: function (res) {
+						if (res.status) {
+							showFlashMessageByKey('delete', 'success');
+							$row.remove();
+							GetMasterDataList();
+						} else {
+							Swal.fire('Error!', 'Error deleting item group: ' + res.message, 'error');
+						}
+					},
+					error: function (xhr) {
+						Swal.fire('Error!', 'Error deleting item group: ' + xhr.responseText, 'error');
+					}
+				});
+			});
+		});
+
+		function exportToExcel() {
+		  fetch('/InHouseWeighbridgeEntryList/ExportAllDocs')
+			.then(response => {
+			  if (!response.ok) throw new Error("Network response was not ok");
+			  return response.json();
+			})
+			.then(responseData => {
+			  if (!responseData.status) {
+				toastr.error("Failed to fetch data.");
+				return;
+			  }
+			  const dataArray = responseData.data;
+			  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+				toastr.warning("No data available to export.");
+				return;
+			  }
+
+			  const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) });
+			  const colWidths = Object.keys(dataArray[0]).map(key => {
+				const maxLen = Math.max(
+				  key.length,
+				  ...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
+				);
+				return { wch: maxLen + 2 };
+			  });
+			  worksheet['!cols'] = colWidths;
+
+
+			  const headerRowNumber = 1;
+			  Object.keys(dataArray[0]).forEach((_, idx) => {
+				const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
+				if (!worksheet[cellAddress]) return;
+				worksheet[cellAddress].s = {
+				  font: { bold: true },
+				  fill: { fgColor: { rgb: "FFFF00" } }
+				};
+			  });
+
+			  const workbook = XLSX.utils.book_new();
+			  XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+			  const pageName = "StoreWeighBridge";
+			  const now = new Date();
+			  const pad = n => String(n).padStart(2, '0');
+			  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+			  const fileName = `${pageName}_${timestamp}.xlsx`;
+
+			  XLSX.writeFile(workbook, fileName);
+			})
+			.catch(error => {
+			  console.error("Export failed:", error);
+			  toastr.error("Failed to export data.");
+			});
+		}
+
+
+
+		function callGetReportAsPdf() {
+				var reportName = "rpt_emp_mast";
+			var now = new Date();
+			var day = String(now.getDate()).padStart(2, '0');
+			var month = String(now.getMonth() + 1).padStart(2, '0');
+			var year = String(now.getFullYear()).slice(-2);
+			var hours = String(now.getHours()).padStart(2, '0');
+			var minutes = String(now.getMinutes()).padStart(2, '0');
+			var seconds = String(now.getSeconds()).padStart(2, '0');
+			var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+			 $.ajax({
+				url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+				type: 'GET',
+				data: { Reportname: reportName },
+				xhrFields: {
+					responseType: 'blob'
+				},
+				success: function (response) {
+					console.log('PDF response:', response);
+					var file = new Blob([response], { type: 'application/pdf' });
+					var fileName = `${reportName}_${timestamp}.pdf`;
+
+					var link = document.createElement('a');
+					link.href = URL.createObjectURL(file);
+					link.download = fileName;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				},
+				error: function (xhr, status, error) {
+					console.error('Error generating report:', error);
+				}
+			});
+		 }
+
+
+		 function showImpExpExpensePopup(docCode) {
+			 $.ajax({
+				 url: '/InHouseWeighbridgeEntryList/GetInHouseWBridgeEntryDetails',
+				 type: 'Get',
+				 dataType: 'json',
+				 data: { docid: docCode },
+				 success: function(response) {
+						 if(response.status) {
+						 showDocumentPopupjQuery(response.data, docCode);
+					 } else {
+						 toastr.error("Failed to get document details.");
+					 }
+				 },
+				 error: function() {
+					 toastr.error("An error occurred while fetching document details.");
+				 }
+			 });
+		 }
+
+</script>
+
+
+@* <script>
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadDocumentStages();
+
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			loadDocumentStages();
+		});
+	});
+
+	//Load main grid...............
+	function loadDocumentStages() {
+		const searchTerm = $('#searchBox').val();
+
+		$.ajax({
+			url: '/ApprovalStageMasterList/GetAllDocs',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				console.log(res);
+				const docs = res.items || res.data || [];
+				const totalCount = res.totalCount || 0;
+
+				const tbody = $('#tblApprovalStageMaster tbody');
+				tbody.empty();
+
+				if (docs.length === 0) {
+					tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+					renderPagination(0, pageSize, currentPage);
+					return;
+				}
+
+				docs.forEach(doc => {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
+							<td>${doc.doC_CODE || ''}</td>
+							<td>${doc.doC_NAME || ''}</td>
+							<td>${doc.useR_NO || '0'}</td>
+							<td>
+							  <div class="action-icons">
+							  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
+							  <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
+							  <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
+							  <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
+							  </div>
+
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const pagination = $('#tablePagination');
+		pagination.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		const startPage = Math.max(1, currentPage - 2);
+		const endPage = Math.min(totalPages, currentPage + 2);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		pagination.html(html);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadDocumentStages();
+	}
+
+	function editDocStage(docCode) {
+		window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+	}
+
+	function viewDocStage(docCode) {
+		window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+	}
+
+	function deleteDocStage(docCode) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "You won't be able to revert this deletion!",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/ApprovalStageMasterList/DeleteDocByCode',
+					type: 'POST',
+					data: { docCode: docCode },
+					success: function (response) {
+						if (response.success) {
+							toastr.success(response.message || "Record deleted successfully.");
+							loadDocumentStages();
+						} else {
+							toastr.warning("Delete failed.");
+						}
+					},
+					error: function () {
+						toastr.error("An error occurred while deleting.");
+					}
+				});
+			}
+		});
+	}
+
+
+</script> *@

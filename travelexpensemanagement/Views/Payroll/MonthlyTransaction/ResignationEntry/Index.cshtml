@@ -1,0 +1,356 @@
+﻿@{
+    ViewBag.Title = "Resignation Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Resignation Entry</legend>
+
+    <form id="ResignationForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <fieldset>
+            <legend class="sub-legend">General Information</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumDocNo">Doc No</label>
+                        <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtDocDate">Doc Date</label>
+                        <input type="date" class="form-control" id="DtDocDate">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlStatus">Status</label>
+                        <select class="form-control" id="ddlStatus">
+                            <option value="">Select Status</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlEmployeeName">Employee Name</label>
+                        <select class="form-control" id="ddlEmployeeName">
+                            <option value="">Select Employee Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtResignationDate">Resignation Date</label>
+                        <input type="date" class="form-control" id="DtResignationDate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtRelievingDate">Relieving Date</label>
+                        <input type="date" class="form-control" id="DtRelievingDate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtLastWorkDate">Last Work Date</label>
+                        <input type="date" class="form-control" id="DtLastWorkDate" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlReasonResign">Reason for Resign</label>
+                        <select class="form-control" id="ddlReasonResign">
+                            <option value="">Select Reason for Resign</option>
+                            <option>Death</option>
+                            <option>Accident</option>
+                            <option>Personal Work</option>
+                            <option>Termination</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtRemarks">Remarks</label>
+                        <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend class="sub-legend">Attachment</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAttachment1">Attachment 1</label>
+                        <input type="file" class="form-control" id="TxtAttachment1" />
+                        <span id="Attachment1Name" class="text-muted"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAttachment2">Attachment 2</label>
+                        <input type="file" class="form-control" id="TxtAttachment2" />
+                        <span id="Attachment2Name" class="text-muted"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAttachment3">Attachment 3</label>
+                        <input type="file" class="form-control" id="TxtAttachment3" />
+                        <span id="Attachment3Name" class="text-muted"></span>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "ResignationList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i> Back to List
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <!-- ✅ Moved onclick to the button -->
+                    <button id="btn_cancel" type="button" class="btn btn-danger" onclick="clearForm()">
+                        <i class="fa fa-close"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(async function () {
+        await DDlStatus();
+        await DDlEmployee();
+
+        if (rowId) {
+            await loadById(rowId);
+            if (isReadOnly) setFormReadOnly();
+        } else {
+            $('#DtDocDate').val(new Date().toISOString().split('T')[0]);
+            await GetVNo();
+        }
+
+        $("#btn-save").click(function (e) {
+            e.preventDefault();
+
+            const DOC_ID = $("#TxtCode").val();
+            const V_NO = $("#NumDocNo").val();
+            const V_DATE = $("#DtDocDate").val().trim();
+            const status = $("#ddlStatus").val();
+            const EMP_CODE = $("#ddlEmployeeName").val();
+            const RESIGN_DATE = $("#DtResignationDate").val().trim();
+            const RELIEVING_DATE = $("#DtRelievingDate").val().trim();
+            const LAST_WORK_DATE = $("#DtLastWorkDate").val().trim();
+            const RESIGN_REASON = $("#ddlReasonResign option:selected").text().trim();
+            const REMARKS = $("#TxtRemarks").val().trim();
+            const ATTACH1 = getFileName("#TxtAttachment1");
+            const ATTACH2 = getFileName("#TxtAttachment2");
+            const ATTACH3 = getFileName("#TxtAttachment3");
+
+            const action = DOC_ID ? 'UPDATE' : 'INSERT';
+
+            const formData = {
+                DOC_ID, V_NO, V_DATE, status, EMP_CODE, RESIGN_DATE, RELIEVING_DATE,
+                LAST_WORK_DATE, RESIGN_REASON, REMARKS, ATTACH1, ATTACH2, ATTACH3, action
+            };
+
+            console.log('Form Data:', formData);
+
+            if (!validateRequiredField('#ddlEmployeeName', 'Employee Name')) return;
+            if (!validateRequiredField('#DtResignationDate', 'Resignation Date')) return;
+            if (!validateRequiredField('#DtRelievingDate', 'Relieving Date')) return;
+            if (!validateRequiredField('#DtLastWorkDate', 'Last Work Date')) return;
+
+            $("#btn-save").prop("disabled", true);
+
+            $.ajax({
+                url: '/ResignationEntry/SaveTempMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    toastr.success(response.message || "Saved successfully!");
+                    setTimeout(() => window.location.href = '/ResignationList/Index', 1000);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", xhr.responseText);
+                    toastr.error("Something went wrong. Please try again.");
+                },
+                complete: function () {
+                    $("#btn-save").prop("disabled", false);
+                }
+            });
+        });
+    });
+
+    // ✅ Extracts filename from input type="file"
+    function getFileName(inputId) {
+        const fileInput = $(inputId)[0];
+        if (fileInput && fileInput.files.length > 0) {
+            return fileInput.files[0].name;
+        }
+        return '';
+    }
+
+    async function GetVNo() {
+        try {
+            const resp = await fetch('/ResignationEntry/GetVNo');
+            if (!resp.ok) throw new Error('Network error: ' + resp.statusText);
+            const data = await resp.json();
+            if (data && data.v_NO) {
+                $('#NumDocNo').val(data.v_NO);
+            } else {
+                toastr.error("Document number not found.");
+            }
+        } catch (err) {
+            console.error("Error fetching VNo:", err);
+            toastr.error("Error fetching Document Number.");
+        }
+    }
+
+    async function DDlStatus() {
+        try {
+            const response = await fetch('/ResignationEntry/DDlStatus');
+            if (!response.ok) throw new Error('Network error: ' + response.statusText);
+            const data = await response.json();
+            const ddl = $('#ddlStatus');
+            ddl.empty().append('<option value="" selected>-- Select Status --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Status:", error);
+            toastr.error('Error loading status: ' + error.message);
+        }
+    }
+
+    async function DDlEmployee() {
+        try {
+            const response = await fetch('/ResignationEntry/DDlEmployee');
+            if (!response.ok) throw new Error('Network error: ' + response.statusText);
+            const data = await response.json();
+            const ddl = $('#ddlEmployeeName');
+            ddl.empty().append('<option value="" selected>-- Select Employee --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Employee:", error);
+            toastr.error('Error loading employee list: ' + error.message);
+        }
+    }
+
+    function loadById(code) {
+        $.ajax({
+            url: '/ResignationList/GetdatabyCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No data found for the given ID.");
+                    return;
+                }
+                populateForm(res.data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading data:", xhr, status, error);
+                toastr.error("Error loading data: " + (xhr.responseText || error));
+            }
+        });
+    }
+
+
+    function populateForm(data) {
+        $("#NumDocNo").val($.trim(data.v_NO));
+        $("#DtDocDate").val(formatDate(data.v_DATE));
+        $("#ddlStatus").val($.trim(data.status));
+        $("#ddlEmployeeName").val($.trim(data.emP_CODE));
+        $("#DtResignationDate").val(formatDate(data.resigN_DATE));
+        $("#DtRelievingDate").val(formatDate(data.relievinG_DATE));
+        $("#DtLastWorkDate").val(formatDate(data.lasT_WORK_DATE));
+        $("#ddlReasonResign").val($.trim(data.resigN_REASON));
+        $("#TxtRemarks").val($.trim(data.remarks));
+        $("#Attachment1Name").text(data.attacH1 || '');
+        $("#Attachment2Name").text(data.attacH2 || '');
+        $("#Attachment3Name").text(data.attacH3 || '');
+        $("#TxtCode").val($.trim(data.doC_ID));
+    }
+
+    function setFormReadOnly() {
+        $('input, select, textarea').prop('disabled', true);
+        $('#btn-save').hide();
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+     
+
+
+      function clearForm() {
+        if (!rowId) {
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to undo this action!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, clear it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // ✅ Clear dropdowns and fields
+              $('#ddlEmployeeName').val('0').trigger('change');
+              $('#ddlStatus').val('0').trigger('change');
+              $('#ddlReasonResign').val('').trigger('change');
+
+              $('#DtResignationDate').val('');
+              $('#DtRelievingDate').val('');
+              $('#DtLastWorkDate').val('');
+              $('#TxtRemarks').val('');
+              $('#TxtAttachment1').val('');
+              $('#TxtAttachment2').val('');
+              $('#TxtAttachment3').val('');
+
+              Swal.fire(
+                'Cleared!',
+                'The form has been cleared except for the Document No.',
+                'success'
+              );
+            }
+          });
+        } else {
+          // ✅ Ensure the row form exists before resetting
+          const form = document.getElementById(`row-${rowId}`);
+          if (form) form.reset();
+        }
+      }
+
+
+</script>

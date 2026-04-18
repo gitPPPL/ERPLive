@@ -1,0 +1,330 @@
+﻿@{
+    ViewBag.Title = "Document Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Document Approval</legend>
+
+    <div class="row mb-3">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnBackList"
+                        type="button"
+                        class="btn btn-primary"
+                        onclick="window.location.href='@Url.Action("Index", "DocumentApprovalList")'">
+                    <i class="fa fa-list"></i> Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="DocumentApprovalFormID">
+        <input type="hidden" id="CODE" name="CODE" />
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DDlDocumentTypeId">Document Type <span class="required">*</span></label>
+                    <select class="form-control" id="DDlDocumentTypeId" name="DocumentType">
+                        <option value="">Select Document Type</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="DocuAppTable" class="table table-bordered table-striped">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th><input type="checkbox" id="selectAllRows" /></th>
+                            <th>Code</th>
+                            <th>Full Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div id="tablePagination" class="custom-pagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="offset-md-9 col-md-3 text-end">
+                <button id="btnSave" type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Submit
+                </button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    let allData = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('id'); // document code
+    const mode = urlParams.get('mode');
+    const vtype = urlParams.get('vtype');
+
+    $(document).ready(function () {
+        DDLDocumentType().then(() => {
+            LoadCopyForm().then(() => {
+                if (code) {
+                    LoadDocumentData(code);
+                }
+            });
+        });
+
+
+          if (mode === 'view') {
+            setFormReadOnly('#ApprovalStagesForm');
+        }
+
+
+
+
+        // Save button click
+          // Save button click
+    $("#btnSave").click(function (e) {
+        e.preventDefault();
+
+        const Action = code ? "Update" : "Insert";
+
+        const formData = {
+            Action: Action,
+            VDate: new Date(),
+            Data: collectAllRows()
+        };
+
+        if (!formData.Data.length) {
+            toastr.warning("Please select at least one user and a document type.");
+            return;
+        }
+
+        $("#btnSave").prop("disabled", true);
+
+        $.ajax({
+            url: '/DocumentApproval/SaveData',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (response) {
+           
+                if (response === true || response.success === true) {
+                    toastr.success(response.message || "Saved successfully!");
+                    
+                    setTimeout(() => window.location.href = '/DocumentApprovalList/Index', 1000);
+                } else {
+                    toastr.warning(response.message || "Save failed.");
+                }
+            },
+            error: function (xhr) {
+                console.error("Error: ", xhr.responseText);
+                toastr.error("Something went wrong.");
+            },
+            complete: function () {
+                $("#btnSave").prop("disabled", false);
+            }
+        });
+    });
+
+
+        // Global "Select All"
+        $(document).on('change', '#selectAllRows', function () {
+            const isChecked = $(this).is(':checked');
+            allData.forEach(item => item.isChecked = isChecked);
+            renderTable();
+        });
+
+        // Track individual checkbox changes
+        $(document).on('change', '.copyRowCheckbox', function () {
+            const index = $(this).closest('tr').data('index');
+            allData[index].isChecked = $(this).is(':checked');
+        });
+    });
+
+    // ======================= Dropdown Loader =======================
+     async function DDLDocumentType() {
+        try {
+            const response = await fetch('/DocumentApproval/DDLDocumentType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#DDlDocumentTypeId');
+
+            ddl.empty().append('<option value="">-- Select Document Type --</option>');
+
+            data.forEach(item => {
+                // Show both text and value in the dropdown
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+        } catch (error) {
+            console.error("Error loading Document Type:", error);
+            toastr.error('Error loading Document Type: ' + error.message);
+        }
+    }
+
+
+    // ======================= Load Table Data =======================
+    function LoadCopyForm() {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/DocumentApproval/GetTableData',
+                method: 'GET',
+                success: function (res) {
+                    if (res.success) {
+                        allData = res.data.map(d => ({ ...d, isChecked: false }));
+                        currentPage = 1;
+                        renderTable();
+                        renderPagination();
+                        resolve();
+                    } else {
+                        toastr.error(res.message || "Failed to load data.");
+                        reject();
+                    }
+                },
+                error: function (err) {
+                    console.error("Failed to load data", err);
+                    toastr.error("Something went wrong while loading the form.");
+                    reject();
+                }
+            });
+        });
+    }
+
+    // ======================= Table Rendering =======================
+    function renderTable() {
+        const tbody = $('#DocuAppTable tbody');
+        tbody.empty();
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = allData.slice(start, end);
+
+        pageData.forEach((item, index) => {
+            const globalIndex = start + index;
+            const row = `
+                <tr data-index="${globalIndex}">
+                    <td><input type="checkbox" class="copyRowCheckbox" ${item.isChecked ? 'checked' : ''} /></td>
+                    <td>${item.code}</td>
+                    <td>${item.fulL_NAME || ''}</td>
+                    <td>${item.designation || ''}</td>
+                    <td>${item.department || ''}</td>
+                </tr>`;
+            tbody.append(row);
+        });
+    }
+
+    // ======================= Pagination Rendering (2 page numbers) =======================
+    function renderPagination() {
+        const totalPages = Math.ceil(allData.length / rowsPerPage);
+        let paginationHTML = '';
+
+        if (totalPages > 1) {
+            paginationHTML += `<button class="btn btn-sm btn-light me-1" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(1)">First</button>`;
+            paginationHTML += `<button class="btn btn-sm btn-light me-1" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Prev</button>`;
+
+            // Show only 2 pages at a time
+            let startPage = currentPage;
+            let endPage = Math.min(currentPage + 1, totalPages);
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} me-1" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            paginationHTML += `<button class="btn btn-sm btn-light me-1" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
+            paginationHTML += `<button class="btn btn-sm btn-light" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${totalPages})">Last</button>`;
+        }
+
+        $('#tablePagination').html(paginationHTML).css({
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "10px",
+            marginRight: "10px",
+            gap: "4px"
+        });
+    }
+
+    // ======================= Page Change =======================
+    function changePage(page) {
+        const totalPages = Math.ceil(allData.length / rowsPerPage);
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderTable();
+        renderPagination();
+    }
+
+    // ======================= Collect All Checked Rows =======================
+    function collectAllRows() {
+        const rowsData = [];
+        const docCode = $("#DDlDocumentTypeId").val();
+
+        if (!docCode) {
+            toastr.warning("Please select a Document Type first.");
+            return [];
+        }
+
+        allData
+            .filter(item => item.isChecked)
+            .forEach(item => {
+                const userCode = parseInt(item.code, 10) || 0;
+                rowsData.push({
+                    DOC_CODE: docCode,
+                    USER_CODE: userCode
+                });
+            });
+
+        console.table(rowsData);
+        return rowsData;
+    }
+
+    // ======================= Load Document Data and check rows =======================
+    function LoadDocumentData(code) {
+        $.ajax({
+            url: `/DocumentApprovalList/GetdatabyCode?code=${code}`,
+            method: 'GET',
+            success: function (res) {
+                console.log('res', res);
+
+                if (res.success) {
+                   
+                    if (res.header?.length) {
+                        const header = res.header[0];
+                        if (header.doC_CODE)
+                            $('#DDlDocumentTypeId').val(header.doC_CODE);
+                    }
+
+                  
+                    if (res.details?.length && allData?.length) {
+                        const assignedCodes = res.details.map(d => parseInt(d.CODE || d.code));
+                        allData.forEach(item => {
+                            item.isChecked = assignedCodes.includes(parseInt(item.code));
+                        });
+                        renderTable();
+                    }
+                } else {
+                    toastr.error(res.message || "Failed to load document data.");
+                }
+            },
+            error: function (err) {
+                console.error("Error loading document data:", err);
+                toastr.error("Something went wrong while loading data.");
+            }
+        });
+    }
+
+
+</script>

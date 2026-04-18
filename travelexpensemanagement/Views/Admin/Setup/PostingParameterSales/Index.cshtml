@@ -1,0 +1,211 @@
+﻿@{
+	ViewBag.Title = "Posting Parameter Sales";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend>Posting Parameter Sales</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "PostingParameterSalesList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+
+
+	<form id="">
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+		@* <fieldset class="form-text">
+			<div class="row g-2 align-items-center">
+				<div class="col-auto">
+					<label class="form-label">Voucher Type</label>
+					<select class="form-select form-control" id="VOUCHER" name="VOUCHER">
+						<option value="">-- Select --</option>
+					</select>
+				</div>
+
+				<div class="col-auto">
+					<label class="form-label">Doc Type</label>
+					<select class="form-select form-control" id="DOCTYPE" name="DOCTYPE">
+						<option value="">-- Select --</option>
+					</select>
+				</div>
+			</div>
+		</fieldset> *@
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Voucher Type</label>
+					<select class="form-select form-control" id="VOUCHER" name="VOUCHER">
+						<option value="">-- Select Voucher Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Doc Type</label>
+					<select class="form-select form-control" id="DOCTYPE" name="DOCTYPE">
+						<option value="">-- Select Doc Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Post Type</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Post Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Form Type</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Form type --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Sales A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Sales A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Discount A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Discount A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">CGST A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select CGST A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">SGST A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select SGST A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">IGST A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select IGST A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Freight A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Freight A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Round A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Round A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Packing A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Packing A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Insurance A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Insurance A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">TDS A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select TDS A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">TCS A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select TCS A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Commision A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Commision A/C --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Cess A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Cess A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">Loading/Unloading A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select Loading/Unloading A/C --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label class="form-label">WB A/C</label>
+					<select class="form-select form-control" id="" name="">
+						<option value="">-- Select WB A/C --</option>
+					</select>
+				</div>
+			</div>
+			
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 mt-3 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+</fieldset>
+
+
+

@@ -1,0 +1,758 @@
+﻿@{
+    ViewBag.Title = "Misc Consumption Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Misc Consumption Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "MiscConsumptionEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="MiscConsumptionEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option>--Select DOC Type--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No<span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date<span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TmDocTime">Doc Time<span class="required">*</span></label>
+                    <input type="time" class="form-control" id="TmDocTime">
+                </div>
+            </div>
+        </div>
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Party Details<span class="required">*</span></legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPartyName">Party Name</label>
+                        <select class="form-control" id="ddlPartyName">
+                            <option>Select Party Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAdd1PD">Add Line1</label>
+                        <input type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address Line 1">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAdd2PD">Add Line2</label>
+                        <input type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address Line 2">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAdd3PD">Add Line3</label>
+                        <input type="text" class="form-control" id="TxtAdd3PD" placeholder="Enter Address Line 3">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtVehicleNo">Vehicle No<span class="required">*</span></label>
+                        <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlType">Type</label>
+                        <select class="form-control" id="ddlType">
+                            <option value="">Select Type</option>
+                            <option>Misc </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtRemarks">Remarks</label>
+                        <textarea type="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-mt button-right">
+                        <button id="btn-pending" type="button" class="btn btn-danger" data-toggle="modal" data-target="#pendingModal">
+                            <i class="fa fa-clock"></i> Pending Documents
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @* Modal Popup *@
+            <!-- Modal -->
+            <div class="modal fade" id="pendingModal" tabindex="-1" role="dialog" aria-labelledby="pendingModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="popup-header">
+                            <h5 class="popup-title" id="pendingModalLabel">Pending Documents</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+
+                        </div>
+                        
+
+                        <div class="modal-body">
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table id="tblPendingDocument" class="table-width">
+                                        <thead class="table-head">
+                                            <tr>
+                                                <th style="display:none;">Code</th> 
+                                                <th><input type="checkbox"></th>  
+                                                <th>Voucher Type</th>             
+                                                <th>Voucher No</th>                
+                                                <th>Date</th>                      
+                                                <th>Quantity</th>             
+                                                <th>Pending Qty</th>              
+                                                <th>Item Name</th>                
+                                                <th>Remarks</th>                   
+                                                <th>Nos</th>                       
+                                                <th>Unit_name</th>                 
+                                                <th>SRNO</th>                      
+
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2 mx-2">
+                            <div class="offset-md-8 col-md-4">
+                                <div class="button-right">
+                                    <button type="button" class="btn btn-primary" id="PendngAddRow"><i class="fa fa-plus"></i>ADD</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblConsumptionEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Item Name</th>
+                            <th>Department</th>
+                            <th>Unit</th>
+                            <th>Nos</th>
+                            <th>Quantity</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const refTypeOptions = ["PO", "Indent", "Manual"];
+    let itemMap = {};
+    let UnitMap = {};
+    let DeptMap = {};
+
+    $(document).ready(function () {
+      const urlParams = new URLSearchParams(window.location.search);
+
+        const rowId = urlParams.get('id');
+        const vtype = urlParams.get('vtype');
+        const $tbody = $("#tblConsumptionEntry tbody");
+        const mode = urlParams.get('mode');
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+      (async () => {
+        try {
+          await LoadDropDowns();
+          addRow($tbody);
+
+            if (rowId) {
+                await LoadFormByID(rowId);
+                    if (mode == 'view') {
+                        console.log('Mode', mode);
+                          setFormReadOnly();
+                    }
+
+            }
+
+
+             if (rowId && rowId !== 0) {
+            await LoadFormByID(rowId, vtype);
+            if (typeof isReadOnly !== 'undefined' && isReadOnly) {
+              setFormReadOnly();
+            }
+          }
+
+            $("#ddlPartyName").on("change", async function () {
+                const partyId = $(this).val();
+                if (!partyId) {
+                $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").val("").prop("disabled", true);
+                return;
+                }
+
+                await fetchPartyAddressDetails(partyId);
+            });
+
+            $("#ddlDocType").change(function () {
+                if (!rowId) GetVNo(this.value);
+            });
+
+
+          $("#btn-pending").on("click", async function () {
+                const partyId = $("#ddlPartyName").val(); 
+
+                if (!partyId) {
+                    toastr.warning("Please select a Party.");
+                    return; 
+                }
+           
+                await loadPendingDocuments(partyId);
+            });
+
+          $(document).on("click", ".btn-add-action", () => addRow($tbody));
+
+          $(document).on("click", ".btn-add-row", () => addRow($tbody));
+
+          $(document).on("click", ".btn-delete-action", function () {
+            const $row = $(this).closest("tr");
+            const wasLast = $row.is(":last-child");
+            $row.remove();
+            if (wasLast) {
+              const $last = $tbody.find("tr:last");
+              if ($last.length && !$last.find(".btn-add-action").length) {
+                $last.find("td:last").prepend(
+                  `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                );
+              }
+            }
+          });
+
+          // Save Button Click
+          $("#btn-save").click(function (e) {
+            e.preventDefault();
+
+            const V_DATE = formatDate($("#DtDocDate").val());
+            const DocType = $.trim($('#ddlDocType').val());
+            const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
+
+            if (!DocType) {
+                toastr.warning("Please select a Doc Type.");
+                $("#ddlDocType").focus();
+                return;
+            }
+
+            if (!V_DATE) {
+                toastr.warning("Please select a Voucher Date.");
+                $("#ddlDocType").focus();
+                return;
+            }
+
+            if (!PartyCode) {
+                toastr.warning("Please select a Party.");
+                $("#ddlPartyName").focus();
+                return;
+            }
+
+            const header = {
+              DOC_ID: $.trim($('#TxtCode').val()) ?? null,
+              V_TYPE: $('#ddlDocType').val() ?? null,
+              V_NO: parseInt($('#NumDocNo').val()) || null,
+                V_DATE: (() => {
+                const d = new Date($("#DtDocDate").val());
+                return !isNaN(d) ? d.toISOString() : null;
+                })(),
+
+
+                V_TIME: (() => {
+                const val = $('#TmDocTime').val();
+                if (!val) return null;
+                return val.length === 5 ? val + ':00' : val;
+                })(),
+
+                PARTY_CODE: parseInt($('#ddlPartyName').val()) || null,
+                TRUCK_NO: $.trim($('#TxtVehicleNo').val()) ?? null,
+                REMARKS: $.trim($('#TxtRemarks').val()) ?? null,
+                Add1: $.trim($('#TxtAdd1PD').val()) ?? null,
+                Add2: $.trim($('#TxtAdd2PD').val()) ?? null,
+                Add3: $.trim($('#TxtAdd3PD').val()) ?? null,
+                ITEM_TYPE: $.trim($('#ddlType').val()) ?? null,
+                action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT'
+            };
+
+          const payload = {
+              Header: header,
+              Deatils: collectTableRowData()
+            };
+
+
+            console.log('Data' , payload);
+
+
+
+            $("#btn-save").prop("disabled", true);
+
+            $.ajax({
+              url: '/MiscConsumptionEntry/SavedData',
+              type: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify(payload),
+              success: function (response) {
+                if (response.success) {
+                  toastr.success("Saved successfully!");
+                      setTimeout(() => window.location.href = '/MiscConsumptionEntryList/Index', 1000);
+
+                } else {
+                  toastr.error(response.message || "Save failed.");
+                }
+              },
+              error: function (xhr) {
+                let errorMessage = "Something went wrong.";
+                if (xhr.status === 400) {
+                  errorMessage = "Bad Request: " + xhr.responseText;
+                } else if (xhr.status === 500) {
+                  errorMessage = "Server error: " + xhr.responseText;
+                } else {
+                  errorMessage = "Unexpected error: " + xhr.statusText;
+                }
+                toastr.error(errorMessage);
+              },
+              complete: function () {
+                $("#btn-save").prop("disabled", false);
+              }
+            });
+          });
+
+         // Add/Delete row buttons
+          $(document).on("click", ".btn-add-action", () => addRow($tbody));
+
+          $(document).on("click", ".btn-delete-action", function () {
+            const $row = $(this).closest("tr");
+            const wasLast = $row.is(":last-child");
+            $row.remove();
+            if (wasLast) {
+              const $last = $tbody.find("tr:last");
+              if ($last.length && !$last.find(".btn-add-action").length) {
+                $last.find("td:last").prepend(
+                  `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                );
+              }
+            }
+          });
+
+          $("#ddlDocType").change(function () {
+            if (!rowId) GetVNo(this.value);
+          });
+
+              $('#PendngAddRow').on('click', function (e) {
+        e.preventDefault();
+
+        // 1. Get selected rows
+        let selectedRows = getSelectedPendingDocuments();
+
+        // 2. If nothing is selected, alert and return
+        if (selectedRows.length === 0) {
+              toastr.warning("Please select at least one row.");
+            return;
+        }
+
+        // 3. Add to consumption table
+        addSelectedToConsumptionTable(selectedRows);
+
+        // 4. (Optional) Log the data
+        console.log('Selected row data:', selectedRows);
+
+        // 5. (Optional) Close the modal
+      
+    });
+
+            
+            
+            $('#tblPendingDocument thead input[type="checkbox"]').on('change', function () {
+                const checked = $(this).is(':checked');
+                $('#tblPendingDocument tbody input.select-row').prop('checked', checked);
+            });
+
+        } catch (err) {
+          console.error("Error initializing page:", err);
+        }
+      })();
+    });
+
+
+
+    async function fetchPartyAddressDetails(partyId) {
+      try {
+
+        const res = await fetch(`/MiscConsumptionEntry/GetAddressByPartyCode?PartyId=${encodeURIComponent(partyId)}`);
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+        const details = await res.json();
+        if (details.length) {
+          const d = details[0];
+          $("#TxtAdd1PD").val(d.add1);
+          $("#TxtAdd2PD").val(d.add2);
+          $("#TxtAdd3PD").val(d.add3);
+        } else {
+
+          $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").val("");
+        }
+      } catch (e) {
+        console.error("Error fetching party address:", e);
+
+      }
+    }
+
+
+      function setFormReadOnly() {
+        const formSelector = '#MiscConsumptionEntryForm';
+        $(`${formSelector} input:not([type="hidden"]):not([type="time"])`).prop('readonly', true);
+        $(`${formSelector} input[type="time"]`).prop('disabled', true);
+        $(`${formSelector} select`).prop('disabled', true);
+        $(`${formSelector} textarea`).prop('readonly', true);
+        $(`${formSelector} button`).prop('disabled', true);
+        $('#tblConsumptionEntry tbody tr, #tblPendingDocument tbody tr').each(function () {
+            $(this).find('input, select, textarea').prop('disabled', true);
+        });
+        $('.btn-add-row, .btn-delete-row, #PendngAddRow').css({
+            'pointer-events': 'none',
+            'opacity': '0.5'
+        });
+        $('#tablePagination').css({
+            'pointer-events': 'none',
+            'opacity': '0.5'
+        });
+        $(`${formSelector} input, ${formSelector} select, ${formSelector} textarea`).attr('tabindex', '-1');
+    }
+
+
+    async function LoadDropDowns() {
+      await Promise.all([
+            DDLVtype(),
+        DDLParty(),
+        loadItemMaster(),
+        loadDeptMaster(),
+        loadUnit()
+
+      ]);
+    }
+
+    async function loadItemMaster() {
+      const res = await fetch("/MiscConsumptionEntry/DDLItemMaster");
+      const data = await res.json();
+      itemMap = {};
+      data.forEach(i => itemMap[i.value] = i.text);
+    }
+
+    async function loadDeptMaster() {
+      const res = await fetch("/MiscConsumptionEntry/DDLDeptMaster");
+      const data = await res.json();
+      DeptMap = {};
+      data.forEach(i => DeptMap[i.value] = i.text);
+    }
+
+    async function loadUnit() {
+      const res = await fetch("/MiscConsumptionEntry/DDLUnit");
+      const data = await res.json();
+      UnitMap = {};
+      data.forEach(i => UnitMap[i.value] = i.text);
+    }
+
+    async function DDLVtype() {
+      const res = await fetch("/MiscConsumptionEntry/DDlVType");
+      const list = await res.json();
+      const ddl = $("#ddlDocType");
+      ddl.empty().append('<option value="">-- Select Voucher Type --</option>');
+      list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+    }
+
+    async function DDLParty() {
+      const res = await fetch("/MiscConsumptionEntry/DDlParty");
+      const list = await res.json();
+      const ddl = $("#ddlPartyName");
+      ddl.empty().append('<option value="">-- Select Party --</option>');
+      list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+    }
+
+    async function GetVNo(Vtype) {
+      const res = await fetch(`/MiscConsumptionEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
+      const data = await res.json();
+      if (data.v_NO) {
+        $('#NumDocNo').val(data.v_NO);
+      } else {
+        console.warn('No document number received');
+      }
+    }
+
+
+    function formatDate(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      return isNaN(date) ? null : date.toISOString().split('T')[0];
+    }
+
+    function generateSelect(optionsMap, selected = "") {
+      return Object.entries(optionsMap)
+        .map(([val, txt]) => `<option value="${val}"${val == selected ? " selected" : ""}>${txt}</option>`)
+        .join("");
+    }
+
+     function collectTableRowData() {
+      const rows = document.querySelectorAll('#tblConsumptionEntry tbody tr');
+
+      return Array.from(rows, row => ({
+        ITEM_CODE: Number(row.querySelector('select.itemName')?.value) || null,
+        ITEM_NAME: row.querySelector('select.itemName option:checked')?.text || '',
+        DEPT_CODE: Number(row.querySelector('select.department')?.value) || null,
+        UOM_CODE: Number(row.querySelector('select.unit')?.value) || null,
+        NOS: Number(row.querySelector('input.no')?.value) || null,
+        QTY: parseFloat(row.querySelector('input.quantity')?.value) || null,
+        REMARKS: row.querySelector('input.remarks')?.value || ''
+      }));
+    }
+
+    function addRow($tbody, data = {}) {
+      $tbody.find(".btn-add-action").remove();
+      const selectItems = generateSelect(itemMap, data.itemName || "");
+      const selectDept = generateSelect(DeptMap, data.department || "");
+      const selectunit = generateSelect(UnitMap, data.unit || "");
+
+      const row = `
+        <tr class="no-border-input">
+          <td style="display:none;">${data.code || ""}</td>
+          <td><select class="form-control itemName"><option value="">-- Select --</option>${selectItems}</select></td>
+          <td><select class="form-control department"><option value="">-- Select --</option>${selectDept}</select></td>
+          <td><select class="form-control unit"><option value="">-- Select --</option>${selectunit}</select></td>
+          <td><input type="number" class="form-control no" value="${data.no || ''}"/></td>
+          <td><input type="number" class="form-control quantity" value="${data.quantity || ''}"/></td>
+          <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
+
+          <td>
+            <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+            <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+          </td>
+        </tr>`;
+      $tbody.append(row);
+    }
+
+    function LoadFormByID(rowId, vtype) {
+      $.ajax({
+        url: '/MiscConsumptionEntryList/GetDataByCode',
+        method: 'POST',
+        data: {
+          rowId: rowId,
+          vtype: vtype
+        },
+        success: function (result) {
+          console.log("selected data:", result);
+          console.log('vType', vtype);
+          if (!result.success || !result.data || !result.data.header) {
+            toastr.error("Invalid or missing response data.");
+            return;
+          }
+
+          console.log('data', result);
+
+
+          const header = result.data.header;
+          const details = result.data.details;
+
+          // Fill header fields
+          $('#TxtCode').val(header.doC_ID || '');
+          $('#ddlDocType').val(header.v_TYPE || '');
+          $('#NumDocNo').val(header.v_NO || '');
+            $('#TmDocTime').val(header.v_TIME);
+
+          $('#DtDocDate').val(formatDate(header.v_DATE));
+          $('#ddlPartyName').val(header.partY_CODE || '');
+          $('#TxtVehicleNo').val(header.trucK_NO || '');
+          $('#TxtRemarks').val(header.remarks || '');
+          $('#TxtAdd1PD').val(header.add1 || '');
+          $('#TxtAdd2PD').val(header.add2 || '');
+          $('#TxtAdd3PD').val(header.add3 || '');
+          $('#ddlType').val(header.iteM_TYPE || '');
+
+          // Load party addresses and set selected
+
+          // Populate table rows
+          const $tbody = $("#tblConsumptionEntry tbody");
+          $tbody.empty();
+
+          (details || []).forEach(detail => {
+            const rowData = {
+              code: detail.iteM_CODE || '',
+              itemName: detail.iteM_CODE || '',
+              department: detail.depT_CODE || '',
+              unit: detail.uoM_CODE || '',
+              no: detail.nos || '',
+              quantity: detail.qty || '',
+              remarks: detail.remarks || ''
+
+            };
+
+            addRow($tbody, rowData);  // Assuming addRow is your custom row-adding function
+          });
+        },
+        error: function (xhr, status, error) {
+          console.error("AJAX error:", error);
+          toastr.error("Error loading form data: " + error);
+        }
+      });
+    }
+
+     function loadPendingDocuments(partyId) {
+        $.ajax({
+            url: '/MiscConsumptionEntryList/GetPendingDocumnents',
+            type: 'GET',
+            data: { PartyId: partyId },
+            success: function (data) {
+                let tbody = $('#tblPendingDocument tbody');
+                tbody.empty();
+                         if (data.length === 0) {
+                    tbody.append('<tr><td colspan="8" class="text-center">No pending documents found.</td></tr>');
+                } else {
+                    $.each(data, function (i, item) {
+                        let row = `<tr>
+                        <td style="display:none;">${item.v_NO}</td>
+                        <td><input type="checkbox" class="select-row" /></td> <!-- ✅ Add class -->
+                        <td>${item.v_type}</td>
+                        <td>${item.v_NO}</td>
+                        <td>${item.v_date}</td>
+                        <td>${item.qty}</td>
+                        <td>${item.p_Qty}</td>
+                        <td>${item.item_name}</td>
+                        <td>${item.remarks}</td>
+                        <td>${item.nos}</td>
+                        <td>${item.unitname}</td>
+                        <td>${item.srno}</td>
+                        </tr>`;
+
+                        tbody.append(row);
+                    });
+                }
+
+                $('#pendingModal').modal('show');
+            },
+            error: function (xhr) {
+                  toastr.warning("Error loading pending documents.");
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+
+    function getSelectedPendingDocuments() {
+        let selectedRows = [];
+
+        $('#tblPendingDocument tbody tr').each(function () {
+            let checkbox = $(this).find('.select-row');
+
+            if (checkbox.is(':checked')) {
+                let row = $(this);
+                let rowData = {
+                    item_name: row.find('td').eq(7).text(),
+                    department: "", // Assuming this will be filled manually or from other source
+                    unit: row.find('td').eq(10).text(),
+                    nos: row.find('td').eq(9).text(),
+                    quantity: row.find('td').eq(5).text(),
+                    remarks: row.find('td').eq(8).text(),
+                    code: row.find('td').eq(0).text()
+                };
+
+                selectedRows.push(rowData);
+            }
+        });
+        console.log('selected' , selectedRows);
+        return selectedRows;
+    }
+
+        function addSelectedToConsumptionTable(selectedRows) {
+        const $tbody = $("#tblConsumptionEntry tbody");
+
+        selectedRows.forEach(row => {
+            // 1. Find matching keys from maps
+            const itemCode = Object.keys(itemMap).find(key => itemMap[key] === row.item_name);
+            const unitCode = Object.keys(UnitMap).find(key => UnitMap[key] === row.unit);
+
+            // 2. Find a blank row
+            let $blankRow = null;
+
+            $tbody.find("tr").each(function () {
+                const itemVal = $(this).find("select.itemName").val();
+                const qtyVal = $(this).find("input.quantity").val();
+
+                if (!itemVal && !qtyVal) {
+                    $blankRow = $(this);
+                    return false; // Break loop
+                }
+            });
+
+            const fillRow = ($row) => {
+                $row.find("select.itemName").val(itemCode || "").trigger('change');
+                $row.find("select.unit").val(unitCode || "");
+                $row.find("input.no").val(row.nos || "");
+                $row.find("input.quantity").val(row.quantity || "");
+                $row.find("input.remarks").val(row.remarks || "");
+
+            };
+
+            if ($blankRow) {
+                fillRow($blankRow);
+            } else {
+                // Add new row and fill it
+                addRow($tbody);
+                const $newRow = $tbody.find("tr:last");
+                fillRow($newRow);
+            }
+        });
+    }
+
+
+
+</script>

@@ -1,0 +1,204 @@
+﻿@{
+    ViewBag.Title = "Category Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Category Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "CategoryMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="CategoryMasterform">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName" class="form-label">Short Name</label>
+                    <input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Enter Short Name">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btnSaves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+
+@* Cancel Button Popup *@
+<script>
+        document.getElementById("cancelBtn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel all the changes?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Cancelled!',
+            'Your action has been cancelled.',
+            'success'
+          )
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire(
+            'Resumed',
+            'Your action is still in progress.',
+            'info'
+          )
+        }
+      });
+    });
+</script>
+
+@* Cancel button end *@
+
+
+<script>
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        // Handle Active/Inactive toggle
+        $('#ACTIVE').on('change', function () {
+            let isChecked = $(this).is(':checked');
+            let status = isChecked ? 'Active' : 'Inactive';
+            $('#statusText')
+                .text(status)
+                .removeClass('active inactive')
+                .addClass(isChecked ? 'active' : 'inactive');
+        });
+
+        // Load category by ID if editing
+        if (!isNaN(rowId) && rowId > 0) {
+            loadCoategaryById(rowId);
+            if (isReadOnly) {
+                setFormReadOnly();
+            }
+        }
+
+        // Save button click
+        $("#btnSaves").click(function (e) {
+            e.preventDefault();
+
+            var Name = $("#TxtName").val().trim();
+            var ShortName = $("#TxtShortName").val().trim();
+            var CODE = $("#CODE").val().trim();
+            var isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+            var action = (isNaN(CODE) || CODE <= 0) ? 'INSERT' : 'UPDATE';
+
+            // Validation
+            if (!Name) {
+                toastr.warning("Please enter a Name.");
+                $("#TxtName").focus();
+                return;
+            }
+
+            if (!ShortName) {
+                toastr.warning("Please enter a Short Name.");
+                $("#TxtShortName").focus();
+                return;
+            }
+
+            var formData = {
+                NAME: Name || '',
+                SHORTNAME: ShortName || '',
+                CODE: (CODE && !isNaN(CODE)) ? CODE : null,
+                ACTIVE: isActive,
+                ACTION: action || ''
+            };
+
+            console.log("Submitting: ", formData);
+            $("#btnSaves").prop("disabled", true);
+
+            $.ajax({
+                url: '/CategoryMaster/SaveCategaryMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    toastr.success(response.message || "Saved successfully!");
+                    $("#CategoryMasterform")[0].reset();
+                    $('#statusText').text('Inactive').removeClass('active').addClass('inactive');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error("Something went wrong.");
+                },
+                complete: function () {
+                    $("#btnSaves").prop("disabled", false);
+                }
+            });
+        });
+    });
+        // Load category by ID
+    function loadCoategaryById(code) {
+        $.ajax({
+            url: '/CategoryMasterList/GetCategoryCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No Category found for the given ID.");
+                    return;
+                }
+
+                const data = res.data;
+                console.log('Selected data', data);
+
+                $("#TxtName").val($.trim(data.name));
+                $("#TxtShortName").val($.trim(data.shortname));
+                $("#CODE").val($.trim(data.code));
+
+                const isActive = data.active === 1 || data.active === true;
+                $('#ACTIVE').prop('checked', isActive);
+                $('#statusText')
+                    .text(isActive ? 'Active' : 'Inactive')
+                    .removeClass('active inactive')
+                    .addClass(isActive ? 'active' : 'inactive');
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    // Set form to read-only
+    function setFormReadOnly() {
+        const form = $('#CategoryMasterform'); // corrected ID
+        form.find('input, select, textarea, button').prop('disabled', true);
+    }
+
+</script>

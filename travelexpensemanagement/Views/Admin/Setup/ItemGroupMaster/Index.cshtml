@@ -1,0 +1,178 @@
+﻿@{
+	ViewBag.Title = "ItemGroupMaster";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend>Item Group Master</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("ItemGroupList", "ItemGroupMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+
+
+<form id="">
+	<input type="hidden" class="form-control" name="CODE" id="txtCODE">
+	<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+				<label class="form-label">Name</label>
+				<input type="text" class="form-control" id="txtname">
+			</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Short Name</label>
+			<input type="text" class="form-control" id="txtshortname">
+		</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Print Name</label>
+			<input type="text" class="form-control" id="txtprintname">
+		</div>
+	</div>
+	</div>
+		
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Main Group</label>
+			<select class="form-select form-control" id="ddlmaingroup">
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Group Type</label>
+			<select class="form-select form-control" id="ddlgrouptype" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Accounting Name</label>
+			<select class="form-select form-control" id="ddlaccountingname" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+		</div>
+			<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Sauda Required</label>
+			<select class="form-select form-control" id="ddlsaudarequired" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label class="form-label">Sale Group</label>
+			<select class="form-select form-control" id="ddlsalegroup" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			
+		</div>
+		
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="form-group">
+					<div class="toggle-wrapper justify-content-center" id="ddlActive">
+						<input type="hidden" id="IsActive" name="IsActive" value="1" />
+						<div id="customToggle" class="custom-toggle active"></div>
+						<span id="statusLabel" class="status-label active">Active</span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+				@* <button id="btnUpdate" type="Update" style="font-size: 9px;height: 28px; line-height: 1px; display:none;" class="btn btn-primary">Update</button> *@
+			</div>
+		</div>
+		@* <div class="col-md-4">
+			<input type="checkbox" class="form-check-input" name="ACTIVE" value="1" checked>
+			<label class="form-check-label">Active</label>
+		</div>
+	
+
+	<button type="submit" class="btn btn-primary">Submit</button> *@
+</form>
+
+</fieldset>
+@* Cancel Button Popup *@
+<script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	</Script>
+@* Status Check end *@

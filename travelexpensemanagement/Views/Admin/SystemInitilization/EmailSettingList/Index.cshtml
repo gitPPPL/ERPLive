@@ -1,0 +1,411 @@
+﻿@{
+    ViewBag.Title = "Email Setting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;  // Exit loop once found current menu permission
+        }
+    }
+}
+
+<!-- jQuery -->
+
+<script>
+    function redirectToDashboard() {
+        window.location.href = '@Url.Action("Index", "Dashboard")';
+    }
+</script>
+<fieldset>
+    <legend class="legend-field">Email Setting List</legend>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "EmailSetting")'" type="submit" class="btn btn-add">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approve
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card" id="emailSettingsTable">
+        <div class="table-responsive">
+            <table id="emailSettingsTable" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th>UserID</th>
+                        <th>Web Password</th>
+                        <th>SMTP Server</th>
+                        <th>SMTP Port</th>
+                        <th>SMTP USSL</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<script>
+
+    var canAdd = @canAdd.ToString().ToLower();
+    var canEdit = @canEdit.ToString().ToLower();
+    var canDelete = @canDelete.ToString().ToLower();
+    var canPrint = @canPrint.ToString().ToLower();
+    var canExport = @canExport.ToString().ToLower();
+    var canMail = @canMail.ToString().ToLower();
+    var canApproval = @canApproval.ToString().ToLower();
+    var canDocDetail = @canDocDetail.ToString().ToLower();
+
+    let currentPage = 1;
+    const pageSize = 5;
+    let documentOptionsHtml = '';
+
+    $(document).ready(function () {
+        $.when(loadDocumentDropdownOptions()).done(function () {
+            loadEmailSettings(currentPage);
+        });
+
+        function loadDocumentDropdownOptions() {
+            return $.ajax({
+                url: '/EmailSetting/GetDocumentList',
+                type: 'GET',
+                success: function (data) {
+                    documentOptionsHtml = '<option value="">-- Select Document Type --</option>';
+                    data.forEach(item => {
+                        documentOptionsHtml += `<option value="${item.value}">${item.text}</option>`;
+                    });
+                }
+            });
+        }
+
+        function loadEmailSettings(page) {
+            $.ajax({
+                url: '/EmailSettingList/GetPagedEmailSettings',
+                type: 'GET',
+                data: { page: page, pageSize: pageSize },
+                success: function (res) {
+                    console.log(res)
+                    const tbody = $('#emailSettingsTable tbody');
+                    tbody.empty();
+
+                    if (res.success && res.emailSettingList.length > 0) {
+                        res.emailSettingList.forEach(item => {
+                            tbody.append(`
+                                <tr data-userid="${item.CODE}">
+                                    <td style="font-size: 12px;" class="docUser">${item.userID}</td>
+                                    <td class="docName" style="display:none;" data-compcode="${item.compcode}" data-codeid="${item.codeid}"></td>
+                                    <td><input class="form-control webPassword" value="${item.webPassword}" disabled /></td>
+                                    <td><input class="form-control smtpServer" value="${item.smtpServer}" disabled /></td>
+                                    <td><input class="form-control smtpPort" value="${item.smtpPort}" disabled /></td>
+                                    <td><input class="form-control smtpUssl" value="${item.smtpUssl}" disabled /></td>
+                                   " disabled /></td>
+                                    <td>
+                                            ${canEdit ? '<i class="fa fa-edit editBtn btn-edit" title="Edit"></i>' : ''}
+                                            <i class="fa fa-eye viewBtn btn-view" title="View" ></i>
+                                            ${canDelete ? '<i class="fas fa-trash btn-delete " title="Delete" ></i>' : ''}
+                                            ${canDocDetail ? '<i class="fa fa-file btn-details btn-document" title="Details" ></i>' : ''}
+                                    </td>
+
+                                </tr>
+                            `);
+                        });
+
+                        renderPagination(res.totalCount, page);
+                    } else {
+                        tbody.html('<tr><td colspan="7" class="text-center">No data available.</td></tr>');
+                        $('#pagination').empty();
+                    }
+                }
+            });
+        }
+    function renderPagination(totalCount, currentPage) {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        let paginationHtml = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHtml += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="javascript:void(0);" data-page="${i}">${i}</a>
+                </li>`;
+        }
+
+        $('#pagination').html(paginationHtml);
+    }
+
+        $(document).on('click', '#pagination .page-link', function () {
+            currentPage = parseInt($(this).data("page"));
+            loadEmailSettings(currentPage);
+        });
+
+      $(document).on('click', '.btn-details', function() {
+        const $row = $(this).closest('tr');
+            const $docCell = $row.find('.docName');
+            const vType = $docCell.data('vtype');
+            const compCode = $docCell.data('compcode');
+            const docCode = $docCell.data('codeid');
+            const id = $row.data('userid');
+            showDocumentPopup(docCode); 
+    });
+
+        // 🔁 Edit Button Click
+        $(document).on('click', '.editBtn', function () {
+            const $row = $(this).closest('tr');
+            const $docCell = $row.find('.docName');
+
+            // Get hidden values
+            const vType = $docCell.data('vtype');
+            const compCode = $docCell.data('compcode');
+            const codeId = $docCell.data('codeid');
+
+            const id = $row.data('userid');
+
+            // Construct the URL with the query parameters (id, compCode, codeId)
+            window.location.href = `/EmailSetting/Index?compCode=${compCode}&codeId=${codeId}`;
+
+        });
+
+        // view code
+          $(document).on('click', '.viewBtn', function () {
+              alert("ok")
+            const $row = $(this).closest('tr');
+            const $docCell = $row.find('.docName');
+
+            // Get hidden values
+            const vType = $docCell.data('vtype');
+            const compCode = $docCell.data('compcode');
+            const codeId = $docCell.data('codeid');
+
+            const id = $row.data('userid');
+
+            // Construct the URL with the query parameters (id, compCode, codeId)
+            window.location.href = `/EmailSetting/Index?compCode=${compCode}&codeId=${codeId}&mode=view`;
+
+        });
+
+        // Placeholder for updateBtn click
+        $(document).on('click', '.updateBtn', function () {
+            const $row = $(this).closest('tr');
+            const $docCell = $row.find('.docName');
+
+            // Get hidden values
+            const vType = $docCell.data('vtype');
+            const compCode = $docCell.data('compcode');
+            const codeId = $docCell.data('codeid');
+
+            const id = $row.data('userid');
+
+        });
+    $(document).on('click', '.btn-delete', function () {
+        const $row = $(this).closest('tr');
+        const $docCell = $row.find('.docName');
+        const $UsernameCell = $row.find('.docUser');
+
+        const docCode = $docCell.data('codeid');
+        const UserName = $UsernameCell.text().trim();
+        deleteEmailSetting(docCode);
+    });
+
+     function deleteEmailSetting(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/EmailSettingList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+        // Placeholder for cancelBtn click
+        $(document).on('click', '.cancelBtn', function () {
+            // reload data to reset row
+            loadEmailSettings(currentPage);
+        });
+        function showDocumentPopup(docCode) {
+        $.ajax({
+            url: '/EmailSettingList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',  // important
+            data: { docCode: docCode },
+            success: function(response) {
+                if(response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function() {
+                toastr.error("An error occurred while fetching document details.");
+            }
+        });
+    }
+
+    });
+    function exportToExcel() {
+        fetch('/EmailSettingList/ExportAllDocs')
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(result => {
+                console.log("Raw response:", result);
+
+                if (!result.success) {
+                    toastr.error(result.message || "Export failed.");
+                    throw new Error(result.error || "Unknown error.");
+                }
+
+                const data = result.data;
+                console.log("Exported Data:", data);
+
+                if (!Array.isArray(data)) {
+                    throw new Error("Expected array but got: " + typeof data);
+                }
+
+                const filteredData = data.map(item => ({
+                    CODE: item.code,
+                    USER_ID: item.userId,
+                    WEBPASSWORD: item.webPassword,
+                    SMTP_SERVER: item.smtpServer,
+                    SMTP_PORT: item.smtpPort,
+                    SMTP_USSL: item.smtpUssl
+                }));
+
+                console.log("Exported Data:", filteredData);
+
+                const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "EmailSettings");
+
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+                const fileName = `EmailSettings_${timestamp}.xlsx`;
+
+                XLSX.writeFile(workbook, fileName);
+            })
+            .catch(error => {
+                console.error("Export failed:", error);
+                toastr.error("Failed to export data.");
+            });
+    }
+    function callGetReportAsPdf() {
+        var reportName = "EMAIL_MAST";
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+            type: 'GET',
+            data: { Reportname: reportName },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    }
+    
+</script>

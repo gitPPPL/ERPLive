@@ -1,0 +1,113 @@
+﻿@{
+    ViewBag.Title = "Add Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-control {
+        font-size: 13px;
+    }
+    a {
+        font-size: 14px;
+        color: #007bff;
+    }
+    .main-body {
+        border: none;
+        outline: 2px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+    }
+</style>
+
+<script>
+    function redirectToDashboard() {
+        window.location.href = '@Url.Action("Index", "Dashboard")';
+    }
+</script>
+
+<nav class="breadcrumb">
+    <span class="active" onclick="redirectToDashboard()" style="cursor: pointer;">Dashboard</span>
+    <span> &gt; </span>
+    <a href="#">Add Master</a>
+</nav>
+
+<form id="dynamicForm">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <select id="tableSelector" class="form-control" name="TableName">
+                <option value="">-- Select Table --</option>
+            </select>
+            <br />
+            <div id="dynamicFields"></div>
+
+            <br />
+            <button type="submit" class="btn btn-primary mt-2">Submit</button>
+            <br /><br />
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</form>
+
+<script>
+        $(document).ready(function () {
+        // Load table names
+        $.ajax({
+            url: '/AddMaster/GetAllTables',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    $.each(response.tables, function (index, table) {
+                        $('#tableSelector').append(`<option value="${table}">${table}</option>`);
+                    });
+                }
+            }
+        });
+        // On table change, load columns
+        $('#tableSelector').change(function () {
+            var tableName = $(this).val();
+            $('#dynamicFields').empty();
+            if (tableName) {
+                $.ajax({
+                    url: '/AddMaster/GetColumns',
+                    type: 'GET',
+                    data: { tableName: tableName },
+                    success: function (response) {
+                        if (response.success) {
+                            $.each(response.columns, function (index, columnName) {
+                                var field = `
+                                    <div class="form-group">
+                                        <label>${columnName}</label>
+                                        <input type="text" class="form-control" name="${columnName}" placeholder="${columnName}" />
+                                    </div>`;
+                                $('#dynamicFields').append(field);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        // Handle form submit
+        $('#dynamicForm').submit(function (e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '/AddMaster/SaveData',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        alert("Data saved successfully!");
+                    } else {
+                        alert("Failed to save data.");
+                    }
+                },
+                error: function () {
+                    alert("Error while saving data.");
+                }
+            });
+        });
+    });
+
+</script>

@@ -1,0 +1,378 @@
+﻿@{
+    ViewBag.Title = "Credit Limit Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Credit Limit Master</legend>
+
+    <div class="row">
+        <div class="offset-md-8 col-md-4 btn-right">
+            <button id="btnBackToList" onclick="window.location.href='@Url.Action("Index", "CreditLimitMasterList")'" type="button" class="btn btn-primary">
+                <i class="fa fa-list"></i> Back to list
+            </button>
+        </div>
+    </div>
+
+    <form id="CreditApprovalForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPartyName">Party Name<span class="required">*</span></label>
+                    <select id="ddlPartyName" class="form-control" style="width:100%">
+                        <option value="">-- Select Party --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtGroupName">Group Name</label>
+                    <input type="text" class="form-control" id="TxtGroupName" name="GroupName" placeholder="Enter Group Name">
+                    <input type="hidden" id="HiddenGroupCode">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DateEffectiveFrom">Eff. From<span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DateEffectiveFrom" name="EffectiveFrom">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlInsuranceApproval">Insu. Comp. Approval<span class="required">*</span></label>
+                    <select class="form-control" id="ddlInsuranceApproval" name="InsuranceApproval">
+                        <option value="">--Select --</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Refused">Refused</option>
+                        <option value="Not Reported">Not Reported</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumCreditLimitAmt">Credit Limit Amt.<span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumCreditLimitAmt" name="CreditLimitAmt" placeholder="Enter Credit Limit Amount">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumOSAmt">O/S Amt</label>
+                    <input type="number" class="form-control" id="NumOSAmt" name="OSAmt" placeholder="Enter O/S Amount">
+                    <span class="days-text"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlOurApproval">Our Approval</label>
+                    <div class="input-group">
+                        <select class="form-control" id="ddlOurApproval" name="ddlOurApproval">
+                            <option value="">-- Select Approval --</option>
+                            <option value="OverLimit-Accepted">OverLimit-Accepted</option>
+                            <option value="UnderLimit-Accepted">UnderLimit-Accepted</option>
+                            <option value="OwnRisk-Accepted">OwnRisk-Accepted</option>
+                        </select>
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumInsuCreditDays">Insu. Credit Days</label>
+                    <input type="number" class="form-control" id="NumInsuCreditDays" name="InsuCreditDays" placeholder="Enter Insurance Credit Days">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumOurCreditDays">Our Credit Days<span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumOurCreditDays" name="OurCreditDays" placeholder="Enter Our Credit Days">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea type="text" class="form-control" id="TxtRemarks" name="Remarks" placeholder="Enter Remarks" style="height:100px;"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-4 btn-align">
+                <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                @* <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button> *@
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+        let today = new Date();
+
+        // Format for HTML input (yyyy-mm-dd)
+        let yyyy = today.getFullYear();
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
+        let dd = String(today.getDate()).padStart(2, '0');
+        let formatted = `${yyyy}-${mm}-${dd}`;
+        $('#DateEffectiveFrom').val(formatted);
+
+        loadPartyList().done(function () {
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadCreditLimitByCode(rowId);
+                if (isReadOnly) {
+                    setCreditLimitFormReadOnly();
+                }
+            }
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    function loadPartyList() {
+        const ddl = $('#ddlPartyName');
+
+        return $.ajax({
+            url: '/CreditLimitMaster/GetPartyList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Reset Select2 if initialized
+                if (ddl.hasClass("select2-hidden-accessible")) {
+                    ddl.select2('destroy');
+                }
+
+                ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
+
+                data.forEach(item => {
+                    ddl.append(new Option(item.text, item.value));
+                });
+
+                ddl.select2({
+                    placeholder: "-- Select Party --",
+                    allowClear: true,
+                    width: '100%',
+                    minimumResultsForSearch: data.length >= 5 ? 0 : Infinity,
+                    language: {
+                        inputTooShort: () => 'Type to search...',
+                        searchInputPlaceholder: "Search Party..."
+                    }
+                });
+
+                // Add Bootstrap form-control styling to Select2 container
+                $('.select2-selection').addClass('form-control');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading party list:", xhr.responseText);
+                toastr.error('Error loading party list: ' + error);
+            }
+        });
+    }
+
+    $('#ddlPartyName').on('change',function(){
+        const partyCode = $(this).val();
+        if (partyCode) {
+            loadGroupNameByParty(partyCode);
+        } else {
+            $('#TxtGroupName').val('');
+        }
+    });
+
+        function loadGroupNameByParty(partyCode) {
+        $.ajax({
+            url: '/CreditLimitMaster/GetGroupNameByPartyCode',
+            type: 'GET',
+            data: { code: partyCode },
+            success: function (response) {
+                console.log('Response:', response);
+                if (response.success) {
+                    $('#TxtGroupName').val(response.groupName);
+                    $('#TxtGroupName').prop('readonly', true);
+                    $('#HiddenGroupCode').val(response.groupCode);
+                    $('#NumCreditLimitAmt').val(response.creditlimit);
+                    $('#NumOSAmt').val(response.osAmount);
+                    $('#NumOurCreditDays').val(response.creditdays);
+                    $('.days-text').text(response.drcrStatus).css('color', response.drcrStatus === "Dr" ? "red" : "green");
+
+
+                } else {
+                    $('#TxtGroupName').val('');
+                    $('#HiddenGroupCode').val('');
+
+                    toastr.warning('There is no group name against this Party.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading group name:", error);
+                toastr.error('Error loading group name: ' + error);
+            }
+        });
+    }
+
+
+    $('#CreditApprovalForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const code = parseInt($('#CODE').val()) || 0;
+
+        const creditLimitData = {
+            CODE: code,
+            COMP_CODE: 0,
+            PARTY_CODE: parseInt($('#ddlPartyName').val()) || 0,
+            GR_CODE: parseInt($('#HiddenGroupCode').val()) || 0,
+            EFF_FROM: $('#DateEffectiveFrom').val(),
+            CR_LIMIT: parseFloat($('#NumCreditLimitAmt').val()) || 0,
+            CR_DAYS: parseInt($('#NumInsuCreditDays').val()) || 0,
+            OURCR_DAYS: parseInt($('#NumOurCreditDays').val()) || 0,
+            REMARKS: $('#TxtRemarks').val().trim(),
+            FAPROV_STATUS: $('#ddlInsuranceApproval').val(),
+            FAPROV_REMARKS: $('#ddlOurApproval').val(),
+            AED: code > 0 ? 'E' : 'A',
+            WSID: "WEB",
+            LIP: "127.0.0.1",
+            LID: "WEB",
+            ACTION: code > 0 ? "UPDATE" : "INSERT",
+            UUSER: 1,
+            EUSER: 1,
+            UDATE: new Date().toISOString(),
+            EDATE: new Date().toISOString(),
+            V_DATE: new Date().toISOString(),
+            V_TYPE: "CLMT",
+            V_NO: code
+        };
+        // Simple validation
+        if (!creditLimitData.PARTY_CODE) {
+            toastr.warning("Please select a Party Name.");
+            $('#ddlPartyName').focus();
+            return;
+        }
+        if (!creditLimitData.EFF_FROM) {
+            toastr.warning("Please select an Effective From date.");
+            $('#DateEffectiveFrom').focus();
+            return;
+        }
+         if (!creditLimitData.FAPROV_STATUS) {
+            toastr.warning("Please select Insu. Comp. Approval.");
+            $('#DateEffectiveFrom').focus();
+            return;
+        }
+        if (!creditLimitData.CR_LIMIT) {
+            toastr.warning("Please enter Credit Limit Amount.");
+            $('#NumCreditLimitAmt').focus();
+            return;
+        }
+        if (!creditLimitData.OURCR_DAYS) {
+            toastr.warning("Please enter Our Credit Days");
+            $('#NumCreditLimitAmt').focus();
+            return;
+        }
+        $.ajax({
+            url: '/CreditLimitMaster/SaveCreditLimit',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(creditLimitData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Credit limit saved successfully!");
+                    setCreditLimitFormReadOnly();
+                    // $('#CreditApprovalForm')[0].reset();
+                    // setTimeout(() => {
+                    //     window.location.href = '/CreditLimitMasterList/Index';
+                    // }, 1000);
+                } else {
+                    toastr.warning(response.message || "Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function LoadCreditLimitByCode(code) {
+        $.ajax({
+            url: '/CreditLimitMasterList/GetCreditLimitByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (data) {
+                console.log(data);
+                if (!data.success || !data.data) {
+                    toastr.warning("No data found for the given code.");
+                    return;
+                }
+                const credit = data.data;
+                $('#CODE').val(credit.v_NO);
+                $('#ddlPartyName').val(credit.partY_CODE).trigger('change');
+                $('#TxtGroupName').val(credit.gR_CODE);
+                $('#DateEffectiveFrom').val(credit.efF_FROM?.split('T')[0]); 
+                $('#ddlInsuranceApproval').val(credit.faproV_STATUS);
+                $('#NumCreditLimitAmt').val(credit.cR_LIMIT);
+                $('#NumOSAmt').val(credit.dOC_ID); 
+                $('#ddlOurApproval').val(credit.faproV_REMARKS);
+                $('#NumInsuCreditDays').val(credit.cR_DAYS);
+                $('#NumOurCreditDays').val(credit.ourcR_DAYS);
+                $('#TxtRemarks').val(credit.remarks);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading credit limit:", status, error);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function setCreditLimitFormReadOnly() {
+        const form = $('#CreditApprovalForm');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        form.find('.toggle-switch input').prop('disabled', true);
+        form.find('#customToggle').addClass('disabled');
+    }
+
+</script>
+
+@* Cancel Button Popup *@
+<script>
+       document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Cancelled!',
+                    'Your action has been cancelled.',
+                    'success'
+                ).then(() => {
+                    // Redirect to home page after confirmation
+                    window.location.href = '@Url.Action("Index", "CreditLimitMasterList")';
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire(
+                    'Resumed',
+                    'Your action is still in progress.',
+                    'info'
+                );
+            }
+        });
+    });
+
+</script>
+
+@* Cancel button end *@

@@ -1,0 +1,561 @@
+﻿@{
+    ViewBag.Title = "Approval Stage Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Approval Stage Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button onclick="window.location.href='@Url.Action("Index", "ApprovalStageMasterList")'" type="submit" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="documentStageMasterForm">
+        <input type="hidden" class="form-control" name="DocCODE" id="DocCODE">
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DOC_TYPE"><span class="required">*</span>Document Type</label>
+                    <select class="form-control" id="DOC_TYPE" name="DOC_TYPE">
+                        <option value="">-- Select Document Type --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="FULL_NAME"><span class="required">*</span>User Name</label>
+                    <select class="form-select form-control" id="FULL_NAME" name="FULL_NAME">
+                        <option value="">-- Select User Name --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DESIGNATION">Designation</label>
+                    <select class="form-control" id="DESIGNATION" name="DESIGNATION" disabled>
+                        <option value="">Select Designation</option>
+                        <option value="No record">No record</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DEPARTMENT">Department</label>
+                    <select class="form-control" id="DEPARTMENT" name="DEPARTMENT" disabled>
+                        <option value="">Select Department</option>
+                        <option value="No record">No record</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="APPROV_USER_STAGE"><span class="required">*</span>Approval Type</label>
+                    <select id="APPROV_USER_STAGE" class="form-control" name="stage">
+                        <option value="">Select Stage</option>
+                        <option value="FIRST">FIRST</option>
+                        <option value="SECOND">SECOND</option>
+                        <option value="THIRD">THIRD</option>
+                        <option value="FORTH">FORTH</option>
+                        <option value="FIFTH">FIFTH</option>
+                        <option value="FINAL">FINAL</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="FLAG_A" class="form-label">Flag A</label>
+                    <input type="number" class="form-control" id="FLAG_A" name="FLAG_A" maxlength="50" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="FLAG_B" class="form-label">Flag B</label>
+                    <input type="text" class="form-control" id="FLAG_B" name="FLAG_B" maxlength="50" required>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="FLAG_C" class="form-label">Flag C</label>
+                    <input type="text" class="form-control" id="FLAG_C" name="FLAG_C" maxlength="50" required>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="FLAG_D" class="form-label">Flag D</label>
+                    <input type="text" class="form-control" id="FLAG_D" name="FLAG_D" maxlength="50" required>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="FLAG_E" class="form-label">Flag E</label>
+                    <input type="text" class="form-control" id="FLAG_E" name="FLAG_E" maxlength="50" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Item Buttons -->
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+                <button class="btn btn-success" id="SaveButton">
+                    <i class="fa fa-plus"></i> Add New
+                </button>
+            </div>
+            </div>
+        </div>
+
+        @* SUb Grid Start *@
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblApprovalStageMaster" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Document Code</th>
+                            <th>User Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
+                            <th>Approval User</th>
+                            <th>Flag A</th>
+                            <th>Flag B</th>
+                            <th>Flag C</th>
+                            <th>Flag D</th>
+                            <th>Flag E</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* SUb Grid End *@
+
+        @* Final section  *@
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+                <button type="button" id="SaveFullRequest" class="btn btn-primary"><i class="fa fa-save"></i>Save </button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</fieldset>
+
+
+
+<script>
+    let approvalStageList = [];
+    let fullNameMap = {};
+    let designationMap = {};
+    let departmentMap = {};
+
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = urlParams.get('docCode');
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+
+            if (rowId && rowId.trim() !== '') {
+                LoadDocDetails(rowId);
+
+                if (isReadOnly) {
+                    setDocumentStageFormReadOnly();
+                }
+            }
+
+        });
+        LoadDocTypeList();
+        LoadFullNameList();
+        LoadDesignationList();
+        LoadDepartmentList();
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    function LoadDocTypeList() {
+        return $.ajax({
+            url: '@Url.Action("GetDocumentTypeList", "ApprovalStageMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select Document Type </option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                });
+                $('#DOC_TYPE').html(options);
+
+                // ✅ Preselect value from approvalStageList if available
+                if (approvalStageList.length > 0 && approvalStageList[0].doC_CODE) {
+                    $('#DOC_TYPE').val(approvalStageList[0].doC_CODE);
+                }
+            }
+        });
+    }
+    function LoadFullNameList() {
+        return $.ajax({
+            url: '@Url.Action("GetUserNamesList", "ApprovalStageMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select User Name</option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                    fullNameMap[item.value] = item.text;  // Build fullNameMap
+                });
+                $('#FULL_NAME').html(options);
+            }
+        });
+    }
+
+    // function LoadFullNameList() {
+    //     return $.ajax({
+    //         url: '@Url.Action("GetUserNamesList", "ApprovalStageMaster")',
+    //         type: 'GET',
+    //         success: function (data) {
+    //             let options = `<option value="">Select User Name</option>`;
+    //             $.each(data, function (index, item) {
+    //                 options += `<option value="${item.value}">${item.text}</option>`;
+    //                 fullNameMap[item.value] = item.text;  // Store ID and Name
+    //             });
+    //             $('#FULL_NAME').html(options);
+    //         }
+    //     });
+    // }
+    $('#FULL_NAME').on('change', function () {
+        const userId = $(this).val();
+
+        if (!userId) {
+            $('#DESIGNATION').val('');
+            $('#DEPARTMENT').val('');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetDepartmentAndDesignationByUserName", "ApprovalStageMaster")',
+            type: 'GET',
+            data: { userName: userId },
+            success: function (response) {
+                if (response) {
+                    const desig = response.designation || 'No record';
+                    const dept = response.department || 'No record';
+
+                    // Add designation if not found
+                    if ($("#DESIGNATION option[value='" + desig + "']").length === 0) {
+                        $('#DESIGNATION').append(`<option value="${desig}">${desig}</option>`);
+                    }
+
+                    // Add department if not found
+                    if ($("#DEPARTMENT option[value='" + dept + "']").length === 0) {
+                        $('#DEPARTMENT').append(`<option value="${dept}">${dept}</option>`);
+                    }
+
+                    // Select the values
+                    $('#DESIGNATION').val(desig);
+                    $('#DEPARTMENT').val(dept);
+                }
+            },
+            error: function () {
+                console.error("Failed to fetch department and designation.");
+            }
+        });
+    });
+    function LoadDesignationList() {
+        return $.ajax({
+            url: '@Url.Action("GetDesignationList", "ApprovalStageMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select Designation</option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                 designationMap[item.value] = item.text;  // Store ID and Name
+                });
+                $('#DESIGNATION').html(options);
+            }
+        });
+    }
+    function LoadDepartmentList() {
+        return $.ajax({
+            url: '@Url.Action("GetDepartmentsList", "ApprovalStageMaster")',
+            type: 'GET',
+            success: function (data) {
+                let options = `<option value="">Select Department</option>`;
+                $.each(data, function (index, item) {
+                    options += `<option value="${item.value}">${item.text}</option>`;
+                    departmentMap[item.value] = item.text;  // Store ID and Name
+                });
+                $('#DEPARTMENT').html(options);
+            }
+        });
+    }
+
+    $('#DOC_TYPE').on('change',function(){
+        var docCode = $(this).val();
+        $.ajax({
+            url: '/ApprovalStageMaster/IsDuplicateBranchName',
+            type: 'GET',
+            contentType: 'application/json',
+            data:{docCode:docCode},
+            success: function (response) {
+                console.log(response);
+                if (response.exists) {
+            Swal.fire({
+                title: 'Document already exists.',
+                text: "You can't add. Do you want to edit instead?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Edit',
+                cancelButtonText: 'Back To List'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    LoadDocDetails(docCode);
+                    toastr.success("Edit mode activated.");
+                } else {
+                    window.location.href = '/ApprovalStageMasterList/Index';
+                }
+            });
+        }
+
+            },
+            error: function () {
+                toastr.error("Something went wrong while saving.");
+            }
+        });
+    });
+
+    function LoadDocDetails(docCode) {
+        // Ensure full name list is loaded before processing document details
+        LoadFullNameList().then(() => {
+            $.ajax({
+                url: '/ApprovalStageMasterList/GetDocByCode',
+                type: 'GET',
+                data: { docCode: docCode },
+                success: function (data) {
+                    $('#DocCODE').val(docCode);
+
+                    approvalStageList = (data || []).map((item, index) => ({
+                        doC_CODE: item.doc_CODE || item.doC_CODE || '',
+                        useR_CODE: item.user_CODE?.toString() || item.useR_CODE?.toString() || '',
+                        designation: item.designation || '',
+                        department: item.department || '',
+                        approV_USER: item.approv_USER || item.approV_USER || '',
+                        flaG_A: item.flag_A || item.flaG_A || '',
+                        flaG_B: item.flag_B || item.flaG_B || '',
+                        flaG_C: item.flag_C || item.flaG_C || '',
+                        flaG_D: item.flag_D || item.flaG_D || '',
+                        flaG_E: item.flag_E || item.flaG_E || '',
+                        srno: item.srno || index + 1,
+                        active: item.active === 1 || item.active === true ? 1 : 0
+                    }));
+
+                    if (approvalStageList.length > 0) {
+                        $('#DOC_TYPE').val(approvalStageList[0].doC_CODE).prop('disabled', true);
+                    }
+
+                    // 🔐 At this point fullNameMap is guaranteed to be ready
+                    RenderApprovalStageTable();
+                },
+                error: function () {
+                    alert('Error loading data');
+                }
+            });
+        });
+    }
+    function RenderApprovalStageTable() {
+        let tbody = $('#tblApprovalStageMaster tbody');
+        tbody.empty();
+
+        if (approvalStageList.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center">No records found</td></tr>');
+            return;
+        }
+        // Helper to correctly evaluate active status
+        function isActiveFlag(value) {
+            return value == 1 || value === "1" || value === true;
+        }
+        approvalStageList.forEach(function (item, index) {
+            const isActive = isActiveFlag(item.active);
+            const activeText = isActive ? 'Yes' : 'No';
+            const activeColor = isActive ? 'green' : 'orange';
+
+            let row = `<tr>
+                <td>${item.doC_CODE}</td>
+                <td>${fullNameMap[item.useR_CODE] ?? `<span style="color: red;">Unknown (${item.useR_CODE})</span>`}</td>
+                <td>${item.designation || ''}</td>
+                <td>${item.department || ''}</td>
+                <td>${item.approV_USER || ''}</td>
+                <td>${item.flaG_A || ''}</td>
+                <td>${item.flaG_B || ''}</td>
+                <td>${item.flaG_C || ''}</td>
+                <td>${item.flaG_D || ''}</td>
+                <td>${item.flaG_E || ''}</td>
+                <td>
+                    <i class="fa fa-trash text-danger" style="cursor:pointer;" onclick="deleteRow(${index})"></i>
+                </td>
+            </tr>`;
+
+            tbody.append(row);
+        });
+    }
+    function deleteRow(index) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to delete this row?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                approvalStageList.splice(index, 1);
+                RenderApprovalStageTable();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'Row has been removed.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+
+    //Temperory SAVING Data into array..............
+    $('#SaveButton').on('click', function (e) {
+        e.preventDefault();
+
+    if (!validateRequiredField('#DOC_TYPE', 'Document Type')) return;
+    if (!validateRequiredField('#FULL_NAME', 'User Name')) return;
+    if (!validateRequiredField('#APPROV_USER_STAGE', 'Approval Type')) return;
+        // Fetch values
+        let docTypeVal = $('#DOC_TYPE').val();
+        let userNameVal = $('#FULL_NAME').val();
+        let approvalTypeVal = $('#APPROV_USER_STAGE').val();
+
+        const userExists = approvalStageList.some(item => item.useR_CODE === userNameVal);
+        if (userExists) {
+            toastr.warning("This user has already been added to the approval stage.");
+            return;
+        }
+
+        let isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+        const designationVal = $('#DESIGNATION').val();
+        const departmentVal = $('#DEPARTMENT').val();
+
+        let newItem = {
+            doC_CODE: docTypeVal,
+            useR_CODE: $('#FULL_NAME').val(),
+            designation: (designationVal && designationVal !== 'No record') ? designationVal : '',
+            department: (departmentVal && departmentVal !== 'No record') ? departmentVal : '',
+            approV_USER: $('#APPROV_USER_STAGE').val(),
+            flaG_A: $('#FLAG_A').val(),
+            flaG_B: $('#FLAG_B').val(),
+            flaG_C: $('#FLAG_C').val(),
+            flaG_D: $('#FLAG_D').val(),
+            flaG_E: $('#FLAG_E').val(),
+            srno: approvalStageList.length + 1,
+            active: isActive
+        };
+        console.log(newItem)
+
+        approvalStageList.push(newItem);
+        RenderApprovalStageTable();
+
+        $('#documentStageMasterForm')[0].reset(); // Reset the form
+
+        // Restore DOC_TYPE value after reset
+        setTimeout(() => {
+            $('#DOC_TYPE').val(docTypeVal);
+        }, 0);
+    });
+
+
+    //TO Normalize the data for submittion
+    function normalizeApprovalStageList(list) {
+        return list.map(item => ({
+            User_CODE: parseInt(item.useR_CODE),
+            Approv_USER: item.approV_USER,
+            Flag_A: item.flaG_A,
+            Flag_B: item.flaG_B,
+            Flag_C: item.flaG_C,
+            Flag_D: item.flaG_D,
+            Flag_E: item.flaG_E,
+            Active: item.active ? 1 : 0,
+            Srno: item.srno || 0,
+            Doc_CODE: item.doC_CODE,
+            Comp_CODE: 0
+        }));
+    }
+
+    //SAVING Data into Table..............
+    $('#SaveFullRequest').on('click', function () {
+        const normalizedList = normalizeApprovalStageList(approvalStageList);
+        var normalizedListLength =  normalizedList.length;
+
+         if (!validateRequiredField('#DOC_TYPE', 'Document Type')) return;
+        if (!validateRequiredField('#FULL_NAME', 'User Name')) return;
+        if (!validateRequiredField('#APPROV_USER_STAGE', 'Approval Type')) return;
+
+
+        $.ajax({
+            url: '/ApprovalStageMaster/SaveApprovalStages',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                DocCode: normalizedList[0].Doc_CODE,
+                DocStageList: normalizedList
+            }),
+            success: function (response) {
+                toastr.success("Approval stages saved successfully.");
+                $('#documentStageMasterForm')[0].reset();
+                setTimeout(function () {
+                    window.location.href = '/ApprovalStageMasterList/Index';
+                }, 1000);
+            },
+            error: function () {
+                toastr.error("Something went wrong while saving.");
+            }
+        });
+    });
+
+
+    function setDocumentStageFormReadOnly() {
+        const form = $('#documentStageMasterForm');
+
+        form.find('input[type="text"], input[type="email"], input[type="url"], input[type="number"], input[type="file"], input[type="checkbox"], select, textarea').prop('disabled', true);
+
+        form.find('button').prop('disabled', true);
+
+        form.find('.toggle-switch input[type="checkbox"]').prop('disabled', true);
+        form.find('.toggle-switch').css('pointer-events', 'none').addClass('disabled');
+
+        $('#statusText').css('opacity', 0.6);
+
+        form.find('table i.fa-trash').css('pointer-events', 'none').addClass('text-muted');
+    }
+
+
+</script>
+

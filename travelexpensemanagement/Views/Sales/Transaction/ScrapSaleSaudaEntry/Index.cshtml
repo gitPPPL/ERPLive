@@ -1,0 +1,604 @@
+﻿@{
+    ViewBag.Title = "Scrap Sale Sauda Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var LOGINDATE = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
+
+}
+
+<fieldset>
+    <legend class="legend-field">Scrap Sale Sauda Entry</legend>
+    <form id="ScrapSaleSaudaEntryForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right mb-2">
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumSerialNo">Serial No</label>
+                    <input type="text" class="form-control" id="NumSerialNo" placeholder="Enter Serial No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDate">Date</label>
+                    <input type="date" class="form-control" id="DtDate">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlReferenceNo">Reference No</label>
+                    <select class="form-control" id="ddlReferenceNo">
+                        <option value="">Select Reference No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Customer Details</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlCustomerName">Customer Name</label>
+                        <select class="form-control" id="ddlCustomerName">
+                            <option value="">Select Customer Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAddressL1">Address L1</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressL1" placeholder="Enter Address L1" readonly></textarea>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAddressL2">Address L2</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressL2" placeholder="Enter Address L2" readonly> </textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtAddressL3">Address L3</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressL3" placeholder="Enter Address L3" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumContactNo">Contact No</label>
+                        <input type="number" class="form-control" id="NumContactNo" readonly />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPartyStation">Party Station</label>
+                        <select class="form-control" id="ddlPartyStation">
+                            <option value="">Select Party Station</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtDeliveryTo">Delivery To</label>
+                        <input type="text" class="form-control" id="TxtDeliveryTo" readonly />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlDeliveryStation">Delivery Station</label>
+                        <select class="form-control" id="ddlDeliveryStation">
+                            <option value="">Select Delivery Station</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+       <fieldset class="fieldset-sub">
+           <legend class="sub-legend">Item Details</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlItemFullName">Item Full Name</label>
+                        <select class="form-control" id="ddlItemFullName">
+                            <option value="">Select Item Full Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumNoTrucksContainer">No. of Trucks/Container</label>
+                        <input type="number" class="form-control" id="NumNoTrucksContainer" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumPartyQuantity">Party Quantity</label>
+                        <input type="number" class="form-control" id="NumPartyQuantity" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="TxtPartyRate">Party Rate</label>
+                        <div class="input-divide">
+                            <select class="form-control" id="ddlPartyRateUnit" style="width:50%;">
+                                <option value="">Select Unit</option>
+                            </select>
+                            <input type="number" step="any" class="form-control" id="NumPartyRate" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumOurQuantity">Our Quantity</label>
+                        <input type="number" class="form-control" id="NumOurQuantity" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumOurRate">Our Rate</label>
+                        <input type="number" class="form-control" id="NumOurRate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumDiscount%">Discount %</label>
+                        <input type="number" class="form-control" id="NumDiscount" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumNetRate">Net Rate</label>
+                        <input type="number" class="form-control" id="NumPartyRate" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumDeliveryTerm">Delivery Term</label>
+                        <input type="number" class="form-control" id="NumDeliveryTerm" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlDays">Days</label>
+                        <select class="form-control" id="ddlDays">
+                            <option value="">Select Days</option>
+                            <option value="1">1</option>
+                            <option value="7">7</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlPaymentTerm">Payment Term</label>
+                        <select class="form-control" id="ddlPaymentTerm">
+                            <option value="">Select Payment Term</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlTaxTerm">Tax Term</label>
+                        <select class="form-control" id="ddlTaxTerm">
+                            <option value="">Select Tax Term</option>
+                            <option value="P">P</option>
+                            <option value="A">A</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlFreightTerm">Freight Term</label>
+                        <select class="form-control" id="ddlFreightTerm">
+                            <option value="">Select Freight Term</option>
+                            <option value="FOR">FOR</option>
+                            <option value="ExWork">ExWork</option>
+                            <option value="">CIF</option>
+                            <option value="">FOB</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumFreightRate">Freight Rate</label>
+                        <input type="number" class="form-control" id="NumFreightRate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlItemType">Item Type</label>
+                        <select class="form-control" id="ddlItemType">
+                            <option value="">Select Item Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlItemType">Status</label>
+                        <select class="form-control" id="ddlStatus">
+                            <option value="">Select Status</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+       </fieldset>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblScrapSalesSauda" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Bill No</th>
+                            <th>Bill Date</th>
+                            <th>Quantity</th>
+                            <th>Party Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+    
+            <div class="row">
+                <div class="col-md-12">
+             
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "ScrapSaleSaudaList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+     const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    var logindate = "@LOGINDATE";
+
+    $(document).ready(function(){
+
+          LoadDropDown()
+
+          if (!rowId) {
+            const dateInput = document.getElementById('DtDate');
+            if (dateInput) {
+            dateInput.valueAsDate = new Date();
+            }
+            GetVNo();
+
+         }
+
+            $('#ddlCustomerName').change(async function() {
+            var customercode = $(this).val();
+
+            var  RefNo = document.getElementById('ddlReferenceNo').value;
+
+
+            if (customercode) {
+                try {
+                    await Promise.all([
+                        fetchDataByCustomerCode(customercode),
+                           fetchDataByItemCode(customercode),
+                    ]);   
+                } catch (error) {
+                    console.error('Error during fetch:', error);
+                    alert('An error occurred while fetching data.');
+                }
+            } else {
+                console.warn('No customer selected');
+            }
+    });
+
+            $('#ddlReferenceNo').change(async function() {
+            var RefNo = $(this).val();    
+            if (RefNo) {
+                try {
+                    await Promise.all([
+                       DDlItem(RefNo)
+                    ]);
+                } catch (error) {
+                    console.error('Error during fetch:', error);
+                    alert('An error occurred while fetching data.');
+                }
+            } else {
+                console.warn('No customer selected');
+            }
+    });
+
+    });
+
+
+
+     async function GetVNo() {
+        try {
+            const res = await fetch(`/ScrapSaleSaudaEntry/GetVNo`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+
+            $('#NumSerialNo').val(data.v_NO);
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+
+     async function ddlRefType() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/DDlRefNo');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlReferenceNo');
+
+            ddl.empty().append('<option value="">-- Select Ref No --</option>');
+
+
+            data.forEach(item => {
+                  ddl.append(`<option value="${item}">${item}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading RefNo:", error);
+            toastr.error('Error loading RefNo: ' + error.message);
+        }
+    }
+
+     async function LoadDropDown() {
+         try {
+             await Promise.all([
+                  ddlRefType(),
+                  DDlcoustomer(),
+                  ddlcity(),
+                  DDlDeliveryStation(),
+                  DDlCurrency(),
+                  DDlCurrency(),
+                  DDlPaymentTerm(),
+                  ddlStatus()
+             ]);
+         } catch (error) {
+             console.error("Error loading dropdowns:", error);
+         }
+     }
+
+     async function fetchDataByCustomerCode(customercode) {
+        try {
+            const response = await $.ajax({
+                url: '/ScrapSaleSaudaEntry/GetDatabyCoustomercode',
+                type: 'GET',
+                data: { customercode: customercode }
+            });
+
+
+            console.log("DataBycountrycode",response);
+
+            $('#TxtAddressL1').val(response.adD1);
+            $('#TxtAddressL2').val(response.adD2);
+            $('#TxtAddressL3').val(response.adD3);
+            $('#NumContactNo').val(response.mobile);
+            $('#ddlPartyStation').val(response.citycode);
+            $('#ddlCountry').val(response.countrY_CODE);
+
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            alert("An error occurred while fetching data.");
+        }
+    }
+
+     async function DDlcoustomer() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/DDlcustomerName');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlCustomerName');
+            ddl.empty().append('<option value="">-- Select Customer Name --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+            ddl.select2({
+                placeholder: '-- Select Customer Name --',
+                width: '100%'
+            });
+        } catch (error) {
+            console.error("Error loading CustomerName:", error);
+            toastr.error('Error loading CustomerName: ' + error.message);
+        }
+    }
+
+     async function ddlcity() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/DDlCityName');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlPartyStation');
+
+            ddl.empty().append('<option value="">-- Select City Name --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlCity:", error);
+            toastr.error('Error loading ddlCity: ' + error.message);
+        }
+    }
+       
+     async function DDlDeliveryStation() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/DDlDeliveryStation');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlDeliveryStation');
+
+            ddl.empty().append('<option value="">-- Select City Name --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlCity:", error);
+            toastr.error('Error loading ddlCity: ' + error.message);
+        }
+    }
+
+     async function DDlItem(RefNo) {
+        try {                     
+
+            const response = await fetch(`/ScrapSaleSaudaEntry/DDlItemname?RefNo=${RefNo}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlItemFullName');
+            ddl.empty().append('<option value="">-- Select Item --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+            ddl.select2({
+                placeholder: '-- Select Item --',
+                width: '100%'
+            });
+        } catch (error) {
+            console.error("Error loading item names:", error);
+            toastr.error('Error loading item names: ' + error.message);
+        }
+    }
+
+     async function DDlCurrency() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/DDlCurrency');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlPartyRateUnit');
+
+            ddl.empty().append('<option value="">-- Select --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Currency:", error);
+            toastr.error('Error loading Currency: ' + error.message);
+        }
+    }
+ 
+     async function DDlPaymentTerm() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/DDlPaymentTerm');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlPaymentTerm');
+
+            ddl.empty().append('<option value="">-- Select --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Currency:", error);
+            toastr.error('Error loading Currency: ' + error.message);
+        }
+    }
+ 
+     async function ddlItemType() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/ddlItemType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlItemType');
+
+            ddl.empty().append('<option value="">-- Select Item Type --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlItemType:", error);
+            toastr.error('Error loading ddlItemType: ' + error.message);
+        }
+    }
+     
+     async function ddlStatus() {
+        try {
+            const response = await fetch('/ScrapSaleSaudaEntry/ddlStatus');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlStatus');
+
+            ddl.empty().append('<option value="">-- Select Status--</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlStatus:", error);
+            toastr.error('Error loading ddlStatus: ' + error.message);
+        }
+    }
+
+     async function fetchDataByItemCode(customercode) {
+        try {
+            const response = await $.ajax({
+                url: '/ScrapSaleSaudaEntry/GetDatabyItemcode',
+                type: 'GET',
+                data: { customercode: customercode }
+            });
+
+            $('#TxtDeliveryTo').val(response.nature);
+
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            alert("An error occurred while fetching data.");
+        }
+    }
+
+
+</script>
+
+ 

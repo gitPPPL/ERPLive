@@ -1,0 +1,1051 @@
+﻿@{
+    ViewBag.Title = "Create New Task";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string loginDate = Convert.ToDateTime(TempData["loginDate"]).ToString("yyyy-MM-dd");
+
+    int compCode = ViewBag.CompCode != null ? Convert.ToInt32(ViewBag.CompCode) : 0;
+    int userCode = ViewBag.userCode != null ? Convert.ToInt32(ViewBag.userCode) : 0;
+    string UserName = ViewBag.UserName;
+}
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<style>
+    .task_fieldset {
+        border-radius: 5px !important;
+        padding: 20px 15px 20px 15px !important;
+        background-color: #f9f9f9 !important;
+        border: none !important;
+    }
+
+    .task_subheading {
+        font-size: 20px;
+        padding: 5px 14px;
+        background: linear-gradient(135deg, #003366, #dff4ff);
+        color: white;
+        border-radius: 6px;
+        box-shadow: 5px 4px 14px rgba(0, 0, 0, 0.3), -5px -5px 0px rgba(255, 255, 255, 0.3);
+        margin-bottom: 20px;
+    }
+
+    .heading_popuptask {
+        color: #35743a;
+        font-weight: 600;
+    }
+
+    .section_divide {
+        padding: 14px 10px;
+        border: 1px solid #d9d9d9;
+        background-color: #e9e9e9;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+
+    .button-right-mg {
+        float: right;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-cancel {
+        background-color: red;
+        color: #fff;
+    }
+
+    .button_right{
+        float:right;
+        margin-top: 20px;
+    }
+
+    .taskpopup-header {
+        color: white;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-align: center;
+        align-items: center;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        padding: 5px 10px;
+        background: linear-gradient(135deg, #003366, #dff4ff);
+    }
+
+    .taskpopup-title {
+        margin-bottom: 0;
+        line-height: 1.5;
+        font-size: 15px;
+    }
+
+    .taskpopup-body {
+        padding: 10px;
+        position: relative;
+        flex: 1 1 auto;
+    }
+
+    .btn-backtask {
+        background-color: #043668; /* Dark blue background on hover */
+        color: white; /* Text color changes to white */
+        border-color: #001a32; /* Border color changes */
+        border-radius: 18px;
+        font-weight: 400;
+       /*  transition: all 0.3s ease; /* Smooth transition */ */
+        padding: 7px 16px;
+    }
+
+        .btn-backtask:hover {
+            border: 1px solid #043668;
+            background-color: white;
+            color: #001a32;
+            font-weight: 600;
+        }
+</style>
+
+<fieldset class="task_fieldset">
+    <h2 class="task_subheading">Task Detail</h2>
+    <form id="CreateTaskForm">
+        <input type="hidden" id="DocId" />
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="heading_popuptask" id="popuptaskheading"></h5>
+            </div>
+            <div class="col-md-6">
+                <div class="btn-rightalign">
+                    <button onclick="window.location.href='@Url.Action("Index", "CreateNewTaskList")'" type="button" class="btn btn-backtask">
+                        <i class="fa fa-arrow-left"></i>Back To Task List
+                    </button>
+                </div>
+            </div>
+        </div>
+        <section class="section_divide">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Task No</label>
+                    <input type="text" class="form-control" id="DocNo" readonly>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Task Date</label>
+                    <input type="date" class="form-control" id="DocDate" value="@loginDate">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Assigned Company</label>
+                    <select class="form-control" id="AssignedCompany">
+                        <option value="">Select Company</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Assigned To</label>
+                    <select class="form-control" id="AssignedTo">
+                        <option value="">Select Assigned To</option>
+                    </select>
+                </div>
+            </div>
+        
+        </div>               
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label><b>Task Subject</b><span class="required">*</span></label>
+                    <textarea type="text" class="form-control" id="TaskSubject" style="height:30px;" placeholder="Enter subject" maxlength="100"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Department</label>
+                    <select class="form-control" id="Department1" disabled >
+                        <option value="">---Department---</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Mobile No</label>
+                    <input type="text" class="form-control" id="MobileNo1" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" id="Email1" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Supervision By<span class="required">*</span></label>
+                    <select class="form-control" id="DDlSupervisionBy"  disabled>
+                    </select>                  
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label><b>Description</b><span class="required">*</span></label>
+                    <textarea type="text" class="form-control" id="TaskDescription" style="height:30px;" placeholder="Enter Description" maxlength="1000"></textarea>
+                </div>
+            </div>
+        </div>
+        </section>
+        <section class="section_divide">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="assignedTo">Assigned to Reply Message</label>
+                    <textarea typeof="text" class="form-control" id="assignedRemarks" style="height:30px;"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select class="form-control" id="priority">
+                        <option value="Non Urgent">Non Urgent</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select class="form-control" id="status">
+                        <option value="Pending">Pending</option>
+                            <option value="Close">Close</option>
+                            <option value="Complete">Complete</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="duration">Duration</label>
+                    <select class="form-control" id="duration">
+                        <option value="One Time">One Time</option>
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="fileUpload">Upload File</label>
+                        <span id="txt_file1" style="margin-left: 8px; color: #007bff; font-weight: normal;">
+                        </span>
+                    <input type="file" class="form-control" id="fileUpload">
+                        <button class="btn-imageview" type="button" id="btnBccPreviewImage">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                </div>
+            </div>
+        </div>
+        </section>
+        <div class="row">
+            <div class="col-md-6">
+                <section class="section_divide">
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>CC Company</label>
+                                <select class="form-control" id="CCCompany"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>CC To</label>
+                                <select class="form-control" id="CCTo"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control" id="DepartmentCC" disabled>
+                                    <option value="">---Department---</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mobile No</label>
+                                <input type="text" class="form-control" id="MobileNoCC" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" id="EmailCC" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>CC Reply</label>
+                                <textarea type="text" class="form-control" id="TaskCCReply" style="height:30px;" placeholder="Enter CC Reply" maxlength="1000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-md-6">
+                <section class="section_divide">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>BCC Company</label>
+                                <select class="form-control" id="BCCompany"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>BCC To</label>
+                                <select class="form-control" id="BCCTo"></select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control" id="DepartmentBCC" disabled>
+                                    <option value="">---Department---</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mobile No</label>
+                                <input type="text" class="form-control" id="MobileNoBCC" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" id="EmailBCC" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>BCC Reply</label>
+                                <textarea type="text" class="form-control" id="TaskBCCReply" style="height:30px;" placeholder="Enter BCC Reply" maxlength="1000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-6 col-md-6">
+                <div class="button-right-mg">
+                    <button type="button" id="btnSave" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                    @* <button type="button" class="btn btn-cancel"><i class="fa fa-times"></i>Cancel</button> *@
+                    <button type="button" class="btn btn-success">
+                        <i class="fab fa-whatsapp"></i> Send WhatsApp
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Image Preview Modal -->
+        <div class="modal fade" id="imagePreviewModal" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body p-0" style="height:90vh;">
+                        <img id="previewImage"
+                             style="width:100%; height:100%; object-fit:contain;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </form>
+</fieldset>
+
+<script>
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    const compCode = @compCode;
+    const userCode = @userCode;
+    const UserName = '@UserName';
+    const LoginDate = '@loginDate';
+
+    $(document).ready(async function () {
+      await LoadDropDown();
+        if (!rowId) {
+            await GetVNo();
+            $('#DocDate').attr('min', LoginDate);
+            $('#startDate').attr('min', LoginDate);
+            $('#endDate').attr('min', LoginDate);
+            $('#DDlSupervisionBy').val(userCode);
+            $('#AssignedCompany').val(compCode); 
+        }
+        else{
+            fetchDatabycode(rowId);
+        }
+           await fetchCompName();
+
+             if(mode === 'view'){
+                 setFormReadOnly();
+             }
+
+       $('#btnBccPreviewImage').on('click', function () {
+          
+              let filename = $('#txt_file1').text().trim();
+              if (!filename) {
+                  toastr.warning("No image selected.");
+                  return;
+              }
+              let imagePath = '/images/Task_File/' + filename;
+              $('#previewImage').attr('src', imagePath);
+              const modal = new bootstrap.Modal(
+                  document.getElementById('imagePreviewModal')
+              );
+              modal.show();
+          });
+
+      document.getElementById("fileUpload").addEventListener("change", function () {
+                  const fileNameSpan = document.getElementById("txt_file1");
+                  if (this.files.length > 0)
+                  {
+                   fileNameSpan.textContent = this.files[0].name;
+                  }
+                  else
+                  {
+                   fileNameSpan.textContent = "";
+                  }
+              });
+
+
+
+
+
+
+
+       $('#AssignedCompany').on('change', function () {
+            let code = $(this).val();
+            DDLAssignedTO(code);
+        });
+
+       $('#CCCompany').on('change', function () {
+            let code = $(this).val();
+            Dropdown_CCTo(code);
+        });
+
+       $('#BCCompany').on('change', function () {
+            let code = $(this).val();
+             Dropdown_BCCTo(code);
+        });
+
+       $('#AssignedTo').on('change', function () {
+            let code = $(this).val();
+            fetchDataByToCode(code);
+        });
+
+       $('#CCTo').on('change', function () {
+            let code = $(this).val();
+            fetchDataByCCToCode(code);
+        });
+
+       $('#BCCTo').on('change', function () {
+            let code = $(this).val();
+            fetchDataByBCCToCode(code);
+        });
+
+        $("#btnSave").click(function (e) {
+        e.preventDefault();
+        debugger
+        let DOC_ID = $("#DocId").val().trim() || null;
+        let V_NO = parseInt($("#DocNo").val()) || null;
+        let V_DATE_VAL = $("#DocDate").val();
+        let START_DATE_VAL = $("#startDate").val();
+        let END_DATE_VAL = $("#endDate").val();
+        let V_DATE = V_DATE_VAL ? new Date(V_DATE_VAL) : null;
+        let START_DATETIME = START_DATE_VAL ? new Date(START_DATE_VAL) : null;
+        let END_DATETIME = END_DATE_VAL ? new Date(END_DATE_VAL) : null;
+        let ASSIGN_COMPANY = parseInt($("#AssignedCompany").val()) || null;
+        let ASSIGN_PERSON_CODE = parseInt($("#AssignedTo").val()) || null;
+          let DEPT_NAME = "" ;
+            if(ASSIGN_PERSON_CODE)
+          {
+             DEPT_NAME = $("#AssignedTo option:selected").text() || "";
+          }
+          else
+          {
+             DEPT_NAME = "";
+          }
+        
+        let SUPERVISOR_CODE = parseInt($("#DDlSupervisionBy").val()) || null;
+          let FROM_DEPTNAME = "" ;
+          if(SUPERVISOR_CODE)
+          {
+              FROM_DEPTNAME = $("#DDlSupervisionBy option:selected").text() || null;
+          }
+          else
+          {
+                 FROM_DEPTNAME = "" ;
+          }
+    
+        let CC_COMPANY = parseInt($("#CCCompany").val()) || null;
+        let CC_CODE = parseInt($("#CCTo").val()) || null;
+        let BCC_COMPANY = parseInt($("#BCCompany").val()) || null;
+        let BCC_CODE = parseInt($("#BCCTo").val()) || null;
+        let action = DOC_ID ? "UPDATE" : "INSERT";
+        let Tasksubject = $("#TaskSubject").val().trim() || null;
+        let TaskDesc = $("#TaskDescription").val().trim() || null;
+        // ================= VALIDATIONS =================
+
+        if (!V_DATE) {
+            toastr.warning("Please select a Voucher Date.");
+            $("#DocDate").focus();
+            return;
+        }
+
+          if (!Tasksubject) {
+            toastr.warning("Please Fill Task Subject.");
+              $("#TaskSubject").focus();
+            return;
+        }
+          if (!TaskDesc) {
+              toastr.warning("Please Fill Description.");
+              $("#TaskDescription").focus();
+            return;
+        }
+
+        if (ASSIGN_PERSON_CODE && CC_CODE && ASSIGN_PERSON_CODE === CC_CODE) {
+            toastr.warning("Assigned Person and CC Person must be different.");
+            $("#AssignedTo").focus();
+            return;
+        }
+
+
+              if (CC_CODE && BCC_CODE && CC_CODE === BCC_CODE) {
+            toastr.warning(" CC Person and BCC Person must be different.");
+            $("#AssignedTo").focus();
+            return;
+            }
+
+            if (ASSIGN_PERSON_CODE && BCC_CODE && ASSIGN_PERSON_CODE === BCC_CODE) {
+            toastr.warning(" Assigned Person and BCC Person must be different.");
+            $("#AssignedTo").focus();
+            return;
+            }
+
+
+        if (END_DATETIME && V_DATE && END_DATETIME < V_DATE) {
+            toastr.warning("Task End Date cannot be less than Voucher Date.");
+            $("#endDate").focus();
+            return;
+        }
+
+        if (START_DATETIME && END_DATETIME && END_DATETIME < START_DATETIME) {
+            toastr.warning("Task End Date cannot be less than Task Start Date.");
+            $("#startDate").focus();
+            return;
+        }
+
+        // ================= FORM DATA =================
+
+        let formData = {
+            DOC_ID: DOC_ID,
+            V_NO: V_NO,
+            V_DATE: V_DATE ? V_DATE.toISOString() : null,
+            ASSIGN_COMPANY: ASSIGN_COMPANY,
+            ASSIGN_PERSON_CODE: ASSIGN_PERSON_CODE,
+            SUPERVISOR_CODE: SUPERVISOR_CODE,
+            TASK_SUBJECT: $("#TaskSubject").val().trim() || null,
+            TASK_DESC: $("#TaskDescription").val().trim() || null,
+            START_DATETIME: START_DATETIME ? START_DATETIME.toISOString() : null,
+            END_DATETIME: END_DATETIME ? END_DATETIME.toISOString() : null,
+              FILE_PATH: $('#txt_file1').text().trim()|| "",
+            PRIORITY: $('#priority').val() || null,
+            STATUS: $('#status').val() || null,
+            FREQUENCY: $('#duration').val() || null,
+            CC_COMPANY: CC_COMPANY,
+            CC_CODE: CC_CODE,
+            CC_REMARKS: $("#TaskCCReply").val().trim() || null,
+            MOBILE2: $("#MobileNoCC").val().trim() || null,
+            BCC_COMPANY: BCC_COMPANY,
+            BCC_CODE: BCC_CODE,
+            BCC_REMARKS: $("#TaskBCCReply").val().trim() || null,
+            MOBILE3: $("#MobileNoBCC").val().trim() || null,
+            REMARKS: $("#assignedRemarks").val().trim() || null,
+            action: action,
+            DEPT_NAME : DEPT_NAME,
+            FROM_DEPTNAME : FROM_DEPTNAME
+
+        };
+
+        $("#btnSave").prop("disabled", true);
+
+        $.ajax({
+            url: '/CreateNewTask/SaveTempMaster',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(formData),
+
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Data saved successfully.");
+
+       
+
+                    window.location.href = '/CreateNewTaskList/Index';
+                } else {
+                    toastr.error(response.message || "An error occurred.");
+                }
+            },
+            error: function () {
+                toastr.error("Something went wrong while saving the data.");
+            },
+            complete: function () {
+                $("#btnSave").prop("disabled", false);
+            }
+        });
+    });
+
+
+    });
+
+    async function GetVNo() {
+        try {
+            const res = await fetch('/CreateNewTask/GetVNo');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+
+            $('#DocNo').val(data.v_NO);
+        } catch (e) {
+            console.error('GetVNo failed:', e);
+            toastr.error('Error loading Document Number: ' + e.message);
+        }
+    }
+
+    async function LoadDropDown() {
+        try {
+            await Promise.all([
+                    DDLCompany(),
+                    DDLCCTOCompany(),
+                    DDLBCCTOCompany(),
+                    DropdownDepartment(),
+                    DepartmentCC(),
+                    DepartmentBCC(),
+                    DropdownUser(),
+                    DDLAssignedTO(compCode),
+                    Dropdown_CCTo(compCode),
+                    Dropdown_BCCTo(compCode)
+            ]);
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+
+    async function DDLCompany() {
+        try {
+            const res = await fetch('/CreateNewTask/DropdownCompany');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            const ddl = $('#AssignedCompany');
+
+            ddl.empty().append('<option value="">-- Select Company --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading company dropdown:", error);
+        }
+    }
+      
+    async function DropdownUser() {
+        try {
+            const res = await fetch('/CreateNewTask/DropdownUser');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            const ddl = $('#DDlSupervisionBy');
+
+            ddl.empty().append('');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading User dropdown:", error);
+        }
+    }
+
+    async function DropdownDepartment() {
+         try {
+              const res = await fetch('/CreateNewTask/DropdownDepartment');
+             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+             const data = await res.json();
+              const ddl = $('#Department1');
+
+             ddl.empty().append('<option value="">-- Select Department --</option>');
+             data.forEach(item => {
+                 ddl.append(`<option value="${item.value}">${item.text}</option>`);
+             });
+         } catch (error) {
+             console.error("Error loading company dropdown:", error);
+         }
+     }
+
+    async function DepartmentCC() {
+          try {
+               const res = await fetch('/CreateNewTask/DropdownDepartment');
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+              const data = await res.json();
+                const ddl = $('#DepartmentCC');
+
+              ddl.empty().append('<option value="">-- Select Department --</option>');
+              data.forEach(item => {
+                  ddl.append(`<option value="${item.value}">${item.text}</option>`);
+              });
+          } catch (error) {
+              console.error("Error loading company dropdown:", error);
+          }
+      }
+
+    async function DepartmentBCC() {
+           try {
+                const res = await fetch('/CreateNewTask/DropdownDepartment');
+               if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+               const data = await res.json();
+                  const ddl = $('#DepartmentBCC');
+
+               ddl.empty().append('<option value="">-- Select Department --</option>');
+               data.forEach(item => {
+                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
+               });
+           } catch (error) {
+               console.error("Error loading company dropdown:", error);
+           }
+       }
+
+    async function DDLCCTOCompany() {
+        try {
+            const res = await fetch('/CreateNewTask/DropdownCompany');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            const ddl = $('#CCCompany');
+
+            ddl.empty().append('<option value="">-- Select Company --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading company dropdown:", error);
+        }
+    }
+
+    async function DDLBCCTOCompany() {
+        try {
+            const res = await fetch('/CreateNewTask/DropdownCompany');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            const ddl = $('#BCCompany');
+
+            ddl.empty().append('<option value="">-- Select Company --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading company dropdown:", error);
+        }
+    }
+
+    async function DDLAssignedTO(selectedComp) {
+        try {
+            const res = await fetch(
+                `/CreateNewTask/Dropdown_To?SelectedComp=${encodeURIComponent(selectedComp)}`
+            );
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            $('#Department1').val('');
+            $('#MobileNo1').val('');
+            $('#Email1').val('');
+
+
+            const data = await res.json();
+            const ddl = $('#AssignedTo');
+
+            ddl.empty().append('<option value="">-- Select Assigned To --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Assigned To dropdown:", error);
+        }
+    }
+
+    async function Dropdown_CCTo(selectedComp) {
+        try {
+            const res = await fetch(
+                `/CreateNewTask/Dropdown_CCTo?SelectedComp=${encodeURIComponent(selectedComp)}`
+            );
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            $('#DepartmentCC').val('');
+            $('#MobileNoCC').val('');
+            $('#EmailCC').val('');
+
+
+            const data = await res.json();
+            const ddl = $('#CCTo');
+
+            ddl.empty().append('<option value="">-- Select CC To --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading CC To dropdown:", error);
+        }
+    }
+
+    async function Dropdown_BCCTo(selectedComp) {
+         try {
+             const res = await fetch(
+                  `/CreateNewTask/Dropdown_BCCTo?SelectedComp=${encodeURIComponent(selectedComp)}`
+             );
+
+             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                $('#DepartmentBCC').val('');
+                $('#MobileNoBCC').val('');
+                $('#EmailBCC').val('');
+
+
+             const data = await res.json();
+              const ddl = $('#BCCTo');
+
+              ddl.empty().append('<option value="">-- SelectBCC To --</option>');
+
+             data.forEach(item => {
+                 ddl.append(`<option value="${item.value}">${item.text}</option>`);
+             });
+         } catch (error) {
+              console.error("Error loading BCC To dropdown:", error);
+         }
+     }
+
+    async function fetchDataByToCode(UserCode) {
+        try {
+            const res = await $.ajax({
+                url: '/CreateNewTask/GetSelectTodata',
+                method: 'GET',
+                data: { UserCode: UserCode }
+            });
+            const data = res?.data?.[0];   
+            if (data) {
+                $('#Department1').val(data.Department);
+                $('#MobileNo1').val(data.Mobile_no);
+                $('#Email1').val(data.EMAIL_ID);
+            }
+            else
+            {
+                $('#Department1').val('');
+                $('#MobileNo1').val('');
+                $('#Email1').val('');
+              }
+            return data;
+
+        } catch (error) {
+            console.error('error', error);
+        }
+    }
+
+    async function fetchDataByCCToCode(UserCode) {
+        try {
+            const res = await $.ajax({
+                 url: '/CreateNewTask/GetSelectCCTodata',
+                method: 'GET',
+                data: { UserCode: UserCode }
+            });
+            const data = res.data[0] || '';
+            console.log('CCTo', data);
+
+            if (data) {
+                $('#DepartmentCC').val(data.Department);
+                $('#MobileNoCC').val(data.Mobile_no);
+                $('#EmailCC').val(data.EMAIL_ID);
+            }
+            else             {
+                $('#DepartmentCC').val('');
+                $('#MobileNoCC').val('');
+                $('#EmailCC').val('');
+              }
+            return data;
+
+        } catch (error) {
+            console.error('error', error);
+        }
+    }
+
+    async function fetchDataByBCCToCode(UserCode) {
+         try {
+             const res = await $.ajax({
+                url: '/CreateNewTask/GetSelectBCCTodata',
+                method: 'GET',
+                data: { UserCode: UserCode }
+             });
+             const data = res.data[0] || '';
+             console.log('ByBCCTo', data);
+
+             if (data) {
+                   $('#DepartmentBCC').val(data.Department);
+                   $('#MobileNoBCC').val(data.Mobile_no);
+                   $('#EmailBCC').val(data.Email_ID);
+             }
+            else
+                         {
+                   $('#DepartmentBCC').val('');
+                   $('#MobileNoBCC').val('');
+                   $('#EmailBCC').val('');
+               }
+
+             return data;
+
+         } catch (error) {
+             console.error('error', error);
+         }
+     }
+
+    async function fetchCompName()
+    {
+        try {
+            const  res = await $.ajax({
+             url : '/CreateNewTask/GetSelectCompName',
+             type : 'Get'       
+            });
+
+            const data = res || "" ;
+            console.log("Compname", data);
+             $('#popuptaskheading').text(data.name);
+        }
+        catch(error)
+        {
+            console.log("Error", error);
+        }
+    }
+
+    async function fetchDatabycode (Code)
+    {
+        try{
+            const res = await $.ajax({
+                url :'/CreateNewTaskList/GetDataByCode',
+                type : 'Get',
+                data : {Code : Code}
+
+            });
+            const data = res.data[0] || "" ;
+            console.log('Show data', data);          
+            $('#DocId').val(data.DOC_ID);
+            $('#DocNo').val(data.V_NO);
+            $('#DocDate').val(formatDate(data.V_DATE));
+            $('#AssignedCompany').val(data.ASSIGN_COMPANY);
+            $('#AssignedTo').val(data.ASSIGN_PERSON_CODE);
+            $('#TaskSubject').val(data.TASK_SUBJECT);
+            $('#DDlSupervisionBy').val(data.SUPERVISOR_CODE);
+            $('#TaskDescription').val(data.TASK_DESC);
+            $('#CCCompany').val(data.CC_COMPANY);
+            $('#CCTo').val(data.CC_CODE);
+            $('#TaskCCReply').val(data.CC_REMARKS);
+            $('#BCCompany').val(data.BCC_COMPANY);
+            $('#BCCTo').val(data.BCC_CODE);      
+            $('#TaskBCCReply').val(data.BCC_REMARKS);
+            $('#priority').val(data.PRIORITY);
+            $('#status').val(data.STATUS);
+            $('#startDate').val(formatDate(data.START_DATETIME));
+            $('#endDate').val(formatDate(data.END_DATETIME));
+            $('#assignedRemarks').val(data.REMARKS);
+                $('#txt_file1').text(data.FileName || '');
+            fetchDataByToCode(data.ASSIGN_PERSON_CODE);
+            fetchDataByCCToCode(data.CC_CODE);
+            fetchDataByBCCToCode(data.BCC_CODE);
+        }
+        catch(error)
+        {
+            console.log("Error", error);
+        }
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+  function setFormReadOnly() {
+        const form = $('#CreateTaskForm');
+
+        // Make inputs & textarea readonly
+        form.find('input:not([type="button"]):not([type="file"]), textarea')
+            .prop('readonly', true);
+
+        // Disable selects & file upload
+        form.find('select, input[type="file"]').prop('disabled', true);
+
+        // Disable action buttons (Save / WhatsApp / Popup Save)
+        $('#btnSave, #popupsave').prop('disabled', true);
+
+        // Keep navigation buttons enabled
+        $('.btn-backtask, .btn-cancel').prop('disabled', false);
+    }
+
+</script>

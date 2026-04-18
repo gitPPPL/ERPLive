@@ -1,0 +1,289 @@
+﻿@{
+    ViewBag.Title = "Type Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Type Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "TypeMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="TypeMasterform">
+		<input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtName" class="form-label">Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtName" max="30" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtShortName" class="form-label">Short Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtShortName" maxlength="20" name="ShortName" placeholder="Enter Short Name">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+	let PreviousInputDt = "";
+	let docId = "";
+	let readOnly;
+
+	$(document).ready(function () {
+		docId = getQueryParam('id');
+		readOnly = getQueryParam('readOnly');
+
+		if (docId) {
+			GetDocData(docId, readOnly);
+		}
+
+		$('#TxtName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtShortName').focus();
+			}
+		});
+
+		$('#TxtShortName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#btn-save').focus();
+			}
+		});
+
+		$('#DdActive').on('change', function () {
+			let isChecked = $(this).is(':checked');
+			let status = isChecked ? 'Active' : 'Inactive';
+			let value = isChecked ? 1 : 0;
+			$('#statusText').text(status);
+			$(this).val(value);
+		});
+
+		$('#btn-save').on('click', function (e) {
+			e.preventDefault();
+			const masterData = collectFormData();
+
+			if (!masterData.Name || !masterData.ShortName) {
+				toastr.warning("Please fill all required fields");
+				return;
+			}
+
+			if (docId) {
+				EditMasterData(masterData);
+			} else {
+				SaveMasterData(masterData);
+			}
+		});
+	});
+
+	function SaveMasterData(masterData) {
+		const Namee = masterData?.Name?.trim();
+		if (!Namee) {
+			toastr.warning("Item Type Name is required.");
+			return;
+		}
+		checkExistOrNot(Namee)
+			.done(function (data) {
+				if (data?.status && data?.exists) {
+					toastr.warning("Duplicate Item Type Name");
+					return;
+				}
+
+				$.ajax({
+					url: '@Url.Action("SaveItemTypeMast", "TypeMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(masterData),
+					success: function (response) {
+						if (response?.status) {
+							toastr.success('Data saved successfully.');
+							resetFields();
+							setTimeout(() => {
+								window.location.href = '/TypeMasterList/Index';
+							}, 1500);
+						} else {
+							toastr.error(response?.message || "Save failed. Please try again.");
+						}
+					},
+					error: function () {
+						toastr.error("Error occurred while saving. Please contact admin.");
+					}
+				});
+			})
+			.fail(function () {
+				toastr.error("Error while checking Item Type name.");
+			});
+	}
+
+	function EditMasterData(masterData) {
+		if (PreviousInputDt !== masterData.Name) {
+			checkExistOrNot(masterData.Name)
+				.done(function (data) {
+					if (data?.status && data?.exists) {
+						toastr.warning("Duplicate Item Type Name");
+						return;
+					}
+					UpdateMasterData(masterData);
+				})
+				.fail(function () {
+					toastr.error("Error while checking Item Type Name.");
+				});
+		} else {
+			UpdateMasterData(masterData);
+		}
+	}
+
+	function UpdateMasterData(masterData) {
+		$.ajax({
+			url: '/TypeMaster/UpdateItemTypeMast',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(masterData),
+			dataType: 'json',
+			success: function (response) {
+				if (response?.status) {
+					toastr.success('Data updated successfully.');
+					resetFields();
+					setTimeout(() => {
+						window.location.href = '/TypeMasterList/Index';
+					}, 1500);
+				} else {
+					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error("Data not updated: " + error);
+			}
+		});
+	}
+
+	function GetDocData(docId, readOnly) {
+		$.ajax({
+			url: '/TypeMaster/GetItemTypeDetailsById',
+			type: 'GET',
+			data: { id: docId },
+			success: function (res) {
+				if (res.status && res.data) {
+					fillFormFields(res.data);
+					if (readOnly === 'true') {
+						$('input, #DdActive').prop('disabled', true);
+						$('#btn-save, #cancelBtn').hide();
+					} else {
+						$('input, #DdActive').prop('disabled', false);
+						$('#btn-save, #cancelBtn').show();
+					}
+				} else {
+					toastr.warning('No data found for this ID.');
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load data.');
+			}
+		});
+	}
+
+	function resetFields() {
+		$('#TxtCode, #TxtName, #TxtShortName, #searchInput').val('');
+		setActiveStatus(1);
+	}
+
+	function fillFormFields(dt) {
+		$('#TxtCode').val(dt.CODE);
+		$('#TxtName').val(dt.NAME);
+		$('#TxtShortName').val(dt.SHORTNAME);
+		setActiveStatus(dt.ACTIVE);
+		PreviousInputDt = dt.NAME;
+	}
+
+	function collectFormData() {
+		return {
+			code: toNullableInt($('#TxtCode').val()),
+			Name: toNullableString($('#TxtName').val()),
+			ShortName: toNullableString($('#TxtShortName').val()),
+			PType: '',
+			active: $('#DdActive').val()
+		};
+	}
+
+	function checkExistOrNot(inputData) {
+		return $.ajax({
+			url: '/TypeMaster/getExistOrNot', // ← corrected spelling
+			type: 'GET',
+			dataType: 'json',
+			data: { inputData: inputData?.trim() }
+		});
+	}
+
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "Do you want to cancel all the changes?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, cancel it!',
+			cancelButtonText: 'No, keep it',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+				if (docId) {
+					GetDocData(docId, readOnly);
+				} else {
+					resetFields();
+				}
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+			}
+		});
+	});
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+	function setActiveStatus(input) {
+		let isActive = input == 1;
+		$('#DdActive').prop('checked', isActive);
+		$('#DdActive').val(isActive ? 1 : 0);
+		$('#statusText').text(isActive ? 'Active' : 'Inactive');
+	}
+</script>

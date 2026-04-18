@@ -1,0 +1,419 @@
+﻿@{
+    ViewBag.Title = "QC Disc Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">QC Disc Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "QCDiscMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="QCDiscMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlItemName">Item Name</label>
+                    <select class="form-control" id="ddlItemName" name="ItemName">
+                        <option value="">--Select Item Name--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlParameter">Parameter Name</label>
+                    <select class="form-control" id="ddlParameter" name="ItemName">
+                        <option value="">--Select Parameter--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRate">Rate</label>
+                    <input class="form-control" type="number" id="TxtRate" name="TxtRate"  placeholder="Enter Rate">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-align form-group-active">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <div class="form-group-mt">
+                    <button id="addRow" class="btn btn-success btn-field"><i class="fa fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlImportFrom">Import From</label>
+                    <select class="form-control" id="ddlImportFrom" name="ImportFrom">
+                        <option value="">--Select Import From--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group-mt">
+                    <button id="btnImport" type="submit" class="btn btn-import btn-field"><i class="fa fa-file-import"></i>Import</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+
+
+        @* Getting Desc Master data by Item Code *@
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblQCDiscMasterByItem" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Qcpcode</th>
+                            <th>Parameter Name</th>
+                            <th>Rate</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+       @*  <div class="pagination-wrapper">
+            <ul class="pagination" id="tablePagination"></ul>
+        </div> *@
+
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+           </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+   
+
+</fieldset>
+<script>
+    let qcDiscData = [];
+    let isFormReadOnly = false;
+
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = parseInt(urlParams.get('id'));
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+
+            if (!isNaN(rowId) && rowId > 0) {
+                loadServerData(rowId);
+
+                if (isReadOnly) {
+                    setQCDiscMasterFormReadOnly();
+                }
+            }
+        });
+
+        loadItemToList();
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = urlParams.get('id');
+
+        if (rowId) {
+            const checkAndSetDropdownValue = setInterval(() => {
+                const ddl = $('#ddlItemName');
+                if (ddl.find('option').length > 1) {
+                    ddl.val(rowId);
+                    ddl.prop('disabled', true);
+                    clearInterval(checkAndSetDropdownValue);
+                }
+            }, 100);
+        }
+        loadItemFromList();
+        loadParameterList();
+
+        $('#cancelBtn').on('click', function () {
+            window.location.href = '/ColorGroupList/Index';
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    //Loading Dropdowns..........
+    function loadItemToList() {
+        $.ajax({
+            url: '/QCDiscMaster/GetItemToList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlItemName');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Item --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadItemFromList() {
+        $.ajax({
+            url: '/QCDiscMaster/GetItemFromList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlImportFrom');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Item --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+    function loadParameterList() {
+        $.ajax({
+            url: '/QCDiscMaster/GetParameterList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlParameter');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Parameters --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    //Loading date from table and adding.
+    function loadServerData(itemCode) {
+        $.ajax({
+            url: '/QCDiscMaster/GetQcDiscOnChange',
+            type: 'POST',
+            data: { itemCode: itemCode },
+            success: function (response) {
+                if (response.success) {
+                    // Filter out any old rows for this itemCode
+                    qcDiscData = qcDiscData.filter(x => x.ITEM_CODE !== itemCode);
+
+                    // Group existing serials
+                    let existingSerials = qcDiscData
+                        .filter(x => x.ITEM_CODE === itemCode)
+                        .map(x => x.SerialNo);
+
+                    let serial = 1;
+
+                    // Append new data from server
+                    response.lists.forEach(item => {
+                        qcDiscData.push({
+                            ITEM_CODE: item.iteM_CODE,
+                            QCP_CODE: item.qcP_CODE,
+                            QCP_NAME: item.iteM_NAME,
+                            QCP_DIFF: item.qcP_DIFF,
+                            ACTIVE: item.ACTIVE,
+                            STATUS_TEXT: item.ACTIVE ? 'Active' : 'Inactive',
+                            SerialNo: serial++,
+                            rowId: `${item.iteM_CODE}_${serial - 1}`
+                        });
+                    });
+
+                    loadTableData(); // Load the merged data
+                } else {
+                    toastr.error(response.message || "No data found.");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Error loading data: " + error);
+            }
+        });
+    }
+    function addManualRow() {
+        let itemCode = $('#ddlItemName').val();
+        let itemName = $('#ddlItemName option:selected').text();
+
+        let qcpCode = $('#ddlParameter').val();
+        let parameterName = $('#ddlParameter option:selected').text();
+        let rate = parseFloat($('#TxtRate').val());
+        let isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+        let statusText = isActive ? 'Active' : 'Inactive';
+
+        if (!itemCode || !qcpCode || isNaN(rate)) {
+            toastr.error("Please fill all required fields.");
+            return;
+        }
+
+        // Calculate next SerialNo for the selected ITEM_CODE
+        let maxSerial = Math.max(
+            0,
+            ...qcDiscData
+                .filter(x => x.ITEM_CODE === itemCode)
+                .map(x => x.SerialNo)
+        );
+
+        let nextSerial = maxSerial + 1;
+
+        qcDiscData.push({
+            ITEM_CODE: itemCode,
+            QCP_CODE: qcpCode,
+            QCP_NAME: parameterName,
+            QCP_DIFF: rate,
+            ACTIVE: isActive,
+            STATUS_TEXT: statusText,
+            SerialNo: nextSerial,
+            rowId: `${itemCode}_${nextSerial}`
+        });
+
+        // Clear inputs
+        $('#ddlParameter').val('');
+        $('#TxtRate').val('');
+
+        loadTableData(); // Reload updated data
+    }
+    function loadTableData() {
+        let tbody = $('#tblQCDiscMasterByItem tbody');
+        tbody.empty();
+
+        if (qcDiscData.length === 0) {
+            tbody.append('<tr><td colspan="6">No data available</td></tr>');
+            return;
+        }
+
+        qcDiscData.forEach(item => {
+            if (!item) return;
+
+            let row = `
+                <tr data-id="${item.rowId}">
+                    <td style="display:none;">${item.ITEM_CODE}</td>
+                    <td>${item.QCP_CODE}</td>
+                    <td>${item.QCP_NAME}</td>
+                    <td>${item.QCP_DIFF}</td>
+                    <td>${item.STATUS_TEXT}</td>
+                    ${isFormReadOnly ? '' : `<td>
+                        <i class="fa fa-trash delete-row" style="cursor:pointer; color:red;" title="Delete"></i>
+                    </td>`}
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    $('#tblQCDiscMasterByItem').on('click', '.delete-row', function () {
+        let rowId = $(this).closest('tr').data('id');
+
+        qcDiscData = qcDiscData.filter(item => item.rowId !== rowId);
+
+        loadTableData(); // Re-render after deletion
+    });
+    $('#ddlItemName').on('change', function () {
+        let itemCode = $(this).val();
+        if (itemCode) {
+            loadServerData(itemCode);
+        }
+    });
+    $('#addRow').on('click', function (e) {
+        e.preventDefault();
+        addManualRow();
+    });
+
+    $('#btnImport').click(function (e) {
+        e.preventDefault();
+        var selectedItemCode = $('#ddlImportFrom').val();
+        if (!selectedItemCode || qcDiscData.length === 0) {
+            toastr.error("Please select an item and ensure data is loaded.");
+            return;
+        }
+        importQcDiscData(selectedItemCode, qcDiscData)
+    });
+    $('#btnSave').click(function (e) {
+        e.preventDefault(); 
+
+        var selectedItemCode = $('#ddlItemName').val();
+        if (!selectedItemCode || qcDiscData.length === 0) {
+            toastr.error("Please select an item and ensure data is loaded.");
+            return;
+        }
+        importQcDiscData(selectedItemCode, qcDiscData);
+    });
+
+    function importQcDiscData(selectedItemCode, qcDiscData) {
+        $.ajax({
+            url: '/QCDiscMaster/ImportData',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                itemCode: selectedItemCode,
+                qcDiscList: qcDiscData
+            }),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Data imported successfully.");
+                       $('#QCDiscMasterForm')[0].reset();
+
+                    setTimeout(() => {
+                        window.location.href = '/QCDiscMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.error(response.message || "Import failed.");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('An error occurred during import: ' + error);
+            }
+        });
+    }
+
+    function setQCDiscMasterFormReadOnly() {
+        isFormReadOnly = true;
+
+        const form = $('#QCDiscMasterForm');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        $('#ACTIVE').prop('disabled', true);
+        $('#statusText').addClass('text-muted');
+
+        // Remove Action column header
+        $('#tblQCDiscMasterByItem thead th').each(function () {
+            if ($(this).text().trim().toLowerCase() === 'action') {
+                $(this).remove();
+            }
+        });
+    }
+
+
+
+</script>

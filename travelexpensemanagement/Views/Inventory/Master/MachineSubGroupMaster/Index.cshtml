@@ -1,0 +1,257 @@
+﻿@{
+	ViewBag.Title = "Machine Sub Group Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Machine Sub Group Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "MachineSubGroupMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="MachineSubMasterform">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row"> 
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtMachineSub" class="form-label">Machine Sub Group</label>
+					<input type="text" class="form-control" id="TxtMachineSub" name="TxtMachineSub" placeholder="Enter Machine Sub Group">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtShortName" class="form-label">Short Name</label>
+					<input type="text" class="form-control" id="TxtShortName" name="TxtShortName" placeholder="Enter Short Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlMachineMain" class="form-label">Machine Main Group</label>
+					<select class="form-control" id="ddlMachineMain" name="ddlMachineMain">
+						<option value="">-- Select Machine Main Group --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="offset-md-7 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-3 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		$(function () {
+			const urlParams = new URLSearchParams(location.search);
+			const rowId = parseInt(urlParams.get('id'));
+			const isReadOnly = urlParams.get('readOnly') === 'true';
+
+			if (!isNaN(rowId) && rowId > 0) {
+				LoadMachineSubGroupById(rowId);
+
+				if (isReadOnly) {
+					setMachineSubFormReadOnly();
+				}
+			}
+		});
+
+		loadMainGroupList();
+
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+
+	function loadMainGroupList() {
+		$.ajax({
+			url: '/MachineSubGroupMaster/GetMainGroupList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#ddlMachineMain');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				toastr.error('Error loading module: ' + error);
+			}
+		});
+	}
+
+	function LoadMachineSubGroupById(code) {
+		$.ajax({
+			url: '/MachineSubGroupMasterList/GetMachineSubByCode',
+			type: 'GET',
+			data: { code: code },
+			success: function (response) {
+				console.log(response);
+				console.log(response.data);
+				var data = response.data;
+
+				if (!data) {
+					toastr.warning("No data found.");
+					return;
+				}
+
+				// Set values for all form fields
+				$('#CODE').val(data.code);
+				$('#TxtMachineSub').val(data.name);
+				$('#TxtShortName').val(data.shortname);
+				$('#ddlMachineMain').val(data.mgrouP_CODE).trigger('change');
+				$('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+				$('#statusText').text(data.active ? 'Active' : 'Inactive');
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading Machine Sub Group by ID:", status, error);
+				toastr.error('Error: ' + xhr.responseText);
+			}
+		});
+	}
+
+
+	// Handle form submission
+	$('#MachineSubMasterform').on('submit', function (e) {
+		e.preventDefault();
+
+		const code = parseInt($('#CODE').val()) || 0;
+		const formValues = {
+			CODE: code,
+			MachineSub: $('#TxtMachineSub').val().trim(),
+			ShortName: $('#TxtShortName').val().trim(),
+			MachineMainGroup: $('#ddlMachineMain').val(),
+			IsActive: $('#ACTIVE').is(':checked') ? 1 : 0
+		};
+
+		// Validation
+		if (!formValues.MachineSub) {
+			toastr.warning('Please enter Machine Sub Group.');
+			$('#TxtMachineSub').focus();
+			return;
+		}
+		if (!formValues.ShortName) {
+			toastr.warning('Please enter Short Name.');
+			$('#TxtShortName').focus();
+			return;
+		}
+		if (!formValues.MachineMainGroup) {
+			toastr.warning('Please select Machine Main Group.');
+			$('#ddlMachineMain').focus();
+			return;
+		}
+
+		const payload = {
+			CODE: formValues.CODE,
+			NAME: formValues.MachineSub,
+			SHORTNAME: formValues.ShortName,
+			MGROUP_CODE: parseInt(formValues.MachineMainGroup),
+			ACTIVE: formValues.IsActive,
+			ACTION: code > 0 ? "UPDATE" : "INSERT",
+			COMP_CODE: 1,
+			UUSER: 1,
+			EUSER: 1,
+			UDATE: new Date().toISOString(),
+			EDATE: new Date().toISOString(),
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB"
+		};
+		console.log(payload);
+
+		$.ajax({
+			url: '/MachineSubGroupMaster/SaveMachineSubGroup',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(payload),
+			success: function (response) {
+				if (response.success) {
+					toastr.success("Machine Sub Group saved successfully!");
+					$('#MachineSubMasterform')[0].reset();
+					setTimeout(function () {
+						window.location.href = '/MachineSubGroupMasterList/Index';
+					}, 1000);
+				} else {
+					const message = response.message || "Something went wrong while saving.";
+					toastr.warning(message);
+				}
+			},
+			error: function (xhr) {
+				const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+
+
+
+	// Read-only mode
+	function setMachineSubFormReadOnly() {
+		const form = $('#MachineSubMasterform');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		$('#ACTIVE').prop('disabled', true);
+		$('#statusText').addClass('text-muted');
+	}
+</script>
+
+
+
+
+
+
+
+@* Cancel Button Popup *@
+<script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@

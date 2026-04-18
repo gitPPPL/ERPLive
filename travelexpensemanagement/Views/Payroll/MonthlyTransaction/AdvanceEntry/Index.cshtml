@@ -1,0 +1,332 @@
+﻿@{
+    ViewBag.Title = "Advance Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Advance Entry</legend>
+    <form id="AdvanceEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+           
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployeeName">Employee Name</label>
+                    <select class="form-control" id="ddlEmployeeName">
+                        <option value="">Select Employee Name</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumAmount">Amount</label>
+                    <input type="number" class="form-control" id="NumAmount" placeholder="Enter Amount">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumInstallment">Installment</label>
+                    <input type="number" class="form-control" id="NumInstallment" placeholder="Enter Installment">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <fieldset>
+            <legend class="sub-legend">Import Advance Payment</legend>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtFrom">From</label>
+                                <input type="date" class="form-control" id="DtFrom" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtTo">To</label>
+                                <input type="date" class="form-control" id="DtTo" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="btn-mt">
+                                <button type="button" class="btn btn-primary" id="btn_import"><i class="fa fa-refresh"></i>Import</button>
+                                <button type="button" class="btn btn-primary" id="btn_balance"><i class="fa fa-print"></i>Balance List</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <fieldset>
+                        <legend class="sub-legend">Print Type</legend>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ddlPrintType">Print Type</label>
+                                    <select class="form-control" id="ddlPrintType">
+                                        <option value="">Select Print Type</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="btn-mt">
+                                    <button type="button" class="btn btn-primary" id="btn_Printlist"><i class="fa fa-print"></i>Print List</button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </fieldset>
+                
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "AdvanceList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger" onclick="clearForm();">
+                        <i class="fa fa-close"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(async function () {
+        await DDLEmpcode(); 
+
+        if (rowId) {
+            await loadById(rowId); 
+            if (isReadOnly) setFormReadOnly(); 
+        } else {
+            $('#DtDocDate').val(new Date().toISOString().split('T')[0]); 
+            await GetVNo(); 
+        }
+    });
+
+    $("#btn-save").click(function (e) {
+        e.preventDefault();
+        const DOC_ID = $("#TxtCode").val();
+        const V_NO = $("#NumDocNo").val().trim();
+        const V_DATE = $("#DtDocDate").val().trim();
+        const EMP_CODE = $("#ddlEmployeeName").val();
+        const AMOUNT = $("#NumAmount").val().trim();
+        const INSTALLMENT = $("#NumInstallment").val();
+        const REMARK = $("#TxtRemarks").val();
+
+        const action = DOC_ID ? 'UPDATE' : 'INSERT';
+
+         if (!validateRequiredField('#ddlEmployeeName', 'Employee Name')) return;
+         if (!validateRequiredField('#NumAmount', 'Amount')) return;
+         if (!validateRequiredField('#NumInstallment', 'Installment')) return;
+         if (!validateRequiredField('#TxtRemarks', 'REMARK')) return;
+
+        const formData = {
+            V_NO, V_DATE, EMP_CODE, AMOUNT, INSTALLMENT, REMARK, action, DOC_ID
+        };
+
+    
+
+        $("#btn-save").prop("disabled", true); 
+
+        $.ajax({
+            url: '/AdvanceEntry/SaveTempMaster',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (response) {
+                toastr.success(response.message || "Saved successfully!");
+                setTimeout(() => window.location.href = '/AdvanceList/Index', 1000);
+                $('#statusText').text('Inactive').removeClass('active').addClass('inactive');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", xhr.responseText);
+                toastr.error("Something went wrong. Please try again.");
+            },
+            complete: function () {
+                $("#btn-save").prop("disabled", false); 
+            }
+        });
+    });
+
+ 
+    async function DDLEmpcode() {
+        try {
+            const response = await fetch('/AdvanceEntry/DDlEmpCode');
+            const data = await response.json();
+            const ddl = $('#ddlEmployeeName');
+            ddl.empty(); 
+
+       
+            ddl.append('<option value="" disabled selected>Select Employee</option>');
+
+            data.forEach(item => {
+             
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+           
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%',
+                matcher: function(params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+
+                    const text = data.text.toLowerCase(); 
+                    const term = params.term.toLowerCase();
+
+                    return text.indexOf(term) > -1 ? data : null;
+                }
+            });
+
+        } catch (err) {
+            console.error("Error loading Employee Code dropdown:", err);
+            toastr.error("Error loading Employee Code dropdown");
+        }
+    }
+
+    async function GetVNo() {
+        try {
+            const resp = await fetch('/AdvanceEntry/GetVNo');
+            const data = await resp.json();
+            if (data.v_NO != null) {
+                $('#NumDocNo').val(data.v_NO);
+            }
+        } catch (err) {
+            console.error("Error fetching VNo:", err);
+            toastr.error("Error fetching Document Number");
+        }
+    }
+
+    function loadById(code) {
+        $.ajax({
+            url: '/AdvanceList/GetdatabyCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No data found for the given ID.");
+                    return;
+                }
+
+                console.log('Data received:', res); 
+                populateForm(res.data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error details:", xhr, status, error);
+                toastr.error("Error loading data: " + (xhr.responseText || error));
+            }
+        });
+    }
+
+
+    function populateForm(data) {
+        $("#NumDocNo").val($.trim(data.v_NO));
+        $("#DtDocDate").val(formatDate(data.v_DATE));
+
+        const empCode = data.emP_CODE;
+        const ddl = $("#ddlEmployeeName");
+        ddl.val(empCode).trigger('change'); 
+        $("#TxtCode").val($.trim(data.doC_ID));
+        $("#NumAmount").val($.trim(data.amount));
+        $("#NumInstallment").val($.trim(data.installment));
+        $("#TxtRemarks").val($.trim(data.remark));
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+  
+    function setFormReadOnly() {
+        $('input, select, textarea').prop('disabled', true);
+      $('#btn-save').hide();
+    }
+
+     function clearForm() {
+        if (!rowId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to undo this action!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#NumAmount').val('');
+                    $('#NumInstallment').val('');
+                    $('#TxtRemarks').val('');
+                    $('#DtFrom').val('');
+                    $('#DtTo').val('');
+                    $('#TxtCode').val('');
+
+                  
+                    $('#ddlEmployeeName').val('0').trigger('change'); 
+                    $('#ddlPrintType').val('').trigger('change');
+                                      
+                    Swal.fire(
+                        'Cleared!',
+                        'The form has been cleared except for the Document No.',
+                        'success'
+                    );
+                }
+            });
+        } else {
+                  
+            document.getElementById(`row-${rowId}`).reset();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+</script>

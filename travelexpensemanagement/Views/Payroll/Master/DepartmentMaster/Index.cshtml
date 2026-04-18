@@ -1,0 +1,432 @@
+﻿@{
+    ViewBag.Title = "Department Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Department Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button  onclick="window.location.href='@Url.Action("Index", "DepartmentMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="DepartmentMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName">Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" maxlength="30" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName">Short Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtShortName" name="ShortName" maxlength="15" placeholder="Enter Short Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumColonyExtra">Colony Extra</label>
+					<input type="text" class="form-control" id="NumColonyExtra" name="ColonyExtra" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter Colony Extra">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check-mt">
+                    <div class="form-group">
+                        <input class="form-check-input" type="checkbox" id="ChkProrataAllow" value="0">
+                        <label class="form-check-label" for="ChkProrataAllow">Prorata Allow</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumD23">D23</label>
+					<input type="text" class="form-control" id="NumD23" name="D23" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D23">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumD24">D24</label>
+					<input type="text" class="form-control" id="NumD24" name="D24" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D24">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumD25">D25</label>
+					<input type="text" class="form-control" id="NumD25" name="D25" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D25">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <div class="form-group">
+                        <label for="NumD26">D26</label>
+						<input type="text" class="form-control" id="NumD26" name="D26" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D26">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumD27">D27</label>
+					<input type="text" class="form-control" id="NumD27" name="D27" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D27">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumD28">D28</label>
+					<input type="text" class="form-control" id="NumD28" name="D28" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D28">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumD29">D29</label>
+					<input type="text" class="form-control" id="NumD29" name="D29" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter D29">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <div class="form-group">
+                        <label for="NumD30">D30</label>
+						<input type="text" class="form-control" id="NumD30" name="D30" maxlength="10" oninput="allowOnlyNumbers(this)" placeholder="Enter 30">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+						<input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+	const inputSequence = [
+	'TxtName',
+	'TxtShortName',
+	'NumColonyExtra',	 
+	'NumD23',
+	'NumD24',
+	'NumD25',
+	'NumD26',
+	'NumD27',
+	'NumD28',
+	'NumD29',
+	'NumD30'
+	];
+
+	let PreviousInputDt = "";
+	let MasterTblId ;
+	let readOnly;
+
+	$(document).ready(function () {
+		 
+		MasterTblId = getQueryParam('id');
+		readOnly = getQueryParam('readOnly');
+
+		if (MasterTblId) {
+			GetMasterDataList(MasterTblId, readOnly);
+		}
+
+		 inputSequence.forEach((id, index) => {
+		$(`#${id}`).on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				if (index + 1 < inputSequence.length) {
+					$(`#${inputSequence[index + 1]}`).focus();
+				}
+			}
+		});
+	   });
+
+		$('#NumD30').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#btn-save').focus();
+			}
+		});		 
+
+	 $('#ChkProrataAllow').on('change', function () {
+		var prorate = $(this).is(':checked') ? 1 : 0;
+		 $(this).val(prorate);
+	});
+
+		$('#DdActive').on('change', function () {
+			let isChecked = $(this).is(':checked');
+			let status = isChecked ? 'Active' : 'Inactive';
+			let value = isChecked ? 1 : 0;
+			$('#statusText').text(status);
+			$(this).val(value);
+		});
+
+		$('#btn-save').on('click', function (e) {
+			e.preventDefault();
+			const masterData = collectFormData();
+
+			if (!masterData.Name || !masterData.ShortName) {
+				toastr.warning("Please fill all required fields");
+				return;
+			}
+
+			if (MasterTblId) {
+				EditMasterData(masterData);
+			} else {
+				SaveMasterData(masterData);
+			}
+		});
+	});
+
+	function SaveMasterData(masterData) {
+		const Namee = masterData?.Name?.trim();
+		console.log(masterData);
+		if (!Namee) {
+			toastr.warning("Department Name is required.");
+			return;
+		}
+		checkExistOrNot(Namee)
+			.done(function (data) {
+				if (data?.status && data?.exists) {
+					toastr.warning("Duplicate Department Name");
+					return;
+				}
+
+				$.ajax({
+					url: '@Url.Action("SaveDepartmentMast", "DepartmentMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(masterData),
+					success: function (response) {
+						if (response?.status) {
+							toastr.success('Data saved successfully.');
+							resetFields();
+							setTimeout(() => {
+								window.location.href = '/DepartmentMasterList/Index';
+							}, 1500);
+						} else {
+							toastr.error(response?.message || "Save failed. Please try again.");
+						}
+					},
+					error: function () {
+						toastr.error("Error occurred while saving. Please contact admin.");
+					}
+				});
+			})
+			.fail(function () {
+				toastr.error("Error while checking Department name.");
+			});
+	}
+
+	function EditMasterData(masterData) {
+		if (PreviousInputDt !== masterData.Name) {
+			checkExistOrNot(masterData.Name)
+				.done(function (data) {
+					if (data?.status && data?.exists) {
+						toastr.warning("Duplicate Department Name");
+						return;
+					}
+					UpdateMasterData(masterData);
+				})
+				.fail(function () {
+					toastr.error("Error while checking Department Name.");
+				});
+		} else {
+			UpdateMasterData(masterData);
+		}
+	}
+
+	function UpdateMasterData(masterData) {
+		$.ajax({
+			url: '/DepartmentMaster/UpdateDepartmentMast',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(masterData),
+			dataType: 'json',
+			success: function (response) {
+				if (response?.status) {
+					toastr.success('Data updated successfully.');
+					resetFields();
+					setTimeout(() => {
+						window.location.href = '/DepartmentMasterList/Index';
+					}, 1500);
+				} else {
+					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error("Data not updated: " + error);
+			}
+		});
+	}
+
+	function GetMasterDataList(MasterTblId, readOnly) {
+		$.ajax({
+			url: '/DepartmentMaster/GetDepartmentDetailsById',
+			type: 'GET',
+			data: { id: MasterTblId },
+			success: function (res) {
+				if (res.status && res.data) {
+					console.log(res.data);
+					fillFormFields(res.data);
+					if (readOnly === 'true') {
+						$('input, #ddlQCUnit, #ChkQuantity, #DdActive').prop('disabled', true);
+						$('#btn-save, #cancelBtn').hide();
+					} else {
+						$('input, #ddlQCUnit, #ChkQuantity, #DdActive').prop('disabled', false);
+						$('#btn-save, #cancelBtn').show();
+					}
+				} else {
+					toastr.warning('No data found for this ID.');
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load data.');
+			}
+		});
+	}
+ 
+	function resetFields() {
+		$('#TxtCode, #TxtName, #TxtShortName, #NumColonyExtra, #NumD23, #NumD24, #NumD25, #NumD26, #NumD27, #NumD28, #NumD29, #NumD30').val('');
+		$('#ChkProrataAllow').prop('checked', false);
+		setActiveStatus(1);  
+		setCheckboxValue(0); 
+	}
+ 
+	function fillFormFields(dt) {
+		console.log(dt);
+		$('#TxtCode').val(dt.CODE);
+		$('#TxtName').val(dt.NAME);
+		$('#TxtShortName').val(dt.SHORTNAME);
+		$('#NumColonyExtra').val(dt.COLONY);
+		$('#NumD23').val(dt.D23);
+		$('#NumD24').val(dt.D24);
+		$('#NumD25').val(dt.D25);
+		$('#NumD26').val(dt.D26);
+		$('#NumD27').val(dt.D27);
+		$('#NumD28').val(dt.D28);
+		$('#NumD29').val(dt.D29);
+		$('#NumD30').val(dt.D30);
+		setCheckboxValue(dt.PRORATA_ALLOW);    
+		setActiveStatus(dt.ACTIVE); 
+		PreviousInputDt = dt.NAME;    
+	}
+
+	function collectFormData() {
+		return {
+			Code: toNullableInt($('#TxtCode').val()),
+			Name: toNullableString($('#TxtName').val()),
+			ShortName: toNullableString($('#TxtShortName').val()),
+			Colony: toNullableInt($('#NumColonyExtra').val()),
+			ProrateAllow: $('#ChkProrataAllow').val(),
+			D23: toNullableInt($('#NumD23').val()),
+			D24: toNullableInt($('#NumD24').val()),
+			D25: toNullableInt($('#NumD25').val()),
+			D26: toNullableInt($('#NumD26').val()),
+			D27: toNullableInt($('#NumD27').val()),
+			D28: toNullableInt($('#NumD28').val()),
+			D29: toNullableInt($('#NumD29').val()),
+			D30: toNullableInt($('#NumD30').val()),
+			active: toNullableInt($('#DdActive').val())
+		};
+	}
+
+
+	function checkExistOrNot(inputData) {
+		return $.ajax({
+			url: '/DepartmentMaster/getExistOrNot',
+			type: 'GET',
+			dataType: 'json',
+			data: { inputData: inputData }
+		});
+	}
+
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "Do you want to cancel all the changes?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, cancel it!',
+			cancelButtonText: 'No, keep it',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+				if (MasterTblId) {
+					GetMasterDataList(MasterTblId, readOnly);
+				} else {
+					resetFields();
+				}
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+			}
+		});
+	});
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+	 function allowOnlyNumbers(input) {
+			  input.value = input.value.replace(/[^0-9]/g, '');
+	 }
+
+	function setCheckboxValue(value) {
+		if (value == 1) {
+			$('#ChkProrataAllow').prop('checked', true);
+		} else {
+			$('#ChkProrataAllow').prop('checked', false);
+		}
+	}
+
+	function setActiveStatus(input) {
+		let isActive = input == 1;
+		$('#DdActive').prop('checked', isActive);
+		$('#DdActive').val(isActive ? 1 : 0);
+		$('#statusText').text(isActive ? 'Active' : 'Inactive');
+	}
+
+	function setCheckboxValue(value) {
+		if (value == 1) {
+			$('#ChkProrataAllow').prop('checked', true);
+		} else {
+			$('#ChkProrataAllow').prop('checked', false);
+		}
+	} 
+
+
+
+</script>

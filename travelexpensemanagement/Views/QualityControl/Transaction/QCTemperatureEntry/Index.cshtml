@@ -1,0 +1,319 @@
+﻿@{
+    ViewBag.Title = "QC Temperature Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">QC Temperature Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "QCTemperatureEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="QCTemperatureEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlShift">Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TmTime">Time</label>
+                    <input type="time" class="form-control" id="TmTime" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDenier">Denier</label>
+                    <select class="form-control" id="ddlDenier">
+                        <option value="">Select Denier</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlIncharge">Incharge</label>
+                    <select class="form-control" id="ddlIncharge">
+                        <option value="">Select Incharge</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlOperator">Operator</label>
+                    <select class="form-control" id="ddlOperator">
+                        <option value="">Select Operator</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSupervisor">Supervisor</label>
+                    <select class="form-control" id="ddlSupervisor">
+                        <option>Select Supervisor</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPlantName">Plant Name</label>
+                    <select class="form-control" id="ddlPlantName">
+                        <option value="">Select Plant Name</option>
+                    </select>   
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+       
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Select Reading Details</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlSelectReading">Select Reading</label>
+                        <select class="form-control" id="ddlSelectReading">
+                            <option>Select Reading</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtImport">Import Interval (in Min)</label>
+                        <input type="text" class="form-control" id="TxtImport" placeholder="Enter Import Interval (in Min)">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-mt">
+                        <button type="button" class="btn btn-success" id="btn_import"><i class="fa fa-refresh"></i>Import</button> 
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="table-responsive custom-table-wrapper">
+                        <table id="tblPlantZone" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Plant Zone</th>
+                                    <th>Temperature('C)</th>
+                                    <th>Remarks</th>
+                                    <th>Date Time</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination container -->
+                   @*  <div class="row">
+                        <div class="col-md-12">
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                    </div> *@
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="table-responsive custom-table-wrapper">
+                        <table id="tblScrew" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Screw</th>
+                                    <th>Speed</th>
+                                    <th>Remarks</th>
+                                    <th>Date Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- Pagination container -->
+                    @*  <div class="row">
+                        <div class="col-md-12">
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                    </div> *@
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="table-responsive custom-table-wrapper">
+                        <table id="tblWinder" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Winder No.</th>
+                                    <th>Width(Mm)</th>
+                                    <th>Denier</th>
+                                    <th>Breaking Load(Kgf)</th>
+                                    <th>Tenacity(Gpd.)</th>
+                                    <th>Elongation</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="table-responsive custom-table-wrapper">
+                        <table id="tblMaterial" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Material</th>
+                                    <th>Lot No.</th>
+                                    <th>No. of Bags</th>
+                                    <th>Percent(%)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    $(document).ready(function () {
+
+        function addRow(tableId, data = {}) {
+            const $tbody = $(tableId + ' tbody');
+            // remove previous plus buttons
+            $tbody.find('.btn-add-action').remove();
+
+            let row = "";
+
+            if (tableId === "#tblWinder") {
+                row = `
+                    <tr class="no-border-input">
+                        <td style="display:none;">${data.code || ''}</td>
+                        <td><input type="text" class="form-control" value="${data.winderNo || ''}" /></td>
+                        <td><input type="number" class="form-control" value="${data.width || ''}" /></td>
+                        <td><input type="text" class="form-control" value="${data.denier || ''}" /></td>
+                        <td><input type="number" class="form-control" value="${data.breakingLoad || ''}" /></td>
+                        <td><input type="number" class="form-control" value="${data.tenacity || ''}" /></td>
+                        <td><input type="number" class="form-control" value="${data.elongation || ''}" /></td>
+                        <td>
+                            <i class="fa fa-plus btn-add-action text-success" data-target="${tableId}" style="cursor:pointer;"></i>
+                            <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            if (tableId === "#tblMaterial") {
+                row = `
+                    <tr class="no-border-input">
+                        <td style="display:none;">${data.code || ''}</td>
+                        <td><input type="text" class="form-control" value="${data.material || ''}" /></td>
+                        <td><input type="text" class="form-control" value="${data.lotNo || ''}" /></td>
+                        <td><input type="number" class="form-control" value="${data.noOfBags || ''}" /></td>
+                        <td><input type="number" class="form-control" value="${data.percent || ''}" /></td>
+                        <td>
+                            <i class="fa fa-plus btn-add-action text-success" data-target="${tableId}" style="cursor:pointer;"></i>
+                            <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            $tbody.append(row);
+        }
+
+        // initial rows
+        addRow("#tblWinder");
+        addRow("#tblMaterial");
+
+        // add row from bottom button or plus icon
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            const target = $(this).data('target');
+            addRow(target);
+        });
+
+        // delete row
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const tableId = $(this).closest('table').attr('id');
+            const isLast = $row.is(':last-child');
+            $row.remove();
+
+            if (isLast) {
+                const $tbody = $('#' + tableId + ' tbody');
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" data-target="#${tableId}" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+    });
+</script>

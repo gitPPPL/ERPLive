@@ -1,0 +1,576 @@
+﻿@{
+    ViewBag.Title = "Employee Accomodation Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Employee Accomodation Entry</legend>
+    <form id="EmployeeAccomodationEntryForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployeeName">Employee Name</label>
+                    <select class="form-control" id="ddlEmployeeName">
+                        <option value="">Select Employee Name</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDepartment">Department</label>
+                    <select class="form-control" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDesignation">Designation</label>
+                    <select class="form-control" id="ddlDesignation">
+                        <option value="">Select Designation</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRoomNo">Room No</label>
+                    <input type="text" maxlength="15" class="form-control" id="TxtRoomNo" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtJoiningDate">Joining Date</label>
+                    <input type="date" class="form-control" id="DtJoiningDate" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtOrderRequest">Order/Request/Referred By</label>
+                    <input type="text" maxlength="50" class="form-control" id="TxtOrderRequest" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtApplicable">Applicable From</label>
+                    <input type="date" class="form-control" id="DtApplicable" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtValidUpto">Valid Upto</label>
+                    <input type="date" class="form-control" id="DtValidUpto" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumTotalDays">Total Days</label>
+                    <input type="number" class="form-control" id="NumTotalDays" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "EmployeeAccomodationList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+
+    
+    const allFieldIds = [       
+        "TxtDocId",
+        "NumDocNo",
+        "DtDocDate",
+        "ddlEmployeeName",
+        "ddlDepartment",
+        "ddlDesignation",
+        "TxtRoomNo",
+        "DtJoiningDate",
+        "TxtOrderRequest",
+        "DtApplicable",
+        "DtValidUpto",
+        "NumTotalDays"
+    ];
+
+
+    let docId = "", readOnly;
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {        
+        await handleDocLoad();         
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+     
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+              
+
+      if (!validateRequiredField('#NumDocNo','Doc No') ||
+            !validateRequiredField('#DtDocDate','Doc Date') ||           
+            !validateRequiredField('#ddlEmployeeName','Employee Name')) return;
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+
+      });
+
+    $(document).on('change', '#DtApplicable, #DtValidUpto', function () {
+        var appDt = $('#DtApplicable').val();
+        var validDt = $('#DtValidUpto').val();
+         getTotalDays(appDt, validDt);       
+    });
+
+
+
+    }
+
+</script>
+
+<script>
+     
+
+    async function handleDocLoad() {
+             docId = getQueryParam('id');
+             readOnly = getQueryParam('readOnly');
+            if (docId) {
+                $('#ddlDocType').prop('disabled', true);
+                await GetDocData(docId, readOnly);
+
+
+            } else {                
+                  GetDocid();                
+                const today = new Date();
+                const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+                    $('#DtDocDate').val(todayDate);
+                    $('#DtApplicable').val(todayDate);
+                    $('#DtValidUpto').val(todayDate);
+                  GetEmployeeList();
+                  GetDepartmentList();
+                  GetDesignationList();
+                  var appDt = $('#DtApplicable').val();
+                  var validDt = $('#DtValidUpto').val();
+                  getTotalDays(appDt, validDt);
+
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateEmpAccomodationEntry", "EmployeeAccomodationEntry")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/EmployeeAccomodationList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateEmpAccomodationEntry", "EmployeeAccomodationEntry")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");
+                    // showFlashMessageByKey('update', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/EmployeeAccomodationList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+  function getTotalDays(appDt, validDt){
+        if (appDt && validDt) {
+              var startDate = new Date(appDt);
+              var endDate = new Date(validDt);
+              if (startDate > endDate) {
+                  toastr.warning("Applicable Date should be earlier than Valid Upto Date.");
+                  // $(this).val('');
+                  $('#NumTotalDays').val('');
+                  return;
+              }
+              var timeDiff = endDate - startDate;
+              var dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;              
+              $('#NumTotalDays').val(dayDiff);
+        }
+  }
+
+    // async function fillHeaderData(headerData) {
+    //       const data= headerData[0];
+    //       console.log(data);
+
+    //               $('#TxtDocId').val(DOC_ID);
+    //               $('#NumDocNo').val(V_NO);
+    //               $("#DtDocDate").val(V_DATE);
+    //               $("#ddlEmployeeName").val(EMP_CODE);
+    //               $("#TxtRoomNo").val(ROOM_NO);
+    //               $("#TxtOrderRequest").val(REFERENCE_BY);
+    //               $("#DtApplicable").val(APPL_FROM);
+    //               $("#DtValidUpto").val(ValidUpto);
+    //               GetEmployeeList(data.EMP_CODE ?? "");
+    // }
+
+    async function fillHeaderData(headerData) {
+        const data = headerData[0];
+        console.log(data);
+
+        $('#TxtDocId').val(data.DOC_ID ?? '');
+        $('#NumDocNo').val(data.V_NO ?? '');
+        $('#DtDocDate').val(data.V_DATE ? data.V_DATE.substring(0, 10) : '');
+        $('#ddlEmployeeName').val(data.EMP_CODE ?? '');
+        $('#TxtRoomNo').val(data.ROOM_NO ?? '');
+        $('#TxtOrderRequest').val(data.REFERENCE_BY ?? '');
+        $('#DtApplicable').val(data.APPL_FROM ? data.APPL_FROM.substring(0, 10) : '');
+        $('#DtValidUpto').val(data.ValidUpto ? data.ValidUpto.substring(0, 10) : '');
+
+        GetEmployeeList(data.EMP_CODE ?? '');
+    }
+
+
+    async function collectFormData() {       
+        return {
+            DOC_ID: toNullableString($("#TxtDocId").val()),             
+            V_NO: parseIntSafe($("#NumDocNo").val()),
+            V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
+            EMP_CODE: toNullableString($("#ddlEmployeeName").val()),
+            ROOM_NO: parseIntSafe($("#TxtRoomNo").val()),
+            REFERENCE_BY: toNullableString($("#TxtOrderRequest").val()),
+            APPL_FROM: toNullableDate($("#DtApplicable").val()),
+            ValidUpto: toNullableDate($("#DtValidUpto").val()),
+            REMARKS: null,
+            FAPROV_STATUS: null,
+            FAPROV_REMARKS: null,
+            STATUS: null,
+            LIVING_STATUS: null,
+                SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update"
+        };
+    }
+            
+    function GetDocid() {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "EmployeeAccomodationEntry")',
+            type: 'GET',            
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function GetEmployeeList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetEmployeeMast", "EmployeeAccomodationEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlEmployeeName');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Employee -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.CODE} || ${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetDepartmentList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDepartmentMast", "EmployeeAccomodationEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlDepartment');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Department Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetDesignationList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDesignMastList", "EmployeeAccomodationEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlDesignation');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Category Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Transport Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Name Load failed", error);
+            }
+        });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/EmployeeAccomodationEntry/GetEmpAccomodationById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                console.log(response.data);
+                await fillHeaderData(response.data);              
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+   
+</script>
+
+
+
+

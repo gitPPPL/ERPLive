@@ -1,0 +1,236 @@
+﻿@{
+	ViewBag.Title = "Purchase Quotation List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Purchase Quotation List</legend>
+
+	<div class="row">
+		<div class="col-lg-3">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="tableSearch" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+
+
+		<div class="col-lg-9 btn-rightalign">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "PurchaseQuotation")'" type="button" class="btn btn-add">
+				<i class="fa fa-plus"></i>Add 
+			</button>
+			<button class="btn btn-print" onclick="printCityMasterReport()">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export 
+			</button>  
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail 
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+
+
+
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblPurchaseQuotationList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Voucher No</th>
+						<th>Voucher Type</th>
+						<th>Voucher Date</th>
+						<th>Party Name</th>
+						<th>Quote No</th>
+						<th>Quote Date</th>
+						<th>Contact Person</th>
+						<th>Valid Date</th>
+						<th>Remarks</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</fieldset>
+
+<script>
+	// Global Variable getting from controller
+	var compCode = '@ViewBag.CompCode';
+	var branchCode = '@ViewBag.BranchCode';
+	var yearCode = '@ViewBag.YearCode';
+
+
+	let currentPage = 1;
+	const pageSize = 10;
+
+	$(document).ready(function () {
+		loadAllQuotations();
+	});
+
+	function loadAllQuotations() {
+		const searchTerm = $('#tableSearch').val();
+
+		$.ajax({
+			url: '/PurchaseQuotationList/GetAllQuotations', // 👈 Update with actual endpoint
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				console.log(res);
+				const quotations = res.quotations || [];
+				const totalCount = res.totalCount || 0;
+
+				let tbody = $('#tblPurchaseQuotationList tbody');
+				tbody.empty();
+
+				if (quotations.length === 0) {
+					tbody.append('<tr><td colspan="13" class="text-center text-muted">No quotations found.</td></tr>');
+					renderPagination(0, pageSize, currentPage);
+					return;
+				}
+
+				$.each(quotations, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${item.code}</td>
+							<td>${item.v_NO || ''}</td>
+							<td>${item.v_TYPE || ''}</td>
+							<td>${item.v_DATE || ''}</td>
+							<td>${item.partY_NAME || ''}</td>
+							<td>${item.quotE_NO || ''}</td>
+							<td>${item.quotE_DATE || ''}</td>
+							<td>${item.conT_PERSON || ''}</td>
+							<td>${item.valiD_DATE || ''}</td>
+							<td>${item.remarks || ''}</td>
+							<td>${item.statuS_NAME || ''}</td>
+							<td>
+								<i class="fa fa-edit btn-edit" title="Edit" onclick="editQuotation(${item.v_NO})"></i>
+								<i class="fa fa-eye btn-view" title="View" onclick="viewQuotation(${item.v_NO})"></i>
+								<i class="fa fa-trash btn-delete" title="Delete" onclick="deleteQuotation(${item.v_NO}, '${item.v_TYPE}')"></i>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading quotations: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(html);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllQuotations();
+	}
+
+	$('#tableSearch').on('keyup', function () {
+		currentPage = 1;
+		loadAllQuotations();
+	});
+
+	function editQuotation(id) {
+		window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id);
+	}
+
+	function viewQuotation(id) {
+		window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	}
+
+	function deleteQuotation(code,vType) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This will permanently delete the quotation.",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/PurchaseQuotation/DeletePurchaseQuotationByCode', 
+					type: 'POST',
+					data: {
+						code: code,
+						vType: vType,
+						compCode: compCode,
+						branchCode: branchCode,
+						yearCode: yearCode
+					},					
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllQuotations();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function () {
+						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+					}
+				});
+			}
+		});
+	}
+
+
+</script>

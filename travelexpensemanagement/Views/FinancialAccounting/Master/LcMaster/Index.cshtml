@@ -1,0 +1,208 @@
+﻿@{
+	ViewBag.Title = "LC Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">LC Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "LcMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="lcMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+                    <label for="TxtLC_No" class="form-label"><span class="required">*</span>LC No.</label>
+					<input type="text" class="form-control" id="TxtLC_No" name="TxtLC_No" placeholder="Enter LC Number">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+                    <label for="TxtLC_NAME" class="form-label"><span class="required">*</span>LC Name</label>
+					<input type="text" class="form-control" id="TxtLC_NAME" name="TxtLC_NAME" placeholder="Enter LC Name">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="TxtLC_Date" class="form-label">LC Date</label>
+					<input type="date" class="form-control" id="TxtLC_DATE" name="TxtLC_DATE">
+				</div>
+			</div>
+
+		</div>
+
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="BANK_ADDRESS_L1" class="form-label">Bank Address L1</label>
+					<input type="text" class="form-control" id="TxtBANK_ADDRESS_L1" name="TxtBANK_ADDRESS_L1" placeholder="Enter Bank Address L1">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="BANK_ADDRESS_L2" class="form-label">Bank Address L2</label>
+					<input type="text" class="form-control" id="TxtBANK_ADDRESS_L2" name="TxtBANK_ADDRESS_L2" placeholder="Enter Bank Address L2">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="BANK_ADDRESS_L3" class="form-label">Bank Address L3</label>
+					<input type="text" class="form-control" id="TxtBANK_ADDRESS_L3" name="TxtBANK_ADDRESS_L3" placeholder="Enter Bank Address L3">
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="LcTerms" class="form-label">Terms And Conditions </label>
+					<textarea type="text" class="form-control" id="TxtLcTerms" name="TxtLcTerms" placeholder="Enter LC Terms And Conditions" rows="5"></textarea>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				@* <button type="button" id="cancelBtn" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "LcMasterList")'">Cancel</button> *@
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+
+        $('.active-toggle').hide();//hide the active toggle because there no entry in table
+
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        if (!isNaN(rowId) && rowId > 0) {
+            loadLcMasterById(rowId);
+            if (isReadOnly) {
+              setLcMasterFormReadOnly();
+            }
+        }
+
+        $('#ACTIVE').on('change', function () {
+            const status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    $('#lcMasterForm').on('submit', function (e) {
+        e.preventDefault();
+
+        if (!validateRequiredField('#TxtLC_No', 'LC No.')) return;
+        if (!validateRequiredField('#TxtLC_NAME', 'LC Name')) return;
+
+        const code = parseInt($('#CODE').val()) || 0;
+        const lcMasterData = {
+            CODE: code,
+            LC_NO: $('#TxtLC_No').val().trim(),
+            LC_BANKNAME: $('#TxtLC_NAME').val().trim(),
+            LC_DATE: $('#TxtLC_DATE').val(),
+            LC_BANKADDL1: $('#TxtBANK_ADDRESS_L1').val().trim(),
+            LC_BANKADDL2: $('#TxtBANK_ADDRESS_L2').val().trim(),
+            LC_BANKADDL3: $('#TxtBANK_ADDRESS_L3').val().trim(),
+            LC_TERMS: $('#TxtLcTerms').val().trim(),
+            // ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+            ACTION: code > 0 ? "UPDATE" : "INSERT"
+        };
+
+        // if (!lcMasterData.LC_NO) {
+        //     toastr.warning("Please enter LC Number.");
+        //     $('#TxtLC_No').focus();
+        //     return;
+        // }
+
+        // if (!lcMasterData.LC_BANKNAME) {
+        //   toastr.warning("Please enter LC Name.");
+        //   $('#TxtLC_NAME').focus();
+        //   return;
+        // }
+
+        $.ajax({
+            url: '/LcMaster/SaveLcMaster',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(lcMasterData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("LC Master saved successfully!");
+                    $('#lcMasterForm')[0].reset();
+                    setTimeout(function () {
+                      window.location.href = '/LcMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning(response.message || "Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function loadLcMasterById(code) {
+        $.ajax({
+            url: '/LcMasterList/GetLcMasterByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (data) {
+                console.log(data);
+                if (!data.success || !data.data) {
+                  toastr.warning("No data found for the given code.");
+                  return;
+                }
+
+                const lcMaster = data.data;
+                $('#CODE').val(lcMaster.code);
+                $('#TxtLC_No').val(lcMaster.lC_NO);
+                $('#TxtLC_NAME').val(lcMaster.lC_BANKNAME);
+                $('#TxtLC_DATE').val(lcMaster.lC_DATE ? lcMaster.lC_DATE.split('T')[0] : '');
+                $('#TxtBANK_ADDRESS_L1').val(lcMaster.lC_BANKADDL1);
+                $('#TxtBANK_ADDRESS_L2').val(lcMaster.lC_BANKADDL2);
+                $('#TxtBANK_ADDRESS_L3').val(lcMaster.lC_BANKADDL3);
+                $('#TxtLcTerms').val(lcMaster.lC_TERMS);
+
+                const isActive = lcMaster.active === 1 || lcMaster.active === true;
+                $('#ACTIVE').prop('checked', isActive);
+                $('#statusText').text(isActive ? 'Active' : 'Inactive');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading LC Master:", status, error);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function setLcMasterFormReadOnly() {
+        const form = $('#lcMasterForm');
+        form.find('input, textarea, button').prop('disabled', true);
+        form.find('.toggle-switch input').prop('disabled', true);
+        form.find('#customToggle').addClass('disabled');
+    }
+
+
+</script>

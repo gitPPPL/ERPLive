@@ -1,0 +1,709 @@
+﻿@{
+    ViewBag.Title = "Posting Parameter Salary";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Posting Parameter Salary</legend>
+    <form id="PostingParameterSalaryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSalaryAC">Salary A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlSalaryAC">
+                        <option value="">Select Salary A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSalaryPayableAC">Salary Payable A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlSalaryPayableAC">
+                        <option value="">Select Salary Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlHRAAC">HRA A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlHRAAC">
+                        <option value="">Select HRA A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlConveyanceAC">Conveyance A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlConveyanceAC">
+                        <option value="">Select Conveyance A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlOtherAC">Other A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlOtherAC">
+                        <option value="">Select Other A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWashingAC">Washing A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlWashingAC">
+                        <option value="">Select Washing A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSpecialAC">Special A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlSpecialAC">
+                        <option value="">Select Special A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployeeContributionPF">Employee Con. To PF A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlEmployeeContributionPF">
+                        <option value="">Select Employee Con. To PF A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployeeContributionESI">Employee Con. To ESI A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlEmployeeContributionESI">
+                        <option value="">Select Employee Con. To ESI A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployersContributionPF">Employers Con. To PF A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlEmployersContributionPF">
+                        <option value="">Select Employers Con. To PF A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployersContributionESI">Employers Con. To ESI A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlEmployersContributionESI">
+                        <option value="">Select Employers Con. To ESI A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlAdvanceAC">Advance A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlAdvanceAC">
+                        <option value="">Select Advance A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlTDSPayableAC">TDS Payable A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlTDSPayableAC">
+                        <option value="">Select TDS Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlQualityControlAC">Admin Charges A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlQualityControlAC">
+                        <option value="">Select Admin Charges A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlFamilyPensionAC">Family Pension A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlFamilyPensionAC">
+                        <option value="">Select Family Pension A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEPFPayableAC">EPF Payable A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlEPFPayableAC">
+                        <option value="">Select EPF Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlESIPayableAC">ESI Payable A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlESIPayableAC">
+                        <option value="">Select ESI Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWagesAC">Wages A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlWagesAC">
+                        <option value="">Select Wages A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWagesPayableAC">Wages Payable A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlWagesPayableAC">
+                        <option value="">Select Wages Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlProductionIncentiveAC">Production Incentive A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlProductionIncentiveAC">
+                        <option value="">Select Production Incentive A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlProductionIncentivePayableAC">Production Incentive Payable A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlProductionIncentivePayableAC">
+                        <option value="">Select Production Incentive Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlExGratiaAC">Ex-Gratia A/C</label>
+                    <select class="form-control" id="ddlExGratiaAC">
+                        <option value="">Select Ex-Gratia A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlExGratiaPayableAC">Ex-Gratia Payable A/C</label>
+                    <select class="form-control" id="ddlExGratiaPayableAC">
+                        <option value="">Select Ex-Gratia Payable A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlOtherMonthlyDeductionAC">Other Monthly Deduction A/C</label>
+                    <select class="form-control" id="ddlOtherMonthlyDeductionAC">
+                        <option value="">Select Other Monthly Deduction A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlLoanAC">Loan A/C</label>
+                    <select class="form-control" id="ddlLoanAC">
+                        <option value="">Select Loan A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "PostingParameterSalaryList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+
+    const allFieldIds = [  
+        "ddlSalaryAC",
+        "ddlSalaryPayableAC",
+        "ddlHRAAC",
+        "ddlConveyanceAC",
+        "ddlOtherAC",
+        "ddlWashingAC",
+        "ddlSpecialAC",
+        "ddlEmployeeContributionPF",
+        "ddlEmployeeContributionESI",
+        "ddlEmployersContributionPF",
+        "ddlEmployersContributionESI",
+        "ddlAdvanceAC",
+        "ddlTDSPayableAC",
+        "ddlQualityControlAC",
+        "ddlFamilyPensionAC",
+        "ddlEPFPayableAC",
+        "ddlESIPayableAC",
+        "ddlWagesAC",
+        "ddlWagesPayableAC",
+        "ddlProductionIncentiveAC",
+        "ddlProductionIncentivePayableAC",
+        "ddlExGratiaAC",
+        "ddlExGratiaPayableAC",
+        "ddlOtherMonthlyDeductionAC",
+        "ddlLoanAC"
+    ];
+ 
+    let docId = "", readOnly;
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await handleDocLoad();
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+
+      if (!validateRequiredField('#ddlSalaryAC','SalaryAC') ||
+            !validateRequiredField('#ddlSalaryPayableAC','SalaryPayableAC') ||
+            !validateRequiredField('#ddlHRAAC','HRAAC') ||
+            !validateRequiredField('#ddlConveyanceAC','ConveyanceAC') ||
+            !validateRequiredField('#ddlOtherAC','OtherAC') ||
+            !validateRequiredField('#ddlWashingAC','WashingAC') ||
+            !validateRequiredField('#ddlSpecialAC','SpecialAC') ||
+            !validateRequiredField('#ddlEmployeeContributionPF','EmployeeContributionPF') ||
+            !validateRequiredField('#ddlEmployeeContributionESI','EmployeeContributionESI') ||
+            !validateRequiredField('#ddlEmployersContributionPF','EmployersContributionPF') ||
+            !validateRequiredField('#ddlEmployersContributionESI','EmployersContributionESI') ||
+            !validateRequiredField('#ddlAdvanceAC','AdvanceAC') ||
+            !validateRequiredField('#ddlTDSPayableAC','TDSPayableAC') ||
+            !validateRequiredField('#ddlQualityControlAC','QualityControlAC') ||
+            !validateRequiredField('#ddlFamilyPensionAC','FamilyPensionAC') ||
+            !validateRequiredField('#ddlEPFPayableAC','EPFPayableAC') ||  
+            !validateRequiredField('#ddlESIPayableAC','ESIPayableAC') ||
+            !validateRequiredField('#ddlWagesAC','WagesAC') ||
+            !validateRequiredField('#ddlWagesPayableAC','WagesPayableAC') ||
+            !validateRequiredField('#ddlProductionIncentiveAC','ProductionIncentiveAC') ||
+            !validateRequiredField('#ddlProductionIncentivePayableAC','ProductionIncentivePayableAC')) return;
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          SaveData(data);
+          // docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+
+      });
+
+    $(document).on('change', '#DtApplicable, #DtValidUpto', function () {
+        var appDt = $('#DtApplicable').val();
+        var validDt = $('#DtValidUpto').val();
+         getTotalDays(appDt, validDt);
+    });
+
+    }
+
+</script>
+
+<script>
+
+      async function handleDocLoad() {
+               docId = getQueryParam('id');
+               readOnly = getQueryParam('readOnly');
+               console.log(docId, readOnly);
+              if (docId) {
+                  await GetDocData(docId, readOnly);
+              } else {                    
+                   allFieldIds.forEach(function(dropdownId) {
+                   GetPartyList(dropdownId);
+                   });
+
+              }
+      }
+
+      function SaveData(saveDt) {
+                  $.ajax({
+                      url: '@Url.Action("SaveOrUpdatePostingParameterSalaryEntry", "PostingParameterSalary")',
+                      type: 'POST',
+                      contentType: 'application/json',
+                      data: JSON.stringify(saveDt),
+                      success: function (response) {
+                          if (response?.status) {
+                              toastr.success("Data Insert successfully");
+                              setTimeout(() => {
+                                  window.location.href = '/PostingParameterSalaryList/Index';
+                              }, 1500);
+                          } else {
+                              toastr.error(response?.message || "Save failed. Please try again.");
+                          }
+                      },
+                      error: function () {
+                          toastr.error("Error occurred while saving. Please contact admin.");
+                      }
+                  });
+      }
+          
+
+    function getTotalDays(appDt, validDt){
+          if (appDt && validDt) {
+                var startDate = new Date(appDt);
+                var endDate = new Date(validDt);
+                if (startDate > endDate) {
+                    toastr.warning("Applicable Date should be earlier than Valid Upto Date.");
+                    $('#NumTotalDays').val('');
+                    return;
+                }
+                var timeDiff = endDate - startDate;
+                var dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                $('#NumTotalDays').val(dayDiff);
+          }
+    }
+
+    async function fillHeaderData(headerData) {
+    const data = headerData[0];
+    GetPartyList('ddlSalaryAC', data.SALARY_AC);
+    GetPartyList('ddlSalaryPayableAC', data.SALARY_PAYAC);
+    GetPartyList('ddlHRAAC', data.HRA_AC);
+    GetPartyList('ddlConveyanceAC', data.CONV_AC);
+    GetPartyList('ddlOtherAC', data.OTHER_AC);
+    GetPartyList('ddlWashingAC', data.WASHING_AC);
+    GetPartyList('ddlSpecialAC', data.SPECIAL_AC);
+    GetPartyList('ddlEmployeeContributionPF', data.EMPLOYEE_PFAC);
+    GetPartyList('ddlEmployeeContributionESI', data.EMPLOYEE_ESIAC);
+    GetPartyList('ddlEmployersContributionPF', data.EMPLOYER_PFAC);
+    GetPartyList('ddlEmployersContributionESI', data.EMPLOYER_ESIAC);
+    GetPartyList('ddlAdvanceAC', data.ADVANCE_AC);
+    GetPartyList('ddlTDSPayableAC', data.TDS_PAYAC);
+    GetPartyList('ddlQualityControlAC', data.QCDR_AC);
+    GetPartyList('ddlFamilyPensionAC', data.QLTDR_AC);
+    GetPartyList('ddlEPFPayableAC', data.EPF_PAYAC);
+    GetPartyList('ddlESIPayableAC', data.ESI_PAYAC);
+    GetPartyList('ddlWagesAC', data.WAGES_AC);
+    GetPartyList('ddlWagesPayableAC', data.WAGES_PAYAC);
+    GetPartyList('ddlProductionIncentiveAC', data.PRODINC_AC);
+    GetPartyList('ddlProductionIncentivePayableAC', data.PRODINC_PAYAC);
+    GetPartyList('ddlExGratiaAC', data.EXGRATIA_AC);
+    GetPartyList('ddlExGratiaPayableAC', data.EXGRATIA_PAYAC);
+    GetPartyList('ddlOtherMonthlyDeductionAC', data.OTHER_MTHDEDAC);
+    GetPartyList('ddlLoanAC', data.LOAN_AC);        
+    }
+
+
+       async function collectFormData() {        
+         return {
+            SalaryAc: parseInt(document.getElementById("ddlSalaryAC").value) || null,
+            SalaryPayAc: parseInt(document.getElementById("ddlSalaryPayableAC").value) || null,
+            HraAc: parseInt(document.getElementById("ddlHRAAC").value) || null,
+            ConvAc: parseInt(document.getElementById("ddlConveyanceAC").value) || null,
+            OtherAc: parseInt(document.getElementById("ddlOtherAC").value) || null,
+            WashingAc: parseInt(document.getElementById("ddlWashingAC").value) || null,
+            SpecialAc: parseInt(document.getElementById("ddlSpecialAC").value) || null,
+            EmployeePFac: parseInt(document.getElementById("ddlEmployeeContributionPF").value) || null,
+            EmployeeEsiAc: parseInt(document.getElementById("ddlEmployeeContributionESI").value) || null,
+            EmployerPFac: parseInt(document.getElementById("ddlEmployersContributionPF").value) || null,
+            EmployerEsiAc: parseInt(document.getElementById("ddlEmployersContributionESI").value) || null,
+            AdvanceAc: parseInt(document.getElementById("ddlAdvanceAC").value) || null,
+            TdsPayAc: parseInt(document.getElementById("ddlTDSPayableAC").value) || null,
+            AdminChAc: parseInt(document.getElementById("ddlQualityControlAC").value) || null,  // Assuming this is quality control AC
+            PensionAc: parseInt(document.getElementById("ddlFamilyPensionAC").value) || null, // Assuming this is family pension AC
+            EpFPayAc: parseInt(document.getElementById("ddlEPFPayableAC").value) || null,
+            EsiPayAc: parseInt(document.getElementById("ddlESIPayableAC").value) || null,
+            WagesAc: parseInt(document.getElementById("ddlWagesAC").value) || null,
+            WagesPayAc: parseInt(document.getElementById("ddlWagesPayableAC").value) || null,
+            ProdIncAc: parseInt(document.getElementById("ddlProductionIncentiveAC").value) || null,
+            ProdIncPayAc: parseInt(document.getElementById("ddlProductionIncentivePayableAC").value) || null,
+            ExGratiaAc: parseInt(document.getElementById("ddlExGratiaAC").value) || null,
+            ExGratiaPayAc: parseInt(document.getElementById("ddlExGratiaPayableAC").value) || null,
+            OtherMthDedAc: parseInt(document.getElementById("ddlOtherMonthlyDeductionAC").value) || null,
+            LoanAc: parseInt(document.getElementById("ddlLoanAC").value) || null,
+         };
+         
+         }
+
+
+      function GetVTypeList(selectedValue=null) {
+          $.ajax({
+              url: '@Url.Action("GetVTypeList", "PostingParameterSalary")',
+              type: 'GET',
+              dataType: 'json',
+              success: function (response) {
+                  if (response.status) {
+                      const $DropdownId = $('#ddlVoucherType');
+                      $DropdownId.empty();
+                      $DropdownId.append('<option value="">- Select Vtype -</option>');
+
+                      $.each(response.data, function (index, item) {
+                          $DropdownId.append(`
+                              <option value="${item.CODE}">${item.CODE} || ${item.NAME}</option>
+                          `);
+                      });
+
+                      $DropdownId.select2({
+                          placeholder: "- Select -",
+                          allowClear: true
+                      });
+
+                      if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                          $DropdownId.val(selectedValue).trigger('change');
+                      }
+                      else {
+                          $DropdownId.val('').trigger('change');
+                      }
+
+                  } else {
+                      toastr.error("data Load failed");
+                  }
+              },
+              error: function (xhr, status, error) {
+                  toastr.error("data Load failed", error);
+              }
+          });
+      }
+
+
+    function GetDocTypeList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetDocList", "PostingParameterSalary")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    console.log(response.data);
+                    const $dropdownId = $('#ddlDocType');
+                    $dropdownId.empty();
+                    $dropdownId.append('<option value="">- Select Vtype -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdownId.append(`
+                            <option value="${item.Name}">${item.Name}</option>
+                        `);
+                    });
+
+                    $dropdownId.select2({
+                        placeholder: "- Select Vtype -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Data load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed", error);
+            }
+        });
+    }
+
+
+    function GetPartyList(dropdownId, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "PostingParameterSalary")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdownId = $(`#${dropdownId}`);  // Correct variable reference
+                    $dropdownId.empty();
+                    $dropdownId.append('<option value="">- Select -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $dropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Data load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed", error);
+            }
+        });
+    }
+
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toISOString().split('T')[0];
+      }
+
+      function parseIntSafe(value) {
+          const parsed = parseInt(value, 10);
+          return isNaN(parsed) ? null : parsed;
+      }
+
+      function parseFloatSafe(value) {
+          const parsed = parseFloat(value);
+          return isNaN(parsed) ? null : parsed;
+      }
+
+       function parseDate(dateStr) {
+          if (!dateStr) return null;
+          const parts = dateStr.split(/[-\/]/);
+          if (parts.length === 3) {
+              let [day, month, year] = parts.map(p => parseInt(p, 10));
+              if (year < 1000) year += 2000;
+              return new Date(year, month - 1, day);
+          }
+          return null;
+       }
+
+      function toNullableInt(val) {
+          const parsed = parseInt(val);
+          return isNaN(parsed) ? null : parsed;
+      }
+
+      function toNullableDate(val) {
+          const date = new Date(val);
+          return isNaN(date.getTime()) ? null : val;
+      }
+
+      function toNullableString(val) {
+        return val?.trim() || null;
+      }
+
+      function allowOnlyDecimal(input) {
+        input.value = input.value
+          .replace(/[^0-9.]/g, '')
+          .replace(/(\..*)\./g, '$1');
+      }
+
+      function allowOnlyNumbers(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+      }
+
+      function setFieldsEnabled(enabled) {
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.disabled = !enabled;
+          }
+        });
+      }
+
+
+      function parseDecimalSafe(val) {
+          const num = parseFloat(val);
+          return isNaN(num) ? null : num;
+      }
+
+      function setEnterKeyFocus(sequence) {
+                 sequence.forEach((id, index) => {
+                     $(`#${id}`).on('keypress', function (e) {
+                         if (e.key === 'Enter') {
+                             e.preventDefault();
+                             if (index + 1 < sequence.length) {
+                                 $(`#${sequence[index + 1]}`).focus();
+                             }
+                         }
+                     });
+                 });
+      }
+
+      async function GetDocData(MasterTblId, readOnly) {
+          try {
+              const response = await $.ajax({
+                  url: '/PostingParameterSalary/GetPostingParameterSalaryForUpdate',
+                  type: 'GET',
+                  data: { Vtype: MasterTblId }
+              });
+              if (response.status) {
+                  console.log(response.data);
+                  await fillHeaderData(response.data);
+                  if (readOnly === 'true') {
+                      $('#btn-save, #cancelBtn').hide();
+                      disableAllFields();
+                  } else {
+                      $('#btn-save, #cancelBtn').show();
+                      enableAllFields();
+                  }
+              } else {
+                  toastr.error('No data returned.');
+              }
+          } catch (error) {
+              toastr.error('Failed to load data.');
+              console.error(error);
+          }
+      }
+
+      function enableAllFields() {
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = false;
+        });
+      }
+
+      function disableAllFields() {
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+      }
+
+</script>
+
+
+

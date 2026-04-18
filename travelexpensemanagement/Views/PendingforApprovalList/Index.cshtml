@@ -1,0 +1,435 @@
+﻿@{
+    ViewBag.Title = "Master Insert";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function redirectToDashboard() {
+            window.location.href = '@Url.Action("Index", "Dashboard")';
+        }
+    </script>
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+            font-size: 12px;
+        }
+
+        .table thead th i {
+            margin-right: 6px;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        .btn-sm {
+            padding: 2px 6px;
+        }
+        .editBtn, .updateBtn {
+            margin-right: 4px;
+        }
+        select.form-control {
+            font-size: 12px;
+            height: 25px !important;
+            padding: 0 5px;
+        }
+        .table td, .table th {
+            padding: .35rem !important;
+        }
+        .bg-warning {
+            background-color: gray !important;
+            color: #fff;
+        }
+        #rowContainerReturn .form-control,
+        #rowContainerReturn .form-select {
+            min-height: 33px !important;
+            width: 100% !important;
+            font-size: 12px !important;
+        }
+        #rowContainerReturn .btn {
+            padding: 6px 10px;
+        }
+        .modal-body {
+            position: relative;
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            padding: 0px !important;
+        }
+
+    </style>
+}
+<div class="row">
+    <div class="col-md-4">
+        <h5 class="mb-3 font-weight-bold text-dark">Pending for Approval Details List</h5>
+    </div>
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-4">
+        <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "RequestforTravel")'" style="font-size: 9px;height: 28px; line-height: 1px; float: right;" type="submit" class="btn btn-primary">
+            Add Request Travel
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover mb-0" id="approvalTable">
+            <thead style="background-color: #1f4e79; color: white;">
+                <tr>
+                    <th>SrNo</th>
+                    <th>User Name</th>
+                    <th>Send Date</th>
+                    <th>Remarks</th>
+                    <th>Status</th>
+                    <th>SendName</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- View Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <!-- large modal -->
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1f4e79; color: #ffff; height: 50px;">
+                <h6 class="modal-title">Journey Details</h6>
+                <button type="button" class="btn-close" style="font-size: small;" data-bs-dismiss="modal" aria-label="Close">X</button>
+            </div>
+            <div class="modal-body">
+                <div id="JourneyDetailsCard" class="card shadow-sm border-0">
+                    <div class="card shadow-sm border-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0" id="travelJourneyDetails">
+                                <thead style="background-color: #1f4e79; color: white;">
+                                    <tr>
+                                        <th style="font-size: 12px;">Journey ID</th>
+                                        <th style="font-size: 12px;">Request ID</th>
+                                        <th style="font-size: 12px;">From</th>
+                                        <th style="font-size: 12px;">To</th>
+                                        <th style="font-size: 12px;">Date</th>
+                                        <th style="font-size: 12px;">Cost</th>
+                                        <th style="font-size: 12px;">Purpose</th>
+                                        <th style="font-size: 12px;">Type</th>
+                                        <th style="font-size: 12px;">From/To</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination" class="p-2 text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Display List on Modal Popup Start Block *@
+<script>
+        $(document).on('click', '.Vewbtn', function () {
+        var row = $(this).closest('tr');
+        var requestId = row.data('requestid');
+        $('#modalRequestId').text(requestId);
+        var myModal = new bootstrap.Modal(document.getElementById('viewModal'));
+        myModal.show();
+    });
+</script>
+<script>
+    $(document).on('click', '.Vewbtn', function () {
+        var row = $(this).closest('tr');
+        var requestId = row.data('requestid');
+        $('#modalRequestId').text(requestId);
+        var myModal = new bootstrap.Modal(document.getElementById('viewModal'));
+        myModal.show();
+        loadModalContent(requestId);
+    });
+    function loadModalContent(requestId) {
+        let currentPageJourneyDetails = 1;
+        const pageSizeJourneyDetails = 10;
+        let cityFromOptionsHtmlJourneyDetails = '';
+        let cityToOptionsHtmlJourneyDetails = '';
+        let travelTypeOptionsHtmlJourneyDetails = '';
+
+        $.when(
+            loadCityDropdownOptionsJourneyDetails(),
+            loadCityDropdownOptionstoJourneyDetails(),
+            loadCityDropdownOptionstravelTypeJourneyDetails()
+        ).done(function () {
+            loadTravelRequestsJourneyDetails(currentPageJourneyDetails);
+        });
+        function loadTravelRequestsJourneyDetails(page) {
+            $.ajax({
+                url: '/PendingforApprovalList/GetPagedTravelRequestsJourneyDetails',
+                type: 'GET',
+                data: { page: page, pageSizeJourneyDetails: pageSizeJourneyDetails, requestId: requestId },
+                success: function (response) {
+                    if (response.success && response.travelRequests.length > 0) {
+                        const tbody = $('#travelJourneyDetails tbody');
+                        tbody.empty();
+                        response.travelRequests.forEach(function (row) {
+                            tbody.append(`
+                                <tr data-id="${row.journeyID}">
+                                    <td style="font-size: 12px;">${row.requestID}</td>
+                                    <td style="font-size: 12px;" class="editable">${row.travelFrom}</td>
+                                    <td style="font-size: 12px;" class="fromDropdownCellJourneyDetails" data-value="${row.travelFrom}"></td>
+                                    <td style="font-size: 12px;" class="toDropdownCellJourneyDetails" data-value="${row.travelTo}"></td>
+                                    <td style="font-size: 12px;" class="editable">${row.travelDate}</td>
+                                    <td style="font-size: 12px;" class="editable">${row.totalCost}</td>
+                                    <td style="font-size: 12px;" class="editable">${row.purpose}</td>
+                                    <td style="font-size: 12px;" class="travelTypeDropdownCellJourneyDetails" data-value="${row.travelType}"></td>
+                                    <td style="font-size: 12px;" class="editable">${row.journeytype}</td>
+                                </tr>
+                            `);
+                        });
+                        populateDropdownsJourneyDetails();
+                        renderPaginationJourneyDetails(response.totalCount, page);
+                    } else {
+                        $('#travelJourneyDetails tbody').html('<tr><td colspan="9">No data available.</td></tr>');
+                        $('#pagination').empty();
+                    }
+                }
+            });
+        }
+        function loadCityDropdownOptionsJourneyDetails() {
+            return $.ajax({
+                url: '/PendingforApprovalList/GetFromCityMasterddl1',
+                type: 'GET',
+                success: function (data) {
+                    cityFromOptionsHtmlJourneyDetails = '<option value="">-- Select From --</option>';
+                    data.forEach(item => {
+                        cityFromOptionsHtmlJourneyDetails += `<option value="${item.value}">${item.text}</option>`;
+                    });
+                }
+            });
+        }
+        function loadCityDropdownOptionstoJourneyDetails() {
+            return $.ajax({
+                url: '/PendingforApprovalList/GetFromCityMasterddlto',
+                type: 'GET',
+                success: function (data) {
+                    cityToOptionsHtmlJourneyDetails = '<option value="">-- Select To --</option>';
+                    data.forEach(item => {
+                        cityToOptionsHtmlJourneyDetails += `<option value="${item.value}">${item.text}</option>`;
+                    });
+                }
+            });
+        }
+        function loadCityDropdownOptionstravelTypeJourneyDetails() {
+            return $.ajax({
+                url: '/PendingforApprovalList/GetTransportationModeMasterList',
+                type: 'GET',
+                success: function (data) {
+                    travelTypeOptionsHtmlJourneyDetails = '<option value="">-- Select Mode --</option>';
+                    data.forEach(item => {
+                        travelTypeOptionsHtmlJourneyDetails += `<option value="${item.value}">${item.text}</option>`;
+                    });
+                }
+            });
+        }
+        function populateDropdownsJourneyDetails() {
+            $('#travelJourneyDetails .fromDropdownCellJourneyDetails').each(function () {
+                const selectedValue = $(this).data('value');
+                const select = $('<select class="form-control fromDropdown" disabled></select>').html(cityFromOptionsHtmlJourneyDetails);
+                select.val(selectedValue);
+                $(this).html(select);
+            });
+
+            $('#travelJourneyDetails .toDropdownCellJourneyDetails').each(function () {
+                const selectedValue = $(this).data('value');
+                const select = $('<select class="form-control toDropdown" disabled></select>').html(cityToOptionsHtmlJourneyDetails);
+                select.val(selectedValue);
+                $(this).html(select);
+            });
+
+            $('#travelJourneyDetails .travelTypeDropdownCellJourneyDetails').each(function () {
+                const selectedValue = $(this).data('value');
+                const select = $('<select class="form-control travelTypeDropdown" disabled></select>').html(travelTypeOptionsHtmlJourneyDetails);
+                select.val(selectedValue);
+                $(this).html(select);
+            });
+        }
+        function renderPaginationJourneyDetails(totalCount, currentPage) {
+            const totalPages = Math.ceil(totalCount / pageSizeJourneyDetails);
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="btn btn-sm ${i === currentPage ? 'btn-dark' : 'btn-light'}" data-page="${i}">${i}</button> `;
+            }
+            $('#pagination').html(html);
+        }
+        $(document).on('click', '#pagination button', function () {
+            currentPageJourneyDetails = parseInt($(this).data("page"));
+            loadTravelRequestsJourneyDetails(currentPageJourneyDetails);
+        });
+        $(document).on('click', '.btn-close', function (e) {
+        e.preventDefault(); // Prevent the default action (page refresh)
+        var myModal = new bootstrap.Modal(document.getElementById('viewModal'));
+        myModal.hide(); // Hide the modal manually
+        location.reload();
+    });
+
+    }
+</script>
+@* Display List on Modal Popup End Block *@
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+    let StatusOptionsHtml = '';
+
+    $(document).ready(function () {
+        $.when(loadStatusDropdown()).done(function () {
+            loadApprovalList(currentPage);
+        });
+
+        function loadApprovalList(page) {
+            $.ajax({
+                url: '/PendingforApprovalList/GetPendingforApprovalList',
+                type: 'GET',
+                data: { page: page, pageSize: pageSize },
+                success: function (response) {
+                    if (response.success && response.employeeList.length > 0) {
+                        const tbody = $('#approvalTable tbody');
+                        tbody.empty();
+                        response.employeeList.forEach(function (row) {
+                            tbody.append(`
+                                <tr data-id="${row.srNo}" data-requestid="${row.requestId}">
+                                    <td>${row.srNo}</td>
+                                    <td contenteditable="false" class="editable">${row.userName}</td>
+                                    <td contenteditable="false" class="editable">${row.sendDate}</td>
+                                    <td contenteditable="false" class="editable">${row.remarks}</td>
+                                    <td class="statusDropdownCell" data-value="${row.status}"></td>
+                                    <td contenteditable="false" class="editable">${row.send_Name}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-light editBtn" title="Edit">
+                                            <i class="fas fa-edit text-primary"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light updateBtn" title="Update" style="display:none;">
+                                            <i class="fas fa-check text-success"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light cancelBtn" title="Cancel" style="display:none;">
+                                            <i class="fas fa-times text-danger"></i>
+                                        </button>
+
+                                        <button class="btn btn-sm btn-light Vewbtn" title="View" >
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                        renderStatusDropdowns();
+                        renderPagination(response.totalCount, page);
+                    } else {
+                        
+                        $('#approvalTable tbody').html('<tr><td colspan="6">No data found</td></tr>');
+                        $('#pagination').empty();
+                    }
+                }
+            });
+        }
+
+        function loadStatusDropdown() {
+            return $.ajax({
+                url: '/PendingforApprovalList/GetStatussList',
+                type: 'GET',
+                success: function (data) {
+                    StatusOptionsHtml = '<option value="">--Select--</option>';
+                    data.forEach(item => {
+                        StatusOptionsHtml += `<option value="${item.value}">${item.text}</option>`;
+                    });
+                }
+            });
+        }
+
+        function renderStatusDropdowns() {
+            $('.statusDropdownCell').each(function () {
+                const selectedValue = $(this).data('value');
+                const select = $('<select class="form-control statusDropdown" disabled></select>').html(StatusOptionsHtml);
+                select.val(selectedValue);
+                $(this).html(select);
+            });
+        }
+
+        function renderPagination(totalCount, currentPage) {
+            const totalPages = Math.ceil(totalCount / pageSize);
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="btn btn-sm ${i === currentPage ? 'btn-dark' : 'btn-light'}" data-page="${i}">${i}</button> `;
+            }
+            $('#pagination').html(html);
+        }
+
+        $(document).on('click', '#pagination button', function () {
+            currentPage = parseInt($(this).data("page"));
+            loadApprovalList(currentPage);
+        });
+
+        $(document).on('click', '.editBtn', function () {
+            const row = $(this).closest('tr');
+            row.data('original', {
+                userName: row.find('td:eq(1)').text().trim(),
+                sendDate: row.find('td:eq(2)').text().trim(),
+                remarks: row.find('td:eq(3)').text().trim(),
+                status: row.find('.statusDropdown').val()
+            });
+
+            row.find('.editable').attr('contenteditable', 'true').addClass('bg-warning');
+            row.find('.statusDropdown').prop('disabled', false);
+            row.find('.editBtn').hide();
+            row.find('.updateBtn, .cancelBtn').show();
+        });
+
+        $(document).on('click', '.updateBtn', function () {
+            const row = $(this).closest('tr');
+            const srNo = row.data('id');
+            const requestId = row.data('requestid');
+
+                const updatedData = {
+        SrNo: srNo,
+        UserName: row.find('td:eq(1)').text().trim(),
+        SendDate: row.find('td:eq(2)').text().trim(),
+        Remarks: row.find('td:eq(3)').text().trim(),
+        Status: row.find('.statusDropdown').val(),
+        RequestId: parseInt(requestId) // or just leave it as number
+    };
+
+            console.log(updatedData)
+
+            $.ajax({
+                url: '/PendingforApprovalList/UpdateApprovalStatus',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedData),
+                success: function (res) {
+                    if (res.success) {
+                        toastr.success("Updated successfully!");
+                        row.find('.editable').attr('contenteditable', 'false').removeClass('bg-warning');
+                        row.find('.statusDropdown').prop('disabled', true);
+                        row.find('.editBtn').show();
+                        row.find('.updateBtn, .cancelBtn').hide();
+                    } else {
+                        toastr.error("Update failed: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $(document).on('click', '.cancelBtn', function () {
+            const row = $(this).closest('tr');
+            const original = row.data('original');
+
+            row.find('td:eq(1)').text(original.userName);
+            row.find('td:eq(2)').text(original.sendDate);
+            row.find('td:eq(3)').text(original.remarks);
+            row.find('.statusDropdown').val(original.status);
+
+            row.find('.editable').attr('contenteditable', 'false').removeClass('bg-warning');
+            row.find('.statusDropdown').prop('disabled', true);
+            row.find('.editBtn').show();
+            row.find('.updateBtn, .cancelBtn').hide();
+        });
+    });
+</script>

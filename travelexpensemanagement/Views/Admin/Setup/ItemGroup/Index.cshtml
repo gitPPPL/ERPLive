@@ -1,0 +1,343 @@
+﻿@{
+	ViewBag.Title = "ItemGroupMaster";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Item Group Master</legend>
+
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "ItemGroupList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+		</div>
+	</div> 
+
+
+<form id="ItemMasterGroup">
+	<input type="hidden" class="form-control" name="CODE" id="txtCODE">
+	<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+				<label>Name<span class="required">*</span></label>
+				<input type="text" class="form-control" name="NAME" id="NAME" placeholder="Enter Name">
+			</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Short Name</label>
+			<input type="text" class="form-control" name="SHORTNAME" id="SHORTNAME" placeholder="Enter Short Name">
+		</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Print Name</label>
+			<input type="text" class="form-control" id="PRINT_NAME" name="PRINT_NAME" placeholder="Enter Print Name">
+		</div>
+	</div>
+	</div>
+		
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+			<label>Main Group</label>
+			<select class="form-control" id="MGROUP_CODE" name="MGROUP_CODE">
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+			<label>Group Type</label>
+			<select class="form-control" id="GROUP_TYPE" name="GROUP_TYPE" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+			<label>Accounting Name</label>
+			<select class="form-control" id="ACT_CODE" name="ACT_CODE" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+			<label>Sauda Required</label>
+			<select class="form-control" id="SAUDA_REQ" name="SAUDA_REQ" >
+				<option value="Yes">YES</option>
+				<option value="No">NO</option>
+			</select>
+			</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+			<label>Sale Group</label>
+			<select class="form-control" id="SALE_GROUP" name="SALE_GROUP" >
+				<option value="">-- Other --</option>
+			</select>
+			</div>
+			</div>
+		</div>
+			
+		
+		<div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+			<div class="col-md-3">
+				<div class="btn-last">
+				<button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+			</div>
+			</div>
+		</div>
+
+</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		$(function () {
+			const urlParams = new URLSearchParams(location.search);
+			const rowId = parseInt(urlParams.get('id'));
+			const isReadOnly = urlParams.get('readOnly') === 'true';
+			if (!isNaN(rowId) && rowId > 0) {
+				LoadItemGroupById(rowId);
+
+				if (isReadOnly) {
+					 setFormReadOnly(); 
+				}
+			}
+		});
+		mainGroupList();
+		loadGroupTypeList();
+		loadSaleGroupList();
+		ActNameList();
+
+		$('#ACTIVE').on('change', function () {
+            const status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+	});
+
+	function mainGroupList() {
+		$.ajax({
+			url: '/ItemGroup/GetMainGrpDdl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#MGROUP_CODE');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Main Group --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				alert('Error loading module: ' + error);
+			}
+		});
+	}
+
+	function loadGroupTypeList() {
+		$.ajax({
+			url: '/ItemGroup/GetGroupTypeList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#GROUP_TYPE');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+	
+	function ActNameList() {
+		$.ajax({
+			url: '/ItemGroup/GetActNameDdl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#ACT_CODE');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Main Group --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				alert('Error loading module: ' + error);
+			}
+		});
+	}
+
+	function loadSaleGroupList() {
+		$.ajax({
+			url: '/ItemGroup/GetSaleGroupList', 
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#SALE_GROUP');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+
+	$('#ItemMasterGroup').on('submit', function (e) {
+		e.preventDefault(); 
+
+		if (!validateRequiredField('#NAME', 'Name')) return;
+					
+		var code = parseInt($('#txtCODE').val()) || 0;
+		var itemGroupData = {
+			CODE: code,
+			NAME: $('#NAME').val() || '',
+			SHORTNAME: $('#SHORTNAME').val() || '',
+			PRINT_NAME: $('#PRINT_NAME').val() || '',
+			MGROUP_CODE: $('#MGROUP_CODE').val() || '',	
+			GROUP_TYPE: $('#GROUP_TYPE').val() || '',	
+			Accounting_Name: $('#ACT_CODE').val() || '',	
+			Sauda_Required: $('#SAUDA_REQ').val() || '',	
+			SALE_GROUP: $('#SALE_GROUP').val() || '',	
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+		console.log("kks",itemGroupData)
+
+		$.ajax({
+			url: '/ItemGroup/SaveItemGroup', // Match this with your controller route
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(itemGroupData),
+			success: function (response) {
+			    if (response.success) {
+			        toastr.success("Saved successfully!");
+			        $('#ItemMasterGroup')[0].reset();
+					 setTimeout(function () {
+						 window.location.href = '/ItemGroupList/Index'; 
+					}, 1000);
+
+			    } else {
+					const message = response.message || "Something went wrong while saving.";
+					toastr.warning(message);			 
+				}
+			},
+			error: function (xhr) {
+			    let errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+			    toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+
+	function LoadItemGroupById(code) {
+	    $.ajax({
+	        url: '/ItemGroupList/GetItemGroupByCode',
+	        type: 'GET',
+	        data: { code: code },
+	        success: function (data) {
+				console.log('Get by item data',data);
+
+	            if (!data) {
+	                toastr.warning("No data found.");
+	                return;
+	            }
+	            // Set values for all form fields
+	            $('#txtCODE').val(data.code);
+	            $('#NAME').val(data.name);
+	            $('#SHORTNAME').val(data.shortname);
+	            $('#PRINT_NAME').val(data.prinT_NAME);
+	            $('#MGROUP_CODE').val(data.mgrouP_CODE).trigger('change');
+	            $('#GROUP_TYPE').val(data.grouP_TYPE).trigger('change');
+	            $('#ACT_CODE').val(data.accounting_Name).trigger('change');
+	            $('#SAUDA_REQ').val(data.sauda_Required).trigger('change');
+	            $('#SALE_GROUP').val(data.salE_GROUP).trigger('change');
+	            $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error loading ItemMasterGroup by ID:", status, error);
+	            toastr.error('Error: ' + xhr.responseText);
+	        }
+	    });
+	}
+
+	function setFormReadOnly() {
+		const form = $('#ItemMasterGroup');
+		form.find('input[type="text"], select, textarea').prop('disabled', true);
+		form.find('input[type="checkbox"]').prop('disabled', true);
+		form.find('button').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled'); // optional, for visual feedback
+	}
+
+
+</script>
+
+
+
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	</Script>
+@* Status Check end *@

@@ -1,0 +1,646 @@
+﻿@{
+    ViewBag.Title = "Task List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .task_fieldset {
+        border-radius: 5px !important;
+        padding: 15px 25px 15px 25px !important;
+        background-color: #f9f9f9 !important;
+        border: none !important;
+    }
+
+    .task_subheading {
+        font-size: 20px;
+        padding: 5px 14px;
+        background: linear-gradient(135deg, #003366, #dff4ff);
+        color: white;
+        border-radius: 6px;
+        box-shadow: 5px 4px 14px rgba(0, 0, 0, 0.3), -5px -5px 0px rgba(255, 255, 255, 0.3);
+        /*  margin-bottom: 20px; */
+    }
+
+    .btn-viewlist {
+        padding: 8px 18px;
+        background-color: #122f4d;
+        border-radius: 5px;
+        color: white;
+        font-size: 12px;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+        .btn-viewlist:hover {
+            padding: 8px 18px;
+            background-color: #ffffff;
+            border: 1px solid #122f4d;
+            border-radius: 5px;
+            color: #122f4d;
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+    .button-right-mg {
+        float: right;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .tasktable-head th {
+        position: sticky;
+        top: 0;
+        background-color: #e1e1e1;
+        color: #262626;
+        z-index: 50;
+        border-bottom: 1px Solid #525252;
+        font-weight: 600;
+    }
+
+    .tasktable-width th {
+        vertical-align: middle;
+        padding: 6px 12px;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .tasktable-width {
+        width: max-content; /* table grows based on content */
+        min-width: 100%;
+        table-layout: fixed; /* browser calculates width from rows */
+        border-collapse: collapse;
+    }
+
+    .btn-backtask {
+        background-color: #043668; /* Dark blue background on hover */
+        color: white; /* Text color changes to white */
+        border-color: #001a32; /* Border color changes */
+        border-radius: 18px;
+        font-weight: 400;
+        transition: all 0.3s ease; /* Smooth transition */
+        padding: 7px 16px;
+    }
+
+        .btn-backtask:hover {
+            border: 1px solid #043668;
+            background-color: white;
+            color: #001a32;
+            font-weight: 600;
+        }
+
+    .taskpagination-end {
+        justify-content: flex-end !important;
+        display: flex !important;
+        margin-top: 10px;
+    }
+    /* General styling for the search container */
+
+    /* Search Container */
+    .tasksearch-container {
+        display: flex;
+        align-items: center;
+        background-color: #e6e9ef; /* Light Grey */
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        max-width: 420px;
+        height: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s ease;
+    }
+
+        /* Focus Glow */
+        .tasksearch-container:focus-within {
+            box-shadow: 0 0 0 2px rgb(30 136 229 / 25%), 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Input */
+        .tasksearch-container input {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #1a2a4f; /* Dark navy text */
+            font-size: 14px;
+        }
+
+            /* Placeholder Navy */
+            .tasksearch-container input::placeholder {
+                color: #1a2a4f; /* Dark Navy Blue */
+                opacity: 0.7; /* Slightly soft */
+            }
+
+        /* Button */
+        .tasksearch-container button {
+            background-color: #1e88e5;
+            border: none;
+            width: 44px;
+            height: 100%;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+            .tasksearch-container button:hover {
+                background-color: #1565c0;
+            }
+
+    .card {
+        border-radius: 5px;
+        box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.12);
+        border: none;
+        margin-top: 14px;
+        display: flex;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #fff;
+        background-clip: border-box;
+        position: relative;
+    }
+    /* Alternate Row Highlight */
+    #tblTaskList tbody tr:nth-child(even) {
+        background-color: #e0f2ff; /* Light highlight */
+    }
+    /* Hover Effect */
+    #tblTaskList tbody tr:hover {
+        background-color: #dce6f8;
+        transition: 0.2s ease;
+    }
+    /* Action Button */
+    .btn-action {
+        padding: 4px 10px;
+        background-color: #1e88e5;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+        .btn-action:hover {
+            background-color: #1565c0;
+        }
+
+    table td {
+        border: 1px solid #d1d1d1;
+        /* padding: 5px 5px; */
+        position: relative;
+        vertical-align: middle;
+        font-weight: 200;
+        text-align: left;
+        padding: 4px 6px;
+        white-space: nowrap;
+        color: #2c2c2c;
+    }
+
+    .table-responsive {
+        max-height: 420px; /* table height */
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    #tblTaskList td:nth-child(4) {
+        width: 220px;
+    }
+    /* Task */
+
+</style>
+<fieldset class="task_fieldset">
+    <h2 class="task_subheading">Task List</h2>
+    <div class="row">
+        <div class="offset-md-6 col-md-6">
+            <div class="btn-rightalign">
+                <button onclick="window.location.href='@Url.Action("Index", "TaskDashboard")'" type="button" class="btn btn-backtask">
+                    <i class="fa fa-arrow-left"></i>Back To Task Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>From Date</label>
+                <input type="date" id="FromDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>To Date</label>
+                <input type="date" id="ToDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Assigned By</label>
+                <select id="AssignedBy" class="form-control">
+                    <option value="">--Select Assigned By--</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Assigned To</label>
+                <select id="AssignedTo" class="form-control">
+                    <option value="">--Select Assigned To--</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Status</label>
+                <select id="DDlStatus" class="form-control">
+                    <option value="">--Select--</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Complete">Complete</option>
+                    <option value="Close">Close</option>
+   
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Pending</label>
+                <select id="DDlPending" class="form-control">
+                    <option value="">--Select--</option>
+                    <option value="Urgent">Urgent</option>
+                    <option value="Non Urgent">Non Urgent</option>
+                   
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>CC</label>
+                <select id="DDlCC" class="form-control">
+                    <option value="">--Select--</option>
+
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>BCC</label>
+                <select id="DDlBCC" class="form-control">
+                    <option value="">--Select--</option>
+
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Task Day</label>
+                <select id="DDlTaskDay" class="form-control">
+                    <option value="">--Select--</option>
+                    <option value="Today">Today</option>
+                    <option value="Yesterday">Yesterday</option>
+                    <option value="ALL">ALL</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="button-right">
+                <button id="btn_ShowData" class="btn btn-success">
+                    <i class="fa fa-eye"></i>Show
+                </button>
+                <button id="btn_replytask" class="btn btn-print">
+                    <i class="fa fa-print"></i>With Reply Task
+                </button>
+                <button id="btn_othertask" class="btn btn-print">
+                    <i class="fa fa-print"></i>Other Task
+                </button>
+                <button id="btn_Showalltask" class="btn btn-print">
+                    <i class="fa fa-print"></i>Show All Task
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblTaskList" class="tasktable-width">
+                <colgroup>
+                    <col style="width: 90px;">
+                    <col style="width: 120px;">
+                    <col style="width: 120px;">
+                    <col style="width: 180px;">                   
+                    <col style="width: 120px;">
+                    <col style="width: 120px;">
+                    <col style="width: 120px;">
+                    <col style="width: 120px;">
+                    <col style="width: 90px;">
+                    <col style="width: 90px;">
+                    <col style="width: 150px;">
+                    <col style="width: 120px;">
+                    <col style="width: 150px;">
+                </colgroup>
+                <thead class="tasktable-head">
+                    <tr>
+                        <th>Task No</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Task Description</th>
+                        <th>Detail</th>
+                        <th>Assigned By</th>
+                        <th>Assigned To</th>
+                        <th>CC</th>
+                        <th>BCC</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Reply</th>
+                        <th>File</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+</fieldset>
+
+<!-- ================= TABLE SECTION ================= -->
+
+<script>
+     const urlParams = new URLSearchParams(window.location.search);
+     const Task = urlParams.get('Task');
+
+     $(document).ready(function () {
+
+         if (Task) {
+             LoadTaskList(Task);
+         }       
+
+            LoadDropDown();
+
+         $("#btn_ShowData").click(function () {
+             $("#tblTaskList tbody").empty();
+             ShowData();
+         });
+
+         $(document).on("click", ".btn-view", function () {
+             let taskId = $(this).data("taskno");
+             console.log("Task ID:", taskId);
+           window.location.href = '/ReplyTask/Index?Vno=' + taskId;
+         });
+
+
+            $('#btn_replytask').on('click', function () {
+            GetReport('ReportWtihReply');
+            });
+
+            $('#btn_othertask').on('click', function () {
+            GetReport('ReportWithotherTask');
+            });
+            $('#btn_Showalltask').on('click', function () {
+            GetReport('ReportShowAllTask');
+            });
+
+        $(document).on("click", ".btn-update", function () {
+            let row = $(this).closest("tr");
+            let model = {
+                V_NO: row.find(".TaskNo").val(),       
+                REMARKS: row.find(".Reply").val()
+            };
+          
+            $.ajax({
+                url: '/TaskList/SaveData',  
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (response) {
+                    if (response.success) {
+                         toastr.success("Saved successfully!");
+                    } else {
+                        toastr.error("Error: " + response.message);
+                    }
+                },
+                error: function (xhr) {
+                    toastr.error("Something went wrong: " + xhr.responseText);
+                }
+            });
+
+        });
+
+     });
+
+     // ================= ADD ROW =================
+       function addRow(data) {
+        let row = `
+        <tr class="no-border-input">        
+            <td> <input class="form-control TaskNo" value="${data.TaskNo || ''}" readonly /> </td>
+            <td> <input type="date" class="form-control StartDate" value="${formatDate(data.StartDate)}" readonly /> </td>
+            <td> <input type="date" class="form-control EndDate" value="${formatDate(data.EndDate)}" readonly /> </td>
+            <td> <input class="form-control Task" value="${data.Task || ''}" readonly />  </td>
+            <td> <input class="form-control Detail" value="${data.Detail || ''}" readonly />  </td>
+            <td> <input class="form-control AssignedBy" value="${data.AssignedBy || ''}" readonly />  </td>
+            <td> <input class="form-control AssignedTo" value="${data.AssignedTo || ''}" readonly />  </td>
+            <td> <input class="form-control CCTo" value="${data.CCTo || ''}" readonly />  </td>
+            <td> <input class="form-control BCCTo" value="${data.BCCTo || ''}" readonly />  </td>
+            <td> <input class="form-control Status" value="${data.Status || ''}" readonly />  </td>
+            <td> <input class="form-control Priority" value="${data.Priority || ''}" readonly />  </td>
+            <td> <input class="form-control Reply" value="${data.Reply || ''}"  />  </td>
+            <td> <input class="form-control File" value="${data.File || ''}" readonly />  </td>
+
+            <td> 
+                <i class="fas fa-eye btn-view" data-taskno="${data.TaskNo}" title="View" style="cursor:pointer;"></i>
+
+                <i class="fas fa-edit btn-update me-2" data-taskno="${data.TaskNo}"  title="Update" style="cursor:pointer;color:green;"></i>
+
+                <i class="fas fa-trash text-danger" onclick="deleteTemp('${data.TaskNo}')" title="Delete" style="cursor:pointer;"></i>
+            
+            </td>
+
+        </tr>`;
+
+        $("#tblTaskList tbody").append(row);
+    }
+
+     // ================= DROPDOWNS =================
+    async function LoadDropDown() {
+         try {
+             await Promise.all([
+                 DDLAssignedBy(),
+                 DDlCC(),
+                 DDlBCC(),
+                 DDlAssignedTo()
+             ]);
+         } catch (error) {
+             console.error("Error loading dropdowns:", error);
+         }
+     }
+
+    async function DDLAssignedBy() {
+         const res = await fetch('/TaskList/DDLDropdown');
+         const data = await res.json();
+         const ddl = $('#AssignedBy');
+         ddl.empty().append('<option value="">-- Select Assigned By --</option>');
+         data.forEach(item => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+     }
+
+    async function DDlCC() {
+         const res = await fetch('/TaskList/DDLDropdown');
+         const data = await res.json();
+         const ddl = $('#DDlCC');
+         ddl.empty().append('<option value="">-- Select CC --</option>');
+         data.forEach(item => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+     }
+
+    async function DDlBCC() {
+         const res = await fetch('/TaskList/DDLDropdown');
+         const data = await res.json();
+         const ddl = $('#DDlBCC');
+         ddl.empty().append('<option value="">-- Select BCC --</option>');
+         data.forEach(item => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+     }
+
+    async function DDlAssignedTo() {
+         const res = await fetch('/TaskList/DDLDropdown');
+         const data = await res.json();
+         const ddl = $('#AssignedTo');
+         ddl.empty().append('<option value="">-- Select Assigned To --</option>');
+         data.forEach(item => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+     }
+
+     // ================= LOAD TASK LIST =================
+    async function LoadTaskList(TASK) {
+         try {
+             const res = await $.ajax({
+                 url: '/TaskList/GetTaskListData',
+                 type: 'GET',
+                 data: { TASK }
+             });
+
+             $("#tblTaskList tbody").empty();
+             console.log('List data' , res.data);
+             for (const item of res.data) {
+                 addRow({
+                     TaskNo: item.V_no,
+                     StartDate: formatDate(item.DEPT_STATUSDATE),
+                     EndDate: formatDate(item.QC_STATUSDATE),
+                     Task: item.ITEM_NAME,
+                     Detail: item.REMARKS2,
+                     AssignedBy: item.FROM_DEPTNAME,
+                     AssignedTo: item.DEPT_NAME,
+                     CCTo: item.CCName,
+                     BCCTo: item.BCCName,
+                     Status: item.UOM_NAME,
+                     Priority: item.MAKE_NAME,
+                     Reply: item.REMARKS,
+                     File: item.RFILE_PATH
+                 });
+             }
+         } catch (error) {
+             console.error("Error loading task list:", error);
+         }
+     }
+
+     // ================= SHOW DATA =================
+    async function ShowData() {
+         try {
+             const res = await $.ajax({
+                 url: '/TaskList/GetShowData',
+                 type: 'GET',
+                    data: {
+                    FromDate:  $('#FromDate').val()  || null,
+                    ToDate:    $('#ToDate').val()    || null,
+                    USERCODE:  $('#DDlCC').val()     || null,
+                    UOM_CODE:  $('#DDlBCC').val()    || null,
+                    DEPT_CODE: $('#AssignedTo').val()|| null,
+                    FROM_DEPT: $('#AssignedBy').val()|| null,
+                    Status:    $('#DDlStatus').val() || null
+                    }
+             });
+
+             $("#tblTaskList tbody").empty();
+
+             for (const item of res.data) {
+                 addRow({
+                     TaskNo: item.V_no,
+                     StartDate: formatDate(item.DEPT_STATUSDATE),
+                     EndDate: formatDate(item.QC_STATUSDATE),
+                     Task: item.ITEM_NAME,
+                     Detail: item.REMARKS2,
+                     AssignedBy: item.FROM_DEPTNAME,
+                     AssignedTo: item.DEPT_NAME,
+                     CCTo: item.CCName,
+                     BCCTo: item.BCCName,
+                     Status: item.UOM_NAME,
+                     Priority: item.MAKE_NAME,
+                     Reply: item.REMARKS,
+                     File: item.RFILE_PATH
+                 });
+             }
+         } catch (error) {
+             console.error("Error loading task list:", error);
+         }
+     }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+     async function GetReport(ReportAction) {
+        try {
+            debugger
+            const res = await $.ajax({
+                url: '/TaskList/GetReportWithReplyTaskExcel',
+                type: 'GET',
+                dataType: 'json',   // ensure JSON response
+                data: {
+                    FromDate: $('#FromDate').val() || null,
+                    ToDate: $('#ToDate').val() || null,
+                    USERCODE: $('#DDlCC').val() || null,
+                    UOM_CODE: $('#DDlBCC').val() || null,
+                    DEPT_CODE: $('#AssignedTo').val() || null,
+                    FROM_DEPT: $('#AssignedBy').val() || null,
+                    Status: $('#DDlStatus').val() || null,
+                    ReportAction: ReportAction
+                }
+            });
+
+            if (res && res.Status === true) {
+                toastr.success(res.message, "Task Report Generated", {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 4000
+                });
+            } else {
+                toastr.info(res?.message || "No data found.");
+            }
+
+        } catch (error) {
+            console.error("Error generating report:", error);
+            toastr.error("Something went wrong while generating the report.");
+        }
+    }
+
+</script>
+

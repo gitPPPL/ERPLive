@@ -1,0 +1,193 @@
+﻿@{
+    ViewBag.Title = "Bonus Creation Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Bonus Creation Entry</legend>
+    <form id="BonusCreationEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumWagesLimit">Wages Limit Monthly</label>
+                    <input type="number" class="form-control" id="NumWagesLimit" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumBonusApplicable">Bonus Applicable for Maximum Wages Early</label>
+                    <input type="number" class="form-control" id="NumBonusApplicable" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumBonusLimit">Bonus Limit</label>
+                    <input type="number" class="form-control" id="NumBonusLimit" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumBonus">Bonus %</label>
+                    <input type="number" class="form-control" id="NumBonus" />
+                </div>
+            </div>
+        </div>
+        <fieldset>
+            <legend class="sub-legend">Print</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="radio-label" id="rdBonusList">
+                            <input type="radio" name="Print" checked value="BonusList">
+                            Bonus List
+                        </label>
+                        <label class="radio-label" id="rdBonusSummary">
+                            <input type="radio" name="Print" value="BonusSummary">
+                            Bonus Summary
+                        </label>
+                        <label class="radio-label" id="rdFormC">
+                            <input type="radio" name="Print" value="FormC">
+                            Form C
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <div class="form-row">
+                            <input type="checkbox" id="ChkIgnoreNilBonus">
+                            <label class="checkbox-label" for="ChkIgnoreNilBonus">Ignore Nil Bonus</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-print" id="btn_print"><i class="fa fa-print"></i>Print</button>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="row">
+            <div class="offset-md-6 col-md-6">
+                <div class="btn-mt button-right">
+                    <button id="btn_create" type="button" class="btn btn-primary"><i class="fa fa-plus-circle"></i>Create Bonus</button>
+                    <button id="btn_decreate" type="button" class="btn btn-primary"><i class="fa fa-minus-circle"></i>Decreate Bonus</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+
+
+    $(document).ready(function(){
+
+        $('#NumWagesLimit').val(21000);
+        $('#NumBonusApplicable').val(84000);
+        $('#NumBonusLimit').val(7000);
+        $('#NumBonus').val(8.33)
+
+        $('#btn_create').click(function () {
+            const payload = {
+                WagesLimitMonthly: parseFloat($('#NumWagesLimit').val()),
+                BonusApplYearly:   parseFloat($('#NumBonusApplicable').val()),
+                BonusLimit:        parseFloat($('#NumBonusLimit').val()),
+                BonusPer:          parseFloat($('#NumBonus').val())
+            };
+            jsBonusCreation.createBonus(payload);
+        });
+
+        $('#btn_decreate').click(function () {
+            jsBonusCreation.DecreateBonus();
+        });
+
+        $('#btn_print').click(function(){
+            jsBonusCreation.PrintReport();
+        });
+
+    });
+
+
+    const jsBonusCreation = {         
+        createBonus: (payload) => {
+           $.ajax({
+             url: '@Url.Action("CreateBonus", "BonusCreation")',
+             type: 'POST',
+             data: JSON.stringify(payload),                         // top-level ParamBonus
+             contentType: 'application/json; charset=utf-8',
+             dataType: 'json',
+             success: function (response) {
+               if (response.success) {
+                 toastr.success(response.message || "Bonus created successfully.");
+               } else {
+                 toastr.warning(response.message || "Bonus creation failed.");
+               }
+             },
+             error: function () {
+               toastr.error("An error occurred while creation.");
+             }
+          });
+        },
+
+        DecreateBonus :()=> {
+            $.ajax({
+             url: '@Url.Action("DecreateBonus", "BonusCreation")',
+             type: 'POST',
+             data: null,
+             contentType: 'application/json; charset=utf-8',
+             dataType: 'json',
+             success: function (response) {
+               if (response.success) {
+                 toastr.success(response.message || "De-Created Bonus successfully.");
+               } else {
+                 toastr.warning(response.message || "De-Creation failed.");
+               }
+             },
+             error: function () {
+               toastr.error("An error occurred while De-Creation.");
+             }
+           });
+        },
+
+        PrintReport:()=> {
+
+            let rptname ='';
+            let pubReportPath = '';
+
+            if ( $('#rdFormC').attr('checked') ) {
+                rptname = (pubReportPath + "\PAYROL28.rpt")
+                //REP.DataDefinition.FormulaFields("rptname").Text = "'Form C List'"
+            }
+            else if ( $('#rdBonusList').attr('checked') ) {
+                rptname = (pubReportPath + "\PAYROL3.rpt")
+                //REP.DataDefinition.FormulaFields("rptname").Text = "'Bonus List'"
+            } else  if ( $('#rdBonusSummary').attr('checked') ) {
+                rptname = (pubReportPath + "\PAYROL4.rpt")
+                //REP.DataDefinition.FormulaFields("rptname").Text = "'Bonus Summary'"
+            }
+
+             $.ajax({
+                 url: 'https://',  // url print
+                 type: 'POST',
+                 data: null,
+                 contentType: 'application/json; charset=utf-8',
+                 dataType: 'json',
+                 success: function (response) {
+                   if (response.success) {
+                     toastr.success(response.message || "Print successfully.");
+                   } else {
+                     toastr.warning(response.message || "Print failed.");
+                   }
+                 },
+                 error: function () {
+                   toastr.error("An error occurred while Printing.");
+                 }
+             });
+           
+        },
+
+
+    };
+
+
+</script>
+

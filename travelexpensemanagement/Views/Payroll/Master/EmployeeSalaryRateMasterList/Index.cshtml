@@ -1,0 +1,242 @@
+﻿@{
+    ViewBag.Title = "Employee Salary Rate Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Employee Salary Rate Master List</legend>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="input-group">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-8 btn-align">
+            <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "EmployeeSalaryRateMaster")'" type="submit" class="btn btn-primary">
+                <i class="fa fa-plus"></i>Add Employee Salary
+            </button>
+            <button class="btn btn-print">
+                <i class="fa fa-print"></i> Print
+            </button>
+            <button class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+            <button class="btn btn-mail">
+                <i class="fa fa-envelope"></i> Mail
+            </button>
+            <button class="btn btn-send">
+                <i class="fa fa-paper-plane"></i> Approval Send
+            </button>
+            <button class="btn btn-approved">
+                <i class="fa fa-check"></i> Approved
+            </button>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblEmployeeSalaryRateMaster" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th><input type="checkbox" id="chkAll" /></th>
+                        <th>Code</th>
+                        <th>Search Code</th>
+                        <th>Eff. Date</th>
+                        <th>Emp Name</th>
+                        <th>Basic</th>
+                        <th>H.R.A</th>
+                        <th>Conveyance</th>
+                        <th>Others/Spl</th>
+                        <th>Uniformgw</th>
+                        <th>Spl</th>
+                        <th>Uniformsal</th>
+                        <th>Mobile All</th>
+                        <th>Medical Amount</th>
+                        <th>Insurance</th>
+                        <th>Total Salary</th>
+                        <th>GW Salary</th>
+                        <th>Duty</th>
+                        <th>Spl_allow2</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+
+        </div>
+    </div>
+    <div class="pagination-wrapper">
+        <ul class="pagination" id="tablePagination"></ul>
+    </div>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        $("#chkAll").on("change", function () {
+            $(".rowCheckbox").prop("checked", this.checked);
+        });
+    });
+</script>
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadAllEmployeeSalaryRates();
+    });
+
+    function loadAllEmployeeSalaryRates() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/EmployeeSalaryRateMasterList/GetAllEmployeeSalaryRates',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const employees = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                let tbody = $('#tblEmployeeSalaryRateMaster tbody');
+                tbody.empty();
+
+                if (employees.length === 0) {
+                    tbody.append('<tr><td colspan="21" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                $.each(employees, function (index, emp) {
+                    tbody.append(`
+                        <tr>
+                            <td><input type="checkbox" class="rowCheckbox" /></td>
+                            <td>${emp.code || ''}</td>
+                            <td>${emp.searcH_CODE || ''}</td>
+                            <td>${emp.efF_DATE || ''}</td>
+                            <td>${emp.emP_NAME || ''}</td>
+                            <td>${emp.basic || 0}</td>
+                            <td>${emp.hra || 0}</td>
+                            <td>${emp.conveyance || 0}</td>
+                            <td>${emp.others || 0}</td>
+                            <td>${emp.uniform || 0}</td>
+                            <td>${emp.spL_ALLOW || 0}</td>
+                            <td>${emp.uniformSalary || 0}</td>
+                            <td>${emp.mobilE_ALLOW || 0}</td>
+                            <td>${emp.medicalAmount || 0}</td>
+                            <td>${emp.insurance || 0}</td>
+                            <td>${emp.toT_SALARY || 0}</td>
+                            <td>${emp.gW_SALARY || 0}</td>
+                            <td>${emp.duty || ''}</td>
+                            <td>${emp.spL_ALLOW2 || 0}</td>
+                            <td>${emp.active === 1 ? 'Active' : 'Inactive'}</td>
+
+                            <td>
+                                <i class="fas fa-edit text-primary" style="cursor: pointer;" title="Edit" onclick="editEmployeeSalaryRate(${emp.code})"></i>
+                                <i class="fas fa-eye text-secondary ms-2" style="cursor: pointer;" title="View" onclick="viewEmpSalaryMasterDetails(${emp.code})"></i>
+                                <i class="fas fa-trash text-danger" style="cursor:pointer;" title="Delete" onclick="deleteEmployeeSalaryRate(${emp.code})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading salary rates: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let paginationHtml = '';
+
+        if (currentPage > 1) {
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHtml += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+                    onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(paginationHtml);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllEmployeeSalaryRates();
+    }
+
+    $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadAllEmployeeSalaryRates();
+    });
+
+    function editEmployeeSalaryRate(code) {
+        window.location.href = '/EmployeeSalaryRateMaster/Index?id=' + encodeURIComponent(code);
+    }
+    function viewEmpSalaryMasterDetails(branchId) {
+        window.location.href = '/EmployeeSalaryRateMaster/Index?id=' + encodeURIComponent(branchId) + '&readOnly=true';
+    }
+
+    function deleteEmployeeSalaryRate(code) {
+        alert('Testing'+code)
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action will permanently delete this employee's salary record.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/EmployeeSalaryRateMasterList/DeleteEmpSalaryByCode',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                              loadAllEmployeeSalaryRates();
+                            });
+                        } else {
+                            Swal.fire('Failed', response.message || 'Failed to delete.', 'warning');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+                        console.error('Delete error:', error);
+                    }
+                });
+            }
+        });
+    }
+
+</script>

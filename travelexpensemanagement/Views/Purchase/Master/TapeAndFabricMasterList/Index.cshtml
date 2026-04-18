@@ -1,0 +1,251 @@
+﻿@{
+	ViewBag.Title = "Tape And Fabric Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Tape And Fabric Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TapeAndFabricMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Tape and Fabric 
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblTapeAndFabricMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Name</th>						 
+						<th>Mesh Name</th>
+						<th style="display:none;">Std Gram</th>
+						<th>Min Gram</th>
+						<th>Max Gram</th>
+						<th>Gsm</th>
+						<th>Denier</th>
+						<th>Unit Name</th>						 
+						<th>Color Name</th>
+						<th style="display:none;">Width</th>
+						<th style="display:none;">GPD</th>
+						<th style="display:none;">Min GPD</th>
+						<th style="display:none;">Max GPD</th>
+						<th style="display:none;">Std Strength</th>
+						<th style="display:none;">Strength Max</th>
+						<th style="display:none;">Strength Min</th>
+						<th style="display:none;">Std Elong</th>
+						<th style="display:none;">Elong Max</th>
+						<th style="display:none;">Elong Min</th>
+						<th style="display:none;">Unlam Fab</th>
+						<th style="display:none;">Lam Fab</th>
+						<th>Active</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<div class="pagination-wrapper">
+		<ul class="pagination" id="tablePagination"></ul>
+	</div>
+</fieldset>
+
+
+<script>
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		GetMasterDataList();
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			GetMasterDataList();
+		});
+	});
+
+	function GetMasterDataList() {
+		const searchTerm = $('#searchBox').val().trim();
+		$.ajax({
+			url: '@Url.Action("GetTape_FabricList", "TapeAndFabricMasterList")',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const mastListData = res.data || [];
+				const totalCount = res.totalCount || 0;
+				let tbody = $('#tblTapeAndFabricMaster tbody');
+				tbody.empty();
+				console.log(mastListData);
+				if (mastListData.length === 0) {
+					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+					return;
+				}
+				$.each(mastListData, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td class="code d-none">${item.CODE}</td>
+							<td>${item.NAME}</td>
+							<td>${item.MESH_CODE}</td>
+							<td class="d-none">${item.STD_GRAM}</td>
+							 <td>${item.MIN_GRAM}</td>
+							<td>${item.MAX_GRAM}</td>
+							<td>${item.GSM}</td>
+							 <td>${item.DENIER}</td>
+							<td>${item.UNIT_NAME}</td>
+							<td>${item.COLOR_CODE}</td>
+							 <td class="d-none">${item.WIDTH}</td>
+							<td class="d-none">${item.GPD}</td>
+							<td class="d-none">${item.MIN_GPD}</td>
+							 <td class="d-none">${item.MAX_GPD}</td>
+							<td class="d-none">${item.STD_STRENGTH}</td>
+							<td class="d-none">${item.STRENGTH_MAX}</td>
+							 <td class="d-none">${item.STRENGTH_MIN}</td>
+							<td class="d-none">${item.STD_ELONG}</td>
+							<td class="d-none">${item.ELONG_MAX}</td>
+							<td class="d-none">${item.ELONG_MIN}</td>
+							<td class="d-none">${item.UNLAM_FAB}</td>
+							<td class="d-none">${item.LAM_FAB}</td>
+							<td>${item.ACTIVE === 1 ? 'Yes' : 'No'}</td>
+							<td>
+								<button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.CODE}')" title="Edit">
+									<i class="fas fa-edit"></i>
+								</button>
+								<button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.CODE}')" title="View Detail">
+									<i class="fas fa-eye"></i>
+								</button>
+								<button class="btn btn-sm btn-light btn-delete" title="Delete">
+									<i class="fas fa-trash text-danger"></i>
+								</button>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading PO list: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (total <= 0 || totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		GetMasterDataList();
+	}
+
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/TapeAndFabricMaster/Index?id=' + encodeURIComponent(rowId);
+	}
+
+	function viewMenuDetails(rowId) {
+		window.location.href = '/TapeAndFabricMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+	 $(document).on('click', '.btn-delete', function() {
+				const $row = $(this).closest('tr');
+				const CodeforDel = $row.find('.code').text().trim();
+				Swal.fire({
+					title: 'Are you sure you want to delete?',
+					text: "This action cannot be undone.",
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Yes, delete it!',
+					cancelButtonText: 'No, cancel!',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						$.ajax({
+							url: '/TapeAndFabricMasterList/DelTape_FabricMast',
+							type: 'DELETE',
+							data: { Code: CodeforDel },
+							success: function(data) {
+								if (data.status === true) {
+									Swal.fire(
+										'Deleted!',
+										'Your data has been deleted.',
+										'success'
+									);
+									$row.remove();
+									GetMasterDataList();
+								} else {
+									Swal.fire(
+										'Error!',
+										'There was an issue deleting the data.',
+										'error'
+									);
+								}
+							},
+							error: function(xhr, status, error) {
+								Swal.fire(
+									'Error!',
+									'Data could not be deleted: ' + error,
+									'error'
+								);
+							}
+						});
+					}
+				});
+	});
+
+</script>

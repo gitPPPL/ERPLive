@@ -1,0 +1,423 @@
+﻿@{
+    ViewBag.Title = "Shift Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Shift Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "ShiftMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="ShiftMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlShift">Shift <span class="required">*</span></label>
+                    <select class="form-control" id="ddlShift" name="Shift">
+                        <option selected disabled>--Select Shift--</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="G">G</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlDesignation">Designation <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDesignation" name="Designation">
+                        <option selected disabled>--Select Designation--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmShiftStartTime">Shift Start Time</label>
+                    <input type="time" class="form-control" id="TmShiftStartTime" name="ShiftStartTime" placeholder="Enter Shift Start Time">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmShiftEndTime">Shift End Time</label>
+                    <input type="time" class="form-control" id="TmShiftEndTime" name="ShiftEndTime" placeholder="Enter Shift End Time">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmShiftStartRangeFrom">Shift Start Range From</label>
+                    <input type="time" class="form-control" id="TmShiftStartRangeFrom" name="ShiftStartRangeFrom" placeholder="Enter Shift Start Range From">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmTo">To</label>
+                    <input type="time" class="form-control" id="TmTo" name="To" placeholder="Enter To">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumOTGrace">OT Grace (in Min)</label>
+                    <input type="number" class="form-control" id="NumOTGrace" maxlength="3" name="OTGrace" placeholder="Enter OT Grace">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumLateGrace">Late Grace (in Min)</label>
+                    <input type="number" class="form-control" id="NumLateGrace" name="LateGrace" maxlength="3" placeholder="Enter Late Grace">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                @*  <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div> *@
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const inputSequence = [
+    'ddlShift',
+    'ddlDesignation',
+    'TmShiftStartTime',
+    'TmShiftEndTime',
+    'TmShiftStartRangeFrom',
+    'TmTo',
+    'NumOTGrace',
+    'NumLateGrace'
+    ];
+
+
+    let PreviousShift;
+    let	previousDesignation;
+    let MasterTblId ;
+    let readOnly;
+
+    $(document).ready(function () {
+        getDesignation();
+
+        MasterTblId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+
+        if (MasterTblId) {
+            GetMasterDataList(MasterTblId, readOnly);
+        }
+
+        inputSequence.forEach((id, index) => {
+        $(`#${id}`).on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (index + 1 < inputSequence.length) {
+                    $(`#${inputSequence[index + 1]}`).focus();
+                }
+            }
+        });
+       });
+
+       
+
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            const masterData = collectFormData();
+            console.log(masterData);
+            if (!masterData.Shift || !masterData.DesignationCd) {
+                toastr.warning("Please fill all required fields");
+                return;
+            }
+
+            if (MasterTblId) {
+                EditMasterData(masterData);
+            } else {
+                SaveMasterData(masterData);
+            }
+        });
+    });
+
+    function SaveMasterData(masterData) {
+        if (!masterData.Shift) {
+            toastr.warning("Shift Shift Name is required.");
+            return;
+        }
+        checkExistOrNot(masterData.Shift, masterData.DesignationCd)
+            .done(function (data) {
+                if (data?.status && data?.exists) {
+                    toastr.warning("Duplicate Shift Name");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveShiftMast", "ShiftMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(masterData),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success('Data saved successfully.');
+                            resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/ShiftMasterList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+            })
+            .fail(function () {
+                toastr.error("Error while checking Shift name.");
+            });
+    }
+
+    function EditMasterData(masterData) {
+        if (PreviousShift !== masterData.Shift || previousDesignation!==masterData.DesignationCd) {
+            checkExistOrNot(masterData.Shift, masterData.DesignationCd)
+                .done(function (data) {
+                    if (data?.status && data?.exists) {
+                        toastr.warning("Duplicate Shift Name");
+                        return;
+                    }
+                    UpdateMasterData(masterData);
+                })
+                .fail(function () {
+                    toastr.error("Error while checking Shift Name.");
+                });
+        } else {
+            UpdateMasterData(masterData);
+        }
+    }
+
+    function UpdateMasterData(masterData) {
+        $.ajax({
+            url: '/ShiftMaster/UpdateShiftMast',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(masterData),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success('Data updated successfully.');
+                    resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/ShiftMasterList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    function GetMasterDataList(MasterTblId, readOnly) {
+        $.ajax({
+            url: '/ShiftMaster/GetShiftDetailsById',
+            type: 'GET',
+            data: { id: MasterTblId },
+            success: function (res) {
+                if (res.status && res.data) {
+                    console.log(res.data);
+                    fillFormFields(res.data);
+                    if (readOnly === 'true') {
+                        $('input, #ddlShift, #ddlDesignation').prop('disabled', true);
+                        $('#btn-save, #cancelBtn').hide();
+                    } else {
+                        $('input, #ddlShift, #ddlDesignation').prop('disabled', false);
+                        $('#btn-save, #cancelBtn').show();
+                    }
+                } else {
+                    toastr.warning('No data found for this ID.');
+                }
+            },
+            error: function () {
+                toastr.error('Failed to load data.');
+            }
+        });
+    }
+
+    function resetFields() {
+        $('#TxtCode, #TmShiftStartTime, #TmShiftEndTime, #TmShiftStartRangeFrom, #TmTo, #NumOTGrace, #NumLateGrace').val('');
+        $('#ddlShift, #ddlDesignation').prop('selectedIndex', 0);
+    }
+
+    function fillFormFields(dt) {
+        console.log(dt);
+        $('#TxtCode').val(dt.CODE);
+        $('#ddlShift').val(dt.SHIFT);
+        $('#ddlDesignation').val(dt.DESG_CODE);
+        $('#TmShiftStartTime').val(dt.SHIFT_STARTTIME);
+        $('#TmShiftEndTime').val(dt.SHIFT_ENDTIME);
+        $('#TmShiftStartRangeFrom').val(dt.FROM_START);
+        $('#TmTo').val(dt.TO_START);
+        $('#NumOTGrace').val(dt.OT_GRACE);
+        $('#NumLateGrace').val(dt.LATE_GRACE);
+        PreviousShift= dt.SHIFT;
+        previousDesignation=dt.DESG_CODE;
+
+        // getDesignation();
+        setTimeout(function () {
+        $('#ddlDesignation option').filter(function () {
+            return $(this).text().trim().toLowerCase() === dt.DESG_CODE.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+    }
+
+    function collectFormData() {
+        return {
+            Code: toNullableInt($('#TxtCode').val()),
+            Shift: toNullableString($('#ddlShift').val()),
+            DesignationCd: toNullableInt($('#ddlDesignation').val()),
+            Shift_StartTm: toNullableString($('#TmShiftStartTime').val()),
+            Shift_EndTm: toNullableString($('#TmShiftEndTime').val()),
+            From_start: toNullableString($('#TmShiftStartRangeFrom').val()),
+            To_start: toNullableString($('#TmTo').val()),
+            Ot_grace: toNullableInt($('#NumOTGrace').val()),
+            Late_grace: toNullableInt($('#NumLateGrace').val())
+        };
+    }
+
+
+    function checkExistOrNot(shiftCd, designationCd) {
+        return $.ajax({
+            url: '/ShiftMaster/getExistOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: { shift: shiftCd , designation:designationCd}
+        });
+    }
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+                if (MasterTblId) {
+                    GetMasterDataList(MasterTblId, readOnly);
+                } else {
+                    resetFields();
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+            }
+        });
+    });
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+     function allowOnlyNumbers(input) {
+              input.value = input.value.replace(/[^0-9]/g, '');
+     }
+
+    function setCheckboxValue(value) {
+        if (value == 1) {
+            $('#ChkProrataAllow').prop('checked', true);
+        } else {
+            $('#ChkProrataAllow').prop('checked', false);
+        }
+    }
+
+    function setActiveStatus(input) {
+        let isActive = input == 1;
+        $('#DdActive').prop('checked', isActive);
+        $('#DdActive').val(isActive ? 1 : 0);
+        $('#statusText').text(isActive ? 'Active' : 'Inactive');
+    }
+
+   
+
+    //     function getDesignation() {
+    //     $.ajax({
+    //         url: '@Url.Action("GetDesignationList", "ShiftMaster")',
+    //         type: 'GET',
+    //         dataType: 'json',           
+    //         success: function(data) {
+    //             if (data.status === true && Array.isArray(data.data)) {
+    //                 console.log(data.data);
+    //                 const $designationDropdown = $('#ddlDesignation');
+    //                 $designationDropdown.empty();
+    //                 $designationDropdown.append($('<option selected disabled>').val('').text('Select Designation Name'));
+    //                 data.data.forEach(function(item) {
+    //                     $designationDropdown.append($('<option>').val(item.CODE).text(item.NAME));
+    //                 });
+    //             }
+    //         },
+    //         error: function(xhr) {
+    //             toastr.error("Data load failed");
+    //         }
+    //     });
+    // }
+
+    function getDesignation(){
+        $.ajax({
+            url: '@Url.Action("GetDesignationList", "ShiftMaster")',
+            type:'Get',
+            datatype:'json',
+            success:function(response){
+                if(response.status==true){
+                var $designationDropdown=$('#ddlDesignation');
+                $designationDropdown.empty();
+                $designationDropdown.append('<option selected disabled>- Select Designation Name-</option>');
+                $.each(response.data, function(index, item){
+                    $designationDropdown.append('<option value="'+ item.CODE +'">'+ item.NAME +'</option>');
+                });
+                }else{
+                    toastr.error("Country Name Load failed");
+                }
+            },
+            error:function(xhr,status, error){
+            toastr.error("Country Name Load failed", xhr.error);
+            }
+
+        });
+    }
+
+</script>

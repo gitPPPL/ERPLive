@@ -1,0 +1,206 @@
+﻿@{
+	ViewBag.Title = "Gram Size Conversion Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Gram Size Conversion Master List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "GramSizeConversionMaster")'" type="submit" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print" onclick="printCityMasterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblGramSizeMasterList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Code</th>
+						<th>Item Type</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+
+<script>
+
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadAllMenus();
+
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			loadAllMenus();
+		});
+	});
+
+	function loadAllMenus() {
+		  const searchTerm = $('#searchBox').val();
+
+		  $.ajax({
+			  url: '/GramSizeConversionMasterList/GetList',
+			  type: 'GET',
+			  dataType: 'json',
+			  data: {
+				  searchTerm: searchTerm,
+				  pageNumber: currentPage,
+				  pageSize: pageSize
+			  },
+			  success: function (res) {
+				  if (!res.success) {
+					  toastr.error("Failed to load data.");
+					  return;
+				  }
+
+				  const LoomIncentiveList = res.lists;
+				  const totalCount = res.totalCount;
+				  console.log('Data:', LoomIncentiveList);
+
+				  let tbody = $('#tblGramSizeMasterList tbody');
+				  tbody.empty();
+
+				  if (LoomIncentiveList.length === 0) {
+					  tbody.append('<tr><td colspan="8" class="text-center text-muted">No list found.</td></tr>');
+				  } else {
+					  $.each(LoomIncentiveList, function (index, item) {
+						  $('#tblGramSizeMasterList tbody').append(`
+							  <tr>
+								  <td style="display:none;">${item.code}</td>
+								  <td>${item.code}</td>
+								  <td>${item.itemType}</td>
+							
+								  <td>
+									  <button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.code}')">
+										  <i class="fas fa-edit" style="cursor: pointer;" title="Edit"></i>
+									  </button>
+									  <button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.code}')">
+										  <i class="fas fa-eye" style="cursor: pointer;" title="View Detail"></i>
+									  </button>
+									  <button class="btn btn-sm btn-light btn-delete" onclick="deleteTemp('${item.code}')">
+										  <i class="fas fa-trash text-danger" title="Delete"></i>
+									  </button>
+								  </td>
+							  </tr>
+						  `);
+					  });
+
+					  renderPagination(totalCount, pageSize, currentPage);
+				  }
+			  },
+			  error: function (xhr) {
+				  toastr.error('Error loading list: ' + xhr.responseText);
+			  }
+		  });
+	  }
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const pagination = $('#tablePagination');
+		pagination.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		const startPage = Math.max(1, currentPage - 2);
+		const endPage = Math.min(totalPages, currentPage + 2);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		pagination.html(html);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllMenus();
+	}
+	function AddOrEditFunction(code) {
+		  window.location.href = '/GramSizeConversionMaster/Index?id=' + encodeURIComponent(code);
+	  }
+
+	  function viewMenuDetails(code) {
+		  window.location.href = '/GramSizeConversionMaster/Index?id=' + encodeURIComponent(code) + '&mode=view';
+	  }
+
+	function deleteTemp(code) {
+		  Swal.fire({
+			  title: 'Are you sure?',
+			  text: "You won't be able to revert this deletion!",
+			  icon: 'warning',
+			  showCancelButton: true,
+			  confirmButtonColor: '#d33',
+			  cancelButtonColor: '#3085d6',
+			  confirmButtonText: 'Yes, delete it!'
+		  }).then((result) => {
+			  if (result.isConfirmed) {
+				  $.ajax({
+					  url: '/GramSizeConversionMasterList/Delete',
+					  type: 'POST',
+					  data: { code: code },
+					  success: function (response) {
+						  if (response.success) {
+							  toastr.success(response.message || "Record deleted successfully.");
+							  loadAllMenus();  // Corrected function call here
+						  } else {
+							  toastr.warning(response.message || "Delete failed.");
+						  }
+					  },
+					  error: function () {
+						  toastr.error("An error occurred while deleting.");
+					  }
+				  });
+			  }
+		  });
+	  }
+
+
+
+</script>

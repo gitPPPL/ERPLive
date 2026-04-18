@@ -1,0 +1,3373 @@
+﻿@{
+    ViewBag.Title = "Purchase Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #tblItemRecordPO th:nth-child(2),
+    #tblItemRecordPO td:nth-child(2) select {
+        min-width: 400px;
+        max-width: 700px; /* optional */
+    }
+
+    #tblItemRecordPO th:nth-child(3),
+    #tblItemRecordPO th:nth-child(4),
+    #tblItemRecordPO th:nth-child(5),
+    #tblItemRecordPO th:nth-child(6),
+    #tblItemRecordPO td:nth-child(3) select,
+    #tblItemRecordPO td:nth-child(4) select,
+    #tblItemRecordPO td:nth-child(5) select,
+    #tblItemRecordPO td:nth-child(6) select {
+        min-width: 100px;
+        max-width: 200px;
+    }
+</style>
+<fieldset>
+    <legend class="legend-field">Purchase Order</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "PurchaseOrderList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="PurchaseOrderForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type <span class="required">*</span> </label>
+                    <select class="form-control" id="ddlDocType">                     
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="txtDocNo">Doc No</label>
+                    <input type="text" class="form-control" id="txtDocNo" readonly>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="dtDocDate">Doc Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="dtDocDate">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlPOType1">PO Type</label>
+                    <div class="input-divide">
+                        <select class="form-control" id="ddlPOType1">
+                            <option>Others</option>
+                            <option>Capital</option>
+                            <option>Monthly</option>
+                        </select>
+                        @* <label for="ddlStatus">Request Status</label> *@
+                        <select class="form-control" id="ddlStatus">
+                            <option value="1">Open</option>
+                            <option value="0">Cancel</option>
+                            <option value="2">Close</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlPlace">Place <span class="required">*</span></label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">-Select Place-</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Party Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlPartyName">Party Name<span class="required">*</span></label>
+                                <div class="input-divide">
+                                    <select class="form-control" id="ddlPartyName">
+                                        <option value="">Select Party Name</option>
+                                    </select>
+                                    <div class="select-wrapper">
+                                        <select class="form-control" id="ddlAddressbyparty">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd1PD">Address 1</label>
+                                <textarea type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address 1" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd2PD">Address 2</label>
+                                <textarea type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address 2" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtAdd3PD">Address 3</label>
+                                <input type="text" class="form-control" id="TxtAdd3PD" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumPincodePD">Pincode</label>
+                                <input type="text" class="form-control" id="NumPincodePD" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtCity1PD">City</label>
+                                <input type="text" class="form-control" id="TxtCity1PD" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtGSTPD">GST</label>
+                                <input type="text" class="form-control" id="TxtGSTPD" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Ship Details</legend> 
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlShipFrom">Ship From <span class="required">*</span></label>
+                                <div class="input-divide">
+                                    <select class="form-control" id="ddlShipFrom">
+                                        <option value="">-Select Ship From-</option>
+                                    </select>
+                                    <div class="select-wrapper">
+                                        <select class="form-control" id="ddlAddressbypartySD">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                   
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd1SD">Address 1</label>
+                                <textarea type="text" class="form-control" id="TxtAdd1SD" placeholder="Enter Address 1" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd2SD">Address 2</label>
+                                <textarea type="text" class="form-control" id="TxtAdd2SD" placeholder="Enter Address 2" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtAdd3SD">Address 3</label>
+                                <input type="text" class="form-control" id="TxtAdd3SD" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumPincodeSD">Pincode</label>
+                                <input type="text" class="form-control" id="NumPincodeSD" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtCity1SD">City</label>
+                                <input type="text" class="form-control" id="TxtCity1SD" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtGSTSD">GST</label>
+                                <input type="text" class="form-control" id="TxtGSTSD" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Terms and Condition</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtDeliveryTerm">Delivery Term</label>
+                                <input type="text" class="form-control" id="txtDeliveryTerm" placeholder="Enter Delivery Term">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtTransportTerm">Transport Term</label>
+                                <input type="text" class="form-control" id="txtTransportTerm" placeholder="Enter Transport Term">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlPaymentTerm">Payment Term</label>
+                                <div class="input-divide">
+                                    <select class="form-control" id="ddlPaymentTerm" style="width:30%">
+                                        <option value="">Select Payment Term</option>
+                                    </select>
+                                    <input type="text" class="form-control" id="txtPaymentTerm" placeholder="Enter Payment Term" style="width:70%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtPriceTerm">Price Term</label>
+                                <input type="text" class="form-control" id="txtPriceTerm" placeholder="Enter Price Term">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtRemarksTC">Remarks</label>
+                                <textarea type="text" class="form-control" id="txtRemarksTC" placeholder="Enter Remarks"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="txtPartyRef">Party Ref/Quot No</label>
+                    <input type="text" class="form-control" id="txtPartyRef" placeholder="Enter Party Ref/Quot No">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="chkDeliveryDate">Delivery Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtDeliveryDate" name="DeliveryDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkDeliveryDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="chkValidateDate">Validate Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtValidateDate" name="DeliveryDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkValidateDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlPriceType">Price Type <span class="required">*</span></label>
+                    <select class="form-control" id="ddlPriceType">
+                        <option value="">-Select Price Type-</option>
+                        <option>F.O.R -at our plant</option>
+                        <option>Ex-Work</option>
+                        <option>CIF</option>
+                        <option>FOB</option>
+                        <option>CFR</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label id="LblWbNo" for="ddWBNo">WB No</label>
+                    <select id="ddWBNo" class="form-control">
+                        <option value="">-Select WB No-</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label id="LblSaudaNo" for="ddSaudaNo">Sauda No</label>
+                    <div class="input-icon-wrapper">
+                        <select class="form-control" id="ddSaudaNo">
+                            <option value="">-Select Sauda No-</option>
+                        </select>
+                        <button id="BtnCalculation">
+                            <span class="input-icon"><i class="fa-solid fa-c"></i></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="txtnetamount1">Net Amount</label>
+                    <div class="input-divide">
+                        <input type="text" class="form-control" id="txtnetamount1" readonly>
+                        <input type="text" class="form-control" id="TxtDocId" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlCurrency">Currency</label>
+                    <select class="form-control" id="ddlCurrency">
+                        <option value="">-Select Currency-</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumExRate">Ex-Rate</label>
+                    <input type="text" class="form-control" id="NumExRate" oninput="allowOnlyNumbers(this)" placeholder="Enter Ex-Rate">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Item Total</legend>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="NumTotalNos">Total Nos</label>
+                                <input type="text" class="form-control" id="NumTotalNosIt" placeholder="Enter Total Nos" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="NumQty">Quantity</label>
+                                <input type="text" class="form-control" id="NumQtyIt" placeholder="Enter Quantity" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="NumAmount">Amount</label>
+                                <input type="text" class="form-control" id="NumAmountIt" placeholder="Enter Amount" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="NumPackingAmt">Packing Amt</label>
+                                <input type="text" class="form-control" id="NumPackingAmtIt" oninput="allowOnlyNumbers(this)" placeholder="Enter Packing Amt">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="NumDiscAmt">Disc Amt</label>
+                                <input type="text" class="form-control" id="NumDiscAmtIt" oninput="allowOnlyNumbers(this)" placeholder="Enter Disc Amt">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumCgstAmt">CGST Amt</label>
+                                <input type="text" class="form-control" id="NumCgstAmtIt" oninput="allowOnlyNumbers(this)" placeholder="Enter CGST Amt" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumSgstAmt">SGST Amt</label>
+                                <input type="text" class="form-control" id="NumSgstAmtIt"  placeholder="Enter SGST Amt" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumIgstAmt">IGST Amt</label>
+                                <input type="text" class="form-control" id="NumIgstAmtIt" placeholder="Enter IGST Amt" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumVatAmt">VAT Amt</label>
+                                <input type="text" class="form-control" id="NumVatAmtIt" placeholder="Enter VAT Amt" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumCessAmt">Cess Amt</label>
+                                <input type="text" class="form-control" id="NumCessAmtIt" placeholder="Enter Cess Amt" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumTCS">TCS</label>
+                                <input type="text" class="form-control" id="NumTCSIt" placeholder="Enter TCS" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumOtherAmt">Other Amt</label>
+                                <input type="text" class="form-control" id="NumOtherAmtIt" oninput="allowOnlyNumbers(this)"                                                         placeholder="Enter Other Amt">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumNetAmt">Net Amt</label>
+                                <input type="text" class="form-control" id="NumNetAmtIt" placeholder="Enter Net Amt" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-6 col-md-6 mt-2">
+                <div class="button-right">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fa-solid fa-clock-rotate-left"></i> PO Modification History
+                    </button>
+
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#PendingRequestModal">
+                        <i class="fa-solid fa-hourglass-half"></i> Pending Request
+                    </button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-copy"></i> <span id="dropdownText">Copy From</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="copyFromDropdown">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseRequestModal" id="BtnPurchaseReq">Purchase Request</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#quotationModal" id="BtnQuotationRtAprvl">Quotation Rate Approval</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--Purchase Request Modal-->
+        <div class="modal fade" id="purchaseRequestModal" tabindex="-1" aria-labelledby="purchaseRequestLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="purchaseRequestLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxPR" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendPR">
+                                        <label class="checkbox-label" for="chkAppendPR">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary btn-purchaseCopy" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                    @*  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button> *@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblPurchaseRequest" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Vno</th>
+                                            <th>VType</th>
+                                            <th>Vdate</th>
+                                            <th>Item C</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Make</th>
+                                            <th>Tech Desc</th>
+                                            <th>Req_Qty</th>
+                                            <th>Valid Date</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                            <th>Department</th>
+                                            <th>Dept Code</th>
+                                            <th>Make Code</th>
+                                            <th>Reqno</th>
+                                            <th>Reqtype</th>
+                                            <th>Ucode</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Quotation Modal-->
+        <div class="modal fade" id="quotationModal" tabindex="-1" aria-labelledby="quotationLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="quotationLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxQM" class="form-control" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendQM">
+                                        <label class="checkbox-label" for="chkAppendQM">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary btn-quoteCopy" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                    @*  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button> *@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblQuotationModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllQM" /></th>
+                                            <th>Vno</th>
+                                            <th>VType</th>
+                                            <th>Vdate</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Make</th>
+                                            <th>Tech Desc</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>Pack %</th>
+                                            <th>Pack Amt</th>
+                                            <th>Freight</th>
+                                            <th>Disc%</th>
+                                            <th>Disc Amt</th>
+                                            <th>Tax Type</th>
+                                            <th>CGST%</th>
+                                            <th>CGST Amt</th>
+                                            <th>SGST%</th>
+                                            <th>SGST Amt</th>
+                                            <th>IGST%</th>
+                                            <th>IGST Amt</th>
+                                            <th>Cessp</th>
+                                            <th>Cess</th>
+                                            <th>Oth Amt</th>
+                                            <th>LD Rate</th>
+                                            <th>Net Amt</th>
+                                            <th>Party Name</th>
+                                            <th>Quote No</th>
+                                            <th>Quote Date</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Pending Request Modal Popup-->
+        <div class="modal fade" id="PendingRequestModal" tabindex="-1" aria-labelledby="PendingRequestModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="PendingRequestModal">Pending Request for Make PO</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblPOPendingRequest" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th style="display:none;">VNo</th>
+                                            <th>Department</th>
+                                            <th>DOC_ID</th>
+                                            <th>Item Name</th>
+                                            <th>Make</th>
+                                            <th>Unit</th>
+                                            <th>TechDesc</th>
+                                            <th>Monthly</th>
+                                            <th>STD Req</th>
+                                            <th>ReqQty</th>
+                                            <th>ReqReason</th>
+                                            <th>PlaceUse</th>
+                                            <th>WorkType</th>
+                                            <th>Priority</th>
+                                            <th>Scrapped</th>
+                                            <th>Owner</th>
+                                            <th>Reason</th>
+                                            <th>Remarks</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="navtab-form">
+            <ul class="nav nav-tabs" id="formTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
+                </li>
+                @*  <li class="nav-item">
+                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Item Total</button>
+                </li> *@
+                @* <li class="nav-item">
+                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Service Item</button>
+                </li> *@
+                <li class="nav-item">
+                    <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Attachments</button>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <!-- tab 1 -->
+                <div class="tab-pane fade show active" id="tab1">
+
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblItemRecordPO" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th style="display:none;">Code</th>
+                                        <th style="min-width: 500px;">Item Name</th>
+                                        <th style="min-width: 100px;">Make</th>
+                                        <th style="min-width: 100px;">Unit</th>
+                                        <th style="min-width: 100px;">Place Of Use</th>
+                                        <th style="min-width: 100px;">Department</th>
+                                        <th>Nos</th>
+                                        <th>Qty</th>
+                                        <th>Rate</th>
+                                        <th>Exrate</th>
+                                        <th>Amount</th>
+                                        <th>Pack%</th>
+                                        <th>Pack</th>
+                                        <th>Disc%</th>
+                                        <th>Disc</th>
+                                        <th>Taxtype</th>
+                                        <th>Cgst%</th>
+                                        <th>Cgst</th>
+                                        <th>Sgst%</th>
+                                        <th>Sgst</th>
+                                        <th>Igst%</th>
+                                        <th>Igst</th>
+                                        <th>Vat%</th>
+                                        <th>Vat</th>
+                                        <th>Cess%</th>
+                                        <th>Cess</th>
+                                        <th style="display:none;">TCS%</th>
+                                        <th style="display:none;">TCS</th>
+                                        <th style="display:none;">Other%</th>
+                                        <th>Other Amt</th>
+                                        <th style="display:none;">Other2%</th>
+                                        <th style="display:none;">Other2 Amt</th>
+                                        <th>Net Amt</th>
+                                        <th>Ld Rate</th>
+                                        <th>Remarks</th>
+                                        <th>App. Level</th>
+                                        <th>App. Remarks</th>
+                                        <th>Status</th>
+                                        <th>Reqtype</th>
+                                        <th>Reqno</th>
+                                        <th>Apptype</th>
+                                        <th>Appno</th>
+                                        <th>Saudatype</th>
+                                        <th>Saudano</th>
+                                        <th>Mth Rate</th>
+                                        <th>Qtr Rate</th>
+                                        <th>Anl Rate</th>
+                                        <th>Spcl Rate</th>
+                                        <th>Calc Rate</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                @* <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePagination"></div>
+                                </div> *@
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- tab 2 -->
+                <div class="tab-pane fade" id="tab2">
+
+
+                    @* <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">PO History</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTodayPOAmt">Today PO Amt</label>
+                                    <input type="text" class="form-control" id="NumTodayPOAmtIt" placeholder="Enter Today PO Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumDateAmt">Till Date Amt</label>
+                                    <input type="text" class="form-control" id="NumDateAmtIt" placeholder="Enter Till Date Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTodayDepttAmt">Today Deptt Amt</label>
+                                    <input type="text" class="form-control" id="NumTodayDepttAmtIt" placeholder="Enter Today Deptt Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTilldateDepttAmt">Till date Deptt Amt</label>
+                                    <input type="text" class="form-control" id="NumTilldateDepttAmtIt" placeholder="Enter Till date Deptt Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumLastMonthTilldateAmt">Last Month Till date Amt</label>
+                                    <input type="text" class="form-control" id="NumLastMonthTilldateAmtIt" placeholder="Enter Last Month Till date Amt" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset> *@
+                </div>
+
+                <!--tab 3-->
+                @* <div class="tab-pane fade" id="tab3">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Service Order Detail</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="txtTotalNos">Total Nos</label>
+                                    <input type="text" class="form-control" id="txtTotalNosSod" placeholder="Enter Total Nos" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="txtQuantity">Quantity</label>
+                                    <input type="text" class="form-control" id="txtQuantitySod" placeholder="Enter Quantity" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="txtAmount">Amount</label>
+                                    <input type="text" class="form-control" id="txtAmountSod" placeholder="Enter Amount" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="txtPackingAmt">Packing Amt</label>
+                                    <input type="text" class="form-control" id="txtPackingAmtSod" placeholder="Enter Packing Amt">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumCgstAmt">CGST Amt</label>
+                                    <input type="text" class="form-control" id="NumCgstAmtSod" placeholder="Enter CGST Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumSgstAmt">SGST Amt</label>
+                                    <input type="text" class="form-control" id="NumSgstAmtSod" placeholder="Enter SGST Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumIgstAmt">IGST Amt</label>
+                                    <input type="text" class="form-control" id="NumIgstAmtSod" placeholder="Enter IGST Amt" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtOtherAmtSod">Other Amt</label>
+                                    <input type="text" class="form-control" id="TxtOtherAmtSod" placeholder="Enter Other Amt">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtDiscAmtSod">Disc Amt</label>
+                                    <input type="text" class="form-control" id="TxtDiscAmtSod" placeholder="Enter Disc Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtNetAmtSod">Net Amt</label>
+                                    <input type="text" class="form-control" id="TxtNetAmtSod" placeholder="Enter Net Amt" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div> *@
+
+                <!--tab 4-->
+                <div class="tab-pane fade" id="tab4">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblAttachmentPO" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>File Upload</th>
+                                        <th>Preview</th>
+                                        <th>File Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePagination"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <fieldset class="fieldset-sub" id="SaudaDetail">
+                    <legend class="sub-legend">Sauda Details</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtPartySauda">Party</label>
+                                <input type="text" class="form-control" id="txtPartySauda" placeholder="Enter Party">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtItemNameSauda">Item Name</label>
+                                <input type="text" class="form-control" id="txtItemNameSauda" placeholder="Enter Item Name">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="btn-right">
+                                <button id="btn-orders" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ordersModal">
+                                    <i class="fa fa-shopping-cart"></i>Orders
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Modul Popup-->
+                    <div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <!-- or modal-xl / modal-sm -->
+                            <div class="modal-content draggable-modal">
+                                <div class="popup-header">
+                                    <h5 class="popup-title" id="ordersModalLabel">Orders</h5>
+                                    <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Add your order content here -->
+                                    <div class="card">
+                                        <div class="table-responsive">
+                                            <table id="tblPOMaster" class="table-width">
+                                                <thead class="table-head">
+                                                    <tr>
+                                                        <th style="display:none;">VNo</th>
+                                                        <th>Order No</th>
+                                                        <th>Party</th>
+                                                        <th>Item Name</th>
+                                                        <th>Quantity</th>
+                                                        <th>Rate</th>
+                                                        <th style="display:none;">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                               @*  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div> *@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="txtQuantitySauda">Quantity</label>
+                                <input type="text" class="form-control" id="txtQuantitySauda" oninput="allowOnlyNumbers(this)" placeholder="Enter Quantity">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="NumRateSauda">Rate</label>
+                                <input type="text" class="form-control" id="NumRateSauda" oninput="allowOnlyNumbers(this)" placeholder="Enter Rate">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="txtPriceSauda">Price Type</label>
+                                <input type="text" class="form-control" id="txtPriceSauda" oninput="allowOnlyNumbers(this)" placeholder="Enter Price">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="txtAdjQtySauda">Adj Qty</label>
+                                <input type="text" class="form-control" id="txtAdjQtySauda" oninput="allowOnlyNumbers(this)" placeholder="Enter Adj Qty">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="txtBalQty">Bal Qty</label>
+                                <input type="text" class="form-control" id="txtBalQty" oninput="allowOnlyNumbers(this)" placeholder="Enter Bal Qty">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="TxtRemarksSauda">Remarks</label>
+                                <textarea type="text" class="form-control" id="TxtRemarksSauda" placeholder="Enter Remarks"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <ul id="customContextMenu" class="custom-context-menu" style="display:none;">
+            <li data-action="exporttoexcel" data-bs-toggle="modal" data-bs-target="#ExportToExcel">Export To Excel</li>
+            <li data-action="purchasereceipthistory" data-bs-toggle="modal" data-bs-target="#purchasereceipthistory">Show/Set QC Parameter</li>
+            <li data-action="orderhistory" data-bs-toggle="modal" data-bs-target="#orderhistory">Order History</li>
+        </ul>
+        <!--purchasereceipthistory-->
+        <div class="modal fade" id="orderhistory" tabindex="-1" aria-labelledby="orderhistoryLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="orderhistoryyLabel">Purchase Receipt History</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblorderhistory" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Vno</th>
+                                            <th>Date</th>
+                                            <th>Supplier</th>
+                                            <th>Item Name</th>
+                                            <th>Make</th>
+                                            <th>Unit</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Other Amount</th>
+                                            <th>CGST %</th>
+                                            <th>SGST %</th>
+                                            <th>IGST %</th>
+                                            <th>Pack %</th>
+                                            <th>Disc %</th>
+                                            <th>Other Expenses</th>
+                                            <th>LD Rate</th>
+                                            <th>Remarks</th>
+                                            <th>Status</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+        
+    </form>
+</fieldset>
+<script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
+
+<script>
+
+    const AllFieldsId = [
+      "ddlDocType", "txtDocNo", "dtDocDate", "ddlPOType1", "ddlPOType2", "txtnetamount1", "txtnetamount2",
+      "txtPartyRef", "DtDeliveryDate", "DtValidateDate", "ddlPriceType", "ddWBNo", "ddlPlace", "ddlCurrency",
+      "NumExRate", "ddSaudaNo", "ddlPartyName", "ddlAddressbyparty", "TxtAdd1PD", "TxtAdd2PD", "TxtAdd3PD",
+      "NumPincodePD", "TxtCity1PD", "TxtGSTPD", "ddlShipFrom", "ddlAddressbypartySD", "TxtAdd1SD", "TxtAdd2SD",
+      "TxtAdd3SD", "NumPincodeSD", "TxtCity1SD", "TxtGSTSD"
+    ];
+
+    let itemRecords = [
+      "TxtCode", "ddlItemname", "ddlImake", "ddlUnit", "ddlIplaceofUse", "ddlDepartment",
+      "TxtNos", "TxtQty", "TxtRate", "TxtExrate", "TxtAmount", "TxtPackPercent", "TxtPack",
+      "TxtDiscPercent", "TxtDisc", "ddlTax", "TxtCgstPercent", "TxtCgst", "TxtSgstPercent",
+      "TxtSgst", "TxtIgstPercent", "TxtIgst", "TxtVatPercent", "TxtVat", "TxtCessPercent",
+      "TxtCess", "TxtOthAmt", "TxtNetAmt", "TxtLdRate", "TxtRemarks", "TxtAppLevel",
+      "TxtAppRemarks", "TxtStatus", "TxtReqtype", "TxtReqno", "TxtApptype", "TxtAppno",
+      "TxtSaudatype", "TxtSaudano", "TxtMthRate", "TxtQtrRate", "TxtAnlRate", "TxtSpclRate",
+      "TxtCalcRate"
+    ];
+
+
+    let docId = "";
+    let readOnly;
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    $(async function () {
+        try {
+            await GetDocTypeAsync();
+            $('#ddlDocType').prop('selectedIndex', 0);
+            handleDocLoad();
+        } catch (error) {
+            toastr.error('Failed to load document types: ' + error);
+        }
+    });
+
+    $(document).ready(function () {
+    GetPlaceList();
+    GetCurrencyList();
+    GetShipFromList();
+    GetPartyList();
+    addItemRecordRow();
+    addAttachmentRow();
+    GetPayTermList();
+    });
+
+    $(document).ready(function () {
+    // handleDocLoad();
+    setEnterKeyFocus(AllFieldsId);
+
+    $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        var tbody = $(this).closest('tbody');
+        var rowCount = tbody.find('tr').length;
+
+        if (rowCount > 1) {
+            $(this).closest('tr').remove();
+        } else {
+            alert('Cannot delete the first row.');
+        }
+    });
+
+    $(document).on('click', '#tab4 .btn-add-action', function () {
+    addAttachmentRow();
+    });
+
+    
+    $(document).on('click', '#tab1 .btn-add-row, #tab1 .btn-Itemadd-action', function () {
+        addItemRecordRow();
+    });
+
+    $('#ddlPartyName').on('change', function() {
+        var partyCode = $(this).val();
+        var selectedOption = $(this).find('option:selected');
+       var shipCode= $('#ddlShipFrom').val();
+        if (partyCode) {
+            $('#TxtAdd1PD').val(selectedOption.data('add1'));
+            $('#TxtAdd2PD').val(selectedOption.data('add2'));
+            $('#TxtAdd3PD').val(selectedOption.data('add3'));
+            $('#NumPincodePD').val(selectedOption.data('pincd'));
+            $('#TxtCity1PD').val(selectedOption.data('cityname'));
+            $('#TxtGSTPD').val(selectedOption.data('gstin'));
+            GetPartyAddress(partyCode, '#ddlAddressbyparty');
+            GetSaudaList(partyCode);
+            GetWeighBridgeNo(partyCode);
+            if(!shipCode)
+            {
+               GetShipFromList(partyCode);
+               $('#TxtAdd1SD').val(selectedOption.data('add1'));
+               $('#TxtAdd2SD').val(selectedOption.data('add2'));
+               $('#TxtAdd3SD').val(selectedOption.data('add3'));
+               $('#NumPincodeSD').val(selectedOption.data('pincd'));
+               $('#TxtCity1SD').val(selectedOption.data('cityname'));
+               $('#TxtGSTSD').val(selectedOption.data('gstin'));
+               GetPartyAddress(partyCode, '#ddlAddressbypartySD');
+            }
+              
+        } else {
+            $('#TxtAdd1PD').val('');
+            $('#TxtAdd2PD').val('');
+            $('#TxtAdd3PD').val('');
+            $('#NumPincodePD').val('');
+            $('#TxtCity1PD').val('');
+            $('#TxtGSTPD').val('');
+            $('#ddlAddressbyparty').empty().append('<option value="">-Select Address-</option>');
+            $('#ddSaudaNo').empty().append('<option value="">-Select Sauda No.-</option>');
+            $('#ddWBNo').empty().append('<option value="">-Select WeighBridge No.-</option>');
+            if(!shipCode)
+            {
+            $('#TxtAdd1SD').val('');
+            $('#TxtAdd2SD').val('');
+            $('#TxtAdd3SD').val('');
+            $('#NumPincodeSD').val('');
+            $('#TxtCity1SD').val('');
+            $('#TxtGSTSD').val('');
+            $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
+
+            }
+        }
+    });
+
+    $('#ddlShipFrom').on('change', function(){
+            var shipCode = $(this).val();
+            var selectedOption= $(this).find('option:selected');
+            if (shipCode) {
+            $('#TxtAdd1SD').val(selectedOption.data('add1'));
+            $('#TxtAdd2SD').val(selectedOption.data('add2'));
+            $('#TxtAdd3SD').val(selectedOption.data('add3'));
+            $('#NumPincodeSD').val(selectedOption.data('pincd'));
+            $('#TxtCity1SD').val(selectedOption.data('cityname'));
+            $('#TxtGSTSD').val(selectedOption.data('gstin'));
+            GetPartyAddress(shipCode, '#ddlAddressbypartySD');
+            } else {
+             $('#TxtAdd1SD').val('');
+            $('#TxtAdd2SD').val('');
+            $('#TxtAdd3SD').val('');
+            $('#NumPincodeSD').val('');
+            $('#TxtCity1SD').val('');
+            $('#TxtGSTSD').val('');
+            $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
+            }
+    });
+
+    $(document).on('change', '#ddlAddressbyparty, #ddlAddressbypartySD', function () {
+        const selectedOption = $(this).find('option:selected');
+        const dropdownId = $(this).attr('id');
+
+        if (dropdownId === 'ddlAddressbyparty') {
+            $('#TxtAdd1PD').val(selectedOption.text().trim());
+            $('#TxtAdd2PD').val(selectedOption.data('add2'));
+            $('#TxtAdd3PD').val(selectedOption.data('add3'));
+            $('#NumPincodePD').val(selectedOption.data('pincd'));
+            $('#TxtCity1PD').val(selectedOption.data('cityname'));
+            $('#TxtGSTPD').val(selectedOption.data('gstin'));
+
+            // $('#TxtAdd1SD').val(selectedOption.text().trim());
+            // $('#TxtAdd2SD').val(selectedOption.data('add2'));
+            // $('#TxtAdd3SD').val(selectedOption.data('add3'));
+            // $('#NumPincodeSD').val(selectedOption.data('pincd'));
+            // $('#TxtCity1SD').val(selectedOption.data('cityname'));
+            // $('#TxtGSTSD').val(selectedOption.data('gstin'));
+        } else {
+            $('#TxtAdd1SD').val(selectedOption.text().trim());
+            $('#TxtAdd2SD').val(selectedOption.data('add2'));
+            $('#TxtAdd3SD').val(selectedOption.data('add3'));
+            $('#NumPincodeSD').val(selectedOption.data('pincd'));
+            $('#TxtCity1SD').val(selectedOption.data('cityname'));
+            $('#TxtGSTSD').val(selectedOption.data('gstin'));
+        }
+    });
+     
+
+    $('#ddlDocType').on('change', function () {
+        const VType = $(this).val();
+        Wb_SaudaDdl_Make_enabledisable(VType);
+        GetDocid(VType); 
+        
+    });
+
+    $('#chkDeliveryDate').on('change', function () {
+    $(this).val(this.checked ? '1' : '0');
+    });
+
+    $('#chkValidateDate').on('change', function () {
+    $(this).val(this.checked ? '1' : '0');
+    });
+
+    $(document).on('change', '[id^=ddlTax]', function () {
+        const $select = $(this);
+        const selectedOption = $select.find('option:selected');
+        const rowId = $select.closest('tr').attr('id').replace('row', '');
+
+        const csgstPer = selectedOption.data('csgstper') || 0;
+        const igstPer = selectedOption.data('igstper') || 0;
+        const tdsPer = selectedOption.data('tdsper') || 0;
+        const tcsPer = selectedOption.data('tcsper') || 0;
+        const vatPer = selectedOption.data('vatper') || 0;
+        const othPer1 = selectedOption.data('otherper') || 0;
+        const othPer2 = selectedOption.data('otherper2') || 0;
+
+        // ✅ Update matching input fields
+        $(`#TxtCgstPercent${rowId}`).val(csgstPer);
+        $(`#TxtSgstPercent${rowId}`).val(csgstPer);
+        $(`#TxtIgstPercent${rowId}`).val(igstPer);
+        $(`#TxtTcsPer${rowId}`).val(tcsPer);
+        $(`#TxtVatPercent${rowId}`).val(vatPer);
+        $(`#TxtOthPer${rowId}`).val(othPer1);
+        $(`#TxtOthPer2${rowId}`).val(othPer2);
+        calculateTaxAmounts(rowId);
+    });
+
+    $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
+        const $select = $(this);
+        const rowId = $select.closest('tr').attr('id').replace('row', '');
+        calculateTaxAmounts(rowId);
+    });
+
+    $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
+        const $input = $(this);
+        const rowId = $input.closest('tr').attr('id').replace('row', '');
+        calculateTaxAmounts(rowId);
+    });
+
+    $('#btn-save').on('click', async function (e) {
+        e.preventDefault();
+
+          if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
+          if (!validateRequiredField('#ddlPlace', 'Place')) return;
+          if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
+          if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
+
+        try 
+        {            
+            const tableData = await collectFormData();
+            if (docId) {
+                UpdateData(tableData);
+            } else {
+                SaveData(tableData);
+            }
+        } catch (error) {           
+            toastr.error('An error occurred while saving the data.');
+        }
+    });
+
+    $(document).on('click', '#BtnPurchaseReq', function(){
+        PurchaseRateApproval();
+
+    });
+    $(document).on('click', '#BtnQuotationRtAprvl', function(){
+        quotationRtApproval();
+    });
+
+    $(document).on('click', '.btn-quoteCopy', async function(){
+       var quotationrateList = getquoteTabledata();
+       console.log(quotationrateList);
+       await fillItemDetailsTable(quotationrateList)
+    });
+
+    $(document).on('change', '[id^=ddlItemname]', function () {
+        const $select = $(this);
+        const selectedOption = $select.find('option:selected');
+        const rowId = $select.closest('tr').attr('id').replace('row', '');
+
+        const unit = selectedOption.data('unitname') || '';
+        const unitcode = selectedOption.data('unitcd') || '';       
+    
+    });
+
+    $(document).on('click', '.btn-purchaseCopy',async function(){
+    const selectedItems = getPurchaseData();
+    console.log('a');
+    console.log(selectedItems);
+    fillItemDetailsTable(selectedItems);
+    });
+    
+    $('#selectAllQM').on('change', function () {
+        const isChecked = $(this).is(':checked'); 
+        $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
+    });
+
+    // $(document).on('click', '#BtnCalculation', async function () {
+    //     try {
+    //         const itemRecords = await collectGridDetail();
+    //         const $selectedOption = $('#ddSaudaNo option:selected');
+    //         const saudaType = $selectedOption.data('saudatype');
+    //         const saudaNoText = $selectedOption.val();  
+    //         const saudaNo = parseInt(saudaNoText);
+
+    //         const stateCd = parseInt($('#TxtGSTPD').val());
+    //         const cityCd = parseInt($('#TxtCity1PD').val());
+    //         const docDt = $('#dtDocDate').val();
+
+    //         const payload = {
+    //             btn: "BTN",
+    //             saudaNo,
+    //             SaudaType: saudaType,
+    //             stateCode: stateCd,
+    //             cityCode: cityCd,
+    //             effectiveDate: docDt,
+    //             orders: itemRecords
+    //         };
+
+    //         console.log("Sending payload:", payload);
+
+    //         const response = await $.ajax({
+    //             url: 'PurchaseOrder/CalculationBySaudaNo',
+    //             type: 'POST',                
+    //             data: JSON.stringify(payload)
+    //             // ❌ Removed dataType: 'json' to let jQuery infer it
+    //         });
+
+    //         console.log('AJAX request succeeded.');
+
+    //         if (response.status) {
+    //             console.log('response.data:', response.data);
+    //             // Uncomment when ready:
+    //             // await fillItemDetailsTable(response.data);
+    //         } else {
+    //             console.warn('Server returned failure status:', response.message);
+    //         }
+
+    //     } catch (err) {
+    //         console.error('Error during calculation:', err);
+    //     }
+    // });
+
+    $(document).on('click', '#BtnCalculation', async function (event) {
+        event.preventDefault(); // ✅ Prevent form from submitting and clearing fields
+
+        try {
+            const itemRecords = await collectGridDetail();
+            const $selectedOption = $('#ddSaudaNo option:selected');
+            const saudaType = $selectedOption.data('saudatype');
+            const saudaNoText = $selectedOption.text();
+            const saudaNo = parseInt(saudaNoText);
+
+            const stateCd = parseInt($('#TxtGSTPD').val());
+            const cityCd = parseInt($('#TxtCity1PD').val());
+            const docDt = $('#dtDocDate').val();
+
+            const payload = {
+                btn: "BTN",
+                SaudaNo: saudaNo,
+                SaudaType: saudaType,
+                stateCode: stateCd,
+                cityCode: cityCd,
+                effectiveDate: docDt,
+                orders: itemRecords
+            };
+
+            const response = await $.ajax({
+                url: 'PurchaseOrder/CalculationBySaudaNo',
+                type: 'POST',
+                data: JSON.stringify(payload),
+                contentType: 'application/json',
+                dataType: 'json'
+            });
+                        
+            if (response.status) {               
+                await fillItemDetailsTableBySaudaNo(response.data);
+                calculateAllRows();          
+                calculateAllTotals();
+            } else {
+                console.warn('Server returned failure status:', response.message);
+            }
+
+        } catch (err) {
+            console.error('Error during calculation:', err);
+        }
+    });
+
+
+ 
+         
+    });
+
+</script>
+
+<script>
+
+    async function handleDocLoad() {
+        const docId = getQueryParam('id');
+        const readOnly = getQueryParam('readOnly');
+
+        if (docId) {
+            $('#SaudaDetail').show();
+            $('#ddlStatus').prop('disabled', false);
+            var VTpeU = docId.substring(0,4);
+            var VNoU = docId.substring(4);
+            $('#txtDocNo').val(VNoU);
+            console.log(VTpeU, VNoU);
+            Wb_SaudaDdl_Make_enabledisable(VTpeU);
+            await GetDocData(docId, readOnly);
+        } else {
+            $('#SaudaDetail').hide();
+            $('#ddlStatus').prop('disabled', true);
+            const Vtype = $('#ddlDocType').val();
+            Wb_SaudaDdl_Make_enabledisable(Vtype);
+            GetDocid(Vtype);
+
+            const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+
+            $('#dtDocDate').val(todayDate);
+            $('#DtDeliveryDate').val(todayDate);
+            $('#DtValidateDate').val(todayDate);
+        }
+    }
+
+    async function fillItemDetailsTableBySaudaNo(data) {
+        const $tbody = $('#tblItemRecordPO tbody');
+        $tbody.empty();
+        console.log(data);
+
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+            await bindDropdownData(idx);
+
+            $(`#ddlIplaceofUse${idx}`).val(item.placeUse || '');
+            $(`#ddlItemname${idx}`).val(item.itemCode || '').trigger('change');
+            $(`#ddlImake${idx}`).val(item.makeCode || '').trigger('change');
+            $(`#TxtNos${idx}`).val(item.nos || '');
+            $(`#TxtQty${idx}`).val(item.qty || '');
+            $(`#txtAdjQtySauda${idx}`).val(item.adjQty || '');
+            $(`#ddlUnit${idx}`).val(item.uomCode || '').trigger('change');
+            $(`#TxtRate${idx}`).val(item.rate || '');
+            $(`#TxtExrate${idx}`).val(item.importRate || '');
+            $(`#TxtCalcRate${idx}`).val(item.calcRate || '');
+            $(`#TxtAmount${idx}`).val(item.amount || '');
+            $(`#TxtPackPercent${idx}`).val(item.packPer || '');
+            $(`#TxtPack${idx}`).val(item.packAmt || '');
+            $(`#TxtDiscPercent${idx}`).val(item.discPer || '');
+            $(`#TxtDisc${idx}`).val(item.discAmt || '');
+            $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+            $(`#TxtCgstPercent${idx}`).val(item.cgstPer || '');
+            $(`#TxtCgst${idx}`).val(item.cgstAmt || '');
+            $(`#TxtSgstPercent${idx}`).val(item.sgstPer || '');
+            $(`#TxtSgst${idx}`).val(item.sgstAmt || '');
+            $(`#TxtIgstPercent${idx}`).val(item.igstPer || '');
+            $(`#TxtIgst${idx}`).val(item.igstAmt || '');
+            $(`#TxtVatPercent${idx}`).val(item.vatPer || '');
+            $(`#TxtVat${idx}`).val(item.vatAmt || '');
+            $(`#TxtCessPercent${idx}`).val(item.cessPer || '');
+            $(`#TxtCess${idx}`).val(item.cessAmt || '');
+            $(`#TxtTcsPer${idx}`).val(item.tcsPer || '');
+            $(`#TxtTcsAmt${idx}`).val(item.tcsAmt || '');
+            $(`#TxtOthPer${idx}`).val(item.othPer || '');
+            $(`#TxtOthAmt${idx}`).val(item.othAmt || '');
+            $(`#TxtOthPer2${idx}`).val(item.othPer2 || '');
+            $(`#TxtOthAmt2${idx}`).val(item.othAmt2 || '');
+            $(`#TxtNetAmt${idx}`).val(item.netAmt || '');
+            $(`#TxtLdRate${idx}`).val(item.landRate || '');
+            $(`#ddlDepartment${idx}`).val(item.deptCode || '');
+            $(`#TxtRemarks${idx}`).val(item.remarks || '');
+            $(`#TxtAppLevel${idx}`).val(item.preorityLevel || '');
+            $(`#TxtAppRemarks${idx}`).val(item.preorityRemarks || '');
+            $(`#TxtMthRate${idx}`).val(item.rateMonthly || '');
+            $(`#TxtQtrRate${idx}`).val(item.rateQuarterly || '');
+            $(`#TxtAnlRate${idx}`).val(item.rateAnnualy || '');
+            $(`#TxtSpclRate${idx}`).val(item.rateSpecial || '');
+        }
+    }
+
+
+    async function collectGridDetail() {
+         const items = [];
+         $('#tblItemRecordPO tbody tr').each(function () {
+           const idx = this.id.replace('row', '');
+           const $r = $(this);
+
+           items.push({
+             SNO: parseIntSafe(idx),
+             ItemName: $r.find(`#ddlItemname${idx} option:selected`).text(),
+             ItemCode: parseIntSafe($r.find(`#ddlItemname${idx}`).val()),
+             MakeCode: parseIntSafe($r.find(`#ddlImake${idx}`).val()),
+             Qty: parseFloatSafe($r.find(`#TxtQty${idx}`).val()),
+             UomName: $r.find(`#ddlUnit${idx} option:selected`).text(),
+             UomCode: parseIntSafe($r.find(`#ddlUnit${idx}`).val())
+           });
+         });
+
+         return items;
+    }
+
+    
+
+    function Wb_SaudaDdl_Make_enabledisable(VType)
+    {
+        if(VType=="RORD")
+        {
+        $('#ddSaudaNo').show();
+        $('#ddWBNo').show();
+        $('#LblWbNo').show();
+        $('#LblSaudaNo').show();
+        $('#BtnCalculation').show();
+        }
+        else{
+        $('#ddSaudaNo').hide();
+        $('#ddWBNo').hide();
+        $('#LblWbNo').hide();
+        $('#LblSaudaNo').hide();
+        $('#BtnCalculation').hide();
+        }
+    }
+
+    function quotationRtApproval() {
+        var partyCode=$('#ddlPartyName option:selected').val()||'';
+        $.ajax({
+            url: '@Url.Action("GetQuotationRtAprvlLiast", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            data:{ partyCode: partyCode },
+            success: function (response) {
+                if (response.status) {                   
+                    var $tableBody = $('#tblQuotationModal tbody');
+                    $tableBody.empty();
+                    $.each(response.data, function (index, item) {
+                        var tableRow = `
+                            <tr>
+                                <td><input type="checkbox" id="chkQuot" /></td>
+                                <td>${item.V_NO}</td>
+                                <td>${item.V_TYPE}</td>
+                                <td>${item.V_DATE}</td>
+                                <td value=${item.ITEM_CODE}>${item.itemName}</td>
+                                <td value="${item.UOM_CODE}">${item.Unit}</td>
+                                <td value="${item.MAKE_CODE}">${item.make}</td>
+                                <td>${item.TECH_DESC}</td>
+                                <td>${item.QTY}</td>
+                                <td>${item.RATE}</td>
+                                <td>${item.AMOUNT}</td>
+                                <td>${item.PACK_PER}</td>
+                                <td>${item.PACK_AMT}</td>
+                                <td>${item.FREIGHT}</td>
+                                <td>${item.DISC_PER}</td>
+                                <td>${item.DISC_AMT}</td>
+                                <td value="${item.TAX_CODE}">${item.taxType}</td>
+                                <td>${item.CGST_PER}</td>
+                                <td>${item.CGST_AMT}</td>
+                                <td>${item.SGST_PER}</td>
+                                <td>${item.SGST_AMT}</td>
+                                <td>${item.IGST_PER}</td>
+                                <td>${item.IGST_AMT}</td>
+                                <td>${item.CESS_PER}</td>
+                                <td>${item.CESS_AMT}</td>
+                                <td>${item.OTH_EXPS}</td>
+                                <td>${item.LD_RATE}</td>
+                                <td>${item.NET_AMT}</td>
+                                <td value="${item.PARTY_CODE}">${item.party}</td>
+                                <td>${item.REQ_NO}</td>
+                                <td>${item.REQ_TYPE}</td>
+                                <td>${item.APROV_REMARKS}</td>
+                                <td>${item.STATUS}</td>
+                            </tr>
+                        `;
+                        $tableBody.append(tableRow);
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Data load failed');
+            }
+        });
+    }
+
+    function getquoteTabledata() {
+        var quoteData = [];
+
+        $('#tblQuotationModal tbody tr').each(function () {
+            var $checkbox = $(this).find('input[type="checkbox"]');
+
+            if ($checkbox.is(':checked')) {
+                var row = $(this).find('td');
+
+                var rowData = {
+                    V_NO:        $(row[1]).text().trim(),
+                    V_TYPE:      $(row[2]).text().trim(),
+                    V_DATE:      $(row[3]).text().trim(),
+
+                    ITEM_CODE:   $(row[4]).attr('value'),
+                    itemName:    $(row[4]).text().trim(),
+
+                    UOM_CODE:    $(row[5]).attr('value'),
+                    Unit:        $(row[5]).text().trim(),
+
+                    MAKE_CODE:   $(row[6]).attr('value'),
+                    make:        $(row[6]).text().trim(),
+
+                    TECH_DESC:   $(row[7]).text().trim(),
+                    QTY:         $(row[8]).text().trim(),
+                    RATE:        $(row[9]).text().trim(),
+                    AMOUNT:      $(row[10]).text().trim(),
+
+                    PACK_PER:    $(row[11]).text().trim(),
+                    PACK_AMT:    $(row[12]).text().trim(),
+                    FREIGHT:     $(row[13]).text().trim(),
+
+                    DISC_PER:    $(row[14]).text().trim(),
+                    DISC_AMT:    $(row[15]).text().trim(),
+
+                    TAX_CODE:    $(row[16]).attr('value'),
+                    taxType:     $(row[16]).text().trim(),
+
+                    CGST_PER:    $(row[17]).text().trim(),
+                    CGST_AMT:    $(row[18]).text().trim(),
+
+                    SGST_PER:    $(row[19]).text().trim(),
+                    SGST_AMT:    $(row[20]).text().trim(),
+
+                    IGST_PER:    $(row[21]).text().trim(),
+                    IGST_AMT:    $(row[22]).text().trim(),
+
+                    CESS_PER:    $(row[23]).text().trim(),
+                    CESS_AMT:    $(row[24]).text().trim(),
+
+                    OTH_EXPS:    $(row[25]).text().trim(),
+                    LD_RATE:     $(row[26]).text().trim(),
+                    NET_AMT:     $(row[27]).text().trim(),
+
+                    PARTY_CODE:  $(row[28]).attr('value'),
+                    party:       $(row[28]).text().trim(),
+
+                    REQ_NO:      $(row[29]).text().trim(),
+                    REQ_TYPE:    $(row[30]).text().trim(),
+
+                    APROV_REMARKS: $(row[31]).text().trim(),
+                    STATUS:      $(row[32]).text().trim()
+                };
+
+                quoteData.push(rowData);
+            }
+        });
+        return quoteData;
+    }
+
+
+
+    async function fillItemDetailsTable(data) {
+        const $tbody = $('#tblItemRecordPO tbody');
+        $tbody.empty();
+        console.log(data);
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+            addItemRecordRow();
+            await bindDropdownData(idx);
+            $(`#ddlIplaceofUse${idx}`).val(item.PLACE_OF_USE || '');
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE || '');
+            $(`#ddlImake${idx}`).val(item.MAKE_CODE || '');
+            $(`#TxtNos${idx}`).val(item.NOS || '');
+            $(`#TxtQty${idx}`).val(item.QTY || '');
+            $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY_SAUDA || '');
+            $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
+            $(`#TxtRate${idx}`).val(item.RATE || '');
+            $(`#TxtExrate${idx}`).val(item.EXRATE || '');
+            $(`#TxtCalcRate${idx}`).val(item.CALC_RATE || '');
+            $(`#TxtAmount${idx}`).val(item.AMOUNT || '');
+            $(`#TxtPackPercent${idx}`).val(item.PACK_PER || '');
+            $(`#TxtPack${idx}`).val(item.PACK_AMT || '');
+            $(`#TxtDiscPercent${idx}`).val(item.DISC_PER || '');
+            $(`#TxtDisc${idx}`).val(item.DISC_AMT || '');
+            $(`#ddlTax${idx}`).val(item.TAX_CODE || '');
+            $(`#TxtCgstPercent${idx}`).val(item.CGST_PER || '');
+            $(`#TxtCgst${idx}`).val(item.CGST_AMT || '');
+            $(`#TxtSgstPercent${idx}`).val(item.SGST_PER || '');
+            $(`#TxtSgst${idx}`).val(item.SGST_AMT || '');
+            $(`#TxtIgstPercent${idx}`).val(item.IGST_PER || '');
+            $(`#TxtIgst${idx}`).val(item.IGST_AMT || '');
+            $(`#TxtVatPercent${idx}`).val(item.VAT_PER || '');
+            $(`#TxtVat${idx}`).val(item.VAT_AMT || '');
+            $(`#TxtCessPercent${idx}`).val(item.CESS_PER || '');
+            $(`#TxtCess${idx}`).val(item.CESS_AMT || '');
+            $(`#TxtTcsPer${idx}`).val(item.TCS_PER || '');
+            $(`#TxtTcsAmt${idx}`).val(item.TCS_AMT || '');
+            $(`#TxtOthPer${idx}`).val(item.OTH_PER || '');
+            $(`#TxtOthAmt${idx}`).val(item.OTH_AMT || '');
+            $(`#TxtOthPer2${idx}`).val(item.OTH_PER2 || '');
+            $(`#TxtOthAmt2${idx}`).val(item.OTH_AMT2 || '');
+            $(`#TxtNetAmt${idx}`).val(item.NET_AMT || '');
+            $(`#TxtLdRate${idx}`).val(item.LD_RATE || '');
+            $(`#ddlDepartment${idx}`).val(item.DEPARTMENT || '');
+            $(`#TxtRemarks${idx}`).val(item.REMARKS || '');
+            $(`#TxtAppLevel${idx}`).val(item.APP_LEVEL || '');
+            $(`#TxtAppRemarks${idx}`).val(item.APP_REMARKS || '');
+            $(`#TxtMthRate${idx}`).val(item.MTH_RATE || '');
+            $(`#TxtQtrRate${idx}`).val(item.QTR_RATE || '');
+            $(`#TxtAnlRate${idx}`).val(item.ANL_RATE || '');
+            $(`#TxtSpclRate${idx}`).val(item.SPCL_RATE || '');
+        }
+    }
+
+    function PurchaseRateApproval() {
+        $.ajax({
+            url: '@Url.Action("GetPurchaseRtApprovalList", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $tableBody = $('#tblPurchaseRequest tbody');
+                    $tableBody.empty();
+
+                    $.each(response.data, function (index, item) {
+                        var quotRow = `
+                        <tr>
+                            <td><input type="checkbox" id="ChkPurchase"/></td>
+                            <td>${item.V_NO}</td>
+                            <td>${item.V_TYPE}</td>
+                            <td>${item.V_DATE}</td>
+                            <td>${item.ITEM_CODE}</td>
+                            <td>${item.ItemName}</td>
+                            <td>${item.Unit}</td>
+                            <td>${item.makename}</td>
+                            <td>${item.TECH_DESC}</td>
+                            <td>${item.REQ_QTY}</td>
+                            <td>${item.V_DATE}</td>
+                            <td>${item.APROV_REMARKS}</td>
+                            <td>${item.STATUS}</td>
+                            <td>${item.Department}</td>
+                            <td>${item.DEPT_CODE}</td>
+                            <td>${item.MAKE_CODE}</td>
+                            <td>${item.V_NO}</td>
+                            <td>${item.V_TYPE}</td>
+                            <td>${item.UOM_CODE}</td>
+                        </tr>
+                        `;
+                        $tableBody.append(quotRow);
+                    });
+                } else {
+                    toastr.error("Failed to load quotation data.");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed: " + error);
+            }
+        });
+    }
+
+    function getPurchaseData() {
+        let poData = [];
+
+        $('#tblPurchaseRequest tbody tr').each(function () {
+            const $checkbox = $(this).find('input[type="checkbox"]');
+
+            if ($checkbox.is(':checked')) {
+                const row = $(this).find('td');
+
+                const item = {
+                    ITEM_CODE:    $(row[4]).text().trim(),
+                    ItemName:     $(row[5]).text().trim(),
+                    Unit:         $(row[6]).text().trim(),
+                    makename:     $(row[7]).text().trim(),
+                    TECH_DESC:    $(row[8]).text().trim(),
+                    QTY:          $(row[9]).text().trim(),
+                    UOM_CODE:     $(row[18]).text().trim(),
+                    MAKE_CODE:    $(row[15]).text().trim(),
+                    APROV_REMARKS:$(row[11]).text().trim(),
+                    STATUS:       $(row[12]).text().trim(),
+                    Department:   $(row[13]).text().trim()
+                    // Add other fields if needed
+                };
+
+                poData.push(item);
+            }
+        });
+
+        return poData;
+    }
+
+    async function fillItemDetailsTableByQuoteBtn(data) {
+        const $tbody = $('#tblItemRecordPO tbody');
+        $tbody.empty();
+
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+
+            await bindDropdownData(idx);
+            console.log('a');
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE);
+            $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
+            $(`#ddlImake${idx}`).val(item.MAKE_CODE || '');
+            $(`#TxtQty${idx}`).val(item.QTY || '');
+            $(`#ddlDepartment${idx}`).val(item.Department || '');
+            $(`#TxtRemarks${idx}`).val(item.TECH_DESC || '');
+            $(`#TxtAppRemarks${idx}`).val(item.APROV_REMARKS || '');
+            $(`#TxtAppLevel${idx}`).val(item.STATUS || '');
+
+            // Optional fields: blank if not available
+            $(`#TxtRate${idx}`).val('');
+            $(`#TxtExrate${idx}`).val('');
+            $(`#TxtCalcRate${idx}`).val('');
+            $(`#TxtAmount${idx}`).val('');
+            $(`#TxtPackPercent${idx}`).val('');
+            $(`#TxtPack${idx}`).val('');
+            $(`#TxtDiscPercent${idx}`).val('');
+            $(`#TxtDisc${idx}`).val('');
+            $(`#ddlTax${idx}`).val('');
+            $(`#TxtCgstPercent${idx}`).val('');
+            $(`#TxtCgst${idx}`).val('');
+            $(`#TxtSgstPercent${idx}`).val('');
+            $(`#TxtSgst${idx}`).val('');
+            $(`#TxtIgstPercent${idx}`).val('');
+            $(`#TxtIgst${idx}`).val('');
+            $(`#TxtVatPercent${idx}`).val('');
+            $(`#TxtVat${idx}`).val('');
+            $(`#TxtCessPercent${idx}`).val('');
+            $(`#TxtCess${idx}`).val('');
+            $(`#TxtTcsPer${idx}`).val('');
+            $(`#TxtTcsAmt${idx}`).val('');
+            $(`#TxtOthPer${idx}`).val('');
+            $(`#TxtOthAmt${idx}`).val('');
+            $(`#TxtOthPer2${idx}`).val('');
+            $(`#TxtOthAmt2${idx}`).val('');
+            $(`#TxtNetAmt${idx}`).val('');
+            $(`#TxtLdRate${idx}`).val('');
+            $(`#TxtNos${idx}`).val('');
+            $(`#TxtMthRate${idx}`).val('');
+            $(`#TxtQtrRate${idx}`).val('');
+            $(`#TxtAnlRate${idx}`).val('');
+            $(`#TxtSpclRate${idx}`).val('');
+        }
+    }
+
+    // $(document).on('change', '#ddSaudaNo', async function () {
+    //     const docid = $('#ddSaudaNo').val();
+    //     const data = await GetSaudaDetail(docid);
+
+    //     const item = data[0];
+    //     const rate = item.RATE;
+    //     const taxCode = parseIntSafe(item.TAX_CODE);
+    //     const discper = parseFloatSafe(item.DISC_PER);
+    //     const $rows = $('#tblItemRecordPO tbody tr');
+    //     $rows.each(function () {
+    //         const idx = this.id.replace('row', '');
+    //         $(`#TxtRate${idx}`).val(rate);
+    //         $(`#TxtDiscPercent${idx}`).val(discper);
+    //         $(`#ddlTax${idx}`).val(taxCode);
+    //     });
+    //     calculateAllRows();
+    //     calculateAllTotals();
+    // });
+
+    $(document).on('change', '#ddWBNo', async function () {
+        var docid = $('#ddWBNo').find('option:selected').val();
+        var partyCode = $('#ddlPartyName').val();
+        let data = await GetWeighBridgeDetail(docid, partyCode);
+
+        const $tbody = $('#tblItemRecordPO tbody');
+        $tbody.empty();
+        console.log(data);
+
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+
+            // Ensure dropdowns are bound before setting values
+            await bindDropdownData(idx);
+
+            // Now set values
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+            $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change'); 
+            $(`#TxtQty${idx}`).val(item.Qty);
+            $(`#ddlUnit${idx}`).val(item.UNIT_CODE).trigger('change');
+        }
+    });
+
+    function calculateTaxAmounts(rowId) {
+        const rate = parseFloat($(`#TxtRate${rowId}`).val()) || 0;
+        const qty = parseFloat($(`#TxtQty${rowId}`).val()) || 0;
+        const amount = rate * qty;
+
+        const discPer = parseFloat($(`#TxtDiscPercent${rowId}`).val()) || 0;
+        const discAmt = (amount * discPer) / 100;
+        $(`#TxtDisc${rowId}`).val(discAmt.toFixed(2));
+
+        const packPer = parseFloat($(`#TxtPackPercent${rowId}`).val()) || 0;
+        const packAmt = (amount * packPer) / 100;
+        $(`#TxtPack${rowId}`).val(packAmt.toFixed(2));
+
+        const taxableAmount = amount - discAmt + packAmt;
+
+        const cgstPer = parseFloat($(`#TxtCgstPercent${rowId}`).val()) || 0;
+        const sgstPer = parseFloat($(`#TxtSgstPercent${rowId}`).val()) || 0;
+        const igstPer = parseFloat($(`#TxtIgstPercent${rowId}`).val()) || 0;
+        const cessPer = parseFloat($(`#TxtCessPercent${rowId}`).val()) || 0;
+        const tcsPer = parseFloat($(`#TxtTcsPer${rowId}`).val()) || 0;
+        const vatPer = parseFloat($(`#TxtVatPercent${rowId}`).val()) || 0;
+        const othPer1 = parseFloat($(`#TxtOthPer${rowId}`).val()) || 0;
+        const othPer2 = parseFloat($(`#TxtOthPer2${rowId}`).val()) || 0;
+
+        const cgstAmt = (taxableAmount * cgstPer) / 100;
+        const sgstAmt = (taxableAmount * sgstPer) / 100;
+        const igstAmt = (taxableAmount * igstPer) / 100;
+        const cessAmt = (taxableAmount * cessPer) / 100;
+        const tcsAmt = (taxableAmount * tcsPer) / 100;
+        const vatAmt = (taxableAmount * vatPer) / 100;
+        const othAmt1 = (taxableAmount * othPer1) / 100;
+        const othAmt2 = (taxableAmount * othPer2) / 100;
+
+        const totalTax = cgstAmt + sgstAmt + igstAmt + cessAmt + tcsAmt + vatAmt + othAmt1 + othAmt2;
+        const netAmt = taxableAmount + totalTax;
+
+        // Update DOM
+        $(`#TxtAmount${rowId}`).val(amount.toFixed(2));
+        $(`#TxtCgst${rowId}`).val(cgstAmt.toFixed(2));
+        $(`#TxtSgst${rowId}`).val(sgstAmt.toFixed(2));
+        $(`#TxtIgst${rowId}`).val(igstAmt.toFixed(2));
+        $(`#TxtCess${rowId}`).val(cessAmt.toFixed(2));
+        $(`#TxtTcsAmt${rowId}`).val(tcsAmt.toFixed(2));
+        $(`#TxtVat${rowId}`).val(vatAmt.toFixed(2));
+        $(`#TxtOthAmt${rowId}`).val(othAmt1.toFixed(2));
+        $(`#TxtOthAmt2${rowId}`).val(othAmt2.toFixed(2));
+        $(`#TxtNetAmt${rowId}`).val(netAmt.toFixed(2));
+
+        calculateAllTotals(); // Recalculate footer totals
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+
+            if (response.status) {
+                if (readOnly === 'true') {
+                    disableAllFields();
+                    $('.btn-add-row-last').hide();
+                    $('#btn-save, #cancelBtn').hide();
+                } else {
+                    enableAllFields();
+                    $('#btn-save, #cancelBtn').show();
+                    $('.btn-add-row-last').show();
+
+                }
+                await fillFormFields(response.header);
+                await fillItemDetailsTable(response.detail);
+                $('#tblAttachmentPO tbody').empty();
+                if (response.attachment) {
+                    if (Array.isArray(response.attachment)) {
+                        response.attachment.forEach(att => addAttachmentRow(att));
+                    } else if (typeof response.attachment === 'object') {
+                        addAttachmentRow(response.attachment);
+                    } else {
+                        addAttachmentRow();
+                    }
+                } else {
+                    addAttachmentRow();
+                }                             
+                
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            toastr.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdatePurchaseOrder", "PurchaseOrder")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {             
+                        if (response?.status) {
+                            // showFlashMessageByKey('insert', 'success');
+                            toastr.success("Data Insert Successfully");
+                            // resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/PurchaseOrderList/Index';
+                            }, 500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdatePurchaseOrder", "PurchaseOrder")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    showFlashMessageByKey('update', 'success');
+                    // resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/PurchaseOrderList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+          });
+        }
+
+    async  function fillFormFields(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        toastr.error("Invalid or empty data array");
+        return;
+      }
+
+      const d = data[0]; // use first object
+
+      $('#txtDocNo').val(d.V_NO || '');
+      $('#TxtDocId').val(d.DOC_ID || '');
+      $('#dtDocDate').val((d.V_DATE || '').substring(0, 10));
+      $('#DtDeliveryDate').val((d.DELIVERY_DATE || '').substring(0, 10));
+      $('#DtValidateDate').val((d.VALIDITY_DATE || '').substring(0, 10));
+      $('#ddlDocType').val(d.V_TYPE || '');
+      $('#ddlPlace').val(d.PLACE_CODE || '');
+      $('#ddWBNo').val(d.WB_NO || '');
+      $('#ddlPartyName').val(d.PARTY_CODE || '');
+      $('#ddlShipFrom').val(d.SHIP_CODE || '');
+
+      // Billing Address
+      $('#TxtAdd1PD').val(d.BILL_ADD1 || '');
+      $('#TxtAdd2PD').val(d.BILL_ADD2 || '');
+      $('#TxtAdd3PD').val(d.BILL_ADD3 || '');
+      $('#TxtCity1PD').val(d.BILL_CITY || '');
+      $('#NumPincodePD').val(d.BILL_PINCODE || '');
+      $('#TxtGSTPD').val(d.BILL_GST || '');
+
+      // Shipping Address
+      $('#TxtAdd1SD').val(d.SHIP_ADD1 || '');
+      $('#TxtAdd2SD').val(d.SHIP_ADD2 || '');
+      $('#TxtAdd3SD').val(d.SHIP_ADD3 || '');
+      $('#TxtCity1SD').val(d.SHIP_CITY || '');
+      $('#NumPincodeSD').val(d.SHIP_PINCODE || '');
+
+      // Financials
+      $('#ddlPriceType').val(d.PRICE_TYPE || '');
+      $('#txtPartyRef').val(d.PARTY_REF || '');
+      $('#ddlCurrency').val(d.IMPORT_CURRENCY || '');
+      $('#NumExRate').val(d.EXRATE || '');
+      $('#NumTotalNosIt').val(d.NOS || '');
+      $('#NumQtyIt').val(d.QTY || '');
+      $('#NumAmountIt').val(d.AMOUNT || '');
+      $('#NumPackingAmtIt').val(d.PACK_AMT || '');
+      $('#NumDiscAmtIt').val(d.DISC_AMT || '');
+      $('#NumCgstAmtIt').val(d.CGST_AMT || '');
+      $('#NumSgstAmtIt').val(d.SGST_AMT || '');
+      $('#NumIgstAmtIt').val(d.IGST_AMT || '');
+      $('#TxtOtherAmtSod').val(d.OTH_AMT || '');
+      $('#NumVatAmtIt').val(d.VAT_AMT || '');
+      $('#NumCessAmtIt').val(d.CESS_AMT || '');
+      $('#NumTCSIt').val(d.TCS_AMT || '');
+      $('#NumNetAmtIt').val(d.NET_AMT || '');
+
+      // Terms
+      $('#txtDeliveryTerm').val(d.DELIVERY_TERM || '');
+      $('#txtTransportTerm').val(d.TRANSPORT_TERM || '');
+      $('#ddlPaymentTerm').val(d.PAYTERM_CODE || '');
+      $('#txtPaymentTerm').val(d.PAYMENT_TERM || '');
+      $('#txtPriceTerm').val(d.PRICE_TERM || '');
+      $('#txtRemarksTC').val(d.REMARKS || '');
+      $('#txtPartySauda').val(d.PARTY_NAME || '');
+    }
+
+    async function fillItemDetailsTable(data) {
+        const $tbody = $('#tblItemRecordPO tbody');
+        $tbody.empty();
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+            addItemRecordRow();
+            await bindDropdownData(idx);
+
+            console.log(data, item.ITEM_CODE);
+            $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE);
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+            $(`#ddlImake${idx}`).val(item.MAKE_CODE);
+            $(`#TxtNos${idx}`).val(item.NOS);
+            $(`#TxtQty${idx}`).val(item.QTY);
+            $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY);
+            $(`#ddlUnit${idx}`).val(item.UOM_CODE);
+            $(`#TxtRate${idx}`).val(item.RATE);
+            $(`#TxtExrate${idx}`).val(item.IMPORT_RATE);
+            $(`#TxtCalcRate${idx}`).val(item.CALC_RATE);
+            $(`#TxtAmount${idx}`).val(item.AMOUNT);
+            $(`#TxtPackPercent${idx}`).val(item.PACK_PER);
+            $(`#TxtPack${idx}`).val(item.PACK_AMT);
+            $(`#TxtDiscPercent${idx}`).val(item.DISC_PER);
+            $(`#TxtDisc${idx}`).val(item.DISC_AMT);
+            $(`#ddlTax${idx}`).val(item.TAX_CODE);
+            $(`#TxtCgstPercent${idx}`).val(item.CGST_PER);
+            $(`#TxtCgst${idx}`).val(item.CGST_AMT);
+            $(`#TxtSgstPercent${idx}`).val(item.SGST_PER);
+            $(`#TxtSgst${idx}`).val(item.SGST_AMT);
+            $(`#TxtIgstPercent${idx}`).val(item.IGST_PER);
+            $(`#TxtIgst${idx}`).val(item.IGST_AMT);
+            $(`#TxtVatPercent${idx}`).val(item.VAT_PER);
+            $(`#TxtVat${idx}`).val(item.VAT_AMT);
+            $(`#TxtCessPercent${idx}`).val(item.CESS_PER);
+            $(`#TxtCess${idx}`).val(item.CESS_AMT);
+            $(`#TxtTcsPer${idx}`).val(item.TCS_PER);
+            $(`#TxtTcsAmt${idx}`).val(item.TCS_AMT);
+            $(`#TxtOthPer${idx}`).val(item.OTH_PER);
+            $(`#TxtOthAmt${idx}`).val(item.OTH_AMT);
+            $(`#TxtOthPer2${idx}`).val(item.TOTAL_PER2);
+            $(`#TxtOthAmt2${idx}`).val(item.TOTAL_AMT2);
+            $(`#TxtNetAmt${idx}`).val(item.NET_AMT);
+            $(`#TxtLdRate${idx}`).val(item.LAND_RATE);
+            $(`#ddlDepartment${idx}`).val(item.DEPT_CODE);
+            $(`#TxtRemarks${idx}`).val(item.REMARKS);
+            $(`#TxtAppLevel${idx}`).val(item.PREORITY_LEVEL);
+            $(`#TxtAppRemarks${idx}`).val(item.PREORITY_REMARKS);
+            $(`#TxtMthRate${idx}`).val(item.RATE_MONTHLY);
+            $(`#TxtQtrRate${idx}`).val(item.RATE_QUARTERLY);
+            $(`#TxtAnlRate${idx}`).val(item.RATE_ANNUALY);
+            $(`#TxtSpclRate${idx}`).val(item.RATE_SPECIAL);
+        }
+    }
+
+    async function collectFormData() {
+        const id = toNullableString(docId);
+        const itemRecords = await collectOrder2Items();
+         const attachment = await getAttachmentDetails(); 
+        return {
+            VNo: parseIntSafe(document.getElementById("txtDocNo")?.value),
+            VType: toNullableString(document.getElementById("ddlDocType")?.value),
+            VDate: toNullableDate(document.getElementById("dtDocDate")?.value),
+            DeliveryDate: toNullableDate(document.getElementById("DtDeliveryDate")?.value),
+            ValidityDate: toNullableDate(document.getElementById("DtValidateDate")?.value),
+            DocId: toNullableString(document.getElementById("TxtDocId")?.value),
+            PlaceCode: parseIntSafe(document.getElementById("ddlPlace")?.value),
+            WbType: null,
+            WbNo: parseIntSafe(document.getElementById("ddWBNo")?.value),
+            PartyCode: parseIntSafe(document.getElementById("ddlPartyName")?.value),
+            ShipCode: parseIntSafe(document.getElementById("ddlShipFrom")?.value),
+            ShipFrom: parseIntSafe(document.getElementById("ddlPartyName")?.value),
+            BillAdd1: toNullableString(document.getElementById("TxtAdd1PD")?.value),
+            BillAdd2: toNullableString(document.getElementById("TxtAdd2PD")?.value),
+            BillAdd3: toNullableString(document.getElementById("TxtAdd3PD")?.value),
+            BillCity: parseIntSafe(document.getElementById("TxtCity1PD")?.value),
+            BillPincode: toNullableString(document.getElementById("NumPincodePD")?.value),
+            BillGst: toNullableString(document.getElementById("TxtGSTPD")?.value),
+            ShipAdd1: toNullableString(document.getElementById("TxtAdd1SD")?.value),
+            ShipAdd2: toNullableString(document.getElementById("TxtAdd2SD")?.value),
+            ShipAdd3: toNullableString(document.getElementById("TxtAdd3SD")?.value),
+            ShipCity: parseIntSafe(document.getElementById("TxtCity1SD")?.value),
+            ShipPincode: toNullableString(document.getElementById("NumPincodeSD")?.value),
+            ShipGst: null,
+            PriceType: toNullableString(document.getElementById("ddlPriceType")?.value),
+            PartyRef: toNullableString(document.getElementById("txtPartyRef")?.value),
+            ImportCurrency: toNullableString(document.getElementById("ddlCurrency")?.value),
+            ExRate: parseFloatSafe(document.getElementById("NumExRate")?.value),
+            Nos: parseFloatSafe(document.getElementById("NumTotalNosIt")?.value),
+            Qty: parseFloatSafe(document.getElementById("NumQtyIt")?.value),
+            Amount: parseFloatSafe(document.getElementById("NumAmountIt")?.value),
+            PackAmt: parseFloatSafe(document.getElementById("NumPackingAmtIt")?.value),
+            DiscAmt: parseFloatSafe(document.getElementById("NumDiscAmtIt")?.value),
+            CgstAmt: parseFloatSafe(document.getElementById("NumCgstAmtIt")?.value),
+            SgstAmt: parseFloatSafe(document.getElementById("NumSgstAmtIt")?.value),
+            IgstAmt: parseFloatSafe(document.getElementById("NumIgstAmtIt")?.value),
+            OthAmt: parseFloatSafe(document.getElementById("TxtOtherAmtSod")?.value),
+            VatAmt: parseFloatSafe(document.getElementById("NumVatAmtIt")?.value),
+            CessPer: null,
+            CessAmt: parseFloatSafe(document.getElementById("NumCessAmtIt")?.value),
+            TcsPer: null,
+            TcsAmt: parseFloatSafe(document.getElementById("NumTCSIt")?.value),
+            NetAmt: parseFloatSafe(document.getElementById("NumNetAmtIt")?.value),
+            DeliveryTerm: toNullableString(document.getElementById("txtDeliveryTerm")?.value),
+            TransportTerm: toNullableString(document.getElementById("txtTransportTerm")?.value),
+            PaytermCode: parseIntSafe(document.getElementById("ddlPaymentTerm")?.value),
+            PaymentTerm: toNullableString(document.getElementById("txtPaymentTerm")?.value),
+            PriceTerm: toNullableString(document.getElementById("txtPriceTerm")?.value),
+            SaudaType: null,
+            SaudaNo: null,
+            DeliveryPeriod: null,
+            DeliveryTo: null,
+            Remarks: toNullableString(document.getElementById("txtRemarksTC")?.value),
+            PoType: null,
+            FAProvStatus: null,
+            FAProvRemarks: null,
+            MailSend: null,
+            CDiscAmt: null,
+            AutoGenPo: null,
+            PoAcceptFlg: null,
+            PoAttachPath: null,
+            PoAttachDate: null,
+            TaxCode: null,
+            ItemType: null,
+            SupplyType: null,
+            TranType: null,
+            FormCode: null,
+            VehicleNo: null,
+            InvType: null,
+            InvNo: null,
+            PartyName: toNullableString(document.getElementById("txtPartySauda")?.value),
+            ShipName: null,
+            Status: null,
+            SaveOrUpdate: (!id || id === 0) ? 'Save' : 'Update',
+            ItemRecords: itemRecords,
+            Attachments:attachment
+        };
+    }
+
+    async function collectOrder2Items() {
+      const items = [];
+      $('#tblItemRecordPO tbody tr').each(function () {
+        const idx = this.id.replace('row', '');
+        const $r = $(this);
+
+        items.push({
+          SNO: parseIntSafe(idx),
+          PlaceCode: parseIntSafe($r.find(`#ddlIplaceofUse${idx}`).val()),
+          ItemName: $r.find(`#ddlItemname${idx} option:selected`).text(),
+          ItemCode: parseIntSafe($r.find(`#ddlItemname${idx}`).val()),
+          MakeCode: parseIntSafe($r.find(`#ddlImake${idx}`).val()),
+          NOS: parseIntSafe($r.find(`#TxtNos${idx}`).val()),
+          Qty: parseFloatSafe($r.find(`#TxtQty${idx}`).val()),
+          AdjQty: parseFloatSafe($r.find(`#txtAdjQtySauda${idx}`).val()),
+          GateQty: null,
+          UomName: $r.find(`#ddlUnit${idx} option:selected`).text(),
+          UomCode: parseIntSafe($r.find(`#ddlUnit${idx}`).val()),
+          Rate: parseFloatSafe($r.find(`#TxtRate${idx}`).val()),
+          ImportRate: parseFloatSafe($r.find(`#TxtExrate${idx}`).val()),
+          CalcRate: parseFloatSafe($r.find(`#TxtCalcRate${idx}`).val()),
+          Amount: parseFloatSafe($r.find(`#TxtAmount${idx}`).val()),
+          PackPer: parseFloatSafe($r.find(`#TxtPackPercent${idx}`).val()),
+          PackAmt: parseFloatSafe($r.find(`#TxtPack${idx}`).val()),
+          DiscPer: parseFloatSafe($r.find(`#TxtDiscPercent${idx}`).val()),
+          DiscAmt: parseFloatSafe($r.find(`#TxtDisc${idx}`).val()),
+          TaxCode: parseIntSafe($r.find(`#ddlTax${idx}`).val()),
+          CgstPer: parseFloatSafe($r.find(`#TxtCgstPercent${idx}`).val()),
+          CgstAmt: parseFloatSafe($r.find(`#TxtCgst${idx}`).val()),
+          SgstPer: parseFloatSafe($r.find(`#TxtSgstPercent${idx}`).val()),
+          SgstAmt: parseFloatSafe($r.find(`#TxtSgst${idx}`).val()),
+          IgstPer: parseFloatSafe($r.find(`#TxtIgstPercent${idx}`).val()),
+          IgstAmt: parseFloatSafe($r.find(`#TxtIgst${idx}`).val()),
+          VatPer: parseFloatSafe($r.find(`#TxtVatPercent${idx}`).val()),
+          VatAmt: parseFloatSafe($r.find(`#TxtVat${idx}`).val()),
+          CessPer: parseFloatSafe($r.find(`#TxtCessPercent${idx}`).val()),
+          CessAmt: parseFloatSafe($r.find(`#TxtCess${idx}`).val()),
+          TcsPer: parseFloatSafe($r.find(`#TxtTcsPer${idx}`).val()),
+          TcsAmt: parseFloatSafe($r.find(`#TxtTcsAmt${idx}`).val()),
+          OthPer: parseFloatSafe($r.find(`#TxtOthPer${idx}`).val()),
+          OthAmt: parseFloatSafe($r.find(`#TxtOthAmt${idx}`).val()),
+          TotalPer2: parseFloatSafe($r.find(`#TxtOthPer2${idx}`).val()),
+          TotalAmt2: parseFloatSafe($r.find(`#TxtOthAmt2${idx}`).val()),
+          NetAmt: parseFloatSafe($r.find(`#TxtNetAmt${idx}`).val()),
+          LandRate: parseFloatSafe($r.find(`#TxtLdRate${idx}`).val()),
+          PlaceUse: $r.find(`#ddlIplaceofUse${idx} option:selected`).text(),
+          DeptName: $r.find(`#ddlDepartment${idx} option:selected`).text(),
+          Remarks: $r.find(`#TxtRemarks${idx}`).val(),
+          PreorityLevel: parseIntSafe($r.find(`#TxtAppLevel${idx}`).val()),
+          PreorityRemarks: $r.find(`#TxtAppRemarks${idx}`).val(),
+          RateMonthly: parseFloatSafe($r.find(`#TxtMthRate${idx}`).val()),
+          RateQuarterly: parseFloatSafe($r.find(`#TxtQtrRate${idx}`).val()),
+          RateAnnualy: parseFloatSafe($r.find(`#TxtAnlRate${idx}`).val()),
+          RateSpecial: parseFloatSafe($r.find(`#TxtSpclRate${idx}`).val()),
+          RequestType: null,
+          RequestNo: null,
+          ApprovalType: null,
+          ApprovalNo: null,
+          DeptCode: null,
+          DeliveryDate: null,
+          SaudaType: null,
+          SaudaNo: null,
+          DispThrough: null,
+          DispRef: null,
+          DispRemarks: null,
+          TenacityGrpCode: null,
+          TenacityType: null,
+          TenacityCode: null,
+          TenacityName: null,
+          FAProvStatus: null,
+          FAProvRemarks: null,
+          ColorCode: null,
+          GramCode: null
+        });
+      });
+
+      return items;
+    }
+
+    async function getAttachmentDetails() {
+        const attachments = [];
+
+        const rows = $('#tblAttachmentPO tbody tr').toArray();
+        for (const row of rows) {
+            const $row = $(row);
+            const fileInput = $row.find('.file-input')[0];
+            const file = fileInput?.files[0];
+            const fileNameInput = $row.find('.file-name-input').val()?.trim() || null;
+
+            let base64String = null;
+            let filePath = null;
+            let fileName = null;
+            let fileType = null;
+            let fileSize = null;
+
+            if (file) {
+                base64String = await toBase64(file);
+                fileName = file.name;
+                fileSize = file.size;
+                fileType = file.type;
+                filePath = `/uploads/${file.name}`; // Optional; actual path may depend on backend
+            } else {
+                // Use existing file data if no new file selected
+                fileName = $row.find('.existing-file-name').val()?.trim() || null;
+                fileSize = $row.find('.existing-file-size').val()?.trim() || null;
+                fileType = $row.find('.existing-file-type').val()?.trim() || null;
+                filePath = $row.find('.existing-file-path').val()?.trim() || null;
+            }
+
+            // Only add if there is file info
+            if (fileName || filePath) {
+                attachments.push({
+                    fileName: fileNameInput || fileName,
+                    fileSize: fileSize,
+                    fileType: fileType,
+                    filePath: filePath,
+                    fileContentBase64: base64String // will be null for existing files
+                });
+            }
+        }
+        return attachments;
+    }
+    
+    function toBase64(file) {
+         return new Promise((resolve, reject) => {
+             const reader = new FileReader();
+             reader.onload = () => resolve(reader.result.split(',')[1]);
+             reader.onerror = reject;
+             reader.readAsDataURL(file);
+         });
+     }
+    
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "PurchaseOrder")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          // $dropdown.append('<option value="">-select doc Type-</option>');
+
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid(VType) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "PurchaseOrder")',
+            type: 'GET',
+            data:{V_type:VType},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#txtDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+    
+    function GetSaudaDetail(docid)
+    {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            url:'@Url.Action("GetSaudaDetail", "PurchaseOrder")',
+            type:'Get',
+            dataType:'json',
+            data:{docid:docid},
+            success:function(response){
+               if (response.status){
+                 resolve(response.data);
+               }
+            },
+            error:function(xhr, status, error){
+                reject("Sauda Load failed: " + error);
+            }
+          })
+        });
+    }
+
+    function GetShipFromList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlShipFrom');
+                    $dropdown.empty();
+                     $dropdown.append('<option selected disabled value="">- Select Party -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                                data-add1="${item.ADD1}"
+                                data-add2="${item.ADD2}"
+                                data-add3="${item.ADD3}"
+                                data-cityName="${item.CityName}"
+                                data-GstIn="${item.GSTIN}"
+                                data-cityCd="${item.CITY_CODE}"
+                                data-pinCd="${item.PINCODE}"
+                        value="${item.CODE}">${item.NAME}
+                        </option>`);
+                    });
+
+                    $dropdown.select2({
+                        placeholder: "- Select Party -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Load failed: " + error);
+            }
+        });
+    }
+
+    function GetPartyList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlPartyName');
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select Party -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                            data-add1="${item.ADD1}"
+                            data-add2="${item.ADD2}"
+                            data-add3="${item.ADD3}"
+                            data-cityName="${item.CityName}"
+                            data-GstIn="${item.GSTIN}"
+                            data-cityCd="${item.CITY_CODE}"
+                            data-pinCd="${item.PINCODE}"
+                            value="${item.CODE}">
+                            ${item.NAME}
+                        </option>`);
+                    });
+
+                    // Initialize or refresh Select2
+                    $dropdown.select2({
+                        placeholder: "- Select Party -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Load failed: " + error);
+            }
+        });
+    }
+
+    function GetPartyAddress(partyCd, selectedId, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyAddress", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            data: { partyCd: partyCd },
+            success: function(response) {
+                if (response.status) {                    
+                    const $dropdown = $(selectedId);
+                    $dropdown.empty(response.data);
+                     $dropdown.append('<option selected disabled value="">- Select Address -</option>');
+
+                    $.each(response.data, function(index, item) {
+                        $dropdown.append(`
+                            <option
+                                data-add2="${item.ADD2}"
+                                data-add3="${item.ADD3}"
+                                data-cityName="${item.CityName}"
+                                data-GstIn="${item.GSTIN}"
+                                data-cityCd="${item.CITY_CODE}"
+                                data-pinCd="${item.PINCODE}"
+                                value="${item.code || index}"
+                            >
+                                ${item.ADD1}
+                            </option>
+                        `);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Party Address Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error("Party Address Load failed: " + error);
+            }
+        });
+    }
+
+    function GetCurrencyList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetCurrencyMast", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlCurrency');
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select Currency -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Currency Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Currency Load failed: " + error);
+            }
+        });
+    }
+
+    function GetPlaceList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPlaceMast", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlPlace');
+                    $dropdown.empty();
+                     $dropdown.append('<option selected disabled value="">- Select Place -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Place Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Place Load failed: " + error);
+            }
+        });
+    }
+
+    function GetWeighBridgeNo(partyCd, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetWeighBridge", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            data: { partyCd: partyCd },
+            success: function(response) {
+                if (response.status) {
+                    const $dropdown = $('#ddWBNo');
+                    $dropdown.empty();
+                     $dropdown.append('<option selected disabled value="">- Select WeighBridge No. -</option>');
+
+                    $.each(response.data, function(index, item) {
+                        $dropdown.append(`<option
+                        value="${item.DOC_ID}">
+                        ${item.V_NO}</option>`);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("WeighBridge Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error("WeighBridge Load failed: " + error);
+            }
+        });
+    }
+
+    function GetWeighBridgeDetail(docid, partyCode) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '@Url.Action("GetWeightBridgeDetail", "PurchaseOrder")',
+                type: 'GET',
+                dataType: 'json',
+                data: { docid: docid, partyCd:partyCode },
+                success: function (response) {
+                    if (response.status) {
+                        resolve(response.data);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    reject("WeighBridge Load failed: " + error);
+                }
+            });
+        });
+    }
+
+    function GetSaudaList(partyCd, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetSaudaList", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            data: { partyCd: partyCd },
+            success: function(response) {
+                if (response.status) {                   
+                    const $dropdown = $('#ddSaudaNo');
+                    $dropdown.empty(response.data);
+                     $dropdown.append('<option selected disabled value="">- Select Sauda No. -</option>');
+
+                    $.each(response.data, function(index, item) {
+                        $dropdown.append(`<option 
+                        data-saudaType="${item.V_TYPE}"
+                        value="${item.DOC_ID}">${item.V_NO}
+                        </option>`);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Sauda Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error("Sauda Load failed: " + error);
+            }
+        });
+    }
+
+    function GetPayTermList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPayTermList", "PurchaseOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlPaymentTerm');
+                    $dropdown.empty();
+                     $dropdown.append('<option selected disabled value="">- Select payment Term -</option>');
+
+                    $.each(response.data, function(index, item) {
+                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("payment term Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error("payment term Load failed: " + error);
+            }
+        });
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblItemRecordPO tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+        <tr class="no-border-input" id="row${rowCount}">
+            <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>
+            <td>
+                <select style="min-width: 500px;" class="form-control" id="ddlItemname${rowCount}">
+                    <option value="">-select item Name-</option>
+                </select>
+            </td>
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlImake${rowCount}">
+                    <option value="">-select Make-</option>
+                </select>
+            </td>
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlUnit${rowCount}" disabled>
+                    <option value="">-select Unit-</option>
+                </select>
+            </td>
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlIplaceofUse${rowCount}">
+                    <option value="">-select Place of Use-</option>
+                </select>
+            </td>
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlDepartment${rowCount}">
+                    <option value="">-select department-</option>
+                </select>
+            </td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtExrate${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" readonly id="TxtAmount${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtPackPercent${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtDiscPercent${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}" /></td>
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlTax${rowCount}">
+                    <option value="">-select Tax Type-</option>
+                </select>
+            </td>
+             <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtCgstPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtCgst${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtSgstPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtSgst${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtIgstPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtIgst${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtVatPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtVat${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"  oninput="allowOnlyNumbers(this)" id="TxtCessPercent${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}"  /></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtTcsPer${rowCount}" readonly/></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthPer${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthAmt${rowCount}" readonly/></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthPer2${rowCount}" readonly/></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtNetAmt${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtLdRate${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtRemarks${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtAppLevel${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtAppRemarks${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtStatus${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtReqtype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtReqno${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtApptype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtAppno${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtSaudatype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtSaudano${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtMthRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtQtrRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtAnlRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtSpclRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtCalcRate${rowCount}" readonly /></td>
+            <td>
+                <i class="fa fa-plus btn-add-action btn-Itemadd-action" title="Add Row"></i>
+                <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
+            </td>
+        </tr>
+        `;
+        tbody.append(newRow);
+        bindDropdownData(rowCount);
+        setEnterKeyFocusOnTable(itemRecords, rowCount);
+    }
+
+    function bindUnitOnItemSelect(itemSelect, unitSelect) {
+        itemSelect.on('change', function () {
+            const selectedOption = $(this).find('option:selected');
+            const unitCode = selectedOption.data('unitcd');
+            const unitName = selectedOption.data('unitname');
+
+            if (unitCode) {
+                if (unitSelect.find(`option[value="${unitCode}"]`).length === 0) {
+                    unitSelect.append(`<option value="${unitCode}">${unitName}</option>`);
+                }
+                unitSelect.val(unitCode).trigger('change');
+            } else {
+                unitSelect.val('').trigger('change');
+            }
+        });
+    }
+
+    function bindDropdownData(rowCount) {
+        const itemSelect = $(`#ddlItemname${rowCount}`);
+        const makeSelect = $(`#ddlImake${rowCount}`);
+        const unitSelect = $(`#ddlUnit${rowCount}`);
+        const departmentSelect = $(`#ddlDepartment${rowCount}`);
+        const taxSelect = $(`#ddlTax${rowCount}`);
+        const placeofUse = $(`#ddlIplaceofUse${rowCount}`);
+
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(`<option value="">${defaultText}</option>`);
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '300px',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: selectElem.is(itemSelect) ? 0 : -1 // Only enable search for itemSelect
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} Load failed`);
+                            resolve();
+                        }
+                    },
+                    error: reject
+                });
+            });
+        };
+
+        return Promise.all([
+            loadDropdown('@Url.Action("GetMakeList", "PurchaseOrder")', makeSelect, "- Select Make -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            loadDropdown('@Url.Action("GetUnitList", "PurchaseOrder")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            loadDropdown('@Url.Action("GetDepartmentList", "PurchaseOrder")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            loadDropdown('@Url.Action("GetMachineMastList", "PurchaseOrder")', placeofUse, "- Select Place Of Use -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")',
+                itemSelect,
+                "- Select Item -",
+                item => `<option
+                    data-unitCd="${item.UNIT_CODE}"
+                    data-unitname="${item.UNIT_NAME}"
+                    value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown('@Url.Action("GetTaxList", "PurchaseOrder")', taxSelect, "- Select Tax -", item => `
+                <option
+                    value="${item.CODE}"
+                    data-CSgstPer="${item.CSGST_PER}"
+                    data-IgstPer="${item.IGST_PER}"
+                    data-TdsPer="${item.TDS_PER}"
+                    data-TcsPer="${item.TCS_PER}"
+                    data-VatPer="${item.VAT_PER}"
+                    data-OtherPer1="${item.OTH_PER}"
+                    data-OtherPer2="${item.OTH_PER2}">
+                    ${item.NAME}
+                </option>`)
+        ]).then(() => {           
+            bindUnitOnItemSelect(itemSelect, unitSelect);
+        });
+    }
+
+    // function bindDropdownData(rowCount) {
+    //     const itemSelect = $(`#ddlItemname${rowCount}`);
+    //     const makeSelect = $(`#ddlImake${rowCount}`);
+    //     const unitSelect = $(`#ddlUnit${rowCount}`);
+    //     const departmentSelect = $(`#ddlDepartment${rowCount}`);
+    //     const taxSelect = $(`#ddlTax${rowCount}`);
+    //     const placeofUse = $(`#ddlIplaceofUse${rowCount}`);
+
+    //     // Helper to wrap AJAX call in a Promise
+    //     const loadDropdown = (url, selectElem, defaultText, formatter) => {
+    //         return new Promise((resolve, reject) => {
+    //             $.ajax({
+    //                 url: url,
+    //                 type: 'GET',
+    //                 dataType: 'json',
+    //                 success: function (response) {
+    //                     if (response.status) {
+    //                         selectElem.empty().append(`<option value="">${defaultText}</option>`);
+    //                         $.each(response.data, function (i, item) {
+    //                             selectElem.append(formatter(item));
+    //                         });
+
+    //                         selectElem.select2({
+    //                             width:'300px',
+    //                             placeholder: defaultText,
+    //                             allowClear: true,
+    //                             minimumResultsForSearch: 0
+    //                         });
+    //                         resolve();
+    //                     } else {
+    //                         toastr.error(`${defaultText} Load failed`);
+    //                         resolve(); // Still resolve to avoid hanging
+    //                     }
+    //                 },
+    //                 error: reject
+    //             });
+    //         });
+    //     };
+
+    //     return Promise.all([
+    //         // loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")', itemSelect, "- Select Item -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+    //         loadDropdown('@Url.Action("GetMakeList", "PurchaseOrder")', makeSelect, "- Select Make -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+    //         loadDropdown('@Url.Action("GetUnitList", "PurchaseOrder")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+    //         loadDropdown('@Url.Action("GetDepartmentList", "PurchaseOrder")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+    //         loadDropdown('@Url.Action("GetMachineMastList", "PurchaseOrder")', placeofUse, "- Select Place Of Use -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+    //        loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")',
+    //         itemSelect,
+    //         "- Select Item -",
+    //         item => `<option
+    //         data-unitCd="${item.UNIT_CODE}"
+    //         data-unitname="${item.UNIT_NAME}"
+    //         value="${item.CODE}">${item.NAME}
+    //         </option>`),
+            
+    //         loadDropdown('@Url.Action("GetTaxList", "PurchaseOrder")', taxSelect, "- Select Tax -", item => `
+    //             <option
+    //                 value="${item.CODE}"
+    //                 data-CSgstPer="${item.CSGST_PER}"
+    //                 data-IgstPer="${item.IGST_PER}"
+    //                 data-TdsPer="${item.TDS_PER}"
+    //                 data-TcsPer="${item.TCS_PER}"
+    //                 data-VatPer="${item.VAT_PER}"
+    //                 data-OtherPer1="${item.OTH_PER}"
+    //                 data-OtherPer2="${item.OTH_PER2}">
+    //                 ${item.NAME}
+    //             </option>`)
+    //     ]);
+    // }
+        
+    function addAttachmentRow(data = {}) {
+        const $attachmentTbody = $('#tblAttachmentPO tbody');
+
+        // Don't empty here if you're adding multiple rows
+        if ($attachmentTbody.find('tr').length === 0) {
+            $attachmentTbody.empty();
+        }
+            const row = $(`
+         <tr class="no-border-input">
+        <td>
+            <input type="file" class="form-control file-input" />
+            <input type="hidden" class="existing-file-path" value="${data.FILE_Path || ''}" />
+            <input type="hidden" class="existing-file-name" value="${data.FILE_NAME || ''}" />
+        </td>
+        <td>
+            <div class="file-preview mt-2"></div>
+        </td>
+        <td>
+            <input type="text" class="form-control file-name-input" placeholder="Enter file name" value="${data.FILE_NAME || ''}" />
+        </td>
+        <td>
+            <i class="fa fa-plus btn-add-action attach-row" title="Add Row"></i>
+            <i class="fa fa-trash btn-delete-action" id="attach-del" title="Delete Row"></i>
+        </td>
+       </tr>
+       `);
+
+
+        $attachmentTbody.append(row);
+
+        const previewDiv = row.find('.file-preview');
+
+    if (data.FILE_Path) {
+        const fileExt = data.FILE_Path.split('.').pop().toLowerCase();
+        const fileName = data.FILE_NAME || 'View File';
+
+        // Build preview + download
+        let previewHtml = '';
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+            previewHtml = `<img src="${data.FILE_Path}" alt="Preview" style="max-width: 30px; max-height: 30px;" />`;
+        } else if (fileExt === 'pdf') {
+            previewHtml = `<iframe src="${data.FILE_Path}" style="width: 30px; height: 30px;"></iframe>`;
+        } else {
+            previewHtml = `<span>${fileName}</span>`;
+        }
+
+        // Add a download or view link
+        previewHtml += `<br><a href="${data.FILE_Path}" target="_blank" style="font-size: 10px;">Download</a>`;
+
+        previewDiv.html(previewHtml);
+    }
+
+        // Handle file input preview on change
+        row.find('.file-input').on('change', function () {
+            const file = this.files[0];
+            previewDiv.empty();
+            const fileNameInput = row.find('.file-name-input');
+
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                fileNameInput.val(file.name);
+
+                if (file.type.startsWith('image/')) {
+                    previewDiv.append(
+                        $('<img>', {
+                            src: fileURL,
+                            css: {
+                                width: '30px',
+                                height: '30px',
+                                objectFit: 'cover',
+                                border: '1px solid #ccc',
+                            }
+                        })
+                    );
+                } else if (file.type === 'application/pdf') {
+                    previewDiv.append(
+                        $('<iframe>', {
+                            src: fileURL,
+                            css: {
+                                width: '30px',
+                                height: '30px',
+                                border: '1px solid #ccc',
+                            }
+                        })
+                    );
+                } else {
+                    previewDiv.text('Preview not available');
+                }
+            }
+        });
+    }
+
+    function calculateAllRows() {
+        let totalNos = 0,
+            totalQty = 0,
+            totalRate=0,
+            totalAmount = 0,
+            totalPackAmt = 0,
+            totalDiscAmt = 0,
+            totalCgstAmt = 0,
+            totalSgstAmt = 0,
+            totalIgstAmt = 0,
+            totalVatAmt = 0,
+            totalCessAmt = 0,
+            totalTcsAmt = 0,
+            totalOtherAmt = 0,
+            totalNetAmt = 0;
+
+        $('#tblItemRecordPO tbody tr').each(function () {
+            const $row = $(this);
+            const idx = $row.attr('id').replace('row', '');
+
+            totalNos      = parseFloat($(`#TxtNos${idx}`).val()) || 0;
+            totalQty      = parseFloat($(`#TxtQty${idx}`).val()) || 0;
+            totalRate     = parseFloat($(`#TxtRate${idx}`).val()) || 0;
+            totalAmount   = totalQty + totalRate ;
+            $(`#TxtAmount${idx}`).val(totalAmount);
+            // $(`#TxtNetAmt${idx}`).val(totalAmount);
+
+
+            // totalPackAmt  += parseFloat($(`#TxtPack${idx}`).val()) || 0;
+            // totalDiscAmt  += parseFloat($(`#TxtDisc${idx}`).val()) || 0;
+            // totalCgstPer  += parseFloat($(`#TxtCgstPercent${idx}`).val()) || 0;
+            // totalSgstAmt  += parseFloat($(`#TxtSgst${idx}`).val()) || 0;
+            // totalIgstAmt  += parseFloat($(`#TxtIgst${idx}`).val()) || 0;
+            // totalVatAmt   += parseFloat($(`#TxtVat${idx}`).val()) || 0;
+            // totalCessAmt  += parseFloat($(`#TxtCess${idx}`).val()) || 0;
+            // totalTcsAmt   += parseFloat($(`#TxtTcsAmt${idx}`).val()) || 0;
+            // totalOtherAmt += parseFloat($(`#TxtOthAmt${idx}`).val()) || 0;
+            // totalOtherAmt += parseFloat($(`#TxtOthAmt2${idx}`).val()) || 0;
+            // totalNetAmt   += parseFloat($(`#TxtNetAmt${idx}`).val()) || 0;
+           PackPer = parseFloat($(`#TxtPackPercent${idx}`).val()) || 0;
+           DiscPer  = parseFloat($(`#TxtDiscPercent${idx}`).val()) || 0;
+           CgstPer  = parseFloat($(`#TxtCgstPercent${idx}`).val()) || 0;
+           SgstPer  = parseFloat($(`#TxtSgstPercent${idx}`).val()) || 0;
+           IgstPer  = parseFloat($(`#TxtIgstPercent${idx}`).val()) || 0;
+           VatPer   = parseFloat($(`#TxtVatPercent${idx}`).val()) || 0;
+           CessPer  = parseFloat($(`#TxtCessPercent${idx}`).val()) || 0;
+
+           CgstAmt= (totalAmount*CgstPer)/100;
+           SgstAmt= (totalAmount*SgstPer)/100;
+           IgstAmt= (totalAmount*IgstPer)/100;
+           DiscAmt= (totalAmount*PackPer)/100;
+
+
+           $(`#TxtCgst${idx}`).val(CgstAmt);
+           $(`#TxtSgst${idx}`).val(SgstAmt);
+           $(`#TxtIgst${idx}`).val(IgstAmt);
+           $(`#TxtNetAmt${idx}`).val((totalAmount+CgstAmt+SgstAmt+IgstAmt)-DiscAmt);
+
+
+         });
+
+        $('#NumTotalNosIt').val(totalNos.toFixed(2));
+        $('#NumQtyIt').val(totalQty.toFixed(2));
+        $('#NumAmountIt').val(totalAmount.toFixed(2));
+        $('#NumPackingAmtIt').val(totalPackAmt.toFixed(2));
+        $('#NumDiscAmtIt').val(totalDiscAmt.toFixed(2));
+        $('#NumCgstAmtIt').val(totalCgstAmt.toFixed(2));
+        $('#NumSgstAmtIt').val(totalSgstAmt.toFixed(2));
+        $('#NumIgstAmtIt').val(totalIgstAmt.toFixed(2));
+        $('#NumVatAmtIt').val(totalVatAmt.toFixed(2));
+        $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
+        $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
+        $('#NumOtherAmtIt').val(totalOtherAmt.toFixed(2));
+        $('#NumNetAmtIt').val(totalNetAmt.toFixed(2));
+    }
+
+    function calculateAllTotals() {
+        let totalNos = 0,
+            totalQty = 0,
+            totalAmount = 0,
+            totalPackAmt = 0,
+            totalDiscAmt = 0,
+            totalCgstAmt = 0,
+            totalSgstAmt = 0,
+            totalIgstAmt = 0,
+            totalVatAmt = 0,
+            totalCessAmt = 0,
+            totalTcsAmt = 0,
+            totalOtherAmt = 0,
+            totalNetAmt = 0;
+
+        $('#tblItemRecordPO tbody tr').each(function () {
+            const $row = $(this);
+            const idx = $row.attr('id').replace('row', '');
+
+            totalNos      += parseFloat($(`#TxtNos${idx}`).val()) || 0;
+            totalQty      += parseFloat($(`#TxtQty${idx}`).val()) || 0;
+            totalAmount   += parseFloat($(`#TxtAmount${idx}`).val()) || 0;
+            totalPackAmt  += parseFloat($(`#TxtPack${idx}`).val()) || 0;
+            totalDiscAmt  += parseFloat($(`#TxtDisc${idx}`).val()) || 0;
+            totalCgstAmt  += parseFloat($(`#TxtCgst${idx}`).val()) || 0;
+            totalSgstAmt  += parseFloat($(`#TxtSgst${idx}`).val()) || 0;
+            totalIgstAmt  += parseFloat($(`#TxtIgst${idx}`).val()) || 0;
+            totalVatAmt   += parseFloat($(`#TxtVat${idx}`).val()) || 0;
+            totalCessAmt  += parseFloat($(`#TxtCess${idx}`).val()) || 0;
+            totalTcsAmt   += parseFloat($(`#TxtTcsAmt${idx}`).val()) || 0;
+            totalOtherAmt += parseFloat($(`#TxtOthAmt${idx}`).val()) || 0;
+            totalOtherAmt += parseFloat($(`#TxtOthAmt2${idx}`).val()) || 0;
+            totalNetAmt   += parseFloat($(`#TxtNetAmt${idx}`).val()) || 0;
+        });
+
+        $('#NumTotalNosIt').val(totalNos.toFixed(2));
+        $('#NumQtyIt').val(totalQty.toFixed(2));
+        $('#NumAmountIt').val(totalAmount.toFixed(2));
+        $('#NumPackingAmtIt').val(totalPackAmt.toFixed(2));
+        $('#NumDiscAmtIt').val(totalDiscAmt.toFixed(2));
+        $('#NumCgstAmtIt').val(totalCgstAmt.toFixed(2));
+        $('#NumSgstAmtIt').val(totalSgstAmt.toFixed(2));
+        $('#NumIgstAmtIt').val(totalIgstAmt.toFixed(2));
+        $('#NumVatAmtIt').val(totalVatAmt.toFixed(2));
+        $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
+        $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
+        $('#NumOtherAmtIt').val(totalOtherAmt.toFixed(2));
+        $('#NumNetAmtIt').val(totalNetAmt.toFixed(2));
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : date.toISOString(); // if server expects ISO string
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function setFieldsEnabled(enabled) {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+     function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+     }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+      
+
+</script>
+

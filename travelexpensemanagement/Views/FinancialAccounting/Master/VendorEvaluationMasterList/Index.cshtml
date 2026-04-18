@@ -1,0 +1,238 @@
+﻿@{
+	ViewBag.Title = "Vendor Evaluation Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Vendor Evaluation Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "VendorEvaluationMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Vendor Evaluation
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card shadow-sm border-0 mt-1">
+		<div class="table-responsive">
+			<table id="" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Type</th>
+						<th>Name</th>
+						<th>Max Score</th>
+						<th>Score</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<!-- Pagination container -->
+		<div class="row p-3">
+			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+		</div>
+	</div>
+</fieldset>
+<script>
+
+	let currentPage = 1;
+	let pageSize = 10;
+	let moduleMap = {};
+	let parentModuleMap = {};
+
+
+	$(document).ready(function () {
+		$.when(
+			ModuleDropdownList(),
+			ParentModuleDropdownList()
+		).done(function(){
+			loadAllMenus();
+		});
+	});
+
+	//Dropdown Loaders-------------------------------------
+	function ModuleDropdownList() {
+		$.ajax({
+			url: '/MenuMaster/GetModuleMasterDdl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#MODULE_CODE');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Module --</option>');
+				moduleMap = {}; // Clear and reload
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+					moduleMap[item.value] = item.text;
+				});
+			}
+		});
+	}
+	function ParentModuleDropdownList() {
+		$.ajax({
+			url: '/MenuMaster/GetParentFullListDdl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#PARENTMODULE_CODE');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Parent Module --</option>');
+				parentModuleMap = {}; // Clear and reload
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+					parentModuleMap[item.value] = item.text;
+				});
+			}
+		});
+	}
+
+
+
+	//Load Full LIST START
+	function loadAllMenus() {
+		const searchTerm = $('#searchBox').val();
+
+		$.ajax({
+			url: '/MenuMaster/GetAllMenus',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const menus = res.menus;
+				const totalCount = res.totalCount;
+
+				let tbody = $('#menuMastTable tbody');
+				tbody.empty();
+				if (menus.length === 0) {
+					tbody.append('<tr><td colspan="8" class="text-center text-muted">No menus found.</td></tr>');
+				}
+
+				$.each(menus, function (index, menu) {
+					tbody.append(`
+						<tr>
+							<td>${menu.code}</td>
+							<td>${menu.securitY_TYPE}</td>
+							<td>${menu.name}</td>
+							<td>${parentModuleMap[menu.mainmenU_CODE] || menu.mainmenU_CODE}</td>
+							<td>${moduleMap[menu.modulE_CODE] || menu.modulE_CODE}</td>
+							<td>${menu.forM_NAME}</td>
+							<td>${menu.active === 1 ? 'Yes' : 'No'}</td>
+							<td>
+							<button class="btn btn-sm btn-light">
+								<i class="fas fa-edit" style="cursor: pointer;" title="Edit" onclick="AddOrEditFunction('${menu.code}')"></i>
+								</button>
+								<button class="btn btn-sm btn-light">
+								<i class="fas fa-eye" style="cursor: pointer;" title="View Detail" onclick="viewMenuDetails('${menu.code}')"></i>
+								</button>
+								<button class="btn btn-sm btn-light btn-delete">
+									 <i class='fas fa-trash text-danger'></i>
+									 </button>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading menu list: ' + xhr.responseText);
+			}
+		});
+	}
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+
+		// Clear previous pagination
+		paginationContainer.empty();
+
+		// No records case
+		if (total === 0) {
+			paginationContainer.html('<span class="text-muted"></span>');
+			return;
+		}
+
+		// Don't render pagination if only one page
+		if (totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		// First and Prev
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) {
+			endPage = Math.min(5, totalPages);
+		}
+		if (currentPage >= totalPages - 2) {
+			startPage = Math.max(totalPages - 4, 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		// Next and Last
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+	function goToPage(page) {
+		currentPage = page;
+		loadAllMenus();
+	}
+	$('#searchBox').on('keyup', function () {
+		currentPage = 1;
+		loadAllMenus();
+	});
+	//Load Full LIST END
+
+
+
+	//Redirect to EDIT AND VIEW FROM
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/MenuMaster/MenuMasterAddOrEditForm?id=' + encodeURIComponent(rowId);
+	}
+	function viewMenuDetails(rowId) {
+		window.location.href = '/MenuMaster/MenuMasterAddOrEditForm?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+</script>

@@ -1,0 +1,458 @@
+﻿@{
+    ViewBag.Title = "Canteen Data Import";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Canteen Data Import</legend>
+    <form id="CanteenDataImportForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlEmpCode">Employee Code/Name</label>
+                    <div class="input-divide">
+                        <select class="form-control" id="ddlEmpCode" style="width:50%">
+                            <option value="">Select Emp Code</option>
+                        </select>
+                        <select class="form-control" id="ddlEmpName">
+                            <option value="">Select Emp Name</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtMachineCode">Machine Code</label>
+                    <input type="text" class="form-control" id="TxtMachineCode">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDepartment">Department</label>
+                    <input type="text" class="form-control" id="TxtDepartment" placeholder="Enter Department">
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <input type="text" class="form-control" id="TxtRemarks">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtOutTime">Out Time</label>
+                    <input type="time" class="form-control" id="TxtOutTime">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtInTime">In Time</label>
+                    <input type="time" class="form-control" id="TxtInTime">
+                </div>
+            </div>
+        </div>
+        <fieldset>
+            <legend class="sub-legend">Print Option</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtFrom">From</label>
+                                <input type="date" class="form-control" id="DtFrom" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtTo">To</label>
+                                <input type="date" class="form-control" id="DtTo" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="btn-mt">
+                                <button type="button" class="btn btn-danger" id="btn_duplicateremove"><i class="fa fa-eraser"></i>Duplicate Remove</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="btn-mt">
+                                <button type="button" class="btn btn-success" id="btn_updateout" style="width:100%;"><i class="fa fa-refresh"></i>Update Out</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="btn-mt">
+                                <button type="button" class="btn btn-success" id="btn_updateoutSRP" style="width:100%;"><i class="fa fa-refresh"></i>Update Out SRP</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlShift">Shift</label>
+                                <select class="form-control" id="ddlShift">
+                                    <option value="">Select Shift</option>
+                                    <option value="">A</option>
+                                    <option value="">B</option>
+                                    <option value="">All</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlUnit">Unit</label>
+                                <select class="form-control" id="ddlUnit">
+                                    <option value="">Select Unit</option>
+                                    <option value="">Unit 1</option>
+                                    <option value="">Unit 2</option>
+                                    <option value="">Both</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlEmpType">Emp Type</label>
+                                <select class="form-control" id="ddlEmpType">
+                                    <option value="">Select Emp Type</option>
+                                    <option value="">Staff</option>
+                                    <option value="">Worker</option>
+                                    <option value="">Both</option>
+                                    <option value="">Form 12</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlData">Data</label>
+                                <select class="form-control" id="ddlData">
+                                    <option value="">Select Data</option>
+                                    <option value="">In</option>
+                                    <option value="">Out</option>
+                                    <option value="">Both</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="btn-mt">
+                                <button id="btn_DailyPrint" type="button" class="btn btn-primary"><i class="fa fa-print"></i>Daily Print</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="btn-mt">
+                                <button id="btn_GateShift" type="button" class="btn btn-primary"><i class="fa fa-exchange"></i>Gate Shift</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="btn-mt">
+                                <button id="btn_Inout" type="button" class="btn btn-primary"><i class="fa fa-sign-in-alt"></i>In/Out</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group btn-mt">
+                                <div class="form-row">
+                                    <input type="checkbox" id="chkLateOnly">
+                                    <label class="checkbox-label" for="chkLateOnly">Late Only</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="btn-mt button-right">
+                                <button id="btn_summaryday" type="button" class="btn btn-primary" style="width:100%"><i class="fa fa-calendar-alt"></i>Summary Day wise</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="btn-mt">
+                                <button id="btn_summary" type="button" class="btn btn-primary" style="width:100%"><i class="fa fa-bar-chart"></i>Summary</button>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="btn-mt">
+                                <button id="btn_Salary" type="button" class="btn btn-primary" style="width:100%"><i class="fa fa-balance-scale"></i>Salary Vs Machine</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlDepartment2">Select Department</label>
+                                <select class="form-control" id="ddlDepartment2">
+                                    <option value="">Select Department</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-bg">
+                                <table id="DepartmentTable" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblCanteenDataImport" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Type</th>
+                            <th>SrNo</th>
+                            <th>Date</th>
+                            <th>Emp Code</th>
+                            <th>Emp Name</th>
+                            <th>Deptt</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                            <th>Data</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxteSSL">eSSL Machine Data Import</label>
+                    <input type="text" class="form-control" id="TxteSSL" />
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-secondary" id="btn_polytex"><i class="fa fa-database"></i>Polytex</button>
+                    <button type="button" class="btn btn-tertiary" id="btn_delhioffice"><i class="fa fa-database"></i>Delhi Office</button>
+                    <button type="button" class="btn btn-secondary" id="btn_Kothi"><i class="fa fa-database"></i>Kothi</button>
+                    <button type="button" class="btn btn-tertiary" id="btn_Excrusion"><i class="fa fa-database"></i>Excrusion</button>
+                    <button type="button" class="btn btn-secondary" id="btn_SRP"><i class="fa fa-database"></i>SRP</button>
+                    <button type="button" class="btn btn-tertiary" id="btn_laminator"><i class="fa fa-database"></i>Laminator</button>
+                    <button type="button" class="btn btn-secondary" id="btn_kundana"><i class="fa fa-database"></i>Kundana</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-3 col-md-4">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-secondary" id="btn_salasar"><i class="fa fa-database"></i>Salasar</button>
+                    <button type="button" class="btn btn-tertiary" id="btn_sctpl"><i class="fa fa-database"></i>SCTPL</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "CanteenDataImportList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadDocumentStages();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadDocumentStages();
+        });
+    });
+
+    //Load main grid...............
+    function loadDocumentStages() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ApprovalStageMasterList/GetAllDocs',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const docs = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#tblApprovalStageMaster tbody');
+                tbody.empty();
+
+                if (docs.length === 0) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_NAME || ''}</td>
+                            <td>${doc.useR_NO || '0'}</td>
+                            <td>
+                              <div class="action-icons">
+                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
+                               <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
+                              </div>
+
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+            }
+        });
+    }
+
+        function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        pagination.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadDocumentStages();
+    }
+
+    function editDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+    }
+
+    function viewDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+    }
+
+    function deleteDocStage(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ApprovalStageMasterList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+
+
+
+</script>

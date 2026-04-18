@@ -1,0 +1,355 @@
+﻿@{
+    ViewBag.Title = "Approval Stages";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Approval Stages</legend>
+    <form id="ApprovalStagesForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocumentType">Document Type</label>
+                    <select class="form-control" id="ddlDocumentType">
+                        <option value="">Select Document Type</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+		<div class="card">
+			<div class="table-responsive">
+				<table id="tblApprovalStages" class="table-width">
+					<thead class="table-head">
+						<tr>
+                            <th>Code</th>
+                            <th>Full Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
+                            <th>Approval User</th>
+                            <th>Flag_A</th>
+                            <th>Flag_B</th>
+                            <th>Flag_C</th>
+                            <th>Flag_D</th>
+                            <th>Flag_E</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+			<!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+		</div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "ApprovalStagesList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+
+    let fullNameList = [];
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('id'); 
+    const mode = urlParams.get('mode');
+    const vtype = urlParams.get('vtype');
+
+    $(document).ready(function () {
+        const $tbody = $('#tblApprovalStages tbody');
+    
+        Promise.all([
+            DDLDocumentType(),
+            LoadFullNameList()
+        ])
+        .then(() => {
+            if (code) {
+                LoadDocumentData(code); 
+            } else {
+                addRow($tbody); 
+            }
+        })
+        .catch(err => {
+            console.error('Initialization error:', err);
+            toastr.error('Initialization error: ' + err.message);
+        });
+             
+        if (mode === 'view') {
+            setFormReadOnly('#ApprovalStagesForm'); 
+        }
+             
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addRow($tbody);
+        });
+              
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLast = $row.is(':last-child');
+            $row.remove();
+
+            if (isLast) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length && !$lastRow.find('.btn-add-action').length) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+              
+        $(document).on('change', '.ddlFullName', function () {
+            const $row = $(this).closest('tr');
+            const selectedCode = $(this).val();
+
+            $row.find('td:eq(0) input').val('');
+            $row.find('td:eq(2) input').val('');
+            $row.find('td:eq(3) input').val('');
+
+            if (!selectedCode) return;
+
+            $row.find('td:eq(0) input').val(selectedCode);
+
+            fetch(`/ApprovalStages/DDLFullNamedetails?code=${selectedCode}`)
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const u = data[0];
+                        $row.find('td:eq(2) input').val(u.designation || '');
+                        $row.find('td:eq(3) input').val(u.department || '');
+                    } else {
+                        toastr.warning('No details found for selected user.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading user details:', err);
+                    toastr.error('Error loading user details: ' + err.message);
+                });
+        });
+              
+        $("#btn-save").click(function (e) {
+            e.preventDefault();
+
+            const Action = code ? "Update" : "Insert";
+
+            const formData = {
+                Action: Action,
+                VDate: new Date(),
+                Data: collectTableData()
+            };
+
+            if (!formData.Data.length) {
+                toastr.warning("Please select at least one user and a document type.");
+                return;
+            }
+
+            $("#btnSave").prop("disabled", true);
+
+            $.ajax({
+                url: '/ApprovalStages/SaveData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+
+                if (response === true || response.success === true) {
+                 toastr.success(response.message || "Saved successfully!");
+
+                setTimeout(() => window.location.href = '/ApprovalStagesList/Index', 1000);
+                } else {
+                  toastr.warning(response.message || "Save failed.");
+                }
+
+                },
+                error: function (xhr) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error("Something went wrong.");
+                },
+                complete: function () {
+                    $("#btnSave").prop("disabled", false);
+                }
+            });
+        });
+
+    }); 
+
+    // ---------------- Helper Functions ----------------
+
+    function collectTableData() {
+        const rowsData = [];
+        const docCode = $("#ddlDocumentType").val();
+
+        $('#tblApprovalStages tbody tr').each(function () {
+            const $row = $(this);
+
+            const rowObj = {
+                DOC_CODE: docCode || '',
+                USER_CODE: $row.find('td:eq(0) input').val() || '',
+                APPROV_USER: $row.find('td:eq(4) select').val() || '',
+                FLAG_A: $row.find('td:eq(5) input').val() || '',
+                FLAG_B: $row.find('td:eq(6) input').val() || '',
+                FLAG_C: $row.find('td:eq(7) input').val() || '',
+                FLAG_D: $row.find('td:eq(8) input').val() || '',
+                FLAG_E: $row.find('td:eq(9) input').val() || ''
+            };
+
+            rowsData.push(rowObj);
+        });
+
+        return rowsData;
+    }
+
+    function addRow($tbody, data = {}) {
+     
+        $tbody.find('.btn-add-action').remove();
+
+        const row = `
+            <tr class="no-border-input">
+                <td><input type="text" class="form-control" value="${data.code || ''}" readonly /></td>
+                <td>${getFullNameDropdown(data.fullName || '')}</td>
+                <td><input type="text" class="form-control" value="${data.designation || ''}" readonly /></td>
+                <td><input type="text" class="form-control" value="${data.department || ''}" readonly /></td>
+                <td>${getApprovalStageDropdown(data.approvalUser || '')}</td>
+                <td><input type="text" class="form-control" value="${data.flagA || ''}" /></td>
+                <td><input type="text" class="form-control" value="${data.flagB || ''}" /></td>
+                <td><input type="text" class="form-control" value="${data.flagC || ''}" /></td>
+                <td><input type="text" class="form-control" value="${data.flagD || ''}" /></td>
+                <td><input type="text" class="form-control" value="${data.flagE || ''}" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+        $tbody.append(row);
+    }
+
+    function getFullNameDropdown(selectedValue = "") {
+        let options = '<option value="">Select Full Name</option>';
+        fullNameList.forEach(item => {
+            const selected = item.value == selectedValue ? 'selected' : '';
+            options += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+        });
+        return `<select class="form-control ddlFullName">${options}</select>`;
+    }
+
+    function getApprovalStageDropdown(selectedValue = "") {
+        const stages = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "FINAL"];
+        let options = '<option value="">Select Approval User</option>';
+        stages.forEach(stage => {
+            const selected = stage === selectedValue ? 'selected' : '';
+            options += `<option value="${stage}" ${selected}>${stage}</option>`;
+        });
+        return `<select class="form-control ddlApprovalStage">${options}</select>`;
+    }
+
+    function DDLDocumentType() {
+        return fetch('/ApprovalStages/DDLDocumentType')
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return r.json();
+            })
+            .then(data => {
+                const ddl = $('#ddlDocumentType');
+                ddl.empty().append('<option value="">-- Select Document Type --</option>');
+                data.forEach(item => {
+                    ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+                });
+            })
+            .catch(err => {
+                console.error('Error loading Document Type:', err);
+                toastr.error('Error loading Document Type: ' + err.message);
+            });
+    }
+
+    function LoadFullNameList() {
+        return fetch('/ApprovalStages/DDLFullName')
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return r.json();
+            })
+            .then(data => {
+                fullNameList = data;
+
+               
+                $('#tblApprovalStages tbody tr').each(function () {
+                    const selected = $(this).find('.ddlFullName').val() || "";
+                    $(this).find('td:eq(1)').html(getFullNameDropdown(selected));
+                });
+            })
+            .catch(err => {
+                console.error('Error loading Full Name list:', err);
+                toastr.error('Error loading Full Name list: ' + err.message);
+            });
+    }
+
+    function LoadDocumentData(code) {
+        $.ajax({
+            url: `/ApprovalStagesList/GetdatabyCode?code=${code}`,
+            method: 'GET',
+            success: function (res) {
+      
+                if (res.success) {
+                    if (res.header && res.header.length > 0) {
+                        const header = res.header[0];
+                        if (header.doC_CODE) {
+                            $('#ddlDocumentType').val(header.doC_CODE);
+                        }
+                    }
+                                   
+                    const $tbody = $('#tblApprovalStages tbody');
+                    $tbody.empty();
+
+                    if (res.details && res.details.length > 0) {
+                        res.details.forEach((d) => {
+                            const rowData = {
+                                code: d.useR_CODE || '',
+                                fullName: d.useR_CODE || '',
+                                designation: d.designation || '',
+                                department: d.department || '',
+                                approvalUser: d.approval_user || '',
+                                flagA: d.flaG_A || '',
+                                flagB: d.flaG_B || '',
+                                flagC: d.flaG_C || '',
+                                flagD: d.flaG_D || '',
+                                flagE: d.flaG_E || ''
+                            };
+                            addRow($tbody, rowData);
+                        });
+                    } else {
+                        addRow($('#tblApprovalStages tbody'));
+                    }
+                } else {
+                    toastr.error(res.message || "Failed to load document data.");
+                }
+            },
+            error: function (err) {
+                console.error("Error loading document data:", err);
+                toastr.error("Something went wrong while loading data.");
+            }
+        });
+    }
+
+</script>

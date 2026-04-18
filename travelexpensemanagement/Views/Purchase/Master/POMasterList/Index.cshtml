@@ -1,0 +1,327 @@
+﻿@{
+	ViewBag.Title = "PO Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">PO Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "POMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add PO
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card shadow-sm border-0 mt-1">
+		<div class="table-responsive">
+			<table id="tblPOMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">VNo</th>					 
+						<th>Doc No</th>
+						<th>Doc Date</th>
+						<th>From Date</th>
+						<th>To Date</th>
+						<th style="display:none;">Store Amount</th>
+						<th style="display:none;">Capital Amount</th>
+						<th style="display:none;">Remarks</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row p-3">
+			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+		</div>
+	</div>
+</fieldset>
+
+<script>
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		GetPOMastDt();
+
+		// Search trigger
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			GetPOMastDt();
+		});
+	});
+
+	function GetPOMastDt() {
+		const searchTerm = $('#searchBox').val().trim();		
+		$.ajax({
+			url: '@Url.Action("GetPOMastData", "POMasterList")',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const POList = res.data || [];
+				const totalCount = res.totalCount || 0;
+
+				let tbody = $('#tblPOMaster tbody');
+				tbody.empty();
+
+				if (POList.length === 0) {
+					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+					$('#tablePagination').empty();  
+					return;
+				}
+
+				$.each(POList, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td class="d-none">${item.V_NO}</td>
+							<td>${item.DOC_ID}</td>
+							<td>${formatDate(item.V_DATE)}</td>
+							<td>${formatDate(item.FROM_DATE)}</td>
+							<td>${formatDate(item.TO_DATE)}</td>
+							<td class="d-none">${item.STORE_AMT}</td>
+							<td class="d-none">${item.CAPITAL_AMT}</td>
+							<td class="d-none">${item.REMARK}</td>
+							<td>${item.STATUS === 1 ? 'Open' : 'Close'}</td>
+							<td>
+								<button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.DOC_ID}')" title="Edit">
+									<i class="fas fa-edit"></i>
+								</button>
+								<button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.DOC_ID}')" title="View Detail">
+									<i class="fas fa-eye"></i>
+								</button>
+								<button class="btn btn-sm btn-light btn-delete" title="Delete">
+									<i class="fas fa-trash text-danger"></i>
+								</button>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading PO list: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (total <= 0 || totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		GetPOMastDt();
+	}
+
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/POMaster/Index?id=' + encodeURIComponent(rowId);
+	}
+
+	function viewMenuDetails(rowId) {
+		window.location.href = '/POMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+		function formatDate(dateStr) {
+		if (!dateStr) return '';
+
+		const date = new Date(dateStr);
+		if (isNaN(date)) return dateStr;
+
+		const day = String(date.getDate()).padStart(2, '0');
+		const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+							"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+		const month = monthNames[date.getMonth()];
+		const year = date.getFullYear();
+
+		return `${day}-${month}-${year}`;
+	}
+
+</script>
+
+
+@* <script>
+	let currentPage = 1;
+	let pageSize = 10;
+	 
+	$(document).ready(function () {
+		GetPOMastDt();		
+	});
+   
+	function GetPOMastDt() {
+		const searchTerm = $('#searchBox').val();
+
+		$.ajax({
+			url:'@Url.Action("GetPOMastData", "POMasterList")',  
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const POList = res.data;
+				const totalCount = res.totalCount;
+				console.log(POList);
+				let tbody = $('#tblPOMaster tbody');
+				tbody.empty();
+				if (POList.length === 0) {
+					tbody.append('<tr><td colspan="8" class="text-center text-muted">No POList found.</td></tr>');
+				}
+
+				$.each(POList, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td class="d-none">${item.V_NO}</td>
+							<td>${item.DOC_ID}</td>
+							<td>${formatDate(item.V_DATE)}</td>
+							<td>${formatDate(item.FROM_DATE)}</td>
+							<td>${formatDate(item.TO_DATE)}</td>
+							<td>${item.STORE_AMT}</td>
+							<td>${item.CAPITAL_AMT}</td>
+							<td class="d-none">${item.REMARK}</td>
+							<td>${item.STATUS === 1 ? 'Open' : 'Close'}</td>
+							<td>
+							<button class="btn btn-sm btn-light">
+								<i class="fas fa-edit" style="cursor: pointer;" title="Edit" onclick="AddOrEditFunction('${item.DOC_ID}')"></i>
+								</button>
+								<button class="btn btn-sm btn-light">
+								<i class="fas fa-eye" style="cursor: pointer;" title="View Detail" onclick="viewMenuDetails('${item.DOC_ID}')"></i>
+								</button>
+								<button class="btn btn-sm btn-light btn-delete">
+									 <i class='fas fa-trash text-danger'></i>
+									 </button>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading item list: ' + xhr.responseText);
+			}
+		});
+	}
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination'); 
+		paginationContainer.empty(); 
+		if (total === 0) {
+			paginationContainer.html('<span class="text-muted"></span>');
+			return;
+		}
+		 
+		if (totalPages <= 1) return;
+
+		let paginationHtml = ''; 
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) {
+			endPage = Math.min(5, totalPages);
+		}
+		if (currentPage >= totalPages - 2) {
+			startPage = Math.max(totalPages - 4, 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+ 
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+	function goToPage(page) {
+		currentPage = page;
+		GetPOMastDt();
+	}
+	$('#searchBox').on('keyup', function () {
+		currentPage = 1;
+		GetPOMastDt();
+	});
+	 
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/POMaster/Index?id=' + encodeURIComponent(rowId);
+	}
+	function viewMenuDetails(rowId) {
+		window.location.href = '/POMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+		function formatDate(dateStr) {
+		if (!dateStr) return '';
+		const date = new Date(dateStr);
+		return date.toLocaleDateString(); // Or customize as needed
+	}
+
+
+</script> *@

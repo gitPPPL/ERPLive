@@ -1,0 +1,522 @@
+﻿@{
+    ViewBag.Title = "Gratuity Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Gratuity Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "GratuityMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="GratuityMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Gratuity Days Entry</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlDocType" class="form-label">Doc Type</label>
+                        <select class="form-control" id="ddlDocType">
+                            @* <option value="">-- Select Doc Type --</option> *@
+                            <option value="GratuityDays">GratuityDays</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="DtDocDate" class="form-label">Doc Date</label>
+                        <input type="date" class="form-control" id="DtDocDate" placeholder="Select Doc Date">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="NumDocNo" class="form-label">Doc No</label>
+                        <input type="text" class="form-control" id="NumDocNo" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ddlEmployee" class="form-label">Employee Name</label>
+                        <select class="form-control" id="ddlEmployee">
+                            <option value="">-- Select Employee --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DdlYear" class="form-label">Year</label>
+                        <select id="DdlYear" class="form-control">
+                            <option selected disabled>-- select Year --</option>
+                        </select>
+                        @* <input type="text" class="form-control" id="DdlYear" oninput="allowOnlyNumbers(this)" placeholder="Enter Year"> *@
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumDays" class="form-label">W. Days</label>
+                        <input type="text" class="form-control" id="NumDays" oninput="allowOnlyNumbers(this)" maxlength="8" placeholder="Enter W. Days">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="txtFatherName" class="form-label">Father's Name</label>
+                        <input type="text" class="form-control" id="txtFatherName" readonly placeholder="Enter Father's Name">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">Gratuity</label>
+                        <input type="text" id="TxtDepartment" class="form-control" readonly />
+                        @*  <select class="form-control" id="ddlDepartment">
+                            <option value="">-- Select Gratuity --</option>
+                            <option>FIBC Section</option>
+                        </select> *@
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-7 col-md-2">
+                    @* <div class="active-toggle btn-align">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span class="label-status" id="statusText">Active</span>
+                    </div> *@
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-last">
+                        <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                        <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Print</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="fromDate">From</label>
+                        <input type="date" class="form-control" id="fromDate" name="FromDate">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="toDate">To</label>
+                        <input type="date" class="form-control" id="toDate" name="ToDate">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ddlEmployee">Employee</label>
+                        <select class="form-control" id="ddlEmployee" name="Employee">
+                            <option value="">-- Select Employee --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <button class="btn btn-primary">
+                        <i class="fa fa-print"></i> Yearly Print
+                    </button>
+
+                    <button class="btn btn-primary">
+                        <i class="fa fa-print"></i> Gratuity Paid
+                    </button>
+
+                    <button class="btn btn-primary">
+                        <i class="fa fa-print"></i> Wages Print
+                    </button>
+
+                    <button class="btn btn-primary">
+                        <i class="fa fa-download"></i> Import Data
+                    </button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+</fieldset>
+
+<script>
+    let gratuityVNo;
+    let PreviousInputDt = "";
+    let MasterTblId ;
+    let readOnly;
+    window.addEventListener('DOMContentLoaded', (event) => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('DtDocDate').value = today;
+    });
+
+    $(document).ready(function () {
+        GetEmployeeList();
+        GetYearList();
+
+        MasterTblId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+
+        if (MasterTblId) {
+        GetDocData(MasterTblId, readOnly);
+        } else {
+        GetDocid();
+        }
+
+        $('#NumD30').on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#btn-save').focus();
+            }
+        });
+
+        $('#ddlEmployee').on('change', function () {
+        const selected = $(this).find('option:selected');
+        const empName    = selected.data('empname');
+        const fatherName = selected.data('fathername');
+        const dept       = selected.data('dept');
+
+        $('#txtFatherName').val(fatherName ?? '');
+        $('#TxtDepartment').val(dept ?? '');
+        // $('#txtEmpName').val(empName ?? '');
+        });
+
+
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            const masterData = collectFormData();             
+            if (!masterData.EmpName) {
+                toastr.warning("Please fill all required fields");
+                return;
+            }
+
+            if (MasterTblId) {
+                EditMasterData(masterData);
+            } else {
+                SaveMasterData(masterData);
+            }
+        });
+    });
+
+    function SaveMasterData(masterData) {
+        const Namee = masterData?.EmpName?.trim();
+        console.log(masterData);
+        if (!Namee) {
+            toastr.warning("Employee Name is required.");
+            return;
+        }
+        checkExistOrNot(Namee)
+            .done(function (data) {
+                if (data?.status && data?.exists) {
+                    toastr.warning("Duplicate Gratuity Name");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveGratuityMast", "GratuityMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(masterData),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success('Data saved successfully.');
+                            resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/GratuityMasterList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+            })
+            .fail(function () {
+                toastr.error("Error while checking Gratuity name.");
+            });
+    }
+
+    function EditMasterData(masterData) {
+        if (PreviousInputDt !== masterData.Name) {
+            checkExistOrNot(masterData.Name)
+                .done(function (data) {
+                    if (data?.status && data?.exists) {
+                        toastr.warning("Duplicate Gratuity Name");
+                        return;
+                    }
+                    UpdateMasterData(masterData);
+                })
+                .fail(function () {
+                    toastr.error("Error while checking Gratuity Name.");
+                });
+        } else {
+            UpdateMasterData(masterData);
+        }
+    }
+
+    function UpdateMasterData(masterData) {
+        $.ajax({
+            url: '/GratuityMaster/UpdateGratuityMast',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(masterData),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success('Data updated successfully.');
+                    resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/GratuityMasterList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    function GetDocData(MasterTblId, readOnly) {
+        $.ajax({
+            url: '/GratuityMaster/GetGratuityDetailsById',
+            type: 'GET',
+            data: { id: MasterTblId },
+            success: function (res) {
+                if (res.status && res.data) {
+                    console.log(res.data);
+                    fillFormFields(res.data);
+                    if (readOnly === 'true') {
+                        $('input, #ddlDocType, #ddlEmployee').prop('disabled', true);
+                        $('#btn-save, #cancelBtn').hide();
+                    } else {
+                        $('input, #ddlDocType, #ddlEmployee').prop('disabled', false);
+                        $('#btn-save, #cancelBtn').show();
+                    }
+                } else {
+                    toastr.warning('No data found for this ID.');
+                }
+            },
+            error: function () {
+                toastr.error('Failed to load data.');
+            }
+        });
+    }
+
+    function resetFields() {
+        $('#DtDocDate, #NumDocNo, #DdlYear, #NumDays, #txtFatherName, #TxtDepartment').val('');
+        $('#ddlDocType, #ddlEmployee').prop('checked', false);
+
+    }
+
+    function fillFormFields(dt) {
+        console.log(dt);
+         $('#TxtCode').val(dt.V_NO);
+        $('#ddlDocType').val('GratuityDays');        
+        $('#NumDocNo').val(dt.DOC_ID);         
+        $('#NumDays').val(dt.GDAYS);
+        $('#txtFatherName').val('');
+        $('#TxtDepartment').val('');
+
+        GetEmployeeList(dt.EMP_CODE);
+        GetYearList(dt.GYEAR);
+         let dateOnly = (dt.DtDocDate).substring(0, 10);
+        $('#DtDocDate').val(dateOnly);
+    }
+
+    function collectFormData() {
+       var Gradays= toNullableDecimal($('#NumDays').val())
+       var Gday= Number(Gradays.toFixed(2));
+        return {
+            Vno:toNullableString($('#TxtCode').val()),
+            Docid: toNullableString($('#NumDocNo').val()),
+            VDate: toNullableString($('#DtDocDate').val()),
+            EmpCd: toNullableInt($('#ddlEmployee').val()),
+            EmpName: toNullableString($('#ddlEmployee option:selected').data('empname')),
+            Gyear: toNullableInt($('#DdlYear').val()),
+            GDays: Gday
+        };
+    }
+
+
+    function checkExistOrNot(inputData) {
+        return $.ajax({
+            url: '/GratuityMaster/getExistOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: { inputData: inputData }
+        });
+    }
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+                if (MasterTblId) {
+                    GetMasterDataList(MasterTblId, readOnly);
+                } else {
+                    resetFields();
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+            }
+        });
+    });
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+    function toNullableDecimal(value) {
+         if (value === null || value === undefined || value.trim() === '') {
+             return 0.0;
+         }
+         value = value.replace(/[^0-9.]/g, '');
+         if ((value.match(/\./g) || []).length > 1) {
+             return 0.0;
+         }
+         var parsed = parseFloat(value);
+         return isNaN(parsed) ? 0.0 : parsed;
+     }
+
+     function allowOnlyNumbers(input) {
+       input.value = input.value
+         .replace(/[^0-9.]/g, '')
+         .replace(/(\..*)\./g, '$1');
+     }
+
+     function GetDocid() {
+        $.ajax({
+            url: '@Url.Action("GetDocid", "GratuityMaster")',
+            type: 'GET',
+            success: function (data) {
+                console.log(data);
+                if (data.status === true) {
+                    $('#NumDocNo').val(data.docId);
+                } else {
+                    $('#NumDocNo').val(0);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+
+    function Getdate(inputDate) {
+        if (inputDate) {
+            let parts = inputDate.split('-');  
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;  
+            }
+        }
+        return '';
+    }
+
+
+    function GetEmployeeList(selectedEmpCode = null) {
+        $.ajax({
+            url: '@Url.Action("GetEmployeeList", "GratuityMaster")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $EmpDropdown = $('#ddlEmployee');
+                    $EmpDropdown.empty();
+                    $EmpDropdown.append('<option selected disabled>- Select Employee Name -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $EmpDropdown.append(
+                            `<option value="${item.EmpCd}"
+                                data-empname="${item.EmpName}"
+                                data-fathername="${item.FATHER_NAME}"
+                                data-dept="${item.DEPT_CODE}">
+                                ${item.EmpName} (${item.EmpCd}) | ${item.DEPT_CODE}
+                             </option>`
+                        );
+                    });
+
+                    // ✅ Set selected employee if ID is passed and matches
+                    if (selectedEmpCode) {
+                        $EmpDropdown.val(selectedEmpCode).trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Employee Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Employee Name Load failed", xhr.error);
+            }
+        });
+    }
+
+      function GetYearList(selectedYearCd=null)
+      {
+          $.ajax({
+              url: '@Url.Action("GetYearList", "GratuityMaster")',
+              type: 'GET',
+              dataType: 'json',
+              success: function (response) {
+                  if (response.status) {
+                      var $yearDropdown = $('#DdlYear');
+                      $yearDropdown.empty();
+                      $yearDropdown.append('<option selected disabled>- Select year -</option>');
+                      $.each(response.data, function (index, item) {
+                          $yearDropdown.append(`<option value="${item.code}">${item.PREFIXYR}</option>`);
+                      });
+
+                    if (selectedYearCd && $yearDropdown.find(`option[value="${selectedYearCd}"]`).length > 0) {
+                    $yearDropdown.val(selectedYearCd).trigger('change');
+                    } else {                    
+                    $yearDropdown.prop('selectedIndex', 0);  
+                    }
+
+                  } else {
+                      toastr.error("year  Load failed");
+                  }
+              },
+              error: function (xhr, status, error) {
+                  toastr.error("year Load failed", xhr.error);
+              }
+          });
+      }
+
+</script>
+

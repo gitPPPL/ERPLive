@@ -1,0 +1,702 @@
+﻿@{
+    ViewBag.Title = "Attendence Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Attendence Entry</legend>
+    <form id="AttendenceEntryForm" novalidate>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE" />
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType" name="DocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDocNo">Doc No</label>
+                    <input type="text" class="form-control" id="TxtDocNo" name="DocNo" placeholder="Enter Doc No" readonly />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" name="DocDate" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Department</legend>
+                    <select class="form-control" id="ddlDepartment" name="Department">
+                        <option value="">Select Department</option>
+                    </select>
+                </fieldset>
+            </div>
+
+            <div class="col-md-3">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Designation</legend>
+                    <select class="form-control" id="ddlDesignation" name="Designation">
+                        <option value="">Select Designation</option>
+                    </select>
+                </fieldset>
+            </div>
+
+            <div class="col-md-2">
+                <label class="checkbox-input-mt">
+                    <input type="checkbox" id="ChkLinkMACData" name="LinkMACData" />
+                    Link MAC Data
+                </label>
+            </div>
+
+            <div class="col-md-4">
+                <div class="btn-mt">
+                    <button id="btn_LoadData" type="button" class="btn btn-success">
+                        <i class="fa fa-download"></i> Load Data
+                    </button>
+                    <button id="btn_FillA" onclick="FillStatus('A')" type="button" class="btn btn-success">
+                        <i class="fa fa-download"></i> Fill A
+                    </button>
+                    <button id="btn_ShiftA" onclick="FillShift('A')" type="button" class="btn btn-primary">Shift A</button>
+                    <button id="btn_ShiftB" onclick="FillShift('B')" type="button" class="btn btn-primary">Shift B</button>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group label-gap">
+                    <label>P--Present</label>
+                    <label>A--Absent</label>
+                    <label>O--Off</label>
+                    <label>L--CL</label>
+                    <label>E--EL</label>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="button-right">
+                    <button id="btn_OffDay" type="button" class="btn btn-primary">
+                        <i class="fa fa-print"></i> Off Day
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblAttendenceEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Sr.</th>
+                            <th>Department</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Designation</th>
+                            <th>Status</th>
+                            <th>Shift</th>
+                            <th>Remark/Leave</th>
+                            <th>Off</th>
+                         
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "AttendenceEntryList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-saves" type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                    <button id="btn_cancel" type="button" onclick="confirmAndClearForm()" class="btn btn-danger">
+                        <i class="fa fa-close"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('rowId');
+    const mode = urlParams.get('mode');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+        LoadDropDown().then(() => {
+            if (rowId) {
+                LoadFormByID(rowId);
+            }
+        });
+
+        if (!rowId) {
+            const dateInput = document.getElementById('DtDocDate');
+            if (dateInput) {
+                dateInput.valueAsDate = new Date();
+            }
+        }
+
+        $('#ddlDocType').on('change', function () {
+            const selectedDocType = $(this).val();
+            if (selectedDocType && !rowId) {
+                GetVNo(selectedDocType);
+            }
+        });
+
+        $('#DtDocDate').on('input', function () {
+            const selectedDate = $(this).val();
+            GetVNoByDate(selectedDate);
+        });
+
+        $('#btn_LoadData').click(async function () {
+            const dateTimeValue = $('#DtDocDate').val();
+            const isValid = await checkSalaryDate(dateTimeValue);
+            const today = new Date().toISOString().split('T')[0];
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+
+            if (dateTimeValue > today) {
+                toastr.info("Date cannot be greater than the login date");
+                return;
+            }
+
+            if (isValid) {
+                const DepartmentCode = parseInt($('#ddlDepartment').val(), 10) || 0;
+                const DesignationCode = parseInt($('#ddlDesignation').val(), 10) || 0;
+                const VDate = $('#DtDocDate').val();
+                const linkMACData = document.getElementById("ChkLinkMACData").checked ? 1 : 0;
+                const vtype = $('#ddlDocType').val();
+                if (linkMACData === 0) {
+                    fetchDataWithoutMac(DepartmentCode, DesignationCode, VDate);
+                } else if (linkMACData === 1) {
+                    fetchDataWithMac(DepartmentCode, DesignationCode, VDate, vtype);
+                }
+            } else {
+                console.log('Date check failed.');
+            }
+        });
+
+        $("#btn-saves").click(async function (e) {
+            e.preventDefault();
+
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+
+            const dateTimeValue = $('#DtDocDate').val();
+            const today = new Date().toISOString().split('T')[0];
+
+            if (dateTimeValue > today) {
+                toastr.info("Date cannot be greater than the login date");
+                return;
+            }
+
+            const isValid = await checkSalaryDate(dateTimeValue);
+            if (!isValid) return;
+
+            const attendanceData = collectRowData();
+            if (!attendanceData.length) {
+                toastr.warning("No attendance data found.");
+                return;
+            }
+
+            $("#btn-saves").prop("disabled", true);
+
+            $.ajax({
+                type: "POST",
+                url: "/AttendenceEntry/SaveAttendance",
+                contentType: "application/json",
+                data: JSON.stringify(attendanceData),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Attendance saved successfully");
+                    } else {
+                        toastr.error(response.message || "Failed to save attendance");
+                    }
+                },
+                error: function () {
+                    toastr.error("Error while saving attendance");
+                },
+                complete: function () {
+                    $("#btn-saves").prop("disabled", false);
+                }
+            });
+        });
+    });
+
+    function collectRowData() {
+        const rowData = [];
+
+        const V_no = parseInt($('#TxtDocNo').val()) || 0;
+        const V_Type = $('#ddlDocType').val();
+        const V_Date = $('#DtDocDate').val();
+
+        $('#tblAttendenceEntry tbody tr').each(function () {
+            const $row = $(this);
+            const data = {
+                DOC_ID: $row.find('td:eq(0)').text().trim(),
+                EMP_CODE: parseInt($row.find('.employee-code').val().trim()) || 0,
+                SHIFT: $row.find('.shift').val().trim().toUpperCase(),
+                STATUS: $row.find('.status').val().trim().toUpperCase(),
+                REMARK: $row.find('.remark').val().trim(),
+                OFFDAY: $row.find('.off-day').val().trim(),
+                SNO: $row.find('.sno').val().trim(),
+
+                V_NO: V_no,
+                V_TYPE: V_Type,
+                V_DATE: V_Date
+            };
+
+            rowData.push(data);
+        });
+
+        return rowData;
+    }
+
+    function generateOptions(optionsArray, selectedValue) {
+        return optionsArray.map(opt => {
+            const selected = opt.value === selectedValue ? 'selected' : '';
+            return `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
+        }).join('');
+    }
+
+    function addRow(data = {}) {
+        const rowCount = $('#tblAttendenceEntry tbody tr').length + 1;
+
+        const row = `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td><input type="hidden" class="sno" value="${rowCount}" />${rowCount}</td>
+
+                <td><input type="text" class="form-control department" value="${data.department || ''}" readonly /></td>
+                <td><input type="text" class="form-control employee-code" value="${data.employeeCode || ''}" readonly /></td>
+                <td><input type="text" class="form-control employee-name" value="${data.employeeName || ''}" readonly /></td>
+                <td><input type="text" class="form-control designation" value="${data.designation || ''}" readonly /></td>
+                <td><input type="text" maxlength="1" class="form-control status" value="${data.status || ''}" /></td>
+                <td><input type="text" maxlength="1" class="form-control shift" value="${data.shift || ''}" /></td>
+                <td><input type="text" class="form-control remark" value="${data.remark || ''}" /></td>
+                <td><input type="text" class="form-control off-day" value="${data.off || ''}" /></td>
+            </tr>
+        `;
+
+        $('#tblAttendenceEntry tbody').append(row);
+
+        const shiftInput = $('#tblAttendenceEntry tbody tr:last .shift');
+        shiftInput.on('input', function () {
+            let val = $(this).val().toUpperCase();
+            if (!['A', 'B', 'C'].includes(val)) {
+                $(this).val('');
+            } else {
+                $(this).val(val);
+            }
+        });
+
+        const statusInput = $('#tblAttendenceEntry tbody tr:last .status');
+        statusInput.on('input', function () {
+            let val = $(this).val().toUpperCase();
+            if (!['P', 'A', 'O', 'L', 'E'].includes(val)) {
+                $(this).val('');
+            } else {
+                $(this).val(val);
+            }
+        });
+    }
+
+    function FillShift(Shift) {
+        $('#tblAttendenceEntry tbody tr').each(function () {
+            const status = $(this).find('.status').val().toUpperCase();
+            const shift = $(this).find('.shift').val().trim().toUpperCase();
+
+            if (status === 'P' && shift === '') {
+                $(this).find('.shift').val(Shift);
+            }
+        });
+    }
+
+    function FillStatus(Status) {
+        $('#tblAttendenceEntry tbody tr').each(function () {
+            const rowstatus = $(this).find('.status').val().toUpperCase();
+            if (rowstatus === '') {
+                $(this).find('.status').val(Status);
+            }
+        });
+    }
+
+    async function GetVNo(vtype) {
+        try {
+            const res = await fetch(`/AttendenceEntry/GetVNo?vtype=${encodeURIComponent(vtype)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+
+            $('#TxtDocNo').val(data.v_NO);
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+
+    async function LoadDropDown() {
+        try {
+            await Promise.all([
+                ddlDocType(),
+                ddlDepartment(),
+                ddlDesignation()
+            ]);
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+
+    async function ddlDocType() {
+        try {
+            const response = await fetch('/AttendenceEntry/DDlDoctype');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlDocType');
+
+            ddl.empty().append('<option value="">-- Select Document Type --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlDocType:", error);
+            toastr.error('Error loading Document Type: ' + error.message);
+        }
+    }
+
+    async function ddlDepartment() {
+        try {
+            const response = await fetch('/AttendenceEntry/DDlDepartment');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlDepartment');
+
+            ddl.empty().append('<option value="">-- Select Department --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlDepartment:", error);
+            toastr.error('Error loading Department: ' + error.message);
+        }
+    }
+
+    async function ddlDesignation() {
+        try {
+            const response = await fetch('/AttendenceEntry/DDlDesignation');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlDesignation');
+
+            ddl.empty().append('<option value="">-- Select Designation --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlDesignation:", error);
+            toastr.error('Error loading Designation: ' + error.message);
+        }
+    }
+
+    async function checkSalaryDate(dtDate) {
+        try {
+            const result = await $.ajax({
+                url: '/AttendenceEntry/CheckPaySalaryDate',
+                type: 'GET',
+                data: { dtDate: dtDate },
+                dataType: 'json'
+            });
+
+            if (result.success) {
+                return true;
+            } else {
+                toastr.error(result.message || 'Salary date check failed.');
+                return false;
+            }
+        } catch (error) {
+            console.error('Catch block error:', error);
+            toastr.error('An error occurred while checking salary date.');
+            return false;
+        }
+    }
+
+    function fetchDataWithoutMac(deptCode, Desigcode, vDate) {
+        $.ajax({
+            url: '/AttendenceEntry/GetDataWithoutMac',
+            type: 'GET',
+            data: {
+                DeptCode: deptCode,
+                Desigcode: Desigcode,
+                v_date: vDate
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#tblAttendenceEntry tbody').empty();
+                    response.data.forEach(item => {
+                        addRow({
+                            code: item.code || '',
+                            department: item.department || '',
+                            employeeCode: item.emP_CODE || '',
+                            employeeName: item.name || '',
+                            designation: item.designation || '',
+                            status: item.status || '',
+                            shift: item.shift || '',
+                            remark: item.remark || '',
+                            off: item.offday || ''
+                        });
+                    });
+                } else {
+                    toastr.info(response.message);
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+
+    function fetchDataWithMac(deptCode, Desigcode, vDate, vtype) {
+        $.ajax({
+            url: '/AttendenceEntry/GetDataWithMac',
+            type: 'GET',
+            data: {
+                DeptCode: deptCode,
+                Desigcode: Desigcode,
+                v_date: vDate,
+                vtype: vtype
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#tblAttendenceEntry tbody').empty();
+                    response.data.forEach(item => {
+                        addRow({
+                            code: item.code || '',
+                            department: item.department || '',
+                            employeeCode: item.emP_CODE || '',
+                            employeeName: item.name || '',
+                            designation: item.designation || '',
+                            status: item.status || '',
+                            shift: item.shift || '',
+                            remark: item.remark || '',
+                            off: item.offday || ''
+                        });
+                    });
+                } else {
+                    toastr.info(response.message);
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+
+    function confirmAndClearForm() {
+        Swal.fire({
+            title: 'Are you sure to exit?',
+            text: "This will clear the form and any unsaved data.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, clear it',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById("AttendenceEntryForm").reset();
+
+                document.getElementById("ddlDocType").selectedIndex = 0;
+                document.getElementById("ddlDepartment").selectedIndex = 0;
+                document.getElementById("ddlDesignation").selectedIndex = 0;
+                document.getElementById("TxtCode").value = "";
+                document.getElementById("TxtDocNo").value = "";
+
+                const tableBody = document.querySelector("#tblAttendenceEntry tbody");
+                tableBody.innerHTML = "";
+
+                document.getElementById("tablePagination").innerHTML = "";
+
+                const dateInput = document.getElementById('DtDocDate');
+                if (dateInput) {
+                    dateInput.valueAsDate = new Date();
+                }
+
+                Swal.fire({
+                    title: 'Cleared!',
+                    text: 'The form has been reset.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+
+    async function GetVNoByDate(VDate) {
+        try {
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+
+            const res = await fetch(`/AttendenceEntry/GetVNoByDate?VDate=${encodeURIComponent(VDate)}`);
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+
+            if (data.v_NO !== null && data.v_NO !== undefined && data.v_NO !== "") {
+                console.log('v_NO received:', data.v_NO);
+                $('#TxtDocNo').val(data.v_NO);
+            } else {
+                let selectedDocType = document.getElementById('ddlDocType').value;
+                GetVNo(selectedDocType);
+            }
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+
+
+    async function LoadFormByID(id) {
+        try {
+            console.log("Calling GetDataByCode with id:", id);
+
+            const res = await $.ajax({
+                url: '/AttendenceEntryList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("AJAX failed:", textStatus, errorThrown, jqXHR.responseText);
+                toastr.error("AJAX call failed: " + textStatus);
+                throw new Error(textStatus);
+            });
+
+            console.log("AJAX response:", res);
+
+            if (!res.success) {
+                toastr.error("Failed to load data: " + (res.message || "Unknown error"));
+                return;
+            }
+
+            const header = res.data?.header;
+            const details = res.data?.details;
+
+            if (!header) {
+                toastr.error("No header data returned from server.");
+                console.error("Header data is missing:", res.data);
+                return;
+            }
+
+            // Fill header fields
+            $('#TxtCode').val(header.DOC_ID || '');
+            $('#ddlDocType').val(header.V_TYPE || '');
+            $('#TxtDocNo').val(header.V_NO || '');
+
+            const formattedDate = header.V_DATE ? formatDate(new Date(header.V_DATE)) : '';
+            $('#DtDocDate').val(formattedDate);
+
+            // Clear and load details
+            $('#tblAttendenceEntry tbody').empty();
+
+            if (Array.isArray(details)) {
+                details.forEach(item => {
+                    addRow({
+                        department: item.dept || '',
+                        employeeCode: item.EMP_CODE || '',
+                        employeeName: item.emp || '',
+                        designation: item.desg || '',
+                        status: item.STATUS || '',
+                        shift: item.SHIFT || '',
+                        remark: item.REMARK || '',
+                        off: item.OFFDAY || ''
+                    });
+                });
+            } else {
+                console.warn("Details data is missing or not an array:", details);
+            }
+
+        } catch (err) {
+            console.error("LoadFormByID Error:", err);
+            toastr.error("Something went wrong while loading the form. See console for details.");
+        }
+    }
+
+
+    // Example of a simple date formatter for yyyy-MM-dd
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        if (isNaN(date)) return '';
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function populateTableRowsFromData(details) {
+        $('#tblAttendenceEntry tbody').empty();
+        details.forEach(item => {
+            addRow({
+                code: item.code || '',
+                department: item.department || '',
+                employeeCode: item.emP_CODE || '',
+                employeeName: item.name || '',
+                designation: item.designation || '',
+                status: item.status || '',
+                shift: item.shift || '',
+                remark: item.remark || '',
+                off: item.offday || ''
+            });
+        });
+    }
+
+    function formatDate(dateString) {
+ 
+        const date = new Date(dateString);
+        if (isNaN(date)) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`; 
+    }
+
+    function validateRequiredField(selector, fieldName) {
+        const element = $(selector);
+        if (!element.val()) {
+            toastr.warning(`${fieldName} is required.`);
+            element.focus();
+            return false;
+        }
+        return true;
+    }
+</script>

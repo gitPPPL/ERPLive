@@ -1,0 +1,183 @@
+﻿@{
+	ViewBag.Title = "Bank Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Bank Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "BankMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="bankMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANK_NAME" class="form-label"><span class="required">*</span>Bank Name</label>
+					<input type="text" class="form-control" id="TxtBANK_NAME" name="BANK_NAME" placeholder="Enter Bank Name">
+				</div> 
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SHORT_NAME" class="form-label">Short Name</label>
+					<input type="text" class="form-control" id="TxtSHORT_NAME" name="SHORT_NAME" placeholder="Enter Short Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TYPE" class="form-label"><span class="required">*</span>Type</label>
+					<select class="form-control" id="ddlTYPE" name="ddlTYPE">
+						<option value="">-- Select Type --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+		if (!isNaN(rowId) && rowId > 0) {
+			loadBankById(rowId);
+			if (isReadOnly) {
+				setBankFormReadOnly();
+			}
+		}
+		loadTypeList();
+
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+		$('#cancelBtn').on('click', function () {
+			window.location.href = '/BankMasterList/Index';
+		});
+	});
+
+	function loadTypeList() {
+		$.ajax({
+			url: '/BankMaster/GetBankTypeList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#ddlTYPE');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+	$('#bankMasterForm').on('submit', function (e) {
+		e.preventDefault();
+		const code = parseInt($('#CODE').val()) || 0;
+
+		if (!validateRequiredField('#TxtBANK_NAME', 'Bank Name')) return;
+		if (!validateRequiredField('#ddlTYPE', 'Type')) return;
+
+		const bankData = {
+			CODE: code,
+			NAME: $('#TxtBANK_NAME').val().trim(),
+			SHORTNAME: $('#TxtSHORT_NAME').val().trim(),
+			TYPE: $('#ddlTYPE').val(),
+			REPL_CODE: 0, // optional or dynamic
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			UUSER: 1, // Replace with dynamic user ID
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? 'E' : 'A',
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB",
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+	$.ajax({
+		url: '/BankMaster/SaveBank',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify(bankData),
+
+		success: function (response) {
+
+			if (response.success) {
+
+				toastr.success(response.message || "Saved successfully!");
+
+				// If INSERT (code == 0) then make form readonly
+				if (bankData.CODE === 0) {
+					setBankFormReadOnly();
+				}
+
+			} else {
+				toastr.warning(response.message || "Something went wrong while saving.");
+			}
+		},
+
+		error: function (xhr) {
+			const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+			toastr.error("Error: " + errorMsg);
+		}
+	});
+
+	});
+	function loadBankById(code) {
+		$.ajax({
+			url: '/BankMasterList/GetBankByCode',
+			type: 'GET',
+			data: { code },
+			success: function (res) {
+				if (!res.success || !res.data) {
+					toastr.warning("No bank found for given ID.");
+					return;
+				}
+				const bank = res.data;
+				$('#CODE').val(bank.code);
+				$('#TxtBANK_NAME').val(bank.name);
+				$('#TxtSHORT_NAME').val(bank.shortname);
+				$('#ddlTYPE').val(bank.type).trigger('change');
+				const isActive = bank.active === 1 || bank.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText').text(isActive ? 'Active' : 'Inactive');
+			},
+			error: function (xhr) {
+				toastr.error("Error: " + xhr.responseText);
+			}
+		});
+	}
+	// Read-only
+	function setBankFormReadOnly() {
+		const form = $('#bankMasterForm');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		form.find('#ACTIVE').prop('disabled', true);
+	}
+
+</script>

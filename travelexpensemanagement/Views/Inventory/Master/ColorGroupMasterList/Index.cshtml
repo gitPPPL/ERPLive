@@ -1,0 +1,196 @@
+﻿@{
+	ViewBag.Title = "Color Group Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Color Group Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "ColorGroupMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Color Group
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print 
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblColorGroupMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Name</th>
+						<th>Color Type</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<div class="pagination-wrapper">
+		<ul class="pagination" id="tablePagination"></ul>
+	</div>
+</fieldset>
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadAllColorGroups();
+    });
+
+    function loadAllColorGroups() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ColorGroupMasterList/GetAllColorGroups', // Make sure this endpoint matches your controller
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const lists = res.lists;
+                const totalCount = res.totalCount;
+
+                let tbody = $('#tblColorGroupMaster tbody');
+                tbody.empty();
+
+                if (!lists || lists.length === 0) {
+                    tbody.append('<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                $.each(lists, function (index, item) {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${item.code}</td>
+                            <td>${item.name || ''}</td>
+                            <td>${item.coloR_TYPE || ''}</td>
+                            <td>${item.active === 1 ? 'Active' : 'Inactive'}</td>
+                            <td>
+                                <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editColorGroup(${item.code})"></i>
+                                <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewColorGroup(${item.code})"></i>
+                                <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteColorGroup(${item.code})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                alert('Error loading color group data: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button></li>`;
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button></li>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li><button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button></li>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button></li>`;
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button></li>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllColorGroups();
+    }
+
+    $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadAllColorGroups();
+    });
+
+    function editColorGroup(code) {
+        window.location.href = '/ColorGroupMaster/Index?id=' + encodeURIComponent(code);
+    }
+
+    function viewColorGroup(code) {
+        window.location.href = '/ColorGroupMaster/Index?id=' + encodeURIComponent(code) + '&readOnly=true';
+    }
+
+    function deleteColorGroup(code) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete the color group.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ColorGroupMaster/DeleteColorGroupByCode', 
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                                loadAllColorGroups();
+                            });
+                        } else {
+                            Swal.fire('Failed', response.message, 'warning');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'An error occurred while deleting the color group.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+</script>

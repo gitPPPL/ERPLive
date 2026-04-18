@@ -1,0 +1,334 @@
+﻿@{
+    ViewBag.Title = "RM Discount Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">RM Discount Master</legend>
+    <form id="RMDiscountMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtSaudaItemName">Sauda Item Name</label>
+                    @* <input type="text" class="form-control" id="TxtSaudaItemName" /> *@
+                    <select class="form-control" id="ddlSaudaItemName">
+                        <option value="">Select Sauda Item Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtItemName">Item Name</label>
+                    @* <input type="text" class="form-control" id="TxtItemName" /> *@
+                    <select class="form-control" id="ddlItemName">
+                        <option value="">Select Item Item Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtEffectiveDate">Effective Date</label>
+                    <input type="date" class="form-control" id="DtEffectiveDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtLastEffectiveDate">Last Effective Date</label>
+                    <input type="date" class="form-control" id="DtLastEffectiveDate" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumRate">Rate</label>
+                    <input tyep="number" class="form-control" id="NumRate" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumAbove">Above</label>
+                    <div class="input-icon-wrapper input-divide">
+                        <input type="number" class="form-control" id="NumAbove">
+                        <span>%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumAboveAmount">Above Amount</label>
+                    <input type="number" class="form-control" id="NumAboveAmount" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "RMDiscountMasterList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
+
+        const srno = getQueryParam("sno");
+        console.log("SRNO =", srno);
+
+        ddlSaudaItemName(() => {
+            ddlItemName(() => {
+                if (srno) {
+                    loadEditData(srno);
+                }
+            });
+        });
+        $('#btn-save').click(function (e) {
+            e.preventDefault();
+
+            var formData = {
+                Code: srno,
+                DType: $('#ddlDType').val(),
+                SaudaItem: $('#ddlSaudaItemName').val(),
+                ItemCode: $('#ddlItemName').val(),
+                EffectiveDate: new Date($('#DtEffectiveDate').val()).toISOString(),
+                Rate: parseFloat($('#NumRate').val()) || 0,
+                AbovePercentage: parseFloat($('#NumAbove').val()) || 0,
+                AboveAmount: parseFloat($('#NumAboveAmount').val()) || 0,
+                Remarks: $('#TxtRemarks').val(),
+                ACTION: srno ? "UPDATE" : "INSERT"
+            };
+
+            $.ajax({
+                url: '/RMDiscountMaster/SaveRMDiscountMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    alert(response.message);
+                    if (response.success) {
+                        window.location.href = '/RMDiscountMasterList/Index';
+                    }
+                }
+            });
+        });
+    });
+    function ddlSaudaItemName(callback) {
+        const ddl = $('#ddlSaudaItemName');
+        $.ajax({
+            url: '/RMDiscountMaster/GetddSaudaItemName',
+            type: 'GET',
+            success: function (data) {
+                ddl.empty().append('<option value="">Select Sauda Item Type</option>');
+                data.forEach(x => ddl.append(new Option(x.text, x.value)));
+                ddl.select2({ width: "100%" });
+
+                if (callback) callback();  
+            }
+        });
+    }
+    function ddlItemName(callback) {
+        const ddl = $('#ddlItemName');
+        $.ajax({
+            url: '/RMDiscountMaster/GetddItemName',
+            type: 'GET',
+            success: function (data) {
+                ddl.empty().append('<option value="">Select Item</option>');
+                data.forEach(x => ddl.append(new Option(x.text, x.value)));
+                ddl.select2({ width: "100%" });
+
+                if (callback) callback();  
+            }
+        });
+    }
+    function loadEditData(srno) {
+        $.ajax({
+            url: '/RMDiscountMaster/GetID',
+            type: 'POST',
+            data: { Code: srno },
+            success: function (response) {
+                if (response.success && response.data) {
+                    let d = response.data;
+
+                    // ✅ Dropdowns
+                    $('#ddlDType').val(d.dType);
+                    $('#ddlSaudaItemName').val(d.saudaItem).trigger("change");
+                    $('#ddlItemName').val(d.itemCode).trigger("change");
+
+                    // ✅ Textboxes
+                    $('#DtEffectiveDate').val(d.effectiveDate.split("T")[0]);
+                    $('#NumRate').val(d.rate);
+                    $('#NumAbove').val(d.abovePercentage);
+                    $('#NumAboveAmount').val(d.aboveAmount);
+                    $('#TxtRemarks').val(d.remarks);
+                }
+            }
+        });
+    }
+</script>
+
+
+@* <script>
+    $(document).ready(function () {
+
+     function getQueryParam(param) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(param);
+    }
+
+    const srno = getQueryParam("sno");
+       if (srno) {
+        $.ajax({
+            url: '/RMDiscountMaster/GetID',
+            type: 'POST',
+            data: { Code: srno },
+            success: function (response) {
+                console.log(response)
+                if (response.success && response.data) {
+                    let d = response.data;
+
+                    $('#ddlDType').val(d.dType);
+                    $('#ddlSaudaItemName').val(d.saudaItem).trigger("change");
+                    $('#ddlItemName').val(d.itemCode).trigger("change");
+
+                    $('#DtEffectiveDate').val(d.effectiveDate.split("T")[0]);
+                    $('#NumRate').val(d.rate);
+                    $('#NumAbove').val(d.abovePercentage);
+                    $('#NumAboveAmount').val(d.aboveAmount);
+                    $('#TxtRemarks').val(d.remarks);
+                }
+            }
+        });
+    }
+    alert(srno)
+
+        ddlSaudaItemName();
+        ddlItemName();
+
+        $('#btn-save').click(function (e) {
+            e.preventDefault();
+
+            //     var formData = {
+            //     DType: $('#ddlDType').val(),  // ✅ Add this
+            //     SaudaItem: $('#ddlSaudaItemName').val(),
+            //     ItemCode: $('#ddlItemName').val(),
+            //     EffectiveDate: new Date($('#DtEffectiveDate').val()).toISOString(),
+            //     Rate: parseFloat($('#NumRate').val()) || 0,
+            //     AbovePercentage: parseFloat($('#NumAbove').val()) || 0,
+            //     AboveAmount: parseFloat($('#NumAboveAmount').val()) || 0,
+            //     Remarks: $('#TxtRemarks').val(),
+            //     ACTION: srno > 0 ? "UPDATE" : "INSERT",
+            // };
+        var formData = {
+            Code: srno,                   
+            DType: $('#ddlDType').val(),  
+            SaudaItem: $('#ddlSaudaItemName').val(),
+            ItemCode: $('#ddlItemName').val(),
+            EffectiveDate: new Date($('#DtEffectiveDate').val()).toISOString(),
+            Rate: parseFloat($('#NumRate').val()) || 0,
+            AbovePercentage: parseFloat($('#NumAbove').val()) || 0,
+            AboveAmount: parseFloat($('#NumAboveAmount').val()) || 0,
+            Remarks: $('#TxtRemarks').val(),
+            ACTION: srno > 0 ? "UPDATE" : "INSERT"
+        };
+
+            console.log(formData);
+
+            $.ajax({
+                url: '/RMDiscountMaster/SaveRMDiscountMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.location.href = '@Url.Action("Index", "RMDiscountMasterList")';
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error saving data: " + error);
+                }
+            });
+        });
+    });
+
+    function ddlSaudaItemName() {
+        const ddl = $('#ddlSaudaItemName');
+        $.ajax({
+            url: '/RMDiscountMaster/GetddSaudaItemName',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Destroy select2 if already applied
+                if (ddl.hasClass("select2-hidden-accessible")) {
+                    ddl.select2('destroy');
+                }
+                ddl.empty().append('<option value="">Select Sauda Item Type</option>');
+                data.forEach(item => {
+                    ddl.append(new Option(item.text, item.value));
+                });
+                ddl.select2({
+                    placeholder: "Select Sauda Item Type",
+                    allowClear: true,
+                    width: '100%'
+                });
+            },
+            error: function (xhr) {
+                console.error("Error loading list:", xhr.responseText);
+                toastr.error('Error loading list');
+            }
+        });
+    }
+    function ddlItemName() {
+        const ddl = $('#ddlItemName');
+        $.ajax({
+            url: '/RMDiscountMaster/GetddItemName',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                if (ddl.hasClass("select2-hidden-accessible")) {
+                    ddl.select2('destroy');
+                }
+                ddl.empty().append('<option value="">Select Sauda Item Type</option>');
+                data.forEach(item => {
+                    ddl.append(new Option(item.text, item.value));
+                });
+                ddl.select2({
+                    placeholder: "Select Sauda Item Type",
+                    allowClear: true,
+                    width: '100%'
+                });
+            },
+            error: function (xhr) {
+                console.error("Error loading list:", xhr.responseText);
+                toastr.error('Error loading list');
+            }
+        });
+    }
+</script> *@
+
+
+
+

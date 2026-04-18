@@ -1,0 +1,463 @@
+﻿@{
+    ViewBag.Title = "Staff Movement Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Staff Movement Entry</legend>
+    <form id="StaffMovementEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type<span class="required">*</span></label>
+                    <select class="form-control" id="ddlDocTyle">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtDocNo">Doc No</label>
+                    <input type="text" class="form-control" id="TxtDocNo" readonly />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlShift">Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="">Select Shift</option>
+                        <option>A</option>
+                        <option>B</option>
+                        <option>C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlEmpCode">Emp Code<span class="required">*</span></label>
+                    <select class="form-control" id="ddlEmpCode">
+                        <option value="">Select Emp Code</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDeptName">Dept Name</label>
+                    <input type="text" class="form-control" id="TxtDeptName" placeholder="Enter Dept Name" readonly>
+                    <input type="hidden" id="TxtDeptCode" name="DeptCode">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmOutTime">Out Time</label>
+                    <input type="time" class="form-control" id="TmOutTime" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TmInTime">In Time</label>
+                    <input type="time" class="form-control" id="TmInTime" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlHODCode">HOD Code<span class="required">*</span></label>
+                    <select class="form-control" id="ddlHODCode">
+                        <option value="">Select HOD Code</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlOutType">Out Type</label>
+                    <select class="form-control" id="ddlOutType">
+                        <option value="">Select Out Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtGatePassNo">Gate Pass No</label>
+                    <input type="text" class="form-control" id="TxtGatePassNo" placeholder="Enter Gate Pass No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "StaffMovementEntryList")'" type="button" class="btn btn-list">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right">
+                    <button id="btn-saves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn-cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+       const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+
+         if (!rowId) {
+            const dateInput = document.getElementById('DtDocDate');
+            if (dateInput) {
+                dateInput.valueAsDate = new Date();
+            }
+        }
+
+            LoadDropDown().then(() => {
+            if (rowId) {
+                LoadFormByID(rowId);
+            }
+        });
+
+            if (mode === "view") {
+                setFormReadOnly();
+                    $('#StaffMovementEntryForm').after(
+                '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+                );
+            }
+
+            $('#ddlEmpCode').on('change', function () {
+            const selectedEmpCode = $(this).val();
+            if (selectedEmpCode) {
+                 fetchEmployeeData(selectedEmpCode);
+
+            }
+        });
+
+            $('#ddlDocTyle').on('change', function () {
+                     const selectedEmpCode = $(this).val();
+                     if (selectedEmpCode) {
+                          GetVNo(selectedEmpCode);
+
+                     }
+                 });
+
+            $("#btn-saves").click(function (e) {
+            e.preventDefault();
+
+      
+            const DOC_ID = $.trim($('#TxtCode').val());
+            const V_TYPE = $.trim($('#ddlDocTyle').val());
+            const V_NO = parseFloat($.trim($('#TxtDocNo').val())) || 0;
+            const V_DATE = formatDate($("#DtDocDate").val());
+            const SHIFT = $.trim($('#ddlShift option:selected').text()) || "";
+            const EMP_CODE = parseInt($('#ddlEmpCode').val()) || 0;
+            const fullText = $.trim($('#ddlEmpCode option:selected').text()) || "";
+            const EMP_NAME = fullText.replace(/\s*\([^)]*\)/, '').trim();
+            const DEPT_CODE = parseInt($('#TxtDeptCode').val()) || 0;
+            const DEPT_NAME = $.trim($('#TxtDeptName').val());
+            const REASON_CODE = parseInt($('#ddlOutType').val()) || 0;
+            const GP_TYPE = $.trim($('#ddlOutType option:selected').text()) || "";
+            const REMARKS = $.trim($('#TxtRemarks').val());
+            const E_TIME = $.trim($('#TmOutTime').val());
+            const IN_TIME = $.trim($('#TmInTime').val());
+            const GP_NO = $.trim($('#TxtGatePassNo').val());
+            const HOD_CODE = parseInt($('#ddlHODCode').val()) || 0;
+            const HOD_NAME = $.trim($('#ddlHODCode option:selected').text()) || "";
+            const action = (!DOC_ID || DOC_ID.trim() === '') ? 'INSERT' : 'UPDATE';
+
+            if (!validateRequiredField('#ddlEmpCode', 'Emp Code')) return;
+            if (!validateRequiredField('#ddlHODCode', 'HOD Code')) return;
+            if (!validateRequiredField('#ddlDocTyle', 'Doc Type')) return;
+              
+            const Header = {
+                DOC_ID,
+                V_TYPE,
+                V_NO,
+                V_DATE,
+                SHIFT,
+                EMP_CODE,
+                EMP_NAME,
+                DEPT_CODE,
+                DEPT_NAME,
+                REASON_CODE,
+                GP_TYPE,
+                REMARKS,
+                E_TIME,
+                IN_TIME,
+                GP_NO,
+                HOD_CODE,
+                HOD_NAME,
+                action
+            };
+                   
+            $("#btn-saves").prop("disabled", true);
+
+            $.ajax({
+                url: '/StaffMovementEntry/SavedData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(Header),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Saved successfully!");
+                        setTimeout(() => window.location.href = '/StaffMovementEntryList/Index', 1000);
+                    } else {
+                        toastr.error(response.message || "Save failed.");
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = "Something went wrong.";
+                    if (xhr.status === 400) {
+                        errorMessage = "Bad Request: " + xhr.responseText;
+                    } else if (xhr.status === 500) {
+                        errorMessage = "Server error: " + xhr.responseText;
+                    } else {
+                        errorMessage = "Unexpected error: " + xhr.statusText;
+                    }
+                    toastr.error("Error: " + errorMessage);
+                },
+                complete: function () {
+                    $("#btn-saves").prop("disabled", false);
+                }
+
+
+            });
+
+
+            });
+
+
+    });
+
+
+
+     function formatDate(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      if (isNaN(date)) return null;
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+     async function GetVNo(vtype) {
+        try {
+
+        
+
+            const res = await fetch(`/StaffMovementEntry/GetVNo?vtype=${encodeURIComponent(vtype)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+            $('#TxtDocNo').val(data.v_NO);
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+
+     function setFormReadOnly() {
+        const form = $('#ManualOutEntryForm');
+        form.find(':input').prop('disabled', true);
+        form.find('textarea').css('background-color', '#f0f0f0');
+
+        $('#btn-saves').hide();
+        $('#btn-cancel').hide();
+
+    }
+
+     async function LoadDropDown() {
+        try {
+            await Promise.all([
+                DDLDocType(),
+                DDLEmp(),
+                DDLHod(),
+                DDLOutType()
+
+               
+            ]);
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+
+     async function DDLDocType() {
+        try {
+            const response = await fetch('/StaffMovementEntry/DDlDoctype');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlDocTyle');
+
+            ddl.empty().append('<option value="">-- Select Document Type --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading DDLDocType:", error);
+            toastr.error('Error loading DDLDocType: ' + error.message);
+        }
+    }
+
+     async function DDLEmp() {
+        try {
+            const response = await fetch('/StaffMovementEntry/DDLEmp');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlEmpCode');
+            ddl.empty().append('<option value="">-- Select Emp --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+            ddl.select2({
+                placeholder: "-- Select Emp --",
+                allowClear: true,
+                matcher: function (params, data) {
+                    if ($.trim(params.term) === '') return data;
+                    const term = params.term.toLowerCase();
+                    const text = data.text.toLowerCase();
+                    return text.includes(term) ? data : null;
+                }
+            });
+
+            if (rowId) {
+                setTimeout(() => {
+                    $('#ddlEmpCode').val($('#ddlEmpCode').val()).trigger('change');
+                }, 200);
+            }
+
+        } catch (error) {
+            console.error("Error loading DDLEmp:", error);
+            toastr.error('Error loading DDLEmp: ' + error.message);
+        }
+    }
+    
+     async function DDLHod() {
+        try {
+            const response = await fetch('/StaffMovementEntry/DDLHod');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlHODCode');
+
+            ddl.empty().append('<option value="">-- Select Document Type --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading DDLDocType:", error);
+            toastr.error('Error loading DDLDocType: ' + error.message);
+        }
+    }
+
+     async function DDLOutType() {
+        try {
+            const response = await fetch('/StaffMovementEntry/DDLOutType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+           
+
+            const ddl = $('#ddlOutType');
+
+            ddl.empty().append('<option value="">-- Select Out Type --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading ddlOutType:", error);
+            toastr.error('Error loading ddlOutType: ' + error.message);
+        }
+    }
+
+     function fetchEmployeeData(empcode) {
+
+        $.ajax({
+            url: '/StaffMovementEntry/FetchDataByEmpcode',
+            type: 'GET',
+            data: { empcode: empcode },
+            success: function (data) {
+                     if (data && data.length > 0) {
+                    const item = data[0];
+                    $('#TxtDeptName').val(item.deptName);
+                    $('#TxtDeptCode').val(item.deptCode);
+                    document.getElementById('TmOutTime').value = ((d=>`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`)(new Date()));
+
+                } else {
+                    $('#TxtDeptName').val('');
+                    $('#TxtDeptCode').val('');
+                
+                }
+            },
+            error: function () {
+              toastr.error("An error occurred while fetching data.");
+            }
+        });
+    }
+
+     function LoadFormByID(code) {
+        $.ajax({
+            url: '/StaffMovementEntryList/GetdataByCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res || !res.success || !res.data) {
+                    toastr.warning("No data found for the given ID.");
+                    return;
+                }
+
+                const data = res.data;
+
+                $('#TxtCode').val($.trim(data.doC_ID || ''));
+                $('#TxtDocNo').val($.trim(data.v_NO || ''));
+                $("#DtDocDate").val(formatDate(data.v_DATE));
+                $('#ddlShift').val(data.shift || '');
+                $('#ddlDocTyle').val(data.v_TYPE || '');
+                $('#ddlEmpCode').val(data.emP_CODE || 0);
+                $('#TxtDeptName').val(data.depT_NAME || '');
+                $('#TxtDeptCode').val(data.depT_CODE || 0);
+
+                $('#TmOutTime').val(data.e_TIME || '');
+                $('#TmInTime').val(data.iN_TIME || '');
+                $('#ddlHODCode').val(data.hoD_CODE || 0);
+                            $('#ddlOutType').val(data.reasoN_CODE || '');
+
+                $('#TxtRemarks').val(data.remarks || '');
+                $('#TxtGatePassNo').val(data.gP_NO || 0);
+
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    }
+
+
+
+</script>

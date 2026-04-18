@@ -1,0 +1,502 @@
+﻿@{
+    ViewBag.Title = "Canteen Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Canteen Entry</legend>
+    <form id="CanteenEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+           
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-5">
+                <fieldset>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="DtDateFrom">Date From</label>
+                                <input type="date" class="form-control" id="DtDateFrom" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="DtTo">To</label>
+                                <input type="date" class="form-control" id="DtTo" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-mt button-right">
+                                <button type="button" class="btn btn-print" id="btn_print"><i class="fa fa-print"></i>Print</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblCANTEEN" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Sno.</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Amount</th>
+                            <th>Remark</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row"  id="AddRow"  title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "CanteenList")'" type="button" class="btn btn-draft" id="Backtolist">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger" onclick="clearForm()">
+                        <i class="fa fa-close"></i>Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    let EMPOptions = '';
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let employeeMap = new Map();
+
+    $(document).ready(async function () {
+        try {
+            // Load dropdowns once
+            await Promise.all([DDLDocType(), loadEmployeeDropdownOptions()]);
+
+            if (rowId) {
+                await LoadFormByID(rowId);
+                if (isReadOnly) setFormReadOnly();
+            } else {
+                const dateInput = document.getElementById('DtDocDate');
+                if (dateInput) dateInput.valueAsDate = new Date();
+                await GetVNo();
+                addRow();
+            }
+
+            setupDelegatedEvents();
+        } catch (err) {
+            console.error("Initialization error:", err);
+            toastr.error("Error while initializing page");
+        }
+
+        // Save button
+        $("#btn-save").click(async function (e) {
+            e.preventDefault();
+            if (isReadOnly) return;
+
+            if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+            const attendanceData = collectRowData();
+            if (attendanceData.length === 0) {
+                toastr.warning("No data found.");
+                return;
+            }
+
+            $("#btn-save").prop("disabled", true);
+            try {
+                const response = await $.ajax({
+                    type: "POST",
+                    url: "/CanteenEntry/SaveData",
+                    contentType: "application/json",
+                    data: JSON.stringify(attendanceData)
+                });
+
+                if (response.success) {
+                    toastr.success("Data saved successfully");
+                    setTimeout(() => window.location.href = '/CanteenList/Index', 1000);
+                } else {
+                    toastr.error(response.message || "Failed to save");
+                }
+            } catch (err) {
+                console.error("Save error:", err);
+                toastr.error("Error while saving");
+            } finally {
+                $("#btn-save").prop("disabled", false);
+            }
+        });
+    });
+
+    // ===== Load Dropdowns =====
+    async function DDLDocType() {
+        try {
+            const response = await fetch('/CanteenEntry/ddlDocType');
+            const data = await response.json();
+            const ddl = $('#ddlDocType');
+            ddl.empty();
+            data.forEach(item => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+        } catch (err) {
+            console.error("Error loading DocType:", err);
+            toastr.error("Error loading Doc Type");
+        }
+    }
+
+    async function loadEmployeeDropdownOptions() {
+        try {
+            const resp = await fetch('/CanteenEntry/DDLGridEmp');
+            const data = await resp.json();
+            EMPOptions = '<option value="">--Select--</option>';
+            employeeMap.clear();
+            data.forEach(emp => {
+                EMPOptions += `<option value="${emp.value}">${emp.text}</option>`;
+                employeeMap.set(emp.value, emp.text);
+            });
+        } catch (err) {
+            console.error("Error loading employees:", err);
+            toastr.error("Error loading Employee List");
+        }
+    }
+
+    async function GetVNo() {
+        try {
+            const resp = await fetch('/CanteenEntry/GetVNo');
+            const data = await resp.json();
+            if (data.v_NO != null) $('#NumDocNo').val(data.v_NO);
+        } catch (err) {
+            console.error("Error getting VNo:", err);
+        }
+    }
+
+    // ===== Add Row =====
+    function addRow(data = {}) {
+        const $tbody = $('#tblCANTEEN tbody');
+        $tbody.find('.btn-add-action').remove();
+
+        const rowNumber = $tbody.find('tr').length + 1;
+        const empCode = data.empCode || '';
+
+        const rowHtml = `
+            <tr>
+                <td>${rowNumber}</td>
+                <td><input type="text" class="form-control emp-code" name="empCode" value="${empCode}" /></td>
+                <td>
+                    <select class="form-control employee-name" style="width:300px;">
+                        ${EMPOptions}
+                    </select>
+                </td>
+                <td><input type="number" class="form-control" name="amount" value="${data.amount || ''}" /></td>
+                <td><input type="text" class="form-control" name="remark" value="${data.remark || ''}" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>`;
+        $tbody.append(rowHtml);
+
+        const $row = $tbody.find('tr').last();
+        const $dropdown = $row.find('.employee-name');
+        if (empCode && employeeMap.has(empCode)) $dropdown.val(empCode);
+
+        currentPage = Math.ceil($tbody.find('tr').length / rowsPerPage);
+        paginateTable($('#tblCANTEEN'), $('#tablePagination'), rowsPerPage);
+    }
+
+    // ===== Event Delegation =====
+    function setupDelegatedEvents() {
+        const $tbody = $('#tblCANTEEN tbody');
+
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            if (!isReadOnly) addRow();
+        });
+
+        $tbody.on('click', '.btn-delete-action', function () {
+            if (isReadOnly) return;
+            $(this).closest('tr').remove();
+            renumberRows();
+            currentPage = 1;
+            paginateTable($('#tblCANTEEN'), $('#tablePagination'), rowsPerPage);
+        });
+
+        $tbody.on('change', '.employee-name', function () {
+            const $row = $(this).closest('tr');
+            $row.find('.emp-code').val($(this).val());
+        });
+
+        $tbody.on('input', '.emp-code', function () {
+            const $row = $(this).closest('tr');
+            $row.find('.employee-name').val($(this).val());
+        });
+    }
+
+    // ===== Collect Data =====
+    function collectRowData() {
+        const arr = [];
+        const V_no = parseInt($('#NumDocNo').val()) || 0;
+        const V_Type = $('#ddlDocType').val();
+        const V_Date = $('#DtDocDate').val();
+
+        $('#tblCANTEEN tbody tr').each(function () {
+            const $row = $(this);
+            const empCode = $row.find('input[name="empCode"]').val().trim();
+            if (!empCode) return;
+            arr.push({
+                EMP_CODE: empCode,
+                Emp_name: employeeMap.get(empCode) || $row.find('.employee-name option:selected').text().trim(),
+                amount: parseFloat($row.find('input[name="amount"]').val().trim()) || 0,
+                remark: $row.find('input[name="remark"]').val().trim(),
+                V_NO: V_no,
+                V_TYPE: V_Type,
+                V_DATE: V_Date
+            });
+        });
+        return arr;
+    }
+
+    // ===== Load Form (Edit Mode) =====
+    async function LoadFormByID(id) {
+        try {
+            const resp = await $.ajax({
+                url: '/CanteenList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            });
+
+            const header = resp.data?.header;
+            const details = resp.data?.details;
+            if (!header) {
+                toastr.error("No header data found");
+                return;
+            }
+
+            $('#TxtCode').val(header.DOC_ID || '');
+            $('#ddlDocType').val(header.V_TYPE || '');
+            $('#NumDocNo').val(header.V_NO || '');
+            $('#DtDocDate').val(header.V_DATE ? formatDate(new Date(header.V_DATE)) : '');
+
+            const $tbody = $('#tblCANTEEN tbody');
+            $tbody.empty();
+
+            if (Array.isArray(details)) {
+                details.forEach(item => {
+                    addRow({
+                        empCode: item.EMP_CODE,
+                        amount: item.AMOUNT,
+                        remark: item.REMARK
+                    });
+                });
+
+                $('#tblCANTEEN tbody tr').each(function () {
+                    const $row = $(this);
+                    const empCode = $row.find('.emp-code').val();
+                    const $dropdown = $row.find('.employee-name');
+                    $dropdown.val(empCode);
+
+                    if (!$dropdown.find(`option[value="${empCode}"]`).length && empCode) {
+                        const empName = employeeMap.get(empCode) || empCode;
+                        $dropdown.append(`<option value="${empCode}" selected>${empName}</option>`);
+                    }
+                });
+            }
+
+            currentPage = 1;
+            paginateTable($('#tblCANTEEN'), $('#tablePagination'), rowsPerPage);
+
+        } catch (err) {
+            console.error("LoadForm error:", err);
+            toastr.error("Error loading form data");
+        }
+    }
+
+    // ===== Utilities =====
+    function formatDate(date) {
+        if (!date) return '';
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function validateRequiredField(selector, fieldName) {
+        const val = $(selector).val();
+        if (!val) {
+            toastr.warning(`Please select ${fieldName}`);
+            $(selector).focus();
+            return false;
+        }
+        return true;
+    }
+
+    function setFormReadOnly() {
+        $('form#CanteenEntryForm :input').prop('disabled', true);
+        $('#btn-save').hide();
+        $('#Backtolist').prop('disabled', false).show();
+    }
+
+    function renumberRows() {
+        $('#tblCANTEEN tbody tr').each(function (i) {
+            $(this).find('td:first').text(i + 1);
+        });
+    }
+
+    // ===== Optimized Pagination =====
+    function paginateTable($table, $pagination, rowsPerPage = 10) {
+        const $rows = $table.find('tbody tr');
+        const totalRows = $rows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        if (totalPages === 0) {
+            $pagination.empty();
+            $rows.hide();
+            return;
+        }
+
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        $rows.hide();
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        $rows.slice(start, end).show();
+
+        $pagination.empty();
+
+        const makeBtn = (text, disabled, onClick) => $('<button>')
+            .addClass('btn btn-sm mx-1')
+            .addClass(disabled ? 'btn-secondary' : 'btn-primary')
+            .text(text)
+            .prop('disabled', disabled)
+            .on('click', onClick);
+
+        $pagination.append(makeBtn('⏮ First', currentPage === 1, () => {
+            currentPage = 1;
+            paginateTable($table, $pagination, rowsPerPage);
+        }));
+
+        $pagination.append(makeBtn('◀ Prev', currentPage === 1, () => {
+            currentPage--;
+            paginateTable($table, $pagination, rowsPerPage);
+        }));
+
+        let startPage = Math.max(1, currentPage - 1);
+        let endPage = Math.min(totalPages, startPage + 2);
+        if (endPage - startPage < 2) startPage = Math.max(1, endPage - 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            const $btn = $('<button>')
+                .addClass('btn btn-sm mx-1')
+                .addClass(i === currentPage ? 'btn-success' : 'btn-light border')
+                .text(i)
+                .on('click', () => {
+                    currentPage = i;
+                    paginateTable($table, $pagination, rowsPerPage);
+                });
+            $pagination.append($btn);
+        }
+
+        $pagination.append(makeBtn('Next ▶', currentPage === totalPages, () => {
+            currentPage++;
+            paginateTable($table, $pagination, rowsPerPage);
+        }));
+
+        $pagination.append(makeBtn('Last ⏭', currentPage === totalPages, () => {
+            currentPage = totalPages;
+            paginateTable($table, $pagination, rowsPerPage);
+        }));
+
+        const info = $('<span class="mx-2 small text-muted">')
+            .text(`Page ${currentPage} of ${totalPages}`);
+        $pagination.append(info);
+
+        renumberRows();
+
+        // Optional UX: scroll to table top
+        $('html, body').animate({ scrollTop: $('#tblCANTEEN').offset().top - 100 }, 200);
+    }
+
+
+     function clearForm(rowId) {
+
+        if (!rowId) {
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to undo this action!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                         document.querySelector('#tblCANTEEN tbody').innerHTML = '';
+
+                              addRow();
+
+
+                        const dateInput = document.getElementById('DtDocDate');
+                        if (dateInput) dateInput.valueAsDate = new Date();
+
+
+                         Swal.fire(
+                        'Cleared!',
+                        'The form has been cleared except for the Document No.',
+                        'success'
+                    );
+                }
+            });
+        } else {
+
+            console.log("RowId is not null, custom behavior goes here.");
+        }
+    }
+
+
+
+
+
+
+
+</script>

@@ -1,0 +1,1594 @@
+﻿@{
+    ViewBag.Title = "Sales Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+   var logindate= Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+}
+<fieldset>
+    <legend class="legend-field">Sales Order</legend>
+    <form id="SalesOrderForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right">
+                    @if(canPrint)
+                    {
+                        <button class="btn btn-print">
+                            <i class="fa fa-print"></i> Print
+                        </button>
+                    }
+                    @if(canExport)
+                    {
+                        <button class="btn btn-export">
+                            <i class="fas fa-file-export"></i> Export
+                        </button>
+                    }
+                    @if(canMail)
+                    {
+                        <button class="btn btn-mail">
+                            <i class="fa fa-envelope"></i> Mail
+                        </button>
+                    }
+                    @if(canApproval)
+                    {
+                        <button class="btn btn-send" type="button" onclick="popupModal()">
+                            <i class="fa fa-paper-plane"></i> Approval Send
+                        </button>
+                    }                     
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtDocId">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" value="@logindate">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="button-right btn-mt">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#OrderAdjustmentModal"> Order Adjustment Detail</button>
+                </div>
+            </div>
+        </div>
+        @* Modal Popup *@
+        <div class="modal fade" id="OrderAdjustmentModal" tabindex="-1" aria-labelledby="OrderAdjustmentLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="OrderAdjustmentLabel">Order Adjustment</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                       
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblOrderAdjustmentModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Bill No</th>
+                                            <th>Bill Date</th>
+                                            <th>Item Name</th>
+                                            <th>Quantity</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Sauda Details</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlSaudaNo">Sauda No</label>
+                        <div class="input-divide">
+                            @* <input type="number" class="form-control" id="ddlSaudaNo" placeholder="Enter Sauda No"> *@
+                            <select class="form-control" id="ddlSaudaNo">
+                                <option>"select sauda No."</option>
+                            </select>
+                            <button class="btn btn-primary w-100" type="button"><i class="fa fa-calculator"></i> Calculate Rate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlBillTo">Bill To</label>
+                        <select class="form-control" id="ddlBillTo">
+                            <option value="">Select Bill To</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAddressL1">Address L1</label>
+                        <div class="input-divide">
+                            <input type="text" class="form-control" id="TxtAddressL1" placeholder="Enter Address L1">
+                            <div class="select-wrapper">
+                                <select id="ddladdressL1">
+                                    <option value="">Select address</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAddressL2">Address L2</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressL2" placeholder="Enter Address L2"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtAddressL3">Address L3</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressL3" placeholder="Enter Address L3"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlCity">City</label>
+                        <select id="ddlCity" class="form-control">
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumPincode">Pincode</label>
+                        <input type="number" class="form-control" id="NumPincode" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtGSTNo">GST No.</label>
+                        <input type="text" class="form-control" id="TxtGSTNo" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumMobile">Mobile No.</label>
+                        <input type="number" class="form-control" id="NumMobile" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="TxtDelivery">Delivery To</label>
+                        <input type="text" class="form-control" id="TxtDelivery" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Ship Details</legend>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="NumIssueNo">Issue No</label>
+                        <div class="input-divide">
+                            <input type="number" class="form-control" id="NumIssueNo" placeholder="Enter Issue No">
+                            <button class="btn btn-primary w-100" type="button"><i class="fa fa-refresh"></i> Load Issue Data</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlShipTo">Ship To</label>
+                        <select class="form-control" id="ddlShipTo">
+                            <option value="">Select Ship To</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAddressShipL1">Address L1</label>
+                        <div class="input-divide">
+                            <input type="text" class="form-control" id="TxtAddressShipL1" placeholder="Enter Address L1">
+                            <div class="select-wrapper">
+                                <select id="ddlShipaddressL1">
+                                    <option value="">Select address</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtAddressShipL2">Address L2</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressShipL2" placeholder="Enter Address L2"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtAddressShipL3">Address L3</label>
+                        <textarea typeof="text" class="form-control" id="TxtAddressShipL3" placeholder="Enter Address L3"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlShipCity">City</label>
+                        <select id="ddlShipCity" class="form-control">
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumShipPincode">Pincode</label>
+                        <input type="number" class="form-control" id="NumShipPincode" />
+                    </div>
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtShipGST">GST</label>
+                        <input type="text" class="form-control" id="TxtShipGST" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="NumContactNo">Contact No.</label>
+                        <div class="input-divide">
+                            <input type="number" class="form-control" id="NumContactNo" placeholder="Enter Contact No">
+                            <button class="btn btn-primary w-100" type="button" id="btn_createdelivery" data-bs-toggle="modal" data-bs-target="#CreateDeliveryModal"><i class="fa fa-plus"></i> Create Delivery Plan</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="NumPackingNo">Packing No.</label>
+                        <div class="input-divide">
+                            <input type="number" class="form-control" id="NumPackingNo" placeholder="Enter Packing No">
+                            <button class="btn btn-primary w-100" type="button" id="btn_loadpacking"><i class="fa fa-download"></i> Load Packing Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        @* Modal Popup *@
+        <div class="modal fade" id="CreateDeliveryModal" tabindex="-1" aria-labelledby="CreateDeliveryLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="CreateDeliveryLabel">Dispatch Delivery Planning</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="NumModalDocNo">Doc No</label>
+                                    <input type="number" class="form-control" id="NumModalDocNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="DtModalDocDate">Doc Date</label>
+                                    <input type="date" class="form-control" id="DtModalDocDate" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblCreateDeliveryModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Del. Date</th>
+                                            <th>Quantity</th>
+                                            <th>Remarks</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="offset-md-6 col-md-6">
+                                <div class="button-right btn-mt">
+                                    <button type="button" class="btn btn-primary" id="btn_dispatchsave"><i class="fa fa-save"></i> Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-5">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Sauda Details</legend>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Party : <span> <input type="text" class="form-control" id="TxtParty" disabled /></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Item Name : <span> <input type="text" class="form-control" id="TxtItemName" disabled /></span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Quantity : <span> <input type="number" class="form-control" id="NumQuantity" disabled /></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Rate : <span> <input type="number" class="form-control" id="NumRate" disabled /></span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Tenacity Group : <span> <input type="text" class="form-control" id="TxtTenaCity" disabled /></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="btn-mt">
+                                <button type="button" class="btn btn-primary" id="btn_linkedOrder" data-bs-toggle="modal" data-bs-target="#linkedorderModal"> Linked Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-7">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Other Details</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Total Nos : <span> <input type="number" class="form-control" id="NumTotalNos" /></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Total Qty : <span> <input type="number" class="form-control" id="NumTotalQty" /></span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ddlPaymentTerm">Payment Term</label>
+                                <select class="form-control" id="ddlPaymentTerm">
+                                    <option value="">Select Payment Term</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtDeliveryPeriod">Delivery Period</label>
+                                <input type="text" class="form-control" id="TxtDeliveryPeriod" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumCashDiscount">Cash Discount</label>
+                                <input type="number" class="form-control" id="NumCashDiscount" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumOtherDiscount">Other Discount</label>
+                                <input type="number" class="form-control" id="NumOtherDiscount" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlStatus">Status</label>
+                                <select class="form-control" id="ddlStatus">
+                                    <option value="">Select Status</option>
+                                    <option value="1">Open</option>
+                                    <option value="2">Cancel</option>
+                                    <option value="0">Close</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        @* Modal Popup *@
+        <div class="modal fade" id="linkedorderModal" tabindex="-1" aria-labelledby="linkedorderLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="linkedorderLabel">List of Orders</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblRMPurchaseModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Order No</th>
+                                            <th>Party</th>
+                                            <th>Item Name</th>
+                                            <th>Quantity</th>
+                                            <th>Rate</th>
+                                            <th>Tenacity</th>
+                                            <th>Tenacity Group</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblSalesOrderEntryModal" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Code</th>
+                            <th>Item Name</th>
+                            <th>Nos</th>
+                            <th>Weight</th>
+                            <th>Rate</th>
+                            <th>Tenacity</th>
+                            <th>Delivery Date</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="btn-add-row-last">
+                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                </div>
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "SalesOrderList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
+
+<script>
+    const AllFieldsId = [    
+    'TxtDocId', 'NumDocNo', 'DtDocDate',
+    'ddlSaudaNo',
+    'ddlBillTo',
+    'TxtAddressL1',
+    'ddladdressL1',
+    'TxtAddressL2',
+    'TxtAddressL3',
+    'ddlCity',
+    'NumPincode',
+    'TxtGSTNo',
+    'NumMobile',
+    'TxtDelivery',
+    'NumIssueNo',
+    'ddlShipTo',
+    'TxtAddressShipL1',
+    'ddlShipaddressL1',
+    'TxtAddressShipL2',
+    'TxtAddressShipL3',
+    'ddlShipCity',
+    'NumShipPincode',
+    'TxtShipGST',
+    'NumContactNo',   
+    'NumPackingNo',    
+    'ddlPaymentTerm', 'TxtDeliveryPeriod',
+    'ddlStatus'
+    ];
+
+    let itemRecords = [
+        'TxtCode',
+        'ddlItemname',
+        'TxtNos',
+        'TxtWeight',
+        'TxtRate',
+        'ddlTenacity',
+        'DtDeliveryDate',
+        'TxtRemarks'
+    ];
+      
+
+    var LoginDate=@logindate;
+    console.log(LoginDate);
+    let docId = "";
+    let readOnly;
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    $(async function () {
+        try {            
+            handleDocLoad();
+        } catch (error) {
+            toastr.error('Failed to load document types: ' + error);
+        }
+    });
+ 
+    $(document).ready(function () {
+    GetBindSaudaNoList();
+    GetPaymentTermList();
+    GetBillToList();
+    GetShipToList();
+    GetCityList('ddlCity');
+    GetCityList('ddlShipCity');
+
+
+    $('#DtDocDate').attr('max', LoginDate);
+    // handleDocLoad();
+    addItemRecordRow();
+    setEnterKeyFocus(AllFieldsId);
+
+    $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        var tbody = $(this).closest('tbody');
+        var rowCount = tbody.find('tr').length;
+
+        if (rowCount > 1) {
+            $(this).closest('tr').remove();
+        } else {
+            alert('Cannot delete the first row.');
+        }
+    });
+    
+    // $(document).on('click', '#tab1 .btn-add-row, #tab1 .btn-Itemadd-action', function () {
+    //     addItemRecordRow();
+    // });
+       
+    $('#btn-save').on('click', async function (e) {
+        e.preventDefault();
+
+          // if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
+          // if (!validateRequiredField('#ddlPlace', 'Place')) return;
+          // if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
+          // if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
+
+        try
+        {
+            const tableData = await collectFormData();
+            console.log(tableData); 
+            if (docId) {
+                UpdateData(tableData);
+            } else {
+                SaveData(tableData);
+            }
+        } catch (error) {
+            toastr.error('An error occurred while saving the data.');
+        }
+    });
+
+    $(document).on('change', '#ddlSaudaNo', async function() {
+        // console.log(docId);
+        // if (!docId) return;
+        // console.log('a');
+        const saudaNo = $('#ddlSaudaNo').val();       
+        try {
+            const saudaList = await $.ajax({
+                url: '@Url.Action("GetSaudaDataList", "SalesOrder")',
+                type: 'GET',
+                dataType: 'json',
+                data: { saudaNo: saudaNo }
+            });
+             console.log(saudaList);
+           await fillISaudaBySaudaNo(saudaList.data);
+           await showSaudasDetails(saudaList.saudaDetails);
+
+        } catch (error) {
+            console.error('Error loading Sauda data:', error);
+        }
+    });
+
+    $(document).on('click', '.btn-add-action, .btn-add-row', function () {
+    addItemRecordRow();
+    });
+
+    $(document).on('change', '#ddladdressL1, #ddlShipaddressL1', function () {
+        const selectedOption = $(this).find('option:selected');
+        const dropdownId = $(this).attr('id');
+        var cityCd=selectedOption.data('cityCd');
+                
+        if (dropdownId === 'ddladdressL1') {
+            $('#TxtAdd1SD').val(selectedOption.text().trim());
+            $('#TxtAdd2SD').val(selectedOption.data('add2'));
+            $('#TxtAdd3SD').val(selectedOption.data('add3'));
+            $('#NumPincode').val(selectedOption.data('pincd'));
+            // $('#ddlCity').val(selectedOption.data('cityCd'));
+            $('#TxtGSTNo').val(selectedOption.data('gstin'));
+            $('#NumMobile').val(selectedOption.data('gstin'));
+            GetCityList('ddlCity', cityCd);
+             
+        } else {
+            $('#TxtAddressShipL1').val(selectedOption.text().trim());
+            $('#TxtAddressShipL2').val(selectedOption.data('add2'));
+            $('#TxtAddressShipL3').val(selectedOption.data('add3'));
+            $('#NumShipPincode').val(selectedOption.data('pincd'));
+            // $('#ddlShipCity').val(selectedOption.data('cityCd'));
+            $('#TxtShipGST').val(selectedOption.data('gstin'));
+            $('#NumContactNo').val(selectedOption.data('gstin'));
+            GetCityList('ddlShipCity', cityCd);
+        }
+    });
+       
+
+    });
+
+</script>
+
+<script>
+       
+    async function handleDocLoad() {
+        const docId = getQueryParam('id');
+        const readOnly = getQueryParam('readOnly');
+
+        if (docId) {
+            $('#SaudaDetail').show();
+            $('#ddlStatus').prop('disabled', false);            
+            await GetDocData(docId, readOnly);
+        } else {            
+            GetDocid();          
+        }
+    }
+
+    async function fillISaudaBySaudaNo(datatable) {
+        const data=datatable[0]; 
+        console.log(data);
+        $('#TxtDocId').val(data.DOC_ID);
+        $('#NumDocNo').val(data.V_NO);
+        $('#DtDocDate').val(data.EDATE ? data.EDATE.substring(0, 10) : '');       
+        $('#TxtAddressL1').val(data.ADD1);
+        $('#TxtAddressL2').val(data.ADD2);
+        $('#TxtAddressL3').val(data.ADD3); 
+        $('#TxtGSTNo').val(data.GST_NO);
+        $('#NumMobile').val(data.PHONE);
+        $('#TxtDelivery').val(data.DELIVERY_TERMIMP ? data.DELIVERY_TERMIMP.substring(0, 10) : '');
+        $('#NumIssueNo').val(data.ISSUE_NO);
+        $('#TxtAddressShipL1').val(data.ADD1);
+        $('#TxtAddressShipL2').val(data.ADD2);
+        $('#TxtAddressShipL3').val(data.ADD3);      
+        $('#TxtShipGST').val(data.GST_NO);
+        $('#NumContactNo').val(data.PHONE);
+        $('#NumPackingNo').val(data.PACKING_NO);
+        GetBillToList(data.PARTY_CODE);
+        GetShipToList(data.PARTY_CODE);
+        GetCityList('ddlCity');
+        GetCityList('ddlShipCity');
+        $('#ddlCity').val(data.CITY_CODE).trigger('change');
+        $('#ddlShipCity').val(data.CITY_CODE).trigger('change');
+        GetPartyAddress(data.PARTY_CODE, 'ddladdressL1', data.PARTY_CODE);
+        GetPartyAddress(data.PARTY_CODE, 'ddlShipaddressL1', data.SHIP_CODE);
+        fillISaudaDetailsTableBySaudaNo(datatable);
+       
+        // $('#ddlCity').val(data.CITY_CODE).trigger('change');
+        // $('#NumPincode').val(data.PINO);
+        // $('#ddladdressL1').val(data.ADD2).trigger('change');
+        // $('#ddlShipTo').val(data.SHIP_CODE).trigger('change');
+        // $('#ddlShipaddressL1').val(data.ADD2).trigger('change');
+          // $('#ddlShipCity').val(data.CITY_CODE).trigger('change');
+        // $('#NumShipPincode').val(data.PINCODE);
+        // $('#btn_createdelivery').prop('disabled', !data.CREATE_DELIVERY); // Adjust button logic
+        // $('#btn_loadpacking').prop('disabled', !data.LOAD_PACKING); // Adjust button logic
+         // $('#btn_linkedOrder').prop('disabled', !data.LINKED_ORDER);
+        // $('#NumTotalNos').val(data.TOTAL_NOS);
+        // $('#NumTotalQty').val(data.TOTAL_QTY);
+        // $('#ddlPaymentTerm').val(data.PAYTERM_CODE).trigger('change'); 
+        // $('#TxtDeliveryPeriod').val(data.DELIVERY_DAYS);
+        // $('#NumCashDiscount').val(data.CDISC_PER);
+        // $('#NumOtherDiscount').val(data.DISC_PER);
+        // $('#ddlStatus').val(data.STATUS).trigger('change');
+         // $('#ddlSaudaNo').val(data.SAUDA_NO); // Ensure SAUDA_NO exists in data
+        // $('#ddlBillTo').val(data.PARTY_CODE).trigger('change');
+       
+    }
+
+    async function fillISaudaDetailsTableBySaudaNo(data) {
+        const todayDt=getTodayDate();
+        const $tbody = $('#tblSalesOrderEntryModal tbody');
+        $tbody.empty();        
+
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+            await bindDropdownData(idx);
+
+            $(`#TxtCode${idx}`).val(item.ITEM_CODE || '');
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE || '').trigger('change');
+            $(`#TxtNos${idx}`).val(item.QTY || '');
+            $(`#TxtWeight${idx}`).val(item.QTY || '');
+            $(`#TxtRate${idx}`).val(item.RATE || '');
+            // $(`#ddlTenacity${idx}`).val(item.preorityLevel || '');
+            $(`#DtDeliveryDate${idx}`).val(todayDt || '');
+            $(`#TxtRemarks${idx}`).val('');
+        }
+    }
+
+    async function showSaudasDetails(datas){       
+        const data = datas[0];     
+        $('#TxtParty').val(data.Party);
+        $('#TxtItemName').val(data.ItemName ?? '');
+        $('#NumQuantity').val(data.QTY);
+        $('#NumRate').val(data.rate);
+        $('#TxtTenaCity').val(data.Tenacity_type);
+    }
+      
+    function getTodayDate(){
+          const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+            return todayDate;
+    }
+       
+    // async function fillItemDetailsTable(data) {
+    //     const $tbody = $('#tblSalesOrderEntryModal tbody');
+    //     $tbody.empty();
+       
+    //     for (let index = 0; index < data.length; index++) {
+    //         const item = data[index];
+    //         const idx = index + 1;
+    //         addItemRecordRow();
+    //         await bindDropdownData(idx);
+
+    //     }
+    // }
+
+    async function fillItemDetailsTable(data) {
+        const $tbody = $('#tblSalesOrderEntryModal tbody');
+        $tbody.empty();
+
+        for (let index = 0; index < data.length; index++) {
+
+            const item = data[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+            await bindDropdownData(idx);
+
+            $(`#TxtCode${idx}`).val(item.ITEM_CODE);
+
+            if (item.ITEM_CODE) {
+                $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+            }
+
+            $(`#TxtNos${idx}`).val(item.NOS);
+            $(`#TxtWeight${idx}`).val(item.QTY);
+            $(`#TxtRate${idx}`).val(item.RATE);
+
+            if (item.TENACITY_CODE) {
+                $(`#ddlTenacity${idx}`).val(item.TENACITY_CODE).trigger('change');
+            }
+
+            if (item.DELIVERY_DATE) {
+                $(`#DtDeliveryDate${idx}`).val(item.DELIVERY_DATE.split('T')[0]);
+            }
+
+            $(`#TxtRemarks${idx}`).val(item.REMARKS);
+        }
+    }
+
+ 
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/SalesOrder/GetPurchaseOrderRecordsById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+
+            if (response.status) {
+                if (readOnly === 'true') {
+                    disableAllFields();
+                    $('.btn-add-row-last').hide();
+                    $('#btn-save, #cancelBtn').hide();
+                } else {
+                    enableAllFields();
+                    $('#btn-save, #cancelBtn').show();
+                    $('.btn-add-row-last').show();
+
+                }
+                console.log(response.header,response.detail);
+                await fillFormFields(response.header);
+                await fillItemDetailsTable(response.detail);
+                
+
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            toastr.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateSalesOrder", "SalesOrder")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            // showFlashMessageByKey('insert', 'success');
+                            toastr.success("Data Insert Successfully");
+                            // resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/SalesOrderList/Index';
+                            }, 500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateSalesOrder", "SalesOrder")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    showFlashMessageByKey('update', 'success');
+                    // resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/SalesOrderList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    // async  function fillFormFields(data) {
+    //   if (!Array.isArray(data) || data.length === 0) {
+    //     toastr.error("Invalid or empty data array");
+    //     return;
+    //   }
+    //   const d = data[0]; // use first object
+      
+            
+    // }
+
+    async function fillFormFields(data) {
+        if (!Array.isArray(data) || data.length === 0) {
+            toastr.error("Invalid or empty data array");
+            return;
+        }
+        const d = data[0];
+        const setVal = (id, value) => {
+            const el = document.getElementById(id);
+            if (el !== null && value !== undefined) {
+                el.value = value ?? '';
+            }
+        };
+       var StrDocId=(d.V_TYPE)+(d.V_NO);
+        setVal('TxtDocId', StrDocId);
+        setVal('NumDocNo', d.V_NO);
+        setVal('DtDocDate', d.V_DATE?.split('T')[0]);
+        // setVal('ddlSaudaNo', d.SAUDA_NO);
+        setVal('ddlBillTo', d.PARTY_CODE);
+        setVal('TxtAddressL1', d.BILL_ADD1);
+        setVal('TxtAddressL2', d.BILL_ADD2);
+        setVal('TxtAddressL3', d.BILL_ADD3);
+        // setVal('ddlCity', d.BILL_CITY);
+        setVal('NumPincode', d.BILL_PINCODE);
+        setVal('TxtGSTNo', d.BILL_GST);
+        setVal('TxtDelivery', d.DELIVERY_TO);
+        setVal('ddlShipTo', d.SHIP_CODE);
+        setVal('TxtAddressShipL1', d.SHIP_ADD1);
+        setVal('TxtAddressShipL2', d.SHIP_ADD2);
+        setVal('TxtAddressShipL3', d.SHIP_ADD3);
+        // setVal('ddlShipCity', d.SHIP_CITY);
+        setVal('NumShipPincode', d.SHIP_PINCODE);
+        setVal('TxtShipGST', d.SHIP_GST);
+        setVal('ddlPaymentTerm', d.PAYTERM_CODE);
+        setVal('TxtDeliveryPeriod', d.DELIVERY_PERIOD);
+        setVal('ddlStatus', d.STATUS);
+        // SHIP_CODE PARTY_CODE SHIP_CITY,BILL_CITY
+        GetBillToList(d.PARTY_CODE);
+        GetShipToList(d.SHIP_CODE);
+        GetCityList('ddlCity', d.BILL_CITY);
+        GetCityList('ddlShipCity', d.SHIP_CITY);        
+        var saudaDocid=(d.SAUDA_TYPE)+(d.SAUDA_NO);
+        console.log(saudaDocid);
+        // GetBindSaudaNoList();
+        $('#ddlSaudaNo').val(saudaDocid);
+    }
+
+
+    async function collectFormData() {
+        const id = toNullableString(document.getElementById("TxtDocId")?.value);
+        const itemRecords = await collectOrder2Items();         
+
+        return {
+            VNo: parseIntSafe(document.getElementById("NumDocNo")?.value),
+            VDate: toNullableDate(document.getElementById("DtDocDate")?.value),
+            DocId: id,  
+            SaudaNo:$('#ddlSaudaNo option:selected').text(),
+            PartyCode: parseIntSafe(document.getElementById("ddlBillTo")?.value),
+            BillAdd1: toNullableString(document.getElementById("TxtAddressL1")?.value),
+            BillAdd2: toNullableString(document.getElementById("TxtAddressL2")?.value),
+            BillAdd3: toNullableString(document.getElementById("TxtAddressL3")?.value),
+            BillCity: parseIntSafe(document.getElementById("ddlCity")?.value),
+            BillPincode: toNullableString(document.getElementById("NumPincode")?.value),
+            BillGst: toNullableString(document.getElementById("TxtGSTNo")?.value),
+            ShipCode: parseIntSafe(document.getElementById("ddlShipTo")?.value),
+            ShipAdd1: toNullableString(document.getElementById("TxtAddressShipL1")?.value),
+            ShipAdd2: toNullableString(document.getElementById("TxtAddressShipL2")?.value),
+            ShipAdd3: toNullableString(document.getElementById("TxtAddressShipL3")?.value),
+            ShipCity: parseIntSafe(document.getElementById("ddlShipCity")?.value),
+            ShipPincode: toNullableString(document.getElementById("NumShipPincode")?.value),
+            ShipGst: toNullableString(document.getElementById("TxtShipGST")?.value),
+            PaytermCode: parseIntSafe(document.getElementById("ddlPaymentTerm")?.value),
+            DeliveryPeriod: toNullableString(document.getElementById("TxtDeliveryPeriod")?.value),
+            DeliveryTo: toNullableString(document.getElementById("TxtDelivery")?.value),
+            CDiscAmt: parseFloatSafe(document.getElementById("NumCashDiscount")?.value),
+            DiscAmt: parseFloatSafe(document.getElementById("NumOtherDiscount")?.value),
+            Status: parseIntSafe(document.getElementById("ddlStatus")?.value),
+            SaveOrUpdate: (!id || id === "0") ? "Save" : "Update",
+            ItemRecords: itemRecords
+        };
+    }
+
+    async function collectOrder2Items() {
+        const items = [];
+        $('#tblSalesOrderEntryModal tbody tr').each(function (index) {
+            const idx = index + 1;             
+            const qty = parseFloatSafe($(`#TxtWeight${idx}`).val());
+            const rate = parseFloatSafe($(`#TxtRate${idx}`).val());           
+            const saudaNo = $('#ddlSaudaNo option:selected').text();
+            console.log(saudaNo);
+
+            items.push({
+                SNO: idx, 
+                ItemCode: parseIntSafe($(`#TxtCode${idx}`).val()),
+                ItemName: $(`#ddlItemname${idx} option:selected`).text(),
+                NOS: parseIntSafe($(`#TxtNos${idx}`).val()),
+                Qty: qty,
+                Rate: rate,
+                Amount: qty && rate ? qty * rate : 0,
+                Remarks: $(`#TxtRemarks${idx}`).val(),
+                TenacityCode: parseIntSafe($(`#ddlTenacity${idx}`).val()),
+                TenacityName: $(`#ddlTenacity${idx} option:selected`).text(),                
+                SaudaType: 'SAUD',
+                SaudaNo: saudaNo,
+                DeliveryDate: toNullableDate($(`#DtDeliveryDate${idx}`).val()),
+                Status: 1
+            });
+        });
+        return items;
+    }
+
+
+    // async function collectOrder2Items() {
+    //     const items = [];
+
+    //     $('#tblSalesOrderEntryModal tbody tr').each(function () {
+    //         const idx = this.id.replace('row', '');
+
+    //         const getVal = (id) => document.getElementById(`${id}${idx}`)?.value || null;
+
+    //         const itemCode = parseIntSafe(getVal('ddlItemname'));
+
+    //         items.push({
+    //             SNO: parseIntSafe(idx),
+
+    //             ItemCode: itemCode,
+    //             ItemName: getVal('ddlItemname')
+    //                 ? document.getElementById(`ddlItemname${idx}`)?.selectedOptions[0]?.text
+    //                 : null,
+
+    //             NOS: parseIntSafe(getVal('TxtNos')),
+    //             Qty: parseFloatSafe(getVal('TxtWeight')),
+    //             Rate: parseFloatSafe(getVal('TxtRate')),
+
+    //             TenacityCode: parseIntSafe(getVal('ddlTenacity')),
+    //             TenacityName: getVal('ddlTenacity')
+    //                 ? document.getElementById(`ddlTenacity${idx}`)?.selectedOptions[0]?.text
+    //                 : null,
+
+    //             DeliveryDate: toNullableDate(getVal('DtDeliveryDate')),
+    //             Remarks: getVal('TxtRemarks'),
+    //             Status: parseIntSafe(document.getElementById("ddlStatus")?.value)
+    //         });
+    //     });
+
+    //     return items;
+    // }
+
+
+    // async function collectOrder2Items() {
+    //   const items = [];
+    //   $('#tblSalesOrderEntryModal tbody tr').each(function () {
+    //     const idx = this.id.replace('row', '');
+    //     const $r = $(this);
+
+    //     items.push({
+    //       SNO: parseIntSafe(idx)
+    //       //
+    //       //
+    //     });
+    //   });
+    //   return items;
+    // }
+            
+    function GetDocid() {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "SalesOrder")',
+            type: 'GET',
+            data:{V_type:'SORD'},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#NumDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function GetCityList(dropdownId, selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetCityList", "SalesOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status) {
+                      const $dropdown = $('#'+dropdownId);
+                    $dropdown.empty();
+                    $dropdown.append('<option value="">- Select -</option>');
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+                 
+                $dropdown.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                }else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Sauda Load failed: " + error);
+            }
+        });
+    }
+
+    function GetBindSaudaNoList() {
+        $.ajax({
+            url: '@Url.Action("GetSaudaNoList", "SalesOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlSaudaNo');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Sauda -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.DOC_ID}">${item.V_NO}</option>`);
+                    });                                       
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+ 
+     function GetPaymentTermList() {
+        $.ajax({
+            url: '@Url.Action("GetPaymentTermList", "SalesOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlPaymentTerm');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetShipToList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "SalesOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlShipTo');
+                    $dropdown.empty();
+                     $dropdown.append('<option selected disabled value="">- Select Party -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                                data-add1="${item.ADD1}"
+                                data-add2="${item.ADD2}"
+                                data-add3="${item.ADD3}"                                 
+                                data-GstIn="${item.GSTIN}"
+                                data-cityCd="${item.CITY_CODE}"
+                                data-pinCd="${item.PINCODE}"
+                        value="${item.CODE}">${item.NAME}
+                        </option>`);
+                    });
+
+                    $dropdown.select2({
+                        placeholder: "- Select Party -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Load failed: " + error);
+            }
+        });
+    }
+
+    function GetBillToList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "SalesOrder")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlBillTo');
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select Party -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                            data-add1="${item.ADD1}"
+                            data-add2="${item.ADD2}"
+                            data-add3="${item.ADD3}"
+                            data-cityName="${item.CityName}"
+                            data-GstIn="${item.GSTIN}"
+                            data-cityCd="${item.CITY_CODE}"
+                            data-pinCd="${item.PINCODE}"
+                            value="${item.CODE}">
+                            ${item.NAME}
+                        </option>`);
+                    });
+
+                    // Initialize or refresh Select2
+                    $dropdown.select2({
+                        placeholder: "- Select Party -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Load failed: " + error);
+            }
+        });
+    }
+
+    function GetPartyAddress(partyCd, selectedId, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyAddress", "SalesOrder")',
+            type: 'GET',
+            dataType: 'json',
+            data: { partyCd: partyCd },
+            success: function(response) {
+                if (response.status) {
+                    
+                    const $dropdown = $('#'+selectedId);
+                    $dropdown.empty(response.data);
+                     $dropdown.append('<option selected disabled value="">- Select Address -</option>');
+
+                    $.each(response.data, function(index, item) {
+                        $dropdown.append(`
+                            <option
+                                data-add2="${item.ADD2}"
+                                data-add3="${item.ADD3}"
+                                data-cityName="${item.CityName}"
+                                data-GstIn="${item.GSTIN}"
+                                data-cityCd="${item.CITY_CODE}"
+                                data-pinCd="${item.PINCODE}"
+                                value="${item.code}">${item.ADD1}</option>
+                        `);
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Party Address Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error("Party Address Load failed: " + error);
+            }
+        });
+    }
+       
+    function addItemRecordRow() {
+        let tbody = $('#tblSalesOrderEntryModal tbody');
+        let rowCount = tbody.find('tr').length + 1;
+        let newRow = `
+        <tr>
+                    <td><input type="text" class="form-control" id="TxtCode${rowCount}" /></td>
+                    <td>
+                    <select style="min-width: 500px;" class="form-control" id="ddlItemname${rowCount}">
+                    <option value="">-select item Name-</option>
+                   </select>
+                   </td>                  
+                    <td><input type="number" class="form-control" id="TxtNos${rowCount}" /></td>
+                    <td><input type="number" class="form-control" id="TxtWeight${rowCount}" /></td>
+                    <td><input type="number" class="form-control" id="TxtRate${rowCount}" /></td>
+                    <td>
+                    <select style="min-width: 500px;" class="form-control" id="ddlTenacity${rowCount}">
+                    <option value="">-select -</option>
+                   </select>
+                    
+                    </td>
+                    <td><input type="date" class="form-control" id="DtDeliveryDate${rowCount}" /></td>
+                    <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" /></td>
+                    <td>
+                        <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+        </tr>        
+        `;
+        tbody.append(newRow);
+        bindDropdownData(rowCount);
+        setEnterKeyFocusOnTable(itemRecords, rowCount);
+    }
+        
+    function bindDropdownData(rowCount) {
+        const itemSelect = $(`#ddlItemname${rowCount}`); 
+        const tenacitySelect=$(`#ddlTenacity${rowCount}`);
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(`<option value="">${defaultText}</option>`);
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '300px',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: selectElem.is(itemSelect) ? 0 : -1 // Only enable search for itemSelect
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} Load failed`);
+                            resolve();
+                        }
+                    },
+                    error: reject
+                });
+            });
+        };
+        
+        return Promise.all([
+            loadDropdown('@Url.Action("GetItemList", "SalesOrder")', itemSelect, "- Select -", item => `<option value="${item.CODE}">${item.NAME}</option>`)
+            ,loadDropdown('@Url.Action("GetTenacityList", "SalesOrder")', tenacitySelect, "- Select -", item => `<option value="${item.CODE}">${item.NAME}</option>`)
+
+
+        ]);
+    }
+ 
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : date.toISOString(); // if server expects ISO string
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function setFieldsEnabled(enabled) {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+     function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+     }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+
+
+</script>
+
+
+
+@* 
+<script>
+    $(document).ready(function () {
+
+        const $tbody = $('#tblSalesOrderEntryModal tbody');
+
+        function addRow(data = {}) {
+
+            // Remove plus from all existing rows
+            $tbody.find('.btn-add-action').remove();
+
+            const row = `
+                <tr>
+                    <td><input type="text" class="form-control" value="${data.code || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.itemName || ''}" /></td>
+                    <td><input type="number" class="form-control" value="${data.nos || ''}" /></td>
+                    <td><input type="number" class="form-control" value="${data.weight || ''}" /></td>
+                    <td><input type="number" class="form-control" value="${data.rate || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.tenacity || ''}" /></td>
+                    <td><input type="date" class="form-control" value="${data.deliveryDate || ''}" /></td>
+                    <td><input type="text" class="form-control" value="${data.remarks || ''}" /></td>
+                    <td>
+                        <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+                </tr>
+            `;
+
+            $tbody.append(row);
+        }
+
+        // Initial row
+        addRow();
+
+        // Add new row using + icon or "Add New Row" button
+        $(document).on('click', '.btn-add-action, .btn-add-row', function () {
+            addRow();
+        });
+
+        // Delete row
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+
+            $row.remove();
+
+            // Ensure last row always has a plus button
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(`
+                        <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    `);
+                }
+            }
+        });
+
+    });
+</script>
+ *@

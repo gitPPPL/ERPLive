@@ -1,0 +1,532 @@
+﻿@{
+    ViewBag.Title = "Update Emp Bank Data";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+
+
+}
+
+<fieldset>
+    <legend class="legend-field">Update Emp Bank Data</legend>
+    <div class="row">
+        <div class="offset-md-6 col-md-6">
+            <div class="button-right mb-2">
+                @if (canPrint)
+                {
+                    <button class="btn btn-print">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+
+                @if (canApproval)
+                {
+
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+
+                }
+
+                @if (canApproval)
+                {
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+
+                }            
+            
+            </div>
+        </div>
+    </div>
+
+    <form id="UpdateEmpBankDataForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <!-- Select Employee -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlEmployee">Select Employee<span class="required">*</span></label>
+                    <select id="ddlEmployee" class="form-control">
+                        <option value="">--Select Employee--</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Employee Name -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtEmployeeName">Employee Name</label>
+                    <input type="text" class="form-control" id="TxtEmployeeName" name="EmployeeName" placeholder="Enter Employee Name" readonly>
+                </div>
+            </div>
+
+            <!-- Bank -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlBank">Bank<span class="required">*</span></label>
+                    <select id="ddlBank" class="form-control">
+                        <option value="">--Select Bank--</option>
+                   
+                    </select>
+                </div>
+            </div>
+
+            <!-- Branch -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtBranch">Branch<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtBranch" name="Branch" placeholder="Enter Branch Name" maxlength="100">
+                </div>
+            </div>
+        </div>
+
+        <!-- Account No -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumAccountNo">Account No<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="NumAccountNo" name="AccountNo" placeholder="Enter Account Number" maxlength="30">
+                </div>
+            </div>
+
+            <!-- IFSC Code -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtIFSC">IFSC Code<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtIFSC" name="IFSC" placeholder="Enter IFSC Code" maxlength="30">
+                </div>
+            </div>
+
+            <!-- Account Type -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAccountType">Account Type<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtAccountType" name="AccountType" placeholder="Enter Account Type" maxlength="30">
+                </div>
+            </div>
+
+            <!-- Bank Verified -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlBankVerified">Bank Verified<span class="required">*</span></label>
+                    <select id="ddlBankVerified" name="BANK_VERIFY" class="form-control">
+                        <option value="" selected disabled>Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attachment Table -->
+        <div class="card">
+            <div class="table-responsive-entry">
+                <table id="tblAttachmentPR" class="table-entry">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>File Name</th>
+                            <th>File Upload</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Attachment rows will be added dynamically here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "UpdateEmpBankDataList")'" type="button" class="btn btn-draft" id="BacktolistID">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-6 col-md-3">
+                <div class="button-right btn-mt">
+                    <button id="btnSaves" type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i>Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const mode = urlParams.get("mode");
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+    const $attachmentTbody = $('#tblAttachmentPR tbody');
+    let attachmentIndex = 1;
+    let userTriggered = false;
+
+    $(document).ready(function () {
+        LoadDropDown().then(() => {
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadFormByID(rowId).then(() => {
+                    if (isReadOnly) {
+                        setFormReadOnly();
+                    }
+                });
+            }
+        });
+
+        addAttachmentRow();
+
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#UpdateEmpBankDataForm').after('<span style="color:red; background-color:#e7e3e3; padding:5px;"><marquee >Read-Only Mode</marquee></span>');
+        }
+
+        $('#ddlEmployee').on('select2:opening', function () {
+            userTriggered = true;
+        });
+
+        $("#ddlEmployee").on("change", function () {
+            if (userTriggered) {
+                const code = $(this).val();
+                LoadFormByEmpID(code);
+                userTriggered = false;
+            }
+        });
+        
+        $("#ddlEmployee, #ddlBank, #TxtBranch, #select2-ddlEmployee-container,#NumAccountNo,#TxtIFSC,#TxtAccountType,#ddlBankVerified").on('change keyup', function () {
+            if ($(this).val().trim() !== "") {
+                $(this).removeAttr('style');
+            }
+        });
+
+        $("#btnSaves").click(async function (e) {
+            e.preventDefault();
+
+            var CODE = $("#CODE").val().trim();
+            var EMP_CODE = $("#ddlEmployee").val();
+            var BANK_CODE = $("#ddlBank").val();
+            var BRANCH = $("#TxtBranch").val();
+            var AC_NO = $("#NumAccountNo").val();
+            var IFSC_CODE = $("#TxtIFSC").val();
+            var AC_TYPE = $("#TxtAccountType").val();
+            var BANK_VERIFY = $("#ddlBankVerified option:selected").text();
+
+            if (!EMP_CODE) {
+                toastr.warning("Please Select Employee.");
+                $("#ddlEmployee").css("border-color", "red");
+                $("#select2-ddlEmployee-container").css("border-color", "red").focus();
+                return;
+            }
+
+            if (!BANK_CODE) {
+                toastr.warning("Please Select Bank.");
+                $("#ddlBank").css("border-color", "red").focus();
+                return;
+            }
+
+            if (!BRANCH) {
+                toastr.warning("Please Fill Branch.");
+                $("#TxtBranch").css("border-color", "red").focus();
+                return;
+            }
+
+              if (!AC_NO) {
+                toastr.warning("Please Fill Account No.");
+                $("#NumAccountNo").css("border-color", "red").focus();
+                return;
+            }
+              if (!IFSC_CODE) {
+                toastr.warning("Please Fill IFSC CODE.");
+                $("#TxtIFSC").css("border-color", "red").focus();
+                return;
+            }
+
+
+                if (!AC_TYPE) {
+                    toastr.warning("Please select AC TYPE.");
+                    $("#TxtAccountType").css("border-color", "red").focus();
+                    return;
+                }
+
+                if (!BANK_VERIFY) {
+                toastr.warning("Please select Bank Verified.");
+                $("#ddlBankVerified").css("border-color", "red").focus();
+                return;
+            }
+
+            var action = (isNaN(CODE) || CODE <= 0) ? 'INSERT' : 'UPDATE';
+                      
+            const attachmentData = collectAttachmentData();
+            let FileName = '';
+
+            if (attachmentData) {
+                FileName = attachmentData.FileName;
+            }
+                      
+            if (!CODE || isNaN(CODE) || CODE <= 0) {
+                CODE = await getCode();  
+            }
+                        
+            var formData = {
+                EMP_CODE: EMP_CODE || 0,
+                BANK_CODE: BANK_CODE || 0,
+                BANK_NAME: $("#ddlBank option:selected").text() || '',
+                BRANCH: BRANCH || '',
+                AC_NO: AC_NO || '',
+                IFSC_CODE: IFSC_CODE || '',
+                AC_TYPE: AC_TYPE || '',
+                BANK_VERIFY: BANK_VERIFY || '',
+                CODE: CODE || null,  
+                ACTION: action || '',
+                FileName: FileName
+            };
+                 
+
+            $("#btnSaves").prop("disabled", true);
+
+            $.ajax({
+                url: '/UpdateEmpBankData/SavedData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message || "Saved successfully!");
+                        window.location.href = '/UpdateEmpBankData/Index?id=' +
+                            encodeURIComponent(formData.CODE) + '&mode=view';
+                    } else {
+                        toastr.error(response.message || "Save failed.");
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error("Something went wrong while saving the data.");
+                },
+                complete: function () {
+                    $("#btnSaves").prop("disabled", false);
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-delete-action', function () {
+            const row = $(this).closest('tr');
+            row.remove();
+            addAttachmentRow();
+        });
+    });
+
+    async function LoadDropDown() {
+        try {
+            await Promise.all([DDlEmp(), DDlBankList()]);
+        } catch (error) {
+            console.error("Error in loading dropdowns:", error);
+        }
+    }
+
+    function setFormReadOnly() {
+        $('#UpdateEmpBankDataForm :input').prop('disabled', true);
+        $('#btnSaves').hide();
+        $('#BacktolistID').prop('disabled', false);
+    }
+
+    async function DDlEmp() {
+        try {
+            const response = await fetch('/UpdateEmpBankData/DDLEmployee');
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlEmployee');
+            ddl.empty();
+            ddl.append('<option value="" selected>-- Select Employee --</option>');
+            data.forEach(item => {
+                ddl.append($('<option>', {
+                    value: item.value,
+                    text: `${item.text} (${item.value})`
+                }));
+            });
+
+            ddl.select2();
+            $('#loading').hide();
+        } catch (error) {
+            console.error("Error loading Employee: ", error);
+            alert('An error occurred while loading employee data. Please try again later.');
+            $('#loading').hide();
+        }
+    }
+
+    async function DDlBankList() {
+        try {
+            const response = await fetch('/UpdateEmpBankData/DDlBank');
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlBank');
+            ddl.empty();
+            ddl.append('<option value="" selected>-- Select Bank Name --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Bank list: ", error);
+            alert('Error loading Bank List: ' + error.message);
+        }
+    }
+
+    function addAttachmentRow(data = {}) {
+        const index = data.index || attachmentIndex++;
+        const row = `
+            <tr>
+                <td style="display:none;">
+                    <input type="hidden" class="attachment-code" value="${index}" />
+                </td>
+                <td>
+                    <input type="text" class="form-control mb-1" id="fileName_${index}" value="${data.fileName || ''}" placeholder="Enter file name" disabled />
+                </td>
+                <td>
+                    <input type="file" class="form-control file-upload" id="fileInput_${index}" />
+                </td>
+                <td>
+                    <i class="fa fa-trash btn-delete-action" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+        $attachmentTbody.append(row);
+
+        $(`#fileInput_${index}`).on('change', function () {
+            const fileName = this.files && this.files[0] ? this.files[0].name : '';
+            $(`#fileName_${index}`).val(fileName);
+        });
+    }
+
+    function collectAttachmentData() {
+        let attachmentData = null;
+
+        const firstRow = $attachmentTbody.find('tr').first();
+
+        const fileName = firstRow.find('input[type="text"]').val();
+        const fileInput = firstRow.find('input[type="file"]')[0];
+        const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
+        if (fileName && file) {
+            attachmentData = {
+                FileName: fileName
+            };
+        }
+
+        return attachmentData;
+    }
+
+    async function LoadFormByEmpID(code) {
+        try {
+            const response = await $.get('/UpdateEmpBankData/GetEmpDataByCode', { code });
+            if (!response.success || !response.data) {
+                toastr.warning("No Data found for the given ID.");
+                return;
+            }
+            const data = response.data;
+            $('#TxtEmployeeName').val(data.emP_Name);
+            $('#ddlBank').val(data.banK_CODE);
+            $('#TxtBranch').val(data.branch);
+            $('#NumAccountNo').val(data.aC_NO);
+            $('#TxtIFSC').val(data.ifsC_CODE);
+            $('#TxtAccountType').val(data.aC_TYPE);
+            $('#ddlBankVerified').val(data.banK_VERIFY);
+        } catch (error) {
+            toastr.error("Error loading data: " + error);
+        }
+    }
+
+    async function LoadFormByID(code) {
+        try {
+            const response = await $.get('/UpdateEmpBankDataList/GetDataByCode', { code });
+            if (!response.success || !response.data) {
+                toastr.warning("No data found for the given ID.");
+                return;
+            }
+            const data = response.data;
+            $('#CODE').val(data.code);
+            $('#ddlEmployee').val(String(data.emP_CODE)).trigger('change');
+            $('#TxtEmployeeName').val(data.emP_Name);
+            $('#ddlBank').val(String(data.banK_CODE)).trigger('change');
+            $('#TxtBranch').val(data.branch);
+            $('#NumAccountNo').val(data.aC_NO);
+            $('#TxtIFSC').val(data.ifsC_CODE);
+            $('#TxtAccountType').val(data.aC_TYPE);
+            $('#ddlBankVerified').val(data.banK_VERIFY);
+
+            $('#tblAttachmentPR tbody').empty();
+
+            if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+                data.attachments.forEach((attachment, index) => {
+                    addAttachmentRow({
+                        index: index,
+                        fileName: attachment.fileName,
+                        filepath: attachment.filepath
+                    });
+                });
+            } else if (data.filepath) {
+                addAttachmentRow({
+                    index: 0,
+                    fileName: data.fileName,
+                    filepath: data.filepath
+                });
+            }
+
+        } catch (error) {
+            toastr.error("Error loading data: " + error.message);
+        }
+    }
+
+    function getCode() {
+        return fetch('/UpdateEmpBankData/Getcode')
+            .then(response => response.json())
+            .then(data => data.code)
+            .catch(() => null);
+    }
+</script>

@@ -1,0 +1,119 @@
+﻿@{
+	ViewBag.Title = "Bank and Term Condition Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Bank Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "BankandTermConditionMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DOCUMENT_TYPE" class="form-label">Document Type</label>
+					<select class="form-control" id="ddlDOCUMENT_TYPE" name="DOCUMENT_TYPE">
+						<option value="">-- Select Document Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANK_NAME" class="form-label">Bank Name</label>
+					<select class="form-control" id="ddlBANK_NAME" name="BANK_NAME">
+						<option value="">-- Select Bank Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="AC_NUMBER" class="form-label">A/C Number</label>
+					<input type="text" class="form-control" id="TxtAC_NUMBER" name="AC_NUMBER" placeholder="Enter A/C Number">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="IFSC_CODE" class="form-label">IFSC Code</label>
+					<input type="text" class="form-control" id="TxtIFSC_CODE" name="IFSC_CODE" placeholder="Enter IFSC Code">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANK_SWIFT_CODE" class="form-label">Bank Swift Code</label>
+					<input type="text" class="form-control" id="TxtBANK_SWIFT_CODE" name="BANK_SWIFT_CODE" placeholder="Enter Bank Swift Code">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ABA" class="form-label">ABA</label>
+					<input type="text" class="form-control" id="TxtABA" name="ABA" placeholder="Enter ABA">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ROUTING_NO" class="form-label">Routing No.</label>
+					<input type="number" class="form-control" id="NumROUTING_NO" name="ROUTING_NO" placeholder="Enter Routing No.">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BRANCH" class="form-label">Branch</label>
+					<input type="text" class="form-control" id="TxtBRANCH" name="BRANCH" placeholder="Enter Branch">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANK_AD_CODE" class="form-label">Bank AD Code</label>
+					<input type="text" class="form-control" id="TxtBANK_AD_CODE" name="BANK_AD_CODE" placeholder="Enter Bank AD Code">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SORT_CODE" class="form-label">Sort Code</label>
+					<input type="text" class="form-control" id="TxtSORT_CODE" name="SORT_CODE" placeholder="Enter Sort Code">
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="BANK_ADDRESS" class="form-label">Bank Address</label>
+					<textarea type="text" class="form-control" id="TxtBANK_ADDRESS" name="BANK_ADDRESS" placeholder="Enter Bank Address"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+					<div class="form-group">
+						<label for="TERMS_AND_CONDITIONS" class="form-label">Terms and Conditions</label>
+					<textarea type="text" class="form-control" id="TxtTERMS_AND_CONDITIONS" name="TERMS_AND_CONDITIONS" placeholder="Enter Terms and Conditions" style="height: 130px;"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+</script>

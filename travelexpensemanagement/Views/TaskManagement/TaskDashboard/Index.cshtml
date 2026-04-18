@@ -1,0 +1,620 @@
+﻿@{
+    ViewBag.Title = "Task Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Header UI</title>
+    <link rel="stylesheet" href="~/css/Taskmanagementstyle.css" />
+
+ <style>
+        /* Modal shell */
+        .task-modal {
+            border-radius: 12px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+            border: none;
+        }
+
+            /* Header */
+            .task-modal .modal-header {
+                padding: 16px 24px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .task-modal .modal-title {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            /* Body */
+            .task-modal .modal-body {
+                padding: 20px 24px;
+            }
+
+
+        /* Inputs */
+        .task-modal .form-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .task-modal .form-control,
+        .task-modal .form-select {
+            height: 38px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        /* Footer */
+        .task-modal .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Create button */
+        .btn-create {
+            background: linear-gradient(135deg, #3f8a46, #2a5f30);
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+        } 
+        .search-container {
+            position: relative;
+            width: 300px; /* adjust as needed */
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-top: none;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none; /* JS will toggle this */
+            z-index: 9999;
+        }
+
+            .search-suggestions li {
+                padding: 8px 12px;
+                cursor: pointer;
+            }
+
+                .search-suggestions li:hover {
+                    background-color: #f0f0f0;
+                }
+
+        .search-notification-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .notification-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-box {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 6px;
+            padding: 10px 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: max-content;
+            display: none; /* JS toggle */
+            z-index: 9999;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            list-style: none;
+            margin: 0;
+            padding: 6px 0;
+            max-height: 240px;
+            overflow-y: auto;
+            display: none; /* toggled by JS */
+            z-index: 9999;
+            border: 1px solid #e5e7eb;
+        }
+
+            .search-suggestions li {
+                padding: 10px 14px;
+                font-size: 13px;
+                color: #1f2937;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: background-color 0.2s ease;
+            }
+
+                .search-suggestions li:hover,
+                .search-suggestions li.active {
+                    background-color: #d6e1f9 !important;
+                }
+
+                /* Zebra striping */
+                .search-suggestions li:nth-child(odd) {
+                    background-color: #ffffff;
+                }
+
+                .search-suggestions li:nth-child(even) {
+                    background-color: #e5e5e5;
+                }
+
+        .notification-btn {
+            position: relative;
+            background: transparent;
+            border: none;
+            font-size: 24px; /* makes bell bigger */
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: red;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            margin: 0;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+        }
+
+            .notification-item:hover {
+                background-color: #f5f7fa;
+            }
+
+        .notification-icon {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            color: #17661f;
+        }
+
+        .notification-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+   </style>
+
+
+</head>
+<body>
+
+    <header class="task-header">
+        <div class="task-header-left">
+            <h1>Task Dashboard</h1>            
+        </div>
+
+        <div class="task-header-center">
+            <div class="search-notification-wrapper">
+                <div class="search-container">
+                    <input type="search" id="DashBoardSearch" placeholder="Search tasks..." autocomplete="off" />
+                    <ul id="DashBoardSearchList" class="search-suggestions"></ul>
+                </div>
+
+                <div class="notification-container">
+                    <button class="notification-btn" type="button" id="btn_BellIcon">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount"></span>
+                    </button>
+
+                    <div class="notification-box" id="notificationBox">
+                        <p>🔔 New task assigned</p>
+                        <p>📌 Task deadline approaching</p>
+                        <p>✅ Task marked complete</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="task-header-right">
+   
+            <button class="btn-create-task" id="CreteTask" type="button">
+                <i class="fas fa-plus"></i> Create Task
+            </button>
+        </div>
+    </header>
+
+    <div class="row">
+        <div class="offset-md-6 col-md-6">
+            <div class="button-right-mg">
+             <button onclick="window.location.href='@Url.Action("Index", "CreateNewTaskList")'" type="button" class="btn btn-viewlist"><i class="fa fa-list"></i>View All Task List</button>
+            </div>
+        </div>
+    </div>
+    <!-- Overview -->
+    <div class="section">
+        <div class="section-title">Overview</div>
+        
+        <div class="cards">
+
+            <!-- Yesterday -->
+            <div class="task-card task-orange clickable" data-link="/TaskList/Index?Task=CreateYesterday">
+                <div class="task-card-header">
+                    <span class="task-card-title">Yesterday Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-calendar-day"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="YesterdayID"></div>
+                    <div class="task-card-subtitle">Completed/Pending</div>
+                </div>
+            </div>
+
+            <!-- Today -->
+            <div class="task-card task-blue clickable" data-link="/TaskList/Index?Task=CreateToday">
+                <div class="task-card-header">
+                    <span class="task-card-title">Today Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-sun"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="TodayID"></div>
+                    <div class="task-card-subtitle">Yet To Start</div>
+                </div>
+            </div>
+
+            <!-- Total Active -->
+            <div class="task-card task-green clickable" data-link="/TaskList/Index?Task=TotalActiveTask">
+                <div class="task-card-header">
+                    <span class="task-card-title">Total Active Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-lock"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="ActiveTasksID"></div>
+                    <div class="task-card-subtitle">No Action Required</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Assigned by Me -->
+    <div class="sub_section">
+        <div class="sub_section-title">Assigned by Me</div>
+
+        <div class="cards">
+
+            <!-- Pending -->
+            <div class="task-card task-red clickable" data-link="/TaskList/Index?Task=ABMPending">
+                <div class="task-card-header">
+                    <span class="task-card-title">Pending Tasks</span>
+                    <span class="task-icon-box"><i class="fa fa-clock"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="ABMPendingID"></div>
+                    <div class="task-card-subtitle">Created Today</div>
+                </div>
+            </div>
+
+            <!-- Completed -->
+            <div class="task-card task-completed clickable" data-link="/TaskList/Index?Task=AMBCOMPLETE">
+                <div class="task-card-header">
+                    <span class="task-card-title">Completed Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-sun"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="ABMCompleteID"></div>
+                    <div class="task-card-subtitle">Completed Successfully</div>
+                </div>
+            </div>
+
+            <!-- Total Active -->
+            <div class="task-card task-closed clickable" data-link="/TaskList/Index?Task=AMBCLOSE">
+                <div class="task-card-header">
+                    <span class="task-card-title">Closed Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-lock"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="ABMclosed"></div>
+                    <div class="task-card-subtitle">Closed</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Assigned To Me -->
+    <div class="sub_section">
+        <div class="sub_section-title">Assigned To Me</div>
+
+        <div class="cards">
+
+            <!-- Pending -->
+            <div class="task-card task-red clickable" data-link="/TaskList/Index?Task=ATMPending">
+                <div class="task-card-header">
+                    <span class="task-card-title">Pending Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-calendar-day"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="ATMPending"></div>
+                    <div class="task-card-subtitle">Pending</div>
+                </div>
+            </div>
+
+            <!-- Completed -->
+            <div class="task-card task-completed clickable" data-link="/TaskList/Index?Task=AtmComplete">
+                <div class="task-card-header">
+                    <span class="task-card-title">Completed Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-sun"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="AtmCompleteId"></div>
+                    <div class="task-card-subtitle">Finished Successfully</div>
+                </div>
+            </div>
+
+            <!-- Total Active -->
+            <div class="task-card task-closed clickable" data-link="/TaskList/Index?Task=ATMclosed">
+                <div class="task-card-header">
+                    <span class="task-card-title">Closed Tasks</span>
+                    <span class="task-icon-box"><i class="fa-solid fa-lock"></i></span>
+                </div>
+
+                <div class="task-card-body">
+                    <div class="task-card-value" id="ATMclosed"></div>
+                    @* <div class="task-card-subtitle">Closed</div> *@
+                </div>
+            </div>
+
+        </div>
+    </div>
+ 
+</body>
+</html>
+
+<script>
+      
+    $(document).ready(function () {
+
+        GetToDoDashboardCounts();
+        NotificationDataCount();
+
+        $('.clickable').on('click', function () {
+            const link = $(this).data('link');
+            if (link) {
+             window.location.href = link;
+            }
+        });
+
+        $('#bt_CreateTask').on('click', function () {
+            window.location.href = '/CreateTask/Index';
+        });
+
+        $('#btn_BellIcon').on('click', function (e) {
+            e.stopPropagation();
+            NotificationData();         
+        });
+        
+        $(document).on('click', function () {
+            $('#notificationBox').hide();
+            $('#DashBoardSearchList').hide();
+        });
+
+        $('#CreteTask').on('click' , function() {
+          window.location.href = '/CreateNewTask/Index';    
+        });
+
+
+        $(document).on('click', '.notification-item', function () {
+            const vNo = $(this).attr('data-vno');
+            console.log('Selected V_NO:', vNo);              
+            window.location.href = '/ReplyTask/Index?Vno=' + vNo ;
+        });
+
+
+             
+
+
+    });
+
+      async function GetToDoDashboardCounts() {
+        try {
+            const response = await $.ajax({
+                url: '/TaskDashboard/GetDEshBoardCount',
+                type: 'GET'
+            });
+
+            const data = response.data || {};
+
+            $('#YesterdayID').text(data.YesterDayCount ?? 0);
+            $('#TodayID').text(data.TodayCount ?? 0);
+            $('#ActiveTasksID').text(data.TotalActiveTask ?? 0);
+            $('#ABMPendingID').text(data.ASBPending ?? 0);
+            $('#ABMCompleteID').text(data.ASBCompleted ?? 0);
+            $('#ABMclosed').text(data.ASBClose ?? 0);
+            $('#ATMPending').text(data.ATBPending ?? 0);
+            $('#AtmCompleteId').text(data.ATBComplete ?? 0);
+            $('#ATMclosed').text(data.TodayToMe ?? 0);
+        } catch (ex) {
+            console.error("Error fetching dashboard counts:", ex);
+        }
+    }
+
+      async function NotificationData() {
+        try {
+            const res = await $.ajax({
+                url: '/TaskDashboard/GetdataForBellIcon',
+                type: 'GET'
+            });   
+            const data = res.data || {};
+            const notifications = data.notification || [];
+            const notificationCount = notifications.length ;
+            const $box = $('#notificationBox');
+            $box.empty();
+
+            if (notificationCount === 0) {
+                $box.append('<p>No new notifications</p>');
+            }        
+            else {
+                notifications.forEach(item => {
+                    $box.append(`
+                    <p class="notification-item" data-vno="${item.V_NO}">
+                        <span class="notification-icon">🔔</span>
+                        <span class="notification-content">
+                            <strong class="notification-title">${item.V_NO}</strong>
+                            <span class="notification-text">${item.TASK_SUBJECT}</span>
+                        </span>
+                    </p>
+                `);
+                            });
+            }
+            $box.show();
+
+        } catch (error) {
+            console.error("Failed To Fetch Data", error);
+        }
+    }
+
+      async function NotificationDataCount() {
+        try {
+            const res = await $.ajax({
+                url: '/TaskDashboard/GetdataForBellIconCount',
+                type: 'GET'
+            });
+
+            const data = res.data || {};
+            const notifications = data.notification[0] || "";     
+               
+              $('#notificationCount').text(notifications.STATUSCOUNT ||0);
+
+        } catch (error) {
+            console.error("Failed To Fetch Data", error);
+        }
+    }
+
+
+
+
+
+
+
+</script>
+
+<script>
+    const input = document.getElementById("DashBoardSearch");
+    const list = document.getElementById("DashBoardSearchList");
+
+    // Search on typing
+    input.addEventListener("input", async function () {
+        const searchText = this.value.trim();
+
+        if (searchText.length < 1) {
+            list.style.display = "none";
+            list.innerHTML = "";
+            return;
+        }
+
+        try {
+            const result = await $.ajax({
+                url: '/TaskDashboard/GetDashBoardSearch',
+                type: 'GET',
+                data: { SEARCH: searchText }
+            });
+
+            list.innerHTML = "";
+            const data = result?.data?.notification || [];
+
+            if (data.length === 0) {
+                list.style.display = "none";
+                return;
+            }
+
+            data.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = item.TASK_SUBJECT;
+
+                // Run function after selecting item
+                li.onclick = () => {
+                    input.value = item.TASK_SUBJECT;
+                    list.style.display = "none";
+                    console.log("V_NO:", item.V_NO);                                   
+            
+                   window.location.href = '/ReplyTask/Index?Vno=' + item.V_NO;
+                };
+
+                list.appendChild(li);
+            });
+
+            list.style.display = "block";
+
+        } catch (err) {
+            console.error("ERROR:", err);
+            list.style.display = "none";
+        }
+    });
+
+    
+    document.addEventListener("click", function (e) {
+        if (!input.contains(e.target) && !list.contains(e.target)) {
+            list.style.display = "none";
+        }
+    });
+
+
+ 
+
+
+</script>

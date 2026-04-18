@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ProductPortfolio</title>
+    @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
+    <link rel="stylesheet" href="~/ProductPortfolio/css/Masterstyle.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/ProductPortfolio.styles.css" asp-append-version="true" /> *@
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- Include jQuery before any other scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Add this line -->
+
+@*    <style>
+               .header-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* logo center */
+            padding: 15px 0;
+        }
+
+        .logo img {
+            max-height: 70px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+   </style> *@
+</head>
+<body>
+    @* <header class="logo">
+        <img src="/images/web-logo.webp" alt="Pashupati Logo" />
+    </header> *@
+
+    <div class="container">
+        @* <div class="header-bar">
+            <div class="logo">
+                <img src="~/ProductPortfolio/images/web-logo.webp" alt="Pashupati Logo" />
+            </div>
+
+            <button class="btn btn-danger logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div> *@
+        <div class="logo">
+            <img src="~/ProductPortfolio/images/web-logo.webp" alt="Pashupati Logo" />
+        </div>
+        <button class="btn btn-danger logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+
+    </div>
+  @*  
+    <script>
+              function logout() {
+            clearPinSession(); // clears PIN_VERIFIED & PIN_TIME
+            window.location.href = "/HomeLogin/Index";
+        }
+        </script> *@
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+   
+
+    <!-- Your custom site.js (make sure this file exists) -->
+    <script src="~/ProductPortfolio/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

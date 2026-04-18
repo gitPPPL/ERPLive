@@ -1,0 +1,72 @@
+﻿@{
+	ViewBag.Title = "Vendor Evaluation Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Vendor Evaluation Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "VendorEvaluationMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TYPE" class="form-label">Type</label>
+					<select class="form-control" id="ddlTYPE" name="TYPE">
+						<option value="">-- Select Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NAME" class="form-label">Name</label>
+					<input type="text" class="form-control" id="TxtNAME" name="NAME" placeholder="Enter Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="MAX_SCORE" class="form-label">Max Score</label>
+					<input type="number" class="form-control" id="TxtMAX_SCORE" name="MAX_SCORE" placeholder="Enter Max Score">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SCORE" class="form-label">Score</label>
+					<input type="number" class="form-control" id="TxtSCORE" name="SCORE" placeholder="Enter Score">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+</script>

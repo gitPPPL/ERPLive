@@ -1,0 +1,2865 @@
+﻿@{
+    ViewBag.Title = "Import Export Expenses Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+
+
+</style>
+<fieldset>
+
+    <legend class="legend-field">Import Export Expenses Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "ImportExportExpensesEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="PurchaseReceiptEntryForm">
+
+        <input type="hidden" class="form-control" id="TxtDocId">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type<span class="required">*</span></label>
+                    <select class="form-control" id="ddlDocType">
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date<span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocDate" name="DocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtRefNo">Ref No<span class="required">*</span></label>
+                    <div class="input-divide">
+                        <input type="text" class="form-control" id="txtRefNo" readonly>
+                        <select class="form-control" id="ddlRefNo">
+                            <option value="">--Select Reference Id--</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Bill From Section -->
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Bill Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlBillFrom">Bill From<span class="required">*</span></label>
+                                <select class="form-control" id="ddlBillFrom">
+                                    <option value="">--Select Bill From--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtAddLine1">Add Line1</label>
+                                <div class="input-divide">
+                                    <input type="text" class="form-control" id="txtAddLine1" placeholder="Enter Address Line 1" readonly>
+                                    <div class="select-wrapper">
+                                        <select id="ddladdressBD1">
+                                            <option value="">Select address</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtAddLine2">Address Line 2</label>
+                                <input type="text" class="form-control" id="txtAddLine2" placeholder="Enter Address" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtAddLine3">Address Line 3</label>
+                                <input type="text" class="form-control" id="txtAddLine3" placeholder="Enter Address" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlCity">City</label>
+                                @* <input type="text" id="TxtCity" class="form-control" /> *@
+                                <select class="form-control" id="ddlCity" disabled>
+                                    <option value="">--Select City--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlState">State</label>
+                                @* <input type="text" id="TxtState" class="form-control" /> *@
+                                <select class="form-control" id="ddlState" disabled>
+                                    <option value="">--Select State--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtGST">GST</label>
+                                <input type="text" class="form-control" id="txtGST" placeholder="Enter GST" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtPincode">Pincode</label>
+                                <input type="text" class="form-control" id="txtPincode" placeholder="Enter Pincode" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <!-- Ship From Section -->
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Ship Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlShipFrom">Ship from<span class="required">*</span></label>
+                                <div class="input-divide">
+                                    <select class="form-control" id="ddlShipFrom">
+                                        <option value="">Select Ship from</option>
+                                    </select>
+                                    <div class="select-wrapper">
+                                        <select class="form-control" id="ddlShipFrom2">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtShipAddLine1">Add Line1</label>
+                                <input type="text" class="form-control" id="txtShipAddLine1" placeholder="Enter Address" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtShipAddLine2">Address Line 2</label>
+                                <input type="text" class="form-control" id="txtShipAddLine2" placeholder="Enter Address" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="txtShipAddLine3">Address Line 3</label>
+                                <input type="text" class="form-control" id="txtShipAddLine3" placeholder="Enter Address" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlShipCity">City</label>
+                                @* <input type="text" id="TxtShipCity" class="form-control" /> *@
+                                <select class="form-control" id="ddlShipCity" disabled>
+                                    <option value="">--Select City--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlShipState">State</label>
+                                @* <input type="text" id="TxtShipState" /> *@
+                                <select class="form-control" id="ddlShipState" disabled>
+                                    <option value="">--Select State--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtShipGST">GST</label>
+                                <input type="text" class="form-control" id="txtShipGST" placeholder="Enter GST">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumShipPincode">Pincode</label>
+                                <input type="number" class="form-control" id="NumShipPincode" data-maxlength="6" placeholder="Enter Pincode">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Document Details</legend>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtBillNo">Bill No<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtBillNo" maxlength="15" placeholder="Enter Bill No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtBillDate">Bill Date<span class="required">*</span></label>
+                                <input type="date" class="form-control" id="DtBillDate" name="BillDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumBOENo">BOE No</label>
+                                <input type="number" class="form-control" id="NumBOENo" maxlength="15" placeholder="Enter BOE No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtBOEDate">BOE Date</label>
+                                <input type="date" class="form-control" id="DtBOEDate" name="BOEDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtWaybillNo">Waybill No</label>
+                                <input type="text" class="form-control" id="TxtWaybillNo" maxlength="15" placeholder="Enter Waybill No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlTransitNo">Transit No</label>
+                                <select class="form-control" id="ddlTransitNo">
+                                    <option value="">-Select Transit No-</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlInputType">Input Type</label>
+                                <select class="form-control" id="ddlInputType">
+                                    <option value="">--Select Input Type--</option>
+                                    <option>GST Input</option>
+                                    <option>GST NA</option>
+                                    <option>Import</option>
+                                    <option>Input NA </option>
+                                    <option>RCM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlExpensesType">Expenses Type</label>
+                                <select class="form-control" id="ddlExpensesType">
+                                    <option value="">--Select Expenses Type--</option>
+                                    <option>Custom Duty</option>
+                                    <option>Shipping Line</option>
+                                    <option>Container</option>
+                                    <option>Clearing Agent</option>
+                                    <option>Freight</option>
+                                    <option>Detention</option>
+                                    <option>Clearing Exps</option>
+                                    <option>Lab Test</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlDebitAC">Debit A/c <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDebitAC">
+                        <option value="">Select Debit A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlCreditAC">Credit A/c <span class="required">*</span></label>
+                    <select class="form-control" id="ddlCreditAC">
+                        <option value="">Select Credit Account</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="txtRemarks">Remarks</label>
+                    <textarea type="text" class="form-control" id="txtRemarks" maxlength="500" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Net Amount -->
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtNetAmount">Net Amount</label>
+                    <input type="text" class="form-control" id="TxtNetAmount" placeholder="Enter Amount" readonly>
+                </div>
+            </div>
+            <!-- Status Dropdown -->
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlStatus">Status</label>
+                    <select class="form-control" id="ddlStatus" readonly>
+                        <option>Open</option>
+                        <option>Closed</option>
+                        <option>Pending</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlEmployee">Employee</label>
+                    <select class="form-control" id="ddlEmployee">
+                        <option value="">Select Employee</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="col-md-12">
+                <div class="button-right">
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#costallocationModal">
+                        <i class="fa fa-project-diagram"></i> Cost Allocation
+                    </button>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#pendingapprovalModal">
+                        <i class="fa fa-tasks"></i> List of Pending Approval
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--Cost Allocation Modal-->
+        <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="costallocationLabel">Cost Allocation</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="PartyName">Party Name</label>
+                                    <input type="text" class="form-control" id="TxtPartyNameCA" placeholder="Enter Party Name">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-edit"></i>Edit</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="RefVno">Ref. Vno</label>
+                                    <input type="number" class="form-control" id="NumRefVno" placeholder="Enter Ref. VNo">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="TotalAmtAllocated">Total Amt. to be allocated</label>
+                                    <input type="text" class="form-control" id="TxtTotalAmtAllocated" placeholder="Enter Total Amt. to be allocated">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="SrNo">Sr. No</label>
+                                    <input type="number" class="form-control" id="NumSrNo" placeholder="Enter Sr. No">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="SrDate">Sr. Date</label>
+                                    <input type="date" class="form-control" id="DtSrDate">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="BalAmount">Bal. Amount</label>
+                                    <input type="number" class="form-control" id="NumBalAmount" placeholder="Enter Bal Amount">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblpurchaseallocationmodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Cost Center</th>
+                                            <th>Allocated Amt</th>
+                                            <th>Narration</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="btn-add-row-last">
+                                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                    </div>
+                                    <div class="pagination-end">
+                                        <div class="custom-pagination" id="tablePagination"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-12">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Item Total</legend>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="NumReceivedQty">Received Qty</label>
+                                        <input type="number" class="form-control" id="NumReceivedQty" readonly placeholder="Enter Received Qty">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="NumBillQty">Bill Qty</label>
+                                        <input type="number" class="form-control" id="NumBillQty" readonly placeholder="Enter Bill Qty">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumAmount">Amount</label>
+                                        <input type="number" class="form-control" id="NumAmount" readonly placeholder="Enter Amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumPacking">Packing</label>
+                                        <input type="number" class="form-control" id="NumPacking" readonly placeholder="Enter Packing Amt">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumDiscount">Discount</label>
+                                        <input type="number" class="form-control" id="NumDiscount" readonly placeholder="Enter Discount Amt">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="NumCGST">CGST</label>
+                                        <input type="number" class="form-control" id="NumCGST" readonly placeholder="Enter CGST">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="NumSGST">SGST</label>
+                                        <input type="number" class="form-control" id="NumSGST" readonly placeholder="Enter SGST">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumIGST">IGST</label>
+                                        <input type="number" class="form-control" id="NumIGST" readonly placeholder="Enter IGST">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumCESS">CESS</label>
+                                        <input type="number" class="form-control" id="NumCESS" readonly placeholder="Enter CESS">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumVAT">VAT</label>
+                                        <input type="number" class="form-control" id="NumVAT" readonly placeholder="Enter VAT">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="NumOtherAmt">Other Amt</label>
+                                        <input type="number" class="form-control" id="NumOtherAmt" readonly placeholder="Enter Other Amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="NumTCSPer">TCS %</label>
+                                        <div class="input-divide">
+                                            <input type="text" oninput="allowOnlyNumbers(this);" class="form-control" id="NumTCSPer1" maxlength="5" placeholder="Enter TCS %">
+                                            <input type="text" oninput="allowOnlyNumbers(this);" class="form-control" maxlength="10" id="NumTCSAmt">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumSubTotal">Sub Total</label>
+                                        <input type="number" class="form-control" id="NumSubTotal" readonly placeholder="Enter Sub Total">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumRoundOff">Round Off</label>
+                                        <input type="number" class="form-control" id="NumRoundOff" readonly placeholder="Enter Round Off">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="NumFinalNetAmt">Net Amount</label>
+                                        <input type="number" class="form-control" id="NumFinalNetAmt" readonly placeholder="Enter Net Amount">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- TDS A/c -->
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="ddlTdsAccount">TDS A/c</label>
+                                        <select class="form-control" id="ddlTdsAccount">
+                                            <option value="">Select TDS A/C</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="TxtTds">TDS</label>
+                                        <div class="input-divide">
+                                            <input type="text" class="form-control" oninput="allowOnlyNumbers(this);" maxlength="10" id="TxtTds1">
+                                            <input type="text" class="form-control" oninput="allowOnlyNumbers(this);" maxlength="10" id="TxtTds2">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- TDS 194Q -->
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="TxtTds194q">TDS 194Q</label>
+                                        <div class="input-divide">
+                                            <input type="text" oninput="allowOnlyNumbers(this);" class="form-control" maxlength="10" id="TxtTds194q1">
+                                            <input type="text" oninput="allowOnlyNumbers(this);" class="form-control" maxlength="10" id="TxtTds194q2">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Party Bill Amt in USD -->
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="TxtPartyUsd">Party Bill Amt in USD</label>
+                                        <input type="text" class="form-control" id="TxtPartyUsd" oninput="allowOnlyNumbers(this);" maxlength="20" placeholder="Enter USD Amount">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- PL No & Date -->
+                            <div class="row">
+
+                                <!--Modal TDS Calculation-->
+                                <div class="modal fade" id="tdscalculationModal" tabindex="-1" aria-labelledby="tdscalculationLabel">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content draggable-modal">
+                                            <div class="popup-header">
+                                                <h5 class="popup-title" id="tdscalculationLabel">TDS 194Q Cal As.</h5>
+                                                <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-lg-3">
+                                                        <div class="form-group">
+                                                            <label for="NumNetAmt">Net Amt :</label>
+                                                            <input type="text" oninput="allowOnlyNumbers(this);" maxlength="12" class="form-control" id="NumNetAmt" placeholder="Enter Net Amount">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3">
+                                                        <div class="form-group">
+                                                            <label for="NumAdvTDS">(-) Adv TDS :</label>
+                                                            <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumAdvTDS" placeholder="Enter Adv TDS">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3">
+                                                        <div class="form-group">
+                                                            <label for="NumDrNote">(-) Dr Note :</label>
+                                                            <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumDrNote" placeholder="Enter DR Note">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3">
+                                                        <div class="form-group">
+                                                            <label for="NumCRNote">(+) CR Note :</label>
+                                                            <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumCRNote" placeholder="Enter CR Note">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="my-2" />
+                                                <div class="row">
+                                                    <div class="offset-lg-4 col-lg-3">
+                                                        <div class="form-group">
+                                                            <label for="NumTDSAmt">TDS 194Q on Amt :</label>
+                                                            <input type="text" oninput="allowOnlyNumbers(this);" maxlength="12" class="form-control" id="NumTDSAmt" placeholder="Enter TDS Amount">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="Remarks">Remarks</label>
+                                <textarea type="text" class="form-height" id="txtremarks" placeholder="Enter Remarks"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="button-right">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tdsadjustment">
+                                    <i class="fa fa-sitemap"></i> TDS Adjustment
+                                </button>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tdscalculationModal">
+                                    <i class="fa fa-tasks"></i> TDS Calculation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <!--indendorderstoreModal-->
+        <div class="modal fade" id="indendorderstoreModal" tabindex="-1" aria-labelledby="indendorderstoreModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="indendorderstoreModalLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxIOSM" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group mt-2">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendIOSM">
+                                        <label class="checkbox-label" for="chkAppendIOSM">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive table-height">
+                                <table id="tblindendorderstore" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllIOSM" /></th>
+                                            <th>Vno</th>
+                                            <th>Vtype</th>
+                                            <th>Vdate</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Qty</th>
+                                            <th>Balqty</th>
+                                            <th>Rate</th>
+                                            <th>Taxtype</th>
+                                            <th>Pack%</th>
+                                            <th>Disc%</th>
+                                            <th>Cgst%</th>
+                                            <th>Sgst%</th>
+                                            <th>Igst%</th>
+                                            <th>Cess%</th>
+                                            <th>Cess</th>
+                                            <th>Vat%</th>
+                                            <th>Oth Amt</th>
+                                            <th>Make</th>
+                                            <th>Department</th>
+                                            <th>Remarks</th>
+                                            <th>Req Type</th>
+                                            <th>Req No</th>
+                                            <th>Deptcode</th>
+                                            <th>Make Code</th>
+                                            <th>UCode</th>
+                                            <th>Taxcode</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navtab-form">
+            <div class="row">
+                <div class="col-md-10">
+                    <ul class="nav nav-tabs" id="formTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Logistic Details</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab">Cr/Dr Note</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Attachment</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <div class="dropdown">
+                        <select class="form-control custom-dropdown" id="ddlcopyFromDropdown">
+                            <option value="">--Select Order Type--</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            @* Add List box showing block Start *@
+            <div class="tab-content">
+                <!-- tab 1 -->
+                <div class="tab-pane fade show active" id="tab1">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblPurchaseReceiptIR" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th style="display:none;">Code</th>
+                                        <th style="width:150px;">Item Name</th>
+                                        <th>HSN Code</th>
+                                        <th>Unit</th>
+                                        <th style="display:none;">UnitCode</th>
+                                        <th>Nos</th>
+                                        <th>Rec Qty</th>
+                                        <th>Bill Qty</th>
+                                        <th>Rate</th>
+                                        <th>Amount</th>
+                                        <th>RCM Y/N</th>
+                                        <th>Input Y/N</th>
+                                        <th>Tax Type</th>
+                                        <th>Pack%</th>
+                                        <th>Pack Amt</th>
+                                        <th>Disc %</th>
+                                        <th>Disc</th>
+                                        <th>CGST%</th>
+                                        <th>CGST</th>
+                                        <th>SGST%</th>
+                                        <th>SGST</th>
+                                        <th>IGST%</th>
+                                        <th>IGST</th>
+                                        <th>Cess%</th>
+                                        <th>Cess</th>
+                                        <th>VAT%</th>
+                                        <th>VAT</th>
+                                        <th>Oth Amt</th>
+                                        <th>Net Amt</th>
+                                        <th>Make</th>
+                                        <th>Department</th>
+                                        <th>Remarks</th>
+                                        <th>LD Rate</th>
+                                        <th>LD Amt</th>
+                                        <th>PO Type</th>
+                                        <th>PO No</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePagination"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--tab 2-->
+                <div class="tab-pane fade" id="tab2">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Transport Information</legend>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlTransportName">Transport Name</label>
+                                    <select class="form-control" id="ddlTransportName">
+                                        <option value="">Select Transport Name</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtVehicleNo">Vehicle No</label>
+                                    <input type="text" class="form-control" maxlength="20" id="txtVehicleNo" placeholder="Enter Vehicle No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtContainerNo">Container No</label>
+                                    <input type="text" class="form-control" maxlength="20" id="txtContainerNo" placeholder="Enter Container No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtGRNo">GR No</label>
+                                    <input type="text" class="form-control" maxlength="20" id="txtGRNo" placeholder="Enter GR No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtGRDate">GR Date</label>
+                                    <input type="date" class="form-control" id="DtGRDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="checkbox-input">
+                                <input type="checkbox" id="ChkSealedVehicle" value="0" />
+                                Sealed Vehicle
+                            </label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Freight Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumFreightPay">Freight Pay</label>
+                                    <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumFreightPay" placeholder="Enter Freight Pay">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumFrtTax">Frt Tax%</label>
+                                    <div class="input-divide">
+                                        <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumFrtTax1">
+                                        <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumFrtTax2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlFreightDebitAC">Freight Debit A/C</label>
+                                    <select class="form-control" id="ddlFreightDebitAC">
+                                        <option value="">Select Freight Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlFreightCreditAC">Freight Credit A/C</label>
+                                    <select class="form-control" id="ddlFreightCreditAC">
+                                        <option value="">Select Freight Credit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtFrtPayNarration">Frt Pay Narration</label>
+                                    <input type="text" maxlength="30" class="form-control" id="TxtFrtPayNarration" placeholder="Enter Frt Pay Narration">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTDSonFRT">TDS on FRT%</label>
+                                    <div class="input-divide">
+                                        <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumTDSonFRT1">
+                                        <input type="text" oninput="allowOnlyNumbers(this);" maxlength="10" class="form-control" id="NumTDSonFRT2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 5-->
+                <div class="tab-pane fade" id="tab5">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Debit / Credit Notes</legend>
+                        <div class="offset-md-2 col-md-3">
+                            <label class="checkbox-input">
+                                <input type="checkbox" id="ChkDebitFromTransporter" />
+                                Debit from Transporter
+                            </label>
+                        </div>
+                        <!-- One Row = Label + 2 Inputs + Narration -->
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Quality Diff Debit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD1" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD2" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" id="TxtQDDNarration" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Rate Diff Debit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>QC Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Weight Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Others Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Quality Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>QC Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Weight Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Rate Diff Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <!-- Payment, Reason, Hold Date -->
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="ddlPayment">Payment</label>
+                                    <select class="form-control" id="ddlPaymentCRDRNote">
+                                        <option>NA</option>
+                                        <option>Paid</option>
+                                        <option>Hold</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="TxtReason">Reason</label>
+                                    <input type="text" class="form-control" id="TxtReasonCRDRNote">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtHoldDate">Hold Date</label>
+                                    <input type="date" class="form-control" id="DtHoldDateCRDRNote">
+                                </div>
+                            </div>
+                            @*  <div class="col-md-4">
+                                <div class="btn-mt button-right">
+                                    <button type="button" id="PurchaseSlipCRDRNote" class="btn btn-primary"><i class="fa fa-file-invoice"></i>Purchase Slip</button>
+                                </div>
+                            </div> *@
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 3-->
+                <div class="tab-pane fade" id="tab3">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblAttachmentPRE" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>File Upload</th>
+                                        <th>Preview</th>
+                                        <th>File Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePagination"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+
+<script>
+
+    const AllFieldsId = ['ddlDocType','NumDocNo','DtDocDate','txtRefNo','ddlRefNo','ddlBillFrom','txtAddLine1','ddladdressBD1','txtAddLine2','txtAddLine3','ddlCity','ddlState','txtGST','txtPincode','ddlShipFrom','ddlShipFrom2','txtShipAddLine1','txtShipAddLine2','txtShipAddLine3','ddlShipCity',
+    'ddlShipState','txtShipGST','NumShipPincode','txtBillNo','DtBillDate','NumBOENo','DtBOEDate','TxtWaybillNo','ddlTransitNo','ddlInputType','ddlExpensesType','ddlDebitAC','ddlCreditAC','txtRemarks','TxtNetAmount','ddlStatus','ddlEmployee'
+    ];
+
+    const itemRecords = [
+      'TxtCode', 'ddlItemName', 'TxtHSNCode', 'TxtUnit', 'TxtNos', 'TxtRecQty', 'TxtBillQty',
+      'TxtRate', 'TxtAmount', 'TxtEmptyYN', 'TxtInputYN', 'ddlTaxType', 'TxtPackPer', 'TxtPackAmt',
+      'TxtDiscPer', 'TxtDiscAmt', 'TxtCGSTPer', 'TxtCGSTAmt', 'TxtSGSTPer', 'TxtSGSTAmt',
+      'TxtIGSTPer', 'TxtIGSTAmt', 'TxtCESSPer', 'TxtCESSAmt', 'TxtVATPer', 'TxtVATAmt',
+      'TxtOthAmt', 'TxtNetAmt', 'ddlMake', 'ddlDepartment', 'TxtRemarks',
+      'TxtLDRate', 'TxtLDAmt', 'TxtPOType', 'TxtPONo'
+    ];
+
+    // const itemRecords = [
+    //   'TxtCode', 'ddlItemName', 'TxtHSNCode', 'TxtUnit', 'TxtUnitCode', 'TxtNos', 'TxtRecQty', 'TxtBillQty', 'TxtRate', 'TxtAmount', 'TxtEmptyYN', 'TxtInputYN',
+    //   'ddlTaxType', 'TxtPackPer', 'TxtPackAmt', 'TxtDiscPer', 'TxtDiscAmt', 'TxtCGSTPer', 'TxtCGSTAmt', 'TxtSGSTPer', 'TxtSGSTAmt', 'TxtIGSTPer', 'TxtIGSTAmt',
+    //   'TxtCESSPer', 'TxtCESSAmt', 'TxtVATPer', 'TxtVATAmt', 'TxtOthAmt', 'TxtNetAmt', 'ddlMake', 'ddlDepartment', 'TxtRemarks', 'TxtLDRate', 'TxtLDAmt', 'TxtPOType', 'TxtPONo'
+    // ];
+
+    const logisticDetailIds = [
+      'ddlTransportName', 'txtVehicleNo', 'txtContainerNo', 'txtGRNo', 'DtGRDate', 'ChkSealedVehicle',
+      'NumFreightPay', 'NumFrtTax1', 'NumFrtTax2', 'ddlFreightDebitAC', 'ddlFreightCreditAC',
+      'TxtFrtPayNarration', 'NumTDSonFRT1', 'NumTDSonFRT2'
+    ];
+
+    const debitCreditNoteIds = [
+    'ChkDebitFromTransporter','NumQDD1','NumQDD2','TxtQDDNarration','NumRDD1','NumRDD2','TxtRDNarration','NumQCD1','NumQCD2','TxtQCDNarration','NumWDN1','NumWDN2','TxtWDNNarration','NumODN1','NumODN2','TxtODNNarration',
+    'NumQCN1','NumQCN2','TxtQCNNarration','NumQCCN1','NumQCCN2','TxtQCCNNarration','NumWCN1','NumWCN2','TxtWCNNarration','NumRDCN1','NumRDCN2','TxtRDCNNarration','ddlPaymentCRDRNote','TxtReasonCRDRNote','DtHoldDateCRDRNote'
+    ];
+
+    let docId = "";
+    let readOnly;
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+
+    $(async function () {
+        try {
+            await GetDocTypeAsync();
+            $('#ddlDocType').prop('selectedIndex', 0);
+             handleDocLoad();
+        } catch (error) {
+            toastr.error('Failed to load document types: ' + error);
+        }
+    });
+
+    $(document).ready(function () {
+    GetEmployeeList();
+    GetTransactionList();
+    GetFreightDebitACList();
+    GetBillFromShipFromList('#ddlBillFrom');
+    GetBillFromShipFromList('#ddlShipFrom');
+    GetBillFromShipFromList('#ddlTdsAccount');
+    GetCreditDebitList('#ddlDebitAC');
+    GetCreditDebitList('#ddlCreditAC');
+    GetCreditDebitList('#ddlFreightCreditAC');
+    GetTransitList();
+    GetReferenceList();
+    addItemRecordRow();
+    addAttachmentRow();
+
+
+    setEnterKeyFocus(AllFieldsId);
+    setEnterKeyFocus(logisticDetailIds);
+    setEnterKeyFocus(debitCreditNoteIds);
+
+    $(".draggable-modal").draggable({
+    handle: ".popup-header"
+    });
+
+    $('#ddlDocType').on('change', function () {
+        const VType = $(this).val();
+        if (VType) {
+            GetDocid(VType);
+        }
+    });
+
+    $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        var tbody = $(this).closest('tbody');
+        var rowCount = tbody.find('tr').length;
+        if (rowCount > 1) {
+            $(this).closest('tr').remove();
+        } else {
+            alert('Cannot delete the first row.');
+        }
+    });
+
+    $(document).on('click', '#tab1 .btn-Itemadd-action', function () {
+    addItemRecordRow();
+    });
+
+
+    $('#ddlBillFrom').on('change', function () {
+        var partyCode = $(this).val();
+        var selectedOption = $(this).find('option:selected');
+
+        if (partyCode) {
+            $('#txtAddLine1').val(selectedOption.data('add1') || '');
+            $('#txtAddLine2').val(selectedOption.data('add2') || '');
+            $('#txtAddLine3').val(selectedOption.data('add3') || '');
+            $('#txtGST').val(selectedOption.data('gstin') || '');
+            $('#txtPincode').val(selectedOption.data('pincd') || '');
+            var cityCode = selectedOption.data('citycd');
+            var cityName = selectedOption.data('cityname');
+            var stateCode = selectedOption.data('statecd');
+            var stateName = selectedOption.data('state');
+            ensureOption($('#ddlCity'), cityCode, cityName);
+            ensureOption($('#ddlState'), stateCode, stateName);
+            $('#ddlCity').val(cityCode).trigger('change');
+            $('#ddlState').val(stateCode).trigger('change');
+            GetBillFromPartyFromAddress(partyCode, '#ddladdressBD1');
+        } else {
+            $('#txtAddLine1, #txtAddLine2, #txtAddLine3, #txtGST, #txtPincode').val('');
+            $('#ddlCity, #ddlState').val('');
+            $('#ddladdressBD1').empty().append('<option value="">-Select Address-</option>');
+        }
+    });
+
+    function ensureOption($dropdown, code, name) {
+        if (code && $dropdown.find(`option[value="${code}"]`).length === 0) {
+            $dropdown.append(`<option value="${code}">${name}</option>`);
+        }
+    }
+
+    $('#ddlShipFrom').on('change', function () {
+        var shipCode = $(this).val();
+        var selectedOption = $(this).find('option:selected');
+
+        if (shipCode) {
+            $('#txtShipAddLine1').val(selectedOption.data('add1') || '');
+            $('#txtShipAddLine2').val(selectedOption.data('add2') || '');
+            $('#txtShipAddLine3').val(selectedOption.data('add3') || '');
+            $('#NumShipPincode').val(selectedOption.data('pincd') || '');
+            $('#txtShipGST').val(selectedOption.data('gstin') || '');
+
+            var cityCode = selectedOption.data('citycd');
+            var cityName = selectedOption.data('cityname');
+            var stateCode = selectedOption.data('statecd');
+            var stateName = selectedOption.data('state');
+
+            // Optional: Ensure city/state exist in dropdowns before setting
+            ensureOption($('#ddlShipCity'), cityCode, cityName);
+            ensureOption($('#ddlShipState'), stateCode, stateName);
+
+            $('#ddlShipCity').val(cityCode).trigger('change');
+            $('#ddlShipState').val(stateCode).trigger('change');
+
+            GetBillFromPartyFromAddress(shipCode, '#ddlShipFrom2');
+        } else {
+            $('#txtShipAddLine1, #txtShipAddLine2, #txtShipAddLine3, #NumShipPincode, #txtShipGST').val('');
+            $('#ddlShipCity, #ddlShipState').val('');
+            $('#ddlShipFrom2').empty().append('<option value="">-Select Address-</option>');
+        }
+    });
+
+
+    $(document).on('change', '#ddladdressBD1, #ddlShipFrom2', function () {
+        const selectedOption = $(this).find('option:selected');
+        const dropdownId = $(this).attr('id');
+
+        if (dropdownId === 'ddladdressBD1') {
+            $('#txtAddLine1').val(selectedOption.text().trim());
+            $('#txtAddLine2').val(selectedOption.data('add2'));
+            $('#txtAddLine3').val(selectedOption.data('add3'));
+            $('#txtPincode').val(selectedOption.data('pincd'));
+            $('#TxtCity').val(selectedOption.data('cityname'));
+            $('#txtGST').val(selectedOption.data('gstin'));
+            $('#TxtState').val(selectedOption.data('state'));
+        } else {
+            $('#txtShipAddLine1').val(selectedOption.text().trim());
+            $('#txtShipAddLine2').val(selectedOption.data('add2'));
+            $('#txtShipAddLine3').val(selectedOption.data('add3'));
+            $('#NumShipPincode').val(selectedOption.data('pincd'));
+            $('#TxtShipCity').val(selectedOption.data('cityname'));
+            $('#txtShipGST').val(selectedOption.data('gstin'));
+            $('#TxtShipState').val(selectedOptiondata('state'));
+        }
+    });
+
+    // $('#chkDeliveryDate').on('change', function () {
+    // $(this).val(this.checked ? '1' : '0');
+    // });
+
+    $('#ChkSealedVehicle').on('change', function () {
+    $(this).val(this.checked ? '1' : '0');
+    });
+
+    // $('#chkValidateDate').on('change', function () {
+    // $(this).val(this.checked ? '1' : '0');
+    // });
+
+    $(document).on('change', '[id^=ddlTaxType]', function () {
+        const $select = $(this);
+        const selectedOption = $select.find('option:selected');
+        const rowId = $select.closest('tr').attr('id').replace('row', '');
+
+        const csgstPer = selectedOption.data('csgstper') || 0;
+        const igstPer = selectedOption.data('igstper') || 0;
+        const tdsPer = selectedOption.data('tdsper') || 0;
+        const tcsPer = selectedOption.data('tcsper') || 0;
+        const vatPer = selectedOption.data('vatper') || 0;
+        const othPer1 = selectedOption.data('otherper') || 0;
+        const othPer2 = selectedOption.data('otherper2') || 0;
+
+        // ✅ Update matching input fields
+        $(`#TxtCGSTPer${rowId}`).val(csgstPer);
+        $(`#TxtSGSTPer${rowId}`).val(csgstPer);
+        $(`#TxtIGSTPer${rowId}`).val(igstPer);
+        // $(`#TxtTcsPer${rowId}`).val(tcsPer);
+        $(`#TxtVATPer${rowId}`).val(vatPer);
+        // $(`#TxtOthPer${rowId}`).val(othPer1);
+        // $(`#TxtOthPer2${rowId}`).val(othPer2);
+        calculateTaxAmounts(rowId);
+    });
+
+    $(document).on('change', '[id^=ddlItemName]', function () {
+        const $select = $(this);
+        const selectedOption = $select.find('option:selected');
+        const rowId = $select.closest('tr').attr('id').replace('row', '');
+
+        const hsncode = selectedOption.data('hsnCode') || '';
+        const unit = selectedOption.data('unitname') || '';
+        const unitcode = selectedOption.data('unitCd') || '';
+
+        $(`#TxtHSNCode${rowId}`).val(hsncode);
+        $(`#TxtUnit${rowId}`).val(unit);
+        $(`#TxtUnitCode${rowId}`).val(unitcode);
+    });
+
+    $(document).on('click', '[id^=TxtRate], [id^=TxtBillQty]', function () {
+        const $select = $(this);
+        const rowId = $select.closest('tr').attr('id').replace('row', '');
+        calculateTaxAmounts(rowId);
+    });
+
+    $(document).on('input', '[id^=TxtRate], [id^=TxtBillQty], [id^=TxtCESSPer], [id^=TxtPackPer], [id^=TxtDiscPer]', function () {
+        const $input = $(this);
+        const rowId = $input.closest('tr').attr('id').replace('row', '');
+        calculateTaxAmounts(rowId);
+    });
+
+    $(document).on('change', '#ddlRefNo', function(){
+    var selectedOption=$(this).find('option:selected');
+    $('#txtRefNo').val(selectedOption.data('vtype'));
+    $('#TxtWaybillNoTxtWaybillNo').val(selectedOption.data('waybillno'));
+    $('#ddlRefNo').val(selectedOption.data('vno'));
+    });
+
+    $(document).on('change', '#ddlTransportName', function(){
+     const selectedOption = $(this).find('option:selected');
+     var pppcd=selectedOption.data('partycode');
+     GetFreightDebitACList(pppcd);
+
+    });
+
+    // $(document).on('input', '#NumTCSPer1', function(){
+    //  var tcsPer=$(this).val();
+    //  var grossAmt=$('#NumAmount').val();
+    //  var TaxAmt=($('#NumCGST').val())+($('#NumSGST').val())+($('#NumIGST').val())+($('#NumCESS').val())+($('#NumVAT').val())+($('#NumOtherAmt').val());
+    //  var discount=$('#NumDiscount').val();
+    //  var TCSAmt=(((grossAmt+TaxAmt)-discount)*tcsPer)/100;
+    //  $('#NumTCSAmt').val(TCSAmt);
+    // });
+
+    $('#btn-save').on('click', async function (e) {
+        e.preventDefault();
+
+          if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+          if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
+          // if (!validateRequiredField('#txtRefNo', 'Reference Type')) return;
+          if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
+          if (!validateRequiredField('#ddlBillFrom', 'Bill From')) return;
+          if (!validateRequiredField('#ddlDebitAC', 'Debit AC')) return;
+          if (!validateRequiredField('#ddlCreditAC', 'Credit AC')) return;
+          if (!validateRequiredField('#txtBillNo', 'Bill No')) return;
+          if (!validateRequiredField('#DtBillDate', 'Bill Date')) return;
+
+
+        try {
+
+          const tableData = await collectFormData();
+
+            if (docId) {
+                UpdateData(tableData);
+            } else {
+                SaveData(tableData);
+            }
+        } catch (error) {
+            console.error('Error during save:', error);
+            toastr.error('An error occurred while saving the data.');
+        }
+    });
+
+    $(document).on('click', '#BtnPurchaseReq', function(){
+        PurchaseRateApproval();
+
+    });
+    $(document).on('click', '#BtnQuotationRtAprvl', function(){
+        quotationRtApproval();
+    });
+
+    $(document).on('click', '.btn-quoteCopy', async function(){
+       var quotationrateList = getquoteTabledata();
+       await fillItemDetailsTable(quotationrateList)
+    });
+
+    $(document).on('click', '.btn-purchaseCopy',async function(){
+    const selectedItems = getPurchaseData();
+    fillItemDetailsTable(selectedItems);
+
+    });
+
+    $('#selectAllQM').on('change', function () {
+        const isChecked = $(this).is(':checked');
+        $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
+    });
+
+        $(document).on('click', '#tab3 .btn-add-row-last, #tab3 .btn-add-action', function () {
+            addAttachmentRow();
+        });
+        $(document).on('click', '#tab1 .btn-add-row-last', function () {
+            addItemRecordRow();
+        });
+
+        $(document).on('click', '.btn-delete-action, .btn-delete-row', function () {
+            $(this).closest('tr').remove();
+        });
+
+
+    });
+
+</script>
+
+<script>
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "ImportExportExpensesEntry")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          // $dropdown.append('<option value="">-select doc Type-</option>');
+
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    async function handleDocLoad() {
+             docId = getQueryParam('id');
+             readOnly = getQueryParam('readOnly');
+
+            if (docId) {
+                $('#ddlDocType').prop('readonly', true);
+                await GetDocData(docId, readOnly);
+            } else {
+                const Vtype = $('#ddlDocType').val();
+                if(Vtype)
+                {
+                  GetDocid(Vtype);
+                }
+                const today = new Date();
+                const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+
+                $('#DtDocDate').val(todayDate);
+                $('#DtBillDate').val(todayDate);
+                $('#DtBOEDate').val(todayDate);
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                     url: '@Url.Action("SaveOrUpdateImportExportExpense", "ImportExportExpensesEntry")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            showFlashMessageByKey('insert', 'success');
+                            // resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/ImportExportExpensesEntryList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateImportExportExpense", "ImportExportExpensesEntry")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    showFlashMessageByKey('update', 'success');
+                    // resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/ImportExportExpensesEntryList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    function calculateTaxAmounts(rowId) {
+        const rate = parseFloat($(`#TxtRate${rowId}`).val()) || 0;
+        const qty = parseFloat($(`#TxtBillQty${rowId}`).val()) || 0;
+        const amount = rate * qty;
+
+        const discPer = parseFloat($(`#TxtDiscPer${rowId}`).val()) || 0;
+        const discAmt = (amount * discPer) / 100;
+        $(`#TxtDiscAmt${rowId}`).val(discAmt.toFixed(2));
+
+        const packPer = parseFloat($(`#TxtPackPer${rowId}`).val()) || 0;
+        const packAmt = (amount * packPer) / 100;
+        $(`#TxtPackAmt${rowId}`).val(packAmt.toFixed(2));
+
+        const taxableAmount = amount - discAmt + packAmt;
+
+        const cgstPer = parseFloat($(`#TxtCGSTPer${rowId}`).val()) || 0;
+        const sgstPer = parseFloat($(`#TxtSGSTPer${rowId}`).val()) || 0;
+        const igstPer = parseFloat($(`#TxtIGSTPer${rowId}`).val()) || 0;
+        const cessPer = parseFloat($(`#TxtCESSPer${rowId}`).val()) || 0;
+        const tcsPer = parseFloat($(`#TxtTcsPer${rowId}`).val()) || 0;
+        const vatPer = parseFloat($(`#TxtVATPer${rowId}`).val()) || 0;
+        // const othPer1 = parseFloat($(`#TxtOthPer${rowId}`).val()) || 0;
+        // const othPer2 = parseFloat($(`#TxtOthPer2${rowId}`).val()) || 0;
+
+        const cgstAmt = (taxableAmount * cgstPer) / 100;
+        const sgstAmt = (taxableAmount * sgstPer) / 100;
+        const igstAmt = (taxableAmount * igstPer) / 100;
+        const cessAmt = (taxableAmount * cessPer) / 100;
+        const tcsAmt = (taxableAmount * tcsPer) / 100;
+        const vatAmt = (taxableAmount * vatPer) / 100;
+        // const othAmt1 = (taxableAmount * othPer1) / 100;
+        // const othAmt2 = (taxableAmount * othPer2) / 100;
+
+        // const totalTax = cgstAmt + sgstAmt + igstAmt + cessAmt + tcsAmt + vatAmt + othAmt1 + othAmt2;
+
+        const totalTax = cgstAmt + sgstAmt + igstAmt + cessAmt + tcsAmt + vatAmt ;
+        const netAmt = taxableAmount + totalTax;
+
+        $(`#TxtAmount${rowId}`).val(amount.toFixed(2));
+        $(`#TxtCGSTAmt${rowId}`).val(cgstAmt.toFixed(2));
+        $(`#TxtSGSTAmt${rowId}`).val(sgstAmt.toFixed(2));
+        $(`#TxtIGSTAmt${rowId}`).val(igstAmt.toFixed(2));
+        $(`#TxtCESSAmt${rowId}`).val(cessAmt.toFixed(2));
+        $(`#TxtTcsAmt${rowId}`).val(tcsAmt.toFixed(2));
+        $(`#TxtVATAmt${rowId}`).val(vatAmt.toFixed(2));
+        // $(`#TxtOthAmt${rowId}`).val(othAmt1.toFixed(2));
+        // $(`#TxtOthAmt2${rowId}`).val(othAmt2.toFixed(2));
+        $(`#TxtNetAmt${rowId}`).val(netAmt.toFixed(2));
+
+        calculateAllTotals(); // Recalculate footer totals
+    }
+
+    function calculateAllTotals() {
+        let totalRecQty = 0,
+            totalQty = 0,
+            totalAmount = 0,
+            totalPackAmt = 0,
+            totalDiscAmt = 0,
+            totalCgstAmt = 0,
+            totalSgstAmt = 0,
+            totalIgstAmt = 0,
+            totalVatAmt = 0,
+            totalCessAmt = 0,
+            totalTcsAmt = 0,
+            totalOtherAmt = 0,
+            totalNetAmt = 0;
+
+        $('#tblPurchaseReceiptIR tbody tr').each(function () {
+            const $row = $(this);
+            const idx = $row.attr('id').replace('row', '');
+
+            totalRecQty      += parseFloat($(`#TxtRecQty${idx}`).val()) || 0;
+            totalQty      += parseFloat($(`#TxtBillQty${idx}`).val()) || 0;
+            totalAmount   += parseFloat($(`#TxtAmount${idx}`).val()) || 0;
+            totalPackAmt  += parseFloat($(`#TxtPackAmt${idx}`).val()) || 0;
+            totalDiscAmt  += parseFloat($(`#TxtDiscAmt${idx}`).val()) || 0;
+            totalCgstAmt  += parseFloat($(`#TxtCGSTAmt${idx}`).val()) || 0;
+            totalSgstAmt  += parseFloat($(`#TxtSGSTAmt${idx}`).val()) || 0;
+            totalIgstAmt  += parseFloat($(`#TxtIGSTAmt${idx}`).val()) || 0;
+            totalVatAmt   += parseFloat($(`#TxtVATAmt${idx}`).val()) || 0;
+            totalCessAmt  += parseFloat($(`#TxtCESSAmt${idx}`).val()) || 0;
+            // totalTcsAmt   += parseFloat($(`#TxtTcsAmt${idx}`).val()) || 0;
+            totalOtherAmt += parseFloat($(`#TxtOthAmt${idx}`).val()) || 0;
+            // totalOtherAmt += parseFloat($(`#TxtOthAmt2${idx}`).val()) || 0;
+            totalNetAmt   += parseFloat($(`#TxtNetAmt${idx}`).val()) || 0;
+        });
+
+        const netAmtRaw = totalNetAmt;
+        const netAmt = Math.round(netAmtRaw);
+        const roundOff = +(netAmtRaw - netAmt).toFixed(2);
+
+
+        $('#NumReceivedQty').val(totalRecQty.toFixed(2));
+        $('#NumBillQty').val(totalQty.toFixed(2));
+        $('#NumAmount').val(totalAmount.toFixed(2));
+        $('#NumPacking').val(totalPackAmt.toFixed(2));
+        $('#NumDiscount').val(totalDiscAmt.toFixed(2));
+        $('#NumCGST').val(totalCgstAmt.toFixed(2));
+        $('#NumSGST').val(totalSgstAmt.toFixed(2));
+        $('#NumIGST').val(totalIgstAmt.toFixed(2));
+        $('#NumVAT').val(totalVatAmt.toFixed(2));
+        // $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
+        // $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
+        $('#NumOtherAmt').val(totalOtherAmt.toFixed(2));
+        $('#NumFinalNetAmt').val(totalNetAmt.toFixed(2));
+        $('#NumRoundOff').val(roundOff.toFixed(2));
+    }
+
+    async function collectFormData() {
+
+        const id = toNullableString(docId);
+        const itemRecords = await collectOrder2Items();
+        const attachment = await getAttachmentDetails();
+
+        return {
+            V_TYPE: toNullableString(document.getElementById("ddlDocType")?.value),
+            V_NO: parseIntSafe(document.getElementById("NumDocNo")?.value),
+            V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
+            DOC_ID: toNullableString(document.getElementById("TxtDocId")?.value),
+            PLACE_CODE: null,
+            EMP_CODE: parseIntSafe(document.getElementById("ddlEmployee")?.value),
+            PARTY_CODE: parseIntSafe(document.getElementById("ddlBillFrom")?.value),
+            EXCH_RATE: null,
+            CREDIT_AC: parseIntSafe(document.getElementById("ddlCreditAC")?.value),
+            DEBIT_AC: parseIntSafe(document.getElementById("ddlDebitAC")?.value),
+            BILL_ADD1: toNullableString(document.getElementById("txtAddLine1")?.value),
+            BILL_ADD2: toNullableString(document.getElementById("txtAddLine2")?.value),
+            BILL_ADD3: toNullableString(document.getElementById("txtAddLine3")?.value),
+            BILL_CITY: parseIntSafe(document.getElementById("ddlCity")?.value),
+            BILL_PINCODE: toNullableString(document.getElementById("txtPincode")?.value),
+            BILL_ADDRESSID: null,
+            BILL_GST: toNullableString(document.getElementById("txtGST")?.value),
+            SHIP_CODE: parseIntSafe(document.getElementById("ddlShipFrom")?.value),
+            SHIP_ADD1: toNullableString(document.getElementById("txtShipAddLine1")?.value),
+            SHIP_ADD2: toNullableString(document.getElementById("txtShipAddLine2")?.value),
+            SHIP_ADD3: toNullableString(document.getElementById("txtShipAddLine3")?.value),
+            SHIP_CITY: parseIntSafe(document.getElementById("ddlShipCity")?.value),
+            SHIP_PINCODE: toNullableString(document.getElementById("NumShipPincode")?.value),
+            SHIP_ADDRESSID: null,
+            SHIP_GST: toNullableString(document.getElementById("txtShipGST")?.value),
+            BILL_NO: toNullableString(document.getElementById("txtBillNo")?.value),
+            BILL_DATE: toNullableDate(document.getElementById("DtBillDate")?.value),
+            CHALL_NO: toNullableString(document.getElementById("NumBOENo")?.value),
+            CHALL_DATE: toNullableDate(document.getElementById("DtBOEDate")?.value),
+            UOM_CODE: null,
+            GATE_TYPE: null,
+            GATE_NO: null,
+            REF_TYPE: null,
+            REF_NO: parseIntSafe(document.getElementById("ddlRefNo")?.value),
+            PASS_TYPE: null,
+            PASS_NO: null,
+            TRANSIT_NO: null,
+            WAYBILL_NO: null,
+            TRANSPORT_CODE: parseIntSafe(document.getElementById("ddlTransportName")?.value),
+            TRANSPORT_NAME: null,
+            TRANSPORT_AC:null,
+            GR_NO: toNullableString(document.getElementById("txtGRNo")?.value),
+            GR_DATE: toNullableDate(document.getElementById("DtGRDate")?.value),
+            TRUCK_NO: toNullableString(document.getElementById("txtVehicleNo")?.value),
+            CONTAINER_NO: toNullableString(document.getElementById("txtContainerNo")?.value),
+            SEALED_VEHICLE: null,
+            INPUT_TYPE: toNullableString(document.getElementById("ddlInputType")?.value),
+            EXPS_TYPE: toNullableString(document.getElementById("ddlExpensesType")?.value),
+            REMARKS: toNullableString(document.getElementById("txtRemarks")?.value),
+            STATUS: parseIntSafe(document.getElementById("ddlStatus")?.value),
+            RECD_QTY: parseFloatSafe(document.getElementById("NumReceivedQty")?.value),
+            BILL_QTY: parseFloatSafe(document.getElementById("NumBillQty")?.value),
+            AMOUNT: parseFloatSafe(document.getElementById("NumAmount")?.value),
+            DISC_PER: null,
+            DISC_AMT: parseFloatSafe(document.getElementById("NumDiscount")?.value),
+            PACK_PER: null,
+            PACK_AMT: parseFloatSafe(document.getElementById("NumPacking")?.value),
+            CGST_PER: null,
+            CGST_AMT: parseFloatSafe(document.getElementById("NumCGST")?.value),
+            SGST_PER: null,
+            SGST_AMT: parseFloatSafe(document.getElementById("NumSGST")?.value),
+            IGST_PER: null,
+            IGST_AMT: parseFloatSafe(document.getElementById("NumIGST")?.value),
+            CESS_PER: null,
+            CESS_AMT: parseFloatSafe(document.getElementById("NumCESS")?.value),
+            VAT_PER: null,
+            VAT_AMT: parseFloatSafe(document.getElementById("NumVAT")?.value),
+            OTH_AMT: parseFloatSafe(document.getElementById("NumOtherAmt")?.value),
+            TCS_PER: parseFloatSafe(document.getElementById("NumTCSPer1")?.value),
+            TCS_AMT: parseFloatSafe(document.getElementById("NumTCSPer2")?.value),
+            ROUND_OFF: parseFloatSafe(document.getElementById("NumRoundOff")?.value),
+            NAMOUNT: parseFloatSafe(document.getElementById("NumFinalNetAmt")?.value),
+            DIFF_AMT: null,
+            BANK_AMT: null,
+            BANK_RATE: null,
+            PL_NO: null,
+            PL_DATE: null,
+            BILLAMT_USD: parseFloatSafe(document.getElementById("TxtPartyUsd")?.value),
+            FRTPAY_AMT: null,
+            FRTPAY_TAXPER: null,
+            FRTPAY_TAX: null,
+            FRTPAY_NAR: null,
+            FRTPAY_DRAC: null,
+            FRTPAY_CRAC: null,
+            FRT_TDSPER: null,
+            FRT_TDS: null,
+            DR_FROM_TPT: null,
+            TDS_ACT: parseIntSafe(document.getElementById("ddlTdsAccount")?.value),
+            TDS_PER: null,
+            TDS_AMT: parseFloatSafe(document.getElementById("TxtTds1")?.value),
+            WB_AMT: null,
+            WB_TDSPER: null,
+            WB_TDS: null,
+            WB_DRACT: null,
+            WB_CRACT: null,
+            WB_NARR: null,
+            UL_AMT: null,
+            UL_TDSPER: null,
+            UL_TDS: null,
+            UL_DRACT: null,
+            UL_CRACT: null,
+            UL_NARR: null,
+            QLT_DR_AMT: null,
+            QLT_DR_TAX: null,
+            QLT_DR_NAR: null,
+            QLT_CR_AMT: null,
+            QLT_CR_TAX: null,
+            QLT_CR_NAR: null,
+            RDF_DR_AMT: null,
+            RDF_DR_TAX: null,
+            RDF_DR_NAR: null,
+            RDF_CR_AMT: null,
+            RDF_CR_TAX: null,
+            RDF_CR_NAR: null,
+            QTY_DR_AMT: null,
+            QTY_DR_TAX: null,
+            QTY_DR_NAR: null,
+            QTY_CR_AMT: null,
+            QTY_CR_TAX: null,
+            QTY_CR_NAR: null,
+            QC_DR_AMT: null,
+            QC_DR_TAX: null,
+            QC_DR_NAR: null,
+            QC_CR_AMT: null,
+            QC_CR_TAX: null,
+            QC_CR_NAR: null,
+            OTH_DR_AMT: null,
+            OTH_DR_TAX: null,
+            OTH_DR_NAR: null,
+            QC_TYPE: null,
+            QC_NO: null,
+            DEPT_CODE: null,
+            TAX_HOLD: null,
+            PRICE_TYPE: null,
+            FAPROV_STATUS: null,
+            FAPROV_REMARKS: null,
+            HOLD_PAY: null,
+            HOLD_REASON: null,
+            HOLD_DATE: null,
+            IMPORT_AMT: null,
+            IMPORT_TAX: null,
+            INVLAND_AMT: null,
+            RCM_NO: null,
+            DRNOTE_MAILSEND: null,
+            FRT_BILLNO: null,
+            FRT_BILLDT: null,
+            FRT_PASSDT: null,
+            FRT_CHQ: null,
+            FRT_REMARK: null,
+            GSTRMAIL_PARTYCNTR: null,
+            GSTRMAIL_BILLCNTR: null,
+            TDS_PER194Q: null,
+            TDS_AMT194Q: null,
+            DISP_ADDRESS: null,
+            DISP_CITY: null,
+            GSTRECO_REFTYPE: null,
+            GSTRECO_REFNO: null,
+            STOREIMG_FLG: null,
+            RET_TYPE: null,
+            FEXCH_USD: null,
+            TRP_GSTNO: null,
+            TRP_BILLNO: null,
+            TRP_BILLDATE: null,
+            TRP_TAXTYPE: null,
+            MONTH_3B: null,
+            MONTH_3BN: null,
+            TRP_MONTH3B: null,
+            MTH_REVYN3B: null,
+            TRP_MTHREVYN3B: null,
+            MONTH_2B: null,
+            EWB_DATE: null,
+            EWB_EXPDATE: null,
+            EWB_INVNO: null,
+            PL_AMT: null,
+            SaveOrUpdate: (!id || id == "") ? 'Save' : 'Update',
+            itemDetail: itemRecords,
+            Attachments: attachment
+        };
+    }
+
+    async function collectOrder2Items() {
+      const items = [];
+      $('#tblPurchaseReceiptIR tbody tr').each(function () {
+        const idx = this.id.replace('row', '');
+        const $r = $(this);
+
+        items.push({
+          SNO: parseIntSafe(idx),
+          ITEM_CODE: parseIntSafe($r.find(`#ddlItemName${idx}`).val()),
+          ITEM_NAME: $r.find(`#ddlItemName${idx} option:selected`).text(),
+          MAKE_CODE: parseIntSafe($r.find(`#ddlMake${idx}`).val()),
+          HSN_CODE: $r.find(`#TxtHSNCode${idx}`).val(),
+          EMPTY_YN: $r.find(`#TxtEmptyYN${idx}`).val(),
+          INPUT_YN: $r.find(`#TxtInputYN${idx}`).val(),
+          UOM_NAME: $r.find(`#TxtUnit${idx}`).val(),
+          UOM_CODE: parseIntSafe($r.find(`#TxtUnitCode${idx}`).val()),
+          DEPT_CODE: parseIntSafe($r.find(`#ddlDepartment${idx}`).val()),
+          NOS: parseIntSafe($r.find(`#TxtNos${idx}`).val()),
+          RECD_QTY: parseFloatSafe($r.find(`#TxtRecQty${idx}`).val()),
+          BILL_QTY: parseFloatSafe($r.find(`#TxtBillQty${idx}`).val()),
+          RATE: parseFloatSafe($r.find(`#TxtRate${idx}`).val()),
+          AMOUNT: parseFloatSafe($r.find(`#TxtAmount${idx}`).val()),
+          PACK_PER: parseFloatSafe($r.find(`#TxtPackPer${idx}`).val()),
+          PACK_AMT: parseFloatSafe($r.find(`#TxtPackAmt${idx}`).val()),
+          DISC_PER: parseFloatSafe($r.find(`#TxtDiscPer${idx}`).val()),
+          DISC_AMT: parseFloatSafe($r.find(`#TxtDiscAmt${idx}`).val()),
+          TAX_CODE: parseIntSafe($r.find(`#ddlTaxType${idx}`).val()),
+          CGST_PER: parseFloatSafe($r.find(`#TxtCGSTPer${idx}`).val()),
+          CGST_AMT: parseFloatSafe($r.find(`#TxtCGSTAmt${idx}`).val()),
+          SGST_PER: parseFloatSafe($r.find(`#TxtSGSTPer${idx}`).val()),
+          SGST_AMT: parseFloatSafe($r.find(`#TxtSGSTAmt${idx}`).val()),
+          IGST_PER: parseFloatSafe($r.find(`#TxtIGSTPer${idx}`).val()),
+          IGST_AMT: parseFloatSafe($r.find(`#TxtIGSTAmt${idx}`).val()),
+          CESS_PER: parseFloatSafe($r.find(`#TxtCESSPer${idx}`).val()),
+          CESS_AMT: parseFloatSafe($r.find(`#TxtCESSAmt${idx}`).val()),
+          VAT_PER: parseFloatSafe($r.find(`#TxtVATPer${idx}`).val()),
+          VAT_AMT: parseFloatSafe($r.find(`#TxtVATAmt${idx}`).val()),
+          OTH_AMT: parseFloatSafe($r.find(`#TxtOthAmt${idx}`).val()),
+          NET_AMT: parseFloatSafe($r.find(`#TxtNetAmt${idx}`).val()),
+          LAND_RATE: parseFloatSafe($r.find(`#TxtLDRate${idx}`).val()),
+          LAND_AMT: parseFloatSafe($r.find(`#TxtLDAmt${idx}`).val()),
+          PO_TYPE: $r.find(`#TxtPOType${idx}`).val(),
+          PO_NO: parseIntSafe($r.find(`#TxtPONo${idx}`).val()),
+          REMARKS: $r.find(`#TxtRemarks${idx}`).val()
+        });
+      });
+
+      return items;
+    }
+
+    async function getAttachmentDetails() {
+        const attachments = [];
+
+        const rows = $('#tblAttachmentPRE tbody tr').toArray();
+        for (const row of rows) {
+            const $row = $(row);
+            const fileInput = $row.find('.file-input')[0];
+            const file = fileInput?.files[0];
+            const fileNameInput = $row.find('.file-name-input').val()?.trim() || null;
+
+            let base64String = null;
+            let filePath = null;
+            let fileName = null;
+            let fileType = null;
+            let fileSize = null;
+
+            if (file) {
+                base64String = await toBase64(file);
+                fileName = file.name;
+                fileSize = file.size;
+                fileType = file.type;
+                filePath = `/uploads/${file.name}`;
+            } else {
+                fileName = $row.find('.existing-file-name').val()?.trim() || null;
+                fileSize = $row.find('.existing-file-size').val()?.trim() || null;
+                fileType = $row.find('.existing-file-type').val()?.trim() || null;
+                filePath = $row.find('.existing-file-path').val()?.trim() || null;
+            }
+
+            if (fileName || filePath) {
+                attachments.push({
+                    fileName: fileNameInput || fileName,
+                    fileSize: fileSize,
+                    fileType: fileType,
+                    filePath: filePath,
+                    fileContentBase64: base64String
+                });
+            }
+        }
+
+        return attachments;
+    }
+
+    function toBase64(file) {
+         return new Promise((resolve, reject) => {
+             const reader = new FileReader();
+             reader.onload = () => resolve(reader.result.split(',')[1]);
+             reader.onerror = reject;
+             reader.readAsDataURL(file);
+         });
+    }
+
+    function GetDocid(VType) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "ImportExportExpensesEntry")',
+            type: 'GET',
+            data:{V_type:VType},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function GetEmployeeList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetEmployeeList", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $DropdownId = $('#ddlEmployee');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Employee Name -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(
+                            `<option
+                                data-empname="${item.EmpName}"
+                                data-fathername="${item.FATHER_NAME}"
+                                data-dept="${item.DEPT_CODE}"
+                               value="${item.EmpCd}"> ${item.EmpName} (${item.EmpCd}) | ${item.DEPT_CODE}
+                             </option>`
+                        );
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select Party -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Employee Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Employee Name Load failed", xhr.error);
+            }
+        });
+    }
+
+    function GetCreditDebitList(selectedId ,selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $(selectedId);
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select Party -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+                    // Initialize or refresh Select2
+                    $dropdown.select2({
+                        placeholder: "- Select Party -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Load failed: " + error);
+            }
+        });
+    }
+
+    function GetBillFromShipFromList(selectedId,selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $(selectedId);
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                            data-add1="${item.ADD1}"
+                            data-add2="${item.ADD2}"
+                            data-add3="${item.ADD3}"
+                            data-cityName="${item.CityName}"
+                            data-GstIn="${item.GSTIN}"
+                            data-cityCd="${item.CITY_CODE}"
+                            data-pinCd="${item.PINCODE}"
+                            data-stateCd="${item.STATE_CODE}"
+                            data-state="${item.state}"
+                            value="${item.CODE}">
+                            ${item.NAME}
+                        </option>`);
+                    });
+
+                    // Initialize or refresh Select2
+                    $dropdown.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Party Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Load failed: " + error);
+            }
+        });
+    }
+
+    function GetBillFromPartyFromAddress(partyCd, selectedId, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyAddress", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            data: { partyCd: partyCd },
+            success: function(response) {
+                if (response.status) {
+                     const $dropdown = $(selectedId);
+                    $dropdown.empty(response.data);
+                     $dropdown.append('<option selected disabled value="">- Select Address -</option>');
+
+                    $.each(response.data, function(index, item) {
+                        $dropdown.append(`
+                            <option
+                            data-add2="${item.ADD2}"
+                            data-add3="${item.ADD3}"
+                            data-cityName="${item.CityName}"
+                            data-GstIn="${item.GSTIN}"
+                            data-cityCd="${item.CITY_CODE}"
+                            data-pinCd="${item.PINCODE}"
+                            data-stateCd="${item.state}"
+                            data-state="${item.STATE_CODE}"
+                            value="${item.CODE}">
+                            ${item.ADD1}
+                            </option>
+                        `);
+                    });
+                       console.log(selectedValue);
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.prop('selectedIndex', 0);
+                    }
+                } else {
+                    toastr.error("Party Address Load failed");
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error("Party Address Load failed: " + error);
+            }
+        });
+    }
+
+    function GetTransactionList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetTransportationList", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+
+                    var $DropdownId = $('#ddlTransportName');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Transaction Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(
+                            `<option
+                            data-partyCode="${item.PARTY_CODE}"
+                            value="${item.CODE}">${item.NAME}</option>`
+                        );
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+                }
+                else
+                {
+                    toastr.error("Transation Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Transation Name Load failed", xhr.error);
+            }
+        });
+    }
+
+    function GetFreightDebitACList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetfreightDebAC", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $DropdownId = $('#ddlFreightDebitAC');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Account Name -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(
+                            `<option value="${item.CODE}">${item.NAME}</option>`
+                        );
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select Account -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Account Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Account Name Load failed", xhr.error);
+            }
+        });
+    }
+
+    function GetReferenceList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetReferenceList", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $DropdownId = $('#ddlRefNo');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Reference ID -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(
+                            `<option value="${item.DOC_ID}" data-WayBillNo="${item.WAYBILL_NO}" data-VType="${item.V_TYPE}" data-VNo="${item.V_NO}">${item.DOC_ID}</option>`
+                        );
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $DropdownId.val('').trigger('change');
+                    }
+                }
+                else {
+                    toastr.error("Reference Id Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Reference Id Load failed", xhr.error);
+            }
+        });
+    }
+
+    function GetTransitList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetTransitList", "ImportExportExpensesEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $DropdownId = $('#ddlTransitNo');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Transit ID -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(
+                            `<option value="${item.DOC_ID}">${item.DOC_ID}</option>`
+                        );
+                    });
+
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Transit Id Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Transit Id Load failed", xhr.error);
+            }
+        });
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblPurchaseReceiptIR tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+        <tr class="no-border-input" id="row${rowCount}">
+            <td><input type="text" class="form-control" id="TxtCode${rowCount}" /></td>
+            <td><select class="form-control item-id-dropdown" id="ddlItemName${rowCount}"><option value="">--Select--</option></select></td>
+            <td><input type="text" class="form-control" id="TxtHSNCode${rowCount}" /></td>
+            <td><input type="text" class="form-control" id="TxtUnit${rowCount}" /></td>
+            <td class="d-none"><input type="text" class="form-control" id="TxtUnitCode${rowCount}" /></td>
+            <td><input type="text" class="form-control" id="TxtNos${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td><input type="text" class="form-control" id="TxtRecQty${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtBillQty${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtRate${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td><input type="text" class="form-control" id="TxtAmount${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td>
+            <select class="form-control" id="TxtEmptyYN${rowCount}">
+                    <option value="">--Select--</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+            </select>
+            </td>
+            <td>
+            <select class="form-control" id="TxtInputYN${rowCount}">
+                    <option value="">--Select--</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+            </select>
+            </td>
+            <td><select class="form-control" id="ddlTaxType${rowCount}"><option value="">--Select--</option></select></td>
+            <td><input type="text" class="form-control" id="TxtPackPer${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td><input type="text" class="form-control" id="TxtPackAmt${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td><input type="text" class="form-control" id="TxtDiscPer${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td><input type="text" class="form-control" id="TxtDiscAmt${rowCount}" oninput="allowOnlyNumbers(this);"  /></td>
+            <td><input type="text" class="form-control" id="TxtCGSTPer${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtCGSTAmt${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtSGSTPer${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtSGSTAmt${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtIGSTPer${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtIGSTAmt${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtCESSPer${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtCESSAmt${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtVATPer${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtVATAmt${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtOthAmt${rowCount}" oninput="allowOnlyNumbers(this);" /></td>
+            <td><input type="text" class="form-control" id="TxtNetAmt${rowCount}" readonly/></td>
+            <td><select class="form-control" id="ddlMake${rowCount}"><option value="">--Select--</option></select></td>
+            <td><select class="form-control" id="ddlDepartment${rowCount}"><option value="">--Select--</option></select></td>
+            <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" /></td>
+            <td><input type="text" class="form-control" id="TxtLDRate${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtLDAmt${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtPOType${rowCount}" readonly /></td>
+            <td><input type="text" class="form-control" id="TxtPONo${rowCount}" readonly /></td>
+            <td>
+                <i class="fas fa-trash btn-delete btn-delete-row" title="Delete"></i>
+            </td>
+        </tr>`;
+
+        // Append the new row
+        tbody.append(newRow);
+
+        // Adjust <td> visibility based on <th> style
+        $('#tblPurchaseReceiptIR thead th').each(function (index) {
+            if ($(this).css('display') === 'none') {
+                $('#tblPurchaseReceiptIR tbody tr:last td').eq(index).css('display', 'none');
+            }
+        });
+
+        // Optional bindings
+        bindDropdownData(rowCount);
+        setEnterKeyFocusOnTable(itemRecords, rowCount);
+    }
+
+    function bindDropdownData(rowCount) {
+        const itemSelect = $(`#ddlItemName${rowCount}`);
+        const taxSelect = $(`#ddlTaxType${rowCount}`);
+        const makeSelect = $(`#ddlMake${rowCount}`);
+        const departmentSelect = $(`#ddlDepartment${rowCount}`);
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(`<option value="">${defaultText}</option>`);
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: 0
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} Load failed`);
+                            resolve();
+                        }
+                    },
+                    error: reject
+                });
+            });
+        };
+
+        return Promise.all([
+            loadDropdown('@Url.Action("GetMakeList", "ImportExportExpensesEntry")', makeSelect, "- Select Make -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            loadDropdown('@Url.Action("GetDepartmentList", "ImportExportExpensesEntry")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+            loadDropdown('@Url.Action("GetItemList", "ImportExportExpensesEntry")',
+            itemSelect,
+            "- Select Item -",
+            item => `<option
+            data-hsnCode="${item.HSN_CODE}"
+            data-unitCd="${item.UNIT_CODE}"
+            data-unitname="${item.UNIT_NAME}"
+            value="${item.CODE}">${item.NAME}
+            </option>`),
+
+            loadDropdown(
+                '@Url.Action("GetTaxList", "ImportExportExpensesEntry")',
+                taxSelect,
+                "- Select Tax -",
+                item => `
+                    <option
+                        value="${item.CODE}"
+                        data-CSgstPer="${item.CSGST_PER}"
+                        data-IgstPer="${item.IGST_PER}"
+                        data-TdsPer="${item.TDS_PER}"
+                        data-TcsPer="${item.TCS_PER}"
+                        data-VatPer="${item.VAT_PER}"
+                        data-OtherPer1="${item.OTH_PER}"
+                        data-OtherPer2="${item.OTH_PER2}">
+                        ${item.NAME}
+                    </option>`
+            )
+        ]);
+    }
+
+    function addAttachmentRow(data = {}) {
+        const $attachmentTbody = $('#tblAttachmentPRE tbody');
+
+        // Don't empty here if you're adding multiple rows
+        if ($attachmentTbody.find('tr').length === 0) {
+            $attachmentTbody.empty();
+        }
+            const row = $(`
+         <tr class="no-border-input">
+        <td>
+            <input type="file" class="form-control file-input" />
+            <input type="hidden" class="existing-file-path" value="${data.FILE_Path || ''}" />
+            <input type="hidden" class="existing-file-name" value="${data.FILE_NAME || ''}" />
+        </td>
+        <td>
+            <div class="file-preview mt-2"></div>
+        </td>
+        <td>
+            <input type="text" class="form-control file-name-input" placeholder="Enter file name" value="${data.FILE_NAME || ''}" />
+        </td>
+        <td>
+           <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+        </td>
+       </tr>
+       `);
+
+
+        $attachmentTbody.append(row);
+
+        const previewDiv = row.find('.file-preview');
+
+    if (data.FILE_Path) {
+        const fileExt = data.FILE_Path.split('.').pop().toLowerCase();
+        const fileName = data.FILE_NAME || 'View File';
+
+        // Build preview + download
+        let previewHtml = '';
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+            previewHtml = `<img src="${data.FILE_Path}" alt="Preview" style="max-width: 30px; max-height: 30px;" />`;
+        } else if (fileExt === 'pdf') {
+            previewHtml = `<iframe src="${data.FILE_Path}" style="width: 30px; height: 30px;"></iframe>`;
+        } else {
+            previewHtml = `<span>${fileName}</span>`;
+        }
+
+        // Add a download or view link
+        previewHtml += `<br><a href="${data.FILE_Path}" target="_blank" style="font-size: 10px;">Download</a>`;
+
+        previewDiv.html(previewHtml);
+    }
+
+        // Handle file input preview on change
+        row.find('.file-input').on('change', function () {
+            const file = this.files[0];
+            previewDiv.empty();
+            const fileNameInput = row.find('.file-name-input');
+
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                fileNameInput.val(file.name);
+
+                if (file.type.startsWith('image/')) {
+                    previewDiv.append(
+                        $('<img>', {
+                            src: fileURL,
+                            css: {
+                                width: '30px',
+                                height: '30px',
+                                objectFit: 'cover',
+                                border: '1px solid #ccc',
+                            }
+                        })
+                    );
+                } else if (file.type === 'application/pdf') {
+                    previewDiv.append(
+                        $('<iframe>', {
+                            src: fileURL,
+                            css: {
+                                width: '30px',
+                                height: '30px',
+                                border: '1px solid #ccc',
+                            }
+                        })
+                    );
+                } else {
+                    previewDiv.text('Preview not available');
+                }
+            }
+        });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    // function toNullableDate(val) {
+    //     const date = new Date(val);
+    //     return isNaN(date.getTime()) ? null : date.toISOString();
+    // }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function setFieldsEnabled(enabled) {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+     }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/ImportExportExpensesEntry/GetImpExpExpenseRecordsById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+
+            if (response.status) {
+                if (readOnly === 'true') {
+                        document.querySelectorAll("#tblPurchaseReceiptIR input, #tblPurchaseReceiptIR select, #tblPurchaseReceiptIR textarea, #tblPurchaseReceiptIR button")
+                       .forEach(el => el.disabled = true);
+                    $('.btn-add-row-last').hide();
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    document.querySelectorAll("#tblPurchaseReceiptIR input, #tblPurchaseReceiptIR select, #tblPurchaseReceiptIR textarea, #tblPurchaseReceiptIR button")
+                    .forEach(el => el.disabled = false);
+                    $('.btn-add-row-last').show();
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+
+                await fillFormFields(response.header);
+                await fillItemDetailsTable(response.detail);
+                $('#tblAttachmentPRE tbody').empty();
+                if (response.attachment) {
+                    if (Array.isArray(response.attachment)) {
+                        response.attachment.forEach(att => addAttachmentRow(att));
+                    } else if (typeof response.attachment === 'object') {
+                        addAttachmentRow(response.attachment);
+                    } else {
+                        addAttachmentRow();
+                    }
+                } else {
+                    addAttachmentRow();
+                }
+                 
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+
+    async function fillFormFields(data) {
+        if (!Array.isArray(data) || data.length === 0) {
+            console.error("Invalid or empty data array");
+            return;
+        }
+
+        const d = data[0];
+        const formatDate = val => val ? val.substring(0, 10) : '';
+        const safeSetDropdown = (selector, value) => {
+            const $el = $(selector);
+            if ($el.length && $el.find(`option[value="${value}"]`).length > 0) {
+                $el.val(value).trigger('change');
+            } else {
+                console.warn(`Dropdown ${selector} missing value: ${value}`);
+            }
+        };
+
+        // Drop-downs
+        GetBillFromShipFromList('#ddlBillFrom', d.PARTY_CODE);
+        GetBillFromShipFromList('#ddlShipFrom', d.SHIP_CODE);
+        GetBillFromShipFromList('#ddlTdsAccount', d.TDS_ACT);
+        GetCreditDebitList('#ddlCreditAC', d.CREDIT_AC);
+        GetCreditDebitList('#ddlDebitAC', d.DEBIT_AC);
+        GetCreditDebitList('#ddlFreightCreditAC');
+        GetReferenceList(d.REF_NO);
+        GetTransactionList(d.TRANSPORT_CODE);
+        GetEmployeeList(d.EMP_CODE);
+        safeSetDropdown('#ddlDocType', d.V_TYPE);
+        safeSetDropdown('#ddlCity', d.BILL_CITY);
+        safeSetDropdown('#ddlShipCity', d.SHIP_CITY);
+        safeSetDropdown('#ddlInputType', d.INPUT_TYPE);
+        safeSetDropdown('#ddlExpensesType', d.EXPS_TYPE);
+        safeSetDropdown('#ddlStatus', d.STATUS);
+        // safeSetDropdown('#ddlTdsAccount', d.TDS_ACT);
+
+
+        // Text fields
+        $('#NumDocNo').val(d.V_NO || '');
+        $('#DtDocDate').val(formatDate(d.V_DATE));
+        $('#TxtDocId').val(d.DOC_ID || '');
+        $('#txtAddLine1').val(d.BILL_ADD1 || '');
+        $('#txtAddLine2').val(d.BILL_ADD2 || '');
+        $('#txtAddLine3').val(d.BILL_ADD3 || '');
+        $('#txtPincode').val(d.BILL_PINCODE || '');
+        $('#txtGST').val(d.BILL_GST || '');
+        $('#txtShipAddLine1').val(d.SHIP_ADD1 || '');
+        $('#txtShipAddLine2').val(d.SHIP_ADD2 || '');
+        $('#txtShipAddLine3').val(d.SHIP_ADD3 || '');
+        $('#NumShipPincode').val(d.SHIP_PINCODE || '');
+        $('#txtShipGST').val(d.SHIP_GST || '');
+        $('#txtBillNo').val(d.BILL_NO || '');
+        $('#DtBillDate').val(formatDate(d.BILL_DATE));
+        $('#NumBOENo').val(d.CHALL_NO || '');
+        $('#DtBOEDate').val(formatDate(d.CHALL_DATE));
+        $('#txtGRNo').val(d.GR_NO || '');
+        $('#DtGRDate').val(formatDate(d.GR_DATE));
+        $('#txtVehicleNo').val(d.TRUCK_NO || '');
+        $('#txtContainerNo').val(d.CONTAINER_NO || '');
+        $('#txtRemarks').val(d.REMARKS || '');
+        $('#NumReceivedQty').val(d.RECD_QTY || '');
+        $('#NumBillQty').val(d.BILL_QTY || '');
+        $('#NumAmount').val(d.AMOUNT || '');
+        $('#NumDiscount').val(d.DISC_AMT || '');
+        $('#NumPacking').val(d.PACK_AMT || '');
+        $('#NumCGST').val(d.CGST_AMT || '');
+        $('#NumSGST').val(d.SGST_AMT || '');
+        $('#NumIGST').val(d.IGST_AMT || '');
+        $('#NumCESS').val(d.CESS_AMT || '');
+        $('#NumVAT').val(d.VAT_AMT || '');
+        $('#NumOtherAmt').val(d.OTH_AMT || '');
+        $('#NumTCSPer1').val(d.TCS_PER || '');
+        $('#NumTCSPer2').val(d.TCS_AMT || '');
+        $('#NumRoundOff').val(d.ROUND_OFF || '');
+        $('#NumFinalNetAmt').val(d.NAMOUNT || '');
+        $('#TxtPartyUsd').val(d.BILLAMT_USD || '');
+        $('#TxtTds1').val(d.TDS_AMT || '');
+
+        // Freight / Transport / EWB Fields
+        $('#FRT_BILLNO').val(d.FRT_BILLNO || '');
+        $('#FRT_BILLDT').val(formatDate(d.FRT_BILLDT));
+        $('#FRT_PASSDT').val(formatDate(d.FRT_PASSDT));
+        $('#FRT_CHQ').val(d.FRT_CHQ || '');
+        $('#FRT_REMARK').val(d.FRT_REMARK || '');
+        $('#TRP_GSTNO').val(d.TRP_GSTNO || '');
+        $('#TRP_BILLNO').val(d.TRP_BILLNO || '');
+        $('#TRP_BILLDATE').val(formatDate(d.TRP_BILLDATE));
+        $('#TRP_TAXTYPE').val(d.TRP_TAXTYPE || '');
+        $('#EWB_DATE').val(formatDate(d.EWB_DATE));
+        $('#EWB_EXPDATE').val(formatDate(d.EWB_EXPDATE));
+        $('#EWB_INVNO').val(d.EWB_INVNO || '');
+    }
+
+    async function fillItemDetailsTable(data) {
+        const $tbody = $('#tblPurchaseReceiptIR tbody');
+        $tbody.empty();
+
+        for (let i = 0; i < data.length; i++) {
+            addItemRecordRow();
+        }
+
+        await Promise.all(
+            data.map((_, index) => bindDropdownData(index + 1))
+        );
+
+        for (let index = 0; index < data.length; index++) {
+            const item = data[index];
+            const idx = index + 1;
+
+            const safeSetDropdown = (selector, value) => {
+                const $el = $(selector);
+                if ($el.find(`option[value="${value}"]`).length > 0) {
+                    $el.val(value).trigger('change');
+                } else {
+                    console.warn(`Value "${value}" not found in ${selector}`);
+                }
+            };
+
+            safeSetDropdown(`#ddlItemName${idx}`, item.ITEM_CODE);
+            safeSetDropdown(`#ddlMake${idx}`, item.MAKE_CODE);
+            safeSetDropdown(`#ddlDepartment${idx}`, item.DEPT_CODE);
+            safeSetDropdown(`#ddlTaxType${idx}`, item.TAX_CODE);
+
+            $(`#TxtHSNCode${idx}`).val(item.HSN_CODE || '');
+            $(`#TxtEmptyYN${idx}`).val(item.EMPTY_YN || '');
+            $(`#TxtInputYN${idx}`).val(item.INPUT_YN || '');
+            $(`#TxtUnit${idx}`).val(item.UOM_NAME || '');
+            $(`#TxtUnitCode${idx}`).val(item.UOM_CODE || '');
+            $(`#TxtNos${idx}`).val(item.NOS || '');
+            $(`#TxtRecQty${idx}`).val(item.RECD_QTY || '');
+            $(`#TxtBillQty${idx}`).val(item.BILL_QTY || '');
+            $(`#TxtRate${idx}`).val(item.RATE || '');
+            $(`#TxtAmount${idx}`).val(item.AMOUNT || '');
+            $(`#TxtPackPer${idx}`).val(item.PACK_PER || '');
+            $(`#TxtPackAmt${idx}`).val(item.PACK_AMT || '');
+            $(`#TxtDiscPer${idx}`).val(item.DISC_PER || '');
+            $(`#TxtDiscAmt${idx}`).val(item.DISC_AMT || '');
+            $(`#TxtCGSTPer${idx}`).val(item.CGST_PER || '');
+            $(`#TxtCGSTAmt${idx}`).val(item.CGST_AMT || '');
+            $(`#TxtSGSTPer${idx}`).val(item.SGST_PER || '');
+            $(`#TxtSGSTAmt${idx}`).val(item.SGST_AMT || '');
+            $(`#TxtIGSTPer${idx}`).val(item.IGST_PER || '');
+            $(`#TxtIGSTAmt${idx}`).val(item.IGST_AMT || '');
+            $(`#TxtCESSPer${idx}`).val(item.CESS_PER || '');
+            $(`#TxtCESSAmt${idx}`).val(item.CESS_AMT || '');
+            $(`#TxtVATPer${idx}`).val(item.VAT_PER || '');
+            $(`#TxtVATAmt${idx}`).val(item.VAT_AMT || '');
+            $(`#TxtOthAmt${idx}`).val(item.OTH_AMT || '');
+            $(`#TxtNetAmt${idx}`).val(item.NET_AMT || '');
+            $(`#TxtLDRate${idx}`).val(item.LAND_RATE || '');
+            $(`#TxtLDAmt${idx}`).val(item.LAND_AMT || '');
+            $(`#TxtPOType${idx}`).val(item.PO_TYPE || '');
+            $(`#TxtPONo${idx}`).val(item.PO_NO || '');
+            $(`#TxtRemarks${idx}`).val(item.REMARKS || '');
+        }
+      }
+
+
+      function enableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+       });      
+       logisticDetailIds.forEach(id => {
+       const el = document.getElementById(id);
+       if(el) el.disabled = false;
+       });
+       debitCreditNoteIds.forEach(id=> {
+       const el=document.getElementById(id);
+       if(el) el.disabled = false;
+       });
+
+      }
+
+    function disableAllFields() {
+      AllFieldsId.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });       
+       logisticDetailIds.forEach(id => {
+       const el = document.getElementById(id);
+       if(el) el.disabled = true;
+       });
+       debitCreditNoteIds.forEach(id=> {
+       const el=document.getElementById(id);
+       if(el) el.disabled = true;
+       });
+
+    }
+
+</script>
+

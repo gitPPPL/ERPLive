@@ -1,0 +1,70 @@
+﻿@{
+	ViewBag.Title = "Master Insert";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	<style>
+		.form-control {
+			font-size: 13px;
+		}
+		a {
+			font-size: 14px;
+			color: #007bff;
+		}
+		.main-body {
+			border: none;
+			outline: 2px solid #ccc;
+			padding: 10px;
+			margin-top: 10px;
+		}
+	</style>
+	<script>
+		function redirectToDashboard() {
+			window.location.href = '@Url.Action("Index", "Dashboard")';
+		}
+	</script>
+}
+
+<nav class="breadcrumb">
+	<span class="active" onclick="redirectToDashboard()" style="cursor: pointer;">Dashboard</span>
+	<span> &gt; </span>
+	<a href="#">Create Expense</a>
+</nav>
+@* <div class="row">
+	<div class="col-md-8">
+		<h5>Create Expense</h5>
+	</div>
+</div> *@
+<div class="row">
+	<div class="col-md-4">
+		<label style="font-size: 13px;"><b>RequestID</b></label>
+		<input type="text" class="form-control" placeholder="Auto fetch" />
+	</div>
+	<div class="col-md-4">
+		<label style="font-size: 13px;"><b>Amount</b></label>
+		<input type="text" class="form-control" placeholder="Amount" />
+	</div>
+	<div class="col-md-4">
+		<label style="font-size: 13px;"><b>Category</b></label>
+		<input type="text" class="form-control" placeholder="Category" />
+	</div>
+</div>
+
+<div class="row" style="margin-top:15px;">
+	<div class="col-md-4">
+		<label style="font-size: 13px;"><b>Date</b></label>
+		<input type="datetime-local" class="form-control" placeholder="Date" />
+	</div>
+	<div class="col-md-4">
+		<label style="font-size: 13px;"><b>Status</b></label>
+		<input type="text" class="form-control" placeholder="Status" />
+	</div>
+	@* <div class="col-md-4">
+      <label style="font-size: 13px;"><b>Designation</b></label>
+      <input type="text" class="form-control" placeholder="Designation" />
+    </div> *@
+</div>
+<br />
+<button id="btnSave" class="btn btn-primary mt-2">Submit</button>
+<br />
+<br />
+
+

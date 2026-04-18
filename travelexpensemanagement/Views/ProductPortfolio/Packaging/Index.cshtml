@@ -1,0 +1,339 @@
+﻿@{
+    ViewBag.Title = "Packaging";
+    Layout = "~/Views/Shared/ProductPortfolioLayout.cshtml";
+}
+
+<section class="container-fluid">
+    <!-- Heading -->
+    <div class="row">
+        <div class="offset-md-9 col-md-3 text-md-end text-center">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "Home")'"
+                        type="button"
+                        class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span class="d-none d-md-inline"> Back To Page</span>
+                </button>
+            </div>
+        </div>
+    </div>
+        <div class="section-heading">
+            <h1 class="main-heading">Packaging</h1>
+            <span class="heading-line"></span>
+        </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs justify-content-center product-tabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pphdpepackaging">
+                        <i class="fa-solid fa-boxes"></i>
+                        <span>PP/HDPE Bags</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pphdpefabric">
+                        <i class="fa-solid fa-square"></i>
+                        <span>PP/HDPE Fabric</span>
+                    </button>
+                </li>
+               
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#fibcbag">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <span>FIBC Bags</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <!-- Packaging -->
+        <div class="tab-pane fade show active" id="pphdpepackaging">
+            <h2 class="sub-heading">PP/HDPE bags for Packaging</h2>
+            @* PP & HDPE Bags for Packaging *@
+            <section class="main_section">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="~/ProductPortfolio/images/packaging1.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Sugar Bag</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging1tds.JPG"
+                                   data-title="Sugar Bag">TDS</a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="~/ProductPortfolio/images/packaging2.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">BOPP Bag</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging2tds.JPG"
+                                   data-title="BOPP Bag">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="~/ProductPortfolio/images/packaging3.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Cement Bag</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging3tds.JPG"
+                                   data-title="Cement Bag">TDS</a>
+                            </div>
+                        </div>
+                       
+                    </div>
+               
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="~/ProductPortfolio/images/packaging4.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Fertilizer Bag</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging4tds.JPG"
+                                   data-title="Fertilizer Bag">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="tab-pane fade" id="pphdpefabric">
+            <h2 class="sub-heading">PP/HDPE Fabric for Packaging</h2>
+            @* PP & HDPE Bags for Fabric *@
+            <section class="main_section">
+
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/fibre/packaging02.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Size - 12” – 90” Handling Range</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging5tds.JPG"
+                                   data-title="Size - 12” – 90” Handling Range">TDS</a>
+                            </div>
+                        </div>
+                       
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/fibre/packaging03.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">35 – 200 GSM Range</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging7tds.JPG"
+                                   data-title="35 – 200 GSM Range">TDS</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/fibre/packaging06.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Yellow</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging7tds.JPG"
+                                   data-title="Yellow">TDS</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+               
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/fibre/packaging04.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Natural</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging8tds.JPG"
+                                   data-title="Natural">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/fibre/packaging07.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">White</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging9tds.JPG"
+                                   data-title="White">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/fibre/packaging05.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">Mix Color</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/packaging10tds.JPG"
+                                   data-title="Mix Color">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+       
+        <div class="tab-pane fade" id="fibcbag">
+            @* FIBC Bag *@
+            <h2 class="sub-heading">FIBC Bags</h2>
+            <section class="main_section">
+                
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/packaging-j014.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">FIBC Bags</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/FIBCBagstds.JPG"
+                                   data-title="FIBC Bags">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card">
+                            <div class="product-image">
+                                <img src="https://pashupatigrp.com/images/packaging-j013.jpg" alt="HDPE Packaging">
+                            </div>
+                            <div class="content">
+                                <div class="content-inner">
+                                    <div class="title-container">
+                                        <div class="title">FIBC Liner</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn-tds" data-bs-toggle="modal" data-bs-target="#B2BpopupModal"
+                                   data-image="/ProductPortfolio/images/FIBCLinerTDS.JPG"
+                                   data-title="FIBC Liner">TDS</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</section>
+<div id="return-to-top">
+    <em class="fa fa-angle-up"></em>
+    <span class="hide__font">Return to top</span>
+</div>
+<!-- Modal Structure -->
+<div class="modal fade" id="B2BpopupModal" tabindex="-1" aria-labelledby="popupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+                <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;font-size: 20px;" aria-label="Close"></i>
+            </div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <img src="" alt="Image description" class="img-fluid" id="modalImage" />
+                @* <h5 id="modalTitle"></h5> *@
+            </div>
+        </div>
+    </div>
+</div>
+<!-- JavaScript -->
+<script src="~/js/portfoliopinsession.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!isPinSessionValid()) {
+            window.location.href = "/HomeLogin/Index";
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var tdsButtons = document.querySelectorAll('.btn-tds');
+
+        tdsButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var imageSrc = button.getAttribute('data-image');
+                var title = button.getAttribute('data-title');
+
+                document.getElementById('modalImage').src = imageSrc;
+                document.getElementById('modalTitle').textContent = title;
+            });
+        });
+    });
+</script>

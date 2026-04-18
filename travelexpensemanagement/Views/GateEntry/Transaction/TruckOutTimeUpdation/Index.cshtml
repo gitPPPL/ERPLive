@@ -1,0 +1,344 @@
+﻿@{
+    ViewBag.Title = "Truck Out Time Updation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Truck Out Time Updation</legend>
+    @*  <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "VehicleGatepassEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div> *@
+    <form id="TruckOutTimeUpdationForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtFromDate">From Date</label>
+                    <input type="date" class="form-control" id="DtFromDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtToDate">To</label>
+                    <input type="date" class="form-control" id="DtToDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlOutType">Out Type</label>
+                    <select class="form-control" id="ddlOutTime">
+                        <option value="">Select Out Type</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option>--Select Doc Type--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtVehicleNo">Vehicle No.</label>
+                    <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No.">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtQRCodeNo">QRCode No</label>
+                    <input type="text" class="form-control" id="TxtQRCodeNo" placeholder="Enter QRCode No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt button-right">
+                    <button class="btn btn-success" type="button" onclick="loadTruckOutData()"><i class="fa fa-download"></i> Load Data</button>
+                    <button class="btn btn-primary" type="button"><i class="fa fa-sync"></i> Update</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblTruckOutTimeUpdation" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Vno</th>
+                            <th>Inward Type</th>
+                            <th>Vdate</th>
+                            <th>Party Name</th>
+                            <th>Transport</th>
+                            <th>Vehicle No</th>
+                            <th>In Time</th>
+                            <th>Report Time</th>
+                            <th>Out Date</th>
+                            <th>Out Time</th>
+                            <th>Remarks</th>
+                            <th>Qrcode</th>
+                            <th>Out Allow</th>
+                            <th><input type="checkbox" /></th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+   
+        loadDocType();
+    });
+
+    function loadDocType() {
+        $.ajax({
+            url: '/TruckOutTimeUpdation/GetDocTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDocType');
+                ddl.empty();
+                ddl.append('<option value="">--Select Doc Type--</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function loadTruckOutData() {
+        const fDate = formatDate($('#DtFromDate').val());
+        const tDate = formatDate($('#DtToDate').val());
+        const outType = $('#ddlOutTime').val();
+        const docType = $('#ddlDocType').val();
+        const vehicleNo = $('#TxtVehicleNo').val();
+        const qrCodeNo = $('#TxtQRCodeNo').val();
+
+        $.ajax({
+            url: '/TruckOutTimeUpdation/GetTruckOutRecords',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                FromDate: fDate,
+                ToDate: tDate,
+                OutType: outType,
+                DocType: docType,
+                VehicleNo: vehicleNo,
+                QrCode: qrCodeNo,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                const data = res.gate1List || res.gate1 || [];
+                const totalCount = res.totalCount || 0;
+
+                console.log(res);
+
+                let tbody = $('#tblTruckOutTimeUpdation tbody');
+                tbody.empty();
+
+                if (data.length === 0) {
+                    tbody.append('<tr><td colspan="16" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);  // Fix here too
+                    return;
+                }
+
+                $.each(data, function (index, item) {
+                    const hasOutTime = item.ouT_DATE && item.ouT_TIME;
+
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${item.v_NO}</td>
+                            <td style="display:none;">${item.doC_ID}</td>
+                            <td>${item.v_NO || ''}</td>
+                            <td>${item.in_Type || ''}</td>
+                            <td>${item.v_Date || ''}</td>
+                            <td>${item.partY_CODE || ''}</td>
+                            <td>${item.transport || ''}</td>
+                            <td>${item.trucK_NO || ''}</td>
+                            <td>${item.v_TIME || ''}</td>
+                            <td>${item.r_TIME || ''}</td>
+                            <td>${item.ouT_DATE || ''}</td>
+                            <td>${item.ouT_TIME || ''}</td>
+                            <td>${item.remarks || ''}</td>
+                            <td>${item.QRCODE_NO || ''}</td>
+                            <td>${item.OUT_ALLOWED === 'Y' ? 'Yes' : 'No'}</td>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    onchange="onCheckboxChanged(this)"
+                                    ${hasOutTime ? 'checked disabled' : ''} />
+                            </td>
+                            <td style="display:none;">
+                                <i class="fas fa-edit text-primary" title="Edit" onclick="editTruckOut(${item.V_NO})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", status, error, xhr.responseText);
+                alert('Error loading truck out data: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button></li>`;
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button></li>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li><button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button></li>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button></li>`;
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button></li>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadTruckOutData();
+    }
+
+    function onCheckboxChanged(checkbox) {
+        const $row = $(checkbox).closest('tr');
+    
+        if (checkbox.checked && !checkbox.disabled) {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+    
+            const currentDate = `${yyyy}-${mm}-${dd}`;
+            const currentTime = `${hh}:${min}`;
+    
+            $row.find('td').eq(10).text(currentDate);
+            $row.find('td').eq(11).text(currentTime); 
+    
+            $row.attr('data-newlyChecked', 'true');
+        } else {
+            $row.find('td').eq(10).text('');
+            $row.find('td').eq(11).text('');
+            $row.removeAttr('data-newlyChecked');
+        }
+    }
+
+
+
+
+    $('#btn-save').on('click', function (e) {
+        e.preventDefault(); 
+        saveTruckOutUpdates();
+    });
+
+    function saveTruckOutUpdates() {
+        let rowsToSave = [];
+
+        $('#tblTruckOutTimeUpdation tbody tr[data-newlyChecked="true"]').each(function () {
+            const $row = $(this);
+            const outDate = $row.find('td').eq(10).text().trim();  // Out Date
+            const outTime = $row.find('td').eq(11).text().trim();  // Out Time
+
+            if (!outDate || !outTime) return;
+
+            const vNoText = $row.find('td').eq(0).text().trim(); // hidden V_NO
+            const docId = $row.find('td').eq(1).text().trim();   // hidden DOC_ID
+
+            const vNo = parseInt(vNoText);
+            if (isNaN(vNo)) {
+                console.warn(`Invalid V_NO: ${vNoText}`);
+                return;
+            }
+
+            rowsToSave.push({
+                V_NO: vNo,
+                DOC_ID: docId,
+                OUT_DATE: outDate,
+                OUT_TIME: outTime
+            });
+        });
+
+        if (rowsToSave.length === 0) {
+            toastr.warning('No rows selected for saving OUT entry.');
+            return;
+        }
+
+        console.log("Sending records:", rowsToSave);
+
+        $.ajax({
+            url: '/TruckOutTimeUpdation/SaveOutTimes',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(rowsToSave),
+            success: function (response) {
+                toastr.success('Out Time/Date updated successfully!');
+                loadTruckOutData();
+            },
+            error: function (xhr) {
+                console.error('Save failed:', xhr.responseText);
+                toastr.error('An error occurred while saving.');
+            }
+        });
+    }
+</script>

@@ -1,0 +1,273 @@
+﻿@{
+    ViewBag.Title = "Gram Size Conversion Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Gram Size Conversion Master</legend>
+    <form id="GramSizeConversionMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlItemType">Item Type</label>
+                    <select class="form-control" id="ddlItemType">
+                        <option value="">Select Item Type</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblGramSizeMaster" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>From Size</th>
+                            <th>To Size</th>
+                            <th>%</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "GramSizeConversionMasterList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const mode = urlParams.get('mode');
+
+    $(document).ready(async function () {
+        const $tbody = $('#tblGramSizeMaster tbody');
+
+        await DDLItemType();
+
+        if (typeof rowId !== 'undefined' && !isNaN(rowId) && rowId > 0) {
+            loadFormById(rowId);
+            if (typeof mode !== 'undefined' && mode === "view") {
+                setFormReadOnly();
+            }
+        }
+
+        addRow();
+             
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addRow();
+        });
+            
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+            $row.remove();
+
+         
+           
+
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+             
+        $("#btn-save").click(async function (e) {
+            e.preventDefault();
+            alert('gg');
+            const CODE = $("#TxtCode").val().trim();
+            const ItemType = $("#ddlItemType option:selected").text().trim();
+            const CAT_CODE = $("#ddlItemType").val().trim();
+
+            if (!ItemType) {
+                toastr.warning("Please select Item Type.");
+                $("#ddlItemType").focus();
+                return;
+            }
+
+            const tableData = collectTableData();
+            if (tableData.length === 0) {
+                toastr.warning("Please add valid rows.");
+                return;
+            }
+
+            const formData = {
+                CODE: CODE ? parseInt(CODE) : null,
+                ItemType: ItemType,
+                CAT_CODE: CAT_CODE,
+                tableData: tableData
+            };
+
+            console.log('formData', formData);
+
+            $("#btn-save").prop("disabled", true);
+
+            try {
+                const response = await $.ajax({
+                    url: '/GramSizeConversionMaster/SaveTempMaster',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData)
+
+                });
+
+                toastr.success(response.message || "Saved successfully!");
+                   setTimeout(() => window.location.href = '/GramSizeConversionMasterList/Index', 1000);
+            } catch (xhr) {
+                console.error("Error: ", xhr.responseText);
+                toastr.error("Something went wrong.");
+            } finally {
+                $("#btn-save").prop("disabled", false);
+            }
+        });
+
+    });
+
+    function addRow(data = {}) {
+        const $tbody = $('#tblGramSizeMaster tbody');
+        $tbody.find('.btn-add-action').remove();
+
+        const row = `
+            <tr>
+                <td><input type="text" class="form-control" value="${data.fromSize || ''}" /></td>
+                <td><input type="text" class="form-control" value="${data.toSize || ''}" /></td>
+                <td><input type="number" class="form-control" value="${data.percentage || ''}" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+        $tbody.append(row);
+    }
+
+     function collectTableData() {
+        return $('#tblGramSizeMaster tbody tr').map(function () {
+            const cells = $(this).find('td input');
+            const FromSize = cells.eq(0).val()?.trim();
+            const ToSize = cells.eq(1).val()?.trim();
+            const Per = cells.eq(2).val()?.trim();
+
+            if (FromSize && ToSize && Per) {
+                return { FromSize, ToSize, Per: parseFloat(Per) };
+            }
+        }).get(); // Convert jQuery object to plain array
+    }
+
+
+    async function DDLItemType() {
+        try {
+            const res = await fetch('/GramSizeConversionMaster/DDLItemType');
+            const data = await res.json();
+            const ddl = $('#ddlItemType');
+            ddl.empty().append('<option value="">-- Select Item Type --</option>');
+            data.forEach(item => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+        } catch (error) {
+            console.error("Error loading Item Type:", error);
+        }
+    }
+     
+    function loadFormById(code) {
+        $.ajax({
+            url: '/GramSizeConversionMasterList/GetDataByCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No Loom Incentive Parameter Master found for the given ID.");
+                    return;
+                }
+                console.log('Res',res);
+
+
+                populateForm(res.data);
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    function populateForm(data) {
+        $("#TxtCode").val(data.code);
+        $("#ddlItemType").val(data.caT_CODE);
+        const $tbody = $('#tblGramSizeMaster tbody');
+        $tbody.empty();
+            
+        if (Array.isArray(data.tableData) && data.tableData.length > 0) {
+            data.tableData.forEach(row => {
+                addRow({
+                    fromSize: row.fromSize,
+                    toSize: row.toSize,
+                    percentage: row.per
+                });
+            });
+        } else {
+           
+            addRow();
+        }
+    }
+
+       function setFormReadOnly() {
+  
+        $('#btn-save, #btn_cancel').hide();
+
+        
+        $('#GramSizeConversionMasterForm')
+            .find('input, select, textarea, button')
+            .prop('disabled', true);
+
+     
+        $('#GramSizeConversionMasterForm')
+            .find("button:contains('Back to list')")
+            .prop('disabled', false);
+
+     
+        $('#tblGramSizeMaster')
+            .find('.btn-add-row, .btn-add-action, .btn-delete-action')
+            .remove();
+
+     
+        $('#GramSizeConversionMasterForm').css({
+            'pointer-events': 'none',
+            'opacity': '0.85'
+        });
+
+       
+        $('#GramSizeConversionMasterForm button:contains("Back to list")')
+            .css('pointer-events', 'auto');
+    }
+
+
+</script>

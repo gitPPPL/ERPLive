@@ -1,0 +1,340 @@
+﻿@{
+	ViewBag.Title = "Dept Desig Req Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Dept Desig Req Master</legend>
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+				<button id="btnbacklist"
+						onclick="window.location.href='@Url.Action("Index", "DeptDesigReqMasterList")'" type="button" class="btn btn-primary">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<form id="DeptDesigReqMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlDepartment">Department</label>
+					<select class="form-control" id="ddlDepartment" name="Department">
+						<option value="">Select Department</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlDesignation">Designation</label>
+					<select class="form-control" id="ddlDesignation" name="Designation">
+						<option value="">Select Designation</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="ddlWorkPlace">Work Place</label>
+					<select class="form-control" id="ddlWorkPlace" name="WorkPlace">
+						<option value="">Select Work Place</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NumShiftA">Shift A</label>
+					<input type="number" class="form-control" id="NumShiftA" name="ShiftA" placeholder="Enter Shift A Count">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NumShiftB">Shift B</label>
+					<input type="number" class="form-control" id="NumShiftB" name="ShiftB" placeholder="Enter Shift B Count">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NumShiftC">Shift C</label>
+					<input type="number" class="form-control" id="NumShiftC" name="ShiftC" placeholder="Enter Shift C Count">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NumShiftG">Shift G</label>
+					<input type="number" class="form-control" id="NumShiftG" name="ShiftG" placeholder="Enter Shift G Count">
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="offset-md-7 col-md-2">
+				<div class="active-toggle btn-align">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE">
+						<span class="slider"></span>
+					</label>
+					<span class="label-status" id="statusText">Inactive</span>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="btn-last">
+					<button id="btnSaves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+					<button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+
+
+@* Cancel Button Popup *@
+<script>
+		document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@
+
+@* Drop down load  and form load *@
+<script>
+	$(document).ready(function () {
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		  const mode = urlParams.get('mode');
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+
+
+	 $.when(LoadDropDown()).then(() => {
+		if (rowId) {
+		  $.when(LoadFormByID(rowId)).then(() => {
+			if (isReadOnly) setFormReadOnly();
+		  });
+		}
+	  });
+
+
+	   if (mode === "view") {
+		setFormReadOnly();
+		$('#DeptDesigReqMasterForm').after(
+		  '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+		);
+	  }
+
+
+
+
+		  async function LoadDropDown() {
+		await Promise.all([DDlDepartment(), DDlDesignation(),DDlPlace() ]);
+	  }
+
+
+
+	async function DDlDepartment() {
+		try {
+
+			const response = await fetch('/DeptDesigReqMaster/DDLDeptMaster');
+			if (!response.ok) {
+				throw new Error('Network response was not ok ' + response.statusText);
+			}
+			const data = await response.json();
+			const ddl = $('#ddlDepartment');
+			ddl.empty();
+			ddl.append('<option value="" selected>-- Select Department --</option>');
+
+
+			data.forEach(item => {
+				ddl.append(`<option value="${item.value}">${item.text}</option>`);
+			});
+		} catch (error) {
+			console.error("Error loading departments: ", error);
+			alert('Error loading departments: ' + error.message);
+		}
+	}
+		
+	async function DDlDesignation() {
+		try {
+
+			const response = await fetch('/DeptDesigReqMaster/DDLDesigination');
+			if (!response.ok) {
+				throw new Error('Network response was not ok ' + response.statusText);
+			}
+			const data = await response.json();
+
+			const ddl = $('#ddlDesignation');
+			ddl.empty();  
+			ddl.append('<option value="" selected>-- Select Designation --</option>');
+
+		
+			data.forEach(item => {
+				ddl.append(`<option value="${item.value}">${item.text}</option>`);
+			});
+		} catch (error) {
+			console.error("Error loading designations: ", error);
+			alert('Error loading designations: ' + error.message);
+		}
+	}
+
+	async function DDlPlace() {
+		try {
+
+			const response = await fetch('/DeptDesigReqMaster/DDLPlaceMaster');
+			if (!response.ok) {
+				throw new Error('Network response was not ok ' + response.statusText);
+			}
+			const data = await response.json();
+
+			const ddl = $('#ddlWorkPlace');
+			ddl.empty();  
+			ddl.append('<option value="" selected>-- Select Place --</option>');
+
+			data.forEach(item => {
+				ddl.append(`<option value="${item.value}">${item.text}</option>`);
+			});
+		} catch (error) {
+			console.error("Error loading places: ", error);
+			alert('Error loading places: ' + error.message);
+		}
+	}
+	});
+
+
+	  function setFormReadOnly() {
+		$('#DeptDesigReqMasterForm :input').prop('disabled', true);
+		$('#btnSaves').hide();
+	  }
+
+
+
+
+	$("#btnSaves").click(function (e) {
+		e.preventDefault();
+		var DEPT_CODE = $("#ddlDepartment").val();
+		var DESG_CODE = $("#ddlDesignation").val();
+		var PLACE_CODE = $("#ddlWorkPlace").val();
+		var SHIFT_A = $("#NumShiftA").val();
+		var SHIFT_B = $("#ShiftB").val();
+		var SHIFT_C = $("#NumShiftC").val();
+		var SHIFT_G = $("#NumShiftG").val();
+		var isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+		var CODE = $("#CODE").val().trim();
+		var action = (isNaN(CODE) || CODE <= 0) ? 'INSERT' : 'UPDATE';
+
+			if (!DEPT_CODE) return toastr.warning("Please Select Department.");
+			if (!DESG_CODE) return toastr.warning("Please Select Designation.");
+			if (!PLACE_CODE) return toastr.warning("Please Select Work Place.");
+					
+		var formData = {
+			DEPT_CODE: parseFloat(DEPT_CODE) || 0,
+			DESG_CODE: parseFloat(DESG_CODE) || 0,
+			PLACE_CODE: parseFloat(PLACE_CODE) || 0,
+			SHIFT_A: parseFloat(SHIFT_A) || 0,
+			SHIFT_B: parseFloat(SHIFT_B) || 0,
+			SHIFT_C: parseFloat(SHIFT_C) || 0,
+			SHIFT_G: parseFloat(SHIFT_G) || 0,
+			ACTIVE: isActive,
+			CODE: (CODE && !isNaN(CODE)) ? CODE : null,
+			ACTION: action || ''
+		};
+
+
+	$("#btnSaves").prop("disabled", true);
+		$.ajax({
+			url: '/DeptDesigReqMaster/SavedDeptReqMaster',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(formData),
+			success: function (response) {
+				toastr.success(response.message || "Saved successfully!");
+				$("#DeptDesigReqMasterForm")[0].reset();
+						  setTimeout(() => window.location.href = '/DeptDesigReqMasterList/Index', 1000);
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				toastr.error("Something went wrong.");
+			},
+			complete: function () {
+				$("#btnSaves").prop("disabled", false);  
+			}
+		});
+	});
+
+
+
+	function LoadFormByID(code) {
+		$.ajax({
+			url: '/DeptDesigReqMasterList/GetDataByCode',
+			type: 'GET',
+			data: { code },
+			success: function (res) {
+				if (!res.success || !res.data) {
+					toastr.warning("No Data found for the given ID.");
+					return;
+				}
+
+				const data = res.data;
+				$('#CODE').val($.trim(data.code));
+				$('#NumShiftA').val($.trim(data.shifT_A));
+				$('#NumShiftB').val($.trim(data.shifT_B));
+				$('#NumShiftC').val($.trim(data.shifT_C));
+				$('#NumShiftG').val($.trim(data.shifT_G));
+				$('#ddlDepartment').val(data.depT_CODE);
+				$('#ddlDesignation').val(data.desG_CODE);
+				$('#ddlWorkPlace').val(data.placE_CODE);
+
+				// Handle toggle
+				const isActive = data.active === 1 || data.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText')
+					.text(isActive ? 'Active' : 'Inactive')
+					.removeClass('active inactive')
+					.addClass(isActive ? 'active' : 'inactive');
+			},
+			error: function (xhr) {
+				toastr.error("Error loading data: " + xhr.responseText);
+			}
+		});
+	}
+
+
+</script>
+
+@* Drop Down Load End
+ *@
+
+
+
+
+

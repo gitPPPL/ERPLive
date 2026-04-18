@@ -1,0 +1,935 @@
+﻿@{
+    ViewBag.Title = "Extra Duty Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Extra Duty Entry</legend>
+    <form id="ExtraDutyEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtNumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="txtNumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <div class="input-divide">
+                        <input type="date" class="form-control" id="txtDocDate" />
+                        <input type="text" class="form-control" id="txtDocID" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDepartment">Department</label>
+                    <select class="form-control" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="btn-mt button-right">
+                    <button id="btn_Calc" type="button" class="btn btn-success"><i class="fa fa-download"></i>Calc</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblExtraDutyEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Employee code</th>
+                            <th>Employee Name</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Shift</th>
+                            <th>Required</th>
+                            <th>Present</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                            <th>Reason</th>
+                            <th>Hod Name</th>
+                            <th>Auth. By</th>
+                            <th>Approval</th>
+                            <th>Approv Remarks</th>
+                            <th>Remarks</th>
+                            <th>Dur</th>
+                            <th>Mac Time</th>
+                            <th style="display:none">ref type</th>
+                            <th style="display:none">ref no</th>
+                            <th style="display:none">gate no</th>
+                            <th style="display:none">dept code</th>
+                            <th style="display:none">desg Code</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "ExtraDutyEntryList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+@* <fieldset>
+    <legend class="legend-field">Extra Duty Entry</legend>
+    <form id="ExtraDutyEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtNumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="txtNumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <div class="input-divide">
+                        <input type="date" class="form-control" id="DtDocDate"/>
+                        <input type="text" class="form-control" id="txtDocID" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDepartment">Department</label>
+                    <select class="form-control" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="btn-mt button-right">
+                    <button id="btn_Calc" type="button" class="btn btn-success"><i class="fa fa-download"></i>Calc</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblExtraDutyEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Employee code</th>
+                            <th>Employee Name</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Before</th>
+                            <th>After</th>
+                            <th>Shift</th>
+                            <th>Required</th>
+                            <th>Present</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                            <th>Reason</th>
+                            <th>Hod Name</th>
+                            <th>Auth. By</th>
+                            <th>Approval</th>
+                            <th>Approv Remarks</th>
+                            <th>Remarks</th>
+                            <th>Dur</th>
+                            <th>Mac Time</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset> *@
+
+<script>
+
+    const jsGateEntry = {
+
+          compCode : '@ViewBag.CompCode',
+          branchCode :'@ViewBag.BranchCode',
+          yearCode : '@ViewBag.YearCode',
+
+          currentPage : 1,
+          pageSize : 10,
+          rowIndex : 0,
+          AddEditMode : '',
+          paramdocId : 0,
+
+          Initialize : function() {
+              this.GetDocTypeAsync(null);
+              this.GetDepartmentAsync(null);
+              $('#ddlDocType').trigger("change");
+
+              this.addNewRowBelow(this.rowIndex);
+
+              $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+                  //addRow();
+
+                  jsGateEntry.addNewRowBelow(jsGateEntry.rowIndex);
+                  jsGateEntry.rowIndex ++;
+              });
+
+              this.rowIndex ++;
+          },
+
+
+
+          collectFormData: function() {
+              // return {
+              //     DocType:  this.toNullableString($('#ddlDocType').val()),
+              //     Vno: this.toNullableString($('#txtNumDocNo').val()),
+              //     DocDate: this.toNullableString($('#txtDocDate').val()),
+              //     Department:  this.toNullableString($('#ddlDepartment').val()),
+              //     tableData: this.collectTableData()
+              // }
+
+              return{
+                  header: {
+                      DocType: this.toNullableString($('#ddlDocType').val()),
+                      Vno:this.toNullableString($('#txtNumDocNo').val()),
+                      DocDate:  this.toNullableString($('#txtDocDate').val()),
+                      Department:   this.toNullableString($('#ddlDepartment').val()),
+                      Action: this.AddEditMode
+                  },
+                  details: {
+                      tableData:this.collectTableData()
+                  }
+              }
+           },
+
+
+          collectTableData: function() {
+             let tdata = [];
+
+              $('#tblExtraDutyEntry tbody tr').each(function (rowIndex) {
+                  const $row = $(this);
+                  let rowdata = {
+                        EmpCode: $row.find(`#EMP_CODE_${rowIndex}`).val(),
+                        EmpName: $row.find(`#EMP_NAME_${rowIndex} option:selected`).text(),
+                        Department: $row.find(`#DEPT_NAME_${rowIndex}`).val(),
+                        Designation: $row.find(`#DESG_NAME_${rowIndex}`).val(),
+                        Before: $row.find(`#BEFORE_${rowIndex}`).val(),
+                        After: $row.find(`#AFTER_${rowIndex}`).val(),
+                        Shift: $row.find(`#SHIFT_${rowIndex}`).val(),
+                        Required: $row.find(`#REQUIRED_${rowIndex}`).val(),
+                        Present: $row.find(`#PRESENT_${rowIndex}`).val(),
+                        InTime: $row.find(`#IN_TIME_${rowIndex}`).val(),
+                        OutTime: $row.find(`#OUT_TIME_${rowIndex}`).val(),
+                        Reason: $row.find(`#REASON_${rowIndex}`).val(),
+                        HodName: $row.find(`#HOD_NAME_${rowIndex}`).val(),
+                        AuthBy: $row.find(`#AUTH_BY_${rowIndex}`).val(),
+                        Approval: $row.find(`#APPROVAL_${rowIndex}`).val(),
+                        ApprovalRemarks: $row.find(`#APPROVAL_REMARKS_${rowIndex}`).val(),
+                        Remarks: $row.find(`#REMARKS_${rowIndex}`).val(),
+                        Duration: $row.find(`#DURATION_${rowIndex}`).val(),
+                        MacTime: $row.find(`#MAC_TIME_${rowIndex}`).val(),
+                        RefType: $row.find(`#REF_TYPE_${rowIndex}`).val(),
+                        RefNo: $row.find(`#REF_NO_${rowIndex}`).val(),
+                        GateNo: $row.find(`#GATE_NO_${rowIndex}`).val(),
+                        DeptCode: $row.find(`#DEPT_CODE_${rowIndex}`).val(),
+                        DesgCode: $row.find(`#DESG_CODE_${rowIndex}`).val(),
+                        Action: 1
+                  };
+                  tdata.push(rowdata);
+               });
+              return tdata;
+          },
+
+          SaveMasterData : function (masterData)  {
+              const Namee = masterData?.header.DocDate?.trim();
+              if (!Namee) {
+                  toastr.warning("Doc date is required.");
+                  return;
+              }
+
+              // this.checkExistOrNot(Namee)
+              //     .done(function (data) {
+              //         if (data?.status && data?.exists) {
+              //             toastr.warning("Duplicate emp Name");
+              //             return;
+              //         }
+
+
+
+                      $.ajax({
+                          url: '@Url.Action("SaveExtraDuty", "ExtraDutyEntry")',
+                          type: 'POST',
+                          contentType: 'application/json',
+                          data: JSON.stringify(masterData),
+                          success: function (response) {
+                              if (response?.success) {
+
+                                  toastr.success('Data saved successfully.');
+                                 // this.resetFields();
+                                  setTimeout(() => {
+                                      window.location.href = '/ExtraDutyEntry/Index';
+                                  }, 1500);
+                              } else {
+                                  toastr.error(response?.message || "Save failed. Please try again.");
+                              }
+                          },
+                          error: function () {
+                              toastr.error("Error occurred while saving. Please contact admin.");
+                          }
+                      });
+
+                  // })
+                  // .fail(function () {
+                  //     toastr.error("Error while checking Department Category name.");
+                  // });
+
+          },
+
+          EditMasterData: function  (masterData) {
+              if (PreviousInputDt !== masterData.Name) {
+                  // checkExistOrNot(masterData.Name)
+                  //     .done(function (data) {
+                          if (data?.status && data?.exists) {
+                              toastr.warning("Duplicate Department Category Name");
+                              return;
+                          }
+                          this.UpdateMasterData(masterData);
+                      // })
+                      // .fail(function () {
+                      //     toastr.error("Error while checking Department Category Name.");
+                      // });
+              } else {
+                  this.UpdateMasterData(masterData);
+              }
+          },
+
+          UpdateMasterData : function (masterData) {
+              $.ajax({
+                  url: '/ExtraDutyEntry/UpdateDepCategoryMast',
+                  type: 'POST',
+                  contentType: 'application/json',
+                  data: JSON.stringify(masterData),
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response?.status) {
+                          toastr.success('Data updated successfully.');
+                          this.resetFields();
+                          setTimeout(() => {
+                                  window.location.href = '/ExtraDutyEntry/Index';
+                          }, 1500);
+                      } else {
+                          toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Data not updated: " + error);
+                  }
+              });
+          },
+
+           checkExistOrNot : function (inputData) {
+
+               return true;
+
+              return $.ajax({
+                  url: '/ExtraDutyEntry/getExistOrNot',
+                  type: 'GET',
+                  dataType: 'json',
+                  data: { inputData: inputData }
+              });
+           },
+
+           GetDocData :  function (docId, readOnly){
+              $.ajax({
+                  url: '/ExtraDutyEntry/GetExtradutyDatabyId',
+                  type: 'GET',
+                  data: { DocNo: docId },
+                  success: function (res) {
+                      if (res.status && res.data) {
+                          jsGateEntry.fillFormFields(res.data);
+                          if (readOnly === 'true') {
+                              $('input,select, #DdActive').prop('disabled', true);
+                              $('#btn-save, #cancelBtn, .btn-add-row, .btn-delete-action, .btn-add-action').hide();
+                          } else {
+                              $('input,select, #DdActive').prop('disabled', false);
+                              $('#btn-save, #cancelBtn, .btn-add-row, .btn-delete-action, .btn-add-action').show();
+                          }
+                      } else {
+                          toastr.warning('No data found for this ID.');
+                      }
+                  },
+                  error: function () {
+                      toastr.error('Failed to load data.');
+                  }
+              });
+          },
+
+          fillFormFields : function (dt) {
+
+            const headerData =  dt.header;
+
+            $('#ddlDocType').val(headerData.docType).trigger('change');
+            $('#txtDocDate').val(headerData.docDate);
+            //$('#ddlDepartment').val(headerData.department).trigger('change');
+            let docid  =  headerData.docType + dt.header.vno;
+            $('#txtDocID').val(docid);
+            $('#txtNumDocNo').val(headerData.vno);
+
+            // $('#tblExtraDutyEntry tbody').empty();
+            this.rowIndex = 1;
+            const rows = dt.details.tableData;
+
+            rows.forEach((item, index) => {
+                if (index > 0) {
+                    jsGateEntry.rowIndex = index;
+                    jsGateEntry.addNewRowBelow(jsGateEntry.rowIndex);
+                }
+
+                const ri = index;
+
+                Promise.all([
+                    jsGateEntry.loadDeptList(`#DEPT_NAME_${ri}`),
+                    jsGateEntry.loadDesgList(`#DESG_NAME_${ri}`),
+                    jsGateEntry.loadEmpList(`#EMP_NAME_${ri}`),
+                    jsGateEntry.loadHODList(`#HOD_NAME_${ri}`, 0),
+                    jsGateEntry.loadReasonList(`#REASON_${ri}`),
+                    jsGateEntry.loadShiftList(`#SHIFT_${ri}`)
+                ]).then(() => {
+                    debugger;
+
+                    $('#EMP_CODE_' + ri).val(item.empCode);
+                    $('#EMP_NAME_' + ri).val(item.empCode).trigger('change');
+                    $('#DEPT_NAME_' + ri).val(item.deptCode).trigger('change');
+                    $('#DESG_NAME_' + ri).val(item.desgCode).trigger('change');
+                    $('#BEFORE_' + ri).val(item.before);
+                    $('#AFTER_' + ri).val(item.after);
+                    $('#SHIFT_' + ri).val(item.shift).trigger('change');
+                    $('#REQUIRED_' + ri).val(item.required);
+                    $('#PRESENT_' + ri).val(item.present);
+                    $('#IN_TIME_' + ri).val(item.inTime);
+                    $('#OUT_TIME_' + ri).val(item.outTime);
+                    $('#REASON_' + ri).val(item.reason).trigger('change');
+                    $('#HOD_NAME_' + ri).val(item.hodName).trigger('change');
+                    $('#AUTH_BY_' + ri).val(item.authBy);
+                    $('#APPROVAL_' + ri).val(item.approval);
+                    $('#APPROVAL_REMARKS_' + ri).val(item.approvalRemarks);
+                    $('#REMARKS_' + ri).val(item.remarks);
+                    $('#DURATION_' + ri).val(item.duration);
+                    $('#MAC_TIME_' + ri).val(item.macTime);
+                    $('#REF_TYPE_' + ri).val(item.refType);
+                    $('#REF_NO_' + ri).val(item.refNo);
+                    $('#GATE_NO_' + ri).val(item.gateNo);
+                    $('#DEPT_CODE_' + ri).val(item.deptCode);
+                    $('#DESG_CODE_' + ri).val(item.desgCode);
+
+                });
+
+             });
+          },
+
+          getQueryParam : function (param){
+              const urlParams = new URLSearchParams(window.location.search);
+              return urlParams.get(param);
+          },
+
+          loadFormData : function() {
+              this.paramdocId = this.getQueryParam('id');
+              let readOnly = this.getQueryParam('readOnly');
+
+              if (this.paramdocId) {
+                  this.GetDocData(this.paramdocId, readOnly);
+                  this.AddEditMode = "UPDATE";
+              }else{
+                  this.AddEditMode = "INSERT";
+              }
+          },
+
+          toNullableInt : function (v) {
+              const t = String(v ?? '').trim();
+              return t === '' ? null : parseInt(t, 10);
+          },
+
+          toNullableString : function (v)  {
+              const t = String(v ?? '').trim();
+              return t === '' ? null : t;
+          },
+
+          GetDepartmentAsync :  function (selectedValue) {
+                  return new Promise((resolve, reject) => {
+                  $.ajax({
+                      url: '@Url.Action("GetDepartmentList", "ExtraDutyEntry")',  // PayGatePas
+                      type: 'GET',
+                      dataType: 'json',
+                      success: function (response) {
+
+                          if (response.status) {
+                              const $dropdown = $('#ddlDepartment');
+                              $dropdown.empty();
+                              // $dropdown.append('<option value="">-select doc Type-</option>');
+
+                              $.each(response.data, function (index, item) {
+                                  $dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+                              });
+
+                              if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                                  $dropdown.val(selectedValue).trigger('change');
+                              } else {
+                                  $dropdown.prop('selectedIndex', 0);
+                              }
+
+                              resolve();
+                          } else {
+                              reject("Invalid response status.");
+                          }
+                      },
+                      error: function (xhr, status, error) {
+                          toastr.error("Department list Load failed: " + error);
+                          reject(error);
+                      }
+                  });
+              });
+          },
+
+          GetDocTypeAsync : function (selectedValue)  {
+
+                  return new Promise((resolve, reject) => {
+                  $.ajax({
+                      url: '@Url.Action("GetDocumentTypeList", "ExtraDutyEntry")',  // PayGatePas
+                      type: 'GET',
+                      dataType: 'json',
+                      success: function (response) {
+
+                          if (response.status) {
+                              const $dropdown = $('#ddlDocType');
+                              $dropdown.empty();
+                              // $dropdown.append('<option value="">-select doc Type-</option>');
+
+                              $.each(response.data, function (index, item) {
+                                  $dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+                              });
+
+                              if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                                  $dropdown.val(selectedValue).trigger('change');
+                              } else {
+                                  $dropdown.prop('selectedIndex', 0);
+                              }
+
+                              $('#ddlDocType').trigger("change");
+
+                              resolve();
+                          } else {
+                              reject("Invalid response status.");
+                          }
+                      },
+                      error: function (xhr, status, error) {
+                          toastr.error("Document Type Load failed: " + error);
+                          reject(error);
+                      }
+                  });
+              });
+          },
+
+          GetDocid : function (VType)  {
+              $.ajax({
+                  url: '@Url.Action("GetMaxVNo", "ExtraDutyEntry")',
+                  type: 'GET',
+                  data:{V_type:VType},
+                  success: function (response) {
+                      console.log(response);
+                      if (response.status === true && response.data) {
+                          $('#txtNumDocNo').val(response.data.vNo || '');
+                          $('#txtDocID').val(response.data.docId || '');
+                      } else {
+                          $('#txtNumDocNo').val('');
+                          $('#txtDocID').val('');
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error('Error fetching Doc ID:', error);
+                  }
+              });
+          },
+
+
+          addNewRowBelow : function (rowIndex) {
+
+              let lastRow = $('#tblExtraDutyEntry tbody tr:last');
+              if (lastRow.length > 0) {
+                  let lastRowId = lastRow.find('select[id^="EMP_NAME"]').data('id');
+                  if (lastRowId) {
+                      let lastIndex = lastRowId
+
+                      let empNameVal = $(`#EMP_NAME_${lastIndex} option:selected`).text();
+                      let empCodeVal = $(`#EMP_CODE_${lastIndex}`).val();
+
+                      if (!jsGateEntry.getQueryParam('id')){
+                          if (!empNameVal) {
+                              toastr.warning('Please select an Emp Name before adding a new row.');
+                              $(`#ITEM_NAME_${lastIndex}`).focus();
+                              return;
+                          }
+
+                          if (!empCodeVal || empCodeVal.trim() === '') {
+                              toastr.warning('Please enter an Emp Code before adding a new row.');
+                              $(`#EMP_CODE_${lastIndex}`).focus();
+                              return;
+                          }
+                      }
+
+                  }
+              }
+
+
+              const rowHtml = `
+                  <tr class="no-border-input">
+                  <td style="display:none;"></td>
+                  <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="EMP_CODE_${rowIndex}"  data-id=${rowIndex}  name="EMP_CODE[${rowIndex}]" type="text" class="form-control-sm" readonly/></td>
+                  <td>
+                      <select style="min-width: 150px; max-width: 300px;"  class="form-control" id="EMP_NAME_${rowIndex}" data-id=${rowIndex} name="EMP_NAME[${rowIndex}]" class="form-control-sm">
+                          <option value="">-- Select Emp name --</option>
+                      </select>
+                  </td>
+                  <td>
+                      <select style="min-width: 100px; max-width: 200px;" class="form-control" id="DEPT_NAME_${rowIndex}" data-id=${rowIndex} name="DEPT_NAME[${rowIndex}]" class="form-control-sm" disabled>
+                          <option value="">-- Select Dept. Name --</option>
+                      </select>
+                  </td>
+                  <td>
+                      <select style="min-width: 100px; max-width: 200px;" class="form-control" id="DESG_NAME_${rowIndex}" data-id=${rowIndex} name="DESG_NAME[${rowIndex}]" class="form-control-sm" disabled>
+                          <option value="">-- Select Desg. Name --</option>
+                      </select>
+                  </td>
+                  <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="BEFORE_${rowIndex}" name="BEFORE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="AFTER_${rowIndex}" name="AFTER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+                  <td>
+                      <select style="min-width: 100px; max-width: 200px;" class="form-control" id="SHIFT_${rowIndex}" data-id=${rowIndex} name="SHIFT[${rowIndex}]" class="form-control-sm">
+                          <option value="">-- Select Shift Name --</option>
+                      </select>
+                  </td>
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REQUIRED_${rowIndex}" name="REQUIRED[${rowIndex}]" type="number" class="form-control-sm" /></td>
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PRESENT_${rowIndex}" name="EXCH_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="IN_TIME_${rowIndex}" name="RATE[${rowIndex}]" type="time" class="form-control-sm" /></td>
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="OUT_TIME_${rowIndex}" name="AMOUNT[${rowIndex}]" type="time" class="form-control-sm" /></td>
+                  <td>
+                      <select style="min-width: 100px; max-width: 200px;" class="form-control" id="REASON_${rowIndex}" data-id=${rowIndex} name="REASON[${rowIndex}]" class="form-control-sm">
+                          <option value="">-- Select Reason --</option>
+                      </select>
+                  </td>
+                  <td>
+                      <select style="min-width: 100px; max-width: 200px;" class="form-control" id="HOD_NAME_${rowIndex}" data-id=${rowIndex} name="HOD_NAME[${rowIndex}]" class="form-control-sm">
+                          <option value="">-- Select HOD Name --</option>
+                      </select>
+                  </td>
+                  <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="AUTH_BY_${rowIndex}" name="AUTH_BY[${rowIndex}]" type="text" class="form-control-sm" maxlength="100" /></td>
+                    <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="APPROVAL_${rowIndex}" name="PPROVAL[${rowIndex}]" type="text" class="form-control-sm" maxlength="100"/></td>
+                    <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="APPROVAL_REMARKS_${rowIndex}" name="APPROVAL_REMARKS[${rowIndex}]" type="text" class="form-control-sm" maxlength="100" /></td>
+                    <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REMARKS_${rowIndex}" name="REMARKS[${rowIndex}]" type="text" class="form-control-sm" maxlength="200" /></td>
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DURATION_${rowIndex}" name="DURATION[${rowIndex}]" type="number" class="form-control-sm" /></td>
+
+                  <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="MAC_TIME_${rowIndex}" name="MAC_TIME[${rowIndex}]" type="time" class="form-control-sm" /></td>
+                  <td>
+                      <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer; margin-right:8px;"></i>
+                      <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                  </td>
+
+                    <td><input style="display:none" id="REF_TYPE_${rowIndex}" name="REF_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+                    <td><input style="display:none" id="REF_NO_${rowIndex}" name="REF_NO[${rowIndex}]" type="text" class="form-control-sm" /></td>
+                    <td><input style="display:none" id="GATE_NO_${rowIndex}" name="GATE_NO[${rowIndex}]" type="text" class="form-control-sm" /></td>
+                    <td><input style="display:none" id="DEPT_CODE_${rowIndex}" name="DEPT_CODE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+                    <td><input style="display:none" id="DESG_CODE_${rowIndex}" name="DESG_CODE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+
+
+              </tr>`;
+              // Remove existing add icons from all rows (but leave delete icons untouched)
+              $('#tblExtraDutyEntry tbody tr td .btn-add-action').remove();
+              $('#tblExtraDutyEntry tbody').append(rowHtml);
+              // Load dropdowns for new row
+
+
+
+              this.loadEmpList(`#EMP_NAME_${rowIndex}`);
+              this.loadDeptList(`#DEPT_NAME_${rowIndex}`);
+              this.loadDesgList(`#DESG_NAME_${rowIndex}`);
+              this.loadHODList(`#HOD_NAME_${rowIndex}`,0);
+              this.loadReasonList(`#REASON_${rowIndex}`);
+              this.loadShiftList(`#SHIFT_${rowIndex}`);
+              rowIndex++;
+              jsGateEntry.rowIndex = rowIndex;
+
+          },
+
+          loadEmpList : function (targetSelector) {
+                  return $.ajax({
+                      url: '@Url.Action("GetEmplist", "ExtraDutyEntry")',
+                      type: 'GET',
+                      data: {},
+                      dataType: 'json',
+                      success: function (data) {
+                          let $ddl = $(targetSelector);
+
+                          $ddl.on('change', function () {
+
+                              const rowId = $(this).data('id');
+                              const selected = $(this).find('option:selected');
+
+                              const empCode = $(this).val();
+                              const deptId  = selected.data('deptid');
+                              const desgId  = selected.data('desgid');
+
+                              $('#EMP_CODE_' + rowId).val(empCode);
+                              $('#DEPT_NAME_' + rowId).val(deptId).trigger('change');
+                              $('#DESG_NAME_' + rowId).val(desgId).trigger('change');
+
+                              jsGateEntry.loadHODList(`#HOD_NAME_${rowId}`,deptId );
+
+                              //jsGateEntry.loadReasonList(`#REASON_${rowId}`);
+
+                          });
+
+                          $ddl.empty();
+                          $ddl.append('<option value="">-- Select Employee --</option>');
+                          $.each(data.data, function (index, item) {
+                              $ddl.append('<option  data-deptid = "'+ item.dept_id +'" data-desgid = "'+ item.desg_id +'"  value="' + item.value + '">' + item.text + '</option>');
+                          });
+                      },
+                      error: function (xhr, status, error) {
+                          toastr.error('Error loading Employee list: ' + error);
+                      }
+                  });
+              },
+
+          loadDeptList : function (targetSelector) {
+                  return $.ajax({
+                      url: '@Url.Action("GetDepartmentList", "ExtraDutyEntry")', //
+                      type: 'GET',
+                      data: {},
+                      dataType: 'json',
+                      success: function (data) {
+                          var ddl = $(targetSelector);
+                          ddl.empty();
+                          ddl.append('<option value="">-- Select Department --</option>');
+                          $.each(data.data, function (index, item) {
+                              ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                          });
+                      },
+                      error: function (xhr, status, error) {
+                          toastr.error('Error loading designation list: ' + error);
+                      }
+                  });
+              },
+
+              //loadDesgList
+          loadDesgList: function(targetSelector) {
+              return $.ajax({
+                  url: '@Url.Action("GetDesglist", "ExtraDutyEntry")',
+                  type: 'GET',
+                  data: {},
+                  dataType: 'json',
+                  success: function (data) {
+                      var ddl = $(targetSelector);
+                      ddl.empty();
+                      ddl.append('<option value="">-- Select Designation --</option>');
+                      $.each(data.data, function (index, item) {
+                          ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                      });
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error('Error loading item list: ' + error);
+                  }
+              });
+              },
+
+          loadHODList : function(targetSelector, DeptCode){
+              return $.ajax({
+                  url: '@Url.Action("GetHODlist", "ExtraDutyEntry")',
+                  type: 'GET',
+                  data: { deptCode: DeptCode },
+                  dataType: 'json',
+                  success: function (data) {
+                      var ddl = $(targetSelector);
+                      ddl.empty();
+                      ddl.append('<option value="">-- Select HOD Name --</option>');
+                      $.each(data.data, function (index, item) {
+                          ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                      });
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error('Error loading item list: ' + error);
+                  }
+              });
+           },
+
+          loadReasonList :  function (targetSelector) {
+              return $.ajax({
+                  url: '@Url.Action("GetReasonlist", "ExtraDutyEntry")',
+                  type: 'GET',
+                  data: { vtype:  $('#ddlDocType option:selected').val() },
+                  dataType: 'json',
+                  success: function (data) {
+                      var ddl = $(targetSelector);
+                      ddl.empty();
+                      ddl.append('<option value="">-- Select Reason --</option>');
+                      $.each(data.data, function (index, item) {
+                          ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                      });
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error('Error loading item list: ' + error);
+                  }
+              });
+           },
+
+          loadShiftList: function (targetSelector) {
+              var ddl = $(targetSelector);
+              ddl.empty();
+              ddl.append('<option value="A">A</option>');
+              ddl.append('<option value="B">B</option>');
+              ddl.append('<option value="C">C</option>');
+              ddl.append('<option value="G">G</option>');
+              },
+
+      }
+
+</script>
+
+<script>
+
+    $(document).ready(function () {
+
+        // Delete row
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+            $row.remove();
+
+            // If last row was deleted, show plus on new last row
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer; margin-right:8px;"></i>
+                         <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+
+         $('#txtNumDocNo').on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                    $('#TxtDocDate').focus();
+            }
+        });
+
+        $('#TxtDocDate').on('keypress', function (e) {
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#ddlDepartment').focus();
+            }
+        });
+
+        $('#ddlDepartment').on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                    $('#btn_Calc').focus();
+            }
+        });
+
+        $('#ddlDocType').on('change', function () {
+            const VType = $(this).val();
+            // If paramdocId is not set (null/undefined/empty/0) -> fetch new Doc id
+            jsGateEntry.paramdocId = jsGateEntry.getQueryParam('id');
+            if (!jsGateEntry.paramdocId) {
+                jsGateEntry.GetDocid(VType);
+            }
+        });
+
+
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+
+
+
+            const masterData = jsGateEntry.collectFormData();
+
+            if (!masterData.header.DocDate || !masterData.header.Vno) {
+                toastr.warning("Please fill all required fields");
+                return;
+            }
+
+            if (jsGateEntry.docId) {
+               jsGateEntry.EditMasterData(masterData);
+            } else {
+                jsGateEntry.SaveMasterData(masterData);
+            }
+
+        });
+
+        jsGateEntry.Initialize();
+        jsGateEntry.loadFormData();
+
+
+    });
+
+</script>

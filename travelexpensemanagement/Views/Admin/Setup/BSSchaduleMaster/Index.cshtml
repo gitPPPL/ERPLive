@@ -1,0 +1,206 @@
+﻿@{
+	ViewBag.Title = "Balance Sheet Schedule Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend>Schedule Master</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+            <button onclick="window.location.href='@Url.Action("Index", "BSSchaduleMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+    <form id="BSSchaduleMasterForm">
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+		<div class="row">
+			<div class="col-md-4"> 
+				<div class="form-group">
+					<label class="form-label">Name<span class="required">*</span></label>
+					<input type="text" class="form-control" name="NAME" id="NAME" placeholder="Enter Name">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Sort Sr. No</label>
+					<input type="number" class="form-control" name="SORT" id="SORT" placeholder="Enter Sort Sr. No">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="form-group mt-4">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				<button type="button" id="cancelBtn" style="display:none" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+	</form>
+
+</fieldset>
+
+
+<script>
+	$(document).ready(function () {
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+
+		if (!isNaN(rowId) && rowId > 0) {
+			LoadScheduleByCode(rowId);
+
+			if (isReadOnly) {
+				setScheduleFormReadOnly();
+			}
+		}
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		});
+	});
+
+	$('#BSSchaduleMasterForm').on('submit', function (e) {
+		e.preventDefault();
+
+		const Name = $('#NAME').val().trim();
+		// if (!Name) {
+		// 	toastr.warning("Name is required");
+		// 	$("#NAME").focus();
+		// 	return;
+		// }
+		if (!validateRequiredField('#NAME', 'Name')) return;
+
+		$('.is-invalid').removeClass('is-invalid');
+
+		// Get form values
+		const code = parseInt($('#CODE').val()) || 0;
+		const name = $('#NAME').val().trim();
+		const sortSrno = $('#SORT').val().trim();
+		const isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+
+		// Simple validation
+		if (!name) return showError('#NAME', 'Name is required.');
+		if (sortSrno && isNaN(sortSrno)) return showError('#SORT', 'Sort Sr. No. must be a number.');
+
+		const formData = {
+			CODE: code,
+			COMP_CODE: 1, // Replace with actual company code if needed
+			NAME: name,
+			SORT_SR_NO: sortSrno ? parseInt(sortSrno) : null,
+			SCH_NO: "", // No input field for SCHEDULE in this form
+			ACTIVE: isActive,
+			UUSER: 1,
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? "E" : "A",
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB",
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+		$.ajax({
+			url: '/BSSchaduleMaster/SaveSchedule',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(formData),
+			success: function (response) {
+				if (response.success) {
+					toastr.success("Schedule saved successfully!");
+					$('#BSSchaduleMasterForm')[0].reset();
+					$('#statusText').text('Active'); // Reset status label
+					$('#ACTIVE').prop('checked', true); // Reset toggle
+					setTimeout(() => {
+						window.location.href = '/BSSchaduleMasterList/Index';
+					}, 1000);
+				} else {
+					const message = response.message || "Something went wrong while saving.";
+					toastr.warning(message);
+				}
+			},
+			error: function (xhr) {
+				const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+
+	// Show validation errors
+	function showError(selector, message) {
+		$(selector).addClass('is-invalid');
+		toastr.error(message);
+	}
+	function LoadScheduleByCode(code) {
+		$.ajax({
+			url: '/BSSchaduleMasterList/GetScheduleByCode',
+			type: 'GET',
+			data: { code: code },
+			success: function (data) {
+				console.log(data);
+				if (!data) {
+					toastr.warning("No data found.");
+					return;
+				}
+
+				$('#CODE').val(data.code);
+				$('#NAME').val(data.name);
+				$('#SORT').val(data.sorT_SR_NO);
+
+				const isActive = data.active === 1 || data.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText').text(isActive ? 'Active' : 'Inactive');
+			},
+			error: function (xhr) {
+				toastr.error("Error: " + (xhr.responseJSON?.message || xhr.responseText));
+			}
+		});
+	}
+
+	function setScheduleFormReadOnly() {
+		const form = $('#BSSchaduleMasterForm');
+		form.find('input, select, textarea, button').prop('disabled', true);
+	}
+
+</script>
+
+
+
+@* Cancel Button Popup *@
+<script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+

@@ -1,0 +1,1720 @@
+﻿@{
+    ViewBag.Title = "Sales Return";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Sales Return</legend>
+    <form id="JobworkReceiveChallanForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right mb-2">
+                    <button class="btn btn-print">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                    <button class="btn btn-export">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Document Details</legend>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocumentType">Document Type</label>
+                    <select class="form-control" id="ddlDocumentType">
+                        <option value="">Select Document Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocumentNo">Document No</label>
+                        <input type="number" class="form-control" id="NumDocumentNo" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocumentDate">Document Date</label>
+                      <input type="text" class="form-control" id="DtDocumentDate" placeholder="dd/mm/yyyy">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPartyName">Party Name</label>
+                    <select class="form-control" id="ddlPartyName">
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddressL1">Address L1</label>
+                    <div class="input-divide">
+                        <input type="text" class="form-control" id="TxtAddressL1" placeholder="Enter Address L1">
+                        <div class="select-wrapper">
+                            <select id="ddladdressL1">
+                                <option value="">Select address</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddressL2">Address L2</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL2" placeholder="Enter Address L2"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddressL3">Address L3</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL3" placeholder="Enter Address L3"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlStation">Station</label>
+                    <input type="text" class="form-control" id="Station" placeholder="Station">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumPincode">Pincode</label>
+                    <input type="number" class="form-control" id="NumPincode" />
+                </div>
+            </div>
+        </div>
+        </fieldset>
+
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Transaction Details</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlTransactionThrough">Transaction Through</label>
+                        <select class="form-control" id="ddlTransactionThrough">
+                            <option value="">Transaction Through</option>
+                            <option value="1">Regular</option>
+                            <option value="2">Bill To - Ship To</option>
+                            <option value="3">Bill From</option>
+                            <option value="4">Combination of both</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlSupplyType">Supply Type</label>
+                        
+                        <select class="form-control" id="ddlSupplyType">
+                            <option value="">Select Supply Type</option>
+                            <option value="1">B2B</option>
+                            <option value="2">B2C</option>
+                            <option value="3">SEZWP</option>
+                            <option value="4">SEZWOP</option>
+                            <option value="5">EXPWP</option>
+                            <option value="6">EXPWOP</option>
+                            <option value="7">DEXP</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlSaleThrough">Sale Through</label>
+                        <select class="form-control" id="ddlSaleThrough">
+                            <option value="">Select Sale Through</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlConsignee">Consignee</label>
+                        <select class="form-control" id="ddlConsignee">
+                            <option value="">Select Consignee</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtTransactionAddressL1">Address L1</label>
+                        <div class="input-divide">
+                            <input type="text" class="form-control" id="TxtTransactionAddressL1" placeholder="Enter Address L1">
+                            <div class="select-wrapper">
+                                <select id="ddlTransactionaddressL1">
+                                    <option value="">Select address</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtTransactionAddressL2">Address L2</label>
+                        <textarea typeof="text" class="form-control" id="TxtTransactionAddressL2" placeholder="Enter Address L2"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtTransactionAddressL3">Address L3</label>
+                        <textarea typeof="text" class="form-control" id="TxtTransactionAddressL3" placeholder="Enter Address L3"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtTransactionStation">Station</label>
+                        <input typeof="text" class="form-control" id="TxtTransactionStation" placeholder="Enter Station">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumTransactionPIN">PIN</label>
+                        <input type="number" class="form-control" id="NumTransactionPIN" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlFormType">Form Type</label>
+                        <select class="form-control" id="ddlFormType">
+                            <option value="">Select Form Type</option>
+                            <option value="1">Finish</option>
+                            <option value="2">Raw</option>
+                            <option value="3">Store</option>
+                            <option value="4">Fuel</option>
+                            <option value="5">Scrap</option>
+                            <option value="6">Waste</option>
+                            <option value="7">Others</option>
+                            <option value="8">Capital</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlJobType">Job Type</label>
+                        <select class="form-control" id="ddlJobType">
+                            <option value="">Select Job Type</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Tax Detail</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlTaxType">Tax Type</label>
+                        <select class="form-control" id="ddlTaxType">
+                            <option value="">Select Tax Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlProductionType">Production Type</label>
+                        <select class="form-control" id="ddlProductionType">
+                            <option value="">Select Production Type</option>
+                            <option value="1">Finish</option>
+                            <option value="2">Raw</option>
+                            <option value="3">Store</option>
+                            <option value="4">Fuel</option>
+                            <option value="5">Scrap</option>
+                            <option value="6">Waste</option>
+                            <option value="7">Other</option>
+                            <option value="8">Capital</option>
+                            <option value="9">PSF</option>
+                            <option value="10">MB</option>
+                            <option value="11">Flakes</option>
+                            <option value="12">Fabric</option>
+                            <option value="13">Granules</option>
+                            <option value="14">Sacks</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlReferenceNo">Reference No</label>
+                        <select class="form-control" id="ddlReferenceNo">
+                            <option value="">Select Reference No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group position-relative">
+                        <label for="DtReferenceDate">Reference Date</label>
+                        <div class="calender-check">
+                            <input type="text" class="form-control" id="DtReferenceDate" name="ReferenceDate" style="padding-left: 30px;">
+                            <input type="checkbox" id="chkReferenceDate" class="checkbox-inside">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlGateNo">Gate No</label>
+                        <select class="form-control" id="ddlGateNo">
+                            <option value="">Select Gate No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlWBNo">WB No</label>
+                        <select class="form-control" id="ddlWBNo">
+                            <option value="">Select WB No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPackNo">Pack No</label>
+                        <select class="form-control" id="ddlPackNo">
+                            <option value="">Select Pack No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlSaudaNo">Sauda No</label>
+                        <select class="form-control" id="ddlSaudaNo">
+                            <option value="">Select Sauda No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumSaudaRate">Sauda Rate</label>
+                        <div class="input-icon-wrapper">
+                            <input type="number" class="form-control" id="NumSaudaRate" />
+                            <span class="input-icon"><i class="fa fa-calculator"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlNatureJW">Nature of JW</label>
+                        <select class="form-control" id="ddlNatureJW">
+                            <option value="">Select Nature of JW</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumPartyChallanNo">Party Challan No.</label>
+                        <input type="number" class="form-control" id="NumPartyChallanNo" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="checkbox-input-mt">
+                            <input type="checkbox" id="ChkPCS" />
+                            PCS
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblJobworkReceiveChallan" class="table-width">
+                    <colgroup>
+                        <col style="display:none;">
+                        <col style="width:60px;">
+                        <col style="width:320px;">
+                        <col style="width:70px;">
+                        <col style="width:90px;">
+                        <col style="width:90px;">
+                        <col style="width:90px;">
+                        <col style="width:100px;">
+
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+
+                        <col style="width:110px;">
+
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+
+                        <col style="width:140px;">
+                        <col style="width:90px;">
+                        <col style="width:90px;">
+
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:100px;">
+
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:100px;">
+
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+
+                        <col style="width:100px;">
+
+                        <col style="width:80px;">
+                    </colgroup>
+
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>ID</th>
+                            <th>Product name</th>
+                            <th>Nos</th>
+                            <th>Gross Qty</th>
+                            <th>Net Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Pack %</th>
+                            <th>Pack Amt</th>
+                            <th>Disc %</th>
+                            <th>Disc Amt</th>
+                            <th>Tax Type</th>
+                            <th>CGST%</th>
+                            <th>CGST Amt</th>
+                            <th>SGST %</th>
+                            <th>SGST Amt</th>
+                            <th>IGST %</th>
+                            <th>IGST Amt</th>
+                            <th>CESS %</th>
+                            <th>CESS Amt</th>
+                            <th>Remark</th>
+                            <th>Pack No</th>
+                            <th>Lot No</th>
+                            <th>Sauda Type</th>
+                            <th>Sauda No</th>
+                            <th>Sauda Rate</th>
+                            <th>Order Type</th>
+                            <th>Order No</th>
+                            <th>Order Rate</th>
+                            <th>DCN Type</th>
+                            <th>DCN No</th>
+                            <th>HSN</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <fieldset class="fieldset-sub btn-mt">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherTotalAmount">Total Amount</label>
+                                        <input type="number" class="form-control" id="NumOtherTotalAmount" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherPacking">Packing</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherPacking1" />
+                                            <input type="number" class="form-control" id="NumOtherPacking2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherDiscount">Discount</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherDiscount1" />
+                                            <input type="number" class="form-control" id="NumOtherDiscount2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherSubTotal">Sub Total</label>
+                                        <input type="number" class="form-control" id="NumOtherSubTotal" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherCGST">CGST</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherCGST1" />
+                                            <input type="number" class="form-control" id="NumOtherCGST2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherSGST">SGST</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherSGST1" />
+                                            <input type="number" class="form-control" id="NumOtherSGST2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherIGST">IGST</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherIGST1" />
+                                            <input type="number" class="form-control" id="NumOtherIGST2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherTotalNos">Total Nos</label>
+                                        <input type="number" class="form-control" id="NumOtherTotalNos" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherCESS">CESS</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherCESS1" />
+                                            <input type="number" class="form-control" id="NumOtherCESS2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherTCS">TCS</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherTCS1" />
+                                            <input type="number" class="form-control" id="NumOtherTCS2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherRoundOff">Round off</label>
+                                        <input type="number" class="form-control" id="NumOtherRoundOff" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherNetAmount">Net Amount</label>
+                                        <input type="number" class="form-control" id="NumOtherNetAmount" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumInsurance">Insurance %</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumInsurance1" />
+                                            <input type="number" class="form-control" id="NumInsurance2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumConsFreight">Cons. Freight</label>
+                                        <input type="number" class="form-control" id="NumConsFreight" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumTDSFreight">TDS Freight</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumTDSFreight1" />
+                                            <input type="number" class="form-control" id="NumTDSFreight2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumGrossQty">Gross Quantity</label>
+                                <input type="number" class="form-control" id="NumGrossQty" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumNetQty">Net Quantity</label>
+                                <input type="number" class="form-control" id="NumNetQty" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumPayFreight">To Pay Freight</label>
+                                <input type="number" class="form-control" id="NumPayFreight" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumWBQty">WB Quantity</label>
+                                <input type="number" class="form-control" id="NumWBQty" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumLoadAmount">Load Amount</label>
+                                <div class="input-divide">
+                                    <input type="number" class="form-control" id="NumLoadAmount1" />
+                                    <input type="number" class="form-control" id="NumLoadAmount2" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumWayBillNo">Way Bill No</label>
+                                <input type="number" class="form-control" id="NumWayBillNo" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlLoadParty">Load Party</label>
+                                <select class="form-control" id="ddlLoadParty">
+                                    <option value="">Select Load Party</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtRemarks1">Remarks</label>
+                                <textarea typeof="text" class="form-control" id="TxtRemarks1"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumWBAmount">WB Amount</label>
+                                <input type="number" class="form-control" id="NumWBAmount" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtRemarks2">Remarks</label>
+                                <textarea typeof="text" class="form-control" id="TxtRemarks2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlWBParty">WB Party</label>
+                                <select class="form-control" id="ddlWBParty">
+                                    <option value="">Select WB Party</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumGRNo">GR No</label>
+                                <input type="number" class="form-control" id="NumGRNo" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group position-relative">
+                                <label for="DtGRdate">GR Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtGRdate" name="GRDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkGRDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlTransport">Transport</label>
+                                <select class="form-control" id="ddlTransport">
+                                    <option value="">Select Transport</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumTruckNo">Truck No</label>
+                                <input type="number" class="form-control" id="NumTruckNo" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumMobileNo">Mobile No</label>
+                                <input type="number" class="form-control" id="NumMobileNo" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtRemarks3">Remarks</label>
+                                <textarea typeof="text" class="form-control" id="TxtRemarks3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "JobworkReceiveChallanList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(async function () {
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        const VNo = getQueryParam('VoucherNo');
+        const vType = getQueryParam('vType');
+        const mode = getQueryParam("mode");
+
+        if (VNo && vType) {
+            $.ajax({
+            url: '/JobworkReceiveChallan/GetID',
+            type: 'POST',
+            data: JSON.stringify({
+                VoucherNo: VNo,
+                VType: vType
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (res) {
+                console.log('response:', res);
+                // Validate response
+                if (!res || !res.header || res.header.length === 0) {
+                    toastr.warning('No record found');
+                    return;
+                }
+                bindSaleHeader(res.header[0]);
+                if (res.items && res.items.length > 0) {
+                    bindSaleItems(res.items);
+                }
+                toastr.success('Data loaded successfully');
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                toastr.error('Failed to load data');
+            }
+            });
+        }
+
+        await ddlPartyName();
+        await ddlSaleThrough();
+        await ddlSaleConsignee();
+        await ddlTaxType();
+        await ddlReferenceNo();
+        await ddlGateNo();
+        await ddlWBNo();
+        await ddlSaudaNo();
+       
+        ddlDocumentType();
+        ddlTransport();
+        ddlWBParty();
+        ddlLoadParty();
+        ddlLoadNatureofJW();
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var yyyy = today.getFullYear();
+        $("#DtDocumentDate").val(dd + "/" + mm + "/" + yyyy);
+        $("#DtReferenceDate").val(dd + "/" + mm + "/" + yyyy);
+        $("#DtGRdate").val(dd + "/" + mm + "/" + yyyy);
+        $("#ddlDocumentType").on('change', async function () {
+            var docType = $(this).val();
+            if (!docType) return;
+            try {
+                const response = await $.ajax({
+                    url: '/JobworkReceiveChallan/GetDocumentNo',
+                    type: 'GET',
+                    data: { documentType: docType }
+                });
+                $("#NumDocumentNo").val(response.documentNo);
+            } catch (err) {
+                console.error("Error loading Document No:", err);
+            }
+            await ddlPackNo(docType);
+        });
+        const $tbody = $('#tblJobworkReceiveChallan tbody');
+        function generateSelect(options, selected = "") {
+            return options.map(opt => `<option ${selected === opt ? 'selected' : ''}>${opt}</option>`).join('');
+        }
+        function addRow(data = {}) {
+            const $tbody = $('#tblJobworkReceiveChallan tbody');
+            $tbody.find('.btn-add-action').remove();
+            const row = `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td><input type="text" class="form-control" value="${data.id || ''}" /></td>
+                <td> <select class="form-control productName-dropdown" name="productName" data-selected-value="${data.code || ''}"> </select> </td>
+                <td><input type="text" class="form-control nos-input" value="${data.nos || ''}" /></td>
+                <td><input type="number" class="form-control Quantity-input" value="${data.grossQuantity || ''}" /></td>
+                <td><input type="number" class="form-control net-input" value="${data.netQuantity || ''}" /></td>
+                <td><input type="number" step="any" class="form-control rate-input" value="${data.rate || ''}" /></td>
+                <td><input type="number" step="any" class="form-control amount-input" value="${data.amount || 0}" readonly /></td>
+                <td><input type="number" class="form-control pack-input" value="${data.packPercent || 0}" /></td>
+                <td><input type="number" class="form-control pack-amount-input" value="${data.packAmount || 0}" readonly /></td>
+                <td><input type="number" class="form-control disc-input" value="${data.discPercent || 0}" /></td>
+                <td><input type="number" class="form-control disc-amount-input" value="${data.discAmount || 0}"  readonly /></td>
+                <td><select class="form-control taxTypes-dropdown" name="taxTypes" data-selected-value="${data.taxTypes || ''}"> </select> </td>
+                <td><input type="number" class="form-control cgst-per" readonly /></td>
+                <td><input type="number" class="form-control cgst-amt" readonly /></td>
+                <td><input type="number" class="form-control sgst-per" readonly /></td>
+                <td><input type="number" class="form-control sgst-amt" readonly /></td>
+                <td><input type="number" class="form-control igst-per" readonly /></td>
+                <td><input type="number" class="form-control igst-amt" readonly /></td>
+                <td><input type="number" class="form-control cess-per" readonly /></td>
+                <td><input type="number" class="form-control cess-amt" readonly /></td>
+                <td><input type="text" class="form-control remark-input" value="${data.remark || ''}" /></td>
+                <td><input type="text" class="form-control packNo-input" value="${data.packNo || ''}" /></td>
+                <td><input type="text" class="form-control lotNo-input" value="${data.lotNo || ''}" /></td>
+                <td><input type="text" class="form-control saudaType-input" value="${data.saudaType || ''}" /></td>
+                <td><input type="text" class="form-control saudaNo-input" value="${data.saudaNo || ''}" /></td>
+                <td><input type="number" class="form-control saudaRate-input" value="${data.saudaRate || ''}" /></td>
+                <td><input type="text" class="form-control orderType-input" value="${data.orderType || ''}" /></td>
+                <td><input type="text" class="form-control orderNo-input" value="${data.orderNo || ''}" /></td>
+                <td><input type="number" step="any" class="form-control orderRate-input" value="${data.orderRate || ''}" /></td>
+                <td><input type="text" class="form-control dcnType-input" value="${data.dcnType || ''}" /></td>
+                <td><input type="text" class="form-control dcnNo-input" value="${data.dcnNo || ''}" /></td>
+                <td><input type="text" class="form-control hsn-input" value="${data.hsn || ''}" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger"></i>
+                </td>
+            </tr>
+        `;
+            $tbody.append(row);
+            const $lastRow = $tbody.find('tr:last');
+            // Load dropdowns
+            loadProductNameDropdown($lastRow.find('.productName-dropdown'), data.code);
+            loadTaxTypeDropdown($lastRow.find('.taxTypes-dropdown'), data.taxTypes);
+             return $lastRow;
+        }
+        addRow();
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addRow();
+        });
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            const isLastRow = $row.is(':last-child');
+            $row.remove();
+            if (isLastRow) {
+                const $lastRow = $tbody.find('tr:last');
+                if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                    $lastRow.find('td:last').prepend(
+                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                    );
+                }
+            }
+        });
+        // onchange .rate-input, .net-input, .pack-input
+        $(document).on('input','.rate-input, .net-input, .pack-input, .disc-input',
+      function () {
+
+          let $row = $(this).closest('tr');
+          let rate    = parseFloat($row.find('.rate-input').val()) || 0;
+          let netQty  = parseFloat($row.find('.net-input').val()) || 0;
+          let packPer = parseFloat($row.find('.pack-input').val()) || 0;
+          let discPer = parseFloat($row.find('.disc-input').val()) || 0;
+          let amount = rate * netQty;
+          $row.find('.amount-input').val(amount.toFixed(2));
+          let packAmt = amount * packPer / 100;
+          $row.find('.pack-amount-input').val(packAmt.toFixed(2));
+          let discAmt = (amount + packAmt) * discPer / 100;
+          $row.find('.disc-amount-input').val(discAmt.toFixed(2));
+          $row.find('.taxTypes-dropdown').trigger('change');
+    });
+        $(document).on('change', '.taxTypes-dropdown', function () {
+        let $row = $(this).closest('tr');
+        let taxCode = $(this).val();
+        applyTax($row, taxCode);
+    });
+
+    function applyTax($row, taxCode) {
+        if (!taxCode) return;
+
+        let amount = parseFloat($row.find('.amount-input').val()) || 0;
+        let packAmt = parseFloat($row.find('.pack-amount-input').val()) || 0;
+        let discAmt = parseFloat($row.find('.disc-amount-input').val()) || 0;
+        let taxable = amount + packAmt - discAmt;
+
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetTaxTypeDetails',
+            type: 'GET',
+            data: { code: taxCode },
+            success: function (res) {
+                if (!res) return toastr.error('Invalid tax data');
+
+                let cgstPer = parseFloat(res.cgsT_PER) || 0;
+                let sgstPer = parseFloat(res.sgsT_PER) || 0;
+                let igstPer = parseFloat(res.igsT_PER) || 0;
+                let cessPer = parseFloat(res.otH_PER) || 0;
+
+                $row.find('.cgst-per').val(cgstPer.toFixed(2));
+                $row.find('.sgst-per').val(sgstPer.toFixed(2));
+                $row.find('.igst-per').val(igstPer.toFixed(2));
+                $row.find('.cess-per').val(cessPer.toFixed(2));
+
+                $row.find('.cgst-amt').val((taxable * cgstPer / 100).toFixed(2));
+                $row.find('.sgst-amt').val((taxable * sgstPer / 100).toFixed(2));
+                $row.find('.igst-amt').val((taxable * igstPer / 100).toFixed(2));
+                $row.find('.cess-amt').val((taxable * cessPer / 100).toFixed(2));
+
+                calculateTotalRecQty();
+            },
+            error: function () {
+                toastr.error('Tax calculation failed');
+            }
+        });
+    }
+    function calculateTotalRecQty() {
+            let totalNos = 0, totalGrossQty = 0, totalNetQty = 0;
+            let totalAmount = 0, totalPackAmt = 0, totalDiscAmt = 0;
+            let totalCGST = 0, totalSGST = 0, totalIGST = 0, totalCESS = 0;
+            $('#tblJobworkReceiveChallan tbody tr').each(function () {
+                let $row = $(this);
+                totalNos += parseFloat($row.find('.nos-input').val()) || 0;
+                totalGrossQty += parseFloat($row.find('.Quantity-input').val()) || 0;
+                totalNetQty += parseFloat($row.find('.net-input').val()) || 0;
+                totalAmount += parseFloat($row.find('.amount-input').val()) || 0;
+                totalPackAmt += parseFloat($row.find('.pack-amount-input').val()) || 0;
+                totalDiscAmt += parseFloat($row.find('.disc-amount-input').val()) || 0;
+                totalCGST += parseFloat($row.find('.cgst-amt').val()) || 0;
+                totalSGST += parseFloat($row.find('.sgst-amt').val()) || 0;
+                totalIGST += parseFloat($row.find('.igst-amt').val()) || 0;
+                totalCESS += parseFloat($row.find('.cess-amt').val()) || 0;
+            });
+
+            let subTotal = totalAmount + totalPackAmt - totalDiscAmt;
+            let netAmount = subTotal + totalCGST + totalSGST + totalIGST + totalCESS;
+            $('#NumOtherTotalNos').val(totalNos.toFixed(2));
+            $('#NumGrossQty').val(totalGrossQty.toFixed(2));
+            $('#NumNetQty').val(totalNetQty.toFixed(2));
+            $('#NumOtherTotalAmount').val(totalAmount.toFixed(2));
+            $('#NumOtherPacking2').val(totalPackAmt.toFixed(2));
+            $('#NumOtherDiscount2').val(totalDiscAmt.toFixed(2));
+            $('#NumOtherSubTotal').val(subTotal.toFixed(2));
+            $('#NumOtherCGST2').val(totalCGST.toFixed(2));
+            $('#NumOtherSGST2').val(totalSGST.toFixed(2));
+            $('#NumOtherIGST2').val(totalIGST.toFixed(2));
+            $('#NumOtherCESS2').val(totalCESS.toFixed(2));
+            $('#NumOtherNetAmount').val(netAmount.toFixed(2));
+         }
+    $('#ddlReferenceNo').on('change', function () {
+        var refValue = $(this).val();
+        var refText = $('#ddlReferenceNo option:selected').text().trim();
+        if (!refValue) return;
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetReferenceDetails',
+            type: 'POST',
+            data: { refValue, refText },
+            success: function (res) {
+                if (res.success) {
+                    if (res.header.length > 0)
+                        bindSaleHeader(res.header[0]);
+                    if (res.items.length > 0)
+                        bindSaleItems(res.items);
+                } else {
+                    alert('No data found');
+                }
+            },
+            error: function () {
+                alert('Server Error');
+            }
+        });
+    });
+    function bindSaleHeader(d) {
+        setDropdownValue('#ddlPartyName', d.BILL_CODE);
+        $('#TxtAddressL1').val(d.BILL_ADD1);
+        $('#TxtAddressL2').val(d.BILL_ADD2);
+        $('#TxtAddressL3').val(d.BILL_ADD3);
+        $('#Station').val(d.B_CITY);
+        $('#NumPincode').val(d.BILL_PINCODE);
+
+        setDropdownValue('#ddlConsignee', d.SHIP_CODE);
+        $('#TxtTransactionAddressL1').val(d.SHIP_ADD1);
+        $('#TxtTransactionAddressL2').val(d.SHIP_ADD2);
+        $('#TxtTransactionAddressL3').val(d.SHIP_ADD3);
+        $('#TxtTransactionStation').val(d.S_NAME);
+        $('#NumTransactionPIN').val(d.SHIP_PINCODE);
+
+        setDropdownValue('#ddlTaxType', d.TAX_CODE);
+        $('#NumGRNo').val(d.GR_NO);
+        setDropdownValue('#ddlTransport', d.TRANSPORT_CODE);
+        $('#NumTruckNo').val(d.VEHICLE_NO);
+        $('#NumMobileNo').val(d.DRIVER_NO);
+        $('#TxtRemarks1').val(d.REMARK);
+    }
+
+    function bindSaleItems(list) {
+       const $tbody = $('#tblJobworkReceiveChallan tbody');
+       $tbody.empty();
+       $.each(list, function (i, d) {
+            let $row = addRow({
+                id: i + 1,
+                code: d.ITEM_CODE,
+                productName: d.I_NAME,
+                nos: d.NOS,
+                grossQuantity: d.GROSS_QTY,
+                netQuantity: d.QTY,
+                rate: d.RATE,
+                amount: d.AMOUNT,
+                packPercent: d.PACK_PER,
+                packAmount: d.PACK_AMT,
+                discPercent: d.DISC_PER,
+                discAmount: d.DISC_AMT,
+                taxTypes: d.TAX_CODE,
+                remark: d.REMARK,
+                packNo: d.PACK_NO,
+                lotNo: d.LOT_NO,
+                saudaType: d.SAUDA_TYPE,
+                saudaNo: d.SAUDA_NO,
+                saudaRate: d.SAUDA_RATE,
+                orderType: d.ORDER_TYPE,
+                orderNo: d.ORDER_NO,
+                orderRate: d.ORDER_RATE,
+                dcnType: d.DCN_TYPE,
+                dcnNo: d.DCN_NO,
+                hsn: d.HSN
+            });
+
+            // Calculate taxable amount for the row
+            let amount = parseFloat(d.AMOUNT) || 0;
+            let packAmt = parseFloat(d.PACK_AMT) || 0;
+            let discAmt = parseFloat(d.DISC_AMT) || 0;
+            let taxable = amount + packAmt - discAmt;
+            // Get tax details and apply
+            $.ajax({
+                url: '/JobworkReceiveChallan/GetTaxTypeDetails',
+                type: 'GET',
+                data: { code: d.TAX_CODE },
+                success: function (res) {
+                    debugger
+                    if (!res) return toastr.error('Invalid tax data');
+
+                    let cgstPer = parseFloat(res.cgsT_PER) || 0;
+                    let sgstPer = parseFloat(res.sgsT_PER) || 0;
+                    let igstPer = parseFloat(res.igsT_PER) || 0;
+                    let cessPer = parseFloat(res.otH_PER) || 0;
+
+                    // Set % in row
+                    $row.find('.cgst-per').val(cgstPer.toFixed(2));
+                    $row.find('.sgst-per').val(sgstPer.toFixed(2));
+                    $row.find('.igst-per').val(igstPer.toFixed(2));
+                    $row.find('.cess-per').val(cessPer.toFixed(2));
+
+                    // Calculate tax amounts
+                    $row.find('.cgst-amt').val((taxable * cgstPer / 100).toFixed(2));
+                    $row.find('.sgst-amt').val((taxable * sgstPer / 100).toFixed(2));
+                    $row.find('.igst-amt').val((taxable * igstPer / 100).toFixed(2));
+                    $row.find('.cess-amt').val((taxable * cessPer / 100).toFixed(2));
+
+                    calculateTotalRecQty(); // Update totals
+                },
+                error: function () {
+                    toastr.error('Tax calculation failed');
+                }
+            });
+        });
+    }
+    // ======================== Apply Tax Function ========================
+    function applyTax($row, taxCode) {
+
+        if (!taxCode) return;
+
+        let amount  = parseFloat($row.find('.amount-input').val()) || 0;
+        let packAmt = parseFloat($row.find('.pack-amount-input').val()) || 0;
+        let discAmt = parseFloat($row.find('.disc-amount-input').val()) || 0;
+        let taxable = amount + packAmt - discAmt;
+
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetTaxTypeDetails',
+            type: 'GET',
+            data: { code: taxCode },
+            success: function (res) {
+                if (!res) return toastr.error('Invalid tax data');
+
+                let cgstPer = parseFloat(res.cgsT_PER) || 0;
+                let sgstPer = parseFloat(res.sgsT_PER) || 0;
+                let igstPer = parseFloat(res.igsT_PER) || 0;
+                let cessPer = parseFloat(res.otH_PER) || 0;
+
+                // Set % in row
+                $row.find('.cgst-per').val(cgstPer.toFixed(2));
+                $row.find('.sgst-per').val(sgstPer.toFixed(2));
+                $row.find('.igst-per').val(igstPer.toFixed(2));
+                $row.find('.cess-per').val(cessPer.toFixed(2));
+
+                // Calculate tax amounts
+                $row.find('.cgst-amt').val((taxable * cgstPer / 100).toFixed(2));
+                $row.find('.sgst-amt').val((taxable * sgstPer / 100).toFixed(2));
+                $row.find('.igst-amt').val((taxable * igstPer / 100).toFixed(2));
+                $row.find('.cess-amt').val((taxable * cessPer / 100).toFixed(2));
+
+                calculateTotalRecQty();
+            },
+            error: function () {
+                toastr.error('Tax calculation failed');
+            }
+        });
+    }
+    //==========================Save Funcation Start Block=================
+
+    $('#btn-save').click(function (e) {
+        e.preventDefault();
+
+        // Collect form data
+        var formData = {
+            documentType: $('#ddlDocumentType').val() || null,
+            documentNo: $('#NumDocumentNo').val() || null,
+            documentDate: $('#DtDocumentDate').val() || null,
+            partyCode: $('#ddlPartyName').val() || null,
+            PartyName: $('#ddlPartyName option:selected').text() || null,
+            addressL1: $('#TxtAddressL1').val() || null,
+            addressL2: $('#TxtAddressL2').val() || null,
+            addressL3: $('#TxtAddressL3').val() || null,
+            station: $('#Station').val() || null,
+            pincode: $('#NumPincode').val() || null,
+            transactionThrough: $('#ddlTransactionThrough').val() || null,
+            supplyType: $('#ddlSupplyType').val() || null,
+            saleThrough: $('#ddlSaleThrough').val() || null,
+
+            consigneeName: $('#ddlConsignee option:selected').text() || null,
+            consignee: $('#ddlConsignee').val() || null,
+            transactionAddressL1: $('#TxtTransactionAddressL1').val() || null,
+            transactionAddressL2: $('#TxtTransactionAddressL2').val() || null,
+            transactionAddressL3: $('#TxtTransactionAddressL3').val() || null,
+            transactionStation: $('#TxtTransactionStation').val() || null,
+            transactionPIN: $('#NumTransactionPIN').val() || null,
+            formType: $('#ddlFormType').val() || null,
+            taxType: $('#ddlTaxType').val() || null,
+            productionType: $('#ddlProductionType').val() || null,
+            referenceNo: $('#ddlReferenceNo').val() || null,
+            referenceDate: $('#DtReferenceDate').val() || null,
+            gateNo: $('#ddlGateNo option:selected').text() || null,
+            wbNo: $('#ddlWBNo').val() || null,
+            packNo: $('#ddlPackNo').val() || null,
+            saudaNo: $('#ddlSaudaNo option:selected').text() || null,
+            saudaRate: $('#NumSaudaRate').val() || null,
+            pcs: $('#ChkPCS').is(':checked'),
+            totalAmount: $('#NumOtherTotalAmount').val() || 0,
+            packing: $('#NumOtherPacking1').val() + ',' + $('#NumOtherPacking2').val(),
+            discount: $('#NumOtherDiscount1').val() + ',' + $('#NumOtherDiscount2').val(),
+            subTotal: $('#NumOtherSubTotal').val() || 0,
+            cgst: $('#NumOtherCGST1').val() + ',' + $('#NumOtherCGST2').val(),
+            sgst: $('#NumOtherSGST1').val() + ',' + $('#NumOtherSGST2').val(),
+            igst: $('#NumOtherIGST1').val() + ',' + $('#NumOtherIGST2').val(),
+            cess: $('#NumOtherCESS1').val() + ',' + $('#NumOtherCESS2').val(),
+            tcs: $('#NumOtherTCS1').val() + ',' + $('#NumOtherTCS2').val(),
+            roundOff: $('#NumOtherRoundOff').val() || 0,
+            netAmount: $('#NumOtherNetAmount').val() || 0,
+            insurance: $('#NumInsurance1').val() + ',' + $('#NumInsurance2').val(),
+            consFreight: $('#NumConsFreight').val() || 0,
+            tdsFreight: $('#NumTDSFreight1').val() + ',' + $('#NumTDSFreight2').val(),
+            grossQty: $('#NumGrossQty').val() || 0,
+            netQty: $('#NumNetQty').val() || 0,
+            payFreight: $('#NumPayFreight').val() || 0,
+            wbQty: $('#NumWBQty').val() || 0,
+            loadAmount: $('#NumLoadAmount1').val() + ',' + $('#NumLoadAmount2').val(),
+            wayBillNo: $('#NumWayBillNo').val() || null,
+            loadParty: $('#ddlLoadParty').val() || null,
+            remarks1: $('#TxtRemarks1').val() || null,
+            wbAmount: $('#NumWBAmount').val() || 0,
+            remarks2: $('#TxtRemarks2').val() || null,
+            wbParty: $('#ddlWBParty').val() || null,
+            grNo: $('#NumGRNo').val() || null,
+            grDate: $('#DtGRdate').val() || null,
+            transport: $('#ddlTransport').val() || null,
+            truckNo: $('#NumTruckNo').val() || null,
+            mobileNo: $('#NumMobileNo').val() || null,
+            remarks3: $('#TxtRemarks3').val() || null,
+            ACTION: VNo > 0 ? "UPDATE" : "INSERT",
+            NatureJW: $('#ddlNatureJW').val() || null,
+        };
+
+        // Collect row data from all rows
+        var rowData = [];
+        $('#tblJobworkReceiveChallan tbody tr').each(function() {
+            var $row = $(this);
+            rowData.push({
+                code: $row.find('td:eq(0)').text().trim(),
+                id: $row.find('.form-control').eq(0).val(),
+                productName: $row.find('.productName-dropdown').val() || null,
+                nos: $row.find('.nos-input').val() || null,
+                grossQuantity: $row.find('.Quantity-input').val() || null,
+                netQuantity: $row.find('.net-input').val() || null,
+                rate: $row.find('.rate-input').val() || null,
+                amount: $row.find('.amount-input').val() || 0,
+                packPercent: $row.find('.pack-input').val() || 0,
+                packAmount: $row.find('.pack-amount-input').val() || 0,
+                discPercent: $row.find('.disc-input').val() || 0,
+                discAmount: $row.find('.disc-amount-input').val() || 0,
+                taxTypes: $row.find('.taxTypes-dropdown').val() || null,
+                cgstPer: $row.find('.cgst-per').val() || 0,
+                cgstAmt: $row.find('.cgst-amt').val() || 0,
+                sgstPer: $row.find('.sgst-per').val() || 0,
+                sgstAmt: $row.find('.sgst-amt').val() || 0,
+                igstPer: $row.find('.igst-per').val() || 0,
+                igstAmt: $row.find('.igst-amt').val() || 0,
+                cessPer: $row.find('.cess-per').val() || 0,
+                cessAmt: $row.find('.cess-amt').val() || 0,
+                remark: $row.find('.remark-input').val() || null,
+                packNo: $row.find('.packNo-input').val() || null,
+                lotNo: $row.find('.lotNo-input').val() || null,
+                saudaType: $row.find('.saudaType-input').val() || null,
+                saudaNo: $row.find('.saudaNo-input').val() || null,
+                saudaRate: $row.find('.saudaRate-input').val() || null,
+                orderType: $row.find('.orderType-input').val() || null,
+                orderNo: $row.find('.orderNo-input').val() || null,
+                orderRate: $row.find('.orderRate-input').val() || null,
+                dcnType: $row.find('.dcnType-input').val() || null,
+                dcnNo: $row.find('.dcnNo-input').val() || null,
+                hsn: $row.find('.hsn-input').val() || null
+            });
+        });
+
+        // Log the data to ensure it looks correct
+        console.log('formData:', formData);
+        console.log('rowData:', rowData);
+        // ACTION: VNo > 0 ? "UPDATE" : "INSERT",
+        // Send both formData and rowData to the server
+        $.ajax({
+            url: '/JobworkReceiveChallan/Save',
+            method: 'POST',
+            data: JSON.stringify({ formData: formData, rowData: rowData }),
+            contentType: 'application/json',
+            success: function(response) {
+                toastr.success('Form and row data submitted successfully');
+            },
+            error: function(xhr, status, error) {
+                toastr.error('Failed to save data');
+            }
+        });
+    });
+    //==========================Save Funcation End Block===================
+    });
+    // Function to fetch Document Types
+    function ddlDocumentType(callback) {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetddlDocumentType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlDocumentType');
+                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDocumentType:", xhr.responseText);
+            }
+        });
+    }
+    async function ddlPartyName() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlPartyName');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlPartyName');
+            ddl.empty(); 
+            ddl.append('<option value="" disabled selected>Select Employee</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%',
+                matcher: function (params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+                    const text = data.text.toLowerCase();
+                    const term = params.term.toLowerCase();
+                    return text.indexOf(term) > -1 ? data : null;
+                }
+            });
+        } catch (err) {
+            console.error("Error loading Employee Code dropdown:", err);
+            toastr.error("Error loading Employee Code dropdown");
+        }
+    }
+    async function ddlSaleThrough() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlSaleThrough');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlSaleThrough');
+            ddl.empty();
+            ddl.append('<option value="" disabled selected>Select Employee</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%',
+                matcher: function (params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+                    const text = data.text.toLowerCase();
+                    const term = params.term.toLowerCase();
+                    return text.indexOf(term) > -1 ? data : null;
+                }
+            });
+        } catch (err) {
+            console.error("Error loading Employee Code dropdown:", err);
+            toastr.error("Error loading Employee Code dropdown");
+        }
+    }
+    async function ddlSaleConsignee() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlConsignee');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlConsignee');
+            ddl.empty();
+            ddl.append('<option value="">Select Employee</option>');
+
+            data.forEach(item => {
+                ddl.append(
+                    `<option value="${item.value}">
+                        ${item.text} (${item.value})
+                     </option>`
+                );
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%'
+            });
+        } catch (err) {
+            console.error("Error loading Employee dropdown:", err);
+            toastr.error("Error loading Employee dropdown");
+        }
+    }
+    async function ddlTaxType() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlTaxType');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlTaxType');
+            ddl.empty();
+            ddl.append('<option value="">Select Employee</option>');
+
+            data.forEach(item => {
+                ddl.append(
+                    `<option value="${item.value}">
+                        ${item.text} (${item.value})
+                     </option>`
+                );
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%'
+            });
+        } catch (err) {
+            console.error("Error loading Employee dropdown:", err);
+            toastr.error("Error loading Employee dropdown");
+        }
+    }
+    async function ddlReferenceNo() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlReferenceNo');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlReferenceNo');
+            ddl.empty();
+            ddl.append('<option value="">Select Employee</option>');
+
+            data.forEach(item => {
+                ddl.append(
+                    `<option value="${item.value}">
+                        ${item.text}
+                     </option>`
+                );
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%'
+            });
+        } catch (err) {
+            console.error("Error loading Employee dropdown:", err);
+            toastr.error("Error loading Employee dropdown");
+        }
+    }
+    async function ddlGateNo() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlGateNo');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlGateNo');
+            ddl.empty();
+            ddl.append('<option value="">Select Employee</option>');
+
+            data.forEach(item => {
+                ddl.append(
+                    `<option value="${item.value}">
+                        ${item.text}
+                     </option>`
+                );
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%'
+            });
+        } catch (err) {
+            console.error("Error loading Employee dropdown:", err);
+            toastr.error("Error loading Employee dropdown");
+        }
+    }
+    async function ddlWBNo() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlWBNo');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlWBNo');
+            ddl.empty();
+            ddl.append('<option value="">Select Employee</option>');
+
+            data.forEach(item => {
+                ddl.append(
+                    `<option value="${item.value}">
+                        ${item.text}
+                     </option>`
+                );
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%'
+            });
+        } catch (err) {
+            console.error("Error loading Employee dropdown:", err);
+            toastr.error("Error loading Employee dropdown");
+        }
+    }
+    async function ddlPackNo(docType) {
+        try {
+            const response = await fetch(`/JobworkReceiveChallan/GetddlPackNo?docType=${docType}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const ddl = $('#ddlPackNo');
+            ddl.empty();
+            ddl.append('<option value="">Select Pack No</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+
+            ddl.select2({
+                placeholder: 'Select Pack No',
+                allowClear: true,
+                width: '100%'
+            });
+
+        } catch (err) {
+            console.error("Error loading Pack No dropdown:", err);
+            toastr.error("Error loading Pack No dropdown");
+        }
+    }
+    async function ddlSaudaNo() {
+        try {
+            const response = await fetch('/JobworkReceiveChallan/GetddlSaudaNo');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlSaudaNo');
+            ddl.empty();
+            ddl.append('<option value="">Select Employee</option>');
+
+            data.forEach(item => {
+                ddl.append(
+                    `<option value="${item.value}">
+                        ${item.text}
+                     </option>`
+                );
+            });
+            ddl.select2({
+                placeholder: 'Select Employee',
+                allowClear: true,
+                width: '100%'
+            });
+        } catch (err) {
+            console.error("Error loading Employee dropdown:", err);
+            toastr.error("Error loading Employee dropdown");
+        }
+    }
+    ///i want to banding dropdown list
+    function loadProductNameDropdown($dropdown, selectedItem = "") {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetProductName',
+            type: 'GET',
+            success: function (data) {
+
+                $dropdown.empty();
+                $dropdown.append('<option value="">--Select Item--</option>');
+
+                selectedItem = String(selectedItem).trim();
+
+                $.each(data, function (index, item) {
+
+                    let isSelected =
+                        selectedItem === String(item.value).trim()
+                            ? 'selected'
+                            : '';
+
+                    $dropdown.append(
+                        `<option value="${item.value}" ${isSelected}>
+                            ${item.text}
+                         </option>`
+                    );
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load items');
+            }
+        });
+    }
+    function loadTaxTypeDropdown($dropdown, selectedItem = "") {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetTaxTypeList',
+            type: 'GET',
+            success: function (data) {
+                $dropdown.empty();
+                $dropdown.append('<option value="">--Select Item--</option>');
+                selectedItem = String(selectedItem).trim();
+                $.each(data, function (index, item) {
+                    let isSelected = selectedItem === String(item.value).trim()  ? 'selected' : '';
+                    $dropdown.append(
+                        `<option value="${item.value}" ${isSelected}>
+                            ${item.text}
+                         </option>`
+                    );
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load items');
+            }
+        });
+    }
+    function ddlTransport(callback) {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetddlTransport',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlTransport');
+                ddl.empty().append('<option value="">-- Select Transport Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlTransport:", xhr.responseText);
+            }
+        });
+    }
+    function ddlWBParty(callback) {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetddlWBParty',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlWBParty');
+                ddl.empty().append('<option value="">-- Select Transport Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlWBParty:", xhr.responseText);
+            }
+        });
+    }
+    function ddlWBParty(callback) {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetddlWBParty',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlWBParty');
+                ddl.empty().append('<option value="">-- Select Transport Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlWBParty:", xhr.responseText);
+            }
+        });
+    }
+    function ddlLoadParty(callback) {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetddlLoadParty',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlLoadParty');
+                ddl.empty().append('<option value="">-- Select Transport Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlWBParty:", xhr.responseText);
+            }
+        });
+    }
+
+    function ddlLoadNatureofJW(callback) {
+        $.ajax({
+            url: '/JobworkReceiveChallan/GetddlLoadNatureofJW',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlNatureJW');
+                ddl.empty().append('<option value="">-- Select Transport Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlWBParty:", xhr.responseText);
+            }
+        });
+    }
+
+
+    function setDropdownValue(selector, value) {
+        if (!value) return;
+        $(selector).val(value).trigger('change');
+    }
+
+</script>
+
+

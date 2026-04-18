@@ -1,0 +1,1413 @@
+﻿@{
+    ViewBag.Title = "Timesheet Dashboard";
+    Layout = "~/Views/Shared/EmployeeLayout.cshtml";
+}
+<style>
+    /* ===== GLASS CONTAINER ===== */
+    .glass-activities {
+        padding: 10px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        border: 1px solid #bcbcbc;
+        background-color: #e9e9e9;
+    }
+
+    /* HEADER */
+    .recent-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* 🔥 allows wrapping */
+    }
+
+        .recent-header h3 {
+            font-weight: 600;
+            font-size: 24px;
+            margin-left: 6px;
+            color: #006119;
+            text-decoration: underline;
+        }
+    /* FILTER BUTTONS */
+    .recent-filters {
+        display: flex;
+        gap: 10px;
+        padding: 3px;
+        border: 1px solid #318346;
+        border-radius: 30px;
+    }
+
+    .filter-btn {
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: none;
+        font-size: 12px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.4);
+        transition: 0.3s;
+    }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #0e243b, #318346);
+            color: white;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+
+    /* ===== TIMELINE ===== */
+    .recent-timeline {
+        position: relative;
+        padding-left: 20px;
+    }
+
+        /* Animated gradient line */
+        .recent-timeline::before {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient( 180deg, #3b82f6, #9333ea, #10b981, #3b82f6 );
+            background-size: 100% 300%;
+            border-radius: 10px;
+        }
+
+
+
+    /* ITEM */
+    .recent-item {
+        margin-bottom: 25px;
+    }
+
+    /* CARD */
+    .recent-card {
+        background: rgba(255, 255, 255, 0.55);
+        border-radius: 4px;
+        padding: 8px 14px;
+        margin-left: 5px;
+        transition: 0.3s;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid #d4d4d4;
+    }
+
+        .recent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 35px rgba(0,0,0,0.15);
+        }
+
+    /* TOP SECTION */
+    .recent-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .recent-user {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .recent-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+
+    /* TEXT */
+    .recent-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #111827;
+    }
+
+    .recent-user-name {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .recent-bottom {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #318346;
+    }
+
+    /* BADGES */
+    .recent-badge {
+        font-size: 11px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .created-badge {
+        background: linear-gradient(45deg, #3b82f6, #6366f1);
+    }
+
+    .completed-badge {
+        background: linear-gradient(45deg, #10b981, #059669);
+    }
+
+    .task-row {
+        display: flex;
+        gap: 15px;
+        width: 100%;
+    }
+
+    /* 30% Left */
+    .task-id-section {
+        width: 30%;
+    }
+
+    /* 70% Right */
+    .task-title-section {
+        width: 70%;
+    }
+
+    .task-title-form {
+        width: 50%;
+    }
+
+    /* Button Section */
+    .timesheet-buttons {
+        display: flex;
+        justify-content: end; /* IMPORTANT */
+        align-items: center;
+        margin-bottom: 30px;
+        width: 100%; /* Ensures the container stretches across the entire width */
+        gap: 15px; /* Spacing between buttons */
+        flex-wrap: nowrap; /* ❌ stop wrapping */
+        overflow-x: auto; /* ✅ allow horizontal scroll */
+        -webkit-overflow-scrolling: touch;
+    }
+
+        .timesheet-buttons > .timesheetbtn-icon {
+            flex: 0 0 auto;
+        }
+
+        .timesheet-buttons::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .timesheet-buttons::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+    /* Button with Icon + Text */
+    .timesheetbtn-icon {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border: 1px solid #a1a1a1;
+        border-radius: 25px; /* Rounded corners */
+        padding: 5px 16px;
+        font-size: 12px;
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+        flex: 0 0 auto; /* 🔥 prevents shrinking */
+        white-space: nowrap;
+    }
+
+        .timesheetbtn-icon:hover {
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .timesheetbtn-icon i {
+            color: #4caf50;
+            margin-right: 10px; /* Spacing between icon and text */
+        }
+
+        .timesheetbtn-icon span {
+            font-weight: 600;
+        }
+
+    /* Search Bar Styles */
+    .timesheetsearch-container {
+        display: flex;
+        align-items: center;
+        margin-left: auto; /* Aligns search bar to the right */
+        gap: 6px;
+        flex: 0 0 auto; /* prevent breaking */
+    }
+
+        .timesheetsearch-container input {
+            padding: 5px 16px;
+            border-radius: 25px;
+            border: 1px solid #4caf50;
+            font-size: 12px;
+            width: 250px;
+            background-color: #fff;
+        }
+
+            .timesheetsearch-container input::placeholder {
+                color: #bbb;
+            }
+
+        .timesheetsearch-container button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            border: 1px solid #4CAF50;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s;
+            margin-left: 5px;
+        }
+
+            .timesheetsearch-container button:hover {
+                background-color: #45a049;
+            }
+
+    /* Timesheet Dashboard Styles */
+    .timesheet-dashboard {
+        background-color: #f4f7fa;
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Card Section */
+    .timesheet-cards .tcard:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    .timesheet-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* 🔥 KEY FIX */
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+        .timesheet-cards .tcard {
+            background: linear-gradient(135deg, #0c2034, #163a5c, #1f4e7a);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+            position: relative;
+            border: 1px solid #d2d2d2;
+            cursor: pointer;
+            min-height: 120px; /* keeps consistency */
+        }
+
+            .timesheet-cards .tcard:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+
+    .theading {
+        color: #ffffff;
+        font-size: 18px;
+        margin-top: 10px;
+    }
+
+    .tp1 {
+        font-size: 22px;
+        font-weight: bold;
+        color: #64e5f3;
+        margin-bottom: 0px;
+    }
+
+    .tp2 {
+        font-size: 22px;
+        font-weight: bold;
+        color: #4caf50;
+        margin-bottom: 0px;
+    }
+
+    .tp3 {
+        font-size: 22px;
+        font-weight: bold;
+        color: #dc3545;
+        margin-bottom: 0px;
+    }
+
+    .tp4 {
+        font-size: 22px;
+        font-weight: bold;
+        color: #ff9b00;
+        margin-bottom: 0px;
+    }
+    /* Circle Icon Styling */
+    .timesheetcard-icon1,
+    .timesheetcard-icon2,
+    .timesheetcard-icon3,
+    .timesheetcard-icon4 {
+        width: 38px;
+        height: 38px;
+        top: -18px;
+    }
+
+    .timesheetcard-icon1 {
+        width: 35px;
+        height: 35px;
+        background-color: #64e5f3;
+        border: 1px solid #00c4d9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px;
+        box-shadow: 0px 4px 8px rgb(0 0 0 / 30%);
+    }
+
+    .timesheetcard-icon2 {
+        width: 35px;
+        height: 35px;
+        background-color: #4caf50;
+        border: 1px solid #009106;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px;
+        box-shadow: 0px 4px 8px rgb(0 0 0 / 30%);
+    }
+
+    .timesheetcard-icon3 {
+        width: 35px;
+        height: 35px;
+        background-color: #dc3545;
+        border: 1px solid #c90013;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px;
+        box-shadow: 0px 4px 8px rgb(0 0 0 / 30%);
+    }
+
+    .timesheetcard-icon4 {
+        width: 35px;
+        height: 35px;
+        background-color: #ff9b00;
+        border: 1px solid #c97c05;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px;
+        box-shadow: 0px 4px 8px rgb(0 0 0 / 30%);
+    }
+
+    /* Color Variations for Cards */
+    .tcard-1 {
+        background-color: #4CAF50;
+    }
+    /* Green */
+    .tcard-2 {
+        background-color: #FF9800;
+    }
+    /* Orange */
+    .tcard-3 {
+        background-color: #2196F3;
+    }
+    /* Blue */
+    .tcard-4 {
+        background-color: #F44336;
+    }
+    /* Red */
+
+    /* Icons inside circles */
+    .timesheetcard-icon1 i {
+        font-size: 16px;
+        color: #fff;
+    }
+
+    .timesheetcard-icon2 i {
+        font-size: 16px;
+        color: #fff;
+    }
+
+    .timesheetcard-icon3 i {
+        font-size: 16px;
+        color: #fff;
+    }
+
+    .timesheetcard-icon4 i {
+        font-size: 16px;
+        color: #fff;
+    }
+
+    /* Task Overview Section */
+    .task-overview {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        border: 1px solid #d9d9d9;
+    }
+
+        .task-overview h3 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+
+
+    /* ================= MODAL ================= */
+    .task-modal {
+        position: fixed;
+        inset: 0;
+        backdrop-filter: blur(10px);
+        background: rgba(0,0,0,0.25);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    /* ================= CARD ================= */
+    .task-card {
+        width: 450px;
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: 18px;
+        padding: 22px 20px 18px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+        animation: slideUp 0.35s ease;
+        backdrop-filter: blur(18px);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* ================= HEADER ================= */
+    .task-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+        .task-header i {
+            color: #2f6fed;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .task-header h3 {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+            color: #033e7d;
+        }
+
+    /* ================= LABEL ================= */
+    .task-label {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #3e4b6d;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    /* ================= INPUTS ================= */
+    .task-input,
+    .task-select,
+    .task-textarea {
+        width: 100%;
+        padding: 6px 12px;
+        border-radius: 10px;
+        border: 1px solid #dce3ef;
+        background: #f8fafd;
+        font-size: 13px;
+        margin-bottom: 14px;
+        outline: none;
+        transition: 0.2s;
+        color: #181818;
+    }
+
+        .task-input:focus,
+        .task-textarea:focus,
+        .task-select:focus {
+            border-color: #2f6fed;
+            box-shadow: 0 0 0 2px rgba(47,111,237,0.15);
+        }
+
+    .task-textarea {
+        resize: none;
+        height: 65px;
+    }
+
+    /* ================= PRIORITY ================= */
+    .priority-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .priority-btn {
+        flex: 1;
+        padding: 7px;
+        border-radius: 10px;
+        border: 1px solid #dce3ef;
+        background: #f8fafd;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.25s;
+        gap: 6px; /* spacing between icon & text */
+    }
+
+        .priority-btn.active {
+            background: #E8F0FF;
+            border-color: #2f6fed;
+            color: #2f6fed;
+            font-weight: 600;
+        }
+
+        .priority-btn:nth-child(1) i {
+            color: #e74c3c;
+        }
+        /* High - Red */
+        .priority-btn:nth-child(2) i {
+            color: #f39c12;
+        }
+        /* Medium - Orange */
+        .priority-btn:nth-child(3) i {
+            color: #27ae60;
+        }
+    /* Low - Green */
+    /* ================= DATE ================= */
+    .date-wrapper {
+        position: relative;
+        margin-bottom: 14px;
+    }
+
+        .date-wrapper i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8da2c3;
+            pointer-events: none;
+        }
+
+        .date-wrapper input {
+            padding-right: 18px;
+        }
+
+    /* ================= UPLOAD ================= */
+    .upload-box {
+        border: 1px dashed #dce3ef;
+        padding: 11px;
+        border-radius: 10px;
+        background: #f8fafd;
+        font-size: 13px;
+        color: #2f6fed;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+
+    /* File List */
+    .file-list {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .file-item {
+        background: #f1f4fa;
+        border: 1px solid #dce3ef;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .file-item i {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+    /* ================= FOOTER ================= */
+    .task-footer {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .create-btn {
+        flex: 1;
+        background: #2f6fed;
+        color: white;
+        border: none;
+        padding: 8px 0;
+        border-radius: 12px;
+        font-size: 14px;
+        box-shadow: 0 10px 25px rgba(47,111,237,0.35);
+        cursor: pointer;
+    }
+
+        .create-btn:hover {
+            background: #1f5ae0; /* slightly darker */
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(47,111,237,0.45);
+        }
+
+    .cancel-btn {
+        flex: 1;
+        background: #F1F3F7;
+        border: 1px solid #ff2b2b;
+        border-radius: 12px;
+        font-size: 14px;
+        cursor: pointer;
+        color: #ff2b2b;
+        padding: 8px 12px;
+    }
+
+        .cancel-btn:hover {
+            background: #ff2b2b; /* soft red background */
+            border-color: #ff2b2b;
+            color:white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,43,43,0.15);
+        }
+</style>
+
+<div class="timesheet-dashboard">
+    <!-- Button Section with Custom Styled Buttons -->
+    <div class="timesheet-buttons">
+
+        <button class="timesheetbtn-icon" id="btn_createtaskmodel">
+            <i class="fa fa-plus"></i>
+            <span>Create Task</span>
+        </button>
+        <button class="timesheetbtn-icon" onclick="location.href='@Url.Action("Index", "TimesheetReplyTaskList")'">
+            <i class="fa fa-reply"></i>
+            <span>Reply to Task</span>
+        </button>
+        <button class="timesheetbtn-icon" onclick="location.href='@Url.Action("Index", "TimesheetTaskList")'">
+            <i class="fa fa-list-ul"></i>
+            <span>Task List</span>
+        </button>
+        @* <button class="timesheetbtn-icon">
+            <i class="fa fa-tasks"></i>
+            <span>Task Assign</span>
+        </button>
+        <button class="timesheetbtn-icon">
+            <i class="fa fa-flag"></i>
+            <span>Report Task</span>
+        </button> *@
+
+
+
+        <!-- Search Task Bar with Icon -->
+@*         <div class="timesheetsearch-container">
+            <input type="text" placeholder="Search Tasks..." id="searchInput" />
+            <button type="button" onclick="searchTasks()">
+                <i class="fa fa-search"></i>
+            </button>
+        </div> *@
+    </div>
+    @* Modal Popup *@
+    <div class="task-modal" id="taskModal">
+        <div class="task-card">
+
+            <div class="task-header">
+                <i class="fa fa-arrow-left" onclick="closeTaskModal()"></i>
+                <h3>Create Task</h3>
+            </div>
+            <div class="task-row">
+
+                <!-- Left Side - Task ID (30%) -->
+                <div class="task-id-section">
+                    <label class="task-label">Task ID:</label>
+                    <input type="text" class="task-input" id="txt_vNo" disabled>
+                </div>
+
+                <!-- Right Side - Task Title (70%) -->
+                <div class="task-title-section">
+                    <label class="task-label">Task Title:</label>
+                    <input type="text" class="task-input" id="txt_tasktitle" maxlength="300">
+                </div>
+
+            </div>
+
+            <label class="task-label">Description:</label>
+            <textarea class="task-textarea" id="txt_disc" maxlength="300"></textarea>
+
+            <label class="task-label">Priority:</label>
+            <div class="priority-group">
+                <div class="priority-btn active">
+                    <i class="fa fa-arrow-up" id="pri_high"></i>
+                    <span>High</span>
+                </div>
+
+                <div class="priority-btn">
+                    <i class="fa fa-minus " id="pri_medium"></i>
+                    <span>Medium</span>
+                </div>
+
+                <div class="priority-btn">
+                    <i class="fa fa-arrow-down" id="pri_low"></i>
+                    <span>Low</span>
+                </div>
+            </div>
+            <div class="task-row">
+                <div class="task-title-form">
+                    <label class="task-label">Due Date:</label>
+                    <div class="date-wrapper">
+                        <input type="date" class="task-input" id="due_date">
+                    </div>
+                </div>
+                <div class="task-title-form">
+                    <label class="task-label">Status</label>
+                    <select class="task-select" id="ddl_status">
+                        <option value="Pending">Pending</option>
+                        <option value="Complete">Complete</option>
+                        <option value="Close">Close</option>
+                    </select>
+                </div>
+            </div>
+
+            <label class="task-label">Assign To:</label>
+            <select class="task-select" id="ddl_assignto">  </select>
+
+            <div class="task-row">
+                <div class="task-title-form">
+                    <label class="task-label">CC To:</label>
+                    <select class="task-select" id="ddl_CCto">  </select>
+                </div>
+                <div class="task-title-form">
+                    <label class="task-label">BCC To:</label>
+                    <select class="task-select" id="ddl_BCCto">  </select>
+                </div>
+            </div>
+
+            <label class="task-label">Duration</label>
+            <select class="task-select" id="ddl_duration">
+                <option value="">Select Duration</option>
+                <option value="One Time">One Time</option>
+                <option value="weekly">weekly</option>
+                <option value="Monthly">Monthly</option>
+            </select>
+
+            <label class="task-label">Attachments:</label>
+            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                <i class="fa fa-upload"></i>
+                <span>Upload Files</span>
+            </div>
+
+            <input type="file" id="fileInput" multiple hidden>
+            <div id="fileList" class="file-list"></div>
+
+            <div class="task-footer">
+                <button class="create-btn" id="btn_createtask">Create Task</button>
+                <button class="cancel-btn" onclick="closeTaskModal()">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+    <!-- Card Section (Task Summary) -->
+    <div class="timesheet-cards">
+        <div class="tcard tcard-1">
+            <div class="timesheetcard-icon1">
+                <i class="fa fa-tasks"></i> <!-- Tasks Icon -->
+            </div>
+            <h3 class="theading">Total Tasks</h3>
+            <p class="tp1" id="TotalTaskID">0</p>
+        </div>
+        <div class="tcard tcard-2">
+            <div class="timesheetcard-icon2">
+                <i class="fa fa-check-circle"></i> <!-- Completed Tasks Icon -->
+            </div>
+            <h3 class="theading">Tasks Completed</h3>
+            <p class="tp2" id="CompletetaskID">0</p>
+        </div>
+        <div class="tcard tcard-3">
+            <div class="timesheetcard-icon3">
+                <i class="fa fa-clock"></i> <!-- Pending Tasks Icon -->
+            </div>
+            <h3 class="theading">Tasks Pending</h3>
+            <p class="tp3" id="PendingTaskID">0</p>
+        </div>
+        <div class="tcard tcard-4">
+            <div class="timesheetcard-icon4">
+                <i class="fa fa-exclamation-circle"></i> <!-- Overdue Tasks Icon -->
+            </div>
+            <h3 class="theading">Tasks Overdue</h3>
+            <p class="tp4" id="TaskOverdueID">0</p>
+        </div>
+    </div>
+
+
+
+    <!-- Recent Activities Section -->
+
+    <div class="recent-activities glass-activities">
+
+        <div class="recent-header">
+            <h3>Recent Activities</h3>
+
+            <div class="recent-filters">
+                <button class="filter-btn active" data-type="ALL">All</button>
+                <button class="filter-btn" data-type="CREATED">Created</button>
+                <button class="filter-btn" data-type="COMPLETED">Completed</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Data Will Load Here -->
+        <div class="recent-timeline" id="recentTimeline"></div>
+
+    </div>
+
+</div>
+<script>
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const rowId = urlParams.get('id');
+        const fileInput = document.getElementById("fileInput");
+        const fileList = document.getElementById("fileList");
+
+        let selectedFiles = [];
+
+        document.addEventListener("DOMContentLoaded", async function () {
+
+            await initDashboard();
+
+
+            if (rowId) {
+
+              loadTask(rowId);
+              openTaskModalReadOnly();
+
+            }
+
+
+            // Priority Selection
+            document.querySelectorAll(".priority-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    document.querySelectorAll(".priority-btn")
+                        .forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                });
+            });
+
+            // File Upload Handling
+            if (fileInput) {
+                fileInput.addEventListener("change", function () {
+                    const files = Array.from(this.files);
+                    files.forEach(file => selectedFiles.push(file));
+                    renderFileList();
+                    this.value = "";
+                });
+            }
+
+            // Create Task
+            $("#btn_createtask").click(function (e) {
+                e.preventDefault();
+                createTask();
+            });
+
+            // Filter Buttons
+            $(document).on("click", ".filter-btn", function () {
+                $(".filter-btn").removeClass("active");
+                $(this).addClass("active");
+                let type = $(this).data("type");
+                loadRecentActivities(type);
+            });
+
+            $('#btn_createtaskmodel').on('click', function(){
+                      openTaskModal();
+                             // Clear text inputs
+                        $('#txt_tasktitle').val('');
+                        $('#txt_disc').val('');
+                        $('#due_date').val('');
+
+                        // Reset dropdowns
+                        $('#ddl_assignto').val('').trigger('change');
+                        $('#ddl_CCto').val('').trigger('change');
+                        $('#ddl_BCCto').val('').trigger('change');
+                        $('#ddl_duration').val('');
+
+                        // Clear file input
+                        $('#fileInput').val('');
+
+                        // Clear file list display
+                        $('#fileList').html('');
+
+                });
+
+
+            $('#TotalTaskID').on('click', function() {
+
+                window.location.href = `/TimesheetTaskList/Index?Status=${encodeURIComponent("All")}`;
+            });
+
+            $('#CompletetaskID').on('click', function() {
+
+            window.location.href = `/TimesheetTaskList/Index?Status=${encodeURIComponent("Complete")}`;
+            });
+
+            $('#PendingTaskID').on('click', function() {
+
+            window.location.href = `/TimesheetTaskList/Index?Status=${encodeURIComponent("Pending")}`;
+            });
+
+                $('#TaskOverdueID').on('click', function() {
+                window.location.href = `/TimesheetTaskList/Index?Status=${encodeURIComponent("Overdue")}`;
+            });
+
+
+
+
+        });
+
+        // =============================
+        // INITIALIZER
+        // =============================
+
+        async function initDashboard() {
+            await Promise.all([
+                loadAllUserDropdowns(),
+                FetchDashBoardcount(),
+                loadRecentActivities('ALL'),
+                rowId ? Promise.resolve() : GetVNo()
+            ]);
+        }
+
+        // =============================
+        // DROPDOWNS
+        // =============================
+
+        async function loadAllUserDropdowns() {
+            try {
+                const response = await fetch('/TimesheetDashboard/DDLUserMast');
+                const data = await response.json();
+
+                fillDropdown("ddl_assignto", data, "Select Assign To");
+                fillDropdown("ddl_CCto", data, "Select CC To");
+                fillDropdown("ddl_BCCto", data, "Select BCC To");
+
+            } catch (error) {
+                console.error("Dropdown load failed:", error);
+            }
+        }
+
+        function fillDropdown(id, data, defaultText) {
+            const ddl = document.getElementById(id);
+            if (!ddl) return;
+
+            ddl.innerHTML = `<option value="">${defaultText}</option>`;
+
+            data.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.textContent = item.text;
+                ddl.appendChild(option);
+            });
+        }
+
+        // =============================
+        // GET DOCUMENT NUMBER
+        // =============================
+
+        async function GetVNo() {
+            try {
+                const res = await fetch('/TimesheetDashboard/GetVNo');
+                const data = await res.json();
+                $('#txt_vNo').val(data.v_NO);
+            }
+            catch (e) {
+                toastr.error('Error loading Document Number');
+            }
+        }
+
+        // =============================
+        // CREATE TASK
+        // =============================
+
+        function createTask() {
+            const V_NO = parseInt($("#txt_vNo").val()) || null;
+            const TaskTitle = $.trim($("#txt_tasktitle").val());
+            const TaskDescription = $.trim($("#txt_disc").val());
+            const DueDate = formatDate($("#due_date").val());
+            const Status = $("#ddl_status").val();
+            const AssignedToID = $("#ddl_assignto").val() ? parseInt($("#ddl_assignto").val()) : null;
+            const CCTOID = $("#ddl_CCto").val() ? parseInt($("#ddl_CCto").val()) : null;
+            const BCCTOID = $("#ddl_BCCto").val() ? parseInt($("#ddl_BCCto").val()) : null;
+            const DURATION = $("#ddl_duration").val();
+            let Priority = $(".priority-btn.active span").text();
+
+            if (!TaskTitle) {
+                toastr.warning("Please enter Task Title");
+                return;
+            }
+
+            if (!TaskDescription) {
+                toastr.warning("Please enter Task Description");
+                return;
+            }
+
+              if (!AssignedToID) {
+                toastr.warning("Please select Assigned To");
+                return;
+            }
+
+            if (!DueDate) {
+                toastr.warning("Please select Due Date");
+                return;
+            }
+
+            const Header = {
+                TaskTitle,
+                TaskDescription,
+                Priority,
+                StartDate: DueDate,
+                EndDate: DueDate,
+                AssignedToID,
+                Status,
+                V_NO,
+                CCTOID,
+                BCCTOID,DURATION,
+                action: "INSERT"
+            };
+
+            const attachments = selectedFiles.map(file => ({
+                FileName: file.name
+            }));
+
+            const payload = {
+                Header,
+                Detail: [],
+                Attachment: attachments
+            };
+
+            $.ajax({
+                url: '/TimesheetDashboard/SavedData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Task saved successfully!");
+                        setTimeout(() => {
+                        window.location.href = '/TimesheetDashboard/Index';
+                        }, 2000); // 2 seconds
+
+
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("Server error occurred.");
+                }
+            });
+        }
+
+        // =============================
+        // DASHBOARD COUNTS
+        // =============================
+
+        async function FetchDashBoardcount() {
+            try {
+                const res = await $.ajax({
+                    url: '/TimesheetDashboard/Dashboardcount',
+                    type: 'GET'
+                });
+
+                $('#TotalTaskID').text(res.totalCount);
+                $('#CompletetaskID').text(res.completeCount);
+                $('#PendingTaskID').text(res.pendingCount);
+                $('#TaskOverdueID').text(res.upcomingCount);
+            }
+            catch (error) {
+                toastr.error("Error fetching dashboard data");
+            }
+        }
+
+        // =============================
+        // RECENT ACTIVITIES
+        // =============================
+
+        function loadRecentActivities(TYPE) {
+            $.ajax({
+                url: '/TimesheetDashboard/RECENTACTIVITY',
+                type: 'GET',
+                data: { TYPE: TYPE },
+                success: function (response) {
+
+                    let timeline = $("#recentTimeline");
+                    timeline.empty();
+
+                    if (!response.success || !response.data.length) {
+                        timeline.append("<p>No Recent Task Found.</p>");
+                        return;
+                    }
+
+                    response.data.forEach(item => {
+
+                        let badgeColor = "";
+
+                        switch ((item.status || "").toLowerCase()) {
+                            case "pending":
+                                badgeColor = "background:#ffe8a3;color:#b58900;";
+                                break;
+                            case "complete":
+                                badgeColor = "background:#d4edda;color:#155724;";
+                                break;
+                            case "close":
+                                badgeColor = "background:#e2e3e5;color:#333;";
+                                break;
+                            default:
+                                badgeColor = "background:#f8d7da;color:#721c24;";
+                        }
+
+                        let html = `
+                            <div class="recent-item">
+                                <div class="recent-card">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <div style="display:flex;align-items:center;gap:10px;">
+                                            <img src="/images/userman.png"
+                                                 style="width:40px;height:40px;border-radius:50%;">
+                                            <div>
+                                                <div style="font-weight:600;">
+                                                    ${item.taskTitle}
+                                                </div>
+                                                <div style="font-size:13px;color:#777;">
+                                                    By ${item.userName || "System"}
+                                                </div>
+                                                <div style="font-size:12px;color:#999;">
+                                                    ${item.v_date}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <span style="
+                                            padding:6px 14px;
+                                            border-radius:20px;
+                                            font-size:12px;
+                                            font-weight:600;
+                                            ${badgeColor}
+                                        ">
+                                            ${item.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        timeline.append(html);
+                    });
+                },
+                error: function () {
+                    toastr.error("Error loading recent activities.");
+                }
+            });
+        }
+
+        // =============================
+        // MODAL
+        // =============================
+
+        function openTaskModal() {
+            document.getElementById("taskModal").style.display = "flex";
+        }
+
+        function closeTaskModal() {
+           // document.getElementById("taskModal").style.display = "none";
+                     window.location.href = '/TimesheetDashboard/Index';
+
+        }
+
+        // =============================
+        // FILE HANDLING
+        // =============================
+
+        function renderFileList() {
+            fileList.innerHTML = "";
+
+            selectedFiles.forEach((file, index) => {
+                const div = document.createElement("div");
+                div.classList.add("file-item");
+
+                div.innerHTML = `
+                    <span>${file.name}</span>
+                    <i class="fa fa-times"></i>
+                `;
+
+                div.querySelector("i").addEventListener("click", function () {
+                    removeFile(index);
+                });
+
+                fileList.appendChild(div);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+        }
+
+        // =============================
+        // SEARCH
+        // =============================
+
+       function searchTasks() {
+            const searchValue = document.getElementById("searchInput").value;
+            alert("Searching for: " + searchValue);
+        }
+
+       function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d)) return '';
+            return d.toISOString().slice(0, 10);
+        }
+
+       async function loadTask(rowId) {
+            try {
+                const res = await $.ajax({
+                    url: '/TimesheetDashboard/GetDatabyId',
+                    type: 'GET',
+                    data: { rowId: rowId },
+                    dataType: 'json'
+                });
+
+                if (res.success && res.data) {
+
+                    const data = res.data;
+                    const attachments = res.attachments || [];
+
+                    $('#txt_vNo').val(data.v_NO);
+
+                    $('#txt_tasktitle').val(data.taskTitle || "");
+
+                    $('#txt_disc').val(data.taskDescription || "");
+
+                    if (data.endDate) {
+                        $('#due_date').val(formatDate(data.endDate));
+                    }
+
+                    $('#ddl_status').val(data.status || "Pending");
+
+                    $('#ddl_assignto').val(data.assignedToID || "");
+                    $('#ddl_CCto').val(data.cctoid > 0 ? data.cctoid : "");
+                    $('#ddl_BCCto').val(data.bcctoid > 0 ? data.bcctoid : "");
+
+                    $('#ddl_duration').val(data.duration || "");
+
+                    $(".priority-btn").removeClass("active");
+
+                    $(".priority-btn").each(function () {
+                        const btnText = $(this).find("span").text().toLowerCase();
+                        if (btnText === (data.priority || "").toLowerCase()) {
+                            $(this).addClass("active");
+                        }
+                    });
+
+
+                    selectedFiles = [];
+                    fileList.innerHTML = "";
+
+                    attachments.forEach((file, index) => {
+                        const div = document.createElement("div");
+                        div.classList.add("file-item");
+
+                        div.innerHTML = `
+                            <span>${file.fileName}</span>
+                            <i class="fa fa-times"></i>
+                        `;
+
+                        div.querySelector("i").addEventListener("click", function () {
+                            div.remove();
+                        });
+
+                        fileList.appendChild(div);
+                    });
+
+                    openTaskModal();
+
+                } else {
+                    toastr.error(res.message || "Data not found.");
+                }
+
+            } catch (error) {
+                console.error("Ajax Error:", error);
+                toastr.error("Error loading task data.");
+            }
+        }
+
+       function openTaskModalReadOnly() {
+
+        const modal = document.getElementById("taskModal");
+        modal.style.display = "flex";
+
+        const card = modal.querySelector(".task-card");
+
+        if (!card) return;
+
+        // 1️⃣ Disable all inputs, textareas, selects
+        card.querySelectorAll("input, textarea, select").forEach(el => {
+            el.setAttribute("disabled", true);
+        });
+
+        // 2️⃣ Disable priority buttons
+        card.querySelectorAll(".priority-btn").forEach(btn => {
+            btn.style.pointerEvents = "none";
+            btn.style.opacity = "0.7";
+        });
+
+        // 3️⃣ Disable upload section
+        const uploadBox = card.querySelector(".upload-box");
+        if (uploadBox) {
+            uploadBox.style.pointerEvents = "none";
+            uploadBox.style.opacity = "0.6";
+        }
+
+        // 4️⃣ Disable attachment remove (❌) buttons
+        card.querySelectorAll(".file-item i").forEach(icon => {
+            icon.style.pointerEvents = "none";
+            icon.style.opacity = "0.5";
+            icon.style.cursor = "not-allowed";
+        });
+
+        // 5️⃣ Hide Create button
+        const createBtn = document.getElementById("btn_createtask");
+        if (createBtn) {
+            createBtn.style.display = "none";
+        }
+    }
+
+</script>

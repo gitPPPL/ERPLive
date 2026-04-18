@@ -1,0 +1,1107 @@
+﻿@{
+    ViewBag.Title = "Employee Attendance";
+    Layout = "~/Views/Shared/EmployeeLayout.cshtml";
+}
+<style>
+
+
+    .empattendancecheck-container {
+        background: #ededed;
+        border-radius: 8px;
+        padding: 10px 10px 10px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-top: 10px;
+        border: 1px solid #9d9d9d;
+    }
+
+    /* ===== Label ===== */
+
+    .empattendancecheck-label {
+        font-weight: 600;
+        margin-right: 15px;
+        color: #1c1c1c;
+    }
+
+    /* ===== View Type ===== */
+
+    .empattendancecheck-viewtype {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    /* ===== Checkbox Option ===== */
+
+    .empattendancecheck-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+        .empattendancecheck-option input {
+            width: 16px;
+            height: 16px;
+            accent-color: #2f7d3d;
+        }
+
+    /* ===== User Selection ===== */
+
+    .empattendancecheck-users {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    /* ===== User List ===== */
+
+    .empattendancecheck-userlist {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    /* ===== User Item ===== */
+
+
+    .empattendancecheck-useritem input {
+        accent-color: #2f7d3d;
+    }
+
+
+
+
+    /* ===== Status Colors ===== */
+
+    .empattendancecheck-status-present {
+        color: #239b42;
+        font-weight: 600;
+    }
+
+    .empattendancecheck-status-absent {
+        color: #ff4f60;
+        font-weight: 600;
+    }
+
+    .empattendancecheck-status-off {
+        color: #3498db;
+        font-weight: 600;
+    }
+    /* Dropdown Container */
+
+    .empattendancecheck-dropdown {
+        position: relative;
+        width: 260px;
+    }
+
+    /* Dropdown Button */
+
+    .empattendancecheck-dropdown-toggle {
+        border: 1px solid #dcdcdc;
+        padding: 2px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #fff;
+        font-size: 12px;
+        width: 100%;
+    }
+
+    /* Dropdown Menu */
+
+    .empattendancecheck-dropdown-menu {
+        display: none;
+        position: absolute;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #dcdcdc;
+        border-radius: 6px;
+        margin-top: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        z-index: 1000;
+    }
+
+        /* Show dropdown */
+
+        .empattendancecheck-dropdown-menu.active {
+            display: block;
+        }
+
+    /* User Item */
+
+    .empattendancecheck-useritem {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        cursor: pointer;
+    }
+
+        .empattendancecheck-useritem:hover {
+            background: #f5f7fa;
+        }
+
+        .empattendancecheck-useritem input {
+            accent-color: #2f7d3d;
+        }
+
+    .empattendancecheck-container {
+        display: none;
+    }
+
+    .emp-bar {
+        background: #ffffff;
+        padding: 6px 20px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        box-shadow: 0 6px 9px rgb(0 0 0 / 16%);
+        border: 1px solid #d7d7d7;
+    }
+
+    .emp-main-title {
+        display: flex;
+        align-items: center;
+        gap: clamp(6px, 1.5vw, 10px);
+        font-weight: 600;
+        font-size: clamp(13px, 2vw, 16px);
+        color: #1f4e79;
+    }
+
+        .emp-main-title i {
+            color: #fff;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 12px;
+            background: #318346;
+        }
+
+    .load-btn {
+        background-color: #0089ff;
+        color: white;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: bold;
+        border: none;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .load-btn:hover {
+            background-color: #45a049; /* Darker green on hover */
+            transform: translateY(-2px); /* Lift button slightly */
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15); /* Bigger shadow */
+        }
+
+        .load-btn:active {
+            transform: translateY(0); /* Reset on click */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+    .timesheettasklist-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+        .timesheettasklist-table th {
+            padding: 8px 14px;
+            text-align: left;
+            border-bottom: 1px solid #0e243a;
+            font-size: 14px;
+        }
+
+        .timesheettasklist-table td {
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .timesheettasklist-table th {
+            background: #cfcfcf;
+            color: #0e243a;
+            font-weight: 600;
+        }
+
+        .timesheettasklist-table tr:hover {
+            background: #f9fbff;
+        }
+
+    .present-cell {
+        background-color: #4CAF50;
+        color: #fff;
+        text-align: center;
+    }
+
+    .absent-cell {
+        background-color: #F44336;
+        color: #fff;
+        text-align: center;
+    }
+
+    .leave-cell {
+        background-color: #FFEB3B;
+        color: #000;
+        text-align: center;
+    }
+
+    .default-cell {
+        background-color: #E0E0E0;
+        text-align: center;
+    }
+
+    .offday-cell {
+        background-color: #9ccbff; /* same as calendar */
+        color: #000;
+        text-align: center;
+       /*  font-weight: 600; */
+    }
+</style>
+<div class="emp-bar">
+    <div class="emp-main-title">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>Employee Attendance</span>
+    </div>
+</div>
+
+<div class="emp-filter-row">
+    <!-- Month Dropdown -->
+    <div class="emp-filter-group">
+        <label for="ddlMonth" class="emp-filter-label">Select Month</label>
+        <select id="monthSelect" class="form-select emp-filter-select"></select>
+    </div>
+
+</div>
+<div class="empattendancecheck-container">
+
+    <!-- View Type -->
+    <div class="empattendancecheck-viewtype">
+        <label class="empattendancecheck-label" id="lbl_ViewType">View Type</label>
+
+        <label class="empattendancecheck-option" id="">
+            <input type="checkbox" id="chkSelf" checked>
+            <span id="lbl_self">Self</span>
+        </label>
+
+        <label class="empattendancecheck-option">
+            <input type="checkbox" id="chkMultiple">
+            <span id="lbl_multiuser">Multiple Users</span>
+        </label>
+    </div>
+
+    <!-- User Selection -->
+    <div class="emp-filter-row">
+        <div class="empattendancecheck-users" id="multiUserSection">
+
+            <label class="empattendancecheck-label" id="lbl_selecteduser">Select Users</label>
+
+            <div class="empattendancecheck-dropdown">
+                <input type="text"
+                       id="empattendancecheckUserSearch"
+                       class="empattendancecheck-dropdown-toggle"
+                       placeholder="Search Users">
+
+                <div class="empattendancecheck-dropdown-menu" id="userCheckboxList">
+                    <!-- Dynamic users -->
+                </div>
+
+            </div>
+            <button id="BTN_LoadData" class="load-btn">Load Data</button>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="timesheettasklist-table" id="tbl_multiuser">
+        <thead id="attendanceHead">
+            <tr>
+                <th>Employee Code</th>
+                <th>Employee</th>
+                <!-- Days will be added dynamically -->
+            </tr>
+        </thead>
+
+        <tbody id="multiUserBody">
+        </tbody>
+    </table>
+</div>
+<!-- Calendar -->
+<div class="table-responsive">
+    <table class="table calendar-table calendar-wrapper mt-2" id="calendarTable">
+        <thead>
+            <tr>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+            </tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    /* ===== Calendar Table ===== */
+    .calendar-table {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+
+
+        .calendar-table thead th {
+            background-color: #0e233a;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+            .calendar-table thead th:first-child {
+                color: #ef8c10; /* Sunday highlighted */
+            }
+
+        .calendar-table td {
+            border: 1px solid #dee2e6;
+        }
+
+    .calendar-cell {
+        height: 80px;
+        padding: 4px;
+        vertical-align: top;
+        position: relative;
+        transition: background-color 0.2s;
+        color: #fff; /* text color visible on colored background */
+        font-size: 12px;
+    }
+
+        .calendar-cell.present {
+            background-color: #239b42;
+        }
+        /* green */
+        .calendar-cell.absent {
+            background-color: #ff4f60;
+        }
+        /* red */
+        .calendar-cell.offday {
+            background-color: #9ccbff;
+        }
+        /* blue */
+        .calendar-cell.missing {
+            background-color: #d7d7d7;
+            color: #000;
+        }
+    /* gray with black text */
+
+    .empty-cell {
+        background-color: #f8f9fa;
+        height: 80px;
+    }
+
+    .calendar-wrapper {
+        overflow-x: auto;
+    }
+        .time-text {
+        font-weight: bold;
+    }
+
+    .time-subtext {
+        font-size: 11px;
+        color: #666;
+    }
+
+
+    /* Flex layout for date + status on the same line */
+    .cell-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .date-left {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .status-right {
+        font-size: 14px;
+        font-weight: 600;
+        color: #101010;
+        padding: 6px;
+        border-radius: 10px;
+    }
+
+    /* Optional: in/out time below */
+    .time-subtext {
+        font-size: 11px;
+        color: #fff; /* white on colored cells */
+        margin-top: 3px;
+    }
+
+    /* Override text color for missing cells (gray) */
+    .calendar-cell.missing .time-subtext {
+        color: #000;
+    }
+
+</style>
+
+<script>
+    $(document).ready(function () {
+        Cheack();
+        populateMonthDropdown();
+        loadUserList();
+
+       $("#monthSelect").change(function () {
+            loadAttendanceDetails($(this).val());
+        });
+
+       $("#empattendancecheckUserSearch").on("keyup focus", function () {
+
+         let value = $(this).val().toLowerCase();
+
+         $("#userCheckboxList").addClass("active");
+
+         $("#userCheckboxList label").filter(function () {
+            $(this).toggle(
+                $(this).text().toLowerCase().indexOf(value) > -1
+            );
+         });
+
+     });
+
+       $(document).click(function(e){
+
+         if(!$(e.target).closest(".empattendancecheck-dropdown").length){
+             $("#userCheckboxList").removeClass("active");
+         }
+
+     });
+
+       $("#chkSelf").change(function () {
+
+         if ($(this).is(":checked")) {
+             // document.querySelector('.empattendancecheck-container').style.display = 'none';
+
+            $("#chkMultiple").prop("checked", false);
+            $(".calendar-wrapper").show();
+            $("#tbl_multiuser").hide();
+            $("#multiUserSection").hide();
+            $('#BTN_LoadData').hide();
+            $('#empattendancecheckUserSearch').hide();
+            $('#lbl_selecteduser').hide();
+            $('#calendarTable').show();
+            loadAttendanceDetails($("#monthSelect").val());
+
+         }
+
+     });
+
+       $("#chkMultiple").change(function () {
+         if ($(this).is(":checked")) {
+           // document.querySelector('.empattendancecheck-container').style.display = 'block'; // or 'flex'
+             $("#chkSelf").prop("checked", false);
+             $(".calendar-wrapper").hide();
+             $("#tbl_multiuser").show();
+             $("#multiUserSection").show();
+             $("#empattendancecheckUserSearch").show();
+             $("#lbl_selecteduser").show();
+             $('#BTN_LoadData').show();
+         }
+
+     });
+
+       $(document).on("change", ".userCheckbox", function () {
+         // Clear search box
+         $("#empattendancecheckUserSearch").val("");
+         // Show all users again
+         $("#userCheckboxList label").show();
+
+     });
+
+       $('#BTN_LoadData').on('click', function () {
+
+        let selectedEmpIds = [];
+
+            $(".userCheckbox:checked").each(function () {
+                selectedEmpIds.push($(this).val());
+            });
+            let month = $("#monthSelect").val();
+
+            LoadMultipleEmpdata(month,selectedEmpIds);
+        });
+
+    });
+
+    function populateMonthDropdown() {
+
+        const monthSelect = $("#monthSelect");
+
+        const monthNames = [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+        ];
+
+        let today = new Date();
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+
+        monthSelect.empty();
+
+        for (let i = 0; i < 12; i++) {
+
+            let monthIndex = currentMonth - i;
+            let year = currentYear;
+
+            if (monthIndex < 0) {
+                monthIndex += 12;
+                year -= 1;
+            }
+            let monthValue = `${year}-${(monthIndex + 1).toString().padStart(2,'0')}`;
+            let monthText = `${monthNames[monthIndex]} ${year}`;
+            monthSelect.append(`<option value="${monthValue}">${monthText}</option>`);
+        }
+    }
+
+    function loadUserList() {
+        $.ajax({
+            url: '/EmpAttendance/DDLUserMast',
+            type: 'GET',
+            success: function (data) {
+
+                let container = $("#userCheckboxList");
+                container.empty();
+
+                $.each(data, function (index, user) {
+
+                    let html = `
+                        <label class="empattendancecheck-useritem">
+                            <input type="checkbox" class="userCheckbox" value="${user.value}">
+                            <span>${user.text}</span>
+                        </label>
+                    `;
+
+                    container.append(html);
+
+                });
+
+            },
+            error: function () {
+                alert("Unable to load users.");
+            }
+        });
+
+    }
+
+    function getSelectedUserIds(){
+        let users = [];
+        $(".userCheckbox:checked").each(function(){
+            users.push($(this).val());
+        });
+        return users;
+    }
+
+    function convertToISO(dateStr) {
+        let parts = dateStr.split("-");
+        let day = parts[0];
+        let monthName = parts[1];
+        let year = parts[2];
+
+        let monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        let monthNumber = monthNames.indexOf(monthName) + 1;
+
+        return year + "-" + monthNumber.toString().padStart(2,'0') + "-" + day.padStart(2,'0');
+
+    }
+
+    // function loadAttendanceDetails(month) {
+    //     $.ajax({
+    //         url: '/EmpAttendance/GetAttendanceDetails',
+    //         type: 'GET',
+    //         data: { month: month },
+    //         success: function(res) {
+               
+    //             console.log("Attendance Data:", res);            
+
+    //             const calendarBody = $("#calendarBody");
+    //             calendarBody.empty();
+
+    //             let [year, monthIndex] = month.split("-");
+    //             monthIndex = parseInt(monthIndex) - 1;
+
+    //             let firstDay = new Date(year, monthIndex, 1);
+    //             let lastDate = new Date(year, monthIndex + 1, 0).getDate();
+    //             let startDay = firstDay.getDay();
+
+    //             let date = 1;
+    //             let row = $("<tr></tr>");
+    //             let today = new Date();
+
+    //             for (let i = 0; i < startDay; i++)
+    //                 row.append("<td class='empty-cell'></td>");
+
+    //             while (date <= lastDate) {
+
+    //                 if (row.children().length === 7) {
+    //                     calendarBody.append(row);
+    //                     row = $("<tr></tr>");
+    //                 }
+
+    //                 let fullDate = `${year}-${(monthIndex+1).toString().padStart(2,'0')}-${date.toString().padStart(2,'0')}`;
+
+    //                 let record = res.find(x => convertToISO(x.date) === fullDate);
+
+    //                 let cellClass = "calendar-cell missing";
+
+    //                 let inTime = "";
+    //                 let outTime = "";
+
+    //                 if (record) {
+
+    //                     if (record.status === "P") {
+    //                         cellClass = "calendar-cell present";
+    //                         inTime = record.inTime || "";
+    //                         outTime = record.outTime || "";
+    //                     }
+    //                     else if (record.status === "A") {
+    //                         cellClass = "calendar-cell absent";
+    //                     }
+    //                     else {
+    //                         cellClass = "calendar-cell offday";
+    //                     }
+
+    //                 }
+
+    //                 let highlightToday =
+    //                     (date === today.getDate() &&
+    //                      monthIndex === today.getMonth() &&
+    //                      year == today.getFullYear())
+    //                     ? "border:2px solid #ef8c10;"
+    //                     : "";
+
+    //                 let cellContent = `<div class="date-number">${date}</div>`;
+
+    //                 if(inTime || outTime){
+
+    //                     cellContent += `<div class="time-text">`;
+
+    //                     if(inTime)
+    //                         cellContent += `${inTime}`;
+
+    //                     if(inTime && outTime)
+    //                         cellContent += ` To `;
+
+    //                     if(outTime)
+    //                         cellContent += `${outTime}`;
+
+    //                     cellContent += `</div>`;
+    //                 }
+
+    //                 let cell = `<td class="${cellClass}" style="${highlightToday}">${cellContent}</td>`;
+
+    //                 row.append(cell);
+
+    //                 date++;
+    //             }
+
+    //             while(row.children().length < 7)
+    //                 row.append("<td class='empty-cell'></td>");
+
+    //             calendarBody.append(row);
+
+    //         },
+
+    //         error: function () {
+    //             alert("Failed to load attendance data");
+    //         }
+
+    //     });
+
+    // }
+
+
+    function loadAttendanceDetails(month) {
+        $.ajax({
+            url: '/EmpAttendance/GetAttendanceDetails',
+            type: 'GET',
+            data: { month: month },
+
+            success: function (res) {
+
+                console.log("Attendance Data:", res);
+
+                const calendarBody = $("#calendarBody");
+                calendarBody.empty();
+
+                let [year, monthIndex] = month.split("-");
+                year = parseInt(year);
+                monthIndex = parseInt(monthIndex) - 1;
+
+                let firstDay = new Date(year, monthIndex, 1);
+                let lastDate = new Date(year, monthIndex + 1, 0).getDate();
+                let startDay = firstDay.getDay();
+
+                let date = 1;
+                let row = $("<tr></tr>");
+                let today = new Date();
+
+                // Optimize lookup: map by ISO date
+                let attendanceMap = {};
+                res.forEach(x => {
+                    let formatted = convertToISO(x.date); // function you already use
+                    attendanceMap[formatted] = x;
+                });
+
+                // Empty cells before first day
+                for (let i = 0; i < startDay; i++) {
+                    row.append("<td class='empty-cell'></td>");
+                }
+
+                while (date <= lastDate) {
+
+                    if (row.children().length === 7) {
+                        calendarBody.append(row);
+                        row = $("<tr></tr>");
+                    }
+
+                    let fullDate = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
+
+                    let record = attendanceMap[fullDate];
+
+                    let cellClass = "calendar-cell missing";
+                    let inTime = "";
+                    let outTime = "";
+
+                    if (record) {
+                        inTime = record.inTime || "";
+                        outTime = record.outTime || "";
+
+                        if (record.status === "P") {
+                            cellClass = "calendar-cell present";
+                        } else if (record.status === "A") {
+                            cellClass = "calendar-cell absent";
+                        } else {
+                            cellClass = "calendar-cell offday";
+                        }
+                    }
+
+                    // Highlight today
+                    let highlightToday =
+                        (date === today.getDate() &&
+                            monthIndex === today.getMonth() &&
+                            year === today.getFullYear())
+                            ? "border:2px solid #ef8c10;"
+                            : "";
+
+                    // Build cell content: date left, status-right
+                    let status = "";
+                    let hrsText = "";
+
+                    if (record) {
+                        status = record.status || "";
+                        if (record.ahrs) {
+                            hrsText = `(${record.ahrs})`;
+                        } else if (record.bhrs) {
+                            hrsText = `(-${record.bhrs})`;
+                        }
+                    }
+
+                    let cellContent = `
+                        <div class="cell-top">
+                            <span class="date-left">${date.toString().padStart(2,'0')}</span>
+                            <span class="status-right">${status}${hrsText}</span>
+                        </div>
+                    `;
+
+                    // Optional: show in/out time below
+                    if (record && (inTime || outTime)) {
+                        cellContent += `
+                            <div class="time-subtext">
+                                ${inTime || ''}
+                                ${inTime && outTime ? 'To' : ''}
+                                ${outTime || ''}
+                            </div>`;
+                    }
+
+                    let cell = `<td class="${cellClass}" style="${highlightToday}">${cellContent}</td>`;
+                    row.append(cell);
+
+                    date++;
+                }
+
+                // Fill remaining cells in last row
+                while (row.children().length < 7) {
+                    row.append("<td class='empty-cell'></td>");
+                }
+
+                calendarBody.append(row);
+            },
+
+            error: function () {
+                alert("Failed to load attendance data");
+            }
+        });
+    }
+
+
+    async function Cheack()
+    {
+        try{
+            const res = await $.ajax({
+                url: '/EmpAttendance/CheackParentId',
+                type: 'GET'
+            });
+
+            if (res.success == true)
+            {
+          document.querySelector('.empattendancecheck-container').style.display = 'block'; // or 'flex'
+                $("#chkMultiple").prop("checked", false);
+                $(".calendar-wrapper").show();
+                $("#tbl_multiuser").hide();
+                $("#multiUserSection").hide();
+                $('#empattendancecheckUserSearch').hide();
+                $('#lbl_selecteduser').hide();
+                $('#calendarTable').show();
+                $('#BTN_LoadData').show();
+                loadAttendanceDetails($("#monthSelect").val());
+
+            }
+            else
+            {
+               document.querySelector('.empattendancecheck-container').style.display = 'none';
+                $("#tbl_multiuser").hide();
+                $('#lbl_ViewType').hide();
+                $('#chkSelf').hide();
+                $('#chkMultiple').hide();
+                $('#lbl_self').hide();
+                $('#lbl_multiuser').hide();
+                $('#empattendancecheckUserSearch').hide();
+                $('#lbl_selecteduser').hide();
+                $('#BTN_LoadData').hide();
+
+                loadAttendanceDetails($("#monthSelect").val());
+
+            }
+
+            console.log("res" ,res);
+        }
+        catch(ex){
+            alert(ex.message);
+        }
+    }
+
+       async function LoadMultipleEmpdata(month, selectedEmpIds) {
+
+        try {
+
+            const res = await $.ajax({
+                url: '/EmpAttendance/GetMULTIPLEEMPAttendanceDetails',
+                type: 'GET',
+                traditional: true,
+                data: {
+                    month: month,      // format: "2026-03"
+                    EMPID: selectedEmpIds
+                }
+            });
+
+            console.log("API Response:", res);
+
+            // ===== GENERATE ALL DATES OF MONTH =====
+            function getAllDatesOfMonth(monthStr) {
+
+                const [year, monthNum] = monthStr.split('-');
+                const totalDays = new Date(year, monthNum, 0).getDate();
+
+                let dates = [];
+
+                for (let d = 1; d <= totalDays; d++) {
+
+                    let day = String(d).padStart(2, '0');
+                    let month = String(monthNum).padStart(2, '0');
+
+                    dates.push(`${year}-${month}-${day}`);
+                }
+
+                return dates;
+            }
+
+            const days = getAllDatesOfMonth(month);
+
+            // ===== TABLE HEADER =====
+            let header = `<tr>
+                            <th>Emp Code</th>
+                            <th>Employee</th>`;
+
+            days.forEach(d => {
+
+                let day = new Date(d).getDate();
+
+                header += `<th>${day}</th>`;
+            });
+
+            header += `</tr>`;
+
+            $("#attendanceHead").html(header);
+
+            // ===== NO DATA =====
+            if (!res || res.length === 0) {
+
+                $("#multiUserBody").html(`
+                    <tr>
+                        <td colspan="${days.length + 2}" style="text-align:center;">
+                            No record found
+                        </td>
+                    </tr>
+                `);
+
+                toastr.warning("Record not found for this selected month");
+
+                return;
+            }
+
+            // ===== GROUP DATA BY EMPLOYEE =====
+            const employees = {};
+
+            res.forEach(item => {
+
+                // convert API date to yyyy-mm-dd
+                let formattedDate = new Date(item.date)
+                    .toISOString()
+                    .split('T')[0];
+
+                // create employee group
+                if (!employees[item.empId]) {
+
+                    employees[item.empId] = {
+                        name: item.employeeName,
+                        dates: {}
+                    };
+                }
+
+                // ===== STATUS COLOR CLASS =====
+                let status = (item.status || "").toLowerCase();
+
+                let cellClass = "default-cell";
+
+                if (status === "present" || status === "p") {
+
+                    cellClass = "present-cell";
+                }
+                else if (status === "absent" || status === "a") {
+
+                    cellClass = "absent-cell";
+                }
+                else if (status === "leave" || status === "l") {
+
+                    cellClass = "leave-cell";
+                }
+                else if (
+                    status === "off" ||
+                    status === "o" ||
+                    status === "offday"
+                ) {
+
+                    cellClass = "offday-cell";
+                }
+
+                // ===== CELL CONTENT =====
+
+                let statusText = item.status || "";
+
+                // show Ahrs or Bhrs only when exists
+                let hrsText = "";
+
+                if (item.ahrs) {
+
+                    hrsText = ` (${item.ahrs})`;
+                }
+                else if (item.bhrs) {
+
+                    hrsText = ` (-${item.bhrs})`;
+                }
+
+                // show time only when exists
+                let timeText = "";
+
+                if (item.inTime && item.outTime) {
+
+                    timeText = `<br><small>${item.inTime} - ${item.outTime}</small>`;
+                }
+
+                // final content
+                let cellContent = "";
+
+                if (statusText) {
+
+                    cellContent += `<b>${statusText}${hrsText}</b>`;
+                }
+
+                cellContent += timeText;
+
+                // save data
+                employees[item.empId].dates[formattedDate] = {
+
+                    class: cellClass,
+                    content: cellContent
+                };
+            });
+
+            // ===== BUILD TABLE ROWS =====
+            let rows = "";
+
+            Object.keys(employees).forEach(empId => {
+
+                rows += `
+                    <tr>
+                        <td>${empId}</td>
+                        <td>${employees[empId].name}</td>
+                `;
+
+                days.forEach(d => {
+
+                    if (employees[empId].dates[d]) {
+
+                        rows += `
+                            <td class="${employees[empId].dates[d].class}">
+                                ${employees[empId].dates[d].content}
+                            </td>
+                        `;
+                    }
+                    else {
+
+                        rows += `
+                            <td class="default-cell"></td>
+                        `;
+                    }
+                });
+
+                rows += `</tr>`;
+            });
+
+            $("#multiUserBody").html(rows);
+
+        }
+        catch (err) {
+
+            console.error("Error:", err);
+
+            toastr.error("Error loading attendance data");
+        }
+    }
+</script>

@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = "Make Conversion Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Make Conversion Master</legend>
+    <form id="MakeConversionMasterForm">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="ddlMakeType">Make Type</label>
+                <select class="form-control" id="ddlMakeType">
+                    <option value="">-- Select Make Type --</option>
+                    <option value="LSL6">LSL6</option>
+                    <option value="LSL610">LSL610</option>
+                    <option value="LSL620">LSL620</option>
+                    <option value="LSL630">LSL630</option>
+                    <option value="NOVA6">NOVA6</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="ddlRunNo">Run No</label>
+                <select class="form-control" id="ddlRunNo">
+                    <option value="">-- Select Run No --</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+
+                </select>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="table-responsive">
+                <table id="tblMakeConversion" class="table table-bordered">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Production</th>
+                            <th>%</th>
+                            <th>Base Production</th>
+                            <th>Flg</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="mt-2 text-right">
+                <button type="button" class="btn btn-success btn-add-row"><i class="fa fa-plus"></i> Add Row</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "MakeConversionMasterList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <button id="btn-cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </form>
+</fieldset>
+
+<script>
+        $(document).ready(function () {
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
+
+        const srno = getQueryParam("sno");
+        const makeTypeQ = getQueryParam("makeType");
+        const runNoQ = getQueryParam("runNo");
+        const $tbody = $("#tblMakeConversion tbody");
+        function addRow(data = {}) {
+            const row = `
+            <tr>
+                <td><input type="text" class="form-control" value="${data.Production || ''}"></td>
+                <td><input type="text" class="form-control" value="${data.Per || ''}"></td>
+                <td><input type="text" class="form-control" value="${data.BaseProduction || ''}"></td>
+                <td><input type="text" class="form-control" value="${data.Flg || ''}"></td>
+                <td>
+                    <i class="fa fa-plus text-success btn-add-action" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash text-danger btn-delete-action" style="cursor:pointer;"></i>
+                </td>
+            </tr>`;
+            $tbody.append(row);
+            updateAddButtons();
+        }
+        function updateAddButtons() {
+            const rows = $tbody.find("tr");
+            rows.find(".btn-add-action").hide();
+            rows.last().find(".btn-add-action").show();
+        }
+        $(document).on("click", ".btn-add-row, .btn-add-action", function () {
+            addRow();
+        });
+
+        $(document).on("click", ".btn-delete-action", function () {
+            $(this).closest("tr").remove();
+            updateAddButtons();
+        });
+
+        // Load record if parameters are available
+        if (srno && makeTypeQ && runNoQ) {
+            loadRecord();
+        } else {
+            addRow();
+        }
+        function loadRecord() {
+            $.ajax({
+                url: "/MakeConversionMaster/GetID",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    Sno: srno,
+                    MakeType: makeTypeQ,
+                    RunNo: runNoQ
+                }),
+                success: function (res) {
+                    if (!res.success) {
+                        toastr.error(res.message);
+                        return;
+                    }
+                    // Map the response to the form fields
+                    $("#ddlMakeType").val(res.data.makE_TYPE || '');
+                    $("#ddlRunNo").val(res.data.ruN_NO || '');
+                    $tbody.empty();
+
+                    // Add row with the fetched data
+                    addRow({
+                        Production: res.data.production,
+                        Per: res.data.per,
+                        BaseProduction: res.data.basE_PRODUCTION,
+                        Flg: res.data.reporT_FLG
+                    });
+                },
+                error: function () {
+                    toastr.error("Error loading record.");
+                }
+            });
+        }
+
+        // Save button click handler
+        $('#btn-save').click(function (e) {
+            e.preventDefault();
+
+            const makeType = $('#ddlMakeType').val();
+            const runNo = $('#ddlRunNo').val();
+            if (!makeType || !runNo) {
+                toastr.error('Please select Make Type and Run No.');
+                return;
+            }
+            const rows = [];
+            $('#tblMakeConversion tbody tr').each(function () {
+                const tds = $(this).find('td');
+                rows.push({
+                    Production: tds.eq(0).find('input').val(),
+                    Per: tds.eq(1).find('input').val(),
+                    BaseProduction: tds.eq(2).find('input').val(),
+                    Flg: parseInt(tds.eq(3).find('input').val()) || 0
+                });
+            });
+            const data = {
+                MAKE_TYPE: makeType,
+                RUN_NO: runNo,
+                Records: rows
+            };
+            // Save data via AJAX
+            $.ajax({
+                url: '/MakeConversionMaster/SaveMakeConversion',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        $('#tblMakeConversion tbody').empty();
+                        addRow();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error('Error saving data.');
+                }
+            });
+        });
+    });
+</script>

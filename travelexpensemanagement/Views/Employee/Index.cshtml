@@ -1,0 +1,241 @@
+﻿@{
+	ViewBag.Title = "Master Insert";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+	<style>
+		.form-control {
+			font-size: 13px;
+		}
+		a {
+			font-size: 14px;
+			color: #007bff;
+			text-decoration: none;
+		}
+			a:hover {
+				text-decoration: underline;
+			}
+		.breadcrumb {
+			background: #f8f9fa;
+			padding: 8px 0px;
+			border-radius: 4px;
+			font-size: 14px;
+		}
+			.breadcrumb span,
+			.breadcrumb a {
+				cursor: pointer;
+			}
+		.main-body {
+			border: none;
+			outline: 2px solid #ccc;
+			padding: 10px;
+			margin-top: 10px;
+		}
+	</style>
+</head>
+
+<!-- Breadcrumb -->
+
+
+<div class="row">
+	<div class="col-md-4">
+		<nav class="breadcrumb">
+			<span class="active" onclick="redirectToDashboard()" style="cursor: pointer;">Dashboard</span>
+			<span> &gt; </span>
+			<a href="#">Employee</a>
+		</nav>
+	</div>
+	<div class="col-md-4">
+	</div>
+	<div class="col-md-4">
+		<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "EmployeeDetailsList")'" style="font-size: 9px;height: 28px; line-height: 1px; float: right;" type="submit" class="btn btn-primary">
+			Employee Details
+		</button>
+	</div>
+</div>
+
+
+<!-- Form -->
+<form id="employeeForm">
+	<div class="row">
+		<div class="col-md-4 form-group">
+			<label><b>Name</b><span style="color:red">*</span></label>
+			<input type="text" class="form-control" readonly id="txtName" name="Name" placeholder="Enter name">
+		</div>
+		<div class="col-md-4 form-group">
+			<label><b>Mobile No</b><span style="color:red">*</span></label>
+			<input type="number" class="form-control" id="txtMobile" name="MobileNo" placeholder="Enter mobile no" oninput="limitDigits(this)" />
+		</div>
+		<div class="col-md-4 form-group">
+			<label><b>Email</b><span style="color:red">*</span></label>
+			<input type="email" class="form-control" readonly id="txtEmail" name="Email" placeholder="Enter email">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4 form-group">
+			<label><b>Address</b><span style="color:red">*</span></label>
+			<input type="text" class="form-control" id="txtAddress" name="Address" placeholder="Enter address">
+		</div>
+		<div class="col-md-4 form-group">
+			<label><b>Department</b><span style="color:red">*</span></label>
+			<select id="ddlDepartment" name="Department" class="form-control">
+				<option value="">-- Select Department --</option>
+			</select>
+		</div>
+		<div class="col-md-4 form-group">
+			<label><b>Designation</b><span style="color:red">*</span></label>
+			<select id="ddlDesignation" name="Designation" class="form-control">
+				<option value="">-- Select Designation --</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12 text-center mt-3">
+			<button id="btnSave" type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</div>
+</form>
+
+<script>
+	$(document).ready(function () {
+		departmentlist();
+		Designationlist();
+			$.ajax({
+		url: '/Employee/GetUserNameEmail',
+		type: 'GET',
+		success: function (response) {
+			if (response.success) {
+				$('#txtName').val(response.userName);
+				$('#txtEmail').val(response.email);
+			} else {
+				// alert(response.message);
+				toastr.error(response.message);
+			}
+		},
+		error: function () {
+			alert("An error occurred while fetching user details.");
+		}
+	});
+		// btn Save Button start block
+		 $("#employeeForm").submit(function (e) {
+			e.preventDefault(); // Prevent default form submission
+			var name = $("#txtName").val().trim();
+			var mobile = $("#txtMobile").val().trim();
+			var email = $("#txtEmail").val().trim();
+			var address = $("#txtAddress").val().trim();
+			var department = $("#ddlDepartment").val();
+			var designation = $("#ddlDesignation").val();
+			// Field-wise validation with toastr messages
+			if (!name) {
+				toastr.error("Name is required");
+				$("#txtName").focus();
+				return;
+			}
+			if (!mobile) {
+				toastr.error("Mobile No is required");
+				$("#txtMobile").focus();
+				return;
+			}
+			if (!email) {
+				toastr.error("Email is required");
+				$("#txtEmail").focus();
+				return;
+			}
+			if (!address) {
+				toastr.error("Address is required");
+				$("#txtAddress").focus();
+				return;
+			}
+			if (!department) {
+				toastr.error("Please select a department");
+				$("#ddlDepartment").focus();
+				return;
+			}
+			if (!designation) {
+				toastr.error("Please select a designation");
+				$("#ddlDesignation").focus();
+				return;
+			}
+			var formData = {
+				Name: name,
+				MobileNo: mobile,
+				Email: email,
+				Address: address,
+				Department: department,
+				Designation: designation
+			};
+			// Submit AJAX
+			$.ajax({
+				url: '/Employee/Submitbtn',
+				type: 'POST',
+				data: formData,
+				success: function (response) {
+					toastr.success(response.message);
+					$("#employeeForm")[0].reset();
+				},
+				error: function (xhr, status, error) {
+					console.error("Error: ", xhr.responseText);
+					toastr.error("Something went wrong.");
+				}
+			});
+		});
+		// btn Save Button End block
+	});
+	// department list banding code start block
+	function departmentlist() {
+		$.ajax({
+			url: '/Employee/GetDepartments',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				console.log(data); // Inspect the data
+				var ddl = $('#ddlDepartment');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Department --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading departments: ' + error);
+			}
+		});
+	}
+	// department list banding code start block
+
+	// Designation list banding code start block
+	function Designationlist() {
+		$.ajax({
+			url: '/Employee/GetDesignation',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				console.log(data); // Inspect the data
+				var ddl = $('#ddlDesignation');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Designation --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading Designation: ' + error);
+			}
+		});
+	}
+	// Designation list banding code start block
+		function limitDigits(ele) {
+		if (ele.value.length > 10) {
+			ele.value = ele.value.slice(0, 10);
+		}
+	}
+	function redirectToDashboard() {
+			window.location.href = '@Url.Action("Index", "Dashboard")';
+		}
+</script>
+

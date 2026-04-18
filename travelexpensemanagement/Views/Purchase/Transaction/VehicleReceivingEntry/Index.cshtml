@@ -1,0 +1,144 @@
+﻿@{
+    ViewBag.Title = "Vehicle Receiving Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Vehicle Receiving Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "VehicleReceivingEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="VehicleReceivingEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlPartyName">Party Name</label>
+                    <select class="form-control" id="ddlPartyName">
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumPartyWBWt">Party WB Weight</label>
+                    <input type="number" class="form-control" id="NumPartyWBWt" placeholder="Enter Party WB Weight">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumInvoiceWeight">Invoice Weight</label>
+                    <input type="number" class="form-control" id="NumInvoiceWeight" placeholder="Enter Invoice Weight">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumReceivedWeight">Received Weight</label>
+                    <input type="number" class="form-control" id="NumReceivedWeight" placeholder="Enter Received Weight">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumLandedPrice">Landed Price</label>
+                    <input type="number" class="form-control" id="NumLandedPrice" placeholder="Enter Landed Price">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumDeductAmount">Deduct Amount</label>
+                    <input type="number" class="form-control" id="NumDeductAmount" placeholder="Enter Deduct Amount">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumWBNo">WB No</label>
+                    <input type="number" class="form-control" id="NumWBNo" placeholder="Enter WB No">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumMRNNo">MRN No</label>
+                    <input type="number" class="form-control" id="NumMRNNo" placeholder="Enter MRN No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtVehicleNo">Vehicle No</label>
+                    <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtBillNo">Bill No</label>
+                    <input type="text" class="form-control" id="TxtBillNo" placeholder="Enter Bill No">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumNoBags">No. of Bags</label>
+                    <input type="number" class="form-control" id="NumNoBags" placeholder="Enter No. of Bags">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumPartyInvoiceWt">Party Wt. - Invoice Wt.</label>
+                    <input type="number" class="form-control" id="NumPartyInvoiceWt">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumReceivedInvoiceWt">Received Wt. - Invoice Wt.</label>
+                    <input type="number" class="form-control" id="NumReceivedInvoiceWt">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumAvgWtBags">Avg. Wt. of 5 Bags(in kgs)</label>
+                    <input type="number" class="form-control" id="NumAvgWtBags" placeholder="Enter Avg. Wt. of 5 Bags">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtNarration">Narration</label>
+                    <textarea type="text" class="form-control" id="TxtNarration" placeholder="Enter Narration"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+

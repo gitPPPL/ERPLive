@@ -1,0 +1,1163 @@
+﻿@{
+    ViewBag.Title = "Sales Invoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Sales Invoice</legend>
+    <form id="SalesInvoiceForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right mb-2">
+                    <button class="btn btn-print">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                    <button class="btn btn-export">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocumentType">Document Type</label>
+                    <select class="form-control" id="ddlDocumentType">
+                        <option value="">Select Document Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumInvoiceNo">Invoice No</label>
+                    <input type="number" class="form-control" id="NumInvoiceNo" placeholder="Enter Invoice No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocumentDate">Document Date</label>
+                    <input type="date" class="form-control" id="DtDocumentDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDONo">DO No</label>
+                    <select class="form-control" id="ddlDONo">
+                        <option value="">Select DO No</option>
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPartyName">Party Name</label>
+                    <select class="form-control" id="ddlPartyName">
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddressL1">Address L1</label>
+                    <div class="input-divide">
+                        <input type="text" class="form-control" id="TxtAddressL1" placeholder="Enter Address L1">
+                        <div class="select-wrapper">
+                            <select id="ddladdressL1">
+                                <option value="">Select address</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddressL2">Address L2</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL2" placeholder="Enter Address L2"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddressL3">Address L3</label>
+                    <textarea typeof="text" class="form-control" id="TxtAddressL3" placeholder="Enter Address L3"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumGSTNo">GST No</label>
+                    <input type="number" class="form-control" id="NumGSTNo" placeholder="Enter GST No">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlStation">Station</label>
+                    <select class="form-control" id="ddlStation">
+                        <option value="">Select Station</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumPincode">Pincode</label>
+                    <input type="number" class="form-control" id="NumPincode" />
+                </div>
+            </div>
+        </div>
+
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Supply Details</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlSalesThrough">Sales Through</label>
+                        <select class="form-control" id="ddlSalesThrough">
+                            <option value="">Select Sales Through</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlSupplyType">Supply Type</label>
+                        <select class="form-control" id="ddlSupplyType">
+                            <option value="">Select Supply Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlConsignee">Consignee</label>
+                        <select class="form-control" id="ddlConsignee">
+                            <option value="">Select Consignee</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtSupplyAddressL1">Address L1</label>
+                        <div class="input-divide">
+                            <input type="text" class="form-control" id="TxtSupplyAddressL1" placeholder="Enter Address L1">
+                            <div class="select-wrapper">
+                                <select id="ddlsupplyaddressL1">
+                                    <option value="">Select address</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtSupplyAddressL2">Address L2</label>
+                        <textarea typeof="text" class="form-control" id="TxtSupplyAddressL2" placeholder="Enter Address L2"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtSupplyAddressL3">Address L3</label>
+                        <textarea typeof="text" class="form-control" id="TxtSupplyAddressL3" placeholder="Enter Address L3"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="NumGSTNo">GST No</label>
+                        <input type="number" class="form-control" id="NumGSTNo" placeholder="Enter GST No">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="TxtSupplyStation">Station</label>
+                        <input typeof="text" class="form-control" id="TxtSupplyStation" placeholder="Enter Station">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumSupplyPIN">PIN</label>
+                        <input type="number" class="form-control" id="NumSupplyPIN" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlFormType">Form Type</label>
+                        <select class="form-control" id="ddlFormType">
+                            <option value="">Select Form Type</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="fieldset-sub">
+            <legend class="sub-legend">Transaction Detail</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlTransactionType">Transaction Type</label>
+                        <select class="form-control" id="ddlTransactionType">
+                            <option value="">Select Transaction Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlTaxType">Tax Type</label>
+                        <select class="form-control" id="ddlTaxType">
+                            <option value="">Select Tax Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPackNo">Pack No</label>
+                        <select class="form-control" id="ddlPackNo">
+                            <option value="">Select Pack No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlSaudaNo">Sauda No</label>
+                        <div class="input-icon-wrapper">
+                            <select class="form-control" id="ddlSaudaNo">
+                                <option value="">Select Sauda No</option>
+                            </select>
+                            <span class="input-icon"><i class="fa fa-calculator"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlIssueNo">Issue No</label>
+                        <select class="form-control" id="ddlIssueNo">
+                            <option value="">Select Issue No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlGodown">Godown</label>
+                        <select class="form-control" id="ddlGodown">
+                            <option value="">Select Godown</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <div class="form-row btn-mt">
+                            <input type="checkbox" id="ChkDefectiveGoods">
+                            <label class="checkbox-label" for="ChkDefectiveGoods">Defective Goods</label>
+
+                            <input type="checkbox" id="ChkPCS">
+                            <label class="checkbox-label" for="ChkPCS">PCS</label>
+
+                            <input type="checkbox" id="ChkDetail">
+                            <label class="checkbox-label" for="ChkDetail"> Detail</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-mt">
+                        <button type="button" class="btn btn-danger" id="btn_pendingchallan" data-bs-toggle="modal" data-bs-target="#pendingchallanModal"> Pending Challan</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="TxtTransRemarks">Remarks</label>
+                        <textarea typeof="text" class="form-control" id="TxtTransRemarks" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        @* Modal Popup *@
+        <div class="modal fade" id="pendingchallanModal" tabindex="-1" aria-labelledby="pendingchallanLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="pendingchallanLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxpc" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendPCModal">
+                                        <label class="checkbox-label" for="chkAppendPCModal">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblpurchaseordermodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" /></th>
+                                            <th>Document Id</th>
+                                            <th>Voucher Type</th>
+                                            <th>Voucher No</th>
+                                            <th>Voucher Date</th>
+                                            <th>Item Name</th>
+                                            <th>Item Unit</th>
+                                            <th>Hsn Code</th>
+                                            <th>Nos</th>
+                                            <th>Gross</th>
+                                            <th>Quantity</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>Disc_Per</th>
+                                            <th>Disc_Amt</th>
+                                            <th>Cgst_Per</th>
+                                            <th>Cgst Amount</th>
+                                            <th>Sgst_Per</th>
+                                            <th>Sgst Amount</th>
+                                            <th>Igst_Per</th>
+                                            <th>Igst Amount</th>
+                                            <th>Pack_Per</th>
+                                            <th>Pack Amount</th>
+                                            <th>Remark</th>
+                                            <th>Type</th>
+                                            <th>Serial No</th>
+                                            <th>Item Code</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlProductType">Product Type</label>
+                    <select class="form-control" id="ddlProductType">
+                        <option value="">Select Product Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWBNo">WB No</label>
+                    <select class="form-control" id="ddlWBNo">
+                        <option value="">Select WB No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumRate">Rate</label>
+                    <input type="number" class="form-control" id="NumRate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlIncoTerm">Inco Term</label>
+                    <select class="form-control" id="ddlIncoTerm">
+                        <option value="">Select Inco Term</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblSalesInvoice" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>ID</th>
+                            <th>Product name</th>
+                            <th>Nos</th>
+                            <th>Gross Quantity</th>
+                            <th>Net Quantity</th>
+                            <th>Rate (in USD)</th>
+                            <th>Rate (in Rs)</th>
+                            <th>Amount</th>
+                            <th>Pack %</th>
+                            <th>Pack Amount</th>
+                            <th>Disc %</th>
+                            <th>Disc Amount</th>
+                            <th>Tax Type</th>
+                            <th>CGST %</th>
+                            <th>CGST Amount</th>
+                            <th>SGST %</th>
+                            <th>SGST Amount</th>
+                            <th>IGST %</th>
+                            <th>IGST Amount</th>
+                            <th>CESS %</th>
+                            <th>CESS Amount</th>
+                            <th>Remark</th>
+                            <th>Pack No</th>
+                            <th>Lot No</th>
+                            <th>Sauda Type</th>
+                            <th>Sauda No</th>
+                            <th>Sauda Rate</th>
+                            <th>Order No</th>
+                            <th>Order Type</th>
+                            <th>Order Rate</th>
+                            <th>DCN Type</th>
+                            <th>DCN No</th>
+                            <th>HSN</th>
+                            <th>Freight Amount</th>
+                            <th>Insu Amount</th>
+                            <th>CDisc Amount</th>
+                            <th>WB Quantity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <fieldset class="fieldset-sub btn-mt">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherTotalAmount">Total Amount</label>
+                                        <input type="number" class="form-control" id="NumOtherTotalAmount" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherPacking">Packing</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherPacking1" />
+                                            <input type="number" class="form-control" id="NumOtherPacking2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherDiscount">Discount</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherDiscount1" />
+                                            <input type="number" class="form-control" id="NumOtherDiscount2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherCashDiscount">Cash Discount</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherCashDiscount1" />
+                                            <input type="number" class="form-control" id="NumOtherCashDiscount2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherSubTotal">Sub Total</label>
+                                        <input type="number" class="form-control" id="NumOtherSubTotal" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherCGST">CGST</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherCGST1" />
+                                            <input type="number" class="form-control" id="NumOtherCGST2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherSGST">SGST</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherSGST1" />
+                                            <input type="number" class="form-control" id="NumOtherSGST2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherIGST">IGST</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherIGST1" />
+                                            <input type="number" class="form-control" id="NumOtherIGST2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherTotalNos">Total Nos</label>
+                                        <input type="number" class="form-control" id="NumOtherTotalNos" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherCESS">CESS</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherCESS1" />
+                                            <input type="number" class="form-control" id="NumOtherCESS2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherTCS">TCS</label>
+                                        <div class="input-divide">
+                                            <input type="number" class="form-control" id="NumOtherTCS1" />
+                                            <input type="number" class="form-control" id="NumOtherTCS2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherRoundOff">Round off</label>
+                                        <input type="number" class="form-control" id="NumOtherRoundOff" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="NumOtherNetAmount">Net Amount</label>
+                                        <input type="number" class="form-control" id="NumOtherNetAmount" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="ddlDocStatus">Doc Status</label>
+                                        <select class="form-control" id="ddlDocStatus">
+                                            <option value="">Select Doc Status</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="navtab-form">
+                        <ul class="nav nav-tabs" id="formTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Transport Detail</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Waybill/Loading Details</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Export Details</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <!-- tab 1 -->
+                            <div class="tab-pane fade show active" id="tab1">
+                                <fieldset class="fieldset-sub">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="ddlTransport">Transport</label>
+                                                <select class="form-control" id="ddlTransport">
+                                                    <option value="">Select Transport</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumGRNo">GR No</label>
+                                                <input type="number" class="form-control" id="NumGRNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group position-relative">
+                                                <label for="DtGRDate">GR Date</label>
+                                                <div class="calender-check">
+                                                    <input type="date" class="form-control" id="DtGRDate" name="GRDate" style="padding-left: 30px;">
+                                                    <input type="checkbox" id="chkGRDate" class="checkbox-inside">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="TxtTruckNo">Truck No</label>
+                                                <input type="text" class="form-control" id="TxtTruckNo" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label for="TxtDriverName">Driver Name</label>
+                                                <input type="text" class="form-control" id="TxtDriverName" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumDriverMob">Driver Mob.</label>
+                                                <input type="number" class="form-control" id="NumDriverMob" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumInsurance">Insurance %</label>
+                                                <div class="input-divide">
+                                                    <input type="number" class="form-control" id="NumInsurance1" />
+                                                    <input type="number" class="form-control" id="NumInsurance2" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumTDSFreight">TDS on Freight %</label>
+                                                <div class="input-divide">
+                                                    <input type="number" class="form-control" id="NumTDSFreight1" />
+                                                    <input type="number" class="form-control" id="NumTDSFreight2" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumTaxFreight">Tax on Freight %</label>
+                                                <div class="input-divide">
+                                                    <input type="number" class="form-control" id="NumTaxFreight1" />
+                                                    <input type="number" class="form-control" id="NumTaxFreight2" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumFreightAmount">Freight Amount</label>
+                                                <input type="number" class="form-control" id="NumFreightAmount" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumDistance">Distance</label>
+                                                <input type="number" class="form-control" id="NumDistance" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="ddlMode">Mode</label>
+                                                <select class="form-control" id="ddlMode">
+                                                    <option value="">Select Mode</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="ddlPaymentTerm">Payment Term</label>
+                                                <select class="form-control" id="ddlPaymentTerm">
+                                                    <option value="">Select Payment Term</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="TxtDeliveryTerm">Delivery Term</label>
+                                                <textarea typeof="text" class="form-control" id="TxtDeliveryTerm"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                            </div>
+                            <!-- tab 2 -->
+                            <div class="tab-pane fade" id="tab2">
+                                <fieldset class="fieldset-sub">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="NumWayBillNo">WayBill No</label>
+                                                <input type="number" class="form-control" id="NumWayBillNo" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="NumToPayFrt">To Pay Frt</label>
+                                                <input type="number" class="form-control" id="NumToPayFrt" placeholder="Enter To Pay Frt">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="NumLoadAmount">Load Amount</label>
+                                                <div class="input-divide">
+                                                    <input type="number" class="form-control" id="NumLoadAmount1">
+                                                    <input type="number" class="form-control" id="NumLoadAmount2">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="TxtRemarks">Remarks</label>
+                                                <textarea typeof="text" class="form-control" id="TxtRemarks1"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="ddlLoadparty">Load Party</label>
+                                                <select class="form-control" id="ddlLoadparty">
+                                                    <option value="">Select Load Party</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="NumWBAmount1">WB Amount</label>
+                                                <input type="number" class="form-control" id="NumWBAmount1">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="TxtRemarks">Remarks</label>
+                                                <textarea typeof="text" class="form-control" id="TxtRemarks2"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="ddlWBParty1">WB Party</label>
+                                                <select class="form-control" id="ddlWBParty1">
+                                                    <option value="">Select WB Party</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <!-- tab 3 -->
+                            <div class="tab-pane fade" id="tab3">
+                                <fieldset class="fieldset-sub">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumExRate">ExRate</label>
+                                                <div class="input-divide">
+                                                    <select class="form-control" id="ddlExrate">
+                                                        <option value="">Select ExRate</option>
+                                                    </select>
+                                                    <input type="number" class="form-control" id="NumExRate">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumFOBValue">FOB Value</label>
+                                                <input type="number" class="form-control" id="NumFOBValue">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumFOBFreight">FOB Freight</label>
+                                                <input type="number" class="form-control" id="NumFOBFreight">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumFOBInsu">FOB Insu.</label>
+                                                <input type="number" class="form-control" id="NumFOBInsu">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumFOBOther">FOB Other</label>
+                                                <input type="number" class="form-control" id="NumFOBOther">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumOrderNo">Order No.</label>
+                                                <input type="number" class="form-control" id="NumOrderNo">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumLUTNo">LUT No.</label>
+                                                <input type="number" class="form-control" id="NumLUTNo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumPOL">P.O.L.</label>
+                                                <input type="number" class="form-control" id="NumPOL">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumPOD">P.O.D.</label>
+                                                <input type="number" class="form-control" id="NumPOD">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="NumReceiptAt">Receipt At</label>
+                                                <input type="number" class="form-control" id="NumReceiptAt">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="TxtLUTDate">LUT Date</label>
+                                                <input type="text" class="form-control" id="TxtLUTDate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="TxtFinalDestination">Final Destination</label>
+                                                <input type="text" class="form-control" id="TxtFinalDestination">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="TxtFDCountry">FD Country</label>
+                                                <input type="text" class="form-control" id="TxtFDCountry">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="TxtBillLading">Bill of Lading</label>
+                                                <input type="text" class="form-control" id="TxtBillLading">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumShipBillNo">Ship Bill No.</label>
+                                                <input type="number" class="form-control" id="NumShipBillNo">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group position-relative">
+                                                <label for="DtShipBillDate">Ship Bill Date</label>
+                                                <div class="calender-check">
+                                                    <input type="date" class="form-control" id="DtShipBillDate" name="ShipBillDate" style="padding-left: 30px;">
+                                                    <input type="checkbox" id="chkShipBillDate" class="checkbox-inside">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="NumPortCode">Port Code</label>
+                                                <input type="number" class="form-control" id="NumPortCode">
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="TxtInsuranceDetail">Insurance Detail</label>
+                                                <input type="text" class="form-control" id="TxtInsuranceDetail">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ddlBankName">Bank Name</label>
+                                                <select class="form-control" id="ddlBankName">
+                                                    <option value="">Select Bank Name</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="NumGrossQty">Gross Quantity</label>
+                                <input type="number" class="form-control" id="NumGrossQty" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="NumNetQty">Net Quantity</label>
+                                <input type="number" class="form-control" id="NumNetQty" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="NumWBQty">WB Quantity</label>
+                                <input type="number" class="form-control" id="NumWBQty" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtLUTDetail">LUT Detail</label>
+                                <input type="text" class="form-control" id="TxtLUTDetail" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="offset-md-3 col-md-9">
+                            <div class="button-right btn-mt">
+                                <button type="button" class="btn btn-primary" id="btn_outallowed"> Out Allowed</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        
+        
+        
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "SalesInvoiceList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-7 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+
+
+
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadDocumentStages();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadDocumentStages();
+        });
+    });
+
+    //Load main grid...............
+    function loadDocumentStages() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ApprovalStageMasterList/GetAllDocs',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const docs = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#tblApprovalStageMaster tbody');
+                tbody.empty();
+
+                if (docs.length === 0) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_CODE || ''}</td>
+                            <td>${doc.doC_NAME || ''}</td>
+                            <td>${doc.useR_NO || '0'}</td>
+                            <td>
+                              <div class="action-icons">
+                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
+                              <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
+                               <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
+                              </div>
+
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+            }
+        });
+    }
+
+        function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        pagination.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadDocumentStages();
+    }
+
+    function editDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+    }
+
+    function viewDocStage(docCode) {
+        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+    }
+
+    function deleteDocStage(docCode) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this deletion!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ApprovalStageMasterList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+                });
+            }
+        });
+    }
+
+
+
+</script>

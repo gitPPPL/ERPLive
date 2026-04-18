@@ -1,0 +1,1015 @@
+﻿@{
+    ViewBag.Title = "Incomming QC RM";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .col-color-1 {
+        background-color: #e8f7e4;
+    }
+
+    .col-color-2 {
+        background-color: #f0f0f0;
+    }
+
+    .readonly-cell {
+        display: none !important;
+    }
+</style>
+
+<fieldset>
+    <legend class="legend-field">Incomming QC RM</legend>
+
+    <form id="PreIncommingQCRMForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="ddlDocType">Doc Type</label>
+                            <select class="form-control" id="ddlDocType">
+                                <option value="">Select Doc Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="NumDocNo">Doc No</label>
+                            <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="DtDate">Date</label>
+                            <input type="date" class="form-control" id="DtDate" />
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ddlQCIncharge">QC Incharge</label>
+                            <select class="form-control" id="ddlQCIncharge">
+                                <option value="">Select QC Incharge</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ddlChem">Chemist</label>
+                            <select class="form-control" id="ddlChem">
+                                <option value="">Select Chem.</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ddlPartyName">Party Name</label>
+                            @*  <select class="form-control" id="ddlPartyName">
+                                <option value="">Select Party Name</option>
+                            </select> *@
+                            <input type="text" class="form-control" id="TxtPartyName" placeholder="Enter Party Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group" style="display:none;">
+                            <label for="ddlTransport">Transport</label>
+
+                            <input type="text" class="form-control" id="TxtTransport" placeholder="Enter Transport" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="NumBillNo">Bill No</label>
+                            <input type="number" class="form-control" id="NumBillNo" placeholder="Enter Bill No" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group position-relative">
+                            <label for="DtBillDate">Bill Date</label>
+                            <div class="calender-check">
+                                <input type="date" class="form-control" id="DtBillDate" style="padding-left: 30px;">
+                                <input type="checkbox" id="chkBillDate" class="checkbox-inside">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtTruckNo">Truck No</label>
+                            <input type="text" class="form-control" id="TxtTruckNo" placeholder="Enter Truck No" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtContainerNo">Container No</label>
+                            <input type="text" class="form-control" id="TxtContainerNo" placeholder="Enter Container No">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtBales">Bales</label>
+                            <input type="text" class="form-control" id="TxtBales" placeholder="Enter Bales" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtInvoiceQty">Invoice Qty</label>
+                            <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtRecordedQty">Received Qty</label>
+                            <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="TxtShortage">Shortage</label>
+                            <input type="text" class="form-control" id="TxtShortage" placeholder="Enter Shortage" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group" style="display:none;">
+                            <label for="TxtInvoiceQty">Invoice Qty</label>
+                            <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group" style="display:none;">
+                            <label for="TxtRecordedQty">Recorded Qty</label>
+                            <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="ddlPurType">Purchase Type</label>
+                            @*  <select class="form-control" id="ddlPurType">
+                                <option value="">Select Pur Type</option>
+                            </select> *@
+                            <input type="text" class="form-control" id="TxtPurType" placeholder="Enter PurType">
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="TxtRemarksT">Remarks</label>
+                            <textarea typeof="text" class="form-control" id="TxtRemarks1" placeholder="Enter Remarks"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group" style="display:none;">
+                            <label for="TxtWastage">Wastage</label>
+                            <input type="text" class="form-control" id="TxtWastage" placeholder="Enter Wastage" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group position-relative" style="display:none;">
+                            <label for="DtGateDate">Gate Date</label>
+                            <div class="calender-check">
+                                <input type="date" class="form-control" id="DtGateDate" style="padding-left: 30px;">
+                                <input type="checkbox" id="chkGateDate" class="checkbox-inside">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>MRN No</label>
+                            <div class="input-icon-wrapper">
+                                <select class="form-control" id="ddlGateNo">
+                                    <option value="0">--Select--</option>
+                                </select>
+                                <span class="input-icon" id="btn_ok">ok</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group position-relative">
+                            <label for="DtBillDate">MRN Date</label>
+                            <div class="calender-check">
+                                <input type="date" class="form-control" id="MRNDate" style="padding-left: 30px;">
+                                <input type="checkbox" id="chkBillDate" class="checkbox-inside">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="ddlItemName">Item Name</label>
+                            <select class="form-control" id="ddlItemName">
+                                <option value="">Select Item Name</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-bg" style="height:100px;">
+                            <table id="itemTable" class="table-prewidth">
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-mt button-right">
+                            <button type="button" class="btn btn-success" id="btn_fill"><i class="fa fa-fill"></i>Fill</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-mt button-right">
+                            <button type="button" class="btn btn-success" id="btn_calculate" style="width:100%;"><i class="fa fa-calculator"></i>Calculate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="NumDeductAmount">Deduct Amount</label>
+                            <input type="number" class="form-control" id="NumDeductAmount" placeholder="Enter Deduct Amount" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="TxtNarration">Narration</label>
+                            <textarea typeof="text" class="form-control" id="TxtNarration" placeholder="Enter Narration"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="TxtRemarks">Remarks1</label>
+                            <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks" style="height:80px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-mt button-right">
+                            <button type="button" class="btn btn-danger" id="btn_PendingQC" data-bs-toggle="modal" data-bs-target="#pendingQCModal"><i class="fa fa-hourglass-half"></i>Pending QC</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                
+            </div>
+            <div class="col-md-4">
+                
+            </div>
+            <div class="col-md-2">
+                
+            </div>
+        </div>
+
+        <!--Pending QC Modal-->
+        <div class="modal fade" id="pendingQCModal" tabindex="-1" aria-labelledby="pendingQCLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="pendingQCLabel">Pending Gate Data for Pre QC</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblpendingQC" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Gate No</th>
+                                            <th>Gate Date</th>
+                                            <th>Party Name</th>
+                                            <th>Vehicle No</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblPreIncomming" class="table-width">
+                    @* <tbody></tbody> *@
+                    <thead>
+                        <tr id="tblPreIncommingHeader" class="table-head"></tr>
+                    </thead>
+                    <tbody id="tblPreIncommingBody"></tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button id=""
+                            onclick="window.location.href='@Url.Action("Index", "PreIncommingQCRMList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+         $(document).ready(function () {
+            ddlDocType();
+            ddlQCIncharge();
+            ddlCheme();
+            ddlItemName();
+           let Headerdata = [];
+           let Itemdata = [];
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('DtDate').value = today;
+              function getQueryParam(param) {
+                 const urlParams = new URLSearchParams(window.location.search);
+                 return urlParams.get(param);
+              }
+              // Read values from query string
+              const vType = getQueryParam('vType');
+              const vNo = getQueryParam('vNo');
+               if (vNo) {
+                 $.ajax({
+                       url: '/PreIncommingQCRMList/GetAllDatadetails',
+                     type: 'POST',
+                     contentType: 'application/json',
+                     data: JSON.stringify({ vNo: vNo, vType: vType }),
+                     success: function (response) {
+                         const $attachmentTbody = $('#tblAttachmentPRE tbody');
+                           GetallDataPreIncommingQCRM(response);
+                     },
+                     error: function (xhr) {
+                             toastr.error('Error: ' + xhr.responseText);
+                     }
+                 });
+             }
+
+            $('#ddlDocType').on('change', function () {
+                const selectedValue = $(this).val();
+                const selectedText = $(this).find("option:selected").text();
+                $('#NumDocNo').prop('readonly', true);
+
+                if (selectedValue !== "") {
+                    sendDocType(selectedValue, selectedText);
+                } else {
+                    $('#NumDocNo').val('');
+                }
+            });
+            $('#ddlGateNo').on('change', function () {
+               var selectedNo = $(this).val(); // Gets the selected value
+               const selectedText = $(this).find('option:selected').text(); // Gets the selected text
+
+               if (selectedNo !== "0" && selectedNo !== "") {
+                   $.ajax({
+                       url: '/IncommingQCRMC/GetGatDetailsList',
+                       type: 'POST',
+                       data: {
+                           StrVNo: selectedNo,
+                           StrV_type: selectedText
+                       },
+                       success: function (response) {
+                           GetalldatafetchGatonchange(response); // Passes response to a function
+                       },
+                       error: function (xhr) {
+                           console.error("Error:", xhr.responseText);
+                       }
+                   });
+               }
+           });
+        // ===========================================================================================
+           $('#ddlItemName').on('change', function () {
+             var selectedNo = $(this).val(); // item code
+             var selectedText = $(this).find('option:selected').text(); // item name
+
+
+             if (selectedNo) {
+                 $('#itemTable tbody').append(
+                     '<tr class="text-left"><td>' + selectedNo + '</td><td>' + selectedText + '</td></tr>'
+                 );
+             }
+             $(this).val('');
+             console.log('Selected Item Code:', selectedNo);
+             console.log('Selected Item Name:', selectedText);
+         });
+           $('#btn_fill').on('click', function () {
+        const rows = $('#itemTable tbody tr');
+        if (rows.length === 0) {
+            alert("No item data found.");
+            return;
+        }
+
+        let dataToSend;
+        let itemsToAdd = []; // define here so it's accessible
+
+        rows.each(function () {
+            const itemCode = $(this).find('td:first').text().trim();
+            const itemName = $(this).find('td:eq(1)').text().trim();
+            itemsToAdd.push({ itemCode: itemCode, itemName: itemName });
+        });
+        console.log('total column',itemsToAdd)
+
+        if (vNo) {
+            // Add columns only if vNo exists
+            AddColumnsOnly(itemsToAdd);
+        } else {
+            // Prepare JSON to send
+            dataToSend = JSON.stringify(itemsToAdd);
+        }
+
+        if (!vNo) {
+            $.ajax({
+                url: '/IncommingQCRMC/GetItemDetails',
+                type: 'POST',
+                contentType: 'application/json',
+                data: dataToSend,
+                success: function (response) {
+                    GetalldataClickonFill(response, itemsToAdd);
+                },
+                error: function (xhr) {
+                    console.error('Error:', xhr.responseText);
+                }
+            });
+        }
+    });
+         function AddColumnsOnly(itemsToAdd) {
+        const theadRow = $('#tblPreIncomming thead tr');
+        const tbodyRows = $('#tblPreIncomming tbody tr');
+        itemsToAdd.forEach(item => {
+            // Avoid adding duplicate columns
+            if ($('#' + item.itemCode).length === 0) {
+                // Add new <th> to header
+                theadRow.append(`<th id="${item.itemCode}">${item.itemName}</th>`);
+
+                // Add new <td> to each existing row
+                tbodyRows.each(function () {
+                    const bgColor = '#d4edda'; // background color
+                    $(this).append(`
+                        <td style="background-color: ${bgColor};">
+                            <input type="text"
+                                   class="form-control"
+                                   name="Item_${item.itemCode}"
+                                   style="background-color: ${bgColor};" />
+                        </td>
+                    `);
+                });
+            }
+        });
+     }
+         function GetalldataClickonFill(response, dataToSend) {
+             const tbody = $('#tblPreIncomming tbody');
+             tbody.empty();
+              console.log('response', response)
+              console.log('dataToSend', dataToSend)
+              debugger
+             let itemList = [];
+
+             if (Array.isArray(dataToSend)) {
+                 itemList = dataToSend;
+             } else if (dataToSend.itemCodes) {
+                 itemList = dataToSend.itemCodes.map(code => ({
+                     itemCode: code,
+                     itemName: code
+                 }));
+             } else if (dataToSend.itemCode) {
+                 itemList = [{
+                     itemCode: dataToSend.itemCode,
+                     itemName: dataToSend.itemName || dataToSend.itemCode
+                 }];
+             }
+
+             const hasItems = itemList.length > 0;
+             // --- Header HTML ---
+             let theadHTML = `
+                 <tr class="table-head">
+                     <th style="display:none;">Code</th>
+                     <th>Qcid</th>
+                     <th>Qcpid</th>
+                     <th>Parameter</th>
+                     <th>Unit</th>
+                     <th>Level</th>
+                     <th>Allow Amount</th>
+                     <th>Deduction Amount</th>
+                     <th>Deduction Narration</th>`;
+
+             if (hasItems) {
+                 itemList.forEach(item => {
+                     theadHTML += `<th id="${item.itemCode}">${item.itemName}</th>`;
+                 });
+             }
+
+             theadHTML += `</tr>`;
+
+             $('#tblPreIncomming thead').html(theadHTML);
+
+             // if (Array.isArray(response) && response.length > 0) {
+             if (Array.isArray(response.data) && response.data.length > 0) {
+                 const colorPalette = ['#d4edda', '#fff9c4', '#f28b82', '#f8bbd0', '#ce93d8', '#81d4fa','#ffcc80'];
+                 const qcCodeColorMap = {};
+                 let qcColorIndex = 0;
+
+                 response.data.forEach((item, index) => {
+                     const qcCode = item.qC_CODE;
+
+                     if (!qcCodeColorMap.hasOwnProperty(qcCode)) {
+                         qcCodeColorMap[qcCode] = colorPalette[qcColorIndex % colorPalette.length];
+                         qcColorIndex++;
+                     }
+                     const dynamicTDColor = qcCodeColorMap[qcCode];
+
+                     let newRow = `
+                         <tr>
+                             <td style="display:none;">${item.qC_CODE || ''}</td>
+                             <td>${item.qC_CODE || ''}</td>
+                             <td>${item.qcP_CODE || ''}</td>
+                             <td>${item.parameter || ''}</td>
+                             <td>${item.unit || ''}</td>
+                             <td>${item.qcP_STD || ''}</td>
+                             <td><input type="text" class="form-control" name="AllowAmt" /></td>
+                             <td><input type="text" class="form-control" name="DeductAmt" /></td>
+                             <td><input type="text" class="form-control" name="DeductNarr" /></td>`;
+
+                     if (hasItems) {
+                         itemList.forEach(it => {
+                             // Editable if first row or matching item code
+                             const isFirstRow = index === 0;
+                             const isEditable = isFirstRow || (item.item_Code === it.itemCode);
+                             const bgColor = dynamicTDColor;
+
+                             newRow += `
+                                 <td style="background-color: ${bgColor};">
+                                     <input type="text"
+                                            class="form-control"
+                                            name="Item_${it.itemCode}"
+                                            ${!isEditable ? 'readonly' : ''}
+                                            style="background-color: ${bgColor};" />
+                                 </td>`;
+                         });
+                     }
+
+                     newRow += `</tr>`;
+                     tbody.append(newRow);
+                 });
+
+             } else {
+                 const colspan = 9 + (hasItems ? itemList.length : 0);
+                 tbody.append(`<tr><td colspan="${colspan}" class="text-center">No data found</td></tr>`);
+             }
+         }
+
+         $('#btn-save').on('click', function () {
+             debugger
+             function parseDecimal(val) {
+                 val = val.trim();
+                 return val === "" ? null : parseFloat(val);
+             }
+             function parseIntOrNull(val) {
+                 val = val.trim();
+                 return val === "" ? null : parseInt(val);
+             }
+             // Step 1: Collect Form Data
+             let formData = {
+                 docType: $('#ddlDocType').val(),
+                 docNo: $('#NumDocNo').val(),
+                 date: $('#DtDate').val(),
+                 gateNo: $('#ddlGateNo option:selected').text(),
+                 qcIncharge: $('#ddlQCIncharge').val(),
+                 chem: $('#ddlChem').val(),
+                 partyName: $('#TxtPartyName').val(),
+                 transport: $('#TxtTransport').val(),
+                 truckNo: $('#TxtTruckNo').val(),
+                 containerNo: $('#TxtContainerNo').val(),
+                 invoiceQty: parseDecimal($('#TxtInvoiceQty').val()),
+                 recordedQty: parseDecimal($('#TxtRecordedQty').val()),
+                 purType: $('#TxtPurType').val(),
+                 shortage: parseDecimal($('#TxtShortage').val()),
+                 billNo: parseIntOrNull($('#NumBillNo').val()),
+                 billDate: $('#DtBillDate').val(),
+                 billDateChecked: $('#chkBillDate').is(':checked'),
+                 wastage: parseDecimal($('#TxtWastage').val()),
+                 gateDate: $('#DtGateDate').val(),
+                 gateDateChecked: $('#chkGateDate').is(':checked'),
+                 bales: parseIntOrNull($('#TxtBales').val()),
+                 remarks: $('#TxtRemarks').val(),
+                 MRNDate: $('#MRNDate').val(),
+                 DeductAmount: $('#NumDeductAmount').val(),
+                 Narration: $('#TxtNarration').val(),
+                 ACTION: vNo > 0 ? "UPDATE" : "INSERT",
+             };
+             debugger
+             // Step 3: Collect Table Data
+             let preIncomingData = [];
+             let combinedItems = {};
+
+             $('#tblPreIncomming tbody tr').each(function (index) {
+                 const $row = $(this);
+
+                 // Store the row data in sequence (with RowIndex as Rid)
+                 const rowData = {
+                     RowIndex: index + 1,  // To keep the sequence starting from 1
+                     QC_CODE: $row.find('td:eq(1)').text().trim(),
+                     QCP_CODE: $row.find('td:eq(2)').text().trim(),
+                     Parameter: $row.find('td:eq(3)').text().trim(),
+                     Unit: $row.find('td:eq(4)').text().trim(),
+                     QCP_STD: $row.find('td:eq(5)').text().trim(),
+                     AllowAmt: $row.find('input[name="AllowAmt"]').val(),
+                     DeductAmt: $row.find('input[name="DeductAmt"]').val(),
+                     DeductNarr: $row.find('input[name="DeductNarr"]').val(),
+                     Items: []   // This will be an array of item objects
+                 };
+
+                 // Loop through item inputs and maintain their values
+                 $row.find('input[name^="Item_"]').each(function () {
+                     const inputName = $(this).attr('name');
+                     const value = $(this).val();
+
+                     const itemCodeMatch = inputName.match(/^Item_(.+)$/);
+                     if (itemCodeMatch) {
+                         const itemCode = itemCodeMatch[1];
+                         rowData.Items.push({ [itemCode]: value });
+
+                         // Build combinedItems for each itemCode
+                         if (!combinedItems[itemCode]) {
+                             combinedItems[itemCode] = [];
+                         }
+                         combinedItems[itemCode].push(value);
+                     }
+                 });
+                 preIncomingData.push(rowData);
+             });
+             debugger
+             // Step 4: Final Object to send in the AJAX request
+             let dataToSend = {
+                 Header: formData,
+                 Details: preIncomingData
+             };
+
+             console.log("📦 Data to send:", dataToSend);
+             debugger
+             // Step 5: Send Data to the Server via AJAX
+             $.ajax({
+                 url: '/IncommingQCRMC/SaveAllData',
+                 method: 'POST',
+                 contentType: 'application/json',
+                 data: JSON.stringify(dataToSend),
+                 success: function (response) {
+                     alert('✅ Data saved successfully!');
+                 },
+                 error: function (xhr) {
+                     alert('❌ Failed to save data: ' + xhr.responseText);
+                     console.error(xhr.responseText);
+                 }
+             });
+         });
+
+           // ===========================================================
+          // save Button End Block
+
+         });
+         function ddlDocType(callback) {
+               $.ajax({
+                   url: '/IncommingQCRMC/GetddlDocType',
+                   type: 'GET',
+                   dataType: 'json',
+                   success: function (data) {
+                       const ddl = $('#ddlDocType');
+                       ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                       $.each(data, function (index, item) {
+                           ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                       });
+                       if (typeof callback === "function") callback();
+                   },
+                   error: function (xhr) {
+                       console.error("Error loading ddlDocType:", xhr.responseText);
+                   }
+               });
+           }
+         function sendDocType(docType, docName) {
+              $.ajax({
+                  url: '/IncommingQCRMC/GetDocNo',
+                  type: 'POST',
+                  data: {
+                      docType: docType,
+                      docName: docName
+                  },
+                  success: function (response)
+                  {
+                      if (response.success) {
+
+                      const vNo = response.nextVNo;
+                      const vType = response.docType;
+
+                      $('#NumDocNo').val(vNo);
+                      ddlGateNo(vNo, vType);
+                      }
+                  },
+                  error: function (xhr) {
+                      console.error("Error:", xhr.responseText);
+                  }
+              });
+            }
+         function ddlGateNo(vNo, vType1) {
+               const ddl = $('#ddlGateNo');
+               return $.ajax({
+                   url: '/IncommingQCRMC/GetddlMRNNo',
+                   type: 'GET',
+                   dataType: 'json',
+                   data: { VNo: vNo, Vtype: vType1 },
+                   success: function(data) {
+                       if (ddl.hasClass("select2-hidden-accessible")) {
+                           ddl.select2('destroy');
+                       }
+                       ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
+                       data.forEach(item => {
+                           ddl.append(new Option(item.text, item.value));
+                       });
+                       ddl.select2({
+                           placeholder: "-- Select Party --",
+                           allowClear: true,
+                           width: '100%',
+                           minimumResultsForSearch: data.length >= 5 ? 0 : Infinity,
+                           language: {
+                               inputTooShort: () => 'Type to search...',
+                               searchInputPlaceholder: "Search Party..."
+                           }
+                       });
+                       $('.select2-selection').addClass('form-control');
+                   },
+                   error: function(xhr, status, error) {
+                       console.error("Error loading party list:", xhr.responseText);
+                       toastr.error('Error loading party list: ' + error);
+                   }
+               });
+           }
+         function ddlQCIncharge(callback) {
+            $.ajax({
+                  url: '/IncommingQCRMC/GetddlQCIncharge',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                      const ddl = $('#ddlQCIncharge');
+                    ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                      console.error("Error loading ddlQCIncharge:", xhr.responseText);
+                }
+            });
+         }
+         function ddlCheme(callback) {
+            $.ajax({
+                url: '/IncommingQCRMC/GetddlChem',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                        const ddl = $('#ddlChem');
+                    ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                        console.error("Error loading ddlChem:", xhr.responseText);
+                }
+            });
+          }
+         function ddlItemName(callback) {
+              $.ajax({
+                      url: '/IncommingQCRMC/GetddlItemName',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (data) {
+                        const ddl = $('#ddlItemName');
+                      ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                      $.each(data, function (index, item) {
+                          ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                      });
+                      if (typeof callback === "function") callback();
+                  },
+                  error: function (xhr) {
+                              console.error("Error loading ddlItemName:", xhr.responseText);
+                  }
+              });
+         }
+         function GetalldatafetchGatonchange(response) {
+               if (!response || response.length === 0) return;
+
+               const data = response[0];
+
+               // Format date function (optional reuse)
+               const formatDate = (dateStr) => {
+                   if (!dateStr) return "";
+                   const parts = dateStr.split('/');
+                   if (parts.length !== 3) return "";
+                   return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+               };
+                $('#DtGateDate').val(formatDate(data.v_DATE)).prop('readonly', true);
+                $('#TxtPartyName').val(data.partyName || '').prop('readonly', true);
+                $('#TxtTruckNo').val(data.trucK_NO || '').prop('readonly', true);
+                $('#NumBillNo').val(data.bilL_NO || '').prop('readonly', true);
+                $('#DtBillDate').val(formatDate(data.bilL_DATE)).prop('readonly', true);
+                $('#TxtInvoiceQty').val(data.qty || '').prop('readonly', true);
+                $('#TxtRecordedQty').val(data.qty || '').prop('readonly', true);
+                $('#TxtShortage').val('0');
+                $('#TxtWastage').val('0');
+                $('#TxtTransport').val('');
+                $('#TxtContainerNo').val('');
+
+               // ✅ Populate itemTable
+               const itemCode = data.iteM_CODE || '';
+               const itemName = data.iteM_NAME || '';
+
+               $('#itemTable thead tr').empty();
+               $('#itemTable tbody').empty();
+               // Add table row
+               $('#itemTable tbody').append(`
+                   <tr class="text-left">
+                       <td>${itemCode}</td>
+                       <td>${itemName}</td>
+                   </tr>
+               `);
+         }
+
+          function GetallDataPreIncommingQCRM(response) {
+             const Headerdata = response.header;
+             const Itemdata = response.items;
+             // --- 1. Fill Header fields
+             if (Headerdata && Headerdata.length > 0) {
+                 const header = Headerdata[0];
+
+                 ddlDocType(() => {
+                     $('#ddlDocType').val(header.V_TYPE);
+                 });
+                 $('#NumDocNo').val(header.DOC_ID);
+
+                 ddlQCIncharge(() => {
+                     $('#ddlQCIncharge').val(header.QC_INCHARGE);
+                 });
+                 ddlCheme(() => {
+                     $('#ddlChem').val(header.CHEMIST);
+                 });
+                 ddlItemName(() => {
+                     $('#ddlItemName').val(header.ITEM_CODE);
+                 });
+
+                 $('#DtDate').val(convertToDateInputFormat(header.V_DATE));
+                 $('#TxtTransport').val(header.TRANSPORT);
+                 $('#TxtTruckNo').val(header.TRUCK_NO);
+                 $('#TxtContainerNo').val(header.CONTAINER_NO);
+                 $('#TxtInvoiceQty').val(header.INV_QTY);
+                 $('#TxtRecordedQty').val(header.RECD_QTY);
+                 $('#TxtPurType').val(header.PUR_TYPE);
+                 $('#TxtShortage').val(header.SHORT_QTY);
+                 $('#NumBillNo').val(header.BILL_NO);
+                 $('#DtBillDate').val(convertToDateInputFormat(header.BILL_DATE));
+                 $('#TxtWastage').val(header.WASTE_WGT);
+             }
+
+             // --- 2. Build Item Table
+             if (Itemdata && Itemdata.length > 0) {
+                 const tableHeader = document.getElementById("tblPreIncommingHeader");
+                 const tableBody = document.getElementById("tblPreIncommingBody");
+                 tableHeader.innerHTML = '';
+                 tableBody.innerHTML = '';
+
+                 const columns = Object.keys(Itemdata[0]);
+
+                 let itemCodes = [];
+                 let columnDisplayNames = [];
+                 let itemMappings = [];
+
+                     columns.forEach(col => {
+                 const parts = col.split('_');
+                 if (parts.length >= 3) {
+                     const rn = parts.pop(); // remove row number (last part)
+                     const itemCode = parts.pop(); // remove item code (second last part)
+                     const itemName = parts.join('_') + '_' + itemCode; // reconstruct full item name with code
+
+                     columnDisplayNames.push(col); // use full column name
+                     itemCodes.push(itemCode);
+                     itemMappings.push({ itemName, itemCode });
+                 } else {
+                     columnDisplayNames.push(col); // non-item columns
+                 }
+             });
+
+
+                 // --- 3. Build Item Code/Name Table
+                 $('#itemTable thead tr').empty();
+                 $('#itemTable tbody').empty();
+
+                 $('#itemTable thead tr').append(`
+                     <th>Item Code</th>
+                     <th>Item Name</th>
+                 `);
+
+                 itemMappings.forEach(item => {
+                     $('#itemTable tbody').append(`
+                         <tr class="text-left">
+                             <td>${item.itemCode}</td>
+                             <td>${item.itemName}</td>
+                         </tr>
+                     `);
+                 });
+
+                 // --- 4. Build dynamic table headers
+                 columnDisplayNames.forEach(displayName => {
+                     const th = document.createElement("th");
+                     th.textContent = displayName;
+                     tableHeader.appendChild(th);
+                 });
+
+                 // --- 5. Build dynamic table body
+                 Itemdata.forEach(row => {
+                     const tr = document.createElement("tr");
+                     columns.forEach((col, index) => {
+                         const td = document.createElement("td");
+
+                         if (index >= 5) {
+                             // Editable input for dynamic columns
+                             const input = document.createElement("input");
+                             input.type = "text";
+                             input.value = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                             input.className = "form-control";
+                             input.dataset.col = col;
+                             td.appendChild(input);
+                         } else {
+                             // Static display for fixed columns
+                             td.textContent = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                         }
+
+                         tr.appendChild(td);
+                     });
+                     tableBody.appendChild(tr);
+                 });
+             }
+         }
+
+         function convertToDateInputFormat(dateStr) {
+               if (!dateStr || !dateStr.includes('/')) return '';
+               const [day, month, year] = dateStr.split('/');
+               return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+           }
+
+</script>
+
+
+<script>
+    document.querySelectorAll("tr").forEach((row, index) => {
+        let typeCell = row.querySelector(".readonly-cell");
+        if (typeCell) {
+            if (index === 0) {
+                typeCell.style.display = "";
+            } else {
+                typeCell.style.display = "none";
+            }
+        }
+    });
+</script>

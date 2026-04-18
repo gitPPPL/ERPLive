@@ -1,0 +1,341 @@
+﻿@{
+    ViewBag.Title = "Loom Incentive Parameter Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Loom Incentive Parameter Master</legend>
+    <form id="LoomIncentiveParameterMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <div class="input-divide">
+                        <select class="form-control" id="ddlDocType">
+                            <option value="">Select Doc Type</option>
+                        </select>
+                        @* <input type="text" class="form-control" id="TxtDocType" /> *@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName">Name</label>
+                    <input type="text" class="form-control" id="TxtName" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlLoomType">Loom Type</label>
+                    <select class="form-control" id="ddlLoomType">
+                        <option value="">Select Loom Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlConversionCode">Conversion Code</label>
+                    <select class="form-control" id="ddlConversionCode">
+                        <option value="">Select Conversion Code</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumAge">% Age</label>
+                    <input type="number" class="form-control" id="NumAge" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="NumFixAmt">Fix Amt</label>
+                    <input type="number" class="form-control" id="NumFixAmt" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="active-toggle button-right" style="margin-top:18px !important;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="status-label" id="statusText">Active</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "LoomIncentiveParameterMasterList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger" onclick="clearForm();">
+                        <i class="fa fa-close"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const mode = urlParams.get('mode');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(async function () {
+        try {
+            // Await dropdown population functions
+            await DDLPartyMast();
+            await DDLLoomType();
+            await DDLConversionCode();
+
+            if (!isNaN(rowId) && rowId > 0) {
+                loadHolidayMasterById(rowId);
+                if (mode === "view") {
+                    setFormReadOnly();
+                }
+            }
+
+
+            $("#btn-save").click(async function (e) {
+                e.preventDefault();
+
+                var Code = $("#TxtCode").val().trim();
+                var V_Type = $("#ddlDocType").val().trim();
+                var Name = $("#TxtName").val().trim();
+                var LoomType = $("#ddlLoomType option:selected").text().trim();
+                var ConvCode = $("#ddlConversionCode").val().trim();
+                var ConvName = $("#ddlConversionCode option:selected").text().trim();
+                var Per = $("#NumAge").val().trim();
+                var FixAmt = $("#NumFixAmt").val().trim();
+                var Active = $('#ACTIVE').is(':checked') ? 1 : 0;
+
+                var action = (isNaN(Code) || Code === "") ? 'INSERT' : 'UPDATE';
+
+                if (!V_Type) {
+                    toastr.warning("Please select Doc Type.");
+                    $("#ddlDocType").focus();
+                    return;
+                }
+
+                if (!Name) {
+                    toastr.warning("Please enter a Name.");
+                    $("#TxtName").focus();
+                    return;
+                }
+
+                if (!LoomType) {
+                    toastr.warning("Please select Loom Type.");
+                    $("#ddlLoomType").focus();
+                    return;
+                }
+
+                if (!ConvCode || isNaN(ConvCode) || ConvCode <= 0) {
+                    toastr.warning("Please select a valid Conversion Code.");
+                    $("#ddlConversionCode").focus();
+                    return;
+                }
+
+                if (!Per || isNaN(Per) || Per <= 0) {
+                    toastr.warning("Please enter a valid % Age.");
+                    $("#NumAge").focus();
+                    return;
+                }
+
+                if (!FixAmt || isNaN(FixAmt) || FixAmt <= 0) {
+                    toastr.warning("Please enter a valid Fix Amt.");
+                    $("#NumFixAmt").focus();
+                    return;
+                }
+
+                var formData = {
+                    Code: Code ? parseInt(Code) : null,
+                    V_Type: V_Type,
+                    Name: Name,
+                    LoomType: LoomType,
+                    ConvCode: ConvCode ? parseInt(ConvCode) : null,
+                    Per: Per ? parseFloat(Per) : null,
+                    FixAmt: FixAmt ? parseFloat(FixAmt) : null,
+                    Active: Active,
+                    action: action,
+                    ConvName: ConvName
+                };
+
+                $("#btn-save").prop("disabled", true);
+
+                try {
+                    const response = await $.ajax({
+                        url: '/LoomIncentiveParameterMaster/SaveTempMaster',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(formData)
+                    });
+                    toastr.success(response.message || "Saved successfully!");
+                    setTimeout(() => window.location.href = '/LoomIncentiveParameterMasterList/Index', 1000);
+                } catch (xhr) {
+                    console.error("Error: ", xhr.responseText);
+                    toastr.error("Something went wrong.");
+                } finally {
+                    $("#btn-save").prop("disabled", false);
+                }
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                var activeCheckbox = document.getElementById("ACTIVE");
+                var statusText = document.getElementById("statusText");
+                var activeState = localStorage.getItem("activeState");
+
+                if (activeState === "true") {
+                    activeCheckbox.checked = true;
+                    statusText.textContent = "Active";
+                    statusText.style.color = "green";
+                } else {
+                    activeCheckbox.checked = false;
+                    statusText.textContent = "InActive";
+                    statusText.style.color = "red";
+                }
+            });
+
+            document.getElementById("ACTIVE").addEventListener("change", function () {
+                var statusText = document.getElementById("statusText");
+                if (this.checked) {
+                    statusText.textContent = "Active";
+                    statusText.style.color = "green";
+                    localStorage.setItem("activeState", "true");
+                } else {
+                    statusText.textContent = "InActive";
+                    statusText.style.color = "red";
+                    localStorage.setItem("activeState", "false");
+                }
+            });
+
+        } catch (error) {
+            console.error("Error loading initial data:", error);
+        }
+    });
+
+    async function DDLPartyMast() {
+        try {
+            const res = await fetch('/LoomIncentiveParameterMaster/DDLInspBy');
+            const data = await res.json();
+            const ddl = $('#ddlDocType');
+            ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Doc Type:", error);
+        }
+    }
+
+    async function DDLLoomType() {
+        try {
+            const res = await fetch('/LoomIncentiveParameterMaster/DDLLoomType');
+            const data = await res.json();
+            const ddl = $('#ddlLoomType');
+            ddl.empty().append('<option value="">-- Select Loom Type --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Loom Type:", error);
+        }
+    }
+
+    async function DDLConversionCode() {
+        try {
+            const res = await fetch('/LoomIncentiveParameterMaster/DDLConversionCode');
+            const data = await res.json();
+            const ddl = $('#ddlConversionCode');
+            ddl.empty().append('<option value="">-- Select Conversion Code --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Conversion Code:", error);
+        }
+    }
+
+    function loadHolidayMasterById(code) {
+        $.ajax({
+            url: '/LoomIncentiveParameterMasterList/GetDataByCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No Loom Incentive Parameter Master found for the given ID.");
+                    return;
+                }
+                console.log('data2', res.data);
+                populateForm(res.data);
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    function populateForm(data) {
+        $("#ddlDocType").val($.trim(data.v_Type)).change();
+        $("#TxtName").val($.trim(data.name));
+        $("#ddlLoomType").val(data.loomType);
+        $("#ddlConversionCode").val(data.convCode);
+        $("#NumAge").val(data.per);
+        $("#NumFixAmt").val(data.fixAmt);
+        $("#TxtCode").val($.trim(data.code));
+        const isActive = data.active === 1 || data.active === true;
+        $('#ACTIVE').prop('checked', isActive);
+        $('#statusText')
+            .text(isActive ? 'Active' : 'Inactive')
+            .removeClass('active inactive')
+            .addClass(isActive ? 'active' : 'inactive');
+    }
+
+
+
+        function clearForm() {
+        if (!rowId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to undo this action!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = $('#LoomIncentiveParameterMasterForm');
+                    form.find('input, select, textarea').not('#documentNo').val('').prop('checked', false).prop('selectedIndex', -1);
+                    Swal.fire(
+                        'Cleared!',
+                        'The form has been cleared except for the Document No.',
+                        'success'
+                    );
+                }
+            });
+        } else {
+  
+            document.getElementById(`row-${rowId}`).reset();
+        }
+    }
+
+
+
+
+
+
+
+
+</script>

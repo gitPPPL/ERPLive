@@ -1,0 +1,957 @@
+﻿@{
+    ViewBag.Title = "Mobile Bill Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Mobile Bill Entry</legend>
+    <form id="MobileBillForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtNumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="txtNumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtDtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="txtDtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="button-right btn-mt">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-copy"></i> <span id="dropdownText">Copy From</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="copyFromDropdown">
+                            <li><a class="dropdown-item" id="LinkMobillBill" href="#" data-bs-toggle="modal" data-bs-target="#mobilebillModal">Mobile Bill</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @* Modal Start *@
+            <div class="modal fade" id="mobilebillModal" tabindex="-1" aria-labelledby="mobilebillModal" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content draggable-modal">
+                        <div class="popup-header">
+                            <h5 class="popup-title" id="mobilebillLabel">Copy From</h5>
+                            <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                        <input type="text" id="searchBoxMB" class="form-control" placeholder="Search Module..." aria-label="Search term" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-2">
+                                    <div class="form-group">
+                                        <div class="form-row">
+                                            <input type="checkbox" id="chkAppendMBModal">
+                                            <label class="checkbox-label" for="chkAppendPOModal">Append</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="btn-rightalign">
+                                        <button type="button" id="btncopyMbill" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table id="tblCopyMobileBilldata" class="table-width">
+                                        <thead class="table-head">
+                                            <tr>
+                                                <th><input type="checkbox" id="selectAllPR" /></th>
+                                                <th>Document Id</th>
+                                                <th>Doc No</th>
+                                                <th>Doc Date</th>
+                                                <th>Remark</th>
+                                                <th>Bill Amt</th>
+                                                <th>Deduct Amt</th>
+                                                <th>Dr Bill Name</th>
+                                                <th>Cr Bill Name</th>
+                                                <th>Cgst Amt</th>
+                                                <th>Sgst Amt</th>
+                                                <th>Igst Amt</th>
+                                                <th>Cgst Name</th>
+                                                <th>Sgst Name</th>
+                                                <th>Igst Name</th>
+                                                <th style="display:none;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="pagination-end">
+                                            <div class="custom-pagination" id="copyTablePagination"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblMobileBillEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Employee Id</th>
+                            <th>Employee Name</th>
+                            <th>Mobile No.</th>
+                            <th>Limit</th>
+                            <th>Bill Amt.</th>
+                            <th>Deduct Amt.</th>
+                            <th>Name</th>
+                            <th>Dr. A/C Name</th>
+                            <th>Cr. A/C Name</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumBillAmount">Bill Amount</label>
+                    <input type="number" class="form-control" id="txtNumBillAmount" placeholder="Enter Bill Amount" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDr">Dr</label>
+                    <select class="form-control" id="ddlDr">
+                        <option value="">Select Dr</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCr">Cr</label>
+                    <select class="form-control" id="ddlCr">
+                        <option value="">Select Cr</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumCGSTAmount">CGST Amount</label>
+                    <input type="number" class="form-control" id="txtNumCGSTAmount" placeholder="Enter CGST Amount" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCgstAc">A/C</label>
+                    <select class="form-control" id="ddlCgstAc">
+                        <option value="">Select A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtNumSGSTAmount">SGST Amount</label>
+                    <input type="number" class="form-control" id="txtNumSGSTAmount" placeholder="Enter SGST Amount" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSgstAC">A/C</label>
+                    <select class="form-control" id="ddlSgstAC">
+                        <option value="">Select A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtNumIGSTAmount">IGST Amount</label>
+                    <input type="number" class="form-control" id="txtNumIGSTAmount" placeholder="Enter IGST Amount" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlAC3">A/C</label>
+                    <select class="form-control" id="ddlIgstAC">
+                        <option value="">Select A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtNumDeductAmount">Deduct Amount</label>
+                    <input type="number" class="form-control" id="txtNumDeductAmount" placeholder="Enter Deduct Amount" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "MobileBillList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="button" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+
+
+    const jsMobileBillEntry = {
+
+        compCode : '@ViewBag.CompCode',
+        branchCode :'@ViewBag.BranchCode',
+        yearCode : '@ViewBag.YearCode',
+
+        currentPage : 1,
+        pageSize : 10,
+        rowIndex : 0,
+        AddEditMode : '',
+        paramdocId : 0,
+
+        $empList: undefined,
+        $acNames :undefined,
+        _empOptionsHTML : null,
+        _acctOptionsHTML : null,
+
+        Initialize : function() {
+
+            this.GetDocTypeAsync(null);
+            $('#ddlDocType').trigger("change");
+            this.SetAcountDropDown($('#ddlDr'));
+            this.SetAcountDropDown($('#ddlCr'));
+            this.SetAcountDropDown($('#ddlCgstAc'));
+            this.SetAcountDropDown($('#ddlSgstAC'));
+            this.SetAcountDropDown($('#ddlIgstAC'));
+            this.addNewRowBelow(this.rowIndex);
+            $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+                //addRow();
+                jsMobileBillEntry.addNewRowBelow(jsMobileBillEntry.rowIndex , true);
+                jsMobileBillEntry.rowIndex ++;
+            });
+
+            this.rowIndex ++;
+        },
+
+        SetAcountDropDown : function($ddlControl){
+              return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: '@Url.Action("GetSubgroupAccount", "MobileBillEntry")',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+
+                        if (response.success) {
+                            const $dropdown = $ddlControl;
+                            $dropdown.empty();
+                            $dropdown.append('<option value="">--select Account--</option>');
+
+                            $.each(response.data, function (index, item) {
+                                $dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+                            });
+
+                            resolve();
+
+                        } else {
+                            reject("Invalid response status.");
+                        }
+
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error("Document Type Load failed: " + error);
+                        reject(error);
+                    }
+                });
+            });
+        },
+
+        collectFormData: function() {
+            return{
+                header: {
+                    vType: this.toNullableString($('#ddlDocType').val()),
+                    vNo:this.toNullableString($('#txtNumDocNo').val()),
+                    vdate:  this.toNullableString($('#txtDtDocDate').val()),
+                    billAmt: parseFloat ($('#txtNumBillAmount').val()) || 0,
+                    billDrAccount: parseInt($('#ddlDr option:selected').val()) || 0,
+                    billCrAccount: parseInt($('#ddlCr option:selected').val()) || 0,
+                    cgstAmt: parseInt($('#txtNumCGSTAmount').val()) || 0,
+                    cgstAccount: parseInt($('#ddlCgstAc option:selected').val()) || 0,
+                    sgstAmt:  parseFloat($('#txtNumSGSTAmount').val()) || 0,
+                    sgstAccount: parseInt($('#ddlSgstAC option:selected').val()) || 0,
+                    igstAmt: parseFloat($('#txtNumIGSTAmount').val()) || 0,
+                    igstAccount: parseInt ($('#ddlIgstAC option:selected').val()) || 0,
+                    deductAmt: parseFloat ($('#txtNumDeductAmount').val()) || 0,
+                    Action: this.AddEditMode
+                },
+                tableRow: this.collectTableData()
+            }
+         },
+
+        collectTableData: function() {
+           let tdata = [];
+
+            $('#tblMobileBillEntry tbody tr').each(function (rowIndex) {
+                const $row = $(this);
+                let rowdata = {
+                    EmpCode: $row.find(`#EMP_CODE_${rowIndex}`).val(),
+                    EmpName: $row.find(`#EMP_NAME_${rowIndex} option:selected`).text(),
+                    MobNo: $row.find(`#MOB_NO_${rowIndex}`).val(),
+                    Limit: $row.find(`#LIMIT_${rowIndex}`).val(),
+                    BillAmt: $row.find(`#BILL_AMT_${rowIndex}`).val(),
+                    DeductAmt: $row.find(`#DEDUCT_AMT_${rowIndex}`).val(),
+                    Name: $row.find(`#NAME_${rowIndex}`).val(),
+                    DrAcName: $row.find(`#DR_AC_NAME_${rowIndex}`).val(),
+                    CrAcName: $row.find(`#CR_AC_NAME_${rowIndex}`).val(),
+                    Remarks: $row.find(`#REMARKS_${rowIndex}`).val(),
+                    Action: 1
+                };
+                tdata.push(rowdata);
+                });
+            return tdata;
+         },
+
+        SaveMasterData : function (mData)  {
+
+
+
+            const docdate = mData?.header.vdate?.trim();
+            if (!docdate) {
+                toastr.warning("Doc date is required.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("SaveMobileEntryData", "MobileBillEntry")',
+                type: 'POST',
+                contentType: 'application/json',
+                  data: JSON.stringify({
+                            Details: mData
+                        }),
+                success: function (response) {
+                    if (response?.success) {
+                        toastr.success('Data saved successfully.');
+                          setTimeout(() => {
+                             window.location.href =   '@Url.Action("index", "MobileBillList")';
+                        }, 1500);
+
+                    } else {
+                        toastr.error(response?.message || "Save failed. Please try again.");
+                    }
+                },
+                error: function () {
+                    toastr.error("Error occurred while saving. Please contact admin.");
+                }
+            });
+        },
+
+        EditMasterData: function  (mbillEntry) {
+            // if (PreviousInputDt !== masterData.Name) {
+            //     // checkExistOrNot(masterData.Name)
+            //     //     .done(function (data) {
+            //         if (data?.status && data?.exists) {
+            //             toastr.warning("Duplicate Department Category Name");
+            //             return;
+            //         }
+            //         this.UpdateMasterData(masterData);
+            //         // })
+            //         // .fail(function () {
+            //         //     toastr.error("Error while checking Department Category Name.");
+            //         // });
+            // } else {
+            this.UpdateMasterData(mbillEntry);
+            // }
+        },
+
+        UpdateMasterData : function (mbillEntry) {
+
+            $.ajax({
+                url: '/MobileBillEntry/SaveMobileEntryData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    Details: mbillEntry
+                }),
+                dataType: 'json',
+                success: function (response) {
+                    if (response?.success) {
+                        toastr.success('Data updated successfully.');
+                        //this.resetFields();
+                        setTimeout(() => {
+                             window.location.href =   '@Url.Action("index", "MobileBillList")';
+                        }, 1500);
+                    } else {
+                        toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Data not updated: " + error);
+                }
+            });
+        },
+
+         checkExistOrNot : function (inputData) {
+
+             return true;
+
+            return $.ajax({
+                url: '/MobileBillEntry/getExistOrNot',
+                type: 'GET',
+                dataType: 'json',
+                data: { inputData: inputData }
+            });
+         },
+
+         GetDocData :  function (docId, readOnly){
+            $.ajax({
+                url: '/MobileBillEntry/GetMobBillEntryDatabyId',
+                type: 'GET',
+                data: { Vno: docId },
+                success: function (res) {
+                    if (res.status && res.data) {
+
+                        const callback = () => {
+                            if (readOnly === 'true') {
+                            $('input,select, #DdActive').prop('disabled', true);
+                            $('#btn-save, #cancelBtn, .btn-add-row, .btn-delete-action, .btn-add-action').hide();
+                            } else {
+                            $('input,select, #DdActive').prop('disabled', false);
+                            $('#btn-save, #cancelBtn, .btn-add-row, .btn-delete-action, .btn-add-action').show();
+                            }
+                        };
+
+                        jsMobileBillEntry.fillFormFields(res.data, callback);
+
+
+
+                    } else {
+                        toastr.warning('No data found for this ID.');
+                    }
+                },
+                error: function () {
+                    toastr.error('Failed to load data.');
+                }
+            });
+        },
+
+        // Returns cached <option> HTML for employees
+        getEmpOptionsHTML : async function () {
+          if (this._empOptionsHTML) return this._empOptionsHTML;
+          const $tmp = $('<select/>');
+          await this.loadEmpList($tmp);           // <-- modify loadEmpList to accept a jQuery/select or return options
+          this._empOptionsHTML = $tmp.html();
+          return this._empOptionsHTML;
+        },
+
+        // Returns cached <option> HTML for accounts
+         getAcctOptionsHTML : async function () {
+          if (this._acctOptionsHTML) return this._acctOptionsHTML;
+          const $tmp = $('<select/>');
+          await this.SetAcountDropDown($tmp);     // <-- modify SetAcountDropDown to accept a jQuery/select or return options
+          this._acctOptionsHTML = $tmp.html();
+          return this._acctOptionsHTML;
+        },
+
+        // Optional: pause change handlers while bulk-setting values
+        // suspendEvents : function (root, on) {
+        //   $(root).data('suspend-change', !!on);
+        // },
+
+        fillFormFields : async function (dt, callback) {
+
+          // 2) Preload options ONCE
+          const [empOptionsHTML, acctOptionsHTML] = await Promise.all([
+             jsMobileBillEntry.getEmpOptionsHTML(),
+             jsMobileBillEntry.getAcctOptionsHTML()
+          ]);
+
+           Promise.all([
+                jsMobileBillEntry.SetAcountDropDown($('#ddlDr')),
+                jsMobileBillEntry.SetAcountDropDown($('#ddlCr')),
+                jsMobileBillEntry.SetAcountDropDown($('#ddlCgstAc')),
+                jsMobileBillEntry.SetAcountDropDown($('#ddlSgstAC')),
+                jsMobileBillEntry.SetAcountDropDown($('#ddlIgstAC')),
+           ]).then(()=>{
+              const headerData =  dt.header;
+              
+              if (callback){
+              
+                  $('#ddlDocType').val(headerData.vType).trigger('change');
+                  $('#txtDocDate').val(headerData.vdate);
+                  //$('#ddlDepartment').val(headerData.department).trigger('change');
+                  let docid  =  headerData.vType + dt.header.vNo;
+                  //$('#txtDocID').val(docid);
+                  $('#ddlDocType').val(headerData.vType);
+                  $('#txtNumDocNo').val(headerData.vNo);
+                  $('#txtDtDocDate').val(headerData.vdate);
+              }
+
+              $('#txtNumBillAmount').val(headerData.billAmt);
+              $('#ddlDr').val(this.toNullableString(headerData.billDrAccount)).trigger('change');
+              $('#ddlCr').val(this.toNullableString(headerData.billCrAccount)).trigger('change');
+              $('#txtNumCGSTAmount').val(headerData.cgstAmt);
+              $('#ddlCgstAc').val(this.toNullableString(headerData.cgstAccount)).trigger('change');
+              $('#txtNumSGSTAmount').val(headerData.sgstAmt);
+              $('#ddlSgstAC').val(this.toNullableString(headerData.sgstAccount)).trigger('change');
+              $('#txtNumIGSTAmount').val(headerData.igstAmt);
+              $('#ddlIgstAC').val(this.toNullableString(headerData.igstAccount)).trigger('change');
+              $('#txtNumDeductAmount').val(headerData.deductAmt);
+            // $('#tblMobileBillEntry tbody').empty();
+            this.rowIndex = 1;
+            const rows = dt.tableRow;
+
+            //jsMobileBillEntry.suspendEvents(rows,true);
+
+            rows.forEach((item, index) => {
+              if (index > 0) {
+                  jsMobileBillEntry.rowIndex = index;
+                  jsMobileBillEntry.addNewRowBelow(jsMobileBillEntry.rowIndex);
+              }
+
+              const ri = index;
+
+                $(`#EMP_NAME_${ri}`).html(empOptionsHTML);
+                $(`#DR_AC_NAME_${ri}`).html(acctOptionsHTML);
+                $(`#CR_AC_NAME_${ri}`).html(acctOptionsHTML);
+                // ]).then(() => {
+                $('#EMP_CODE_' + ri).val(item.empCode);
+                $('#EMP_NAME_' + ri).val(item.empCode).trigger('change');;
+                $('#MOB_NO_' + ri).val(item.mobNo);
+                $('#LIMIT_' + ri).val(item.limit);
+                $('#BILL_AMT_' + ri).val(item.billAmt);
+                $('#DEDUCT_AMT_' + ri).val(item.deductAmt);
+                $('#NAME_' + ri).val(item.name);
+                $('#DR_AC_NAME_' + ri).val(item.drAcName).trigger('change');
+                $('#CR_AC_NAME_' + ri).val(item.crAcName).trigger('change');
+                $('#REMARKS_' + ri).val(item.remarks);
+              });
+
+              if (typeof callback === "function") {
+                 callback();
+              }
+
+              // });
+           });
+           // jsMobileBillEntry.suspendEvents(rows,false);
+
+        },
+
+        getQueryParam : function (param){
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        },
+
+        loadFormData : function() {
+            this.paramdocId = this.getQueryParam('id');
+            let readOnly = this.getQueryParam('readOnly');
+            if (this.paramdocId) {
+                this.GetDocData(this.paramdocId, readOnly);
+                this.AddEditMode = "UPDATE";
+            }else{
+                this.AddEditMode = "INSERT";
+            }
+        },
+
+        toNullableInt : function (v) {
+            const t = String(v ?? '').trim();
+            return t === '' ? null : parseInt(t, 10);
+        },
+
+        toNullableString : function (v)  {
+            const t = String(v ?? '').trim();
+            return t === '' ? null : t;
+        },
+
+
+        GetDocTypeAsync : function (selectedValue)  {
+
+            return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '@Url.Action("GetDocumentTypeList", "MobileBillEntry")',  // PayGatePas
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+
+                    if (response.status) {
+                        const $dropdown = $('#ddlDocType');
+                        $dropdown.empty();
+                        // $dropdown.append('<option value="">-select doc Type-</option>');
+
+                        $.each(response.data, function (index, item) {
+                            $dropdown.append(`<option value="${item.value}">${item.text}</option>`);
+                        });
+
+                        if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                            $dropdown.val(selectedValue).trigger('change');
+                        } else {
+                            $dropdown.prop('selectedIndex', 0);
+                        }
+
+                        $('#ddlDocType').trigger("change");
+
+                        resolve();
+                    } else {
+                        reject("Invalid response status.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Document Type Load failed: " + error);
+                    reject(error);
+                }
+            });
+          });
+        },
+
+        GetDocid : function (VType)  {
+            $.ajax({
+                url: '@Url.Action("GetMaxVNo", "MobileBillEntry")',
+                type: 'GET',
+                data:{V_type:VType},
+                success: function (response) {
+                    console.log(response);
+                    if (response.status === true && response.data) {
+                        $('#txtNumDocNo').val(response.data.vNo || '');
+                        $('#txtDocID').val(response.data.docId || '');
+                    } else {
+                        $('#txtNumDocNo').val('');
+                        $('#txtDocID').val('');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Error fetching Doc ID:', error);
+                }
+            });
+        },
+
+
+        addNewRowBelow : function (rowIndex , btnClick) {
+
+            let lastRow = $('#tblMobileBillEntry tbody tr:last');
+            if (lastRow.length > 0) {
+                let lastRowId = lastRow.find('select[id^="EMP_NAME"]').data('id');
+                if (lastRowId) {
+                    let lastIndex = lastRowId;
+                    let empNameVal = $(`#EMP_NAME_${lastIndex} option:selected`).text();
+                    let empCodeVal = $(`#EMP_CODE_${lastIndex}`).val();
+
+                    if (!jsMobileBillEntry.getQueryParam('id')){
+                        if (!empNameVal) {
+                            toastr.warning('Please select an Emp Name before adding a new row.');
+                            $(`#MOB_NO_${lastIndex}`).focus();
+                            return;
+                        }
+
+                        if (!empCodeVal || empCodeVal.trim() === '') {
+                            toastr.warning('Please enter an Emp Code before adding a new row.');
+                            $(`#EMP_CODE_${lastIndex}`).focus();
+                            return;
+                        }
+                    }
+                }
+            }
+
+
+            const rowHtml = `
+                <tr class="no-border-input">
+                <td style="display:none;"></td>
+                <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="EMP_CODE_${rowIndex}"  data-id=${rowIndex}  name="EMP_CODE[${rowIndex}]" type="text" class="form-control-sm" readonly/></td>
+                <td>
+                    <select style="min-width: 150px; max-width: 300px;"  class="form-control" id="EMP_NAME_${rowIndex}" data-id=${rowIndex} name="EMP_NAME[${rowIndex}]" class="form-control-sm">
+                        <option value="">-- Select Emp name --</option>
+                    </select>
+                </td>
+                <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="MOB_NO_${rowIndex}" name="MOB_NO[${rowIndex}]" type="number" class="form-control-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"  /></td>
+                <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="LIMIT_${rowIndex}" name="LIMIT[${rowIndex}]" type="number" class="form-control-sm"  maxlength= "10"  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"  /></td>
+
+                <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="BILL_AMT_${rowIndex}" name="BILL_AMT[${rowIndex}]" type="number" class="form-control-sm"  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" /></td>
+                <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DEDUCT_AMT_${rowIndex}" name="DEDUCT_AMT[${rowIndex}]" type="number" class="form-control-sm"  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" /></td>
+                <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="NAME_${rowIndex}" name="NAME[${rowIndex}]" type="text" class="form-control-sm"  maxlength= "60" /></td>
+                <td>
+                    <select style="min-width: 100px; max-width: 200px;" class="form-control" id="DR_AC_NAME_${rowIndex}" data-id=${rowIndex} name="DR_AC_NAME[${rowIndex}]" class="form-control-sm">
+                        <option value="">-- Select Debit Account Name --</option>
+                    </select>
+                </td>
+                <td>
+                    <select style="min-width: 100px; max-width: 200px;" class="form-control" id="CR_AC_NAME_${rowIndex}" data-id=${rowIndex} name="CR_AC_NAME_$[${rowIndex}]" class="form-control-sm">
+                        <option value="">-- Select Credit Account Name --</option>
+                    </select>
+                </td>
+                <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REMARKS_${rowIndex}" name="REMARKS[${rowIndex}]" type="text" class="form-control-sm" maxlength="200" /></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer; margin-right:8px;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+                <td><input style="display:none" id="REF_TYPE_${rowIndex}" name="REF_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            </tr>`;
+
+            // Remove existing add icons from all rows (but leave delete icons untouched)
+            $('#tblMobileBillEntry tbody tr td .btn-add-action').remove();
+            $('#tblMobileBillEntry tbody').append($(rowHtml));
+
+
+            if ( !jsMobileBillEntry.getQueryParam('id') ||  btnClick){
+                this.loadEmpList(`#EMP_NAME_${rowIndex}`);
+                this.SetAcountDropDown($(`#DR_AC_NAME_${rowIndex}`));
+                this.SetAcountDropDown($(`#CR_AC_NAME_${rowIndex}`));
+            }
+
+            // debugger;
+
+
+            //   if ($(`#EMP_NAME_${rowIndex} option`).length < 2) {
+            //     this.loadEmpList(`#EMP_NAME_${rowIndex}`);
+            //     this.SetAcountDropDown($(`#DR_AC_NAME_${rowIndex}`));
+            //     this.SetAcountDropDown($(`#CR_AC_NAME_${rowIndex}`));
+            // }
+
+
+
+            rowIndex++;
+            jsMobileBillEntry.rowIndex = rowIndex;
+
+        },
+
+        loadEmpList : function (targetSelector) {
+            return $.ajax({
+                url: '@Url.Action("GetEmplist", "MobileBillEntry")',
+                type: 'GET',
+                data: {},
+                dataType: 'json',
+                success: function (data) {
+                    let $ddl = $(targetSelector);
+
+                    $ddl.on('change', function () {
+                        const rowId = $(this).data('id');
+                        const selected = $(this).find('option:selected');
+                        const empCode = $(this).val();
+                        $('#EMP_CODE_' + rowId).val(empCode);
+                    });
+
+                    $ddl.empty();
+                    $ddl.append('<option value="">-- Select Employee --</option>');
+                    $.each(data.data, function (index, item) {
+                        $ddl.append('<option  value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Error loading Employee list: ' + error);
+                }
+            });
+        },
+
+        copyFromMobileEntry : function(){
+
+             const searchTerm = $('#searchBoxMB').val();
+
+             return $.ajax({
+                url: '@Url.Action("GetCopyMobileList", "MobileBillEntry")',
+                type: 'GET',
+                data: {
+                    searchTerm,
+                    pageNumber: jsMobileBillEntry.currentPage,
+                    pageSize: jsMobileBillEntry.pageSize
+                },
+                dataType: 'json',
+                success: function (data) {
+
+                    const $table = $('#tblCopyMobileBilldata');
+                    // ensure exactly one <tbody>
+                    let $tbody = $table.children('tbody');
+                    if ($tbody.length === 0) {
+                        $tbody = $('<tbody/>').appendTo($table);
+                    } else {
+                        $tbody.empty();
+                    }
+
+                    $.each(data.data, function (index, item) {
+                        let $row  = $ (`<tr>
+                                         <td><input type="checkbox" id="selectDocId`+ index +`"  data-docNo = "`+ item.docNo +`"   /></td>
+                                         <td>${item.docId || ''}</td>
+                                         <td>${item.docNo || ''}</td>
+                                         <td>${item.docDate || ''}</td>
+                                         <td>${item.remark || ''}</td>
+                                         <td>${item.BillAmount || ''}</td>
+                                         <td>${item.deductAmount || ''}</td>
+                                         <td>${item.dr_bill_name || ''}</td>
+                                         <td>${item.cr_bill_name || ''}</td>
+                                         <td>${item.cgstAmt || ''}</td>
+                                         <td>${item.sgstAmt || ''}</td>
+                                         <td>${item.igstAmt || ''}</td>
+                                         <td>${item.cgstActName || ''}</td>
+                                         <td>${item.sgstActName || ''}</td>
+                                         <td>${item.igstActName || ''}</td>
+                                    <tr/>`);
+
+                        let $checkbox =  $row.find(`#selectDocId${index}`);
+                        debugger;
+                        // $checkbox.click(function () {
+                        //     if ($(this).prop('checked')) {
+                        //         $(this).removeAttr('checked'); // uncheck
+                        //         $(this).prop('checked', false); // check
+                        //     } else {
+                        //         $(this).prop('checked', true); // check
+                        //     }
+                        // });
+
+                        $tbody.append($row);
+
+                    });
+
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Error loading Employee list: ' + error);
+                }
+            });
+
+        },
+
+
+    };
+
+
+</script>
+
+<script>
+
+
+    $(document).ready(function () {
+        jsMobileBillEntry.Initialize();
+        jsMobileBillEntry.loadFormData();
+        // On Doc Type change, fetch new Doc ID
+        $('#ddlDocType').on('change', function () {
+            const selectedDocType = $(this).val();
+            if (!jsMobileBillEntry.getQueryParam("id")){
+                jsMobileBillEntry.GetDocid(selectedDocType);
+            }
+        });
+
+        // Save button click handler
+        $('#btn-save').on('click', function () {
+
+            const mbillEntry = jsMobileBillEntry.collectFormData();
+            if (jsMobileBillEntry.AddEditMode === 'INSERT') {
+                jsMobileBillEntry.SaveMasterData(mbillEntry);
+            } else if (jsMobileBillEntry.AddEditMode === 'UPDATE') {
+                jsMobileBillEntry.EditMasterData(mbillEntry);
+            }
+        });
+
+        $(document).on('click', '.btn-delete-action', function () {
+            $(this).closest('tr').remove();
+        });
+
+        // MOBILE BILL  MODAL
+        $(document).on('click', '#LinkMobillBill', function () {
+
+            jsMobileBillEntry.copyFromMobileEntry();
+        });
+
+        $(document).on('keyup', '#searchBoxMB', function () {
+
+            jsMobileBillEntry.copyFromMobileEntry();
+        });
+
+        $(document).on('click','#btncopyMbill',function(){
+
+           const findDocNo = () => {
+                const docNos = [];
+                const $table = $('#tblCopyMobileBilldata');
+                const $rows = $table.find('tbody > tr');
+
+                $rows.each(function() {
+                    const $checkbox = $(this).find('input[type="checkbox"][id^="selectDocId"]');
+                    if ($checkbox.prop('checked')) {
+                        const docno = $checkbox.data('docno');
+                        if (docno !== undefined && docno !== null) {
+                            docNos.push(docno);
+                        }
+                    }
+                });
+
+                return docNos;
+            };
+
+            let docNos = findDocNo();
+
+
+            const getRowsFromBillEntry = (docId) =>{
+
+                 $.ajax({
+                    url: '/MobileBillEntry/GetMobBillEntryDatabyId',
+                    type: 'GET',
+                    data: { Vno: docId },
+                    success: function (res) {
+                        if (res.status && res.data) {
+                            const url = new URL(window.location); // current URL
+                            url.searchParams.set('id', docId); // add or update ?id=
+                            window.history.pushState({}, '', url);
+                            jsMobileBillEntry.fillFormFields(res.data, false);
+                        } else {
+                            toastr.warning('No data found for this ID.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Failed to load data.');
+                    }
+                });
+
+            }
+
+            debugger;
+
+            getRowsFromBillEntry(docNos[0]);
+
+            //console.log('docnos --> ',docNos);
+
+        });
+
+
+    });
+
+
+</script>

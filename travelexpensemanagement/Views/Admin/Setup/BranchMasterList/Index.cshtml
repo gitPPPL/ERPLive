@@ -1,0 +1,256 @@
+﻿@{
+	ViewBag.Title = "Branch Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentMenu = ViewBag.CurrentMenu as string;
+}
+
+<fieldset>
+	<legend class="legend-field">Branch Master List</legend>
+
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
+
+			</div>
+		</div> 
+
+		<div class="">
+			@foreach (var permission in Model.UserMenuPermissions)
+			{
+				if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+				{
+					<div class="">
+						<div class="col-md-12">
+							@* Add Button *@
+							@if (Model.UserLevel == 1 || permission._ADD == 1)
+							{
+								<button class="btn btn-primary" onclick="window.location.href='@Url.Action("Index", "BranchMaster")'">
+									<i class="fa fa-plus"></i> Add Branch
+								</button>
+							}
+							@* Edit Button *@
+							@if (Model.UserLevel == 1 || permission._EDIT == 1)
+							{
+								<button class="btn btn-warning">
+									<i class="fa fa-edit"></i> Edit
+								</button>
+							}
+							@* Delete Button *@
+							@if (Model.UserLevel == 1 || permission._DELETE == 1)
+							{
+								<button class="btn btn-danger">
+									<i class="fa fa-trash"></i> Delete
+								</button>
+							}
+							@* Print Button *@
+							@if (Model.UserLevel == 1 || permission._PRINT == 1)
+							{
+								<button class="btn btn-secondary">
+									<i class="fa fa-print"></i> Print
+								</button>
+							}
+							@* Export Button *@
+							@if (Model.UserLevel == 1 || permission._EXPORT == 1)
+							{
+								<button class="btn btn-success">
+									<i class="fa fa-file-excel-o"></i> Export
+								</button>
+							}
+							@* Mail Button *@
+							@if (Model.UserLevel == 1 || permission._MAIL == 1)
+							{
+								<button class="btn btn-info">
+									<i class="fa fa-envelope"></i> Mail
+								</button>
+							}
+							@* Approval Button *@
+							@if (Model.UserLevel == 1 || permission._APPROVAL == 1)
+							{
+								<button class="btn btn-dark">
+									<i class="fa fa-check"></i> Approve
+								</button>
+							}
+							@* Doc Detail Button *@
+							@if (Model.UserLevel == 1 || permission._DOCDETAIL == 1)
+							{
+								<button class="btn btn-primary">
+									<i class="fa fa-file-text"></i> Doc Detail
+								</button>
+							}
+						</div>
+					</div>
+					break;
+				}
+			}
+
+		</div>
+	</div>
+
+
+
+	<div class="card shadow-sm border-0 mt-2">
+		<div class="table-responsive">
+			<table id="tblBranchMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Branch Name</th>
+						<th>Location</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row p-3">
+			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+		</div>
+	</div>
+
+</fieldset>
+
+<script>
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadAllBranches();
+	});
+
+	function loadAllBranches() {
+		const searchTerm = $('#searchBox').val();
+
+		$.ajax({
+			url: '/BranchMasterList/GetAllBranches', 
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				console.log(res);
+				const branches = res.items || res.branches || []; 
+				const totalCount = res.totalCount || 0;
+
+				let tbody = $('#tblBranchMaster tbody');
+				tbody.empty();
+
+				if (branches.length === 0) {
+					tbody.append('<tr><td colspan="4" class="text-center text-muted">No branches found.</td></tr>');
+					renderPagination(0, pageSize, currentPage);
+					return;
+				}
+
+				$.each(branches, function (index, branch) {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${branch.code || ''}</td>
+							<td>${branch.name || ''}</td>
+							<td>${branch.location || ''}</td>
+							<td>
+								<i class="fas fa-edit text-primary" style="cursor: pointer;" title="Edit" onclick="editBranchMaster(${branch.code})"></i>
+								<i class="fas fa-eye text-secondary ms-2" style="cursor: pointer;" title="View" onclick="viewBranchMasterDetails(${branch.code})"></i>
+								<i class="fas fa-trash text-danger" style="cursor:pointer;" title="Delete" onclick="deleteBranch(${branch.code})"></i>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading branches: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+					onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllBranches();
+	}
+
+	$('#searchBox').on('keyup', function () {
+		currentPage = 1;
+		loadAllBranches();
+	});
+
+	function editBranchMaster(branchId) {
+		window.location.href = '/BranchMaster/Index?id=' + encodeURIComponent(branchId);
+	}
+
+	function viewBranchMasterDetails(branchId) {
+		window.location.href = '/BranchMaster/Index?id=' + encodeURIComponent(branchId) + '&readOnly=true';
+	}
+
+	function deleteBranch(code) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This action will permanently delete the Branch.",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/BranchMaster/DeleteBranchByCode',
+					type: 'POST',
+					data: { code: code },
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllBranches();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function (xhr, status, error) {
+						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+					}
+				});
+			}
+		});
+	}
+
+</script>

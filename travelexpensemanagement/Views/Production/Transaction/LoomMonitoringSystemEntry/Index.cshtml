@@ -1,0 +1,1525 @@
+﻿@{
+    ViewBag.Title = "Loom Monitoring System Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<p class="diamond-heading"><span>Loom Monitoring System</span></p>
+<div class="mf-container">
+    <!-- Button Group -->
+    <div class="mf-btn-group">
+        <button class="mf-btn active" onclick="showForm('form1', this)">
+            <i class="fa fa-tasks"></i> Allocation
+        </button>
+        <button class="mf-btn" onclick="showForm('form2', this)" id="HpBtn">
+            <i class="fa fa-industry"></i> 2 Hrs Production
+        </button>
+        <button class="mf-btn" onclick="showForm('form3', this) " id="PpmBtn">
+            <i class="fa fa-file-alt"></i> PPM Entry
+        </button>
+        <button class="mf-btn" onclick="showForm('form4', this)" id="WastageBtn">
+            <i class="fa fa-recycle"></i> Wastage Entry
+        </button>
+        <button class="mf-btn" onclick="showForm('form5', this)">
+            <i class="fa fa-bar-chart"></i> Report Details
+        </button>
+    </div>
+    <!-- Form 1 -->
+    <div id="form1" class="mf-form-box active">
+        <h3>Machine Allocation Data</h3>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="DtDateMA">Date</label>
+                    <input type="date" class="form-control" id="DtDateMA" />
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="ddlShiftMA">Shift</label>
+                    <select class="form-control" id="ddlShiftMA">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="TxtBlockMA">Block No</label>
+                    @*                     <input type="text" class="form-control" id="TxtBlockMA" placeholder="Enter Block No" value="A" />
+ *@                 <select id="TxtBlockMA" class="form-control">
+                        <option value="">-- Select Block --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-success" id="btn_fillMA"><i class="fa fa-pencil-square"></i>Fill</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblAllocation" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Loom No.</th>
+                            <th>EmpCode</th>
+                            <th>Item Name</th>
+                            <th>Denier</th>
+                            <th>Mesh</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="display:none;">
+                                <input type="hidden" class="form-control" />
+                            </td>
+                            <td>
+                                <select class="form-control" id="Loom_No">
+                                    <option value="">-- Select Loom --</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control" id="Emp_Code">
+                                    <option value="">-- Select EmpCode --</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control" id="Item_Code">
+                                    <option value="">-- Select Item --</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" placeholder="Enter Denier" id="Denier" />
+                            </td>
+                            <td>
+                                <select class="form-control" id="Mash_Code">
+                                    <option value="">-- Select Mesh --</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" placeholder="Enter Name" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            @* <div class="row">
+                    <div class="col-md-12">
+                        <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </div> *@
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-3 offset-lg-9">
+                <div class="btn-mt button-right">
+                    <button type="button" class="btn btn-danger" id="btn_cancelMA"><i class="fa fa-close"></i>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn_saveMA"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Form 2 -->
+    <div id="form2" class="mf-form-box">
+        <h3>2 Hours Production</h3>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="DtDateHP">Date</label>
+                    <input type="date" class="form-control" id="DtDateHP" />
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="ddlShiftHP">Shift</label>
+                    <select class="form-control" id="ddlShiftHP">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="TxtBlockNoHP">Block No</label>
+                    @* <input type="text" class="form-control" id="TxtBlockNoHP" placeholder="Enter Block No" /> *@
+                    <select id="TxtBlockNoHP" class="form-control">
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <div class="form-group">
+                    <label for="ddlTimeHP">Time</label>
+                    <select class="form-control" id="ddlTimeHP">
+                        <option value="00:00">00:00</option>
+                        <option value="02:00">02:00</option>
+                        <option value="04:00">04:00</option>
+                        <option value="06:00">06:00</option>
+                        <option value="08:00">08:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="18:00">18:00</option>
+                        <option value="20:00">20:00</option>
+                        <option value="22:00">22:00</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-success" id="btn_fillHP"><i class="fa fa-pencil-square"></i>Fill</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblHourProduction" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Loom No.</th>
+                            <th>Open Reading</th>
+                            <th>Close Reading</th>
+                            <th>Difference</th>
+                            @* <th>Action</th> *@
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            @* <div class="row">
+                    <div class="col-md-12">
+                        <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </div> *@
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-3 offset-lg-9">
+                <div class="btn-mt button-right">
+                    <button type="button" class="btn btn-danger" id="btn_cancelHP"><i class="fa fa-close"></i>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn_saveHP"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Form 3 -->
+    <div id="form3" class="mf-form-box">
+        <h3>PPM Entry</h3>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="DtDatePPM">Date</label>
+                    <input type="date" class="form-control" id="DtDatePPM" />
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="ddlShiftPPM">Shift</label>
+                    <select class="form-control" id="ddlShiftPPM">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="TxtBlockNoPPM">Block No</label>
+                    @* <input type="text" class="form-control" id="TxtBlockNoPPM" placeholder="Enter Block No" /> *@
+                    <select id="TxtBlockNoPPM" class="form-control">
+                        <option value="">-- Select Block --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-success" id="btn_fillPPM"><i class="fa fa-pencil-square"></i>Fill</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblPPM" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Loom No.</th>
+                            <th>PPM</th>
+                            @* <th>Action</th> *@
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            @* <div class="row">
+                    <div class="col-md-12">
+                        <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </div> *@
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-3 offset-lg-9">
+                <div class="btn-mt button-right">
+                    <button type="button" class="btn btn-danger" id="btn_cancelPPM"><i class="fa fa-close"></i>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn_savePPM"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Form 4 -->
+    <div id="form4" class="mf-form-box">
+        <h3>Wastage Entry</h3>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="DtDateWE">Date</label>
+                    <input type="date" class="form-control" id="DtDateWE" />
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="ddlShiftWE">Shift</label>
+                    <select class="form-control" id="ddlShiftWE">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="TxtBlockNoWE">Block No</label>
+                    @* <input type="text" class="form-control" id="TxtBlockNoWE" placeholder="Enter Block No" /> *@
+                    <select id="TxtBlockNoWE" class="form-control">
+                        <option value="">-- Select Block --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-success" id="btn_fillWE"><i class="fa fa-pencil-square"></i>Fill</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblWE" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Loom No.</th>
+                            <th>Wastage</th>
+                            @*  <th>Emp Code</th>
+                            <th>Name</th>
+                            <th>Action</th> *@
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            @* <div class="row">
+                    <div class="col-md-12">
+                        <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </div> *@
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-3 offset-lg-9">
+                <div class="btn-mt button-right">
+                    <button type="button" class="btn btn-danger" id="btn_cancelWE"><i class="fa fa-close"></i>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn_saveWE"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--form 5-->
+    <div id="form5" class="mf-form-box">
+        <h3>Report Details</h3>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="reportFrom">From Date</label>
+                    <input type="date" class="form-control" id="reportFrom" />
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="form-group">
+                    <label for="reportTo">To Date</label>
+                    <input type="date" class="form-control" id="reportTo" />
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fa fa-search"></i> Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function showForm(id, btn) {
+      // hide all forms
+      document.querySelectorAll(".mf-form-box").forEach(f => f.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      // reset all buttons
+      document.querySelectorAll(".mf-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+</script>
+
+
+<script>
+
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    var itemListCache = [];
+    var mashListCache = [];
+    let isAllEmpCodeEmpty = true;
+
+
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("DtDateMA").setAttribute("max", today);
+
+        $('#DtDateMA').val(new Date().toISOString().split('T')[0]);
+        $('#DtDateHP').val(new Date().toISOString().split('T')[0]);
+        $('#DtDatePPM').val(new Date().toISOString().split('T')[0]);
+        $('#DtDateWE').val(new Date().toISOString().split('T')[0]);
+
+        getshiftList('#ddlShiftMA');
+        getBlockList('#TxtBlockMA');
+        getshiftList('#ddlShiftHP');
+        getBlockList('#TxtBlockNoHP');
+        getshiftList('#ddlShiftPPM');
+        getBlockList('#TxtBlockNoPPM');
+        getshiftList('#ddlShiftWE');
+        getBlockList('#TxtBlockNoWE');
+
+        fetchItemList(() => {
+            loadLoomProductionInfo();
+        });
+    });
+
+
+    $('#tblAllocation tbody tr').each(function () {
+        const empCode = $(this).find('.Emp_Code').val()?.trim();
+        if (empCode && empCode !== '') {
+            isAllEmpCodeEmpty = false;
+            return false;
+        }
+    });
+
+    window.isAllEmpCodeEmpty = isAllEmpCodeEmpty;
+
+    function getBlockList(targetSelector) {
+        return $.ajax({
+            url: '/LoomMonitoringSystemEntry/getBlocksList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                var ddl = $(targetSelector);
+                ddl.empty();
+                ddl.append('<option value="">-- Select Block --</option>');
+
+                $.each(response.data, function (index, block) {
+                    ddl.append('<option value="' + block + '">' + block + '</option>');
+                });
+                if (response.data.length > 0) {
+                    ddl.val(response.data[0]);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Block list: ' + error);
+            }
+        });
+    }
+
+    function fetchItemList(callback) {
+        if (itemListCache.length > 0) {
+            callback(); // Use cached data
+            return;
+        }
+        $.ajax({
+            url: '/LoomMonitoringSystemEntry/itemList',
+            type: 'GET',
+            data: { cCode: 5 },
+            success: function (response) {
+                itemListCache = response;
+                callback();
+            },
+            error: function (xhr, status, error) {
+                console.error('Failed to fetch item list:', error);
+            }
+        });
+    }
+
+    function getshiftList(targetSelector) {
+        return $.ajax({
+            url: '/LoomMonitoringSystemEntry/shiftList',
+            type: 'GET',
+            data: { cCode: compCode },
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $(targetSelector);
+                ddl.empty();
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.value + '</option>');
+                });
+
+                if (data.length > 0) {
+                    ddl.val(data[0].value);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Shift list: ' + error);
+            }
+        });
+    }
+
+    function fetchMashList(callback) {
+        if (mashListCache.length > 0) {
+            callback();
+            return;
+        }
+        $.ajax({
+            url: '/LoomMonitoringSystemEntry/meshList',
+            type: 'GET',
+            data: { cCode: compCode },
+            success: function(response) {
+                mashListCache = response;
+                callback();
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to fetch mash list:', error);
+            }
+        });
+    }
+
+
+
+    $('#btn_fillMA').click(function () {
+        $('#DtDateMA').prop('disabled', true);
+        $('#ddlShiftMA').prop('disabled', true);
+        $('#TxtBlockMA').prop('disabled', true);
+        fetchItemList(() => {
+            loadLoomProductionInfo();
+        });
+    });
+
+    $('#btn_cancelMA').click(function () {
+        $('#DtDateMA').prop('disabled', false);
+        $('#ddlShiftMA').prop('disabled', false);
+        $('#TxtBlockMA').prop('disabled', false);
+
+        $('#DtDateMA').val(new Date().toISOString().split('T')[0]);
+        $('#ddlShiftMA')[0].selectedIndex = 0;
+        $('#TxtBlockMA')[0].selectedIndex = 1;
+
+        fetchItemList(() => {
+            loadLoomProductionInfo();
+        });
+    });
+
+    function loadLoomProductionInfo() {
+        var shiftCode = $('#ddlShiftMA').val();
+        var groupCode = $('#TxtBlockMA').val();
+        var selectedDate = document.getElementById('DtDateMA').value;
+
+        if (!shiftCode) {
+            shiftCode = 'A';
+            groupCode = 'A';
+        }
+
+        fetchItemList(() => {
+            fetchMashList(() => {
+                $.ajax({
+                    url: '/LoomMonitoringSystemEntry/GetLoomProductionInfo',
+                    type: 'GET',
+                    data: {
+                        sCode: shiftCode,
+                        gCode: groupCode,
+                        sdate: selectedDate
+                    },
+                    success: function (response) {
+                                console.log('GetLoomProductionInfo', response)
+                        if (response.success) {
+                            var tbody = $('#tblAllocation tbody');
+                            tbody.empty();
+
+                            let loomRowIndex = 0;
+
+                            $.each(response.data, function (index, item) {
+                                loomRowIndex++;
+
+                                // Build options for Item dropdown
+                                let itemOptions = '';
+                                if (itemListCache.length === 0) {
+                                    itemOptions = '<option disabled selected>No items available</option>';
+                                } else {
+                                    $.each(itemListCache, function (i, itm) {
+                                        let selected = itm.value == item.iteM_CODE ? 'selected' : '';
+                                        itemOptions += `<option value="${itm.value}" ${selected}>${itm.text}</option>`;
+                                    });
+                                }
+
+                                // Build options for Mash dropdown
+                                let mashOptions = '';
+                                if (mashListCache.length === 0) {
+                                    mashOptions = '<option disabled selected>No mash available</option>';
+                                } else {
+                                    $.each(mashListCache, function (i, mash) {
+                                        let selected = mash.value == item.mesH_CODE ? 'selected' : '';
+                                        mashOptions += `<option value="${mash.value}" ${selected}>${mash.text}</option>`;
+                                    });
+                                }
+
+                                let newRow = `
+                                    <tr id="${loomRowIndex}" data-row-index="${loomRowIndex}">
+                                        <td style="display:none;" class="text-center">${loomRowIndex}</td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="loomCode_${loomRowIndex}" name="loomCode[${loomRowIndex}]" class="form-control Loom_Code" value="${item.looM_CODE}"/>
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vNo_${loomRowIndex}" name="vNo[${loomRowIndex}]" class="form-control V_No" value="${item.v_NO}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vType_${loomRowIndex}" name="vType[${loomRowIndex}]" class="form-control V_Type" value="${item.v_TYPE}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="docId_${loomRowIndex}" name="docId[${loomRowIndex}]" class="form-control Doc_Id" value="${item.doC_ID ?? ''}" />
+                                        </td>
+                                        <td>
+                                            <input type="text" id="machineName_${loomRowIndex}" name="machineName[${loomRowIndex}]" class="form-control Machine_Name" value="${item.machinE_NAME}" readonly/>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="empCode_${loomRowIndex}" name="empCode[${loomRowIndex}]" class="form-control Emp_Code"  data-row-id="${loomRowIndex}" value="${item.emP_CODE}" data-original-value="${item.emP_CODE}" />
+                                        </td>
+                                        <td>
+                                            <select id="itemCode_${loomRowIndex}" name="itemCode[${loomRowIndex}]" class="form-control Item_Code">
+                                                ${itemOptions}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="denier_${loomRowIndex}" name="denier[${loomRowIndex}]" class="form-control Denier" value="${item.denier}" />
+                                        </td>
+                                        <td style="width:100px;">
+                                            <select id="mashName_${loomRowIndex}" name="mashName[${loomRowIndex}]" class="form-control Mash_Name">
+                                                ${mashOptions}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="empName_${loomRowIndex}" name="empName[${loomRowIndex}]" class="form-control Emp_Name" value="${item.emP_NAME}"/>
+                                        </td>
+                                    </tr>
+                                `;
+
+                                tbody.append(newRow);
+                            });
+
+                            let isAllEmpCodeEmpty = true;
+
+                            $('#tblAllocation tbody tr').each(function () {
+                                const empCode = $(this).find('.Emp_Code').val()?.trim();
+                                if (empCode && empCode !== '') {
+                                    isAllEmpCodeEmpty = false;
+                                    return false; // exit loop early
+                                }
+                            });
+
+                            window.isAllEmpCodeEmpty = isAllEmpCodeEmpty;
+
+                            tbody.find('.Emp_Code').off('keydown').on('keydown', function (e) {
+                                if (e.key === 'Tab' && !e.shiftKey) {
+                                    e.preventDefault();
+
+                                    const $currentInput = $(this);
+                                    const currentValue = $currentInput.val().trim();
+                                    const $currentRow = $currentInput.closest('tr');
+                                    const currentIndex = $currentRow.data('row-index');
+
+                                    const empCodeInt = parseInt(currentValue, 10);
+                                    if (isNaN(empCodeInt)) {
+                                        toastr.warning('Invalid Employee Code');
+                                        $currentInput.focus().select();
+                                        return;
+                                    }
+
+                                    // 🔍 Validate employee first
+                                    $.ajax({
+                                        url: '/LoomMonitoringSystemEntry/GetEmpNameBycode',
+                                        type: 'GET',
+                                        data: {
+                                            cCode: compCode,
+                                            eCode: empCodeInt
+                                        },
+                                        success: function (response) {
+                                            if (!response.success) {
+                                                toastr.warning(response.message || 'Employee not found');
+                                                $currentInput.focus().select(); 
+                                                return;
+                                            }
+
+                                            const $nextRow = $(`#tblAllocation tbody tr[data-row-index="${currentIndex + 1}"]`);
+                                            const $nextEmpInput = $nextRow.find('.Emp_Code');
+                                            const $nextEmpNameInput = $nextRow.find('.Emp_Name');
+
+                                            if ($nextEmpInput.length) {
+                                                const nextEmpVal = $nextEmpInput.val().trim();
+
+                                                if (!nextEmpVal) {
+                                                    $nextEmpInput.val(currentValue);
+                                                    $nextEmpNameInput.val(response.empName);
+                                                }
+
+                                                $nextEmpInput.focus().select(); 
+                                            }
+                                        },
+                                        error: function () {
+                                            toastr.error('Error validating employee');
+                                            $currentInput.focus().select(); 
+                                        }
+                                    });
+                                }
+                            });
+
+                            // Add tab navigation to wastage fields
+                            $('#tblAllocation').off('keydown', '.Denier').on('keydown', '.Denier', function (e) {
+                                if (e.key === 'Tab') {
+                                    e.preventDefault();
+
+                                    const currentInput = $(this);
+                                    const currentRow = currentInput.closest('tr');
+                                    const nextRow = currentRow.next('tr');
+
+                                    if (nextRow.length) {
+                                        const nextWastageInput = nextRow.find('.Denier');
+                                        if (nextWastageInput.length) {
+                                            nextWastageInput.focus();
+                                            nextWastageInput.select(); 
+                                        }
+                                    }
+                                }
+                            });
+
+
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('AJAX error: ' + error);
+                    }
+                });
+            });
+        });
+    }
+
+
+
+
+    $('#HpBtn').click(function () {
+        loadHPInfo();
+    });
+
+    $('#btn_fillHP').click(function () {
+        $('#DtDateHP').prop('disabled', true);
+        $('#ddlShiftHP').prop('disabled', true);
+        $('#TxtBlockNoHP').prop('disabled', true);
+        $('#ddlTimeHP').prop('disabled', true);
+        loadHPInfo();
+    });
+
+    $('#btn_cancelHP').click(function () {
+        $('#DtDateHP').prop('disabled', false);
+        $('#ddlShiftHP').prop('disabled', false);
+        $('#TxtBlockNoHP').prop('disabled', false);
+        $('#ddlTimeHP').prop('disabled', false);
+
+        $('#DtDateHP').val(new Date().toISOString().split('T')[0]);
+        $('#ddlShiftHP')[0].selectedIndex = 0;  
+        $('#TxtBlockNoHP')[0].selectedIndex = 1; 
+        $('#ddlTimeHP')[0].selectedIndex = 0;   
+
+        loadHPInfo();
+    });
+
+    function loadHPInfo() {
+        var shiftCode = $('#ddlShiftHP').val();
+        var groupCode = $('#TxtBlockNoHP').val();
+        var selectedDate = document.getElementById('DtDateHP').value;
+        var selectedTime = $('#ddlTimeHP').val().substring(0, 2);
+
+        if (!shiftCode) {
+            shiftCode = 'A';
+            groupCode = 'A';
+        }
+
+        fetchItemList(() => {
+            fetchMashList(() => {
+                $.ajax({
+                    url: '/LoomMonitoringSystemEntry/GetHPInfo',
+                    type: 'GET',
+                    data: {
+                        sCode: shiftCode,
+                        gCode: groupCode,
+                        sdate: selectedDate,
+                        stime: selectedTime
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            var tbody = $('#tblHourProduction tbody');
+                            tbody.empty();
+                            let loomRowIndex = 0;
+
+                            $.each(response.data, function (index, item) {
+                                loomRowIndex++;
+
+                                const opReading = item.oP_READING != null ? parseFloat(item.oP_READING) : null;
+                                const clReading = item.cL_READING != null ? parseFloat(item.cL_READING) : null;
+
+                                let diff = 0;
+                                if (clReading === 0 || clReading == null) {
+                                    diff = 0;
+                                } else if (opReading != null && clReading != null) {
+                                    diff = opReading > clReading
+                                        ? (clReading + 10000 - opReading).toFixed(2)
+                                        : (clReading - opReading).toFixed(2);
+                                }
+
+                                let newRow = `
+                                    <tr id="${loomRowIndex}" data-row-index="${loomRowIndex}">
+                                        <td style="display:none;" class="text-center">${loomRowIndex}</td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="loomCode_${loomRowIndex}" name="loomCode[${loomRowIndex}]" class="form-control Loom_Code" value="${item.looM_CODE}"/>
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vNo_${loomRowIndex}" name="vNo[${loomRowIndex}]" class="form-control V_No" value="${item.v_NO}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vType_${loomRowIndex}" name="vType[${loomRowIndex}]" class="form-control V_Type" value="${item.v_TYPE}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="docId_${loomRowIndex}" name="docId[${loomRowIndex}]" class="form-control Doc_Id" value="${item.doC_ID ?? ''}" />
+                                        </td>
+                                        <td>
+                                            <input type="text" id="machineName_${loomRowIndex}" name="machineName[${loomRowIndex}]" class="form-control Machine_Name" value="${item.looM_NAME}" readonly/>
+                                        </td>
+                                        <td>
+                                            <input type="number" id="opReading_${loomRowIndex}" name="opReading[${loomRowIndex}]" class="form-control OpReading" value="${opReading != null ? opReading : ''}" />
+                                        </td>
+                                        <td>
+                                            <input type="number" id="clReading_${loomRowIndex}" name="clReading[${loomRowIndex}]" class="form-control CpClosing" value="${clReading != null ? clReading : ''}" />
+                                        </td>
+                                        <td>
+                                            <input type="number" id="diff_${loomRowIndex}" name="diff[${loomRowIndex}]" class="form-control diff" data-row-id="${loomRowIndex}" value="${diff}" readonly />
+                                        </td>
+                                    </tr>
+                                `;
+
+                                tbody.append(newRow);
+                            });
+
+                            // Recalculate diff on input
+                            $('#tblHourProduction').off('input', '.OpReading, .CpClosing').on('input', '.OpReading, .CpClosing', function () {
+                                const row = $(this).closest('tr');
+
+                                const opVal = parseFloat(row.find('.OpReading').val());
+                                const clVal = parseFloat(row.find('.CpClosing').val());
+
+                                if (!isNaN(opVal) && !isNaN(clVal)) {
+                                    let diffVal = opVal > clVal
+                                        ? clVal + 10000 - opVal
+                                        : clVal - opVal;
+                                    row.find('.diff').val(diffVal.toFixed(2));
+                                } else {
+                                    row.find('.diff').val('');
+                                }
+                            });
+
+                            // Tab diff validation
+                            $('#tblHourProduction').off('keydown', '.CpClosing').on('keydown', '.CpClosing', function (e) {
+                                if (e.key === 'Tab') {
+                                    const currentRow = $(this).closest('tr');
+                                    const opVal = parseFloat(currentRow.find('.OpReading').val());
+                                    const clVal = parseFloat(currentRow.find('.CpClosing').val());
+
+                                    if (!isNaN(opVal) && !isNaN(clVal)) {
+                                        let diffVal = opVal > clVal
+                                            ? clVal + 10000 - opVal
+                                            : clVal - opVal;
+
+                                        if (diffVal > 500) {
+                                            e.preventDefault();
+                                            toastr.warning('Reading difference cannot be more than 500 units. Please check...');
+                                            $(this).focus().select();
+                                            return;
+                                        }
+                                    }
+
+                                    // Move focus to next row
+                                    setTimeout(() => {
+                                        const nextRow = currentRow.next('tr');
+                                        const nextInput = nextRow.find('.CpClosing');
+                                        if (nextInput.length) {
+                                            nextInput.focus().select();
+                                        }
+                                    }, 0);
+                                }
+                            });
+
+                        } else {
+                                 toastr.error('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('AJAX error: ' + error);
+                    }
+                });
+            });
+        });
+    }
+
+    $('#PpmBtn').click(function () {
+        loadPpmInfo();
+    });
+
+    $('#btn_fillPPM').click(function () {
+        $('#DtDatePPM').prop('disabled', true);
+        $('#ddlShiftPPM').prop('disabled', true);
+        $('#TxtBlockNoPPM').prop('disabled', true);
+        loadPpmInfo();
+    });
+
+    $('#btn_cancelPPM').click(function () {
+        $('#DtDatePPM').prop('disabled', false);
+        $('#ddlShiftPPM').prop('disabled', false);
+        $('#TxtBlockNoPPM').prop('disabled', false);
+
+        $('#DtDatePPM').val(new Date().toISOString().split('T')[0]);
+        $('#ddlShiftPPM')[0].selectedIndex = 0;
+        $('#TxtBlockNoPPM')[0].selectedIndex = 1;
+
+        loadPpmInfo();
+    });
+
+    function loadPpmInfo() {
+        var shiftCode = $('#ddlShiftPPM').val();
+        var groupCode = $('#TxtBlockNoPPM').val();
+        var selectedDate = document.getElementById('DtDatePPM').value;
+
+        if (!shiftCode) {
+            shiftCode = 'A';
+            groupCode = 'A';
+        }
+
+        fetchItemList(() => {
+            fetchMashList(() => {
+                $.ajax({
+                    url: '/LoomMonitoringSystemEntry/GetPPMInfo',
+                    type: 'GET',
+                    data: {
+                        sCode: shiftCode,
+                        gCode: groupCode,
+                        sdate: selectedDate
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            var tbody = $('#tblPPM tbody');
+                            tbody.empty();
+
+                            let loomRowIndex = 0;
+                            let missingData = false;
+
+                            $.each(response.data, function (index, item) {
+                                loomRowIndex++;
+
+                                if (!item.v_NO || !item.v_TYPE || !item.doC_ID) {
+                                    missingData = true;
+                                }
+
+                                let newRow = `
+                                    <tr id="${loomRowIndex}" data-row-index="${loomRowIndex}">
+                                        <td style="display:none;" class="text-center">${loomRowIndex}</td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="loomCode_${loomRowIndex}" name="loomCode[${loomRowIndex}]" class="form-control Loom_Code" value="${item.looM_CODE}"/>
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vNo_${loomRowIndex}" name="vNo[${loomRowIndex}]" class="form-control V_No" value="${item.v_NO}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vType_${loomRowIndex}" name="vType[${loomRowIndex}]" class="form-control V_Type" value="${item.v_TYPE}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="docId_${loomRowIndex}" name="docId[${loomRowIndex}]" class="form-control Doc_Id" value="${item.doC_ID ?? ''}" />
+                                        </td>
+                                        <td>
+                                            <input type="text" id="machineName_${loomRowIndex}" name="machineName[${loomRowIndex}]" class="form-control Machine_Name" value="${item.machinE_NAME}" readonly/>
+                                        </td>
+                                        <td>
+                                            <input type="number" id="ppm_${loomRowIndex}" name="ppm_$[${loomRowIndex}]" class="form-control Ppm"  data-row-id="${loomRowIndex}" value="${item.ppm}" />
+                                        </td>
+                                    </tr>
+                                `;
+
+                                tbody.append(newRow);
+                            });
+
+                            if (missingData) {
+                                toastr.warning("There is no Loom data for PPM entry. First you need to add Loom Allocation.");
+                            } else {
+                                toastr.success("Loom data is loaded for PPM Entry.");
+                            }
+
+                            $('#tblPPM').off('keydown', '.Ppm').on('keydown', '.Ppm', function (e) {
+                                if (e.key === 'Tab') {
+                                    e.preventDefault();
+
+                                    const currentInput = $(this);
+                                    const currentRow = currentInput.closest('tr');
+                                    const nextRow = currentRow.next('tr');
+
+                                    if (nextRow.length) {
+                                        const nextWastageInput = nextRow.find('.Ppm');
+                                        if (nextWastageInput.length) {
+                                            nextWastageInput.focus();
+                                            nextWastageInput.select(); 
+                                        }
+                                    }
+                                }
+                            });
+
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('AJAX error: ' + error);
+                    }
+                });
+            });
+        });
+    }
+
+
+
+    $('#WastageBtn').click(function () {
+        $('#DtDateWE').val(new Date().toISOString().split('T')[0]);
+        $('#ddlShiftWE')[0].selectedIndex = 0;
+        $('#TxtBlockNoWE')[0].selectedIndex = 1;
+        loadWastageInfo();
+    });
+
+    $('#btn_fillWE').click(function () {
+        $('#DtDateWE').prop('disabled', true);
+        $('#ddlShiftWE').prop('disabled', true);
+        $('#TxtBlockNoWE').prop('disabled', true);
+        loadWastageInfo();
+    });
+
+    $('#btn_cancelWE').click(function () {
+        $('#DtDateWE').prop('disabled', false);
+        $('#ddlShiftWE').prop('disabled', false);
+        $('#TxtBlockNoWE').prop('disabled', false);
+
+        $('#DtDateWE').val(new Date().toISOString().split('T')[0]);
+        $('#ddlShiftWE')[0].selectedIndex = 0;
+        $('#TxtBlockNoWE')[0].selectedIndex = 1;
+
+        loadWastageInfo();
+    });
+
+    function loadWastageInfo() {
+        var shiftCode = $('#ddlShiftWE').val();
+        var groupCode = $('#TxtBlockNoWE').val();
+        var selectedDate = document.getElementById('DtDateWE').value;
+
+        if (!shiftCode) {
+            shiftCode = 'A';
+            groupCode = 'A';
+        }
+
+        fetchItemList(() => {
+            fetchMashList(() => {
+                $.ajax({
+                    url: '/LoomMonitoringSystemEntry/GetWastageInfo',
+                    type: 'GET',
+                    data: {
+                        sCode: shiftCode,
+                        gCode: groupCode,
+                        sdate: selectedDate
+                    },
+                    success: function (response) {
+                            console.log('kks', response)
+                        if (response.success) {
+                            var tbody = $('#tblWE tbody');
+                            tbody.empty();
+
+                            let loomRowIndex = 0;
+
+                            let hasMissingData = false;
+
+                            $.each(response.data, function (index, item) {
+                                loomRowIndex++;
+
+                                if (!item.v_NO || !item.v_TYPE || !item.doC_ID) {
+                                    hasMissingData = true;
+                                }
+
+                                let newRow = `
+                                    <tr id="${loomRowIndex}" data-row-index="${loomRowIndex}">
+                                        <td style="display:none;" class="text-center">${loomRowIndex}</td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="loomCode_${loomRowIndex}" name="loomCode[${loomRowIndex}]" class="form-control Loom_Code" value="${item.looM_CODE}"/>
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vNo_${loomRowIndex}" name="vNo[${loomRowIndex}]" class="form-control V_No" value="${item.v_NO}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="vType_${loomRowIndex}" name="vType[${loomRowIndex}]" class="form-control V_Type" value="${item.v_TYPE}" />
+                                        </td>
+                                        <td style="display:none;">
+                                            <input type="hidden" id="docId_${loomRowIndex}" name="docId[${loomRowIndex}]" class="form-control Doc_Id" value="${item.doC_ID ?? ''}" />
+                                        </td>
+                                        <td>
+                                            <input type="text" id="machineName_${loomRowIndex}" name="machineName[${loomRowIndex}]" class="form-control Machine_Name" value="${item.machinE_NAME}" readonly/>
+                                        </td>
+                                        <td>
+                                            <input type="number" id="wastage_${loomRowIndex}" name="wastage_$[${loomRowIndex}]" class="form-control Wastage"  value="${item.wastage}" />
+                                        </td>
+                                    </tr>
+                                `;
+
+                                tbody.append(newRow);
+                            });
+
+                            if (hasMissingData) {
+                                toastr.warning("No Loom for Wastage entry");
+                            } else {
+                                toastr.success("Loom data loaded");
+                            }
+
+                            $('#tblWE').off('keydown', '.Wastage').on('keydown', '.Wastage', function (e) {
+                                if (e.key === 'Tab') {
+                                    e.preventDefault();
+
+                                    const currentInput = $(this);
+                                    const currentRow = currentInput.closest('tr');
+                                    const nextRow = currentRow.next('tr');
+
+                                    if (nextRow.length) {
+                                        const nextWastageInput = nextRow.find('.Wastage');
+                                        if (nextWastageInput.length) {
+                                            nextWastageInput.focus();
+                                            nextWastageInput.select(); 
+                                        }
+                                    }
+                                }
+                            });
+
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('AJAX error: ' + error);
+                    }
+                });
+            });
+        });
+    }
+
+
+
+    //GET EMPLOYEE NAME BY CODE
+    $(document).on('change', '.Emp_Code', function () {
+        var $empCodeInput = $(this);
+        var empCodeVal = $empCodeInput.val().trim();
+
+        if (!empCodeVal) {
+            $empCodeInput.closest('tr').find('.Emp_Name').val('');
+            return;
+        }
+
+        var empCodeInt = parseInt(empCodeVal, 10);
+        if (isNaN(empCodeInt)) {
+            toastr.error('Invalid Employee Code entered');
+            return;
+        }
+
+        $.ajax({
+            url: '/LoomMonitoringSystemEntry/GetEmpNameBycode',
+            type: 'GET',
+            data: {
+                cCode: compCode,
+                eCode: empCodeInt
+            },
+            success: function (response) {
+                if (response.success) {
+                    $empCodeInput.closest('tr').find('.Emp_Name').val(response.empName);
+                } else {
+                    toastr.warning(response.message);
+                    $empCodeInput.closest('tr').find('.Emp_Name').val('');
+                }
+            },
+            error: function () {
+                toastr.error('Error fetching employee name');
+                $empCodeInput.closest('tr').find('.Emp_Name').val('');
+            }
+        });
+    });
+
+
+
+    $('#btn_saveMA').click(function () {
+        const finalData = [];
+
+        const selectedShift = $('#ddlShiftMA').val();
+        let selectedDate = $("#DtDateMA").val();
+        let selectedGroup = $("#TxtBlockMA").val();
+        // const today = new Date();
+        // const currentDate = today.toISOString().split('T')[0];
+
+        $('#tblAllocation tbody tr').each(function () {
+            const $row = $(this);
+            const rowIndex = $row.data('row-index');
+
+            const machineName = $row.find(`#machineName_${rowIndex}`).val();
+            const loomCode = $row.find(`#loomCode_${rowIndex}`).val();
+            const itemCode = $row.find(`#itemCode_${rowIndex}`).val();
+            const empCode = $row.find(`#empCode_${rowIndex}`).val()?.trim();
+            const empName = $row.find(`#empName_${rowIndex}`).val()?.trim();
+            const meshCode = $row.find(`#mashName_${rowIndex}`).val();
+            const denier = $row.find(`#denier_${rowIndex}`).val();
+            const vNo = $row.find(`#vNo_${rowIndex}`).val();
+            const vType = $row.find(`#vType_${rowIndex}`).val();
+            const docId = $row.find(`#docId_${rowIndex}`).val();
+
+            if (!loomCode) return;
+
+            const record = {
+                LOOM_NO : machineName,
+                COMP_CODE: compCode,
+                YEAR_CODE: yearCode,
+                BRANCH_CODE: branchCode,
+                LOOM_CODE: loomCode,
+                ITEM_CODE: itemCode,
+                EMP_CODE: empCode || null,
+                MESH_CODE: meshCode,
+                DNR: denier,
+                SCH_SHIFT: selectedShift,
+                DOC_ID: docId,
+                V_TYPE: vType,
+                V_NO: vNo,
+                AED: 'A',
+                V_DATE: selectedDate,
+                GROUP_CODE:selectedGroup
+            };
+
+            finalData.push(record);
+        });
+
+        if (finalData.length === 0) {
+            toastr.warning("No data to save.");
+            return;
+        }
+
+        const apiUrl = window.isAllEmpCodeEmpty
+            ? '/LoomMonitoringSystemEntry/SaveLoomProductionRecords'
+            : '/LoomMonitoringSystemEntry/UpdateLoomProductionRecords';
+
+        const successMsg = window.isAllEmpCodeEmpty ? 'Inserted successfully.' : 'Updated successfully.';
+
+
+
+        $.ajax({
+            url: "/LoomMonitoringSystemEntry/SaveLoomProductionRecords",
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(finalData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Inserted successfully.');
+                    $('#DtDateMA').prop('disabled', false);
+                    $('#ddlShiftMA').prop('disabled', false);
+                    $('#TxtBlockMA').prop('disabled', false);
+                    $('#DtDateMA').val(new Date().toISOString().split('T')[0]);
+                    $('#ddlShiftMA')[0].selectedIndex = 0;
+                    $('#TxtBlockMA')[0].selectedIndex = 1;
+
+
+                    setTimeout(() => {
+                        loadLoomProductionInfo();
+                    }, 1000);
+                } else {
+                    toastr.error(response.message || 'Operation failed.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+                toastr.error('An error occurred.');
+            }
+        });
+    });
+
+    $('#btn_saveHP').click(function () {
+    let hpUpdates = [];
+    let validationFailed = false;
+
+    let shiftCode = $('#ddlShiftHP').val() || '';
+    let groupCode = $('#TxtBlockNoHP').val() || '';
+    let selectedDate = $('#DtDateHP').val();
+    let selectedTime = $('#ddlTimeHP').val();
+
+    $('#tblHourProduction tbody tr').each(function () {
+        const row = $(this);
+
+        let loomCode = row.find('input.Loom_Code').val();
+        let vNo = row.find('input.V_No').val();
+        let vType = row.find('input.V_Type').val();
+        let docId = row.find('input.Doc_Id').val();
+        let opReading = row.find('input.OpReading').val();
+        let clReading = row.find('input.CpClosing').val();
+        let diff = row.find('input.diff').val();
+
+        let op = parseFloat(opReading);
+        let cl = parseFloat(clReading);
+        let d = parseFloat(diff);
+
+        if (!vNo || !vType || !docId) {
+            toastr.warning(`First you need to add Loom Allocation for same Date,Time,Block.`);
+            validationFailed = true;
+            return false; 
+        }
+
+        if (!isNaN(d) && d > 500) {
+            toastr.warning(`Difference for loom code ${loomCode} is more than 500 units. Please correct.`);
+            validationFailed = true;
+            return false;
+        }
+
+        if (!isNaN(op) && !isNaN(cl) && loomCode) {
+            hpUpdates.push({
+                LOOM_CODE: loomCode,
+                V_NO: parseInt(vNo),
+                V_TYPE: vType,
+                DOC_ID: docId,
+                OP_READING: op,
+                CL_READING: cl,
+                DIFF: d,
+                SHIFT: shiftCode,
+                GROUP_CODE: groupCode,
+                V_DATE: selectedDate,
+                V_TIME: selectedTime,
+                READING_TIME: `${selectedDate}T${selectedTime}`
+            });
+        }
+    });
+
+    if (validationFailed) {
+        return;
+    }
+
+    if (hpUpdates.length === 0) {
+        alert('No Hour Production data to save.');
+        return;
+    }
+
+    console.log(hpUpdates);
+
+    $.ajax({
+        url: '/LoomMonitoringSystemEntry/SaveAndUpdateHrsProduction',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(hpUpdates),
+        success: function (response) {
+            if (response.success) {
+                toastr.success('Hour Production data saved successfully!');
+                $('#DtDateHP, #ddlShiftHP, #TxtBlockNoHP, #ddlTimeHP').prop('disabled', false);
+
+                setTimeout(function () {
+                    loadHPInfo();
+                }, 1000);
+            } else {
+                toastr.error('Save failed: ' + response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            toastr.error('AJAX error: ' + error);
+        }
+    });
+});
+
+
+  $('#btn_savePPM').click(function () {
+        let ppmUpdates = [];
+        let validationFailed = false;
+
+        $('#tblPPM tbody tr').each(function () {
+            let row = $(this);
+
+            let loomCode = row.find('.Loom_Code').val();
+            let vNo = row.find('.V_No').val();
+            let vType = row.find('.V_Type').val();
+            let docId = row.find('.Doc_Id').val();
+            let ppmValue = row.find('.Ppm').val();
+
+            let shiftCode = $('#ddlShiftPPM').val() || '';
+            let groupCode = $('#TxtBlockNoPPM').val() || '';
+            let date = $('#DtDatePPM').val();
+
+            if (!vNo || !vType || !docId) {
+                toastr.warning(`First you need to add Loom Allocation for same Date,Time,Block.`);
+                validationFailed = true;
+                return false; 
+            }
+
+            if (ppmValue && loomCode) {
+                ppmUpdates.push({
+                    LOOM_CODE: loomCode,
+                    V_NO: parseInt(vNo),
+                    V_TYPE: vType,
+                    DOC_ID: docId,
+                    PPM: ppmValue,
+                    SCH_SHIFT: shiftCode,
+                    GROUP_CODE: groupCode,
+                    V_DATE: date
+                });
+            }
+        });
+
+        if (validationFailed) {
+            return;
+        }
+
+        if (ppmUpdates.length === 0) {
+            toastr.warning('No PPM data to save.');
+            return;
+        }
+
+        $.ajax({
+            url: '/LoomMonitoringSystemEntry/UpdatePpmBatch',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(ppmUpdates),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('PPM data updated successfully!');
+                    $('#DtDatePPM').prop('disabled', false);
+                    $('#ddlShiftPPM').prop('disabled', false);
+                    $('#TxtBlockNoPPM').prop('disabled', false);
+                    
+                    $('#DtDatePPM').val(new Date().toISOString().split('T')[0]);
+                    $('#ddlShiftPPM')[0].selectedIndex = 0;
+                    $('#TxtBlockNoPPM')[0].selectedIndex = 1;
+
+                    setTimeout(function () {
+                        loadPpmInfo();
+                    }, 1000);
+                } else {
+                    toastr.error('Error updating data: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('AJAX error: ' + error);
+            }
+        });
+    });
+
+
+
+    $('#btn_saveWE').click(function () {
+    let wastageUpdates = [];
+    let validationFailed = false;
+
+    $('#tblWE tbody tr').each(function () {
+        let row = $(this);
+
+        let loomCode = row.find('input.Loom_Code').val();
+        let vNo = row.find('input.V_No').val();
+        let vType = row.find('input.V_Type').val();
+        let docId = row.find('input.Doc_Id').val();
+        let wastageRaw = row.find('input.Wastage').val();
+        let wastageValue = parseFloat(wastageRaw);
+
+        let shiftCode = $('#ddlShiftWE').val() || '';
+        let groupCode = $('#TxtBlockNoWE').val() || '';
+        let date = $('#DtDateWE').val();
+
+        if (!vNo || !vType || !docId) {
+            toastr.warning(`First you need to add Loom Allocation for same Date,Time,Block.`);
+            validationFailed = true;
+            return false; 
+        }
+
+        if (!isNaN(wastageValue) && loomCode) {
+            wastageUpdates.push({
+                LOOM_CODE: loomCode,
+                V_NO: parseInt(vNo),
+                V_TYPE: vType,
+                DOC_ID: docId,
+                WASTAGE: wastageValue,
+                SCH_SHIFT: shiftCode,
+                GROUP_CODE: groupCode,
+                V_DATE: date
+            });
+        }
+    });
+
+    if (validationFailed) {
+        return;
+    }
+
+    if (wastageUpdates.length === 0) {
+        alert('No Wastage data to save.');
+        return;
+    }
+
+    $.ajax({
+        url: '/LoomMonitoringSystemEntry/UpdateWastageBatch',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(wastageUpdates),
+        success: function (response) {
+            if (response.success) {
+                toastr.success('Wastage data updated successfully!');
+                $('#DtDateWE').prop('disabled', false);
+                $('#ddlShiftWE').prop('disabled', false);
+                $('#TxtBlockNoWE').prop('disabled', false);
+
+                $('#DtDateWE').val(new Date().toISOString().split('T')[0]);
+                $('#ddlShiftWE')[0].selectedIndex = 0;
+                $('#TxtBlockNoWE')[0].selectedIndex = 1;
+
+
+                setTimeout(function () {
+                    loadWastageInfo();
+                }, 1000);
+            } else {
+                toastr.error('Error updating data: ' + response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            toastr.error('AJAX error: ' + error);
+        }
+    });
+});
+
+</script>
+
+
+

@@ -1,0 +1,258 @@
+﻿@{
+	ViewBag.Title = "ItemDepartmentMaster";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Insurance Policy Master</legend>
+
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "InsurancePolicyMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+			</div>
+		</div>
+	</div>
+	 
+
+<form id="InsurancePolicyMaster">
+	<input type="hidden" class="form-control" name="CODE" id="CODE">
+	<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+				<label>Name<span class="required">*</span></label>
+				<input type="text" class="form-control" id="NAME" name="NAME" placeholder="Enter Name">
+			</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Entry Date</label>
+			<input type="date" class="form-control" id="ENTRY_DATE" name="ENTRY_DATE" >
+		</div>
+		</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Effective Date</label>
+			<input type="date" class="form-control" id="EFF_DATE" name="EFF_DATE">
+		</div>
+	</div>
+	</div>
+		
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+				<label>Description</label>
+				<input type="text" class="form-control" id="DESCRIPTION" name="DESCRIPTION" placeholder="Enter Description">
+			</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Company Name<span class="required">*</span></label>
+			<input type="text" class="form-control" id="COMP_NAME" name="COMP_NAME" placeholder="Enter Company Name">
+			</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+			<label>Address</label>
+			<input type="text" class="form-control" id="COMP_ADD" name="COMP_ADD" placeholder="Enter Company Address">
+			</div>
+			</div>
+		</div>
+			<div class="row">
+				<div class="col-md-3">
+				<div class="form-group">
+					<label>Policy Amount</label>
+				 <input type="number" class="form-control" id="POLICY_AMT" name="POLICY_AMT" placeholder="Enter Amt.">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+				<label>Expire Date</label>
+				<input type="date" class="form-control" id="EXP_DATE" name="EXP_DATE">
+			</div>
+			</div>
+			
+		</div>
+		
+		
+		<div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+			<div class="col-md-3">
+				<div class="btn-last">
+				<button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+			</div>
+			</div>
+		</div>
+		
+</form>
+
+
+</fieldset>
+
+<script>
+
+	$(document).ready(function () {
+		$(function () {
+			const urlParams = new URLSearchParams(location.search);
+			const rowId = parseInt(urlParams.get('id'));
+			const isReadOnly = urlParams.get('readOnly') === 'true';
+			if (!isNaN(rowId) && rowId > 0) {
+				LoadInsurancePolicyById(rowId);
+
+				if (isReadOnly) {
+					 setInsuranceFormReadOnly(); 
+				}
+			}
+		});
+
+		$('#ACTIVE').on('change', function () {
+            const status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+	});
+
+	$('#InsurancePolicyMaster').on('submit', function (e) {
+		e.preventDefault();
+		if (!validateRequiredField('#NAME', 'Name')) return;
+		if (!validateRequiredField('#COMP_NAME', 'Company Name')) return;
+
+		const Name = $('#NAME').val().trim();
+		const CompanyName = $('#COMP_NAME').val().trim();
+
+		var code = parseInt($('#CODE').val()) || 0;
+		var insuData = {
+		    CODE: code,
+		    COMP_CODE: 1, // Change dynamically if needed
+		    NAME: $('#NAME').val(),
+		    DESCRIPTION: $('#DESCRIPTION').val(),
+		    COMP_NAME: $('#COMP_NAME').val(),
+		    COMP_ADD: $('#COMP_ADD').val(),
+		    POLICY_AMT: parseFloat($('#POLICY_AMT').val()) || 0,
+		    ENTRY_DATE: $('#ENTRY_DATE').val() ? new Date($('#ENTRY_DATE').val()).toISOString() : null,
+		    EFF_DATE: $('#EFF_DATE').val() ? new Date($('#EFF_DATE').val()).toISOString() : null,
+		    EXP_DATE: $('#EXP_DATE').val() ? new Date($('#EXP_DATE').val()).toISOString() : null,
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+		    UUSER: 1, // Current user ID (set dynamically if needed)
+		    UDATE: new Date().toISOString(),
+		    EUSER: 1,
+		    EDATE: new Date().toISOString(),
+		    AED: code > 0 ? "E" : "A",
+		    WSID: "WEB",
+		    LIP: "127.0.0.1",
+		    LID: "WEB",
+		    ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+		$.ajax({
+		    url: '/InsurancePolicyMaster/SaveInsurancePolicy', // Adjust to match your actual controller route
+		    type: 'POST',
+		    contentType: 'application/json',
+		    data: JSON.stringify(insuData),
+		    success: function (response) {
+		        if (response.success) {
+		            toastr.success("Saved successfully!");
+		            $('#InsurancePolicyMaster')[0].reset();
+		            setTimeout(function () {
+		                window.location.href = '/InsurancePolicyMasterList/Index'; // Adjust as needed
+		            }, 1000);
+		        } else {
+					const message = response.message || "Something went wrong while saving.";
+					toastr.warning(message);		       
+				}
+		    },
+		    error: function (xhr) {
+		        let errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+		        toastr.error("Error: " + errorMsg);
+		    }
+		});
+	});
+
+	function LoadInsurancePolicyById(code) {
+		$.ajax({
+		    url: '/InsurancePolicyMasterList/GetInsurancePolicyByCode',
+		    type: 'GET',
+		    data: { code: code },
+		    success: function (data) {
+		        if (!data) {
+		            toastr.warning("No data found.");
+		            return;
+		        }
+		        // Populate form fields
+		        $('#CODE').val(data.code);
+		        $('#NAME').val(data.name);
+		        $('#DESCRIPTION').val(data.description);
+		        $('#COMP_NAME').val(data.comP_NAME);
+		        $('#COMP_ADD').val(data.comP_ADD);
+		        $('#POLICY_AMT').val(data.policY_AMT);
+		        $('#ENTRY_DATE').val(data.entrY_DATE ? data.entrY_DATE.split('T')[0] : '');
+		        $('#EFF_DATE').val(data.efF_DATE ? data.efF_DATE.split('T')[0] : '');
+		        $('#EXP_DATE').val(data.exP_DATE ? data.exP_DATE.split('T')[0] : '');
+                $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+
+		    },
+		    error: function (xhr, status, error) {
+		        console.error("Error loading insurance policy by ID:", status, error);
+		        toastr.error('Error: ' + xhr.responseText);
+		    }
+		});
+	}
+
+	function setInsuranceFormReadOnly() {
+		const form = $('#InsurancePolicyMaster');
+		form.find('input[type="text"], input[type="date"], input[type="number"], textarea, select').prop('disabled', true);
+		form.find('button').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled'); // visual feedback for toggle
+	}
+
+
+</script>
+
+
+
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	</Script>
+@* Status Check end *@

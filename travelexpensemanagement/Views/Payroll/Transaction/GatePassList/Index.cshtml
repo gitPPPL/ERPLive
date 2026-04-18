@@ -1,0 +1,192 @@
+﻿@{
+    ViewBag.Title = "Gate Pass List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Gate Pass List</legend>
+    <form id="GatePassListForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDate">Date</label>
+                    <input type="date" class="form-control" id="DtDate" />
+                </div>
+            </div>
+            <div class="offset-md-2 col-md-7">
+                <div class="btn-mt button-right">
+                    <button id="btn_load" type="button" class="btn btn-primary"><i class="fa fa-download"></i>Load Data</button>
+                    <button id="btn_update" type="button" class="btn btn-success"><i class="fa fa-save"></i>Update</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                    <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblGatePassList" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th style="width:50px;">Vtype</th>
+                            <th style="width:80px;">Vno</th>
+                            <th style="width:80px;">Vdate</th>
+                            <th style="width:30px;">Shift</th>
+                            <th style="width:80px;">Ecode</th>
+                            <th style="width:150px;">Employee Name</th>
+                            <th style="width:150px;">Dept Name</th>
+                            <th style="width:100px;">Gp Type</th>
+                            <th style="width:80px;">Gp No.</th>
+                            <th style="width:150px;">Hod Name</th>
+                            <th style="width:150px;">Remarks</th>
+                            <th style="width:60px;">Exit Time</th>
+                            <th style="width:60px;">In Time</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        var todayDate=getTodayDate();
+        $('#DtDate').val(todayDate);
+
+        $('#searchBox').on('keyup', function () {
+            var cDate=$('#DtDate').val();
+            currentPage = 1;
+            GetMasterDataList(cDate);
+        });
+
+        $(document).on('click', '#btn_load', function(){
+            var cDate=$('#DtDate').val();
+            GetMasterDataList(cDate);
+        });
+
+    });
+
+    function GetMasterDataList(cDate) {
+        const searchTerm = $('#searchBox').val().trim();
+        $.ajax({
+            url: '@Url.Action("GetGatePassList", "GatePassList")',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize,
+                CDate:cDate
+            },
+            success: function (res) {
+                const mastListData = res.data || [];
+                const totalCount = res.totalCount || 0;
+            let tbody = $('#tblGatePassList tbody');
+                tbody.empty();
+                console.log(mastListData);
+                if (mastListData.length === 0) {
+                    tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+                    return;
+                }
+        $.each(mastListData, function (index, item) {
+        tbody.append(`
+        <tr>
+            <td class="d-none code">${item.DOC_ID ?? ''}</td>
+            <td>${item.V_type ?? ''}</td>
+            <td>${item.V_no ?? ''}</td>            
+            <td>${item.V_date ? item.V_date.substring(0, 10) : ''}</td>
+            <td>${item.Shift ?? ''}</td>
+            <td>${item.Emp_code ?? ''}</td>
+            <td>${item.Emp_Name ?? ''}</td>
+            <td>${item.Dept_name ?? ''}</td>
+            <td>${item.GP_TYPE ?? ''}</td>
+            <td>${item.GP_NO ?? ''}</td>
+            <td>${item.HOD_NAME ?? ''}</td>
+             <td>${item.REMARKS ?? ''}</td>
+            <td>${item.E_TIME ?? ''}</td>
+            <td>${item.IN_TIME ?? ''}</td>
+        </tr>
+        `);
+        });
+            renderPagination(totalCount, pageSize, currentPage);
+
+            },
+            error: function (xhr) {
+                toastr.error('Error loading Shift Data list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (total <= 0 || totalPages <= 1) return;
+
+        let paginationHtml = '';
+
+        if (currentPage > 1) {
+        paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+        paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHtml += `
+            <button type="button" class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+                        onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+        paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+        paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(paginationHtml);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        var CDate=$('#DtDate').val();
+        GetMasterDataList(CDate);
+    }
+
+     function getTodayDate(){
+        const today = new Date();
+        const todayDate = today.getFullYear() + '-' +
+            (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+            today.getDate().toString().padStart(2, '0');
+        return todayDate ;
+
+     }
+
+</script>
+

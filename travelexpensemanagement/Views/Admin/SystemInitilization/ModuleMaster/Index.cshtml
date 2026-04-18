@@ -1,0 +1,433 @@
+﻿@{
+	ViewBag.Title = "Module Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;  // Exit loop once found current menu permission
+		}
+	}
+	<style>
+		#pagination {
+			list-style: none;
+			padding-left: 0;
+			margin-top: 10px;
+			display: flex;
+			gap: 6px;
+		}
+		#pagination li {
+			list-style-type: none;
+		}
+		#pagination .page-link {
+			padding: 6px 12px;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+		#pagination .active .page-link {
+			background: #0d3c78;
+			color: white;
+		}
+	</style>
+}
+<fieldset>
+	<legend class="legend-field">Module Master List</legend>
+
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchInput" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				@if (canAdd)
+				{
+					<button id="btnSave" onclick="window.location.href='@Url.Action("ModuleMast", "ModuleMaster")'" type="submit" class="btn btn-add">
+						<i class="fa fa-plus"></i>Add
+					</button>
+				}
+				@if (canPrint)
+				{
+					<button class="btn btn-print" onclick="callGetReportAsPdf()">
+						<i class="fa fa-print"></i> Print
+					</button>
+				}
+				@if (canExport)
+				{
+					<button class="btn btn-export" onclick="exportToExcel()">
+						<i class="fas fa-file-export"></i> Export
+					</button>
+				}
+				@if (canMail)
+				{
+					<button class="btn btn-mail">
+						<i class="fa fa-envelope"></i> Mail
+					</button>
+				}
+				@if (canApproval)
+				{
+					<button class="btn btn-approved">
+						<i class="fa fa-check"></i> Approve
+					</button>
+				}
+			</div>
+		</div>
+	</div>
+
+	<div class="card" id="tabledt">
+		<div class="table-responsive">
+			<table id="tabledt" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<td style="display:none;">Code</td>
+						<th>Name</th>
+						<th>Display Name</th>
+						<th>Position No</th>
+						<th>Active</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					@* <div class="custom-pagination" id="pagination"></div> *@
+					<ul class="custom-pagination pagination" id="pagination"></ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+
+<script>
+	var canAdd = @canAdd.ToString().ToLower();
+	var canEdit = @canEdit.ToString().ToLower();
+	var canDelete = @canDelete.ToString().ToLower();
+	var canPrint = @canPrint.ToString().ToLower();
+	var canExport = @canExport.ToString().ToLower();
+	var canMail = @canMail.ToString().ToLower();
+	var canApproval = @canApproval.ToString().ToLower();
+	var canDocDetail = @canDocDetail.ToString().ToLower();
+
+	let allMastData = [];
+	let filteredData = [];
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	 
+	$(document).ready(function () {
+		getModuleMastDt();
+		$('#searchInput').on('input', function () {
+			const keyword = $(this).val().toLowerCase();
+			filteredData = allMastData.filter(item =>
+				Object.values(item).some(val =>
+					String(val).toLowerCase().includes(keyword)
+				)
+			);
+			currentPage = 1;
+			renderModuleTable();
+			renderPagination();
+		});
+
+		$(document).on('click', '.page-link', function (e) {
+			e.preventDefault();
+			const page = parseInt($(this).data('page'));
+			const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+			if (page >= 1 && page <= totalPages) {
+				currentPage = page;
+				renderModuleTable();
+				renderPagination();
+			}
+		});
+
+	$(document).on('click', '.btn-edit', function () {
+		const $row = $(this).closest('tr');
+		getDataOfRow($row);		 
+		localStorage.setItem('editModule', JSON.stringify(ModuleData));
+		localStorage.setItem('Mode', 'Edit');
+		window.location.href = '/ModuleMaster/ModuleMast';
+	});
+
+		$(document).on('click', '.btn-view', function () {
+		const $row = $(this).closest('tr');
+		getDataOfRow($row); 
+		localStorage.setItem('editModule', JSON.stringify(ModuleData));
+		localStorage.setItem('Mode', 'View');
+		window.location.href = '/ModuleMaster/ModuleMast';
+	});
+
+	 $(document).on('click', '.btn-details', function() {
+		const docCode = $(this).data('doc');
+		showDocumentPopup(docCode);  // Your popup function
+	});
+	 
+		$(document).on('click', '.btn-delete', function() {
+			const $row = $(this).closest('tr');
+			const CodeforDel = $row.find('.code').data('code');
+			Swal.fire({
+				title: 'Are you sure you want to delete?',
+				text: "This action cannot be undone.",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonText: 'Yes, delete it!',
+				cancelButtonText: 'No, cancel!',
+				reverseButtons: true
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$.ajax({
+						url: '/ModuleMaster/DelModuleyDt',
+						type: 'DELETE',
+						data: { code: CodeforDel },
+						success: function(data) {
+							if (data.status === true) {
+								Swal.fire(
+									'Deleted!',
+									'Your data has been deleted.',
+									'success'
+								);
+								$row.remove();
+									getModuleMastDt();
+							} else {
+								Swal.fire(
+									'Error!',
+									'There was an issue deleting the data.',
+									'error'
+								);
+							}
+						},
+						error: function(xhr, status, error) {
+							Swal.fire(
+								'Error!',
+								'Data could not be deleted: ' + error,
+								'error'
+							);
+						}
+					});
+				}
+			});
+		});
+
+	});
+
+	function getDataOfRow($row) {
+	   ModuleData = {
+			code: $row.find('.code').data('code'),
+			name: $row.find('.name').text().trim(),
+			displayName: $row.find('.displayName').text().trim(),
+			positionNo:$row.find('.PositionNo').text().trim(),
+			active: $row.find('.active').data('active')
+		};
+
+	}
+	// Load data from server
+	function getModuleMastDt() {
+		$.ajax({
+			url:'@Url.Action("geModuleMaster", "ModuleMaster")',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				if (data.status === true) {
+					allMastData = data.data;
+					filteredData = allMastData;
+					console.log(filteredData);
+					currentPage = 1;
+					renderModuleTable();
+					renderPagination();
+				} else {
+					alert("Failed to load Module data.");
+				}
+			},
+			error: function (xhr, status, error) {
+				console.error('Error fetching data:', xhr.responseText);
+				alert('Error loading data: ' + error);
+			}
+		});
+	}
+
+	// Render table rows
+	function renderModuleTable() {
+		const tbody = $('#tabledt tbody');
+		tbody.empty();
+
+		const start = (currentPage - 1) * rowsPerPage;
+		const end = start + rowsPerPage;
+		const pageData = filteredData.slice(start, end);
+		pageData.forEach(item => {
+			const row = `
+				<tr>
+					<td class="code d-none" data-code="${item.code}">${item.code}</td>
+					<td class="name">${item.name}</td>
+					<td class="displayName">${item.displayName}</td>
+					<td class="PositionNo">${item.positionNo}</td>
+					<td class="active" data-active="${item.active=='Yes'? 1 : 0 }">${item.active}</td>
+					<td>
+					${canEdit ? `<i class="fas fa-edit btn-edit" title="Edit"></i>` : ''}
+					<i class="fas fa-eye btn-view" title="View"></i>
+					${canDelete ? `<i class="fa fa-trash btn-delete" title="Delete"></i>` : ''}
+					${canDocDetail ? `<i class="fa fa-file btn-details btn-document" data-doc="${item.code}" title="Details"></i>` : ''}
+					</td>
+				</tr>
+			`;
+			tbody.append(row);
+		});
+	}
+
+	// Render pagination
+	
+	function renderPagination() {
+		const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+		const pagination = $('#pagination');
+		pagination.empty();
+
+		if (totalPages <= 1) return;
+
+		const maxVisiblePages = 7;
+		const ellipsis = '<li class="page-item disabled"><span class="page-link">...</span></li>';
+
+		pagination.append(`<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+			<a class="page-link" href="#" data-page="${currentPage - 1}">Prev</a>
+		</li>`);
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 4) {
+			startPage = 1;
+			endPage = Math.min(totalPages, maxVisiblePages - 2);
+		} else if (currentPage >= totalPages - 3) {
+			startPage = Math.max(1, totalPages - (maxVisiblePages - 3));
+			endPage = totalPages;
+		}
+
+		if (startPage > 1) {
+			pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`);
+			if (startPage > 2) pagination.append(ellipsis);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			pagination.append(`<li class="page-item ${i === currentPage ? 'active' : ''}">
+				<a class="page-link" href="#" data-page="${i}">${i}</a>
+			</li>`);
+		}
+
+		if (endPage < totalPages) {
+			if (endPage < totalPages - 1) pagination.append(ellipsis);
+			pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`);
+		}
+
+		pagination.append(`<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+			<a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+		</li>`);
+	}
+
+	function exportToExcel() {
+		fetch('/ModuleMaster/ExportAllDocs')
+			.then(response => {
+				if (!response.ok) throw new Error("Network response was not ok");
+				return response.json();
+			})
+			.then(data => {
+				console.log('show data',data);
+				const filteredData = data.map(item => ({
+				"Code": item.code,
+				"Module Name": item.name,
+				"Display Name": item.displaY_NAME,
+				"Position No": item.positioN_NO,
+				"Status": item.status
+			}));
+				console.log(filteredData)
+				const worksheet = XLSX.utils.json_to_sheet(filteredData);
+				const workbook = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+				const pageName = "Module Structure";
+				const now = new Date();
+				const pad = n => String(n).padStart(2, '0');
+				const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+				const fileName = `${pageName}_${timestamp}.xlsx`;
+				XLSX.writeFile(workbook, fileName);
+			})
+			.catch(error => {
+				console.error("Export failed:", error);
+				toastr.error("Failed to export data.");
+			});
+	}
+	function callGetReportAsPdf() {
+		var reportName = "MODULE_MAST";
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+			type: 'GET',
+			data: { Reportname: reportName },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
+	function showDocumentPopup(docCode) {
+		$.ajax({
+			url: '/ModuleMaster/DocDetailsCode',
+			type: 'POST',
+			dataType: 'json',  // important
+			data: { docCode: docCode },
+			success: function(response) {
+				if(response.success) {
+					showDocumentPopupjQuery(response.data, docCode);
+				} else {
+					toastr.error("Failed to get document details.");
+				}
+			},
+			error: function() {
+				toastr.error("An error occurred while fetching document details.");
+			}
+		});
+	}
+
+</script>
+
+

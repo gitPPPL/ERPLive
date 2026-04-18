@@ -1,0 +1,446 @@
+﻿@{
+    ViewBag.Title = "Party QC Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Party QC Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "PartyQCMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="PartyQCMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSupplier">Supplier</label>
+                    <select class="form-control" id="ddlSupplier" name="Supplier">
+                        <option selected disabled>--Select Supplier--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlQCName">QC Name</label>
+                    <select class="form-control" id="ddlQCName" name="QCName">
+                        <option selected disabled>--Select QC Name--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="offset-md-3 col-md-3">
+                <div class="btn-last">
+                    <button id="btnLoadParam" type="button" class="btn btn-success"><i class="fa fa-download"></i>Load Parameter</button>                   
+                </div>
+            </div>
+        </div>
+       
+        <div class="card">
+            <div class="table-responsive">
+				<table id="tblPartyQCMaster" class="table-width">
+					<thead class="table-head">
+						<tr>
+							<th>Code</th>
+							<th>Qc Parameter</th>
+							<th style="display:none;">QCP Code</th>
+							<th>Unit</th>
+							<th>Standard</th>
+							<th>From Result</th>
+							<th>To Result</th>						 
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+            </div>			 
+        </div>
+       
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-last">
+					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+	let PreviousInputDt = "";
+	let docId = "";
+	let readOnly;
+	let PreviousParty;
+	let PreviousQC;
+
+	$(document).ready(function () {
+	getQCNameList();
+	getSupplierList();
+ 
+		docId = getQueryParam('id');
+		readOnly = getQueryParam('readOnly');
+		if (docId) {
+			GetDocData(docId, readOnly);
+		}
+
+		$('#TxtName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtShortName').focus();
+			}
+		});
+
+		$('#TxtShortName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#btn-save').focus();
+			}
+		});
+
+	$('#ddlQCName').on('change', function () {
+        let tbody = $('#tblPartyQCMaster tbody');
+        tbody.empty(); 
+    });
+
+		$('#btnLoadParam').click(function () {
+		let qcCode = $('#ddlQCName').val();
+		if (!qcCode) {
+		toastr.info("Please first select QC Name");
+		return;
+	    }
+
+		$.ajax({
+			type: 'GET',
+			url: '/PartyQCMaster/GetQCDetailList',
+			data: { Qccode: qcCode },
+			success: function (res) {
+				const mastListData = res.data || [];
+				let tbody = $('#tblPartyQCMaster tbody');
+				tbody.empty();
+
+				mastListData.forEach((item, index) => {
+					tbody.append(`
+						<tr>
+							<td class="code">${item.QC_Code}</td>
+							<td class="QC_param">${item.QC_Parameter}</td>
+							<td class="d-none QC_parameterCd">${item.QCP_CODE}</td>
+							<td class="Unit">${item.Unit}</td>
+							<td class="standard">${item.Standard}</td>
+							 <td class="fromResult"><input type="text" class="result-input" name="FromResult_${index}" oninput="allowOnlyNumbers(this)" /></td>
+	                         <td class="toResult"><input type="text" class="result-input" name="ToResult_${index}" oninput="allowOnlyNumbers(this)" /></td>
+						</tr>
+					`);
+				});
+			},
+			error: function () {
+				alert("Error while fetching data.");
+			}
+		});
+	});
+
+		$('#btn-save').on('click', function (e) {
+			e.preventDefault();
+			 	 
+			if (!parseInt($('#ddlSupplier').val())  || !parseInt($('#ddlQCName').val())) {
+				toastr.warning("Please fill all required fields");
+				return;
+			}
+			let hasRows = $('#tblPartyQCMaster tbody tr').length > 0;
+			if (!hasRows) {
+		    alert("Please first upload parameter");
+		    return;
+	        }
+
+	let tableData = [];
+	$('#tblPartyQCMaster tbody tr').each(function () {
+		let row = $(this);
+		let rowData = {			 
+			QCP_Code: toNullableInt(row.find('.QC_parameterCd').text().trim()),
+			UnitCode: toNullableInt(row.find('.Unit').text().trim()),
+			Std: toNullableDecimal(row.find('.standard').text().trim()),
+			FromResult: toNullableDecimal(row.find('.fromResult input').val().trim()),
+			ToResult: toNullableDecimal(row.find('.toResult input').val().trim())
+		};
+		tableData.push(rowData);
+	});
+		const masterData = {
+		code: toNullableInt($('#TxtCode').val()),
+		partyCd: toNullableInt($('#ddlSupplier').val()),
+		QC_Code: toNullableInt($('#ddlQCName').val()),
+		QCDetails: tableData
+	};
+	console.log(masterData);
+
+			if (docId) {
+				EditMasterData(masterData);
+			} else {
+				SaveMasterData(masterData);
+			}
+		});
+	});
+
+	function SaveMasterData(masterData) {			
+		checkExistOrNot(masterData.partyCd, masterData.QC_Code)
+			.done(function (data) {
+				if (data?.status && data?.exists) {
+					toastr.warning("Duplicate Party QC Name");
+					return;
+				}
+				console.log(masterData);
+				$.ajax({
+					url: '@Url.Action("SavePartyQCMast", "PartyQCMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(masterData),
+					success: function (response) {
+						if (response?.status) {
+							toastr.success('Data saved successfully.');
+							resetFields();
+							setTimeout(() => {
+								window.location.href = '/PartyQCMasterList/Index';
+							}, 1500);
+						} else {
+							toastr.error(response?.message || "Save failed. Please try again.");
+						}
+					},
+					error: function () {
+						toastr.error("Error occurred while saving. Please contact admin.");
+					}
+				});
+			})
+			.fail(function () {
+				toastr.error("Error while checking Party QC name.");
+			});
+	}
+
+	function EditMasterData(masterData) {		
+		if (PreviousParty !== masterData.partyCd || PreviousQC !== masterData.QC_Code) {
+			checkExistOrNot(masterData.partyCd, masterData.QC_Code)
+				.done(function (data) {
+					if (data?.status && data?.exists) {
+						toastr.warning("Duplicate Party QC Name");
+						return;
+					}
+					UpdateMasterData(masterData);
+				})
+				.fail(function () {
+					toastr.error("Error while checking Party QC Name.");
+				});
+		} else {
+			UpdateMasterData(masterData);
+		}
+	}
+
+
+	function UpdateMasterData(masterData) {
+		$.ajax({
+			url: '/PartyQCMaster/UpdatePartyQCMast',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(masterData),
+			dataType: 'json',
+			success: function (response) {
+				if (response?.status) {
+					toastr.success('Data updated successfully.');
+					resetFields();
+					setTimeout(() => {
+						window.location.href = '/PartyQCMasterList/Index';
+					}, 1500);
+				} else {
+					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error("Data not updated: " + error);
+			}
+		});
+	}
+
+	function GetDocData(docId, readOnly) {
+		$.ajax({
+			url: '/PartyQCMaster/GetPartyQCDetailsById',
+			type: 'GET',
+			data: { id: docId },
+			success: function (res) {
+				if (res.status && res.data) {
+					fillFormFields(res.data);
+					if (readOnly === 'true') {
+						$('input, #ddlSupplier, #ddlQCName, #btnLoadParam').prop('disabled', true);
+						$('#btn-save, #cancelBtn').hide();
+					} else {
+						$('input, #ddlSupplier, #ddlQCName, #btnLoadParam').prop('disabled', false);
+						$('#btn-save, #cancelBtn').show();
+					}
+				} else {
+					toastr.warning('No data found for this ID.');
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load data.');
+			}
+		});
+	}
+
+	function resetFields() {
+		$('#TxtCode').val('');
+		$('#ddlSupplier select').prop('selectedIndex', 0);
+	$('#ddlQCName select').prop('selectedIndex', 0);
+	}
+ 
+		
+	function fillFormFields(dt) {
+		if (!dt || dt.length === 0) return;
+ 
+		let first = dt[0];
+
+		PreviousParty = toNullableInt(first.PARTY_CODE);
+		PreviousQC = toNullableInt(first.QC_CODE);
+		 
+		$('#TxtCode').val(first.CODE);
+		$('#ddlSupplier').val(first.PARTY_CODE);
+		$('#ddlQCName').val(first.QC_CODE);
+
+		// Fill the table with all items
+		let tbody = $('#tblPartyQCMaster tbody');
+		tbody.empty();
+
+		dt.forEach((item, index) => {
+			tbody.append(`
+				<tr>
+					<td class="code">${item.QC_CODE}</td>
+					<td class="QC_param">${item.QC_Parameter}</td>
+					<td class="d-none QC_parameterCd">${item.QCP_CODE}</td>
+					<td class="Unit">${item.UNIT_CODE}</td>
+					<td class="standard">${item.STD}</td>
+					<td class="fromResult">
+						<input type="text" class="result-input" name="FromResult_${index}" oninput="allowOnlyNumbers(this)" value="${item.FROM_RESULT}" />
+					</td>
+					<td class="toResult">
+						<input type="text" class="result-input" name="ToResult_${index}" oninput="allowOnlyNumbers(this)" value="${item.TO_RESULT}" />
+					</td>
+				</tr>
+			`);
+		});
+	}
+
+
+	function checkExistOrNot(partyCd, QC_Code) {
+		return $.ajax({
+			url: '/PartyQCMaster/getExistOrNot',
+			type: 'GET',
+			dataType: 'json',
+			data: { partyCd: partyCd , QCcode:QC_Code}
+		});
+	}
+
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "Do you want to cancel all the changes?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, cancel it!',
+			cancelButtonText: 'No, keep it',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+				if (docId) {
+					GetDocData(docId, readOnly);
+				} else {
+					resetFields();
+				}
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+			}
+		});
+	});
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+	function toNullableDecimal(value) {
+		if (value === null || value === undefined || value.trim() === '') {
+			return null;
+		}
+		value = value.replace(/[^0-9.]/g, '');
+		if ((value.match(/\./g) || []).length > 1) {
+			return null;
+		}
+		var parsed = parseFloat(value);
+		return isNaN(parsed) ? null : parsed;
+	}
+
+	function allowOnlyNumbers(input) {
+	  input.value = input.value
+		.replace(/[^0-9.]/g, '')
+		.replace(/(\..*)\./g, '$1');
+	}
+
+
+		function getSupplierList() {
+		$.ajax({
+			url: '@Url.Action("GetSupplierList", "PartyQCMaster")',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				if (data.status === true && Array.isArray(data.data)) {
+					var supplierList = $('#ddlSupplier');
+					supplierList.empty();
+					supplierList.append($('<option selected disabled>').val('').text('Select Supplier Name'));
+					data.data.forEach(function (item) {
+						supplierList.append($('<option>').val(item.code).text(item.Name));
+					});
+				} else {
+					toastr.warning("No data found");
+				}
+			},
+			error: function (xhr) {
+				toastr.error("Data load failed");
+			}
+		});
+	}
+
+	function getQCNameList() {
+		$.ajax({
+			url: '@Url.Action("GetQCNameList", "PartyQCMaster")',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				if (data.status === true && Array.isArray(data.data)) {
+					var QCList = $('#ddlQCName');
+					QCList.empty();
+					QCList.append($('<option selected disabled>').val('').text('Select QC Name'));
+					data.data.forEach(function (item) {
+						QCList.append($('<option>').val(item.code).text(item.Name));
+					});
+				} else {
+					toastr.warning("No data found");
+				}
+			},
+			error: function (xhr) {
+				toastr.error("Data load failed");
+			}
+		});
+	}
+
+
+</script>

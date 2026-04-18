@@ -1,0 +1,814 @@
+﻿@{
+    ViewBag.Title = "Posting Parameter Sales";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Posting Parameter Sales</legend>
+    <form id="PostingParameterSalesForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <fieldset style="margin-bottom:10px;">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlVoucherType">Voucher Type <span class="required">*</span></label>
+                        <select class="form-control" id="ddlVoucherType">
+                            <option value="">Select Voucher Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlDocType">Doc Type <span class="required">*</span></label>
+                        <select class="form-control" id="ddlDocType">
+                            <option value="">Select Doc Type</option>
+                            <option value="SALE">SALE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPostType">Post Type <span class="required">*</span></label>
+                        <select class="form-control" id="ddlPostType">
+                            <option value="">Select Post Type</option>
+                           @*  <option>Chips</option>
+                            <option>Finish</option>
+                            <option>Flakes</option>
+                            <option>MFibre</option>
+                            <option>Other</option>
+                            <option>PSF</option>
+                            <option>Raw</option>
+                            <option>Scrap</option>
+                            <option>SFG</option>
+                            <option>Store</option>
+                            <option>Waste</option> *@
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlFormType">Form Type <span class="required">*</span></label>
+                        <select class="form-control" id="ddlFormType">
+                            <option value="">Select Form Type</option>
+                           @*  <option>Export-GST</option>
+                            <option>Export-NA</option>
+                            <option>GST</option>
+                            <option>NA</option>   *@                          
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSalesAC">Sales A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlSalesAC">
+                        <option value="">Select Sales A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDiscountAC">Discount A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDiscountAC">
+                        <option value="">Select Discount A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCGSTAC">CGST A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlCGSTAC">
+                        <option value="">Select CGST A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlSGSTAC">SGST A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlSGSTAC">
+                        <option value="">Select SGST A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlIGSTAC">IGST A/C</label>
+                    <select class="form-control" id="ddlIGSTAC">
+                        <option value="">Select IGST A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlFreightAC">Freight A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlFreightAC">
+                        <option value="">Select Freight A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlRoundAC">Round A/C <span class="required">*</span></label>
+                    <select class="form-control" id="ddlRoundAC">
+                        <option value="">Select Round A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPackingAC">Packing A/C</label>
+                    <select class="form-control" id="ddlPackingAC">
+                        <option value="">Select Packing A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlInsuranceAC">Insurance A/C</label>
+                    <select class="form-control" id="ddlInsuranceAC">
+                        <option value="">Select Insurance A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlTDSAC">TDS A/C</label>
+                    <select class="form-control" id="ddlTDSAC">
+                        <option value="">Select TDS A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlTCSAC">TCS A/C</label>
+                    <select class="form-control" id="ddlTCSAC">
+                        <option value="">Select TCS A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCommissionAC">Commission A/C</label>
+                    <select class="form-control" id="ddlCommissionAC">
+                        <option value="">Select Commission A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCessAC">Cess A/C</label>
+                    <select class="form-control" id="ddlCessAC">
+                        <option value="">Select Cess A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlLoadingUnloadingAC">Loading/Unloading A/C</label>
+                    <select class="form-control" id="ddlLoadingUnloadingAC">
+                        <option value="">Select Loading/Unloading A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWBAC">WB A/C</label>
+                    <select class="form-control" id="ddlWBAC">
+                        <option value="">Select WB A/C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="offset-md-5">
+                <button id="btn_print" type="button" class="btn btn-print"><i class="fa fa-print"></i>Print</button>
+                <button id="btn_gridview" type="button" class="btn btn-print"><i class="fa fa-print"></i>Gridview</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "PostingParameterSalesList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+   
+    const allFieldIds = [
+        "TxtCode",
+        "ddlVoucherType",
+        "ddlDocType",
+        "ddlPostType",
+        "ddlFormType",
+        "ddlSalesAC",
+        "ddlDiscountAC",
+        "ddlCGSTAC",
+        "ddlSGSTAC",
+        "ddlIGSTAC",
+        "ddlFreightAC",
+        "ddlRoundAC",
+        "ddlPackingAC",
+        "ddlInsuranceAC",
+        "ddlTDSAC",
+        "ddlTCSAC",
+        "ddlCommissionAC",
+        "ddlCessAC",
+        "ddlLoadingUnloadingAC",
+        "ddlWBAC"
+    ];
+
+    const dropdownIds = [
+        "ddlSalesAC",
+        "ddlDiscountAC",
+        "ddlCGSTAC",
+        "ddlSGSTAC",
+        "ddlIGSTAC",
+        "ddlFreightAC",
+        "ddlRoundAC",
+        "ddlPackingAC",
+        "ddlInsuranceAC",
+        "ddlTDSAC",
+        "ddlTCSAC",
+        "ddlCommissionAC",
+        "ddlCessAC",
+        "ddlLoadingUnloadingAC",
+        "ddlWBAC"
+    ];
+
+    let docId = "", readOnly;
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await handleDocLoad();
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+
+      if (!validateRequiredField('#ddlVoucherType','Voucher Type') ||
+            !validateRequiredField('#ddlDocType','DocType') ||
+            !validateRequiredField('#ddlPostType','PostType') ||
+            !validateRequiredField('#ddlFormType','FormType') ||
+            !validateRequiredField('#ddlSalesAC','SalesAC') ||
+            !validateRequiredField('#ddlDiscountAC','DiscountAC') ||
+            !validateRequiredField('#ddlCGSTAC','CGSTAC') ||
+            !validateRequiredField('#ddlSGSTAC','DiscountAC') ||
+            !validateRequiredField('#ddlFreightAC','FreightAC') ||
+            !validateRequiredField('#ddlRoundAC','RoundAC')) return;
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+
+      });
+
+    $(document).on('change', '#DtApplicable, #DtValidUpto', function () {
+        var appDt = $('#DtApplicable').val();
+        var validDt = $('#DtValidUpto').val();
+         getTotalDays(appDt, validDt);
+    });
+
+
+
+    }
+
+</script>
+
+<script>
+
+      async function handleDocLoad() {
+               docId = getQueryParam('id');
+               readOnly = getQueryParam('readOnly');
+               var posttype=getQueryParam('postType');
+               var formid=getQueryParam('formCode');
+               console.log(docId,posttype,formid, readOnly);
+              if (docId) {
+                  await GetDocData(docId,posttype,formid, readOnly);
+              } else {
+                    GetVTypeList();
+                    // GetDocTypeList();
+                    GetPostTypeList();
+                    GetFormtypeList();
+                   dropdownIds.forEach(function(dropdownId) {
+                   GetPartyList(dropdownId);
+                   });
+
+              }
+      }
+
+      function SaveData(saveDt) {
+                  $.ajax({
+                      url: '@Url.Action("SaveOrUpdatePostingParameterSaleEntry", "PostingParameterSales")',
+                      type: 'POST',
+                      contentType: 'application/json',
+                      data: JSON.stringify(saveDt),
+                      success: function (response) {
+                          if (response?.status) {
+                              toastr.success("Data Insert successfully");
+                              setTimeout(() => {
+                                  window.location.href = '/PostingParameterSalesList/Index';
+                              }, 1500);
+                          } else {
+                              toastr.error(response?.message || "Save failed. Please try again.");
+                          }
+                      },
+                      error: function () {
+                          toastr.error("Error occurred while saving. Please contact admin.");
+                      }
+                  });
+      }
+
+      function UpdateData(UpdateDt) {
+          $.ajax({
+              url: '@Url.Action("SaveOrUpdatePostingParameterSaleEntry", "PostingParameterSales")',
+              type: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify(UpdateDt),
+              dataType: 'json',
+              success: function (response) {
+                  if (response?.status) {
+                     toastr.success("Data Update successfully");
+                      // showFlashMessageByKey('update', 'success');
+                      setTimeout(() => {
+                          window.location.href = '/PostingParameterSalesList/Index';
+                      }, 1500);
+                  } else {
+                      toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                  }
+              },
+              error: function (xhr, status, error) {
+                  toastr.error("Data not updated: " + error);
+              }
+          });
+      }
+
+    function getTotalDays(appDt, validDt){
+          if (appDt && validDt) {
+                var startDate = new Date(appDt);
+                var endDate = new Date(validDt);
+                if (startDate > endDate) {
+                    toastr.warning("Applicable Date should be earlier than Valid Upto Date.");
+                    $('#NumTotalDays').val('');
+                    return;
+                }
+                var timeDiff = endDate - startDate;
+                var dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                $('#NumTotalDays').val(dayDiff);
+          }
+    }
+
+
+      async function fillHeaderData(headerData) {
+          const data = headerData[0];
+          console.log(data);
+    
+    GetPostTypeList(data.POST_TYPE);
+    GetFormtypeList(data.FORM_CODE);    
+    GetVTypeList(data.V_TYPE);
+    // GetDocTypeList(data.DOC_TYPE);
+    $('#ddlDocType').val(data.DOC_TYPE).trigger('change');
+    GetPartyList('ddlSalesAC', data.SALE_AC);
+    GetPartyList('ddlDiscountAC', data.DISC_AC);
+    GetPartyList('ddlCGSTAC', data.CGST_AC);
+    GetPartyList('ddlSGSTAC', data.SGST_AC);
+    GetPartyList('ddlIGSTAC', data.IGST_AC);
+    GetPartyList('ddlFreightAC', data.FREIGHT_AC);
+    GetPartyList('ddlRoundAC', data.ROUND_AC);
+    GetPartyList('ddlPackingAC', data.PACK_AC);
+    GetPartyList('ddlInsuranceAC', data.INSU_AC);
+    GetPartyList('ddlTDSAC', data.TDS_AC);
+    GetPartyList('ddlTDS194QAC', data.TDS_194QAC);
+    GetPartyList('ddlTCSAC', data.TCS_AC);
+    GetPartyList('ddlCommissionAC', data.COMM_AC);  
+    GetPartyList('ddlCessAC', data.CESS_AC);
+    GetPartyList('ddlLoadingUnloadingAC', data.LOADING_AC);
+    GetPartyList('ddlWBAC', data.WB_AC);
+
+      }
+
+    async function collectFormData() {
+        const docType = toNullableString($("#ddlDocType").val());
+        const postType = toNullableString($("#ddlPostType").val());
+        const vType = toNullableString($("#ddlVoucherType").val());
+        const formCode = toNullableInt($("#ddlFormType").val());
+        const saleAC = toNullableString($("#ddlSalesAC").val());
+        const discAC = toNullableString($("#ddlDiscountAC").val());
+        const cgstAC = toNullableString($("#ddlCGSTAC").val());
+        const sgstAC = toNullableString($("#ddlSGSTAC").val());
+        const igstAC = toNullableString($("#ddlIGSTAC").val());
+        const freightAC = toNullableString($("#ddlFreightAC").val());
+        const roundAC = toNullableString($("#ddlRoundAC").val());
+        const insuAC = toNullableString($("#ddlInsuranceAC").val());
+        const tdsAC = toNullableString($("#ddlTDSAC").val());
+        const tcsAC = toNullableString($("#ddlTCSAC").val());
+        const qltDrAC = toNullableString($("#ddlCommissionAC").val());  // Assuming CommissionAC corresponds to QLTDR_AC
+        const qcDrAC = toNullableString($("#ddlCessAC").val());  // Assuming CessAC corresponds to QCDR_AC
+        const qtyDrAC = toNullableString($("#ddlLoadingUnloadingAC").val());  // Assuming LoadingUnloadingAC corresponds to QTYDR_AC
+        const rddrAC = toNullableString($("#ddlWBAC").val());  // Assuming WBAC corresponds to RDDR_AC
+        const cgstACRCM = toNullableString($("#ddlCGSTAC").val());  // Assuming CGSTAC corresponds to CGST_AC_RCM
+        const sgstACRCM = toNullableString($("#ddlSGSTAC").val());  // Assuming SGSTAC corresponds to SGST_AC_RCM
+        const igstACRCM = toNullableString($("#ddlIGSTAC").val());  // Assuming IGSTAC corresponds to IGST_AC_RCM
+        const cessAC = toNullableString($("#ddlCessAC").val());
+        const packAC = toNullableString($("#ddlPackingAC").val());
+        // const importPL = toNullableString($("#ddlFormType").val());  // Assuming FormType corresponds to IMPORT_PL
+        // const gstHoldAC = toNullableString($("#ddlInsuranceAC").val());  // Assuming InsuranceAC corresponds to GSTHOLD_AC
+        // const billHoldAC = toNullableString($("#ddlTDSAC").val());  // Assuming TDSAC corresponds to BILLHOLD_AC
+        // const tds194QAC = toNullableString($("#ddlTDSAC").val());  // Assuming TDSAC corresponds to TDS_194QAC
+
+        return {
+            DOC_TYPE: docType,
+            POST_TYPE: postType,
+            V_TYPE: vType,
+            FORM_CODE: formCode,
+            SALE_AC: saleAC,
+            DISC_AC: discAC,
+            CGST_AC: cgstAC,
+            SGST_AC: sgstAC,
+            IGST_AC: igstAC,
+            FREIGHT_AC: freightAC,
+            ROUND_AC: roundAC,
+            INSU_AC: insuAC,
+            TDS_AC: tdsAC,
+            TCS_AC: tcsAC,
+            QLTDR_AC: qltDrAC,
+            QCDR_AC: qcDrAC,
+            QTYDR_AC: qtyDrAC,
+            RDDR_AC: rddrAC,
+            CGST_AC_RCM: cgstACRCM,
+            SGST_AC_RCM: sgstACRCM,
+            IGST_AC_RCM: igstACRCM,
+            CESS_AC: cessAC,
+            PACK_AC: packAC,
+            IMPORT_PL: null,
+            GSTHOLD_AC: null,
+            BILLHOLD_AC: null,
+            TDS_194QAC: null,
+            LOADING_AC: null,   
+            WB_AC: null,  
+            SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update"
+        };
+    }
+
+ 
+      function GetVTypeList(selectedValue=null) {
+          $.ajax({
+              url: '@Url.Action("GetVTypeList", "PostingParameterSales")',
+              type: 'GET',
+              dataType: 'json',
+              success: function (response) {
+                  if (response.status) {
+                      const $DropdownId = $('#ddlVoucherType');
+                      $DropdownId.empty();
+                      $DropdownId.append('<option value="">- Select Vtype -</option>');
+
+                      $.each(response.data, function (index, item) {
+                          $DropdownId.append(`
+                              <option value="${item.CODE}">${item.CODE} || ${item.NAME}</option>
+                          `);
+                      });
+
+                      $DropdownId.select2({
+                          placeholder: "- Select -",
+                          allowClear: true
+                      });
+
+                      if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                          $DropdownId.val(selectedValue).trigger('change');
+                      }
+                      else {
+                          $DropdownId.val('').trigger('change');
+                      }
+
+                  } else {
+                      toastr.error("data Load failed");
+                  }
+              },
+              error: function (xhr, status, error) {
+                  toastr.error("data Load failed", error);
+              }
+          });
+      }
+
+
+    function GetDocTypeList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetDocList", "PostingParameterSales")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    console.log(response.data);
+                    const $dropdownId = $('#ddlDocType');
+                    $dropdownId.empty();
+                    $dropdownId.append('<option value="">- Select Vtype -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdownId.append(`
+                            <option value="${item.Name}">${item.Name}</option>
+                        `);
+                    });
+
+                    $dropdownId.select2({
+                        placeholder: "- Select Vtype -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Data load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed", error);
+            }
+        });
+    }
+
+    function GetPostTypeList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPostTypeList", "PostingParameterSales")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    console.log(response.data);
+                    const $dropdownId = $('#ddlPostType');
+                    $dropdownId.empty();
+                    $dropdownId.append('<option value="">- Select Posttype -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdownId.append(`
+                            <option value="${item.NAME}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $dropdownId.select2({
+                        placeholder: "- Select Posttype -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Data load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed", error);
+            }
+        });
+    }
+
+    function GetFormtypeList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetFormTypeList", "PostingParameterSales")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    console.log(response.data);
+                    const $dropdownId = $('#ddlFormType');
+                    $dropdownId.empty();
+                    $dropdownId.append('<option value="">- Select Formtype -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $dropdownId.select2({
+                        placeholder: "- Select Formtype -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Data load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed", error);
+            }
+        });
+    }
+
+    function GetPartyList(dropdownId, selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "PostingParameterSales")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdownId = $(`#${dropdownId}`);  // Correct variable reference
+                    $dropdownId.empty();
+                    $dropdownId.append('<option value="">- Select -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $dropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $dropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdownId.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Data load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data load failed", error);
+            }
+        });
+    }
+
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toISOString().split('T')[0];
+      }
+
+      function parseIntSafe(value) {
+          const parsed = parseInt(value, 10);
+          return isNaN(parsed) ? null : parsed;
+      }
+
+      function parseFloatSafe(value) {
+          const parsed = parseFloat(value);
+          return isNaN(parsed) ? null : parsed;
+      }
+
+       function parseDate(dateStr) {
+          if (!dateStr) return null;
+          const parts = dateStr.split(/[-\/]/);
+          if (parts.length === 3) {
+              let [day, month, year] = parts.map(p => parseInt(p, 10));
+              if (year < 1000) year += 2000;
+              return new Date(year, month - 1, day);
+          }
+          return null;
+       }
+
+      function toNullableInt(val) {
+          const parsed = parseInt(val);
+          return isNaN(parsed) ? null : parsed;
+      }
+
+      function toNullableDate(val) {
+          const date = new Date(val);
+          return isNaN(date.getTime()) ? null : val;
+      }
+
+      function toNullableString(val) {
+        return val?.trim() || null;
+      }
+
+      function allowOnlyDecimal(input) {
+        input.value = input.value
+          .replace(/[^0-9.]/g, '')
+          .replace(/(\..*)\./g, '$1');
+      }
+
+      function allowOnlyNumbers(input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+      }
+
+      function setFieldsEnabled(enabled) {
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.disabled = !enabled;
+          }
+        });
+      }
+
+
+      function parseDecimalSafe(val) {
+          const num = parseFloat(val);
+          return isNaN(num) ? null : num;
+      }
+
+      function setEnterKeyFocus(sequence) {
+                 sequence.forEach((id, index) => {
+                     $(`#${id}`).on('keypress', function (e) {
+                         if (e.key === 'Enter') {
+                             e.preventDefault();
+                             if (index + 1 < sequence.length) {
+                                 $(`#${sequence[index + 1]}`).focus();
+                             }
+                         }
+                     });
+                 });
+      }
+
+      async function GetDocData(MasterTblId, posttype,formid, readOnly) {
+          try {
+              const response = await $.ajax({
+                  url: '/PostingParameterSales/GetPostingParameterForUpdate',
+                  type: 'GET',
+                  data: { vType: MasterTblId , postType:posttype , formCode:formid }
+              });
+              if (response.status) {
+                  console.log(response.data);
+                  await fillHeaderData(response.data);
+                  if (readOnly === 'true') {
+                      $('#btn-save, #cancelBtn').hide();
+                      disableAllFields();
+                  } else {
+                      $('#btn-save, #cancelBtn').show();
+                      enableAllFields();
+                  }
+              } else {
+                  toastr.error('No data returned.');
+              }
+          } catch (error) {
+              toastr.error('Failed to load data.');
+              console.error(error);
+          }
+      }
+
+      function enableAllFields() {
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = false;
+        });
+      }
+
+      function disableAllFields() {
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+      }
+
+</script>
+
+

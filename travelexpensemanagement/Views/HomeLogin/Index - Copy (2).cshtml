@@ -1,0 +1,499 @@
+﻿@{
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pashupati Group</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+       
+        /* ===== Animated Gradient ===== */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(270deg, #071a2d, #0f9b6c, #0a2540);
+            overflow-x: hidden;
+        }
+        @@keyframes gradientMove {
+            0%
+        {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+
+        }
+
+        /* ===== Floating Shapes ===== */
+        .shapes {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            filter: blur(2px);
+        }
+            .shape:nth-child(1) {
+                width: 220px;
+                height: 220px;
+                top: 70%;
+                left: 10%;
+            }
+            .shape:nth-child(2) {
+                width: 160px;
+                height: 160px;
+                top: 20%;
+                left: 70%;
+            }
+            .shape:nth-child(3) {
+                width: 300px;
+                height: 300px;
+                top: 85%;
+                left: 40%;
+            }
+
+            .shape:nth-child(4) {
+                width: 120px;
+                height: 120px;
+                top: 75%;
+                left: 85%;
+            }
+
+        /* ===== Content ===== */
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 30px 15px;
+        }
+
+        /* ===== Logo Animation ===== */
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 10px;
+            /* animation: floatLogo 4s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(56, 239, 125, 0.7); */
+        }
+        @@keyframes floatLogo {
+            0%
+
+        {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-12px);
+        }
+
+        100% {
+            transform: translateY(0);
+        }
+
+        }
+
+        /* ===== Glass Card ===== */
+        .glass-card {
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(40px);
+            border-radius: 22px;
+            padding: 20px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+            color: #fff;
+            text-align: center;
+            height: 100%;
+            transition: transform .35s ease, box-shadow .35s ease;
+        }
+
+            .glass-card:hover {
+                transform: translateY(-12px);
+                box-shadow: 0 30px 65px rgba(0,0,0,0.45);
+            }
+
+            /* ===== Ripple Effect ===== */
+            .glass-card span.ripple {
+                position: absolute;
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 600ms linear;
+                background-color: rgba(255,255,255,0.45);
+            }
+        @@keyframes ripple {
+            to
+
+        {
+            transform: scale(4);
+            opacity: 0;
+        }
+
+        }
+
+        /* ===== Card Content ===== */
+        .icon {
+            font-size: 70px;
+            margin-bottom: 25px;
+            color: #eaffea;
+        }
+
+        .glass-card h3 {
+            font-size: 1.7rem;
+            margin-bottom: 15px;
+        }
+
+        .glass-card p {
+            color: #f1fff1;
+            margin-bottom: 30px;
+        }
+
+        /* ===== Button ===== */
+        .login-btn {
+            padding: 12px 34px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            background: linear-gradient(135deg, #eaffea, #b6f5d2);
+            color: #0a2540;
+            transition: all .3s ease;
+        }
+
+            .login-btn:hover {
+                transform: scale(1.08);
+                box-shadow: 0 10px 25px rgba(0,0,0,.3);
+            }
+
+        .card_section{
+            justify-content: center !important;
+        }
+
+        /* Header Css */
+        /* ===== Header ===== */
+        .top-header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgb(255 255 255 / 67%);
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .header-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+        }
+
+        /* Logo Left */
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(56,239,125,0.6);
+        }
+
+           .header-logo img{
+               width: 60%;
+           }
+
+        /* Nav Right */
+        .header-nav {
+            display: flex;
+            gap: 26px;
+        }
+
+            .header-nav a {
+                color: #eaffea;
+                text-decoration: none;
+                font-weight: 500;
+                position: relative;
+            }
+
+                .header-nav a::after {
+                    content: "";
+                    position: absolute;
+                    bottom: -6px;
+                    left: 0;
+                    width: 0;
+                    height: 2px;
+                    background: #38ef7d;
+                    transition: 0.3s;
+                }
+
+                .header-nav a:hover::after {
+                    width: 100%;
+                }
+
+        .top-header {
+            width: 100%;
+            left: 0;
+            right: 0;
+            position: relative;
+        }
+
+        .main_subheading{
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .btn-cancelpin {
+            padding: 12px 34px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            background: linear-gradient(135deg, #eaffea, #b6f5d2);
+            color: #ff0000;
+            transition: all .3s ease;
+        }
+
+            .btn-cancelpin:hover {
+                padding: 12px 34px;
+                border-radius: 30px;
+                border: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #eaffea, #b6f5d2);
+                color: #fff;
+                background-color: #ff0000;
+                transition: all .3s ease;
+        }
+        .btn-login {
+            padding: 12px 34px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            background: linear-gradient(135deg, #eaffea, #b6f5d2);
+            color: #fff;
+            background-color: #00b5ff;
+            transition: all .3s ease;
+        }
+
+        .btn-login:hover {
+                padding: 12px 34px;
+                border-radius: 30px;
+                border: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #eaffea, #b6f5d2);
+                color: #00b5ff;
+                transition: all .3s ease;
+        }
+    </style>
+</head>
+@* Modal Popup *@
+<!-- PIN Verification Modal -->
+<!-- PIN Verification Modal -->
+<div class="modal fade" id="pinModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card p-4">
+            <h5 class="text-center mb-3">Enter 4-Digit PIN</h5>
+
+            <input type="password"
+                   id="pinInput"
+                   maxlength="4"
+                   class="form-control text-center fs-4 mb-3"
+                   placeholder="Password" onmouseenter="this.focus()" onkeydown="handleEnter(event)" />
+
+            <div class="text-danger text-center d-none" id="pinError">
+                Invalid PIN. Try again.
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-cancelpin" style="color:#ff0000" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-login" style="color: black;" onclick="verifyPin()">Login</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<body>
+
+    <!-- Background Shapes -->
+    <div class="shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <!-- ===== Header (FULL WIDTH) ===== -->
+    <header class="top-header">
+        <div class="container header-wrap">
+            <div class="header-logo">
+                @* <i class="fas fa-leaf"></i>
+                <span>Pashupati Group</span> *@
+                <img src="https://pashupatigrp.com/frontend/images/web-logo.webp" />
+            </div>
+
+            @* <nav class="header-nav">
+                <a href="@Url.Action("Index", "Home")">Products</a>
+                <a href="@Url.Action("Index", "Testpage")">Visitor</a>
+                <a href="@Url.Action("Index", "Login")">Login</a>
+            </nav> *@
+        </div>
+    </header>
+    <div class="content container">
+        
+
+        <!-- Animated Logo -->
+        <div class="logo">Pashupati Group</div>
+        <p class="main_subheading">Pashupati Group, with a 45-year legacy, is India's pioneering recycler, leveraging FDA innovative solutions in rPET and
+            rPolyolefins to turn waste into premium sustainable products, driving a cleaner & greener future.</p>
+        <section class="card_section">
+            <div class="row">
+
+                @*  <div class="col-lg-3 col-md-6">
+                <div class="glass-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <h3>Employee Portal</h3>
+                    <p>Manage employee profiles, attendance and payroll.</p>
+                    <button class="login-btn" onclick="redirectToEmployeeLogin()">Login</button>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card">
+                    <div class="icon"><i class="fas fa-building"></i></div>
+                    <h3>Pashupati Portal</h3>
+                    <p>Access company services, tools and updates.</p>
+                    <button class="login-btn" onclick="redirectToLogin()">Login</button>
+                </div>
+            </div> *@
+
+                <div class="offset-xl-2 offset-lg-2 col-sm-6 col-md-6 col-lg-4 col-xl-4">
+                    <div class="glass-card">
+                        <div class="icon"><i class="fas fa-boxes-stacked"></i></div>
+                        <h3>Product Portfolio</h3>
+                        <p>Explore innovative products and solutions.</p>
+                       @*  <button class="login-btn" onclick="redirectToProducts()">View Products</button> *@
+                        <button class="login-btn" onclick="openPinModal('products')">
+                            View Products
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
+                    <div class="glass-card">
+                        <div class="icon"><i class="fa fa-qrcode"></i></div>
+                        <h3>Visitor Registration</h3>
+                        <p>For external visitors, vendors and guests. No system access is granted through visitor registeration.</p>
+                        @* <button class="login-btn" onclick="redirectToVisitorRegistration()">Register Visitor</button> *@
+                        <button class="login-btn" onclick="openPinModal('visitor')">
+                            Register Visitor
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        
+
+    </div>
+    <script src="~/js/portfoliopinsession.js"></script>
+    <!-- Bootstrap JS FIRST -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- PIN Session Logic -->
+
+    <script>
+        const pinModal = document.getElementById('pinModal');
+
+        pinModal.addEventListener('shown.bs.modal', function () {
+            document.getElementById('pinInput').focus();
+        });
+             function handleEnter(event) {
+            if (event.key === "Enter") {
+                // event.preventDefault();
+                verifyPin(); // 👈 same as Login button click
+            }
+        }
+
+    </script>
+
+
+    <script>
+        function verifyPin() {
+            const enteredPin = document.getElementById("pinInput").value;
+
+            if (enteredPin === "2620") {
+                setPinSession(); // ✅ Store session
+                redirectAfterPin();
+            } else {
+                document.getElementById("pinError").classList.remove("d-none");
+            }
+        }
+    </script>
+ 
+
+
+    <!-- ===== JavaScript ===== -->
+    <script>
+        /* Mouse Parallax */
+        document.addEventListener("mousemove", e => {
+            document.querySelectorAll(".shape").forEach((shape, i) => {
+                const speed = (i + 1) * 0.02;
+                shape.style.transform =
+                    `translate(${e.clientX * speed}px, ${e.clientY * speed}px)`;
+            });
+        });
+
+        /* Ripple Effect */
+        document.querySelectorAll(".glass-card").forEach(card => {
+            card.addEventListener("click", function (e) {
+                const ripple = document.createElement("span");
+                ripple.classList.add("ripple");
+                const rect = card.getBoundingClientRect();
+                ripple.style.left = `${e.clientX - rect.left}px`;
+                ripple.style.top = `${e.clientY - rect.top}px`;
+                ripple.style.width = ripple.style.height = `${Math.max(rect.width, rect.height)}px`;
+                card.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+    </script>
+
+    <script>
+        function redirectToLogin() {
+           window.location.href = '@Url.Action("Index", "Login")';
+        }
+        function redirectToEmployeeLogin() {
+           window.location.href = '@Url.Action("Index", "EmpLogin")';
+        }
+        function redirectToProducts() {
+           window.location.href = '@Url.Action("Index", "Home")';
+        }
+         function redirectToVisitorRegistration() {
+           window.location.href = '@Url.Action("Index", "Testpage")';
+        }
+
+        
+    </script>
+
+    
+</body>
+</html>

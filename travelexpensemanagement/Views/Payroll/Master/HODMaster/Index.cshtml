@@ -1,0 +1,400 @@
+﻿@{
+    ViewBag.Title = "HOD Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">HOD Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "HODMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="HODMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DdlHodName">HOD Name <span class="required">*</span></label>
+                    <select id="DdlHodName" class="form-control">
+                        <option selected disabled>- Select HOD Name -</option>
+                    </select>
+                    @* <input type="text" class="form-control" id="TxtHODName" name="HODName" placeholder="Enter HOD Name"> *@
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDepartmentName">Department Name</label>
+                    <div class="input-icon-wrapper">
+                        <input type="text" class="form-control" id="TxtDepartmentName" name="DepartmentName" placeholder="Enter Department Name">
+                        <span class="input-icon"><i class="fa fa-search"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblHODMasterDD" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th class="checkbox-header"><input type="checkbox" id="chkSelectAll" /></th>
+                                    <th>Code</th>
+                                    <th>Dept Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                @*  <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div> *@
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    document.getElementById("chkSelectAll").addEventListener("change", function () {
+        const isChecked = this.checked;
+        document.querySelectorAll(".row-checkbox").forEach(function (checkbox) {
+            checkbox.checked = isChecked;
+        });
+    });
+</script>
+<script>
+    let employeeCode=0;
+    let	PreviousHOD;
+    let MasterTblId ;
+    let readOnly;
+
+    $(document).ready(function () {
+        GetDepartmentList();
+        GetEmployeeList();
+
+        MasterTblId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+
+        if (MasterTblId) {
+            GetMasterDataList(MasterTblId, readOnly);
+        }
+
+
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            const masterData = collectFormData();
+            console.log(masterData);
+            employeeCode=$('#DdlHodName').val();
+            if (!employeeCode) {
+                toastr.warning("Please enter HOD name");
+                return;
+            }
+        if (masterData.length === 0) {
+        toastr.warning("Please select at least one department");
+        return;
+        }
+            if (MasterTblId) {
+                EditMasterData(masterData);
+            } else {
+                SaveMasterData(masterData);
+            }
+        });
+
+    });
+
+    function SaveMasterData(masterData) {
+        if (!employeeCode) {
+            toastr.warning("HOD  Name is required.");
+            return;
+        }
+        console.log(masterData);
+        checkExistOrNot(employeeCode)
+            .done(function (data) {
+                if (data?.status && data?.exists) {
+                    toastr.warning("Duplicate HOD Name");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveHODMast", "HODMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(masterData),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success('Data saved successfully.');
+                            resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/HODMasterList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+            })
+            .fail(function () {
+                toastr.error("Error while checking HOD name.");
+            });
+    }
+
+    function EditMasterData(masterData) {
+        console.log(PreviousHOD, employeeCode);
+        if (PreviousHOD != employeeCode) {
+            checkExistOrNot(employeeCode)
+                .done(function (data) {
+                    if (data?.status && data?.exists) {
+                        toastr.warning("Duplicate HOD Name");
+                        return;
+                    }
+                    UpdateMasterData(masterData);
+                })
+                .fail(function () {
+                    toastr.error("Error while checking HOD Name.");
+                });
+        } else {
+            UpdateMasterData(masterData);
+        }
+    }
+
+    function UpdateMasterData(masterData) {
+        $.ajax({
+            url: '/HODMaster/UpdateHODMast',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(masterData),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success('Data updated successfully.');
+                    resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/HODMasterList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    function GetMasterDataList(MasterTblId, readOnly) {
+        $.ajax({
+            url: '/HODMaster/GetHODDetailsById',
+            type: 'GET',
+            data: { id: MasterTblId },
+            success: function (res) {
+                if (res.status && res.data) {
+                    console.log(res.data);
+                    fillFormFields(res.data);
+                    if (readOnly === 'true') {
+                        $('input, #tblHODMasterDD, #DdlHodName').prop('disabled', true);
+                        $('#btn-save, #cancelBtn').hide();
+                    } else {
+                        $('input, #tblHODMasterDD, #ddlDesignation').prop('disabled', false);
+                        $('#btn-save, #cancelBtn').show();
+                    }
+                } else {
+                    toastr.warning('No data found for this ID.');
+                }
+            },
+            error: function () {
+                toastr.error('Failed to load data.');
+            }
+        });
+    }
+
+    function resetFields() {        
+        $('#DdlHodName').prop('selectedIndex', 0);
+        GetDepartmentList();
+    }
+
+
+    function fillFormFields(dt) {
+        console.log(dt); 
+        let hodDt = dt[0];
+
+        PreviousHOD=hodDt.EMP_CODE;
+        setTimeout(function () {
+            $('#DdlHodName option').filter(function () {
+                return $(this).text().trim().toLowerCase() === hodDt.EMP_NAME.trim().toLowerCase();
+            }).prop('selected', true);
+        }, 300);
+
+        $('#tblHODMasterDD tbody tr').each(function () {
+            const row = $(this);
+            const deptCode = row.find('.code').text().trim();              
+            if (dt.some(item => item.DEPT_CODE.toString() === deptCode)) {
+                row.find('.ChkDepartment').prop('checked', true);   
+            }
+        });
+    }
+
+
+
+    function collectFormData() {
+        const employeeId = $('#DdlHodName').val();
+        const employeeName = $('#DdlHodName option:selected').text();
+
+        const allHODList = [];
+
+        $('#tblHODMasterDD tbody tr').each(function () {
+            const checkbox = $(this).find('.ChkDepartment');
+            if (checkbox.is(':checked')) {
+                const departmentCd = $(this).find('.code').text().trim();
+                const allow = 'Y';
+
+                const exists = allHODList.some(item => item.EmployeeCd === employeeId && item.DepartmentCd === departmentCd);
+                if (!exists) {
+                    allHODList.push({
+                        EmployeeCd: employeeId,
+                        EmployeeName: employeeName,
+                        DepartmentCd: departmentCd,
+                        Allow: allow
+                    });
+                }
+            }
+        });
+
+        return {
+            EmployeeCd: employeeId,
+            EmployeeName: employeeName,
+            HODModels: allHODList
+        };
+    }
+
+
+
+    function checkExistOrNot(HOD) {
+        return $.ajax({
+            url: '/HODMaster/getExistOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: { HOD: HOD }
+        });
+    }
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+                if (MasterTblId) {
+                    GetMasterDataList(MasterTblId, readOnly);
+                } else {
+                    resetFields();
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+            }
+        });
+    });
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+    function GetEmployeeList()
+      {
+          $.ajax({
+              url: '@Url.Action("EmployeeList", "HODMaster")',
+              type: 'GET',
+              dataType: 'json',
+              success: function (response) {
+                  if (response.status) {
+                      var $departmentDropdown = $('#DdlHodName');
+                      $departmentDropdown.empty();
+                      $departmentDropdown.append('<option selected disabled>- Select HOD Name -</option>');
+                      $.each(response.data, function (index, item) {
+                          $departmentDropdown.append('<option value="' + item.CODE + '">' + item.NAME + '</option>');
+                      });
+                  } else {
+                      toastr.error("HOD Name Load failed");
+                  }
+              },
+              error: function (xhr, status, error) {
+                  toastr.error("HOD Name Load failed", xhr.error);
+              }
+          });
+      }
+
+    function GetDepartmentList() {
+        $.ajax({
+            url: '@Url.Action("DepartmentList", "HODMaster")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const DeparmentList = data.data || [];
+                let tbody = $('#tblHODMasterDD tbody');
+                tbody.empty();
+                console.log(DeparmentList);
+                if (DeparmentList.length === 0) {
+                    tbody.append('<tr><td colspan="10" class="text-center text-muted"> </td></tr>');
+                    return;
+                }
+                $.each(DeparmentList, function (index, item) {
+                    tbody.append(`
+                        <tr>
+                        <td class="text-center"><input type="checkbox" class="row-checkbox ChkDepartment" /></td>
+                        <td class="code">${item.CODE}</td>
+                        <td class="department">${item.NAME}</td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function (xhr) {
+                toastr.error('Error loading  Data list: ' + xhr.responseText);
+            }
+        });
+    }
+
+</script>

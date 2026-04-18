@@ -1,0 +1,174 @@
+﻿@{
+    ViewBag.Title = "Cost Category Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Cost Category Master</legend>
+
+    <div class="row">
+        <div class="offset-md-8 col-md-4 btn-align">
+            <button id="btnBackToList" onclick="window.location.href='@Url.Action("Index", "CostCategoryMasterList")'" type="button" class="btn btn-primary">
+                <i class="fa fa-list"></i> Back to list
+            </button>
+        </div>
+    </div>
+      
+    <form id="CostCategoryMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName"><span class="required">*</span>Name</label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtCostCode"><span class="required">*</span>Cost Code</label>
+                    <input type="text" class="form-control" id="TxtCostCode" name="CostCode" placeholder="Enter Cost Code">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCostType"><span class="required">*</span>Cost Type</label>
+                    <select class="form-control" id="ddlCostType" name="CostType">
+                        <option value="Product">-- Select Cost Type --</option>
+                        <option value="Product">Product</option>
+                        <option value="Capital">Capital</option>
+                        <option value="NA">NA</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3 btn-align">
+                <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+        if (!isNaN(rowId) && rowId > 0) {
+            loadCostCategoryById(rowId);
+            if (isReadOnly) {
+                setCostCategoryFormReadOnly();
+            }
+        }
+        $('#ACTIVE').on('change', function () {
+            const status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    // Submit form
+    $('#CostCategoryMasterForm').on('submit', function (e) {
+        e.preventDefault();
+        if (!validateRequiredField('#TxtName', 'Name')) return;
+        if (!validateRequiredField('#TxtCostCode', 'Cost Code')) return;
+        if (!validateRequiredField('#ddlCostType', 'Cost Type')) return;
+
+        const code = parseInt($('#CODE').val()) || 0;
+
+        const costCatData = {
+            CODE: code,
+            COMP_CODE: 1, // Replace with dynamic value
+            NAME: $('#TxtName').val().trim(),
+            COSTCODE: $('#TxtCostCode').val().trim(),
+            COSTTYPE: $('#ddlCostType').val(),
+            ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+            UUSER: 1, // Replace with dynamic user ID
+            UDATE: new Date().toISOString(),
+            EUSER: 1,
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? 'E' : 'A',
+            WSID: 'WEB',
+            LIP: '127.0.0.1',
+            LID: 'WEB',
+            ACTION: code > 0 ? 'UPDATE' : 'INSERT'
+        };
+
+        // Validation
+        if (!costCatData.NAME) {
+            toastr.warning("Please enter Name.");
+            $('#TxtName').focus();
+            return;
+        }
+
+        $.ajax({
+            url: '/CostCategoryMaster/SaveCostCatMaster', // Adjust controller path
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(costCatData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Cost Category saved successfully!");
+                    // $('#CostCategoryMasterForm')[0].reset();
+                    // setTimeout(function () {
+                    //     window.location.href = '/CostCategoryMasterList/Index';
+                    // }, 1000);
+                    setCostCategoryFormReadOnly();
+
+                } else {
+                    const message = response.message || "Something went wrong while saving.";
+                    toastr.warning(message);
+                }
+            },
+            error: function (xhr) {
+                const err = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + err);
+            }
+        });
+    });
+
+    // Load Cost Category by ID
+    function loadCostCategoryById(code) {
+        $.ajax({
+            url: '/CostCategoryMasterList/GetCostCategoryByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (res) {
+                if (!res.success || !res.data) {
+                    toastr.warning("No data found.");
+                    return;
+                }
+
+                const costCat = res.data;
+                $('#CODE').val(costCat.code);
+                $('#TxtName').val(costCat.name);
+                $('#TxtCostCode').val(costCat.costcode);
+                $('#ddlCostType').val(costCat.costtype);
+                $('#ACTIVE').prop('checked', costCat.active === 1 || costCat.active === true);
+                $('#statusText').text(costCat.active ? 'Active' : 'Inactive');
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Error loading cost category: " + error);
+            }
+        });
+    }
+
+    // Make form read-only
+    function setCostCategoryFormReadOnly() {
+        const form = $('#CostCategoryMasterForm');
+        form.find('input, select, textarea').prop('disabled', true);
+        $('#customToggle').addClass('disabled'); // Optional if toggle UI exists
+    }
+
+</script>

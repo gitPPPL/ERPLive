@@ -1,0 +1,539 @@
+﻿@{
+    ViewBag.Title = "A/C Opening Balance Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">A/C Opening Balance Entry</legend>
+    <form id="ACOpeningBalanceEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-6">
+                <fieldset>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlAC">For A/C</label>
+                                <select class="form-control" id="ddlAC">
+                                    <option value="">Select For A/C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-mt">
+                                <button id="btn_print" type="button" class="btn btn-print"><i class="fa fa-search"></i>Show Opening Entries</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblACOpeningBalanceEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Voucher Type</th>
+                            <th>Date</th>
+                            <th>Voucher No.</th>
+                            <th>Srno.</th>
+                            <th>Opening Balance</th>
+                            <th>Dr/Cr</th>
+                            <th>Narration</th>
+                            <th>Bill No</th>
+                            <th>Bill Date</th> 
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="offset-md-8 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+
+    let itemRecords = [
+        'ddlVtype',
+        'dtVDate',
+        'txtvoucherNo',
+        'txtsrNo',
+        'txtopeningBalance',
+        'ddldrCr',
+        'txtnarration',
+        'txtbillNo',
+        'txtbillDate'
+    ];
+       
+    $(document).ready(function () {
+      GetPartytList();
+      addItemRecordRow();
+
+    $(document).on('click', '#btn_print', async function () {
+        const partyCd = $('#ddlAC').val();
+        $.ajax({
+            url: "/ACOpeningBalanceEntry/GetOpeningEntriesData",
+            type: "GET",
+            data: { partyCode: partyCd },
+            dataType: "json",
+            success: async function (response) {
+                if (response.status) {
+                    const data = response.data;
+                    console.log(data);
+                    const $tbody = $('#tblACOpeningBalanceEntry tbody');
+                    $tbody.empty();
+
+                    for (let index = 0; index < data.length; index++) {
+                        const item = data[index];
+                        const idx = index + 1;
+                        addItemRecordRow();
+                        if (typeof bindDropdownData === "function") {
+                            await bindDropdownData(idx);
+                        }
+                        
+                        $(`#ddlVtype${idx}`).val(item.V_TYPE).trigger('change');
+                        $(`#dtVDate${idx}`).val(item.V_DATE ? item.V_DATE.split('T')[0] : ""); 
+                        $(`#txtvoucherNo${idx}`).val(item.V_NO ?? "");
+                        $(`#txtsrNo${idx}`).val(item.SNO);
+                        $(`#txtopeningBalance${idx}`).val(item.AMT ?? "");
+                        $(`#ddldrCr${idx}`).val(item.DR_CR ?? "");
+                        $(`#txtnarration${idx}`).val(item.NARRATION ?? "");
+                        $(`#txtbillNo${idx}`).val(item.BILL_NO ?? "");
+                        $(`#txtbillDate${idx}`).val(item.BILL_DATE ? item.BILL_DATE.split('T')[0] : "");                      
+ 
+                    }
+                } else {
+                    alert("No data found for this party code!");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", error);
+                alert("Something went wrong while fetching data!");
+            }
+        });
+    });
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+      if (!validateRequiredField('#ddlAC','Account Name')) return;
+     
+        try {
+          const data = await collectFormData(); 
+          console.log(data);
+          if (data.ledger2.rowCount == 0) {
+        console.log("No rows to process.");
+        return;  // Exit the function early
+    }
+
+          SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+      });
+
+    $(document).on('change', 'select[id^="ddlVtype"]', function() {
+        let rowId = $(this).closest('tr').attr('id');
+        let rowCount = rowId.replace('row', '');
+
+        const today = new Date();
+        const todayDate = today.getFullYear() + '-' +
+                          (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                          today.getDate().toString().padStart(2, '0');
+
+        $(`#dtVDate${rowCount}`).val(todayDate);
+        $(`#txtbillDate${rowCount}`).val(todayDate);
+        $(`#txtsrNo${rowCount}`).val(rowCount);
+    });
+
+    
+      $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addItemRecordRow();
+     });
+
+        // Delete row
+        $(document).on('click', '.btn-delete-action', function () {
+            const $row = $(this).closest('tr');
+            $row.remove();             
+       });
+
+
+    });
+    
+
+</script>
+
+<script>
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateAcOpeningBalanceEntry", "ACOpeningBalanceEntry")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            $('#tblACOpeningBalanceEntry tbody').empty();
+                            $('#ddlVtype').val('');
+
+                            // setTimeout(() => {
+                            //     window.location.href = '/EmployeeGateOutList/Index';
+                            // }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    async function collectFormData() {
+        const ledgerData = collectDetailTabledata();
+        const data = {
+            partyCode: $('#ddlAC').val() || 0,
+            ledger2: ledgerData
+        };
+
+        return data;
+    }
+ 
+        function parseDate(value) {
+        if (!value) return null;
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        }
+
+        function collectDetailTabledata() {
+        const rows = $('#tblACOpeningBalanceEntry tbody tr');
+        const data = [];
+        const partyCode = $('#ddlAC').val() || 0;
+
+        rows.each(function (index, row) {
+            const rowIndex = index + 1;
+
+            const drCrValue = $(`#ddldrCr${rowIndex}`).val()?.trim().toUpperCase();
+            const V_TYPE = $(`#ddlVtype${rowIndex}`).val()?.trim() || "";
+            const V_NO = $(`#txtvoucherNo${rowIndex}`).val()?.trim() || "";
+
+            // Only proceed if the required fields are filled
+            if (drCrValue && V_TYPE && V_NO) {
+                const item = {
+                    V_TYPE: V_TYPE,
+                    V_NO: V_NO,
+                    V_DATE: parseDate($(`#dtVDate${rowIndex}`).val()),
+                    DOC_ID: null,
+                    SNO: rowIndex,
+                    DR_CODE: partyCode,
+                    CR_CODE: partyCode,
+                    AMT: parseFloat($(`#txtopeningBalance${rowIndex}`).val()) || 0,
+                    NARRATION: $(`#txtnarration${rowIndex}`).val()?.trim() || "",
+                    CHQ_NO: null,
+                    CHQ_DATE: null,
+                    CLG_DATE: null,
+                    RTGS_TYPE: null,
+                    RTGS_NO: null,
+                    BILL_NO: $(`#txtbillNo${rowIndex}`).val()?.trim() || "",
+                    BILL_DATE: parseDate($(`#txtbillDate${rowIndex}`).val()),
+                    HOLD_TYPE: null,
+                    HOLD_DATE: null,
+                    EMP_CODE: null,
+                    SRNO: parseInt($(`#txtsrNo${rowIndex}`).val()) || null,
+                    USD_AMT: null,
+                    USD_RATE: null,
+                    FEXCH_BANKUSD: null
+                };
+ 
+                const code = parseInt($(`#ddlVtype${rowIndex}`).val()) || null;
+                if (drCrValue === 'DR') {
+                    item.DR_CODE = code;
+                } else if (drCrValue === 'CR') {
+                    item.CR_CODE = code;
+                }
+                data.push(item);   
+            }
+        });
+
+        return data;
+    }
+
+
+    function GetPartytList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "ACOpeningBalanceEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlAC');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Department -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+ 
+    function addItemRecordRow() {
+        let tbody = $('#tblACOpeningBalanceEntry tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+        <tr class="no-border-input" id="row${rowCount}">
+                    <td>
+                    <select class="form-control" id="ddlVtype${rowCount}">
+                    <option value="">- Select Department -</option>
+                    </select>
+                    </td>
+                    <td><input type="date" class="form-control" id="dtVDate${rowCount}" /></td>
+                    <td><input type="text" class="form-control" oninput="allowOnlyNumbers(this)" maxlength="9" id="txtvoucherNo${rowCount}" /></td>
+                    <td><input type="text" class="form-control" id="txtsrNo${rowCount}" maxlength="3" /></td>
+                    <td><input type="text" class="form-control" oninput="allowOnlyDecimal(this)" maxlength="9" id="txtopeningBalance${rowCount}" /></td>
+                    <td>                   
+                     <select class="form-control" id="ddldrCr${rowCount}">
+                    <option value="">- Select Dr/Cr -</option>
+                    <option>Dr</option>
+                    <option>Cr</option>
+                    </select>
+                    </td>
+                    <td><input type="text" class="form-control" id="txtnarration${rowCount}"  maxlength="200" /></td>
+                    <td><input type="text" class="form-control" oninput="allowOnlyNumbers(this)" maxlength="9" id="txtbillNo${rowCount}"  /></td>
+                    <td><input type="date" class="form-control" id="txtbillDate${rowCount}"  /></td>                  
+                    <td>
+                        <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+
+        </tr>
+        `;
+
+        tbody.append(newRow);
+        bindDropdownData(rowCount);
+        setEnterKeyFocusOnTable?.(itemRecords, rowCount);
+
+    }
+    
+
+    function bindDropdownData(rowCount) {
+        const vtypeSelect = $(`#ddlVtype${rowCount}`);
+        
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: defaultText,
+                                    disabled: true,
+                                    selected: true
+                                })
+                            );
+
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '100%',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: 0
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} load failed`);
+                            resolve();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(`Error loading ${defaultText}: ${error}`);
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+        return Promise.all([ 
+            loadDropdown(
+                '@Url.Action("GetVtypeList", "ACOpeningBalanceEntry")',
+                vtypeSelect,
+                "- Select VType -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            )
+        ]);
+    }
+
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+
+
+
+</script>

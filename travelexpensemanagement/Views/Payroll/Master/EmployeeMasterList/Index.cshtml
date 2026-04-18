@@ -1,0 +1,394 @@
+﻿@{
+	ViewBag.Title = "Employee Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;   
+		}
+	}
+
+}
+
+<fieldset>
+	<legend class="legend-field">Employee Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			@if (canAdd)
+			{
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "EmployeeMaster")'" type="submit" class="btn btn-primary">
+					<i class="fa fa-plus"></i>Add Employee
+				</button>
+			}
+
+			@if (canPrint)
+			{
+				<button class="btn btn-print" onclick="callGetReportAsPdf()">
+					<i class="fa fa-print"></i> Print
+				</button>
+			}
+			@if (canExport)
+			{
+				<button class="btn btn-export" onclick="exportToExcel()">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+			}
+			@if (canMail)
+			{
+				<button class="btn btn-info">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+			}
+			@if (canApproval)
+			{
+				<button class="btn btn-dark">
+					<i class="fa fa-check"></i> Approve
+				</button>
+			}
+			@if (canDocDetail)
+			{
+				<button class="btn btn-primary">
+					<i class="fa fa-file-text"></i> Doc Detail
+				</button>
+			}
+			@* <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "EmployeeMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Employee
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button> *@
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblEmployeeMaster" class="table-width">
+				<thead class="table-head">
+					<tr>						 
+						<th>Emp Code</th>
+						<th>Employee Name</th>
+						<th>Father's Name</th>						 
+						<th>City</th>						 
+						<th>Department</th>
+						<th>Designation</th>
+						<th>Join Date</th>
+						<th>Resign Date</th>
+						<th>Active</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<div class="pagination-wrapper">
+		<ul class="pagination" id="tablePagination"></ul>
+	</div>
+</fieldset>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+
+	 var canAdd = @canAdd.ToString().ToLower();
+	var canEdit = @canEdit.ToString().ToLower();
+	var canDelete = @canDelete.ToString().ToLower();
+	var canPrint = @canPrint.ToString().ToLower();
+	var canExport = @canExport.ToString().ToLower();
+	var canMail = @canMail.ToString().ToLower();
+	var canApproval = @canApproval.ToString().ToLower();
+	var canDocDetail = @canDocDetail.ToString().ToLower();
+
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		GetMasterDataList();
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			GetMasterDataList();
+		});
+	});
+
+	function GetMasterDataList() {
+		const searchTerm = $('#searchBox').val().trim();
+		$.ajax({
+			url: '@Url.Action("GetEmployeeMastData", "EmployeeMasterList")',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const mastListData = res.data || [];
+				const totalCount = res.totalCount || 0;
+				let tbody = $('#tblEmployeeMaster tbody');
+				tbody.empty();
+				console.log(mastListData);
+				if (mastListData.length === 0) {
+					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+					return;
+				}
+				$.each(mastListData, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td class="code">${item.CODE}</td>						 
+							<td>${item.NAME}</td>
+							<td>${item.FATHER_NAME}</td>
+							<td>${item.City}</td>
+							<td>${item.DEPT_CODE}</td>
+							<td>${item.DESG_CODE}</td>							 
+							<td>${item.JOIN_DATE}</td>
+							<td>${item.RESIGN_DATE}</td>
+							<td>${item.ACTIVE==1 ? "Yes" : "No"}</td>							 
+							<td>
+								<button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.CODE}')" title="Edit">
+									<i class="fas fa-edit"></i>
+								</button>
+								<button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.CODE}')" title="View Detail">
+									<i class="fas fa-eye"></i>
+								</button>
+								<button class="btn btn-sm btn-light btn-delete" title="Delete">
+									<i class="fas fa-trash text-danger"></i>
+								</button>
+										<button class="btn btn-sm btn-light btn-details" onclick="showEmployeePopup('${item.CODE}')" title="Details">
+									<i class="fa fa-file text-info"  style="cursor:pointer;"></i>
+								</button>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading Shift Data list: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (total <= 0 || totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		GetMasterDataList();
+	}
+
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/EmployeeMaster/Index?id=' + encodeURIComponent(rowId);
+	}
+
+	function viewMenuDetails(rowId) {
+		window.location.href = '/EmployeeMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+ 
+
+    $(document).on('click', '.btn-delete', function() {
+	    const $row = $(this).closest('tr');
+		const CodeforDel = $row.find('.code').text().trim();	
+		confirmAction().then((confirmed) => {
+			if (!confirmed) return;  
+
+			$.ajax({
+				url: '/EmployeeMaster/DeleteEmployeeMaster',
+				type: 'POST',
+				data: { Code: CodeforDel },
+				success: function (res) {
+					if (res.status) {						 
+						showFlashMessageByKey('delete', 'success');
+						$row.remove();
+					    GetMasterDataList();
+					} else {
+						Swal.fire('Error!', 'Error deleting item group: ' + res.message, 'error');
+					}
+				},
+				error: function (xhr) {
+					Swal.fire('Error!', 'Error deleting item group: ' + xhr.responseText, 'error');
+				}
+			});
+		});
+	});
+ 
+	function exportToExcel() {
+	  fetch('/EmployeeMasterList/ExportAllDocs')
+		.then(response => {
+		  if (!response.ok) throw new Error("Network response was not ok");
+		  return response.json();
+		})
+		.then(responseData => {
+		  if (!responseData.status) {
+			toastr.error("Failed to fetch data.");
+			return;
+		  }
+		  const dataArray = responseData.data;
+		  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+			toastr.warning("No data available to export.");
+			return;
+		  }
+ 
+		  const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) }); 
+		  const colWidths = Object.keys(dataArray[0]).map(key => {
+			const maxLen = Math.max(
+			  key.length,
+			  ...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
+			);
+			return { wch: maxLen + 2 };  
+		  });
+		  worksheet['!cols'] = colWidths;
+
+		 
+		  const headerRowNumber = 1;
+		  Object.keys(dataArray[0]).forEach((_, idx) => {
+			const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
+			if (!worksheet[cellAddress]) return;
+			worksheet[cellAddress].s = {
+			  font: { bold: true },
+			  fill: { fgColor: { rgb: "FFFF00" } }  
+			};
+		  });
+
+		  const workbook = XLSX.utils.book_new();
+		  XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+		  const pageName = "Employee_Master_List";
+		  const now = new Date();
+		  const pad = n => String(n).padStart(2, '0');
+		  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+		  const fileName = `${pageName}_${timestamp}.xlsx`;
+ 
+		  XLSX.writeFile(workbook, fileName);
+		})
+		.catch(error => {
+		  console.error("Export failed:", error);
+		  toastr.error("Failed to export data.");
+		});
+	}
+
+function callGetReportAsPdf() {
+			var reportName = "rpt_emp_mast";
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+			type: 'GET',
+			data: { Reportname: reportName },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
+
+
+	 function showEmployeePopup(docCode) {
+		 $.ajax({
+				url: '/EmployeeMasterList/GetEmpDetail',
+			 type: 'Get',
+			 dataType: 'json',  
+			 data: { Code: docCode },
+			 success: function(response) {
+					 if(response.status) {
+							 console.log(response.data);
+					 showDocumentPopupjQuery(response.data, docCode);
+				 } else {
+					 toastr.error("Failed to get document details.");
+				 }
+			 },
+			 error: function() {
+				 toastr.error("An error occurred while fetching document details.");
+			 }
+		 });
+	 }
+
+</script>

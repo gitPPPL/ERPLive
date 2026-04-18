@@ -1,0 +1,318 @@
+﻿@{
+    ViewBag.Title = "Master Insert";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Form -->
+<fieldset>
+    <legend class="legend-field">Menu Master</legend>
+    <div class="row">
+
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "MenuMaster")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="MenuMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="MODULE_CODE">Select Module<span class="required">*</span></label>
+                    <select class="form-control" id="MODULE_CODE" name="MODULE_CODE">
+                        <option value="">-- Select Module --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="PARENTMODULE_CODE">Parent Module<span class="required">*</span></label>
+                    <select class="form-control" id="PARENTMODULE_CODE" name="PARENTMODULE_CODE">
+                        <option value="">-- Select Parent Module --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="MENU_NAME">Menu Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="MENU_NAME" name="MENU_NAME" placeholder="ENTER MODULE NAME">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DISPLAY_NAME">Dislay Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="DISPLAY_NAME" name="DISPLAY_NAME" placeholder="ENTER DISPLAY NAME">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="FORM_NAME">Web Form Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="FORM_NAME" name="FORM_NAME" placeholder="ENTER WEB FORM NAME">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="MENU_TYPE">Menu Type<span class="required">*</span></label>
+                    <select class="form-control" id="MENU_TYPE" name="MENU_TYPE">
+                        <option value="">-- Select Menu Type --</option>
+                        <option value="Master">Master</option>
+                        <option value="Transaction">Transaction</option>
+                        <option value="Report">Report</option>
+                        <option value="Others">Others</option>
+                        <!-- Add more types as needed -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="SECURITY_TYPE">Security Type<span class="required">*</span></label>
+                    <select class="form-control" id="SECURITY_TYPE" name="SECURITY_TYPE">
+                        <option value="">-- Select Security Type --</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="MENU_OPTION">Menu Option<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="MENU_OPTION" name="MENU_OPTION" maxlength="50" placeholder="ENTER MODULE OPTION">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TAG">Tag</label>
+                    <input type="text" class="form-control" id="TAG" name="TAG" maxlength="50" placeholder="ENTER TAG">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <div class="form-row">
+                        <input type="checkbox" id="DEFAULT_APPROVAL" name="DEFAULT_APPROVAL" value="1" checked>
+                        <label class="checkbox-label" for="DEFAULT_APPROVAL">Default Approval</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-last">
+                <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            </div>
+            </div>
+        </div>
+
+    </form>
+
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = parseInt(urlParams.get('id'));
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadMenuById(rowId);
+
+                if (isReadOnly) {
+                    setFormReadOnly();
+                }
+            }
+        });
+        ModuleDropdownList();
+        // When module changes, load parent modules
+        $('#MODULE_CODE').on('change', function () {
+            var moduleCode = $(this).val();
+            if (moduleCode) {
+                ParentModuleDropdownList(moduleCode);
+            } else {
+                $('#PARENTMODULE_CODE').empty().append('<option value="">-- Select Parent Module --</option>');
+            }
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    function setFormReadOnly() {
+        const form = $('#MenuMasterForm');
+        form.find('input[type="text"], select, textarea').prop('disabled', true);
+        form.find('input[type="checkbox"]').prop('disabled', true);
+        form.find('button').prop('disabled', true);
+    }
+
+    //Dropdown Loaders-------------------------------------
+    function ModuleDropdownList() {
+        $.ajax({
+            url: '/MenuMaster/GetModuleMasterDdl',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#MODULE_CODE');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Module --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    function ParentModuleDropdownList(moduleCode) {
+        $.ajax({
+            url: '/MenuMaster/GetParentModuleDdl?ModuleCode=' + moduleCode,
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#PARENTMODULE_CODE');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Parent Module --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading parent module: ", xhr.responseText);
+                toastr.error('Error loading parent module: ' + error);
+            }
+        });
+    }
+
+    $('#MenuMasterForm').on('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        if (!validateRequiredField('#MODULE_CODE', 'Select Module')) return;
+        if (!validateRequiredField('#PARENTMODULE_CODE', 'Parent Module')) return;
+        if (!validateRequiredField('#MENU_NAME', 'Menu Name')) return;
+        if (!validateRequiredField('#DISPLAY_NAME', 'DISPLAY NAME')) return;
+        if (!validateRequiredField('#FORM_NAME', 'FORM NAME')) return;
+        if (!validateRequiredField('#MENU_TYPE', 'MENU TYPE')) return;
+        if (!validateRequiredField('#SECURITY_TYPE', 'SECURITY TYPE')) return;
+        if (!validateRequiredField('#MENU_OPTION', 'MENU OPTION')) return;
+
+        var code = parseInt($('#CODE').val()) || 0;
+        var menuData = {
+            CODE: code,
+            MODULE_CODE: parseInt($('#MODULE_CODE').val()) || 0,
+            MAINMENU_CODE: parseInt($('#PARENTMODULE_CODE').val()) || 0,
+            MENU_OPTION: parseInt($('#MENU_OPTION').val()) || 0,
+            NAME: $('#MENU_NAME').val(),
+            DISPLAY_NAME: $('#DISPLAY_NAME').val(),
+            WebFORM_NAME: $('#FORM_NAME').val(),
+            TAG_NAME: $('#TAG').val(),
+            MENU_TYPE: $('#MENU_TYPE').val(),
+            SECURITY_TYPE: parseInt($('#SECURITY_TYPE').val()) || 0,
+            APPROVAL: $('#DEFAULT_APPROVAL').is(':checked') ? 'Yes' : 'No',
+            ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+            UUSER: 1,
+            UDATE: new Date().toISOString(),
+            EUSER: 1,
+            EDATE: new Date().toISOString(),
+            AED: "A",
+            WSID: "WEB",
+            LIP: "127.0.0.1",
+            LID: "WEB",
+            LOCK_EDIT: 0,
+            ACTION:code > 0 ? "UPDATE" : "INSERT"
+        };
+
+        $.ajax({
+            url: '/MenuMaster/SaveMenu',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(menuData),
+            success: function (response) {
+                toastr.success("Saved successfully!");
+                $('#MenuMasterForm')[0].reset();
+                setTimeout(function () {
+                        window.location.href = '/MenuMaster/Index';
+                }, 1000);
+            },
+            error: function (xhr) {
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    });
+
+    function LoadMenuById(code) {
+        $.ajax({
+            url: '/MenuMaster/GetMenuByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (data) {
+                console.log(data);
+                console.log("Active from DB:", data.active);
+                // Set values into form fields
+                $('#CODE').val(data.code);
+                $('#MODULE_CODE').val(data.modulE_CODE).trigger('change');
+
+                // Delay to ensure parent dropdown loads correctly after module selection
+                setTimeout(() => {
+                    $('#PARENTMODULE_CODE').val(data.mainmenU_CODE);
+                }, 300);
+
+                $('#MENU_OPTION').val(data.menU_OPTION);
+                $('#MENU_NAME').val(data.name);
+                $('#DISPLAY_NAME').val(data.displaY_NAME);
+                $('#FORM_NAME').val(data.webFORM_NAME);
+                $('#TAG').val(data.taG_NAME);
+                $('#MENU_TYPE').val(data.menU_TYPE);
+                $('#SECURITY_TYPE').val(data.securitY_TYPE);
+
+                // Checkbox handling
+                $('#DEFAULT_APPROVAL').prop('checked', data.approval === "Yes");
+                $('#ACTIVE').prop('checked', data.active === 1);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading menu by ID:", status, error);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+</script>
+
+
+
+
+
+

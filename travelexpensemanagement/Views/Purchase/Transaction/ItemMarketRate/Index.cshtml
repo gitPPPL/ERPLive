@@ -1,0 +1,606 @@
+﻿@{
+    ViewBag.Title = "Item Market Rate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Item Market Rate</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "ItemMarketRateList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div> 
+    </div>
+    <form id="ItemMarketRateForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option>--Select DOC Type--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlItemGroup">Item Group</label>
+                    <select class="form-control" id="ddlItemGroup">
+                        <option>--Select Item Group--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtEffFrom">Eff. From</label>
+                    <input type="date" class="form-control" id="DtEffFrom">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtExpiredOn">Expired On</label>
+                    <input type="date" class="form-control" id="DtExpiredOn">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea type="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2 mb-2">
+                <div class="btn-last">
+                    <button id="btn-load-data" type="button" onclick="LoadPreviousData()" class="btn btn-success"><i class="fa fa-rotate-left"></i>Load Previous Data</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblPurchaseBillPassEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>ICode</th>
+                            <th>Item Name</th>
+                            <th>Minimum Rate</th>
+                            <th>Maximum Rate</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>  
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="button" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    let marketRateItems = [];
+    let globalItemMap = {};
+
+
+     //getting 
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+        loadItemList(compCode).then(() => {
+            if (!isNaN(rowId) && rowId > 0) {
+              loadFullItemMarketRateByVno(rowId);
+            } else {
+                addNewRowBelow(true);
+            }
+            loadNextDocNo(yearCode);
+            loadDocTypeList();
+            loadItemGroupTypeList(compCode);
+        });
+    });
+
+
+    function loadNextDocNo(yearC){
+        $.ajax({
+            url: '/ItemMarketRate/GetNextV_NO',
+            type: 'GET',
+            data: { yearCode : yearC },
+            success: function (response) {
+                $('#NumDocNo').val(response).attr('disabled',true);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    }
+    function loadDocTypeList() {
+        docTypeMap = {};
+        return $.ajax({
+            url: '/ItemMarketRate/GetDocumentTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDocType');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Doc Type --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    docTypeMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading DocType list: ' + error);
+            }
+        });
+    }
+
+    function loadItemGroupTypeList(compC) {
+        docTypeMap = {};
+        return $.ajax({
+            url: '/ItemMarketRate/GetItemGroupTypeList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: compC },
+            success: function (data) {
+                console.log(data);
+                var ddl = $('#ddlItemGroup');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Item Group --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item + '">' + item + '</option>');
+                    docTypeMap[item] = item;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading DocType list: ' + error);
+            }
+        });
+    }
+
+
+    function loadItemList(compC) {
+        return $.ajax({
+            url: '/ItemMarketRate/GetItemList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode : compC },
+        }).then(function (data) {
+            const map = {};
+            data.forEach(item => {
+                map[item.value] = item.text;
+            });
+            globalItemMap = map;  // ✅ Important!
+            return map;
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading Item list: ' + error);
+            return {};
+        });
+    }
+
+    $(document).on('change', 'select[name^="itemName"]', function () {
+        const selectedCode = $(this).val();
+        const row = $(this).closest('tr');
+        const rowIndex = row.index(); // same as marketRateItems index
+
+        // Update itemCode input
+        $(`#itemCode_${rowIndex}`).val(selectedCode);
+
+        // Optional: also update in the array
+        if (marketRateItems[rowIndex]) {
+            marketRateItems[rowIndex].iteM_CODE = selectedCode;
+        }
+    });
+
+
+    //function to LOAD DATA from MARKET_RATE 1,2 Table
+    function loadFullItemMarketRateByVno(vNo) {
+        $.ajax({
+            url: '/ItemMarketRate/GetItemMarketRateByVno',
+            type: 'GET',
+            data: { vNo },
+            success: function (res) {
+                if (!res.success || !res.header) {
+                    toastr.warning("Item Market Rate not found.");
+                    return;
+                }
+
+                const header = res.header;
+                marketRateItems = res.items || [];
+
+                $('#ddlDocType').val(header.v_TYPE).trigger('change');
+                $('#DtDocDate').val(header.v_DATE?.substring(0, 10));
+                $('#NumDocNo').val(header.v_NO);
+                $('#ddlItemGroup').val(header.mgrouP_TYPE).trigger('change');
+                $('#DtEffFrom').val(header.efF_DATE?.substring(0, 10));
+                $('#DtExpiredOn').val(header.exP_DATE?.substring(0, 10));
+                $('#TxtRemarks').val(header.remarks);
+
+
+                // ✅ Render rows manually, one by one
+                const tbody = $('#tblPurchaseBillPassEntry tbody');
+                tbody.empty();
+
+                marketRateItems.forEach((row, i) => {
+                    const isLastRow = (i === marketRateItems.length - 1);
+                    const rowHtml = generateRowHtml(row, i, globalItemMap, isLastRow);
+                    tbody.append(rowHtml);
+                });
+
+                $('select.form-select').select2();
+            },
+            error: function (xhr) {
+                toastr.error("Failed to load quotation: " + xhr.responseText);
+            }
+        });
+    }
+    function generateRowHtml(row, i, itemMap, isLastRow = false) {
+        const getValue = value => (value === undefined || value === null || value === '') ? '' : value;
+        const dropdownOptions = generateDropdownOptions(itemMap, getValue(row.iteM_CODE));
+
+        return `
+            <tr>    
+                <td style="display:none;">
+                    <input type="hidden" id="hidden_${i}" name="hidden[${i}]" value="${getValue(row.v_NO)}" />
+                </td>
+                <td>
+                    <input class="form-control" type="text" id="itemCode_${i}" name="itemCode[${i}]" class="form-control-sm" value="${getValue(row.iteM_CODE)}" readonly />
+                </td>
+                <td>
+                    <select id="itemName_${i}" name="itemName[${i}]" class="form-select">
+                        ${dropdownOptions}
+                    </select>
+                </td>
+                <td>
+                    <input class="form-control" type="number" id="minRate_${i}" name="minRate[${i}]" class="form-control-sm" value="${getValue(row.miN_RATE)}" style="width: 50px;" />
+                </td>
+                <td>
+                    <input class="form-control" type="number" id="maxRate_${i}" name="maxRate[${i}]" class="form-control-sm" value="${getValue(row.maX_RATE)}" style="width: 50px;" />
+                </td>
+                <td>
+                    <input class="form-control" type="text" id="remarks_${i}" name="remarks[${i}]" class="form-control-sm" value="${getValue(row.remark || '')}" />
+                </td>
+                <td>
+                    <i class="fas fa-trash ms-2" style="color:red; cursor:pointer;" onclick="deleteRow(this)"></i>
+                    ${isLastRow ? `<i class="fas fa-plus-circle ms-2 text-success" style="cursor:pointer;" onclick="addNewRowBelow()"></i>` : ''}
+                </td>
+            </tr>
+        `;
+    }
+    function generateDropdownOptions(itemMap, selectedValue) {
+        return Object.keys(itemMap).map(key => {
+            const selected = (selectedValue == key) ? 'selected' : '';
+            return `<option value="${key}" ${selected}>${itemMap[key]}</option>`;
+        }).join('');
+    }
+    function deleteRow(button) {
+        const row = button.closest('tr');
+        if (row) {
+            row.remove();
+        }
+    }
+    function addNewRowBelow(suppressValidation = false) {
+        const lastRow = $('#tblPurchaseBillPassEntry tbody tr:last');
+        let isValid = true;
+
+        // Don't run validation if suppressValidation is true
+        if (!suppressValidation && lastRow.length > 0) {
+            const fieldsToValidate = [
+                { idPrefix: 'itemName', label: 'Item Name' },
+                { idPrefix: 'minRate', label: 'Minimum Rate', isNumeric: true },
+                { idPrefix: 'maxRate', label: 'Maximum Rate', isNumeric: true }
+            ];
+
+            fieldsToValidate.forEach(field => {
+                const input = lastRow.find(`[id^='${field.idPrefix}_']`);
+                const value = input.val();
+
+                let fieldIsValid = true;
+
+                if (!value || value === '' || (field.isNumeric && parseFloat(value) <= 0)) {
+                    fieldIsValid = false;
+                }
+
+                if (!fieldIsValid) {
+                    input.addClass('is-invalid');
+                    toastr.warning(`Please enter a valid ${field.label}.`);
+                    isValid = false;
+                } else {
+                    input.removeClass('is-invalid');
+                }
+            });
+
+            if (!isValid) return;
+        }
+
+        // ✅ Remove all plus icons from existing rows
+        $('#tblPurchaseBillPassEntry tbody tr').each(function () {
+            $(this).find('.fa-plus-circle').remove();
+        });
+
+        const emptyRow = {
+            v_NO: '',
+            iteM_CODE: '',
+            miN_RATE: '',
+            maX_RATE: '',
+            remark: ''
+        };
+
+        const newIndex = marketRateItems.length;
+        marketRateItems.push(emptyRow);
+
+        const newRowHtml = generateRowHtml(emptyRow, newIndex, globalItemMap, true);
+        $('#tblPurchaseBillPassEntry tbody').append(newRowHtml);
+
+        $(`#itemName_${newIndex}`).select2({ width: '100%' });
+    }
+    function LoadPreviousData() {
+        var grpType = $('#ddlItemGroup').val();
+
+        if (!grpType || grpType === "0" || grpType === "--Select Item Group--") {
+            toastr.warning("Please select a valid group type.");
+            return;
+        }
+
+        $.ajax({
+            url: '/ItemMarketRate/GetItemMarketRate2ByGroupType',
+            method: 'POST',
+            data: { groupType: grpType },
+            success: function (res) {
+                const tbody = $('#tblPurchaseBillPassEntry tbody');
+
+                if (!res.success || !Array.isArray(res.items) || res.items.length === 0) {
+                    toastr.warning("No previous data found for selected group.");
+
+                    // ✅ Clear global array and table
+                    marketRateItems = [];
+                    tbody.empty();
+
+                    return;
+                }
+
+                // ✅ Assign and render
+                marketRateItems = res.items;
+                tbody.empty();
+
+                marketRateItems.forEach((row, i) => {
+                    const isLastRow = (i === marketRateItems.length - 1);
+                    const rowHtml = generateRowHtml(row, i, globalItemMap, isLastRow);
+                    tbody.append(rowHtml);
+                });
+
+                $('select.form-select').select2({ width: '100%' });
+
+                toastr.success("Previous data loaded successfully.");
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading previous data: ' + error);
+            }
+        });
+    }
+
+
+
+
+
+
+    $('#btn-save').click(function (e) {
+        e.preventDefault();
+
+        if (!validateHeader()) {
+            return;
+        }
+
+        let rowsData = [];
+        let isAllRowsValid = true;
+
+        // 1. Header data
+        const headerData = {
+            COMP_CODE: compCode,
+            BRANCH_CODE: branchCode,
+            YEAR_CODE: yearCode,
+            V_TYPE: $('#ddlDocType').val(),
+            V_NO: parseInt($('#NumDocNo').val()) || null,
+            V_DATE: $('#DtDocDate').val(),
+            EFF_DATE: $('#DtEffFrom').val(),
+            EXP_DATE: $('#DtExpiredOn').val(),
+            MGROUP_TYPE: $('#ddlItemGroup').val(),
+            REMARKS: $('#TxtRemarks').val()
+        };
+
+        // Validate each row and collect valid ones only
+        $('#tblPurchaseBillPassEntry tbody tr').each(function () {
+            const row = $(this);
+
+            const itemCode = row.find('select[id^="itemName_"]').val();
+            const minRate = parseFloat(row.find('input[id^="minRate_"]').val());
+            const maxRate = parseFloat(row.find('input[id^="maxRate_"]').val());
+
+            let isRowValid = true;
+
+            // Clear previous invalid styles
+            row.find('select[id^="itemName_"]').removeClass('is-invalid');
+            row.find('input[id^="minRate_"]').removeClass('is-invalid');
+            row.find('input[id^="maxRate_"]').removeClass('is-invalid');
+
+            // Validate individual inputs with separate toastr messages
+            if (!itemCode) {
+                row.find('select[id^="itemName_"]').addClass('is-invalid');
+                toastr.warning('Please select an Item Name.');
+                isRowValid = false;
+            }
+
+            if (isNaN(minRate) || minRate <= 0) {
+                row.find('input[id^="minRate_"]').addClass('is-invalid');
+                toastr.warning('Please enter a valid Minimum Rate greater than zero.');
+                isRowValid = false;
+            }
+
+            if (isNaN(maxRate) || maxRate <= 0) {
+                row.find('input[id^="maxRate_"]').addClass('is-invalid');
+                toastr.warning('Please enter a valid Maximum Rate greater than zero.');
+                isRowValid = false;
+            }
+
+            if (isRowValid) {
+                // If this row is valid, add to rowsData
+                rowsData.push({
+                    COMP_CODE: compCode,
+                    BRANCH_CODE: branchCode,
+                    YEAR_CODE: yearCode,
+                    V_TYPE: headerData.V_TYPE,
+                    V_NO: headerData.V_NO,
+                    V_DATE: headerData.V_DATE,
+                    ITEM_CODE: parseInt(itemCode),
+                    MIN_RATE: minRate,
+                    MAX_RATE: maxRate,
+                    AVG_RATE: 0,
+                    REMARK: row.find('input[id^="remarks_"]').val(),
+                });
+            } else {
+                isAllRowsValid = false;
+            }
+        });
+
+        if (rowsData.length === 0) {
+            toastr.warning('Please add at least one valid detail row before saving.');
+            return;
+        }
+
+        if (!isAllRowsValid) {
+            // If any row was invalid, stop saving
+            return;
+        }
+
+        const payload = {
+            header: headerData,
+            lineRows: rowsData
+        };
+
+        $.ajax({
+            url: '/ItemMarketRate/SaveItemMarketRate',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Saved successfully!');
+                    setTimeout(() => {
+                        window.location.href = '/ItemMarketRateList/Index';
+                    }, 1000);
+                } else {
+                    toastr.error('Error saving data: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error saving data: ' + error);
+            }
+        });
+    });
+
+
+    function validateHeader() {
+        let isValid = true;
+
+        // Validate Doc Type
+        const docType = $('#ddlDocType').val();
+        if (!docType || docType === '--Select DOC Type--') {
+            $('#ddlDocType').addClass('is-invalid');
+            toastr.warning('Please select a valid Doc Type.');
+            isValid = false;
+        } else {
+            $('#ddlDocType').removeClass('is-invalid');
+        }
+
+        // Validate Doc Date
+        const docDate = $('#DtDocDate').val();
+        if (!docDate) {
+            $('#DtDocDate').addClass('is-invalid');
+            toastr.warning('Please enter a valid Doc Date.');
+            isValid = false;
+        } else {
+            $('#DtDocDate').removeClass('is-invalid');
+        }
+
+        // Validate Doc No
+        const docNo = $('#NumDocNo').val();
+        if (!docNo || parseInt(docNo) <= 0) {
+            $('#NumDocNo').addClass('is-invalid');
+            toastr.warning('Please enter a valid Doc No.');
+            isValid = false;
+        } else {
+            $('#NumDocNo').removeClass('is-invalid');
+        }
+
+        // Validate Item Group
+        const itemGroup = $('#ddlItemGroup').val();
+        if (!itemGroup || itemGroup === '--Select Item Group--') {
+            $('#ddlItemGroup').addClass('is-invalid');
+            toastr.warning('Please select a valid Item Group.');
+            isValid = false;
+        } else {
+            $('#ddlItemGroup').removeClass('is-invalid');
+        }
+
+        // Validate Effective From Date
+        const effDate = $('#DtEffFrom').val();
+        if (!effDate) {
+            $('#DtEffFrom').addClass('is-invalid');
+            toastr.warning('Please enter a valid Effective From date.');
+            isValid = false;
+        } else {
+            $('#DtEffFrom').removeClass('is-invalid');
+        }
+
+        // Validate Expired On Date
+        const expDate = $('#DtExpiredOn').val();
+        if (!expDate) {
+            $('#DtExpiredOn').addClass('is-invalid');
+            toastr.warning('Please enter a valid Expired On date.');
+            isValid = false;
+        } else {
+            $('#DtExpiredOn').removeClass('is-invalid');
+        }
+
+        return isValid;
+    }
+</script>

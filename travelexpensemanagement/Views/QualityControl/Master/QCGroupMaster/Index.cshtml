@@ -1,0 +1,177 @@
+﻿@{
+    ViewBag.Title = "QC Group Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">QC Group Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "QCGroupMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="QCGroupMasterform">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-3"> 
+                <div class="form-group">
+                    <label for="TxtQCGName" class="form-label">QCG Name</label>
+                    <input type="text" class="form-control" id="TxtQCGName" name="QCGName" placeholder="Enter QCG Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlQCType" class="form-label">QC Type</label>
+                    <select class="form-control" id="ddlQCType" name="QCType">
+                        <option value="">--Select QC Type--</option>
+                        <option value="RMG">RMG</option>
+                        <option value="STORE">STORE</option>
+                        <option value="FINISH">FINISH</option>
+                        <option value="WASTE">WASTE</option>
+                        <option value="SCRAP">SCRAP</option>
+                        <option value="FULE">FULE</option>
+                        <option value="SFG">SFG</option>
+                        <option value="OTHERS">OTHERS</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        if (!isNaN(rowId) && rowId > 0) {
+            loadQCGroupById(rowId);
+
+            if (isReadOnly) {
+                setQCGroupFormReadOnly();
+            }
+        }
+
+        $('#cancelBtn').on('click', function () {
+            window.location.href = '/QCGroupMasterList/Index';
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    $('#QCGroupMasterform').on('submit', function (e) {
+        e.preventDefault();
+
+        const code = parseInt($('#CODE').val()) || 0;
+        const name = $('#TxtQCGName').val().trim();
+        const qcType = $('#ddlQCType').val();
+        const isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+
+        if (!name) {
+            toastr.warning('Please enter QCG Name.');
+            $('#TxtQCGName').focus();
+            return;
+        }
+
+        if (!qcType) {
+            toastr.warning('Please select QC Type.');
+            $('#ddlQCType').focus();
+            return;
+        }
+
+        const payload = {
+            CODE: code,
+            NAME: name,
+            QC_TYPE: qcType,
+            ACTIVE: isActive,
+            UDATE: new Date().toISOString(),
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? 'U' : 'A',
+            ACTION: code > 0 ? 'UPDATE' : 'INSERT',
+            WSID: 'WEB',
+            UUSER: 1,
+            EUSER: 1
+        };
+
+        $.ajax({
+            url: '/QCGroupMaster/SaveQCGroup',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("QC Group saved successfully!");
+                    $('#QCGroupMasterform')[0].reset();
+                    setTimeout(function () {
+                        window.location.href = '/QCGroupMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning(response.message || "Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function loadQCGroupById(code) {
+        $.ajax({
+            url: '/QCGroupMasterList/GetQCGroupByCode',
+            type: 'GET',
+            data: { code },
+            success: function (response) {
+                const data = response.data;
+                if (!data) {
+                    toastr.warning("No data found.");
+                    return;
+                }
+
+                $('#CODE').val(data.code);
+                $('#TxtQCGName').val(data.name);
+                $('#ddlQCType').val(data.qC_TYPE);
+                $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+            },
+            error: function (xhr) {
+                console.error("Error loading QC Group by ID:", xhr);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function setQCGroupFormReadOnly() {
+        const form = $('#QCGroupMasterform');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        $('#ACTIVE').prop('disabled', true);
+        $('#statusText').addClass('text-muted');
+    }
+
+</script>
+

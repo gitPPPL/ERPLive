@@ -1,0 +1,2510 @@
+﻿@{
+    ViewBag.Title = "BusinessPartnerMaster";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Business Partner Master</legend>
+    @* section Start *@
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="form-label">GST No<span class="required">*</span></label>
+                <input type="text" class="form-control" id="txtGstNo" placeholder="Enter GST No">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="btn-mt">
+                <button id="btnGetdata" type="submit" class="btn btn-success"><i class="fa fa-file-import"></i>Import Data</button>
+            </div>
+        </div>
+    </div>
+
+    @* NavTab *@
+    <div class="navtab-form">
+        <ul class="nav nav-tabs" id="formTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link-tab active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">General Details</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Contact Details</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Address Details</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Other Details</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab">Bank Details</button>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <!-- tab 1 -->
+            <div class="tab-pane fade show active" id="tab1">
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-label">A/c Code</label>
+                                <input type="text" class="form-control" id="txtACCODE" placeholder="Enter A/C Code" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-label">Bank Reference No</label>
+                                <input type="text" class="form-control" id="NumBankRefernceNo" placeholder="Enter Bank Reference No" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Name<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtNAME" placeholder="Enter Name">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Short Name</label>
+                                <input type="text" class="form-control" id="txtSHORTNAME" placeholder="Enter Short Name">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-label">Alias</label>
+                                <input type="text" class="form-control" id="txtALIAS" placeholder="Enter Alias">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Legal Name<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtLEGALNAME" placeholder="Enter Legal Name">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Group Name<span class="required">*</span></label>
+                                <select class="form-select form-control" onchange="GetddlGROUPNAMEID()" id="ddlGROUPNAME" name="GroupName">
+                                    <option value="">-- Select Group --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <input type="number" class="form-control" id="txtPHONE" placeholder="Enter Phone No." oninput="limitLength(this, 10)">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Nature</label>
+                                <input type="text" class="form-control" id="txtNATURE" placeholder="Enter Nature" readonly>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Fax</label>
+                                <input type="text" class="form-control" id="txtFAX" placeholder="Enter Fax">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Mobile<span class="required">*</span></label>
+                                <input type="number" class="form-control" id="txtMOBILE" oninput="limitLength(this, 10)" placeholder="Enter Mobile No">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">SMS<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtSMS" placeholder="Enter SMS">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Website</label>
+                                <input type="text" class="form-control" id="txtWEBSITE" placeholder="Enter Website Name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label mb-1">Email ID<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtEMAILID" placeholder="Enter Email ID">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-1 d-block align-items-center">
+                                <label class="form-label">Language<span class="required">*</span></label>
+                                @*  <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#languageModal" style="float: right;">
+                                        +
+                                    </button> *@
+
+                                <button type="button" class="btn btn-success btn-sm openModalBtn" data-bs-toggle="modal" data-bs-target="#languageModal" data-table="LANGUAGE_MAST"
+                                        style="float:right;">
+                                    +
+                                </button>
+
+                            </div>
+                            <select class="form-select form-control" id="ddlLANGUAGE">
+                                <option value="">-- Select Language --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label mb-1">Currency</label>
+                                <button type="button" class="btn btn-success btn-sm openModalBtn" data-bs-toggle="modal" data-bs-target="#languageModal" data-table="CURRENCY_MAST"
+                                        style="float:right;">
+                                    +
+                                </button>
+                                <select class="form-select form-control" id="ddlCURRENCY">
+                                    <option value="">-- Select Currency --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label mb-1">Party Type<span class="required">*</span></label>
+                                <select class="form-select form-control" id="ddlPARTYTYPE" name="PARTYTYPE">
+                                    <option value="">-- Select Type --</option>
+                                    <option value="Manufacture">Manufacture</option>
+                                    <option value="Traders">Traders</option>
+                                    <option value="Dealer">Dealer</option>
+                                    <option value="Transporter">Transporter</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="PSU">PSU</option>
+                                    <option value="Service Provider">Service Provider</option>
+                                    <option value="Related Unit">Related Unit</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">GST Type<span class="required">*</span></label>
+                                <select class="form-select form-control" id="ddlGSTTYPE" name="GSTTYPE">
+                                    <option value="">-- Select GST --</option>
+                                    <option value="Composite">Composite</option>
+                                    <option value="Registered">Registered</option>
+                                    <option value="UnRegistered">UnRegistered</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">MSME Y/N<span class="required">*</span></label>
+                                <select class="form-select form-control" id="ddlMSMEYN" name="MSMEYN">
+                                    <option value="">-- Select MSME Y/N --</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">MSME No.</label>
+                                <input type="text" class="form-control" id="txtMSMENO" placeholder="Enter MSMENO">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">MSME Type</label>
+                                <select class="form-select form-control" id="ddlMSMETYPE" name="MSMETYPE">
+                                    <option value="">-- Select MSME Type --</option>
+                                    <option value="Small">Small</option>
+                                    <option value="Micro">Micro</option>
+                                    <option value="Medium">Medium</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">TCS Applicable<span class="required">*</span></label>
+                                <select class="form-select form-control" id="ddlTCSAPPLICABLE" name="TCSAPPLICABLE">
+                                    <option value="">-- Select TCS --</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">TDS 206 Applicable</label>
+                                <select class="form-select form-control" id="ddlTDSAPPLICABLE" name="TDSAPPLICABLE">
+                                    <option value="">-- Select TDS --</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Contact Person</label>
+                                <input type="text" class="form-control" id="TxtCONTACTPERSON" placeholder="Enter Contact Person">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Main A/C</label>
+                                <select class="form-select form-control" id="ddlMAINAC" name="MAINAC">
+                                    <option value="">-- Select Main A/C --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Agent Name</label>
+                                <select class="form-select form-control" id="ddlAGENTNAME" name="AGENTNAME">
+                                    <option value="">-- Select Agent Name --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">O/S Group</label>
+                                <select class="form-select form-control" id="ddlOSGROUP" name="ddlOSGROUP">
+                                    <option value="">-- Select O/S group --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Discount %</label>
+                                <input type="number" class="form-control" id="TxtDISCOUNT" placeholder="Enter Discount %">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">District Group</label>
+                                <select class="form-select form-control" id="ddlDISTRICTGROUP" name="DISTRICTGROUP">
+                                    <option value="">-- Select District Group --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Payment Terms</label>
+                                <select class="form-select form-control" id="ddlPAYMENTTERM" name="PAYMENTTERM">
+                                    <option value="">-- Select Payment --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Cr Days</label>
+                                <input type="number" class="form-control" id="TxtCRDAYS" placeholder="Enter Days">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Cr Limit</label>
+                                <input type="number" class="form-control" id="TxtCRLIMIT" placeholder="Enter Cr limit">
+                            </div>
+                        </div>
+                        @*  <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Last Cr Limit</label>
+                                    <input type="number" class="form-control" id="TxtLASTCRLIMIT" placeholder="Enter last Cr limit">
+                                </div>
+                            </div> *@
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Aadhar</label>
+                                <input type="text" class="form-control" id="TxtAADHAR" placeholder="Enter Aadhar">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row" style="display:none;">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Bank Name</label>
+                                <select class="form-select form-control" id="ddlBANKNAME" name="BANKNAME">
+                                    <option value="">-- Select Bank Name --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Bank Country</label>
+                                <select class="form-select form-control" id="ddlBANKCOUNTRY" name="BANKCOUNTRY">
+                                    <option value="">-- Select Bank Country --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Bank Branch</label>
+                                <input type="text" class="form-control" id="TxtBANKBRANCH" placeholder="Enter Bank Branch">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">IFSC Code</label>
+                                <input type="text" class="form-control" id="TxtIFSCCODE" placeholder="Enter IFSC Code">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="display:none;">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Pay Type</label>
+                                <select class="form-select form-control" id="ddlPAYTYPE" name="PAYTYPE">
+                                    <option value="">-- Select Pay Type --</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="NEFT">NEFT</option>
+                                    <option value="RTGS">RTGS</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Print Type</label>
+                                <select class="form-select form-control" id="ddlPRINTTYPE" name="PRINTTYPE">
+                                    <option value="">-- Select Print Type --</option>
+                                    <option value="Summary">Summary</option>
+                                    <option value="Detail">Detail</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">A/C No</label>
+                                <input type="text" class="form-control" id="TxtACNO" placeholder="Enter A/C">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">CPCB No</label>
+                                <input type="text" class="form-control" id="TxtCPCBNO" placeholder="Enter CPCB No">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Entity Type</label>
+                                <select class="form-select form-control" id="ddlENTITYTYPE" name="ENTITYTYPE">
+                                    <option value="">-- Select Entity Type --</option>
+                                    <option value="NA">NA</option>
+                                    <option value="Producer">Producer</option>
+                                    <option value="Importer">Importer</option>
+                                    <option value="Brand Owner">Brand Owner</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Remarks</label>
+                                <input type="text" class="form-control" id="TxtREMARKS" placeholder="Enter Remarks">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="active-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="active-text" id="statusText">Active</span>
+
+                                @*  <button id="btnSave" type="submit" class="btn btn-success"><i class="fa fa-file-import"></i>Import Data</button> *@
+                                @* <button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button> *@
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- tab 2 -->
+            <div class="tab-pane fade" id="tab2">
+                <form id="ContactDetails">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Title</label>
+                                <select class="form-select form-control" id="ddlTITLEC" name="Title">
+                                    <option value="">-- Select Title --</option>
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Contact Person</label>
+                                <input type="text" class="form-control" id="txtCONTACTPERSONC" placeholder="Enter Contact Person">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Designation</label>
+                                <input type="text" class="form-control" id="txtDESIGNATIONC" placeholder="Enter Designation">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <input type="number" class="form-control" id="txtPHONEC" oninput="limitLength(this, 10)" placeholder="Enter Phone No.">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Mobile</label>
+                                <input type="number" class="form-control" id="txtMOBILEC" oninput="limitLength(this, 10)" placeholder="Enter Mobile No.">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">SMS</label>
+                                <input type="text" class="form-control" id="txtSMSC" placeholder="Enter SMS">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Email ID</label>
+                                <input type="text" class="form-control" id="txtEMAILIDC" placeholder="Enter Email ID">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Fax</label>
+                                <input type="text" class="form-control" id="txtFAXC" placeholder="Enter Fax No.">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" id="txtDATEOFBIRTHC" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Date of Marriage</label>
+                                <input type="date" id="txtDATEOFMARRIAGEC" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select form-control" id="ddlGENDERC">
+                                    @* <option value="">-- Select Gender --</option> *@
+                                    <option value="">-- Select Gender --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Portal ID</label>
+                                <input type="text" class="form-control" id="txtPortalIDC" placeholder="Enter Fax No.">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Portal Password</label>
+                                <input type="text" id="txtPORTALPASSWORDC" class="form-control">
+                            </div>
+                        </div>
+                        <div class="offset-md-6 col-md-3 mt-4 btn-align">
+                            @*    <button type="button" class="btn btn-primary">
+                                <i class="fa fa-plus"></i> Add Contact Details
+                            </button> *@
+
+                            <button type="button" class="btn btn-primary" id="btnAddContact">
+                                <i class="fa fa-plus"></i> Add Contact Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0 mt-2">
+                        <div class="table-responsive">
+                            <table id="contactTable" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Contact Person</th>
+                                        <th>Designation</th>
+                                        <th>Phone</th>
+                                        <th>Mobile</th>
+                                        <th>SMS</th>
+                                        <th>Email ID</th>
+                                        <th>Fax</th>
+                                        <th>Date of Birth</th>
+                                        <th>Date of Marriage</th>
+                                        <th>Gender</th>
+                                        <th>Portal ID</th>
+                                        <th>Portal Password</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row p-3">
+                            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- tab 3 -->
+            <div class="tab-pane fade" id="tab3">
+                <form id="AddressDetails">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Address 1<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtADDRESS1Add" placeholder="Enter Address 1">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Address 2<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtADDRESS2Add" placeholder="Enter Address 2">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Address 3</label>
+                                <input type="text" class="form-control" id="txtADDRESS3Add" placeholder="Enter Address 3">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">City<span class="required">*</span></label>
+                                @* <input type="text" class="form-control" id="txtCITYAdd" placeholder="Enter City"> *@
+                                <select class="form-select form-control" id="ddlCITYAdd">
+                                    <option value="">-- Select City --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">State<span class="required">*</span></label>
+                                @* <input type="text" class="form-control" id="txtSTATEAdd" placeholder="Enter State"> *@
+                                <select class="form-select form-control" id="ddlSTATEAdd">
+                                    <option value="">-- Select State --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Country<span class="required">*</span></label>
+                                @* <input type="text" class="form-control" id="txtCOUNTRYAdd" placeholder="Enter Country"> *@
+                                <select class="form-select form-control" id="ddlCOUNTRYAdd">
+                                    <option value="">-- Select State --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Pincode<span class="required">*</span></label>
+                                <input type="number" class="form-control" oninput="limitLength(this, 6)" id="txtPINCODEAdd" placeholder="Enter Pincode">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">GST No<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtGSTNOAdd" oninput="limitLength(this, 15)" placeholder="Enter GST No">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Pan No<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtPANNOAdd" oninput="limitLength(this, 10)" placeholder="Enter Pan No">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Tan No</label>
+                                <input type="number" class="form-control" id="txtTANNOAdd" placeholder="Enter Tan No">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">GST Cert. Dt.</label>
+                                <input type="number" class="form-control" id="txtGSTCCERTAdd" placeholder="Enter GST">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Decl No</label>
+                                <input type="number" class="form-control" id="txtDECLNOAdd" placeholder="Enter Decl No">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Decl Date</label>
+                                <input type="date" id="txtDECLDATEAdd" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Distance (Km)</label>
+                                <input type="number" class="form-control" id="txtDISTANCEAdd" placeholder="Enter Distance">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Bill Type</label>
+                                <input type="text" class="form-control" id="txtBILLTYPEAdd" placeholder="Enter Bill Type">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Lead Days</label>
+                                <input type="number" class="form-control" id="txtLEADDAYSAdd" placeholder="Enter Lead Days">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Legal Name</label>
+                                <input type="text" id="txtLEGALNAMEAdd" class="form-control">
+                            </div>
+                        </div>
+                        <div class="offset-md-6 col-md-3 mt-4 btn-align">
+                            <button type="button" class="btn btn-add" id="btnAddAddress">
+                                <i class="fa fa-plus"></i> Add Address Details
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="addressTable" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th></th>
+                                        <th>Address 1</th>
+                                        <th>Address 2</th>
+                                        <th>Address 3</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Country</th>
+                                        <th>Pincode</th>
+                                        <th>GST No</th>
+                                        <th>Pan No</th>
+                                        <th>Tan No</th>
+                                        <th>GST Cert. Dt.</th>
+                                        <th>Decl No</th>
+                                        <th>Decl Date</th>
+                                        <th>Distance (Km)</th>
+                                        <th>Bill Type</th>
+                                        <th>Lead Days</th>
+                                        <th>Legal Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row p-3">
+                            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- tab 4 -->
+            <div class="tab-pane fade" id="tab4">
+                <form id="OtherDetails">
+                    <h3 class="accordion-heading">Document Upload</h3>
+
+                    <!-- Upload Card Template -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="PANCOPY" class="form-label">PAN Copy</label>
+                                <input type="file" class="form-control" id="PANCOPY">
+                                <div class="file-preview" id="PANCOPYPreview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="GSTINCOPY" class="form-label">GST Copy</label>
+                                <input type="file" class="form-control" id="GSTINCOPY">
+                                <div class="file-preview" id="GSTINCOPYPreview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="CANCELLEDCHEQUECOPY" class="form-label">Cancelled Cheque Copy</label>
+                                <input type="file" class="form-control" id="CANCELLEDCHEQUECOPY">
+                                <div class="file-preview" id="CANCELLEDCHEQUECOPYPreview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="MSMECOPY" class="form-label">MSME Copy</label>
+                                <input type="file" class="form-control" id="MSMECOPY">
+                                <div class="file-preview" id="MSMECOPYPreview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="AADHARCOPY" class="form-label">Aadhar Copy</label>
+                                <input type="file" class="form-control" id="AADHARCOPY">
+                                <div class="file-preview" id="AADHARCOPYPreview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="CPCBCOPY" class="form-label">CPCB Copy</label>
+                                <input type="file" class="form-control" id="CPCBCOPY">
+                                <div class="file-preview" id="CPCBCOPYPreview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="OTHERCOPY" class="form-label">Other Copy</label>
+                                <input type="file" class="form-control" id="OTHERCOPY">
+                                <div class="file-preview" id="OTHERCOPYPreview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mt-4 btn-align">
+                            <button type="button" class="btn btn-add" id="btnAddOtherDetails">
+                                <i class="fa fa-plus"></i> Add Other Details
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="otherDetailsTable" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>PAN Copy</th>
+                                        <th>GST Copy</th>
+                                        <th>Cancelled Cheque Copy</th>
+                                        <th>MSME Copy</th>
+                                        <th>Aadhar Copy</th>
+                                        <th>CPCB Copy</th>
+                                        <th>Other Copy</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row p-3">
+                            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- tab 5 -->
+            <div class="tab-pane fade" id="tab5">
+                <form id="BankDetails">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Bank Name<span class="required">*</span></label>
+                                @* <input type="text" class="form-control" id="txtBANKNAME" placeholder="Enter Bank Name"> *@
+                                <select class="form-select form-control" id="ddlBANKNAMEBD">
+                                    <option value="">-- Select State --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Bank Country<span class="required">*</span></label>
+                                @* <input type="text" class="form-control" id="txtBANKCOUNTRY" placeholder="Enter Bank Country"> *@
+                                <select class="form-select form-control" id="ddlBANKCOUNTRYBD">
+                                    <option value="">-- Select State --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">IFSC Code<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtIFSCCODE" placeholder="Enter IFSC Code">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">A/C No<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtACNO" oninput="limitLength(this, 16)" placeholder="Enter A/C No">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Branch<span class="required">*</span></label>
+                                <input type="text" class="form-control" id="txtBRANCH" placeholder="Enter Branch">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Pay</label>
+                                @* <input type="text" class="form-control" id="txtPAY" placeholder="Enter Pay"> *@
+                                <select class="form-select form-control" id="ddltxtPAYBD" name="PAYTYPE">
+                                    <option value="">-- Select Pay Type --</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="NEFT">NEFT</option>
+                                    <option value="RTGS">RTGS</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">File Name</label>
+                                <input type="text" class="form-control" id="txtFILENAME" placeholder="Enter File Name">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">Attachment Date</label>
+                                <input type="date" class="form-control" id="txtATTACHMENTDATE" placeholder="Enter Attachment Date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="offset-md-9 col-md-3 btn-align">
+
+                            <button type="button" class="btn btn-add" id="btnAddBankDetails">
+                                <i class="fa fa-plus"></i> Add Bank Details
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblBankDetails" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>Bank Name</th>
+                                        <th>Bank Country</th>
+                                        <th>IFSC Code</th>
+                                        <th>A/C No</th>
+                                        <th>Branch</th>
+                                        <th>Pay</th>
+                                        <th>File Name</th>
+                                        <th>Attachment Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row p-3">
+                            <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="accordion btn-mt" id="supplierAccordion">
+        <div class="modal fade" id="languageModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="modalTitle">Add Record</h5>
+                        <i class="fa fa-times"
+                           data-bs-dismiss="modal"
+                           style="cursor:pointer;">
+                        </i>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="hdnTableName" />
+
+                        <!-- Dynamic fields will append here -->
+                        <div id="dynamicFields" class="row"></div>
+
+                        <div class="button-right btn-mt mt-3">
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    id="btn_savemodal">
+                                <i class="fa fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "BusinessPartnerMasterList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                    <button type="button" id="btnUpdate" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="hdnTableName" />
+</fieldset>
+
+<script>
+    function previewFile(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const file = input.files[0];m
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            if (file.type.startsWith('image/')) {
+                preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" width="100" />`;
+            } else {
+                preview.innerHTML = `<p>${file.name}</p>`;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    // Attach change event
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', () => {
+            previewFile(input, input.id + 'Preview');
+        });
+    });
+    // maxLength in Mobile Number
+       function limitLength(elem, maxLength) {
+      if (elem.value.length > maxLength) {
+        elem.value = elem.value.slice(0, maxLength);
+      }
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+         var selectedTable = "";
+         const today = new Date();
+         const yyyy = today.getFullYear();
+         const mm = String(today.getMonth() + 1).padStart(2, '0');
+         const dd = String(today.getDate()).padStart(2, '0');
+
+         document.getElementById("txtDATEOFBIRTHC").value = `${yyyy}-${mm}-${dd}`;
+         document.getElementById("txtDATEOFMARRIAGEC").value = `${yyyy}-${mm}-${dd}`;
+         document.getElementById("txtDECLDATEAdd").value = `${yyyy}-${mm}-${dd}`;
+         document.getElementById("txtATTACHMENTDATE").value = `${yyyy}-${mm}-${dd}`;
+         // $('#btnGetdata').click(function (e) {
+         //     e.preventDefault();
+         //     var gstno = $('#txtGstNo').val();
+         //     if (gstno === "") {
+         //         alert("Please enter GST No");
+         //         return;
+         //     }
+         //     $.ajax({
+         //     url: '/BusinessPartnerMaster/GetLegalNameByGSTIN',
+         //     type: 'GET',
+         //     data: { gstno: gstno },
+         //     success: function (response) {
+         //         let res = JSON.parse(response);
+         //         console.log('Get gst No', response)
+         //         if (res.status_cd == "1") {
+         //             $('#txtLEGALNAME').val(res.data.lgnm);
+         //             bindGSTDataToAddressRow(res.data);
+         //         } else {
+         //             alert("Invalid GST Number!");
+         //         }
+         //     },
+         //     error: function (err) {
+         //         console.log(err);
+         //     }
+         // });
+         //  });
+         // function bindGSTDataToAddressRow(data) {
+         //     let addr = data.pradr.addr;
+         //     let address = {
+         //         isChecked: true,
+         //         address1: addr.bno || "",
+         //         address2: addr.st || "",
+         //         address3: addr.loc || "",
+         //         city: addr.dst || "",
+         //         cityValue: addr.dst || "",
+         //         state: addr.stcd || "",
+         //         stateValue: addr.stcd || "",
+         //         country: "India",
+         //         countryValue: "India",
+         //         pincode: addr.pncd || "",
+         //         gstNo: data.gstin || "",
+         //         panNo: "",
+         //         tanNo: "",
+         //         gstCertDt: "",
+         //         declNo: "",
+         //         declDate: "",
+         //         distance: "",
+         //         billType: "",
+         //         leadDays: "",
+         //         legalName: data.lgnm || ""
+         //     };
+         //     bindToTable([address]);
+         // }
+         // function bindToTable(list) {
+         //     const tableBody = $('#addressTable tbody');
+         //     tableBody.empty();
+         //     list.forEach(function (address) {
+         //         const row = `
+         //         <tr>
+         //             <td><input type="checkbox" class="rowCheckbox" checked /></td>
+         //             <td>${address.address1}</td>
+         //             <td>${address.address2}</td>
+         //             <td>${address.address3}</td>
+
+         //             <td data-value="0">${address.city}</td>
+         //             <td data-value="0">${address.state}</td>
+         //             <td data-value="0">${address.country}</td>
+         //             <td>${address.pincode}</td>
+         //             <td>${address.gstNo}</td>
+         //             <td>${address.panNo}</td>
+         //             <td>${address.tanNo}</td>
+         //             <td>${address.gstCertDt}</td>
+         //             <td>${address.declNo}</td>
+         //             <td>${address.declDate}</td>
+         //             <td>${address.distance}</td>
+         //             <td>${address.billType}</td>
+         //             <td>${address.leadDays}</td>
+         //             <td>${address.legalName}</td>
+         //             <td><button class="btn btn-danger btnDelete btn-sm">Delete</button></td>
+         //         </tr>`;
+         //         tableBody.append(row);
+         //     });
+         //  }
+        $('#btnGetdata').click(function (e) {
+         e.preventDefault();
+         var gstno = $('#txtGstNo').val();
+         if (gstno === "") {
+             alert("Please enter GST No");
+             return;
+         }
+
+         $.ajax({
+             url: '/BusinessPartnerMaster/GetLegalNameByGSTIN',
+             type: 'GET',
+             data: { gstno: gstno },
+             success: function (response) {
+
+                 let res = JSON.parse(response);
+
+                 if (res.status_cd == "1") {
+
+                     $('#txtLEGALNAME').val(res.data.lgnm);
+
+                     bindGSTDataToAddressRow(res.data);
+                 }
+                 else {
+                     alert("Invalid GST Number!");
+                 }
+             }
+         });
+     });
+         // map GST response to address object
+         function bindGSTDataToAddressRow(data) {
+         let addr = data.pradr.addr;
+         console.log('GST data', addr);
+         // ------- Fill textboxes -------
+         $('#txtADDRESS1Add').val(addr.bno || "");
+         $('#txtADDRESS2Add').val(addr.st || "");
+         $('#txtADDRESS3Add').val(addr.loc || "");
+         $('#txtPINCODEAdd').val(addr.pncd || "");
+
+         $('#txtCITYAdd').val(addr.dst || "");
+         $('#txtSTATEAdd').val(data.stj || "");
+         $('#txtCOUNTRYAdd').val("India");
+
+         $('#txtGSTNOAdd').val(data.gstin || "");
+         $('#txtLEGALNAMEAdd').val(data.lgnm || "");``
+         }
+
+        $("#btnUpdate").hide();
+            function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+            const code = getQueryParam('id');
+            const mode = getQueryParam("mode");
+            GetAccountID();
+            ddlGroupName();
+            GetddlLanguage();
+            GetddlCurrency();
+            GetddlMainAC();
+            GetddlAgentName();
+            GetddlOSGroup();
+            GetddlDistrictGroup();
+            GetddlPaymentTerms();
+            GetddlBankName();
+            GetddlBankCountry();
+            Getddltitle();
+            GetddlCity();
+            Getddlstate();
+            GetddlCountry();
+            GetddlBankNameBD();
+            GetddlBankCountryBD();
+            $('#ddlMSMEYN').change(function () {
+             if ($(this).val() === "Yes") {
+                 // Add required rule
+                 if (!validateRequiredField('#txtMSMENO', 'MSME No')) return;
+                 if (!validateRequiredField('#ddlMSMETYPE', 'MSME Type')) return;
+
+
+             } else {
+                 // Remove required rule
+                 $('#txtMSMENO').removeAttr('required');
+                 $('#ddlMSMETYPE').removeAttr('required');
+             }
+            });
+            $('#ddlPAYMENTTERM').change(function () {
+             var paymentId = $(this).val();
+                 $.ajax({
+                     url: '/BusinessPartnerMaster/GetPaymentTerms',
+                     type: 'GET',
+                     data: { id: paymentId },
+                     success: function (response) {
+                         $('#TxtCRDAYS').val(response.days);
+                     },
+                     error: function (err) {
+                         console.log("Error:", err);
+                     }
+                 });
+             });
+              $('#ddlCITYAdd').change(function () {
+                 var Cityid = $('#ddlCITYAdd').val();
+                 $.ajax({
+                     url: '/BusinessPartnerMaster/GetCityID',
+                     type: 'GET',
+                     data: { id: Cityid },
+                     success: function (response) {
+                         if (response) {
+                             Getddlstate(function () {
+                                 $('#ddlSTATEAdd').val(response.stateCode);
+                             });
+                             GetddlCountry(function () {
+                                 $('#ddlCOUNTRYAdd').val(response.countryCode);
+                             });
+                             $('#txtPINCODEAdd').val(response.zipCode);
+                         }
+                     },
+                     error: function (xhr, status, error) {
+                         alert("An error occurred: " + error);
+                     }
+                 });
+             });
+
+            if (code) {
+             $("#btnSubmit").hide();
+             $("#btnUpdate").show();
+
+             $.ajax({
+                 url: '/BusinessPartnerMaster/GetBusinessPartnerMaster',
+                 type: 'POST',
+                 contentType: 'application/json',
+                 data: JSON.stringify({ code: parseInt(code) }),
+                 success: function (response) {
+
+                     var generalInfo = response.general;
+                     var contactList = response.contacts;
+                     var addressList = response.addresses;
+                     var bankList = response.banks;
+                     var otherDetails = response.others;
+                     console.log('generalInfo',generalInfo)
+                     console.log('contactList',contactList)
+                     console.log('addressList',addressList)
+                     console.log('bankList',bankList)
+
+
+
+                     $('#txtACCODE').val(generalInfo.accode);
+                     $('#txtNAME').val(generalInfo.name);
+                     $('#txtNATURE').val(generalInfo.nature);
+                     $('#txtSHORTNAME').val(generalInfo.shortname);
+                     $('#txtALIAS').val(generalInfo.alias);
+                     $('#txtLEGALNAME').val(generalInfo.legalname);
+                     ddlGroupName(function () {
+                     $('#ddlGROUPNAME').val(generalInfo.groupname);
+                     });
+                     $('#txtPHONE').val(generalInfo.phone);
+                     $('#txtFAX').val(generalInfo.fax);
+                     $('#txtMOBILE').val(generalInfo.mobile);
+                     $('#txtSMS').val(generalInfo.sms);
+                     $('#txtWEBSITE').val(generalInfo.website);
+                     $('#txtEMAILID').val(generalInfo.emailid);
+                     GetddlLanguage(function () {
+                     $('#ddlLANGUAGE').val(generalInfo.language);
+                     })
+                      GetddlCurrency(function () {
+                     $('#ddlCURRENCY').val(generalInfo.currency);
+                     });
+                     // Party Type
+                      if (generalInfo.partytype) {
+                      $('#ddlPARTYTYPE').val(generalInfo.partytype);
+                      }
+                     // GST Type
+                      if (generalInfo.gsttype) {
+                      $('#ddlGSTTYPE').val(generalInfo.gsttype);
+                      }
+                     // MSME Y/N
+                      if (generalInfo.msmeyn) {
+                      $('#ddlMSMEYN').val(generalInfo.msmeyn);
+                      }
+                      $('#txtMSMENO').val(generalInfo.msmeno);
+                      if (generalInfo.msmetype) {
+                      $('#ddlMSMETYPE').val(generalInfo.msmetype);
+                      }
+                      if (generalInfo.tcsapplicable) {
+                      $('#ddlTCSAPPLICABLE').val(generalInfo.tcsapplicable);
+                      }
+                      if (generalInfo.tdsapplicable) {
+                      $('#ddlTDSAPPLICABLE').val(generalInfo.tdsapplicable);
+                      }
+                      $('#TxtCONTACTPERSON').val(generalInfo.contactperson);
+                      GetddlMainAC(function () {
+                      $('#ddlMAINAC').val(generalInfo.mainac);
+                      });
+                      GetddlAgentName(function () {
+                      $('#ddlAGENTNAME').val(generalInfo.agentname);
+                      });
+                      GetddlOSGroup(function () {
+                      $('#ddlOSGROUP').val(generalInfo.osgroup);
+                      });
+                      $('#TxtDISCOUNT').val(generalInfo.discount);
+                      GetddlDistrictGroup(function () {
+                      $('#ddlDISTRICTGROUP').val(generalInfo.districtgroup);
+                      });
+                      GetddlPaymentTerms(function () {
+                      $('#ddlPAYMENTTERM').val(generalInfo.paymentterm);
+                      });
+                      $('#TxtCRDAYS').val(generalInfo.crdays);
+                      $('#TxtCRLIMIT').val(generalInfo.crlimit);
+                      $('#TxtLASTCRLIMIT').val(generalInfo.lastcrlimit);
+                      GetddlBankName(function () {
+                      $('#ddlBANKNAME').val(generalInfo.banK_CODE);
+                      });
+                      GetddlBankCountry(function () {
+                      $('#ddlBANKCOUNTRY').val(generalInfo.bankcountry);
+                      });
+                      $('#TxtBANKBRANCH').val(generalInfo.bankbranch);
+                      $('#TxtIFSCCODE').val(generalInfo.ifsccode);
+                      if (generalInfo.paytype) {
+                      $('#ddlPAYTYPE').val(generalInfo.paytype);
+                      }
+                      if (generalInfo.printtype) {
+                      $('#ddlPRINTTYPE').val(generalInfo.printtype);
+                      }
+                      $('#TxtACNO').val(generalInfo.acno);
+                      $('#TxtREMARKS').val(generalInfo.remarks);
+                      $('#TxtAADHAR').val(generalInfo.aadhar);
+                      $('#TxtCPCBNO').val(generalInfo.cpcbNo);
+                      if (generalInfo.entitytype) {
+                      $('#ddlENTITYTYPE').val(generalInfo.entitytype);
+                      }
+
+                     loadContactTable(contactList);
+                     loadAddressTable(addressList);
+                     loadBankDetailsTable(bankList);
+                     loadotherDetailsTable(otherDetails);
+
+                 },
+                 error: function (xhr) {
+                     toastr.error('Error: ' + xhr.responseText);
+                 }
+             });
+               function loadContactTable(contactList) {
+                console.log('dom',contactList)
+                const tableBody = $('#contactTable tbody');
+                tableBody.empty(); // Clear old rows
+                contactList.forEach(function (contact) {
+                 const row = `
+                 <tr>
+                     <td>${contact.title}</td>
+                     <td>${contact.contactPerson}</td>
+                     <td>${contact.designation}</td>
+                     <td>${contact.phone}</td>
+                     <td>${contact.mobile}</td>
+                     <td>${contact.sms}</td>
+                     <td>${contact.email}</td>
+                     <td>${contact.fax}</td>
+                     <td>${formatDate(contact.dob)}</td>
+                     <td>${formatDate(contact.dom)}</td>
+                     <td>${contact.gender}</td>
+                     <td>${contact.portalID}</td>
+                     <td>${contact.portalPassword ?? ''}</td>
+                     <td><button class="btn btn-danger btn-sm btnDeleteContact">Delete</button></td>
+                 </tr>
+             `;
+                 tableBody.append(row);
+                  });
+                }
+               function loadAddressTable(addressList) {
+                const tableBody = $('#addressTable tbody');
+                tableBody.empty();
+
+                addressList.forEach(function (address) {
+                const row = `
+                 <tr>
+                     <td><input type="checkbox" class="rowCheckbox" ${address.isChecked ? 'checked' : ''} /></td>
+                     <td>${address.address1 ?? ''}</td>
+                     <td>${address.address2 ?? ''}</td>
+                     <td>${address.address3 ?? ''}</td>
+                     <td data-value="${address.cityValue ?? ''}">${address.city ?? ''}</td>
+                     <td data-value="${address.stateValue ?? ''}">${address.state ?? ''}</td>
+                     <td data-value="${address.countryValue ?? ''}">${address.country ?? ''}</td>
+                     <td>${address.pincode ?? ''}</td>
+                     <td>${address.gstNo ?? ''}</td>
+                     <td>${address.panNo ?? ''}</td>
+                     <td>${address.tanNo ?? ''}</td>
+                     <td>${address.gstCertDt ?? ''}</td>
+                     <td>${address.declNo ?? ''}</td>
+                     <td>${formatDate(address.declDate)}</td>
+                     <td>${address.distance ?? ''}</td>
+                     <td>${address.billType ?? ''}</td>
+                     <td>${address.leadDays ?? ''}</td>
+                     <td>${address.legalName ?? ''}</td>
+                     <td><button class="btn btn-danger btn-sm btnDelete">Delete</button></td>
+                 </tr>
+                 `;
+                 tableBody.append(row);
+             });
+                }
+               function formatDate(dateStr) {
+                 if (!dateStr) return '';
+                 const date = new Date(dateStr);
+                 const year = date.getFullYear();
+                 const month = String(date.getMonth() + 1).padStart(2, '0');
+                 const day = String(date.getDate()).padStart(2, '0');
+                 return `${year}-${month}-${day}`;
+               }
+               function loadBankDetailsTable(bankList) {
+                 console.log('kks',bankList)
+                 const tableBody = $('#tblBankDetails tbody');
+                 tableBody.empty();
+
+                 if (!Array.isArray(bankList) || bankList.length === 0) {
+                     console.warn("Bank list is empty");
+                     return;
+                 }
+
+                 bankList.forEach(function (bank) {
+                 const row = `
+                 <tr
+                     data-bankcode="${bank.bankCode ?? ''}"
+                     data-countrycode="${bank.countryCode ?? ''}"
+                     data-paycode="">
+
+                     <td>${bank.bankName ?? ''}</td>
+                     <td>${bank.bD_Name ?? ''}</td>
+                     <td>${bank.ifsc ?? ''}</td>
+                     <td>${bank.acNo ?? ''}</td>
+                     <td>${bank.branch ?? ''}</td>
+                     <td>${bank.pay ?? ''}</td>
+                     <td>${bank.fileName ?? ''}</td>
+                     <td>${formatDate(bank.attachDate)}</td>
+                     <td>
+                         <button type="button" class="btn btn-danger btn-sm remove-row">
+                             Delete
+                         </button>
+                     </td>
+                 </tr>
+             `;
+             tableBody.append(row);
+         });
+               }
+               function loadotherDetailsTable(otherDetailsList) {
+                  const tableBody = $('#otherDetailsTable tbody');
+                  tableBody.empty();
+                  otherDetailsList.forEach(item => {
+                  let pan = "";
+                  let gst = "";
+                  let cheque = "";
+                  let msme = "";
+                  let aadhar = "";
+                  let cpcb = "";
+                  let other = "";
+                  if (item.filePath) {
+                      const lower = item.filePath.toLowerCase();
+                      if (lower.includes("/pan/")) pan = item.fileName;
+                      else if (lower.includes("/gst/")) gst = item.fileName;
+                      else if (lower.includes("/cheque/")) cheque = item.fileName;
+                      else if (lower.includes("/msme/")) msme = item.fileName;
+                      else if (lower.includes("/aadhar/")) aadhar = item.fileName;
+                      else if (lower.includes("/cpcb/")) cpcb = item.fileName;
+                      else other = item.fileName;
+                  }
+                  let row = `
+                  <tr>
+                      <td>${pan}</td>
+                      <td>${gst}</td>
+                      <td>${cheque}</td>
+                      <td>${msme}</td>
+                      <td>${aadhar}</td>
+                      <td>${cpcb}</td>
+                      <td>${other}</td>
+                      <td>${item.attachDate ?? ''}</td>
+                      <td><button type="button" class="btn btn-sm btn-danger btn-delete">Delete</button></td>
+                  </tr>`;
+                  tableBody.append(row);
+                  });
+                }
+               // Delete row on click
+               $(document).on('click', '.btnDeleteContact', function () {
+               $(this).closest('tr').remove();
+             });
+         }
+            // Add CONTACT DETAILS
+            $('#btnAddContact').click(function () {
+                const title = $('#ddlTITLEC').val().trim();
+                const contactPerson = $('#txtCONTACTPERSONC').val().trim();
+                const designation = $('#txtDESIGNATIONC').val().trim();
+                const phone = $('#txtPHONEC').val().trim();
+                const mobile = $('#txtMOBILEC').val().trim();
+                const sms = $('#txtSMSC').val().trim();
+                const email = $('#txtEMAILIDC').val().trim();
+                const fax = $('#txtFAXC').val().trim();
+                const dob = $('#txtDATEOFBIRTHC').val().trim();
+                const dom = $('#txtDATEOFMARRIAGEC').val().trim();
+                const gender = $('#ddlGENDERC').val().trim();
+                const portalId = $('#txtPortalIDC').val().trim();
+                const portalPassword = $('#txtPORTALPASSWORDC').val().trim();
+                $('#contactTable tbody').append(`
+                    <tr>
+                        <td>${title}</td>
+                        <td>${contactPerson}</td>
+                        <td>${designation}</td>
+                        <td>${phone}</td>
+                        <td>${mobile}</td>
+                        <td>${sms}</td>
+                        <td>${email}</td>
+                        <td>${fax}</td>
+                        <td>${dob}</td>
+                        <td>${dom}</td>
+                        <td>${gender}</td>
+                        <td>${portalId}</td>
+                        <td>${portalPassword}</td>
+                        <td><button class="btn btn-danger btn-sm btnDeleteContact">Delete</button></td>
+                    </tr>
+                `);
+                   $('#ContactDetails').find('input[type="text"], input[type="date"]').val('');
+                   $('#ContactDetails').find('select').val('');
+            });
+            $(document).on('click', '.btnDeleteContact', function () {
+                $(this).closest('tr').remove();
+            });
+            $('#btnAddAddress').click(function () {
+            const address1 = $('#txtADDRESS1Add').val();
+            const address2 = $('#txtADDRESS2Add').val();
+            const address3 = $('#txtADDRESS3Add').val();
+            const cityText = $('#ddlCITYAdd option:selected').text();
+            const cityValue = $('#ddlCITYAdd').val();
+            const stateText = $('#ddlSTATEAdd option:selected').text();
+            const stateValue = $('#ddlSTATEAdd').val();
+            const countryText = $('#ddlCOUNTRYAdd option:selected').text();
+            const countryValue = $('#ddlCOUNTRYAdd').val();
+            const pincode = $('#txtPINCODEAdd').val();
+            const gstNo = $('#txtGSTNOAdd').val();
+            const panNo = $('#txtPANNOAdd').val();
+            const tanNo = $('#txtTANNOAdd').val();
+            const gstCertDt = $('#txtGSTCCERTAdd').val();
+            const declNo = $('#txtDECLNOAdd').val();
+            const declDate = $('#txtDECLDATEAdd').val();
+            const distance = $('#txtDISTANCEAdd').val();
+            const billType = $('#txtBILLTYPEAdd').val();
+            const leadDays = $('#txtLEADDAYSAdd').val();
+            const legalName = $('#txtLEGALNAMEAdd').val();
+
+            $('#addressTable tbody').append(`
+                <tr>
+                <td><input type="checkbox" class="rowCheckbox" /></td>
+                    <td>${address1}</td>
+                    <td>${address2}</td>
+                    <td>${address3}</td>
+                    <td data-value="${cityValue}">${cityText}</td>
+                    <td data-value="${stateValue}">${stateText}</td>
+                    <td data-value="${countryValue}">${countryText}</td>
+                    <td>${pincode}</td>
+                    <td>${gstNo}</td>
+                    <td>${panNo}</td>
+                    <td>${tanNo}</td>
+                    <td>${gstCertDt}</td>
+                    <td>${declNo}</td>
+                    <td>${declDate}</td>
+                    <td>${distance}</td>
+                    <td>${billType}</td>
+                    <td>${leadDays}</td>
+                    <td>${legalName}</td>
+                    <td><button class="btn btn-danger btn-sm btnDelete">Delete</button></td>
+                </tr>
+            `);
+            // Clear inputs
+            $('#AddressDetails').find('input[type="text"], input[type="date"]').val('');
+            $('#AddressDetails').find('select').val('');
+        });
+            $(document).on('click', '.btnDelete', function () {
+                $(this).closest('tr').remove();
+            });
+            // Add OTHER DETAILS
+            $('#btnAddOtherDetails').click(function () {
+                let pan = $('#PANCOPY')[0].files[0]?.name || '';
+                let gst = $('#GSTINCOPY')[0].files[0]?.name || '';
+                let cheque = $('#CANCELLEDCHEQUECOPY')[0].files[0]?.name || '';
+                let msme = $('#MSMECOPY')[0].files[0]?.name || '';
+                let aadhar = $('#AADHARCOPY')[0].files[0]?.name || '';
+                let cpcb = $('#CPCBCOPY')[0].files[0]?.name || '';
+                let other = $('#OTHERCOPY')[0].files[0]?.name || '';
+                if (!(pan || gst || cheque || msme || aadhar || cpcb || other)) {
+                    toastr.warning("Please select at least one file.");
+                    return;
+                }
+                let row = `<tr>
+                    <td>${pan}</td>
+                    <td>${gst}</td>
+                    <td>${cheque}</td>
+                    <td>${msme}</td>
+                    <td>${aadhar}</td>
+                    <td>${cpcb}</td>
+                    <td>${other}</td>
+                    <td><button type="button" class="btn btn-sm btn-danger btn-delete">Delete</button></td>
+                </tr>`;
+                $('#otherDetailsTable tbody').append(row);
+                $('#OtherDetails').find('select').val('');
+                $('#OtherDetails').find('input[type="file"]').val('');
+                $('#OtherDetails').find('[id$="Preview"]').html('');
+            });
+            $(document).on('click', '.btn-delete', function () {
+                $(this).closest('tr').remove();
+            });
+            // Add Bank Details
+
+            $('#btnAddBankDetails').on('click', function () {
+            var bankCode = $('#ddlBANKNAMEBD').val();
+            var bankName = $('#ddlBANKNAMEBD option:selected').text();
+
+            var countryCode = $('#ddlBANKCOUNTRYBD').val();
+            var country = $('#ddlBANKCOUNTRYBD option:selected').text();
+
+            var ifsc = $('#txtIFSCCODE').val();
+            var acNo = $('#txtACNO').val();
+            var branch = $('#txtBRANCH').val();
+
+            var payCode = $('#ddltxtPAYBD').val(); // Get Pay Code
+            var pay = $('#ddltxtPAYBD option:selected').text(); // Get Pay Name
+
+            var fileName = $('#txtFILENAME').val();
+            var attachDate = $('#txtATTACHMENTDATE').val();
+
+            var row = `<tr
+                data-bankcode="${bankCode}"
+                data-countrycode="${countryCode}"
+                data-paycode="${payCode}">
+                <td>${bankName}</td>
+                <td>${country}</td>
+                <td>${ifsc}</td>
+                <td>${acNo}</td>
+                <td>${branch}</td>
+                <td>${pay}</td>
+                <td>${fileName}</td>
+                <td>${attachDate}</td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-row">Delete</button></td>
+            </tr>`;
+
+            $('#tblBankDetails tbody').append(row);
+
+            // Clear inputs
+            $('#BankDetails').find('input[type="text"], input[type="date"]').val('');
+            $('#BankDetails').find('select').val('');
+        });
+            // SUBMIT ALL DATA
+            $('#btnSubmit').click(function (e) {
+
+                if (!validateRequiredField('#txtNAME', 'Name Type')) return;
+                if (!validateRequiredField('#txtLEGALNAME', 'Legal Name')) return;
+                if (!validateRequiredField('#ddlGROUPNAME', 'Group Name')) return;
+                if (!validateRequiredField('#txtSMS', 'SMS')) return;
+                if (!validateRequiredField('#txtEMAILID', 'Email ID')) return;
+                if (!validateRequiredField('#ddlLANGUAGE', 'Language')) return;
+
+                if (!validateRequiredField('#txtMOBILE', 'Mobile')) return;
+                if (!validateRequiredField('#ddlPARTYTYPE', 'Party Type')) return;
+                if (!validateRequiredField('#ddlGSTTYPE', 'GST Type')) return;
+                if (!validateRequiredField('#ddlMSMEYN', 'MSME Y/N')) return;
+                if (!validateRequiredField('#ddlTCSAPPLICABLE', 'TCS Applicable')) return;
+                // Address validate start Block
+                if (!validateRequiredField('#txtADDRESS1Add', 'Address 1')) return;
+                if (!validateRequiredField('#txtADDRESS2Add', 'Address 2')) return;
+                // if (!validateRequiredField('#txtADDRESS3Add', 'Address 3')) return;
+                if (!validateRequiredField('#ddlCITYAdd', 'City')) return;
+                if (!validateRequiredField('#ddlSTATEAdd', 'State')) return;
+                if (!validateRequiredField('#ddlCOUNTRYAdd', 'Country')) return;
+                if (!validateRequiredField('#txtPINCODEAdd', 'PinCode')) return;
+                if (!validateRequiredField('#txtGSTNOAdd', 'GST No')) return;
+                if (!validateRequiredField('#txtPANNOAdd', 'Pan Card')) return;
+                // Address validate End Block
+
+                // Bank validate start Block
+                if (!validateRequiredField('#ddlBANKNAMEBD', 'Bank Name')) return;
+                if (!validateRequiredField('#ddlBANKCOUNTRYBD', 'Bank Country')) return;
+                if (!validateRequiredField('#txtIFSCCODE', 'IFSC Code')) return;
+                if (!validateRequiredField('#txtACNO', 'A/C No')) return;
+                if (!validateRequiredField('#txtBRANCH', 'Branch Name')) return;
+                // Bank validate End Block
+
+               var name = $('#txtNAME').val().trim();
+               var LegaName = $('#txtLEGALNAME').val().trim();
+               var GroupName = $('#ddlGROUPNAME').val().trim();
+               var Mobile = $('#txtMOBILE').val().trim();
+               var PartyType = $('#ddlPARTYTYPE').val().trim();
+               var GSTType = $('#ddlGSTTYPE').val().trim();
+
+                e.preventDefault();
+                var GeneralDetails = {
+                    ACCODE: $('#txtACCODE').val() || null,
+                    NAME: $('#txtNAME').val() || null,
+                    NATURE: $('#txtNATURE').val() || null,
+                    SHORTNAME: $('#txtSHORTNAME').val() || null,
+                    ALIAS: $('#txtALIAS').val() || null,
+                    LEGALNAME: $('#txtLEGALNAME').val() || null,
+                    GROUPNAME: $('#ddlGROUPNAME').val() || null,
+                    PHONE: $('#txtPHONE').val() || null,
+                    FAX: $('#txtFAX').val() || null,
+                    MOBILE: $('#txtMOBILE').val() || null,
+                    SMS: $('#txtSMS').val() || null,
+                    WEBSITE: $('#txtWEBSITE').val() || null,
+                    EMAILID: $('#txtEMAILID').val() || null,
+                    LANGUAGE: $('#ddlLANGUAGE').val() || null,
+                    CURRENCY: $('#ddlCURRENCY').val() || null,
+                    PARTYTYPE: $('#ddlPARTYTYPE').val() || null,
+                    GSTTYPE: $('#ddlGSTTYPE').val() || null,
+                    MSMEYN: $('#ddlMSMEYN').val() || null,
+                    MSMENO: $('#txtMSMENO').val() || null,
+                    MSMETYPE: $('#ddlMSMETYPE').val() || null,
+                    TCSAPPLICABLE: $('#ddlTCSAPPLICABLE').val() || null,
+                    TDSAPPLICABLE: $('#ddlTDSAPPLICABLE').val() || null,
+                    CONTACTPERSON: $('#TxtCONTACTPERSON').val() || null,
+                    MAINAC: $('#ddlMAINAC').val() || null,
+                    AGENTNAME: $('#ddlAGENTNAME').val() || null,
+                    OSGROUP: $('#ddlOSGROUP').val() || null,
+                    DISCOUNT: $('#TxtDISCOUNT').val() || null,
+                    DISTRICTGROUP: $('#ddlDISTRICTGROUP').val() || null,
+                    PAYMENTTERM: $('#ddlPAYMENTTERM').val() || null,
+                    CRDAYS: $('#TxtCRDAYS').val() || null,
+                    CRLIMIT: $('#TxtCRLIMIT').val() || null,
+                    LASTCRLIMIT: $('#TxtLASTCRLIMIT').val() || null,
+
+                    BANKNAME: $('#ddlBANKNAME option:selected').text() || null,
+
+                    BANK_CODE: $('#ddlBANKNAME').val() || null,
+                    BANKCOUNTRY: $('#ddlBANKCOUNTRY').val() || null,
+                    BANKBRANCH: $('#TxtBANKBRANCH').val() || null,
+                    IFSCCODE: $('#TxtIFSCCODE').val() || null,
+
+                    PAYTYPE: $('#ddlPAYTYPE').val() || null,
+                    PRINTTYPE: $('#ddlPRINTTYPE').val() || null,
+                    ACNO: $('#TxtACNO').val() || null,
+                    REMARKS: $('#TxtREMARKS').val() || null,
+                    AADHAR: $('#TxtAADHAR').val() || null,
+                    CPCBNo: $('#TxtCPCBNO').val() || null,
+                    ENTITYTYPE: $('#ddlENTITYTYPE').val() || null
+                };
+                const contacts = getContactData();
+                const addresses = getAddressData();
+                const bankDetails = getBankDetails();
+                const otherDetails = getOtherDetails();
+
+                console.log('GeneralDetails',GeneralDetails)
+                console.log('contacts',contacts)
+                console.log('addresses',addresses)
+                console.log('bankDetails',bankDetails)
+                console.log('otherDetails',otherDetails)
+
+                $.ajax({
+                    url: '/BusinessPartnerMaster/SaveAllData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        General: GeneralDetails,
+                        Contacts: contacts,
+                        Addresses: addresses,
+                        Banks: bankDetails,
+                        Others: otherDetails
+                    }),
+                    success: function (response) {
+                        toastr.success('Saved successfully!');
+                    },
+                    error: function () {
+                        toastr.error('Error while saving!');
+                    }
+                });
+            });
+            //Update start Block
+
+            $('#btnUpdate').click(function (e) {
+               var name = $('#txtNAME').val().trim();
+               var LegaName = $('#txtLEGALNAME').val().trim();
+               var GroupName = $('#ddlGROUPNAME').val().trim();
+               var Mobile = $('#txtMOBILE').val().trim();
+               var PartyType = $('#ddlPARTYTYPE').val().trim();
+               var GSTType = $('#ddlGSTTYPE').val().trim();
+
+               e.preventDefault();
+               var GeneralDetails = {
+                    ACCODE: code || null,
+                    NAME: $('#txtNAME').val() || null,
+                    NATURE: $('#txtNATURE').val() || null,
+                    SHORTNAME: $('#txtSHORTNAME').val() || null,
+                    ALIAS: $('#txtALIAS').val() || null,
+                    LEGALNAME: $('#txtLEGALNAME').val() || null,
+                    GROUPNAME: $('#ddlGROUPNAME').val() || null,
+                    PHONE: $('#txtPHONE').val() || null,
+                    FAX: $('#txtFAX').val() || null,
+                    MOBILE: $('#txtMOBILE').val() || null,
+                    SMS: $('#txtSMS').val() || null,
+                    WEBSITE: $('#txtWEBSITE').val() || null,
+                    EMAILID: $('#txtEMAILID').val() || null,
+                    LANGUAGE: $('#ddlLANGUAGE').val() || null,
+                    CURRENCY: $('#ddlCURRENCY').val() || null,
+                    PARTYTYPE: $('#ddlPARTYTYPE').val() || null,
+                    GSTTYPE: $('#ddlGSTTYPE').val() || null,
+                    MSMEYN: $('#ddlMSMEYN').val() || null,
+                    MSMENO: $('#txtMSMENO').val() || null,
+                    MSMETYPE: $('#ddlMSMETYPE').val() || null,
+                    TCSAPPLICABLE: $('#ddlTCSAPPLICABLE').val() || null,
+                    TDSAPPLICABLE: $('#ddlTDSAPPLICABLE').val() || null,
+                    CONTACTPERSON: $('#TxtCONTACTPERSON').val() || null,
+                    MAINAC: $('#ddlMAINAC').val() || null,
+                    AGENTNAME: $('#ddlAGENTNAME').val() || null,
+                    OSGROUP: $('#ddlOSGROUP').val() || null,
+                    DISCOUNT: $('#TxtDISCOUNT').val() || null,
+                    DISTRICTGROUP: $('#ddlDISTRICTGROUP').val() || null,
+                    PAYMENTTERM: $('#ddlPAYMENTTERM').val() || null,
+                    CRDAYS: $('#TxtCRDAYS').val() || null,
+                    CRLIMIT: $('#TxtCRLIMIT').val() || null,
+                    LASTCRLIMIT: $('#TxtLASTCRLIMIT').val() || null,
+
+                    BANKNAME: $('#ddlBANKNAME option:selected').text() || null,
+
+                    BANK_CODE: $('#ddlBANKNAME').val() || null,
+                    BANKCOUNTRY: $('#ddlBANKCOUNTRY').val() || null,
+                    BANKBRANCH: $('#TxtBANKBRANCH').val() || null,
+                    IFSCCODE: $('#TxtIFSCCODE').val() || null,
+
+                    PAYTYPE: $('#ddlPAYTYPE').val() || null,
+                    PRINTTYPE: $('#ddlPRINTTYPE').val() || null,
+                    ACNO: $('#TxtACNO').val() || null,
+                    REMARKS: $('#TxtREMARKS').val() || null,
+                    AADHAR: $('#TxtAADHAR').val() || null,
+                    CPCBNo: $('#TxtCPCBNO').val() || null,
+                    ENTITYTYPE: $('#ddlENTITYTYPE').val() || null
+                };
+               debugger
+               const contacts = getContactData();
+               const addresses = getAddressData();
+               debugger
+               const bankDetails = getBankDetails();
+               const otherDetails = getOtherDetails();
+               console.log('GeneralDetails kks', GeneralDetails)
+               console.log('contacts kks', contacts)
+               console.log('addresses kks', addresses)
+               console.log('bankDetails kks', bankDetails)
+               console.log('otherDetails kks', otherDetails)
+               $.ajax({
+                    url: '/BusinessPartnerMaster/UpdateAllData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        General: GeneralDetails,
+                         Contacts: contacts,
+                         Addresses: addresses,
+                         Banks: bankDetails,
+                         Others: otherDetails,
+                    }),
+                    success: function (response) {
+                        toastr.success('Saved successfully!');
+                    },
+                    error: function () {
+                        toastr.error('Error while saving!');
+                    }
+                });
+            });
+            //Update End Block
+            // modal Popup start block
+          $(".openModalBtn").on("click", function () {
+
+             let tableName = $(this).data("table");
+
+             $("#hdnTableName").val(tableName);
+             $("#modalTitle").text("Add — " + tableName);
+             $("#dynamicFields").html("");
+
+             $.ajax({
+             url: "/BusinessPartnerMaster/GetTableColumns",
+             type: "GET",
+             data: { tableName: tableName },
+             success: function (cols) {
+                 console.log('cols',cols)
+                 $.each(cols, function (i, col) {
+
+                     let field =
+                         `<div class="col-md-4">
+                             <div class="form-group">
+                                 <label class="form-label">${col.label}</label>
+                                 <input type="text" class="form-control dyn-input" data-column="${col.columnName}" placeholder="Enter ${col.label}">
+                             </div>
+                         </div>`;
+
+                     $("#dynamicFields").append(field);
+                 });
+             }
+         });
+         });
+
+         $("#btn_savemodal").on("click", function () {
+
+             let tableName = $("#hdnTableName").val();
+             let dataList = [];
+             $(".dyn-input").each(function () {
+                 dataList.push({
+                     columnName: $(this).data("column"),
+                     value: $(this).val()
+                 });
+             });
+             console.log("Table Name :", tableName);
+             console.log("Collected Data :", dataList);
+
+             $.ajax({
+             url: "/BusinessPartnerMaster/SaveDynamicRecord",
+             type: "POST",
+             contentType: "application/json",
+             data: JSON.stringify({
+                 tableName: tableName,
+                 values: dataList
+             }),
+             success: function (res) {
+                 GetddlLanguage();
+                 GetddlCurrency();
+                 alert("Record saved successfully");
+                 $("#languageModal").modal("hide");
+             },
+             error: function (err) {
+                 console.log(err);
+                 alert("Error while saving");
+             }
+         });
+
+         });
+        // modal Popup End block
+
+        });
+    // Helper Functions
+    function getContactData() {
+            let contacts = [];
+            $('#contactTable tbody tr').each(function () {
+                const cells = $(this).find('td');
+
+             const cellTexts = cells.map(function () {
+             return $(this).text().trim();
+             }).get();
+            const allEmpty = cellTexts.every(text => text === "");
+            if (allEmpty) return;
+
+                contacts.push({
+                    Title: $(cells[0]).text() || null,
+                    ContactPerson: $(cells[1]).text() || null,
+                    Designation: $(cells[2]).text() || null,
+                    Phone: $(cells[3]).text() || null,
+                    Mobile: $(cells[4]).text() || null,
+                    SMS: $(cells[5]).text() || null,
+                    Email: $(cells[6]).text() || null,
+                    Fax: $(cells[7]).text() || null,
+                    DOB: $(cells[8]).text() || null,
+                    DOM: $(cells[9]).text() || null,
+                    Gender: $(cells[10]).text() || null,
+                    PortalID: $(cells[11]).text() || null,
+                    PortalPassword: $(cells[12]).text() || null
+                });
+            });
+            return contacts;
+        }
+    function getAddressData() {
+         let list = [];
+         $('#addressTable tbody tr').each(function () {
+             list.push({
+                 IsChecked: $(this).find('.rowCheckbox').is(':checked') ? 1 : 0,
+                 Address1: $(this).find('td:eq(1)').text().trim(),
+                 Address2: $(this).find('td:eq(2)').text().trim(),
+                 Address3: $(this).find('td:eq(3)').text().trim(),
+                 City: $(this).find('td:eq(4)').text().trim(),
+                 CityValue: $(this).find('td:eq(4)').data("value") || 0,
+                 State: $(this).find('td:eq(5)').text().trim(),
+                 StateValue: $(this).find('td:eq(5)').data("value") || 0,
+                 Country: $(this).find('td:eq(6)').text().trim(),
+                 CountryValue: $(this).find('td:eq(6)').data("value") || 0,
+                 Pincode: $(this).find('td:eq(7)').text().trim(),
+                 GstNo: $(this).find('td:eq(8)').text().trim(),
+                 PanNo: $(this).find('td:eq(9)').text().trim(),
+                 TanNo: $(this).find('td:eq(10)').text().trim(),
+                 GstCertDt: $(this).find('td:eq(11)').text().trim(),
+                 DeclNo: $(this).find('td:eq(12)').text().trim(),
+                 DeclDate: $(this).find('td:eq(13)').text().trim(),
+                 Distance: $(this).find('td:eq(14)').text().trim(),
+                 BillType: $(this).find('td:eq(15)').text().trim(),
+                 LeadDays: $(this).find('td:eq(16)').text().trim(),
+                 LegalName: $(this).find('td:eq(17)').text().trim()
+             });
+         });
+         return list;
+     }
+    // function getAddressData() {
+     //     let addresses = [];
+     //     $('#addressTable tbody tr').each(function () {
+     //         const cells = $(this).find('td');
+     //         const isChecked = $(cells[0]).find('input[type="checkbox"]').is(':checked') ? 1 : 0;
+
+     //         addresses.push({
+     //             IsChecked: isChecked,
+     //             address1: $(cells[1]).text() || null,
+     //             address2: $(cells[2]).text() || null,
+     //             address3: $(cells[3]).text() || null,
+     //             city: $(cells[4]).text() || null,
+     //             CityValue: $(cells[4]).data('value') || 0,
+     //             state: $(cells[5]).text() || null,
+     //             StateValue: $(cells[5]).data('value') || 0,
+     //             country: $(cells[6]).text() || null,
+     //             CountryValue: $(cells[6]).data('value') || 0,
+     //             pincode: $(cells[7]).text() || null,
+     //             gstNo: $(cells[8]).text() || null,
+     //             panNo: $(cells[9]).text() || 0,
+     //             tanNo: $(cells[10]).text() || 0,
+     //             gstCertDt: $(cells[11]).text() || 0,
+     //             declNo: $(cells[12]).text() || 0,
+     //             declDate: $(cells[13]).text() || null,
+     //             distance: $(cells[14]).text() || 0,
+     //             billType: $(cells[15]).text() || null,
+     //             leadDays: $(cells[16]).text() || 0,
+     //             legalName: $(cells[17]).text() || null
+     //         });
+     //     });
+     //     return addresses;
+     // }
+    function getOtherDetails() {
+            let files = [];
+            $('#otherDetailsTable tbody tr').each(function () {
+                const cells = $(this).find('td');
+
+              const cellTexts = cells.map(function () {
+             return $(this).text().trim();
+             }).get();
+            const allEmpty = cellTexts.every(text => text === "");
+            if (allEmpty) return;
+
+                files.push({
+                    PAN: $(cells[0]).text() || null,
+                    GST: $(cells[1]).text() || null,
+                    Cheque: $(cells[2]).text() || null,
+                    MSME: $(cells[3]).text() || null,
+                    Aadhar: $(cells[4]).text() || null,
+                    CPCB: $(cells[5]).text() || null,
+                    Other: $(cells[6]).text() || null
+                });
+            });
+            return files;
+        }
+    function getBankDetails() {
+            let bankDetails = [];
+            $('#tblBankDetails tbody tr').each(function () {
+                const row = $(this);
+                const cols = row.find('td');
+                const celltexts = cols.map(function () {
+                   return $(this).text().trim();
+                }).get();
+
+                const allempty = celltexts.every(text => text === "");
+                if (allempty) return;
+
+                bankDetails.push({
+                    BankCode: row.attr('data-bankcode') || '',
+                    BankName: cols.eq(0).text().trim(),
+                    CountryCode: row.attr('data-countrycode') || '',
+                    Country: cols.eq(1).text().trim(),
+                    IFSC: cols.eq(2).text().trim(),
+                    acNo: cols.eq(3).text().trim(),
+                    Branch: cols.eq(4).text().trim(),
+                    PayCode: row.attr('data-paycode') || '',
+                    pay: cols.eq(5).text().trim(),
+                    FileName: cols.eq(6).text().trim(),
+                    attachDate: cols.eq(7).text().trim()
+                });
+            });
+            return bankDetails;
+        }
+    // General Details ddl banding data
+    function GetAccountID()
+        {
+             $.ajax({
+                url: '/BusinessPartnerMaster/GetNextAccountID',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $('#txtACCODE').val(data.nextCode);
+                    $('#NumBankRefernceNo').val(data.fullAccountID);
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlGROUPNAME:", xhr.responseText);
+                }
+            });
+        }
+    function ddlGroupName(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlGroupName',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlGROUPNAME');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlGROUPNAME:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlGROUPNAMEID(callback) {
+            var selectedCode = $('#ddlGROUPNAME').val();
+            if (selectedCode) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/BusinessPartnerMaster/GetNatureBanding',
+                    data: { code: selectedCode },
+                    success: function (response) {
+                    if (response && response.length > 0) {
+                        $('#txtNATURE').val(response[0].text);
+                    } else {
+                        $('#txtNATURE').val('');
+                    }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error:", error);
+                    }
+                });
+            }
+        }
+    function GetddlLanguage(callback) {
+         $.ajax({
+             url: '/BusinessPartnerMaster/GetLanguageBanding',
+             type: 'GET',
+             dataType: 'json',
+             success: function (data) {
+                 const ddl = $('#ddlLANGUAGE');
+                 ddl.empty().append('<option value="">-- Select Language --</option>');
+                 $.each(data, function (index, item) {
+                     ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                 });
+                 if (typeof callback === "function") callback();
+             },
+             error: function (xhr) {
+                 console.error("Error loading ddlLANGUAGE:", xhr.responseText);
+             }
+         });
+     }
+    function GetddlCurrency(callback) {
+         $.ajax({
+             url: '/BusinessPartnerMaster/GetCurrencyBanding',
+             type: 'GET',
+             dataType: 'json',
+             success: function (data) {
+                 const ddl = $('#ddlCURRENCY');
+                 ddl.empty().append('<option value="">-- Select Currency --</option>');
+                 $.each(data, function (index, item) {
+                     ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                 });
+                 if (typeof callback === "function") callback();
+             },
+             error: function (xhr) {
+                 console.error("Error loading ddlCURRENCY:", xhr.responseText);
+             }
+         });
+     }
+    function GetddlMainAC(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlMainAC',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlMAINAC');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlMAINAC:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlAgentName(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlAgentName',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlAGENTNAME');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlAGENTNAME:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlOSGroup(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlOSGroup',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlOSGROUP');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlOSGROUP:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlDistrictGroup(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlDistrictGroup',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlDISTRICTGROUP');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlDISTRICTGROUP:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlPaymentTerms(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlPaymentTerms',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlPAYMENTTERM');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlPAYMENTTERM:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlBankName(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlBankName',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlBANKNAME');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlBANKNAME:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlBankCountry(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlBankCountry',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlBANKCOUNTRY');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlBANKCOUNTRY:", xhr.responseText);
+                }
+            });
+        }
+    function Getddltitle(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlTitle',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlTITLEC');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlTITLEC:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlCity(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlCity',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlCITYAdd');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlCITYAdd:", xhr.responseText);
+                }
+            });
+        }
+    function Getddlstate(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/Getddlstate',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlSTATEAdd');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlSTATEAdd:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlCountry(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlCountry',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlCOUNTRYAdd');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlCOUNTRYAdd:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlBankNameBD(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlBankNameBD',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlBANKNAMEBD');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlBANKNAME:", xhr.responseText);
+                }
+            });
+        }
+    function GetddlBankCountryBD(callback) {
+            $.ajax({
+                url: '/BusinessPartnerMaster/GetddlBankCountryBD',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const ddl = $('#ddlBANKCOUNTRYBD');
+                    ddl.empty().append('<option value="">-- Select Group Name --</option>');
+                    $.each(data, function (index, item) {
+                        ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    });
+                    if (typeof callback === "function") callback();
+                },
+                error: function (xhr) {
+                    console.error("Error loading ddlBANKCOUNTRY:", xhr.responseText);
+                }
+            });
+        }
+</script>
+
+@* Active status start*@
+<script>
+        $('#ACTIVE').on('change', function () {
+        let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+        $('#statusText').text(status);
+    });
+</script>
+@* Active status end*@
+@* file Upload Delete Script start *@
+<script>
+    function setupFileUpload(inputId, previewId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+
+      input.addEventListener('change', function () {
+        if (input.files.length > 0) {
+          const fileName = input.files[0].name;
+          preview.innerHTML = `
+            📄 ${fileName}
+            <span class="remove-btn" onclick="removeFile('${inputId}', '${previewId}')">&times;</span>
+          `;
+        } else {
+          preview.innerHTML = '';
+        }
+      });
+    }
+    function removeFile(inputId, previewId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+
+      input.value = '';
+      preview.innerHTML = '';
+    }
+
+    setupFileUpload('PANCOPY', 'PANCOPYPreview');
+    setupFileUpload('GSTINCOPY', 'GSTINCOPYPreview');
+    setupFileUpload('CANCELLEDCHEQUECOPY', 'CANCELLEDCHEQUECOPYPreview');
+    setupFileUpload('MSMECOPY', 'MSMECOPYPreview');
+    setupFileUpload('AADHARCOPY', 'AADHARCOPYPreview');
+    setupFileUpload('CPCBCOPY', 'CPCBCOPYPreview');
+    setupFileUpload('OTHERCOPY', 'OTHERCOPYPreview');
+</script>
+
+@* file Upload Delete Script end *@
+@* Required Field Accordion Start *@
+<script>
+    $(function () {
+      $('#submitBtn').click(function (e) {
+        let firstInvalid = $('#supplierAccordion [required]').filter(function () {
+          return !this.value.trim();
+        }).first();
+
+        if (firstInvalid.length) {
+          e.preventDefault();
+          const panel = firstInvalid.closest('.accordion-collapse');
+          bootstrap.Collapse.getOrCreateInstance(panel[0]).show();
+          firstInvalid[0].setCustomValidity("Please fill this field");
+          firstInvalid[0].reportValidity();
+          firstInvalid.focus();
+        }
+      });
+    });
+</script>
+@* Required Field Accordion End *@
+
+<script>
+    $(document).ready(function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const openBank = urlParams.get('openBank');
+
+      if (openBank === '1') {
+        const bankSection = $('#collapseFive');
+        const bsCollapse = bootstrap.Collapse.getOrCreateInstance(bankSection[0]);
+        bsCollapse.show();
+
+        // Optional: scroll to accordion
+        $('html, body').animate({
+          scrollTop: bankSection.offset().top - 100
+        }, 500);
+      }
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Get the collapsible element
+        var targetAccordion = document.getElementById('collapseOne');
+
+        // Use Bootstrap 5's Collapse API
+        if (targetAccordion) {
+            var bsCollapse = bootstrap.Collapse.getOrCreateInstance(targetAccordion);
+            bsCollapse.show(); // Opens the accordion
+        }
+    });
+</script>

@@ -1,0 +1,227 @@
+﻿@{
+    ViewBag.Title = "Mesh Conversion Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Mesh Conversion Master</legend>
+    <form id="MeshConversionMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlConversionType">Conversion Type</label>
+                    <select class="form-control" id="ddlConversionType">
+                        <option value="">Select Conversion Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlRunNo">Run No</label>
+                    <select class="form-control" id="ddlRunNo">
+                        <option value="">-- Select Run No --</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblMeshConversionMaster" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Production</th>
+                            <th>%</th>
+                            <th>Base Production</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "MeshConversionMasterList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+    $(document).ready(function () {
+        ddlConversionTypeDropdown();
+
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
+        const srno = getQueryParam("sno");
+        const meshNameQ = getQueryParam("mesH_NAME");
+        const runNoQ = getQueryParam("runNo");
+        const $tbody = $("#tblMeshConversionMaster tbody");
+        // Function to add a new row
+       function addRow(data = {}) {
+        const row = `
+            <tr>
+                <td><input type="text" class="form-control" value="${data.Production !== null && data.Production !== undefined ? data.Production : ''}"></td>
+                <td><input type="text" class="form-control" value="${data.Per !== null && data.Per !== undefined ? data.Per : ''}"></td>
+                <td><input type="text" class="form-control" value="${data.BaseProduction !== null && data.BaseProduction !== undefined ? data.BaseProduction : ''}"></td>
+                <td>
+                    <i class="fa fa-plus text-success btn-add-action" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash text-danger btn-delete-action" style="cursor:pointer;"></i>
+                </td>
+            </tr>`;
+        $tbody.append(row);
+        updateAddButtons();
+        }
+        function updateAddButtons() {
+            const rows = $tbody.find("tr");
+            rows.find(".btn-add-action").hide();
+            rows.last().find(".btn-add-action").show();
+        }
+        $(document).on("click", ".btn-add-row, .btn-add-action", function () {
+            addRow();
+        });
+
+        $(document).on("click", ".btn-delete-action", function () {
+            $(this).closest("tr").remove();
+            updateAddButtons();
+        });
+
+        // Load record if parameters are available
+        if (srno && meshNameQ && runNoQ) {
+            loadRecord();
+        } else {
+            addRow();
+        }
+        function loadRecord() {
+            $.ajax({
+                url: "/MeshConversionMaster/GetID",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    Sno: srno,
+                    MeshName: meshNameQ,
+                    RunNo: runNoQ
+                }),
+                success: function (res) {
+                    console.log('res',res)
+                    if (!res.success) {
+                        toastr.error(res.message);
+                        return;
+                    }
+                    // Map the response to the form fields
+                    $("#ddlConversionType").val(res.data.mesH_CODE || '');
+                    $("#ddlRunNo").val(res.data.ruN_NO || '');
+                    $tbody.empty();
+
+                    // Add row with the fetched data
+                    addRow({
+                        Production: res.data.production,
+                        Per: res.data.per,
+                        BaseProduction: res.data.basE_PRODUCTION,
+                        Flg: res.data.reporT_FLG
+                    });
+                },
+                error: function () {
+                    toastr.error("Error loading record.");
+                }
+            });
+        }
+        // Save button click handler
+    $('#btn-save').click(function (e) {
+        e.preventDefault();
+
+        var selectedOption = $('#ddlConversionType').find("option:selected");
+        var meshCode = selectedOption.val(); 
+        var meshName = selectedOption.text();
+        const runNo = $('#ddlRunNo').val();
+        
+        if (!meshName || !meshCode || !runNo) {
+            toastr.error('Please select Mesh Conversion Type and Run No.');
+            return;
+        }
+        const rows = [];
+        $('#tblMeshConversionMaster tbody tr').each(function () {
+            const tds = $(this).find('td');
+            rows.push({
+                Production: tds.eq(0).find('input').val() ? parseFloat(tds.eq(0).find('input').val()) : null,
+                Per: tds.eq(1).find('input').val() ? parseFloat(tds.eq(1).find('input').val()) : null,
+                BaseProduction: tds.eq(2).find('input').val() ? parseFloat(tds.eq(2).find('input').val()) : null
+            });
+        });
+
+        const data = {
+            MESH_NAME: meshName,
+            MESH_CODE: meshCode,
+            RUN_NO: runNo,
+            Records: rows
+        };
+        $.ajax({
+            url: '/MeshConversionMaster/SaveMakeConversion', 
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    $('#tblMeshConversionMaster tbody').empty();
+                    addRow();
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function () {
+                toastr.error('Error saving data.');
+            }
+        });
+    });
+    });
+    function ddlConversionTypeDropdown() {
+        return $.ajax({
+            url: '/MeshConversionMaster/GetddlConversionType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlConversionType');
+                ddl.empty().append('<option value="">-- Select AC Name --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading AC Names:", xhr.responseText);
+                alert('Error loading AC Names: ' + error);
+            }
+        });
+    }
+</script>

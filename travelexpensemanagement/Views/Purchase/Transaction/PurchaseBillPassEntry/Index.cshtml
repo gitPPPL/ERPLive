@@ -1,0 +1,2438 @@
+﻿@{
+    ViewBag.Title = "Purchase Bill Pass Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<fieldset>
+    <legend class="legend-field">Purchase Bill Pass Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "PurchaseBillPassEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div> 
+    </div>
+    <form id="PurchaseBillPassEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group"> 
+                    <label for="ddlDocType">Doc Type</label>
+                    <select class="form-control" id="ddlDocType"> 
+                        <option>--Select DOC Type--</option> 
+                    </select> 
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" placeholder="Enter Doc Date">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtMRNNo">MRN No</label>
+                    <div class="input-divide">
+                        <input type="text" class="form-control" id="TxtMRNNo1">
+                        <input type="text" class="form-control" id="TxtMRNNo2">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Party Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlBillFrom">Bill From</label>
+                                <select class="form-control" id="ddlBillFrom">
+                                    <option>Select Bill From</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd1PD">Add Line1</label>
+                                @* <input type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address Line 1"> *@
+                                <select class="form-control" id="TxtAdd1PD">
+                                    <option>Select Billing Address</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd2PD">Add Line2</label>
+                                <input type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address Line 2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd3PD">Add Line3</label>
+                                <input type="text" class="form-control" id="TxtAdd3PD" placeholder="Enter Address Line 3">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlCity">City</label>
+                                <select class="form-control" id="ddlCityPD">
+                                    <option value="">Select City</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtGSTNo">GST No</label>
+                                <input type="text" class="form-control" id="TxtGSTNo" placeholder="Enter GST No">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtDispFromAdd">Disp From Address</label>
+                                <input type="text" class="form-control" id="TxtDispFromAdd" placeholder="Enter Dispatch Address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlDispCity">Disp City</label>
+                                <select class="form-control" id="ddlDispCity">
+                                    <option value="">Select Dispatch City</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Shipping Details</legend>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlShipFrom">Ship from</label>
+                                <div class="input-divide">
+                                    <select class="form-control" id="ddlShipFrom1">
+                                        <option value="">Select Ship from</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ddlShipFromAddress">Ship from address</label>
+                                <select class="form-control" id="ddlShipFromAddress">
+                                    <option>Select Shipping Address</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd1SF">Add Line1</label>
+                                <input type="text" class="form-control" id="TxtAdd1SF" placeholder="Enter Address Line 1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd2SF">Add Line2</label>
+                                <input type="text" class="form-control" id="TxtAdd2SF" placeholder="Enter Address Line 2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="TxtAdd3SF">Add Line3</label>
+                                <input type="text" class="form-control" id="TxtAdd3SF" placeholder="Enter Address Line 3">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtGSTNoSF">GST No</label>
+                                <input type="text" class="form-control" id="TxtGSTNoSF" placeholder="Enter GST Number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlCitySF">City</label>
+                                <select class="form-control" id="ddlCitySF">
+                                    <option>Select City</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Document Details</legend>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtBillNo">Bill No</label>
+                                <input type="text" class="form-control" id="TxtBillNo" placeholder="Enter Bill No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtBillDate">Bill Date</label>
+                                <input type="date" class="form-control" id="DtBillDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtChallanNo">Challan No</label>
+                                <input type="text" class="form-control" id="TxtChallanNo" placeholder="Enter Challan No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtChDate">Ch Date</label>
+                                <input type="date" class="form-control" id="DtChDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtWaybillNo">Waybill No</label>
+                                <input type="text" class="form-control" id="TxtWaybillNo" placeholder="Enter Waybill No">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlTransitNo">Transit No</label>
+                                <select class="form-control" id="ddlTransitNo">
+                                    <option>Select Transit No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtWaybillDate">Waybill Date</label>
+                                <input type="date" class="form-control" id="DtWaybillDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="TxtWayBillInvNo">WayBill InvNo</label>
+                                <input type="text" class="form-control" id="TxtWayBillInvNo" placeholder="Enter WayBill InvNo">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtWaybillExpiry">Waybill Expiry</label>
+                                <input type="date" class="form-control" id="DtWaybillExpiry">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NumExRate">Ex-Rate(Rs/USD)</label>
+                                <input type="number" class="form-control" id="NumExRate" placeholder="Enter Ex-Rate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ddlInputType">Input Type</label>
+                                <select class="form-control" id="ddlInputType">
+                                    <option>--Select Input Type--</option>
+                                    <option value="Central">Central</option>
+                                    <option value="GST Input">GST Input</option>
+                                    <option value="GST NA">GST NA</option>
+                                    <option value="Import">Import</option>
+                                    <option value="Input Capital">Input Capital</option>
+                                    <option value="Input GST">Input GST</option>
+                                    <option value="Input NA">Input NA</option>
+                                    <option value="Input VAT">Input VAT</option>
+                                    <option value="Local">Local</option>
+                                    <option value="RCM">RCM</option>
+                                    <option value="Exempt">Exempt</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlDebitAC">Debit A/c</label>
+                    <select class="form-control" id="ddlDebitAC">
+                        <option>Select Debit A/C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlCreditAC">Credit A/c</label>
+                    <select class="form-control" id="ddlCreditAC">
+                        <option>Select Credit Account</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="txtRemarks">Remarks</label>
+                    <textarea type="text" class="form-control" id="txtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-6 col-md-6">
+                <div class="button-right">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-copy"></i> <span id="dropdownText">Copy From</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="copyFromDropdown">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseorderModal">Purchase Order</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#RMPurchaseModal">RM Purchase (Indian)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Net Amount -->
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtNetAmount">Net Amount</label>
+                    <input type="text" class="form-control" id="TxtNetAmount" placeholder="Enter Amount">
+                </div>
+            </div>
+            <!-- Status Dropdown -->
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="ddlStatus">Status</label>
+                    <select class="form-control" id="ddlStatus">
+                        <option value="open" selected>Open</option>
+                        <option value="closed">Closed</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="col-md-8">
+                <div class="btn-mt button-right">
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#costallocationModal">
+                        <i class="fa fa-project-diagram"></i> Cost Allocation
+                    </button>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#pendingapprovalModal">
+                        <i class="fa fa-tasks"></i> List of Pending Approval
+                    </button>
+                    <button class="btn btn-primary" type="button">
+                        <i class="fa fa-print"></i> Pending MRN for Bill Passing
+                    </button>
+                    <button class="btn btn-primary" type="button">
+                        <i class="fa fa-print"></i> RM Import Bill
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--Cost Allocation Modal-->
+        <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="costallocationLabel">Cost Allocation</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="PartyName">Party Name</label>
+                                    <input type="text" class="form-control" id="TxtPartyNameCA" placeholder="Enter Party Name">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-edit"></i>Edit</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="RefVno">Ref. Vno</label>
+                                    <input type="number" class="form-control" id="NumRefVno" placeholder="Enter Ref. VNo">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="TotalAmtAllocated">Total Amt. to be allocated</label>
+                                    <input type="text" class="form-control" id="TxtTotalAmtAllocated" placeholder="Enter Total Amt. to be allocated">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="SrNo">Sr. No</label>
+                                    <input type="number" class="form-control" id="NumSrNo" placeholder="Enter Sr. No">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="SrDate">Sr. Date</label>
+                                    <input type="date" class="form-control" id="DtSrDate">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="BalAmount">Bal. Amount</label>
+                                    <input type="number" class="form-control" id="NumBalAmount" placeholder="Enter Bal Amount">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblpurchaseallocationmodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Cost Center</th>
+                                            <th>Allocated Amt</th>
+                                            <th>Narration</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="btn-add-row-last">
+                                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                    </div>
+                                    <div class="pagination-end">
+                                        <div class="custom-pagination" id="tablePagination"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Pending Approval Modal-->
+        <div class="modal fade" id="pendingapprovalModal" tabindex="-1" aria-labelledby="pendingapprovalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="pendingapprovalLabel">List of Unapproved Purchase Bill</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblpendingapprovalmodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Type</th>
+                                            <th>DocID</th>
+                                            <th>Vdate</th>
+                                            <th>Send By</th>
+                                            <th>Send Date</th>
+                                            <th>Send To</th>
+                                            <th>Status</th>
+                                            <th>Approval Status</th>
+                                            <th>Remarks</th>
+                                            <th>Created By</th>
+                                            <th>Created Date</th>
+                                            <th>Party Name</th>
+                                            <th>Bill Amount</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Purchase order Modal-->
+        <div class="modal fade" id="purchaseorderModal" tabindex="-1" aria-labelledby="purchaseorderLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="purchaseorderLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxPR" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendPOModal">
+                                        <label class="checkbox-label" for="chkAppendPOModal">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblpurchaseordermodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Pono</th>
+                                            <th>Potype</th>
+                                            <th>Vdate</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Balqty</th>
+                                            <th>Rate</th>
+                                            <th>Taxtype</th>
+                                            <th>Pack%</th>
+                                            <th>Disc%</th>
+                                            <th>Cgst%</th>
+                                            <th>Sgst%</th>
+                                            <th>Igst%</th>
+                                            <th>Oth Amt</th>
+                                            <th>Make</th>
+                                            <th>Department</th>
+                                            <th>Remarks</th>
+                                            <th>Reqtype</th>
+                                            <th>Reqno</th>
+                                            <th>Reftype</th>
+                                            <th>Refno</th>
+                                            <th>Deptcode</th>
+                                            <th>Makecode</th>
+                                            <th>Ucode</th>
+                                            <th>Taxcode</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--RM Purchase Modal-->
+        <div class="modal fade" id="RMPurchaseModal" tabindex="-1" aria-labelledby="RMPurchaseLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="RMPurchaseLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxQM" class="form-control" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendRMP">
+                                        <label class="checkbox-label" for="chkAppendRMP">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblRMPurchaseModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllQM" /></th>
+                                            <th>Pono</th>
+                                            <th>Potype</th>
+                                            <th>Vdate</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Balqty</th>
+                                            <th>Rate</th>
+                                            <th>Taxtype</th>
+                                            <th>Pack%</th>
+                                            <th>Disc%</th>
+                                            <th>Cgst%</th>
+                                            <th>Sgst%</th>
+                                            <th>Igst%</th>
+                                            <th>Oth Amt</th>
+                                            <th>Make</th>
+                                            <th>Department</th>
+                                            <th>Remarks</th>
+                                            <th>Reqtype</th>
+                                            <th>Reqno</th>
+                                            <th>Reftype</th>
+                                            <th>Refno</th>
+                                            <th>Deptcode</th>
+                                            <th>Makecode</th>
+                                            <th>Ucode</th>
+                                            <th>Taxcode</th>
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* Nav tabs start *@
+        <div class="navtab-form">
+            <ul class="nav nav-tabs" id="formTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Item Total</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Logistic Details</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Cr/Dr Note</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab">Attachments</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab6-tab" data-bs-toggle="tab" data-bs-target="#tab6" type="button" role="tab">EPR</button>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <!-- tab 1 -->
+                <div class="tab-pane fade show active" id="tab1">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblItemRecordPBPE" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th style="display:none;">Code</th>
+                                        <th style="width:200px;">Item Name</th>
+                                        <th>HSN Code</th>
+                                        <th>Unit</th>
+                                        <th>Nos</th>
+                                        <th>Rec Qty</th>
+                                        <th>Bill Qty</th>
+                                        <th>USD Rate</th>
+                                        <th>Ex Rate</th>
+                                        <th>Rate</th>
+                                        <th>Amount</th>
+                                        <th>RCM Y/N</th>
+                                        <th>Input Y/N</th>
+                                        <th>Tax Type</th>
+                                        <th>Pack %</th>
+                                        <th>Pack Amt</th>
+                                        <th>Disc %</th>
+                                        <th>Disc</th>
+                                        <th>CGST %</th>
+                                        <th>CGST</th>
+                                        <th>SGST %</th>
+                                        <th>SGST</th>
+                                        <th>IGST %</th>
+                                        <th>IGST</th>
+                                        <th>Cess %</th>
+                                        <th>Cess</th>
+                                        <th>VAT%</th>
+                                        <th>VAT</th>
+                                        <th>Oth Amt</th>
+                                        <th>Net Amt</th>
+                                        <th>Make</th>
+                                        <th>Department</th>
+                                        <th>Remarks</th>
+                                        <th>LD Rate</th>
+                                        <th>LD Amt</th>
+                                        <th>PO LDRate</th>
+                                        <th>PO Rate</th>
+                                        <th>PO Type</th>
+                                        <th>PO No</th>
+                                        <th>Kanta Type</th>
+                                        <th>Kanta No</th>
+                                        <th>Req Type</th>
+                                        <th>Req No</th>
+                                        <th>Ref Type</th>
+                                        <th>Ref No</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePaginationPBPE"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- tab 2 -->
+                <div class="tab-pane fade" id="tab2">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Total</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumReceivedQty">Received Qty</label>
+                                    <input type="number" class="form-control" id="NumReceivedQty" placeholder="Enter Received Qty">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumBillQty">Bill Qty</label>
+                                    <input type="number" class="form-control" id="NumBillQty" placeholder="Enter Bill Quantity">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumAmount">Amount</label>
+                                    <input type="number" class="form-control" id="NumAmount" placeholder="Enter Amount">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumPacking">Packing</label>
+                                    <input type="number" class="form-control" id="NumPacking" placeholder="Enter Packing Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumDiscount">Discount</label>
+                                    <input type="number" class="form-control" id="NumDiscount" placeholder="Enter Discount Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumCgst">CGST</label>
+                                    <input type="number" class="form-control" id="NumCgst" placeholder="Enter CGST Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumSgst">SGST</label>
+                                    <input type="number" class="form-control" id="NumSgst" placeholder="Enter SGST Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumIgst">IGST</label>
+                                    <input type="number" class="form-control" id="NumIgst" placeholder="Enter IGST Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumVat">VAT</label>
+                                    <input type="number" class="form-control" id="NumVat" placeholder="Enter VAT Amt">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumCess">CESS</label>
+                                    <input type="number" class="form-control" id="NumCess" placeholder="Enter CESS Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumOtherAmt">Other Amt</label>
+                                    <input type="number" class="form-control" id="NumOtherAmt" placeholder="Enter Other Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTcs">TCS</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumTcs1">
+                                        <input type="number" class="form-control" id="NumTcs2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumSubTotal">Sub Total</label>
+                                    <input type="number" class="form-control" id="NumSubTotal" placeholder="Enter Subtotal">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumRoundOff">Round Off</label>
+                                    <input type="number" class="form-control" id="NumRoundOff" placeholder="Enter Round Off">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumNetAmount">Net Amount</label>
+                                    <input type="number" class="form-control" id="NumNetAmount" placeholder="Enter Net Amount">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">TDS & Bank Details</legend>
+                        <div class="row">
+                            <!-- TDS A/c -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlTdsAccount">TDS A/c</label>
+                                    <select class="form-control" id="ddlTdsAccount">
+                                        <option value="">Select TDS A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- TDS -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtTds">TDS</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="TxtTds1">
+                                        <input type="text" class="form-control" id="TxtTds2">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- TDS 194Q -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtTds194q">TDS 194Q</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="TxtTds194q1">
+                                        <input type="text" class="form-control" id="TxtTds194q2">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Bank Rate -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtBankRate">Bank Rate</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="TxtBankRate1">
+                                        <input type="text" class="form-control" id="TxtBankRate2">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- PL No & Date -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtPlNo">PL No & Date</label>
+                                    <div class="input-divide">
+                                        <input type="text" class="form-control" id="ChkPlNo">
+                                        <input type="date" class="form-control" id="DtPlDate">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Diff. Amt -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtDiffAmt">Diff Amt.</label>
+                                    <input type="text" class="form-control" id="TxtDiffAmt" placeholder="Enter Difference Amount">
+                                </div>
+                            </div>
+                            <!-- Party Bill Amt in USD -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="TxtPartyUsd">Party Bill Amt in USD</label>
+                                    <input type="text" class="form-control" id="TxtPartyUsd" placeholder="Enter USD Amount">
+                                </div>
+                            </div>
+                            <div class="offset-md-2 col-md-4">
+                                <div class="btn-mt button-right">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#advancetds">
+                                        <i class="fa fa-sitemap"></i> Advance TDS
+                                    </button>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tdscalculationModal">
+                                        <i class="fa fa-tasks"></i> TDS Calculation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="modal fade" id="tdscalculationModal" tabindex="-1" aria-labelledby="tdscalculationLabel">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content draggable-modal">
+                                <div class="popup-header">
+                                    <h5 class="popup-title" id="tdscalculationLabel">TDS Calculation</h5>
+                                    <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label for="NumNetAmt">Net Amt :</label>
+                                                <input type="number" class="form-control" id="NumNetAmt" placeholder="Enter Net Amount">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label for="NumAdvTDS">(-) Adv TDS :</label>
+                                                <input type="number" class="form-control" id="NumAdvTDS" placeholder="Enter Adv TDS">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label for="NumDrNote">(-) Dr Note :</label>
+                                                <input type="number" class="form-control" id="NumDrNote" placeholder="Enter DR Note">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group">
+                                                <label for="NumCRNote">(+) CR Note :</label>
+                                                <input type="number" class="form-control" id="NumCRNote" placeholder="Enter CR Note">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-2" />
+                                    <div class="row">
+                                        <div class="offset-lg-4 col-lg-3">
+                                            <div class="form-group">
+                                                <label for="NumTDSAmt">TDS Amt :</label>
+                                                <input type="number" class="form-control" id="NumTDSAmt" placeholder="Enter TDS Amount">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--tab 3-->
+                <div class="tab-pane fade" id="tab3">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Transport Information</legend>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlTransportName">Transport Name</label>
+                                    <select class="form-control" id="ddlTransportName">
+                                        <option value="">Select Transport Name</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtVehicleNo">Vehicle No</label>
+                                    <input type="text" class="form-control" id="txtVehicleNo" placeholder="Enter Vehicle No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtContainerNo">Container No</label>
+                                    <input type="text" class="form-control" id="txtContainerNo" placeholder="Enter Container No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="txtGRNo">GR No</label>
+                                    <input type="text" class="form-control" id="txtGRNo" placeholder="Enter GR No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtGRDate">GR Date</label>
+                                    <input type="date" class="form-control" id="DtGRDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="checkbox-input">
+                                <input type="checkbox" id="ChkSealedVehicle" />
+                                Sealed Vehicle
+                            </label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Freight Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumFreightPay">Freight Pay</label>
+                                    <input type="number" class="form-control" id="NumFreightPay" placeholder="Enter Freight Pay">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumFrtTax">Frt Tax%</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumFrtTax1">
+                                        <input type="number" class="form-control" id="NumFrtTax2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlFreightDebitAC">Freight Debit A/C</label>
+                                    <select class="form-control" id="ddlFreightDebitAC">
+                                        <option value="">Select Freight Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlFreightCreditAC">Freight Credit A/C</label>
+                                    <select class="form-control" id="ddlFreightCreditAC">
+                                        <option value="">Select Freight Credit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtFrtPayNarration">Frt Pay Narration</label>
+                                    <input type="text" class="form-control" id="TxtFrtPayNarration" placeholder="Enter Frt Pay Narration">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumTDSonFRT">TDS on FRT%</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumTDSonFRT1">
+                                        <input type="number" class="form-control" id="NumTDSonFRT2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Billing Info</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="ddlTransportGSTNo">Transport GST No</label>
+                                    <select class="form-control" id="ddlTransportGSTNo">
+                                        <option value="">Select Transport GST No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="ddlTaxType">Tax Type</label>
+                                    <select class="form-control" id="ddlTaxType">
+                                        <option value="">-- Select Tax Type --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtBillNoLD">Bill No</label>
+                                    <input type="text" class="form-control" id="TxtBillNoLD" placeholder="Enter Bill No">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtBillDate">Bill Date</label>
+                                    <input type="date" class="form-control" id="DtBillDate">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- WB Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">WB Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumWBAmount">WB Amount</label>
+                                    <input type="number" class="form-control" id="NumWBAmount" placeholder="Enter WB Amount">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="WBTDS">WB TDS</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumWBTDS1" placeholder="%">
+                                        <input type="number" class="form-control" id="NumWBTDS2" placeholder="Value">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlWBDebitAC">WB Debit A/c</label>
+                                    <select class="form-control" id="ddlWBDebitAC">
+                                        <option value="">Select WB Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlWBCreditAC">WB Credit A/c</label>
+                                    <select class="form-control" id="ddlWBCreditAC">
+                                        <option value="">Select WB Credit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtWBNarration">WB Narration</label>
+                                    <input type="text" class="form-control" id="TxtWBNarration" placeholder="Enter WB Narration">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- Unloading Details -->
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Unloading Details</legend>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="NumUnloadAmt">Unloading Amt</label>
+                                    <input type="number" class="form-control" id="NumUnloadAmt" placeholder="Enter Unload Amt">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="UnloadTDS">Unload TDS</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="form-control" id="NumUnloadTDS1" placeholder="%">
+                                        <input type="number" class="form-control" id="NumUnloadTDS2" placeholder="Value">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlUnloadDebitAC">Unload Debit A/c</label>
+                                    <select class="form-control" id="ddlUnloadDebitAC">
+                                        <option value="">Select Unload Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="ddlUnloadCreditAC">Unload Credit A/c</label>
+                                    <select class="form-control" id="ddlUnloadCreditAC">
+                                        <option value="">Select Unload Debit A/C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TxtUnloadNarration">Unload Narration</label>
+                                    <input type="text" class="form-control" id="TxtUnloadNarration" placeholder="Enter Unload Narration">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 4-->
+                <div class="tab-pane fade" id="tab4">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Debit / Credit Notes</legend>
+                        <div class="offset-md-2 col-md-3">
+                            <label class="checkbox-input">
+                                <input type="checkbox" id="ChkDebitFromTransporter" />
+                                Debit from Transporter
+                            </label>
+                        </div>
+                        <!-- One Row = Label + 2 Inputs + Narration -->
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Quality Diff Debit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD1" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD2" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" id="TxtQDDNarration" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Rate Diff Debit</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>QC Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Weight Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Others Debit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Quality Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>QC Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Weight Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-2">
+                                <div class="form-group-mt">
+                                    <label>Rate Diff Credit Note</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
+                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
+                        </div>
+                        <!-- Payment, Reason, Hold Date -->
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="ddlPayment">Payment</label>
+                                    <select class="form-control" id="ddlPaymentCRDRNote">
+                                        <option>NA</option>
+                                        <option>Paid</option>
+                                        <option>Hold</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="TxtReason">Reason</label>
+                                    <input type="text" class="form-control" id="TxtReasonCRDRNote">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="DtHoldDate">Hold Date</label>
+                                    <input type="date" class="form-control" id="DtHoldDateCRDRNote">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="btn-mt button-right">
+                                    <button type="button" id="PurchaseSlipCRDRNote" class="btn btn-primary"><i class="fa fa-file-invoice"></i>Purchase Slip</button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <!--tab 5-->
+                <div class="tab-pane fade" id="tab5">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>File Name</label>
+                                <input type="text" class="form-control" id="txtFileName" placeholder="Enter file name">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Upload File</label>
+                                <input type="file" class="form-control" id="fileUpload">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-success-plus" id="btnAddAttachment"><i class="fa fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="table-responsive">
+                            <table id="tblAttachmentPBPE" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th style="display:none;">Code</th>
+                                        <th>File Name</th>
+                                        <th>File Upload</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination container -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                                </div>
+                                <div class="pagination-end">
+                                    <div class="custom-pagination" id="tablePaginationattachment"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--tab 6-->
+                <div class="tab-pane fade" id="tab6">
+                    <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">EPR Documents</legend>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ddlDocumentType">Document Type</label>
+                                    <select class="form-control" id="ddlDocumentType">
+                                        <option value="">Select Document Type</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="fileUpload" class="form-label">File Upload</label>
+                                    <input type="file" class="form-control file-upload" />
+                                    <i class="fa fa-times remove-file" style="display:none;"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-success-plus btn-add-row" id="SaveButtonDT">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    const rowsData = [];
+    let rowsAttachment = [];
+    let rowIndex = 0;
+
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+    $(document).ready(function () {
+        if (!isNaN(rowId) && rowId > 0) {
+            loadFullQuotationByVno(rowId);
+            //if (isReadOnly) {
+            //    // setQCDiscMasterFormReadOnly();
+            //}
+        }
+        else{
+            addNewRowBelow();
+        }
+        loadNextDocNo(yearCode);
+        loadDocTypeList();
+        loadStatusList();
+        loadPOList(compCode,yearCode,branchCode);
+        //Party list whose Nature = Supplier
+        loadPartyListNatureSupplier(compCode, 'ddlBillFrom');
+        loadPartyListNatureSupplier(compCode, 'ddlShipFrom1');
+        loadCityList('ddlDispCity');
+        loadCityList('ddlCityPD');
+        loadCityList('ddlCitySF');
+
+        loadPartyListNatureOther(compCode, 'ddlDebitAC');
+        loadPartyListNatureOther(compCode, 'ddlCreditAC');
+        loadTransportList(compCode);
+        //Party list whose Nature =  Other
+        loadPartyListNatureOther(compCode, 'ddlFreightDebitAC');
+        loadPartyListNatureOther(compCode, 'ddlFreightCreditAC');
+        loadPartyListNatureOther(compCode, 'ddlWBDebitAC');
+        loadPartyListNatureOther(compCode, 'ddlWBCreditAC');
+        loadPartyListNatureOther(compCode, 'ddlUnloadDebitAC');
+        loadPartyListNatureOther(compCode, 'ddlUnloadCreditAC');
+        loadTaxTypeList();
+    });
+
+    function loadNextDocNo(yearC){
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetNextV_NO',
+            type: 'GET',
+            data: { yearCode : yearC },
+            success: function (response) {
+                $('#NumDocNo').val(response).attr('disabled',true);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    }
+    function loadDocTypeList() {
+        docTypeMap = {};
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetDocTypeList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlDocType');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Doc Type --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    docTypeMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading DocType list: ' + error);
+            }
+        });
+    }
+    function loadStatusList() {
+        statusMap = {};
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetStatusList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlStatus');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Status --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    statusMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Status list: ' + error);
+            }
+        });
+    }
+    function loadPOList(CCode,YCode,BCode) {
+        statusMap = {};
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetPoList',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode, yCode: YCode, bCode: BCode },
+            success: function (data) {
+                var ddl = $('#ddlPONo');
+                ddl.empty();
+                ddl.append('<option value="">-- Select PO Num--</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    statusMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Status list: ' + error);
+            }
+        });
+    }
+    function loadPartyListNatureSupplier(CCode, dropdownId) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetPartyListNatureSupplier',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode },
+        }).then(function (data) {
+            const ddl = $('#' + dropdownId);
+            ddl.empty();
+            ddl.append('<option value="">-- Select --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+            return data; 
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading Party list: ' + error);
+            return [];
+        });
+    }
+    function loadPartyListNatureOther(CCode, dropdownId) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetPartyListNatureOther',
+            type: 'GET',
+            dataType: 'json',
+            data: { cCode: CCode },
+        }).then(function (data) {
+            const ddl = $('#' + dropdownId);
+            ddl.empty();
+            ddl.append('<option value="">-- Select --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+            return data; // or return map if needed
+        }).catch(function (xhr, status, error) {
+            toastr.error('Error loading Party list: ' + error);
+            return [];
+        });
+    }
+    function loadCityList(dropdownId) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetCityList',
+            type: 'GET',
+            success: function (res) {
+                var ddl = $('#' + dropdownId);
+                ddl.empty();
+                ddl.append('<option value="">-- Select City --</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading city list: ' + error);
+            }
+        });
+    }
+    function loadTransportList(compCode){
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetTransportList',
+            type: 'GET',
+            data: { cCode: compCode },
+            success: function (res) {
+                var ddl = $('#ddlTransportName');
+                ddl.empty();
+                ddl.append('<option value="">-- Select City --</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading city list: ' + error);
+            }
+        });
+    }
+    function loadTaxTypeList(){
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetTexType',
+            type: 'GET',
+            success: function (res) {
+                    var ddl = $('#ddlTaxType');
+                    ddl.empty();
+                    ddl.append('<option value="">-- Select Tax Type --</option>');
+                    $.each(res, function (index, item) {
+                        ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                },
+            error: function (xhr, status, error) {
+                console.error('Error loading city list: ' + error);
+            }
+        });
+    }
+    function loadItemList(compCode, targetSelector) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetItemList',
+            type: 'GET',
+            data: { cCode: compCode },
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $(targetSelector);
+                ddl.empty();
+                ddl.append('<option value="">-- Select Item --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading item list: ' + error);
+            }
+        });
+    }
+    function loadUOMList(targetSelector) {
+        return $.ajax({
+            url: '/PurchaseBillPassEntry/GetUOMList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $(targetSelector);
+                ddl.empty();
+                ddl.append('<option value="">-- Select UOM --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading UOM list: ' + error);
+            }
+        });
+    }
+
+    $('#ddlBillFrom').change(function () {
+        var selectedVal = $(this).val();
+
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetTransitNoByParty',
+            type: 'GET',
+            data: { cCode: compCode, yCode: yearCode, bCode: branchCode, pCode: selectedVal },
+            success: function (res) {
+                var ddl = $('#ddlTransitNo');
+                ddl.empty();
+                ddl.append('<option value="">-- Transit No --</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+
+                // Call address loader with correct target dropdown ID
+                loadAddressListByBillTo(compCode, selectedVal, 'TxtAdd1PD');
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading transit numbers: ' + error);
+            }
+        });
+    });
+    $('#ddlShipFrom1').change(function () {
+        var selectedVal = $(this).val();
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetTransitNoByParty',  
+            type: 'GET',
+            data: { cCode: compCode, yCode: yearCode, bCode: branchCode, pCode: selectedVal },
+            success: function (res) {
+                var ddl = $('#ddlTransitNo');
+                ddl.empty();
+                ddl.append('<option value="">-- Transit No --</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+                loadAddressListByBillTo(compCode, selectedVal, 'ddlShipFromAddress');
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading transit numbers: ' + error);
+            }
+        });
+    });
+    function loadAddressListByBillTo(CCode, PCode, elementId) {
+        $('#' + elementId).data('pcode', PCode);
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetAddressListByBillToParty',
+            type: 'GET',
+            data: { cCode: CCode, pCode: PCode },
+            success: function (res) {
+                var ddl = $('#' + elementId); 
+                ddl.empty();
+                ddl.append('<option value="">-- Select Address --</option>');
+                $.each(res, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading address list: ' + error);
+            }
+        });
+    }
+    $('#TxtAdd1PD').change(function(){
+        var selectedVal = $(this).val();
+        var selectedtxt = $(this).text();
+        var PCode = $(this).data('pcode');
+
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
+            type: 'GET',
+            data: { cCode: compCode,pCode: PCode,addressId: selectedVal},
+            success: function (response) {
+                var res = response.addressDetails;
+                $('#TxtAdd2PD').val(res.add2);
+                $('#TxtAdd3PD').val(res.add3);
+                $('#TxtGSTNo').val(res.gstin);
+                if ($('#ddlCityPD option[value="' + res.cityCode + '"]').length === 0) {
+                    $('#ddlCityPD').append($('<option>', {
+                        value: res.cityCode,
+                        text: res.cityName
+                    }));
+                }
+                $('#ddlCityPD').val(res.cityCode);
+
+                // shipto address
+                $('#TxtAdd1SF').val(res.add1);
+                $('#TxtAdd2SF').val(res.add2);
+                $('#TxtAdd3SF').val(res.add3);
+                $('#TxtGSTNoSF').val(res.gstin);
+                if ($('#ddlCitySF option[value="' + res.cityCode + '"]').length === 0) {
+                    $('#ddlCitySF').append($('<option>', {
+                        value: res.cityCode,
+                        text: res.cityName
+                    }));
+                }
+                $('#ddlCitySF').val(res.cityCode);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    })
+    $('#ddlShipFromAddress').change(function(){
+        var selectedVal = $(this).val();
+        var selectedtxt = $(this).text();
+        var PCode = $(this).data('pcode');
+
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
+            type: 'GET',
+            data: { cCode: compCode,pCode: PCode,addressId: selectedVal},
+            success: function (response) {
+                var res = response.addressDetails;
+                // shipto address
+                $('#TxtAdd1SF').val(res.add1);
+                $('#TxtAdd2SF').val(res.add2);
+                $('#TxtAdd3SF').val(res.add3);
+                $('#TxtGSTNoSF').val(res.gstin);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    })
+    $('#ddlTransitNo').change(function(){
+        var selectedVal = $(this).val();
+        var selectedtxt = $(this).text();
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetDocDetailsByTransitNo',
+            type: 'GET',
+            data: { cCode: compCode,yCode: yearCode,bCode: branchCode,docId: selectedVal},
+            success: function (response) {
+                var res = response.docDetails;
+                $('#TxtBillNo').val(res.billNO);
+                $('#TxtWaybillNo').val(res.formNoWB);
+                $('#DtBillDate').val(convertToDateInputFormat(res.billDate));
+                $('#DtWaybillDate').val(convertToDateInputFormat(res.formDateWB));
+                $('#DtWaybillExpiry').val(convertToDateInputFormat(res.expDateWB));
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    })
+    function convertToDateInputFormat(dateTimeStr) {
+        if (!dateTimeStr) return '';
+
+        var datePart = dateTimeStr.split(' ')[0]; 
+        var parts = datePart.split('/'); 
+
+        if (parts.length !== 3) return '';
+
+        var day = parts[0].padStart(2, '0');
+        var month = parts[1].padStart(2, '0');
+        var year = parts[2];
+
+        return `${year}-${month}-${day}`;
+    }
+
+    //function to LOAD DATA from QUOTATION 1,2,3 Table
+    function loadFullQuotationByVno(VNo) {
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetFullQuotationByVno',
+            type: 'GET',
+            data: { vNo :VNo },
+            success: function (res) {
+                console.log(res);
+                if (!res.success || !res.header) {
+                    toastr.warning("Quotation not found.");
+                    return;
+                }
+                const jsonData = res.header;
+                const items = res.items || [];
+                const attachments = res.attachments || [];
+
+                // Loading for QUOTATION1/Header
+                $('#ddlDocType').val(jsonData.v_TYPE);
+                $('#DtDocDate').val(jsonData.v_DATE ? jsonData.v_DATE.split('T')[0] : '');
+                $('#NumDocNo').val(jsonData.v_NO);
+                $('#TxtMRNNo1').val(jsonData.v_TYPE);
+                $('#TxtMRNNo2').val(jsonData.v_NO);
+
+                $('#ddlBillFrom').val(jsonData.partY_CODE);
+                $('#TxtAdd1PD').val(jsonData.bilL_ADD1);
+                $('#TxtAdd2PD').val(jsonData.bilL_ADD2);
+                $('#TxtAdd3PD').val(jsonData.bilL_ADD3);
+                $('#ddlCityPD').val(jsonData.bilL_CITY);
+                $('#TxtGSTNo').val(jsonData.bilL_GST);
+
+                $('#TxtDispFromAdd').val(jsonData.disP_ADDRESS);
+                $('#ddlDispCity').val(jsonData.disP_CITY);
+
+                $('#ddlShipFrom1').val(jsonData.partY_CODE);
+                $('#ddlShipFromAddress').val(jsonData.shiP_ADD1);
+                $('#TxtAdd1SF').val(jsonData.shiP_ADD1);
+                $('#TxtAdd2SF').val(jsonData.shiP_ADD2);
+                $('#TxtAdd3SF').val(jsonData.shiP_ADD3);
+                $('#ddlCitySF').val(jsonData.shiP_CITY);
+                $('#TxtGSTNoSF').val(jsonData.shiP_GST);
+
+                $('#TxtBillNo').val(jsonData.bilL_NO);
+                $('#DtBillDate').val(jsonData.bilL_DATE ? jsonData.bilL_DATE.split('T')[0] : '');
+                $('#TxtChallanNo').val(jsonData.chalL_NO);
+                $('#DtChDate').val(jsonData.chalL_DATE ? jsonData.chalL_DATE.split('T')[0] : '');   
+                $('#TxtWaybillNo').val(jsonData.waybilL_NO);
+                $('#DtWaybillDate').val(jsonData.gR_DATE ? jsonData.gR_DATE.split('T')[0] : '');
+                $('#TxtWayBillInvNo').val(jsonData.ewB_INVNO);
+                $('#DtWaybillExpiry').val(jsonData.ewB_EXPDATE ? jsonData.ewB_EXPDATE.split('T')[0] : '');
+                $('#NumExRate').val(jsonData.excH_RATE);
+                $('#ddlInputType').val(jsonData.inpuT_TYPE);
+
+                $('#ddlDebitAC').val(jsonData.debiT_AC);
+                $('#ddlCreditAC').val(jsonData.crediT_AC);
+
+                $('#txtRemarks').val(jsonData.remarks);
+                $('#TxtNetAmount').val(jsonData.namount);
+
+                // Optional - set status if your dropdown supports values
+                $('#ddlStatus').val(jsonData.status);
+
+
+                // // Loading for Purchase1/items,
+                // if (!Array.isArray(items) || items.length === 0) {
+                //     addNewRowBelow();
+                // } else {
+                //     Promise.all([
+                //         loadItemList(compCode, '#ddlItemList'),
+                //         loadUOMList('#ddlUOMList')
+                //     ]).then(([itemMap, itemMakeMap, taxCodeMap,uomMap]) => {
+                //         items.forEach((row, i) => {
+                //             rowIndex++;
+                //             const isLastRow = (i === items.length - 1);
+                //             const rowHtml = generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap,uomMap,isLastRow);
+                //             $('#tblItemRecordPBPE tbody').append(rowHtml);
+                //         });
+                //     }).catch(err => {
+                //         toastr.error("Failed to load item metadata: " + err);
+                //     });
+                // }
+
+                // Load dropdowns before populating items
+                if (!Array.isArray(items) || items.length === 0) {
+                    addNewRowBelow();
+                } else {
+                    Promise.all([
+                        loadItemList(compCode, '#ddlItemList'),
+                        loadUOMList('#ddlUOMList')
+                    ]).then(([itemListRes, itemMakeMap, taxCodeMap, uomListRes]) => {
+                        items.forEach((row, i) => {
+                            rowIndex++;
+                            const isLastRow = (i === items.length - 1);
+                            const rowHtml = generateRowHtml(
+                                row,
+                                i,
+                                itemListRes,
+                                itemMakeMap,
+                                taxCodeMap,
+                                uomListRes,
+                                isLastRow
+                            );
+                            $('#tblItemRecordPBPE tbody').append(rowHtml);
+                        });
+                    }).catch(err => {
+                        toastr.error("Failed to load item metadata: " + err);
+                    });
+                }
+
+
+                // Loading for PURCHASE3/Attachment
+                const attachBody = $('#tblAttachmentPBPE tbody');
+                attachBody.empty();
+
+                if (attachments.length === 0) {
+                    attachBody.append('<tr><td colspan="3" class="text-center text-muted">No attachments found.</td></tr>');
+                } else {
+                    attachments.forEach((att, idx) => {
+                        const fileName = att.attachment?.split('/').pop() || `Attachment_${idx + 1}`;
+                        const base64File = (att.FILE_NAME || att.filE_NAME || '').trim(); // May be base64
+
+                        if (!base64File) {
+                            console.warn(`Empty base64 for file: ${fileName}`);
+                            return;
+                        }
+
+                        // Determine file extension
+                        const extension = fileName.split('.').pop()?.toLowerCase() || '';
+                        let guessedMime = 'application/octet-stream';
+
+                        if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(extension)) {
+                            guessedMime = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+                        } else if (extension === 'pdf') {
+                            guessedMime = 'application/pdf';
+                        }
+
+                        const fullBase64 = `data:${guessedMime};base64,${base64File}`;
+
+                        // DEBUG: log the final base64 string and MIME
+                        console.log(`Attachment #${idx + 1}:`, {
+                            fileName,
+                            mime: guessedMime,
+                            base64Preview: fullBase64.substring(0, 50) + '...' // show only start for preview
+                        });
+
+                        let filePreview = '';
+                        let tdStyle = 'style="text-align: center; vertical-align: middle;"';
+
+                        // Render based on MIME type
+                        if (guessedMime.startsWith('image/')) {
+                            filePreview = `
+                                <img src="${fullBase64}"
+                                     alt="${fileName}"
+                                     style="max-width: 100px; max-height: 100px; border-radius: 4px; object-fit: contain; border: 1px solid #ccc;" />`;
+                        } else if (guessedMime === 'application/pdf') {
+                            filePreview = `<a href="${fullBase64}" target="_blank" class="btn btn-sm btn-primary">View PDF</a>`;
+                        } else {
+                            filePreview = `<a href="${fullBase64}" download="${fileName}" class="btn btn-sm btn-secondary">Download File</a>`;
+                        }
+
+                        const row = `
+                            <tr data-filename="${fileName}" style="height: 100px;">
+                                <td style="vertical-align: middle;">${fileName}</td>
+                                <td ${tdStyle}>${filePreview}</td>
+                                <td style="vertical-align: middle;">
+                                    <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment" title="Delete"></i>
+                                </td>
+                            </tr>
+                        `;
+
+                        attachBody.append(row);
+                    });
+                }
+
+
+            },
+            error: function (xhr) {
+                toastr.error("Failed to load quotation: " + xhr.responseText);
+            }
+        });
+    }
+
+    function addNewRowBelow() {
+
+        let lastRow = $('#tblItemRecordPBPE tbody tr:last');
+        if (lastRow.length > 0) {
+            let lastRowId = lastRow.find('select[id^="ITEM_NAME"]').attr('id'); 
+            if (lastRowId) {
+                let lastIndex = lastRowId.split('_')[1];
+
+                let itemNameVal = $(`#ITEM_NAME_${lastIndex}`).val();
+                let itemCodeVal = $(`#HSN_CODE_${lastIndex}`).val();
+
+                if (!itemNameVal) {
+                    toastr.warning('Please select an Item Name before adding a new row.');
+                    $(`#ITEM_NAME_${lastIndex}`).focus();
+                    return; 
+                }
+                if (!itemCodeVal || itemCodeVal.trim() === '') {
+                    toastr.warning('Please enter an Item Code before adding a new row.');
+                    $(`#HSN_CODE_${lastIndex}`).focus();
+                    return; 
+                }
+            }
+        }
+
+        rowIndex++;
+
+        const newRowData = {
+            ITEM_NAME: '',
+            HSN_CODE: '',
+            UOM_NAME: '',
+            NOS: '',
+            RECD_QTY: '',
+            BILL_QTY: '',
+            USD_RATE: '',
+            EXCH_RATE: '',
+            RATE: '',
+            AMOUNT: '',
+            RCM_YN: '',
+            INPUT_YN: '',
+            TAX_CODE: '',
+            PACK_PER: '',
+            PACK_AMT: '',
+            DISC_PER: '',
+            DISC_AMT: '',
+            CGST_PER: '',
+            CGST_AMT: '',
+            SGST_PER: '',
+            SGST_AMT: '',
+            IGST_PER: '',
+            IGST_AMT: '',
+            CESS_PER: '',
+            CESS_AMT: '',
+            VAT_PER: '',
+            VAT_AMT: '',
+            OTH_AMT: '',
+            NET_AMT: '',
+            MAKE_CODE: '',
+            DEPT_CODE: '',
+            REMARKS: '',
+            LAND_RATE: '',
+            LAND_AMT: '',
+            POLAND_RATE: '',
+            PO_RATE: '',
+            PO_TYPE: '',
+            PO_NO: '',
+            KANTA_TYPE: '',
+            KANTA_NO: '',
+            REQ_TYPE: '',
+            REQ_NO: '',
+            REF_TYPE: '',
+            REF_NO: ''
+        };
+
+        rowsData.push(newRowData);
+
+        const rowHtml = `
+        <tr>
+            <td>
+                <select style="min-width: 150px; max-width: 300px;"  class="form-control" id="ITEM_NAME_${rowIndex}" name="ITEM_NAME[${rowIndex}]" class="form-control-sm">
+                    <option value="">-- Select Item --</option>
+                </select>
+            </td>   
+            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="HSN_CODE_${rowIndex}" name="HSN_CODE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="UOM_NAME_${rowIndex}" name="UOM_NAME[${rowIndex}]" class="form-control-sm">
+                    <option value="">-- Select UOM --</option>
+                </select>
+            </td>            
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="NOS_${rowIndex}" name="NOS[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="RECD_QTY_${rowIndex}" name="RECD_QTY[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="BILL_QTY_${rowIndex}" name="BILL_QTY[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="USD_RATE_${rowIndex}" name="USD_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="EXCH_RATE_${rowIndex}" name="EXCH_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="RATE_${rowIndex}" name="RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="AMOUNT_${rowIndex}" name="AMOUNT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="RCM_YN_${rowIndex}" name="RCM_YN[${rowIndex}]" type="text" class="form-control-sm" maxlength="1" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="INPUT_YN_${rowIndex}" name="INPUT_YN[${rowIndex}]" type="text" class="form-control-sm" maxlength="1" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="TAX_CODE_${rowIndex}" name="TAX_CODE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PACK_PER_${rowIndex}" name="PACK_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PACK_AMT_${rowIndex}" name="PACK_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DISC_PER_${rowIndex}" name="DISC_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DISC_AMT_${rowIndex}" name="DISC_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CGST_PER_${rowIndex}" name="CGST_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CGST_AMT_${rowIndex}" name="CGST_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="SGST_PER_${rowIndex}" name="SGST_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="SGST_AMT_${rowIndex}" name="SGST_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="IGST_PER_${rowIndex}" name="IGST_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="IGST_AMT_${rowIndex}" name="IGST_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CESS_PER_${rowIndex}" name="CESS_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CESS_AMT_${rowIndex}" name="CESS_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="VAT_PER_${rowIndex}" name="VAT_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="VAT_AMT_${rowIndex}" name="VAT_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="OTH_AMT_${rowIndex}" name="OTH_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="NET_AMT_${rowIndex}" name="NET_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="MAKE_CODE_${rowIndex}" name="MAKE_CODE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DEPT_CODE_${rowIndex}" name="DEPT_CODE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="REMARKS_${rowIndex}" name="REMARKS[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="LAND_RATE_${rowIndex}" name="LAND_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="LAND_AMT_${rowIndex}" name="LAND_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="POLAND_RATE_${rowIndex}" name="POLAND_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PO_RATE_${rowIndex}" name="PO_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="PO_TYPE_${rowIndex}" name="PO_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PO_NO_${rowIndex}" name="PO_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="KANTA_TYPE_${rowIndex}" name="KANTA_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="KANTA_NO_${rowIndex}" name="KANTA_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="REQ_TYPE_${rowIndex}" name="REQ_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REQ_NO_${rowIndex}" name="REQ_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="REF_TYPE_${rowIndex}" name="REF_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
+            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REF_NO_${rowIndex}" name="REF_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
+            <td>
+                <i class="fas fa-trash ms-2 text-danger" onclick="deleteRow(this)" style="cursor:pointer;"></i>
+                <i class="fas fa-plus-circle ms-2 text-success add-row-icon" onclick="addNewRowBelow()" style="cursor:pointer;"></i>
+            </td>
+        </tr>`;
+        // Remove existing add icons from all rows (but leave delete icons untouched)
+        $('#tblItemRecordPBPE tbody tr .add-row-icon').remove();
+        $('#tblItemRecordPBPE tbody').append(rowHtml);
+        // Load dropdowns for new row
+        loadItemList(compCode, `#ITEM_NAME_${rowIndex}`);
+        loadUOMList(`#UOM_NAME_${rowIndex}`);
+    }
+
+    function deleteRow(el) {
+        // Remove row
+        $(el).closest('tr').remove();
+
+        // Remove existing add buttons from all rows
+        $('#tblItemRecordPBPE tbody tr .add-row-icon').remove();
+
+        // Add add-icon to the last row only (if any rows left)
+        const lastRow = $('#tblItemRecordPBPE tbody tr:last');
+        if (lastRow.length) {
+            const actionCell = lastRow.find('td:last');
+            actionCell.append(`
+                <i class="fas fa-plus-circle ms-2 text-success add-row-icon" onclick="addNewRowBelow()" style="cursor:pointer;"></i>
+            `);
+        }
+    }
+
+    $('#btn-save').click(function (e) {
+        e.preventDefault();
+
+        // Validate Doc Type
+        if (!$('#ddlDocType').val()) {
+            toastr.warning("Please select a Document Type.");
+            return;
+        }
+
+        // Validate Doc Date
+        const docDate = $('#DtDocDate').val();
+        if (!docDate) {
+            toastr.warning("Please select a Document Date.");
+            return;
+        }
+        // Optional: check valid date format (basic)
+        if (isNaN(new Date(docDate).getTime())) {
+            toastr.warning("Please enter a valid Document Date.");
+            return;
+        }
+
+        // Validate Bill From (assuming dropdown with numeric value)
+        if (!$('#ddlBillFrom').val()) {
+            toastr.warning("Please select Bill From.");
+            return;
+        }
+
+        // validation for quotation3/attachments
+        if (!rowsAttachment || rowsAttachment.length === 0) {
+            toastr.warning("please attach at least one file before saving.");
+            return;
+        }
+
+        // 1. Clear previous data if any
+        let rowsData = [];
+
+        const headerData = {
+            V_TYPE: $('#ddlDocType').val(),
+            V_DATE: parseNullableDate($('#DtDocDate').val()),                
+            V_NO: parseInt($('#NumDocNo').val()) || null,
+            PARTY_CODE: parseInt($('#ddlBillFrom').val()) || null,
+            BILL_ADD1: $('#TxtAdd1PD').val(),
+            BILL_ADD2: $('#TxtAdd2PD').val(),
+            BILL_ADD3: $('#TxtAdd3PD').val(),
+            BILL_CITY: parseInt($('#ddlCityPD').val()) || null,
+            BILL_GST: $('#TxtGSTNo').val(),
+            DISP_ADDRESS: $('#TxtDispFromAdd').val(),
+            DISP_CITY: parseInt($('#ddlDispCity').val()) || null,
+            SHIP_ADD1: $('#ddlShipFromAddress').val(),
+            SHIP_ADD2: $('#TxtAdd2SF').val(),
+            SHIP_ADD3: $('#TxtAdd3SF').val(),
+            SHIP_CITY: parseInt($('#ddlCitySF').val()) || null,
+            SHIP_GST: $('#TxtGSTNoSF').val(),
+            BILL_NO: $('#TxtBillNoLD').val(),
+            BILL_DATE: parseNullableDate($('#DtBillDate').val()),      
+            CHALL_NO: $('#TxtChallanNo').val(),
+            CHALL_DATE: parseNullableDate($('#DtChDate').val()), 
+            WAYBILL_NO: $('#TxtWaybillNo').val(),
+            GR_DATE: parseNullableDate($('#DtGRDate').val()),
+            EWB_INVNO: $('#TxtWayBillInvNo').val(),
+            EWB_EXPDATE: parseNullableDate($('#DtWaybillExpiry').val()), 
+            EXCH_RATE: parseFloat($('#NumExRate').val()) || null,
+            INPUT_TYPE: $('#ddlInputType').val(),
+            DEBIT_AC: parseInt($('#ddlDebitAC').val()) || null,
+            CREDIT_AC: parseInt($('#ddlCreditAC').val()) || null,
+            REMARKS: $('#txtRemarks').val(),
+            NAMOUNT: parseFloat($('#TxtNetAmount').val()) || null,
+            STATUS: parseInt($('#ddlStatus').val()) || null,
+
+            // 🚚 Transport Information
+            TRANSPORT_NAME: $('#ddlTransportName').val(),
+            TRUCK_NO: $('#txtVehicleNo').val(),
+            CONTAINER_NO: $('#txtContainerNo').val(),
+            GR_NO: $('#txtGRNo').val(),
+            SEALED_VEHICLE: $('#ChkSealedVehicle').is(':checked') ? 1 : 0,
+
+            // 🚛 Freight Details
+            FRTPAY_AMT: parseFloat($('#NumFreightPay').val()) || 0,
+            FRTPAY_TAXPER: parseFloat($('#NumFrtTax1').val()) || 0,
+            FRTPAY_TAX: parseFloat($('#NumFrtTax2').val()) || 0,
+            FRTPAY_DRAC: parseInt($('#ddlFreightDebitAC').val()) || null,
+            FRTPAY_CRAC: parseInt($('#ddlFreightCreditAC').val()) || null,
+            FRTPAY_NAR: $('#TxtFrtPayNarration').val(),
+            FRT_TDSPER: parseFloat($('#NumTDSonFRT1').val()) || 0,
+            FRT_TDS: parseFloat($('#NumTDSonFRT2').val()) || 0,
+
+            // 🧾 Billing Info
+            TRP_GSTNO: $('#ddlTransportGSTNo').val(),
+            TRP_TAXTYPE: $('#ddlTaxType').val(),
+
+            // 📦 WB Details
+            WB_AMT: parseFloat($('#NumWBAmount').val()) || 0,
+            WB_TDSPER: parseFloat($('#NumWBTDS1').val()) || 0,
+            WB_TDS: parseFloat($('#NumWBTDS2').val()) || 0,
+            WB_DRACT: parseInt($('#ddlWBDebitAC').val()) || null,
+            WB_CRACT: parseInt($('#ddlWBCreditAC').val()) || null,
+            WB_NARR: $('#TxtWBNarration').val(),
+
+            // 🏗️ Unloading Details
+            UL_AMT: parseFloat($('#NumUnloadAmt').val()) || 0,
+            UL_TDSPER: parseFloat($('#NumUnloadTDS1').val()) || 0,
+            UL_TDS: parseFloat($('#NumUnloadTDS2').val()) || 0,
+            UL_DRACT: parseInt($('#ddlUnloadDebitAC').val()) || null,
+            UL_CRACT: parseInt($('#ddlUnloadCreditAC').val()) || null,
+            UL_NARR: $('#TxtUnloadNarration').val()
+        };
+
+        $('#tblItemRecordPBPE tbody tr').each(function () {
+            const row = $(this);
+            const index = row.index(); 
+            const rowData = {
+                ITEM_NAME: row.find(`[id^="ITEM_NAME_"]`).val(),
+                HSN_CODE: row.find(`[id^="HSN_CODE_"]`).val(),
+                UOM_NAME: row.find(`[id^="UOM_NAME_"]`).val(),
+                NOS: parseInt(row.find(`[id^="NOS_"]`).val()) || 0,
+                RECD_QTY: parseFloat(row.find(`[id^="RECD_QTY_"]`).val()) || 0,
+                BILL_QTY: parseFloat(row.find(`[id^="BILL_QTY_"]`).val()) || 0,
+                USD_RATE: parseFloat(row.find(`[id^="USD_RATE_"]`).val()) || 0,
+                EXCH_RATE: parseFloat(row.find(`[id^="EXCH_RATE_"]`).val()) || 0,
+                RATE: parseFloat(row.find(`[id^="RATE_"]`).val()) || 0,
+                AMOUNT: parseFloat(row.find(`[id^="AMOUNT_"]`).val()) || 0,
+                RCM_YN: row.find(`[id^="RCM_YN_"]`).val(),
+                INPUT_YN: row.find(`[id^="INPUT_YN_"]`).val(),
+                TAX_CODE: parseInt(row.find(`[id^="TAX_CODE_"]`).val()) || null,
+                PACK_PER: parseFloat(row.find(`[id^="PACK_PER_"]`).val()) || 0,
+                PACK_AMT: parseFloat(row.find(`[id^="PACK_AMT_"]`).val()) || 0,
+                DISC_PER: parseFloat(row.find(`[id^="DISC_PER_"]`).val()) || 0,
+                DISC_AMT: parseFloat(row.find(`[id^="DISC_AMT_"]`).val()) || 0,
+                CGST_PER: parseFloat(row.find(`[id^="CGST_PER_"]`).val()) || 0,
+                CGST_AMT: parseFloat(row.find(`[id^="CGST_AMT_"]`).val()) || 0,
+                SGST_PER: parseFloat(row.find(`[id^="SGST_PER_"]`).val()) || 0,
+                SGST_AMT: parseFloat(row.find(`[id^="SGST_AMT_"]`).val()) || 0,
+                IGST_PER: parseFloat(row.find(`[id^="IGST_PER_"]`).val()) || 0,
+                IGST_AMT: parseFloat(row.find(`[id^="IGST_AMT_"]`).val()) || 0,
+                CESS_PER: parseFloat(row.find(`[id^="CESS_PER_"]`).val()) || 0,
+                CESS_AMT: parseFloat(row.find(`[id^="CESS_AMT_"]`).val()) || 0,
+                VAT_PER: parseFloat(row.find(`[id^="VAT_PER_"]`).val()) || 0,
+                VAT_AMT: parseFloat(row.find(`[id^="VAT_AMT_"]`).val()) || 0,
+                OTH_AMT: parseFloat(row.find(`[id^="OTH_AMT_"]`).val()) || 0,
+                NET_AMT: parseFloat(row.find(`[id^="NET_AMT_"]`).val()) || 0,
+                MAKE_CODE: parseInt(row.find(`[id^="MAKE_CODE_"]`).val()) || null,
+                DEPT_CODE: parseInt(row.find(`[id^="DEPT_CODE_"]`).val()) || null,
+                REMARKS: row.find(`[id^="REMARKS_"]`).val(),
+                LAND_RATE: parseFloat(row.find(`[id^="LAND_RATE_"]`).val()) || 0,
+                LAND_AMT: parseFloat(row.find(`[id^="LAND_AMT_"]`).val()) || 0,
+                POLAND_RATE: parseFloat(row.find(`[id^="POLAND_RATE_"]`).val()) || 0,
+                PO_RATE: parseFloat(row.find(`[id^="PO_RATE_"]`).val()) || 0,
+                PO_TYPE: row.find(`[id^="PO_TYPE_"]`).val(),
+                PO_NO: parseInt(row.find(`[id^="PO_NO_"]`).val()) || null,
+                KANTA_TYPE: row.find(`[id^="KANTA_TYPE_"]`).val(),
+                KANTA_NO: parseInt(row.find(`[id^="KANTA_NO_"]`).val()) || 0,
+                REQ_TYPE: row.find(`[id^="REQ_TYPE_"]`).val(),
+                REQ_NO: parseInt(row.find(`[id^="REQ_NO_"]`).val()) || null,
+                REF_TYPE: row.find(`[id^="REF_TYPE_"]`).val(),
+                REF_NO: parseInt(row.find(`[id^="REF_NO_"]`).val()) || null
+            };
+            rowsData.push(rowData);
+        });
+
+        if (rowsData.length === 0) {
+            toastr.warning("Please add at least one row before saving.");           
+            return;
+        }
+
+        const data = {
+            header: headerData,
+            lineRows: rowsData,
+            Attachement: rowsAttachment
+        };
+        console.log(data);
+
+        //3. AJAX Save
+        $.ajax({
+            url: '/PurchaseBillPassEntry/SavePurchaseBillPassEntry',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Saved successfully!');
+                    setTimeout(() => {
+                        window.location.href = '/PurchaseBillPassEntryList/Index';
+                    }, 1000);
+                } else {
+                    toastr.error('Error: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('AJAX error: ' + error);
+            }
+        });
+    });
+
+    function parseNullableDate(dateStr) {
+        if (!dateStr) return null;
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? null : date.toISOString();
+    }
+
+    $('#btnAddAttachment').on('click', function () {
+        let fileName = $('#txtFileName').val().trim();
+        const fileInput = $('#fileUpload')[0].files[0];
+
+        if (!fileName || !fileInput) {
+            toastr.error("Please provide both file name and file.");
+            return;
+        }
+
+        const extension = fileInput.type.split('/')[1]; 
+
+        if (!fileName.toLowerCase().endsWith(`.${extension}`)) {
+            fileName = `${fileName}.${extension}`;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            let fullBase64 = e.target.result;
+            let base64File = fullBase64.split(',')[1]; 
+
+            const attachment = {
+                ATTACHMENT: fileName,
+                FILE_NAME: base64File,
+                MIME_TYPE: fileInput.type
+            };
+            rowsAttachment.push(attachment);
+
+            const isImage = fileInput.type.startsWith('image/');
+            let previewHtml = '';
+            let tdStyle = '';
+
+            if (isImage) {
+                tdStyle = 'style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #ccc; overflow: hidden; text-align: center; vertical-align: middle;"';
+                previewHtml = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
+            } else {
+                previewHtml = `<a href="${fullBase64}" target="_blank">Preview</a>`;
+            }
+
+            const row = `
+                <tr data-filename="${fileName}" style="height: 100px;">
+                    <td style="vertical-align: middle;">${fileName}</td>
+                    <td ${tdStyle}>${previewHtml}</td>
+                    <td style="vertical-align: middle;">
+                        <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
+                    </td>
+                </tr>`;
+
+            $('#tblAttachmentPBPE tbody').append(row);
+
+            // Clear inputs
+            $('#txtFileName').val('');
+            $('#fileUpload').val('');
+        };
+
+        reader.readAsDataURL(fileInput);
+    });
+
+    $('#tblAttachmentPBPE').on('click', '.btn-delete-attachment', function () {
+        const row = $(this).closest('tr');
+        const fileName = row.data('filename');
+
+        rowsAttachment = rowsAttachment.filter(item => item.ATTACHMENT !== fileName);
+
+        row.remove();
+    });
+
+
+    $('#tblAttachmentPBPE').on('click', '.btn-delete-attachment', function () {
+        const row = $(this).closest('tr');
+        const fileName = row.data('filename');
+
+        rowsAttachment = rowsAttachment.filter(item => item.FileName !== fileName);
+
+        row.remove();
+    });
+
+</script>
+
+
+
+

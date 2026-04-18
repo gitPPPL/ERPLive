@@ -1,0 +1,264 @@
+﻿@{
+	ViewBag.Title = "Godown Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Godown Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "GodownMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="godownMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group"> 
+					<label for="GODOWN_NAME" class="form-label"><span class="required">*</span>Godown Name</label>
+					<input type="text" class="form-control" id="TxtGODOWN_NAME" name="GODOWN_NAME" placeholder="Enter Godown Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="COMP_NAME" class="form-label"><span class="required">*</span>Comp Name</label>
+					<input type="text" class="form-control" id="TxtCOMP_NAME" name="COMP_NAME" placeholder="Enter Company Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ADDRESS_1" class="form-label"><span class="required">*</span>Address 1</label>
+					<textarea type="text" class="form-control" id="TxtADDRESS_1" name="ADDRESS_1" placeholder="Enter Address 1"></textarea>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ADDRESS_2" class="form-label">Address 2</label>
+					<textarea type="text" class="form-control" id="TxtADDRESS_2" name="ADDRESS_2" placeholder="Enter Address 2"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="PINCODE" class="form-label">Pincode</label>
+					<input type="text" class="form-control" id="TxtPINCODE" name="PINCODE" placeholder="Enter Pincode">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="CITY_NAME" class="form-label">City Name</label>
+					<select class="form-control" id="ddlCITY_NAME" name="ddlCITY_NAME">
+						<option value="">-- Select City Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="STATE_CODE" class="form-label">State Code</label>
+					<select class="form-control" id="ddlState_NAME" name="ddlstate_NAME">
+						<option value="">-- Select City Name --</option>
+					</select>
+
+					@* <input type="text" class="form-control" id="TxtSTATE_CODE" name="STATE_CODE" placeholder="Enter State Code"> *@
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="WB_Y_N" class="form-label">WB Y/N</label>
+					<select class="form-control" id="ddlWB_Y_N" name="WB_Y_N">
+						<option value="">-- Select WB --</option>
+						<option value="Yes">YES</option>
+						<option value="No">NO</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				@* <button type="button" id="cancelBtn" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "GodownMasterList")'">Cancel</button> *@
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+
+		if (!isNaN(rowId) && rowId > 0) {
+			LoadGodownById(rowId);
+			if (isReadOnly) {
+				setGodownFormReadOnly();
+			}
+		}
+
+		loadCityList();
+		loadStateList();
+
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+	function loadCityList() {
+		$.ajax({
+			url: '/GodownMaster/GetCityList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#ddlCITY_NAME');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				toastr.error('Error loading module: ' + error);
+			}
+		});
+	}
+
+	function loadStateList() {
+		$.ajax({
+			url: '/GodownMaster/GetStateList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#ddlState_NAME');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				toastr.error('Error loading module: ' + error);
+			}
+		});
+	}
+	
+
+	$('#godownMasterForm').on('submit', function (e) {
+		e.preventDefault();
+
+		// if (!godownData.NAME) {
+		// 	toastr.warning("Please enter Godown Name.");
+		// 	$('#TxtGODOWN_NAME').focus();
+		// 	return;
+		// }
+		if (!validateRequiredField('#TxtGODOWN_NAME', 'Godown Name')) return;
+		if (!validateRequiredField('#TxtCOMP_NAME', 'Comp Name')) return;
+		if (!validateRequiredField('#TxtADDRESS_1', 'Address 1')) return;
+
+		const code = parseInt($('#CODE').val()) || 0;
+
+		const godownData = {
+			CODE: code,
+			COMP_CODE: 1, // dynamically replace if needed
+			NAME: $('#TxtGODOWN_NAME').val().trim(),
+			COMP_NAME: $('#TxtCOMP_NAME').val().trim(),
+			ADDRESS: $('#TxtADDRESS_1').val().trim(),
+			ADDRESS2: $('#TxtADDRESS_2').val().trim(),
+			CITY: $('#ddlCITY_NAME').val(),
+			PINCODE: $('#TxtPINCODE').val().trim(),
+			STATE_CODE: $('#ddlState_NAME').val(),
+			WB_YN: $('#ddlWB_Y_N').val(),
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			UUSER: 1,
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? 'E' : 'A',
+			WSID: 'WEB',
+			LIP: '127.0.0.1',
+			LID: 'WEB',
+			ACTION: code > 0 ? 'UPDATE' : 'INSERT'
+		};
+
+		
+
+		$.ajax({
+			url: '/GodownMaster/SaveGodown',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(godownData),
+			success: function (response) {
+				if (response.success) {
+					toastr.success("Godown saved successfully!");
+					$('#godownMasterForm')[0].reset();
+					setTimeout(function () {
+						window.location.href = '/GodownMasterList/Index';
+					}, 1000);
+				} else {
+					toastr.warning(response.message || "Something went wrong while saving.");
+				}
+			},
+			error: function (xhr) {
+				const msg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + msg);
+			}
+		});
+	});
+
+	function LoadGodownById(code) {
+		$.ajax({
+			url: '/GodownMasterList/GetGodownByCode',
+			type: 'GET',
+			data: { code: code },
+			success: function (data) {
+				console.log(data);
+				if (!data.success || !data.data) {
+					toastr.warning("No data found for this record.");
+					return;
+				}
+
+				const godown = data.data;
+
+				$('#CODE').val(godown.code);
+				$('#TxtGODOWN_NAME').val(godown.name);
+				$('#TxtCOMP_NAME').val(godown.comP_NAME);
+				$('#TxtADDRESS_1').val(godown.address);
+				$('#TxtADDRESS_2').val(godown.addresS2);
+				$('#ddlCITY_NAME').val(godown.city);
+				$('#TxtPINCODE').val(godown.pincode);
+				$('#TxtSTATE_CODE').val(godown.statE_CODE);
+				$('#ddlWB_Y_N').val(godown.wB_YN);
+
+				const isActive = godown.active === 1 || godown.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText').text(isActive ? 'Active' : 'Inactive');
+			},
+			error: function (xhr) {
+				toastr.error("Error loading godown: " + xhr.responseText);
+			}
+		});
+	}
+
+	function setGodownFormReadOnly() {
+		const form = $('#godownMasterForm');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		$('#customToggle').addClass('disabled');
+	}
+</script>

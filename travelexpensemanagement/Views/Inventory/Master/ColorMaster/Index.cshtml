@@ -1,0 +1,372 @@
+﻿@{
+    ViewBag.Title = "Color Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Color Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "ColorMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="ColorMasterform">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                <label for="ddlColorGroup" class="form-label">Color Group <span class="required">*</span></label>
+                <select class="form-control" id="ddlColorGroup" name="ColorGroup">
+                    <option selected disabled>-- Select Color Group --</option>
+                </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName" class="form-label">Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName" class="form-label">Short Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Enter Short Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCType" class="form-label">C Type</label>
+                    <select class="form-control" id="ddlCType" name="CType">
+                        <option selected disabled>-- Select Color Type --</option>                        
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+						<input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+	let PreviousInputDt = "";
+	let MasterTblId ;
+	let readOnly;
+
+	$(document).ready(function () {
+		getColorGrpDtList();
+		getColorTypeList();
+
+		MasterTblId = getQueryParam('id');
+		readOnly = getQueryParam('readOnly');
+
+		if (MasterTblId) {
+			GetMasterDataList(MasterTblId, readOnly);
+		}
+
+		$('#ddlColorGroup').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtName').focus();
+			}
+		});
+		$('#TxtName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtShortName').focus();
+			}
+		});
+		$('#TxtShortName').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#ddlCType').focus();
+			}
+		});
+
+		$('#ddlCType').on('keypress', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#btn-save').focus();
+			}
+		});
+
+		$('#DdActive').on('change', function () {
+			let isChecked = $(this).is(':checked');
+			let status = isChecked ? 'Active' : 'Inactive';
+			let value = isChecked ? 1 : 0;
+			$('#statusText').text(status);
+			$(this).val(value);
+		});
+
+		$('#btn-save').on('click', function (e) {
+			e.preventDefault();
+			const masterData = collectFormData();
+
+			if (!masterData.Name || !masterData.ShortName || !masterData.ColorGroup) {
+				toastr.warning("Please fill all required fields");
+				return;
+			}
+
+			if (MasterTblId) {
+				EditMasterData(masterData);
+			} else {
+				SaveMasterData(masterData);
+			}
+		});
+	});
+
+	function SaveMasterData(masterData) {
+		const Namee = masterData?.Name?.trim();
+		if (!Namee) {
+			toastr.warning("Color Name is required.");
+			return;
+		}
+		checkExistOrNot(Namee)
+			.done(function (data) {
+				if (data?.status && data?.exists) {
+					toastr.warning("Duplicate Color Name");
+					return;
+				}
+
+				$.ajax({
+					url: '@Url.Action("SaveColorMast", "ColorMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(masterData),
+					success: function (response) {
+						if (response?.status) {
+							toastr.success('Data saved successfully.');
+							resetFields();
+							setTimeout(() => {
+								window.location.href = '/ColorMasterList/Index';
+							}, 1500);
+						} else {
+							toastr.error(response?.message || "Save failed. Please try again.");
+						}
+					},
+					error: function () {
+						toastr.error("Error occurred while saving. Please contact admin.");
+					}
+				});
+			})
+			.fail(function () {
+				toastr.error("Error while checking Color name.");
+			});
+	}
+
+	function EditMasterData(masterData) {
+		if (PreviousInputDt !== masterData.Name) {
+			checkExistOrNot(masterData.Name)
+				.done(function (data) {
+					if (data?.status && data?.exists) {
+						toastr.warning("Duplicate Color Name");
+						return;
+					}
+					UpdateMasterData(masterData);
+				})
+				.fail(function () {
+					toastr.error("Error while checking Color Name.");
+				});
+		} else {
+			UpdateMasterData(masterData);
+		}
+	}
+
+	function UpdateMasterData(masterData) {
+		$.ajax({
+			url: '/ColorMaster/UpdateColorMast',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(masterData),
+			dataType: 'json',
+			success: function (response) {
+				if (response?.status) {
+					toastr.success('Data updated successfully.');
+					resetFields();
+					setTimeout(() => {
+						window.location.href = '/ColorMasterList/Index';
+					}, 1500);
+				} else {
+					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error("Data not updated: " + error);
+			}
+		});
+	}
+
+	function GetMasterDataList(MasterTblId, readOnly) {
+		$.ajax({
+			url: '/ColorMaster/GetColorDetailsById',
+			type: 'GET',
+			data: { id: MasterTblId },
+			success: function (res) {
+				if (res.status && res.data) {
+					console.log(res.data);
+					fillFormFields(res.data);
+					if (readOnly === 'true') {
+						$('input, #ddlColorGroup, #ddlCType, #DdActive').prop('disabled', true);
+						$('#btn-save, #cancelBtn').hide();
+					} else {
+						$('input, #ddlColorGroup, #ddlCType, #DdActive').prop('disabled', false);
+						$('#btn-save, #cancelBtn').show();
+					}
+				} else {
+					toastr.warning('No data found for this ID.');
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load data.');
+			}
+		});
+	}
+
+	function resetFields() {
+		$('#TxtCode, #TxtName, #TxtShortName, #searchInput').val('');
+		$('#ddlColorGroup, #ddlCType').prop('selectedIndex', 0);
+		setActiveStatus(1);
+	}
+
+	function fillFormFields(dt) {
+		console.log(dt);
+		$('#ddlColorGroup').val(dt.COLOR_GROUP);
+		$('#TxtCode').val(dt.CODE);
+		$('#TxtName').val(dt.NAME);
+		$('#TxtShortName').val(dt.SHORTNAME);
+		$('#ddlCType').val(dt.CTYPE);
+		setActiveStatus(dt.ACTIVE);
+		PreviousInputDt = dt.NAME;
+	}
+
+	function collectFormData() {
+		return {
+			code: toNullableInt($('#TxtCode').val()),
+			ColorGroup: toNullableInt($('#ddlColorGroup').val()),
+			Name: toNullableString($('#TxtName').val()),
+			ShortName: toNullableString($('#TxtShortName').val()),
+			CType: toNullableString($('#ddlCType').val()),
+			active: $('#DdActive').val()
+		};
+	}
+
+	function checkExistOrNot(inputData) {
+		return $.ajax({
+			url: '/ColorMaster/getExistOrNot',
+			type: 'GET',
+			dataType: 'json',
+			data: { inputData: inputData?.trim() }
+		});
+	}
+
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "Do you want to cancel all the changes?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, cancel it!',
+			cancelButtonText: 'No, keep it',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+				if (MasterTblId) {
+					GetMasterDataList(MasterTblId, readOnly);
+				} else {
+					resetFields();
+				}
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+			}
+		});
+	});
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+ 
+	function setActiveStatus(input) {
+		let isActive = input == 1;
+		$('#DdActive').prop('checked', isActive);
+		$('#DdActive').val(isActive ? 1 : 0);
+		$('#statusText').text(isActive ? 'Active' : 'Inactive');
+	} 
+
+	function getColorGrpDtList() {
+		$.ajax({
+			url: '@Url.Action("GetColorGrpName", "ColorMaster")',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				if (data.status === true && Array.isArray(data.data)) {
+					var $colorGrpList = $('#ddlColorGroup');
+					$colorGrpList.empty();
+					$colorGrpList.append($('<option selected disabled>').val('').text('Select Color Group'));
+					data.data.forEach(function (item) {
+						$colorGrpList.append($('<option>').val(item.CODE).text(item.NAME));
+					});
+				} else {
+					toastr.warning("No data found");
+				}
+			},
+			error: function (xhr) {
+				toastr.error("Data load failed");
+			}
+		});
+	}
+
+	function getColorTypeList()
+	{
+		$.ajax({
+			url:'@Url.Action("GetColorType", "ColorMaster")',
+			type:'GET',
+			dataType:'json',
+			success:function(data){
+				if(data.status===true&& Array.isArray(data.data)){
+					var $colorType=$('#ddlCType');
+					$colorType.empty();
+					$colorType.append($('<option selected disabled>').val('').text('Select C Type'));
+					data.data.forEach(function(item){
+						$colorType.append($('<option>').val(item.ColorType).text(item.ColorType));
+					});
+				}
+			},
+			error:function(xhr){
+				toastr.error("Data load failed");
+			}
+		})
+	}
+
+
+</script>

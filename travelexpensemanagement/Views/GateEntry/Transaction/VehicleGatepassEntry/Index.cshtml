@@ -1,0 +1,255 @@
+﻿@{
+    ViewBag.Title = "Vehicle Gatepass Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Vehicle Gatepass Entry</legend>
+   
+    <form id="VehicleGatepassEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtFrom">From</label>
+                    <input type="date" class="form-control" id="DtFrom">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtTo">To</label>
+                    <input type="date" class="form-control" id="DtTo">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWBType">WB Type</label>
+                    <select class="form-control" id="ddlWBType">
+                        <option>--Select WB Type--</option>
+                        <option>Raw Material</option>
+                        <option>Store</option>
+                        <option>Fuel</option>
+                        <option> Outsider</option>
+                        <option>Misc</option>
+                        <option>JobWork</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtVehicleNo">Vehicle No.</label>
+                    <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No.">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtQRBarcodeNo">QR/Barcode No</label>
+                    <input type="text" class="form-control" id="TxtQRBarcodeNo" placeholder="Enter QR/Barcode No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt button-right">
+                    <button class="btn btn-success" id="LoadData" type="button"><i class="fa fa-download"></i> Load Data</button>
+                </div>
+            </div>
+        </div>      
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblVehicleGatepassEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Gate No</th>
+                            <th>Gate Date</th>
+                            <th>Wb No</th>
+                            <th>Wb Date</th>
+                            <th>Wb Type</th>
+                            <th>Party Name</th>
+                            <th>Vehicle No</th>
+                            <th>Bill No</th>
+                            <th>Wb Qty</th>
+                            <th>Final Remarks</th>
+                            <th>Out Allowed</th>
+                            <th>Wb Slip</th>
+                            <th>Gate Out</th>
+                   
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+
+                <div class="btn-last">
+                    <button id="btn-saves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Saves</button>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+
+    $("#LoadData").on("click", async function () {
+        const FromDate = $("#DtFrom").val();
+        const ToDate = $("#DtTo").val(); // <-- Fixed: ToDate should come from #DtTo
+        const WbType = $("#ddlWBType").val();
+        const VehicleNo = $("#TxtVehicleNo").val();
+    
+        if (!FromDate) {
+            toastr.warning("Please select a From Date.");
+            return;
+        }
+
+        if (!ToDate) {
+            toastr.warning("Please select a To Date.");
+            return;
+        }
+
+        await loadPendingDocuments(FromDate, ToDate, WbType, VehicleNo);
+    });
+
+    $("#btn-save").click(function (e) {
+      e.preventDefault();
+                const fromDate = formatDate($("#DtFrom").val());
+                const todate = formatDate($("#DtTo").val());
+                const wbType = $.trim($('#ddlWBType').val());
+
+
+            if (!fromDate) {
+                toastr.warning("Please select a From Date.");
+                $("#DtFrom").focus();
+                return;
+            }
+
+
+               if (!todate) {
+                    toastr.warning("Please select a To Date.");
+                    $("#DtTo").focus();
+                    return;
+            }
+
+
+                if (!wbType) {
+                    toastr.warning("Please select a WB TYPE.");
+                    $("#ddlWBType").focus();
+                    return;
+                }
+      const payload = collectTableRowData(); 
+      const dataToSend = {
+        ModelListJson: JSON.stringify(payload)
+      };
+
+
+      $.ajax({
+        url: '/VehicleGatepassEntry/SavedData',
+        type: 'POST',
+        data: dataToSend,
+        success: function (response) {
+          if (response.success) toastr.success("Saved successfully!");
+          else toastr.error(response.message || "Save failed.");
+        },
+        error: function (xhr) {
+          const err = xhr.status === 400
+            ? "Bad Request: " + xhr.responseText
+            : xhr.status === 500
+              ? "Server error: " + xhr.responseText
+              : "Unexpected error: " + xhr.statusText;
+          toastr.error(err);
+        },
+        complete: function () {
+          $("#btn-save").prop("disabled", false);
+        }
+      });
+    });
+       
+
+    });
+
+
+      function loadPendingDocuments(FromDate,ToDate,WbType,VehicleNo) {
+        $.ajax({
+            url: '/VehicleGatepassEntry/Getdata',
+            type: 'GET',
+            data: { FromDate: FromDate,
+                    ToDate : ToDate , WbType : WbType , VehicleNo : VehicleNo  },
+            success: function (data) {
+                let tbody = $('#tblVehicleGatepassEntry tbody');
+                tbody.empty();
+                console.log('Data', data);
+
+                         if (data.length === 0) {
+                    tbody.append('<tr><td colspan="8" class="text-center">No pending documents found.</td></tr>');
+                } else {
+                    $.each(data, function (i, item) {
+                        let row = `<tr>
+                            <td>${item.gateNo}</td>
+                            <td>${formatDate(item.gateDate)}</td>
+                            <td>${item.wbNo}</td>
+                            <td>${formatDate(item.wbDate)}</td>
+                            <td>${item.wbType}</td>
+                            <td>${item.partyName}</td>
+                            <td>${item.vehicleNo}</td>
+                            <td>${item.billNo}</td>
+                            <td>${item.wbQty}</td>
+                            <td>${item.finalRemarks}</td>
+                            <td>${item.outAllowed}</td>
+                            <td>${item.partY_WBSLIPNO}</td>
+                            <td>${item.gateOut}</td>
+                        </tr>`;
+
+                        tbody.append(row);
+                    });
+                }
+
+                 
+            },
+            error: function (xhr) {
+                alert("Error loading pending documents.");
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+      function formatDate(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      return isNaN(date) ? null : date.toISOString().split('T')[0];
+    }
+
+      function collectTableRowData() {
+        const rows = document.querySelectorAll('#tblVehicleGatepassEntry tbody tr');
+        return Array.from(rows).map(row => {
+            const cells = row.querySelectorAll('td');
+            return {
+                GateNo: cells[0]?.textContent.trim() || '',
+                GateDate: cells[1]?.textContent.trim() || '',
+                WbNo: cells[2]?.textContent.trim() || '',
+                WbDate: cells[3]?.textContent.trim() || '',
+                WbType: cells[4]?.textContent.trim() || '',
+                PartyName: cells[5]?.textContent.trim() || '',
+                VehicleNo: cells[6]?.textContent.trim() || '',
+                BillNo: cells[7]?.textContent.trim() || '',
+                WbQty: parseFloat(cells[8]?.textContent.trim()) || 0,
+                FinalRemarks: cells[9]?.textContent.trim() || '',
+                OutAllowed: cells[10]?.textContent.trim() || '',
+                Wbslip: cells[11]?.textContent.trim() || ''
+          
+
+
+            };
+        });
+    }
+
+</script>

@@ -1,0 +1,275 @@
+﻿@{
+	ViewBag.Title = "Sales Executive Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Sales Executive Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "SalesExecutiveMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtNAME" class="form-label">Name</label>
+					<input type="text" class="form-control" id="TxtNAME" maxlength="30" name="NAME" placeholder="Enter Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtCODE" class="form-label">Code</label>
+					<input type="text" class="form-control" id="TxtCODE" maxlength="10" oninput="allowOnlyNumbers(this);" name="CODE" placeholder="Enter Code">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button id="btn-save" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+
+<script>
+
+		let OutstandUpdateCd=0;
+		let PreviousInputDt = "";
+		let allMastData = [];
+		let filteredData = [];
+		let currentPage = 1;
+		const rowsPerPage = 10;
+		let ModeOfControl="";
+		let getOutstandDt=[];
+
+		const storedData = localStorage.getItem('editSalesExective');
+		ModeOfControl = localStorage.getItem('Mode');
+		  localStorage.removeItem('Mode');
+		  console.log(storedData);
+
+		$(document).ready(function(){
+		if (storedData && ModeOfControl === 'Edit') {
+		 getOutstandDt = JSON.parse(storedData);
+		 OutstandUpdateCd = getOutstandDt.sno;
+		 PreviousInputDt = getOutstandDt.code;
+			$('#TxtNAME').val(getOutstandDt.name);
+		  $('#TxtCODE').val(getOutstandDt.code);
+		 $('input').prop('readonly', false);
+		  $('#btn-save').show();
+		  $('#cancelBtn').show();
+		  localStorage.removeItem('editSalesExective');
+
+		}
+		else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getOutstandDt = JSON.parse(storedData);
+		 $('#TxtNAME').val(getOutstandDt.name);
+		  $('#TxtCODE').val(getOutstandDt.code);
+		   $('input').prop('readonly', true);
+		  localStorage.removeItem('editSalesExective');
+		}
+
+		$('#TxtNAME').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtCODE').focus();
+				}
+			});
+
+			$('#TxtCODE').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#btn-save').focus();
+				}
+			});
+
+		});
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+		const name =  $('#TxtNAME').val().trim();
+		const code =  $('#TxtCODE').val().trim();
+
+		if (!name || !code ) {
+			alert("Please fill all required fields.");
+			return;
+		}
+		console.log(ModeOfControl);
+		if(ModeOfControl=='Edit')
+		{
+
+			 var AccPutstandingDt = {
+				   Vno: OutstandUpdateCd,
+				   Name: name,
+				   Code:code
+
+			   };
+			 EditsalesExecutive(AccPutstandingDt, code)
+		}
+		else
+		{
+
+			var AccPutstandingDt = {
+				  Name: name,
+				   Code:code
+			   };
+		 saveSalesExecutiveDt(AccPutstandingDt, code);
+		}
+	});
+
+	 function saveSalesExecutiveDt(AccPutstandingDt, Code)
+	{
+		checkExistOrNot(Code)
+			  .done(function (data) {
+			   if (data.status === true && data.exists === true) {
+				alert("Duplicate AccOutstanding Name");
+				return;
+			   }
+
+				$.ajax({
+					url:'@Url.Action("SaveSalesExecutiveMast", "SalesExecutiveMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(AccPutstandingDt),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							resetFields();
+							setTimeout(function () {
+								  window.location.href ='/SalesExecutiveMasterList/Index';
+								}, 1500);
+
+						} else {
+							alert(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						console.error(xhr.responseText);
+						alert("Error occurred while saving.");
+					}
+				});
+			  })
+			.fail(function (xhr, status, error) {
+			console.error("Check AccOutstanding failed:", error);
+			alert("Error while checking AccOutstanding type.");
+			});
+	}
+
+
+	function EditsalesExecutive(AccPutstandingDt, name){	 
+		if (PreviousInputDt != name) {
+				  checkExistOrNot(name)
+					  .done(function (data) {
+					   if (data.status === true && data.exists === true) {
+						alert("Duplicate AccOutstanding Code");
+						return;
+					   }
+						updateCurrencyData(AccPutstandingDt, name);
+
+					  })
+					.fail(function (xhr, status, error) {
+					console.error("Check AccOutstanding failed:", error);
+					alert("Error while checking AccOutstanding type.");
+					});
+				 }
+				 else{
+					 updateCurrencyData(AccPutstandingDt, name);
+				 }
+
+	}
+
+		function updateCurrencyData(AccPutstandingDt, name) {
+			$.ajax({
+				url: '/SalesExecutiveMaster/EditSalesExecutiveMast',
+				type: 'POST',
+				data:JSON.stringify(AccPutstandingDt),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/SalesExecutiveMasterList/Index';
+								}, 1500);
+					} else {
+						alert("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					alert("Data not updated: " + error);
+				}
+			});
+		}
+
+
+		 function resetFields() {
+			$('#TxtNAME').val('');
+			 $('#TxtCODE').val('');
+		}
+
+	  function checkExistOrNot(code)
+	   {
+		   return $.ajax({
+		   url: '/SalesExecutiveMaster/getExitOrNot',
+		   type: 'GET',
+		   dataType: 'json',
+		   data: { code:code }
+	   });
+	   }
+
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		   if(ModeOfControl=='Edit')
+		 {
+		 $('#TxtNAME').val(getOutstandDt.name);
+		  $('#TxtCODE').val(getOutstandDt.code);
+	}
+	else
+	{
+	resetFields();
+	}
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+
+	   function allowOnlyNumbers(input) {
+			  input.value = input.value.replace(/[^0-9]/g, '');
+	   }
+
+
+</script>

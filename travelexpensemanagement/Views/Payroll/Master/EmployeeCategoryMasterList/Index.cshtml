@@ -1,0 +1,245 @@
+﻿@{
+	ViewBag.Title = "Employee Category Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.MENU_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+
+}
+
+<fieldset>
+	<legend class="legend-field">Employee Category Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8">
+			<div class="button-right">
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "EmployeeCategoryMaster")'" type="submit" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblEmployeeCategoryMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Name</th>
+						<th>Short Name</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<div class="pagination-wrapper">
+		<ul class="pagination" id="tablePagination"></ul>
+	</div>
+</fieldset>
+
+<script>
+	let currentPage = 1;
+	let pageSize = 10;
+	let moduleMap = {};
+	let parentModuleMap = {};
+
+	$(document).ready(function () {
+		loadAllMenus();
+	});
+
+	function loadAllMenus() {
+		const searchTerm = $('#searchBox').val();
+		$.ajax({
+			url: '/EmployeeCategoryMasterList/GetEmployeeCategaryList',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function(res) {
+
+				if (!res.success) {
+					toastr.error("Failed to load data.");
+					return;
+				}
+
+				const EmployeeCategoryList = res.lists;
+				const totalCount = res.totalCount;
+				console.log('ss' , res.lists);
+				let tbody = $('#tblEmployeeCategoryMaster tbody');
+				tbody.empty();
+
+				if (EmployeeCategoryList.length === 0) {
+					tbody.append('<tr><td colspan="8" class="text-center text-muted">No ?lIST found.</td></tr>');
+				} else {
+					$.each(EmployeeCategoryList, function(index, item) {
+						$('#tblEmployeeCategoryMaster tbody').append(`
+					<tr>
+						<td>${item.name}</td>
+						<td>${item.shortname}</td>
+						<td>${item.active === 1 ? 'Yes' : 'No'}</td>
+					  <td>
+
+					@if (canEdit)
+					{
+						  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.code}')"></i>
+					}
+
+					<i class="fa fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.code}')"></i>
+
+					@if (canDelete)
+					{
+							<i class="fa fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteTemp('${item.code}')"></i>
+					}
+					  </td>
+					</tr>
+				  `);
+					});
+
+					renderPagination(totalCount, pageSize, currentPage);
+				}
+			},
+			error: function(xhr) {
+				toastr.error('Error loading menu list: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+	
+		paginationContainer.empty();
+				
+		if (total === 0) {
+			paginationContainer.html('<span class="text-muted"></span>');
+			return;
+		}
+
+		if (totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) {
+			endPage = Math.min(5, totalPages);
+		}
+		if (currentPage >= totalPages - 2) {
+			startPage = Math.max(totalPages - 4, 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllMenus();
+	}
+	
+	$('#searchBox').on('keyup', function () {
+		currentPage = 1;
+		loadAllMenus();
+	});
+
+	function AddOrEditFunction(code) {
+		window.location.href = '/EmployeeCategoryMaster/Index?id=' + encodeURIComponent(code);
+	}
+
+	function viewMenuDetails(code) {
+		window.location.href = '/EmployeeCategoryMaster/Index?id=' + encodeURIComponent(code)  + '&mode=view'  ;
+	}
+
+    function deleteTemp(code) {
+
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "You won't be able to revert this deletion!",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/EmployeeCategoryMasterList/Delete',
+					type: 'POST',
+					data: { code: code },
+					success: function (response) {
+						if (response.success) {
+							toastr.success(response.message || "Record deleted successfully.");
+							loadAllMenus();
+						} else {
+							toastr.warning("Delete failed.");
+						}
+					},
+					error: function () {
+						toastr.error("An error occurred while deleting.");
+					}
+				});
+			}
+		});
+	}
+
+
+
+
+
+
+
+
+
+
+
+</script>

@@ -1,0 +1,401 @@
+﻿@{
+    ViewBag.Title = "New Employee Requirement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">New Employee Requirement</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "NewEmployeeRequirementList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="NewEmployeeRequirementForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+        <div class="row">
+            <!-- Department -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlDepartment">Department <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDepartment" name="Department">
+                        <option>Select Department</option>
+                        <option>Accounts Section</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Designation -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlDesignation">Designation <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDesignation" name="Designation">
+                        <option>Select Designation</option>
+                        <option>Account Executive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!-- Work Place -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlWorkPlace">Work Place</label>
+                    <select class="form-control" id="ddlWorkPlace" name="WorkPlace">
+                        <option>Select Work Place</option>
+                        <option>STPL</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- No. of Employees -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="TxtEmployeeCount">No. of Employees</label>
+                    <input type="text" class="form-control" id="TxtEmployeeCount" oninput="allowOnlyNumbers(this)" name="EmployeeCount" maxlength="4" placeholder="Enter No. of Employees">
+                </div>
+            </div>
+        </div>
+        <!-- Remarks -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea class="form-control" id="TxtRemarks" name="Remarks" rows="2" maxlength="500" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const inputSequence = [
+    'ddlDepartment',
+    'ddlDesignation',
+    'ddlWorkPlace',
+    'TxtEmployeeCount',
+    'TmShiftStartRangeFrom',
+    'TxtRemarks'
+    ];
+
+
+    let PreviousShift;
+    let	previousDesignation;
+    let MasterTblId ;
+    let readOnly;
+
+    $(document).ready(function () {
+    GetWorkPlaceList();
+    GetDepartmentList();
+    getDesignation();
+
+        MasterTblId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+
+        if (MasterTblId) {
+            GetMasterDataList(MasterTblId, readOnly);
+        }
+
+        inputSequence.forEach((id, index) => {
+        $(`#${id}`).on('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (index + 1 < inputSequence.length) {
+                    $(`#${inputSequence[index + 1]}`).focus();
+                }
+            }
+        });
+       });
+
+       $('#DdActive').on('change', function () {
+            let isChecked = $(this).is(':checked');
+            let status = isChecked ? 'Active' : 'Inactive';
+            let value = isChecked ? 1 : 0;
+            $('#statusText').text(status);
+            $(this).val(value);
+        });
+
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            const masterData = collectFormData();
+            console.log(masterData);
+            if (!masterData.DEPT_CODE || !masterData.DESG_CODE) {
+                toastr.warning("Please fill all required fields");
+                return;
+            }
+
+            if (MasterTblId) {
+                UpdateMasterData(masterData);
+            } else {
+                SaveMasterData(masterData);
+            }
+        });
+    });
+
+    function SaveMasterData(masterData) {
+                $.ajax({
+                    url: '@Url.Action("SaveNewEmpRequireMast", "NewEmployeeRequirement")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(masterData),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success('Data saved successfully.');
+                            resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/NewEmployeeRequirementList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateMasterData(masterData) {
+        $.ajax({
+            url: '/NewEmployeeRequirement/UpdateNewEmpReqMast',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(masterData),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success('Data updated successfully.');
+                    resetFields();
+                    setTimeout(() => {
+                        window.location.href = '/NewEmployeeRequirementList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    function GetMasterDataList(MasterTblId, readOnly) {
+        $.ajax({
+            url: '/NewEmployeeRequirement/GetNewEmpDetailById',
+            type: 'GET',
+            data: { id: MasterTblId },
+            success: function (res) {
+                if (res.status && res.data) {
+                    console.log(res.data);
+                    fillFormFields(res.data);
+                    if (readOnly === 'true') {
+                        $('input, #ddlDepartment, #ddlDesignation').prop('disabled', true);
+                        $('#btn-save, #cancelBtn').hide();
+                    } else {
+                        $('input, #ddlDepartment, #ddlDesignation').prop('disabled', false);
+                        $('#btn-save, #cancelBtn').show();
+                    }
+                } else {
+                    toastr.warning('No data found for this ID.');
+                }
+            },
+            error: function () {
+                toastr.error('Failed to load data.');
+            }
+        });
+    }
+
+    function resetFields() {
+        $('#TxtCode, #TxtEmployeeCount, #TxtRemarks').val('');
+        $('#ddlDepartment, #ddlDesignation, #ddlWorkPlace').prop('selectedIndex', 0);
+        setActiveStatus(1);
+    }
+
+    function fillFormFields(dt) {
+        console.log(dt);
+        $('#TxtCode').val(dt.CODE);         
+        $('#TxtEmployeeCount').val(dt.NOS);        
+        $('#TxtRemarks').val(dt.REMARKS);
+                   
+        getDesignation();
+        setTimeout(function () {
+        $('#ddlDesignation option').filter(function () {
+            return $(this).text().trim().toLowerCase() === dt.DESG_CODE.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+
+        GetDepartmentList();
+         setTimeout(function () {
+        $('#ddlDepartment option').filter(function () {
+            return $(this).text().trim().toLowerCase() === dt.DEPT_CODE.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+
+        GetWorkPlaceList();
+         setTimeout(function () {
+        $('#ddlWorkPlace option').filter(function () {
+            return $(this).text().trim().toLowerCase() === dt.PLACE_CODE.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+        setActiveStatus(dt.ACTIVE);
+    }
+
+    function collectFormData() {
+        return {
+            CODE: toNullableInt($('#TxtCode').val()),
+            DEPT_CODE: toNullableInt($('#ddlDepartment').val()),
+            DESG_CODE: toNullableInt($('#ddlDesignation').val()),
+            PLACE_CODE: toNullableInt($('#ddlWorkPlace').val()),
+            NOS: toNullableInt($('#TxtEmployeeCount').val()),
+            REMARKS: toNullableString($('#TxtRemarks').val()),
+            ACTIVE: toNullableInt($('#DdActive').val()),
+        };
+    }
+ 
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
+                if (MasterTblId) {
+                    GetMasterDataList(MasterTblId, readOnly);
+                } else {
+                    resetFields();
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire('Resumed', 'Your action is still in progress.', 'info');
+            }
+        });
+    });
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+    function allowOnlyNumbers(input) {
+             input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+
+       function setActiveStatus(input) {
+        let isActive = input == 1;
+        $('#DdActive').prop('checked', isActive);
+        $('#DdActive').val(isActive ? 1 : 0);
+        $('#statusText').text(isActive ? 'Active' : 'Inactive');
+    }
+
+    function getDesignation(){
+        $.ajax({
+            url: '@Url.Action("DesignationList", "NewEmployeeRequirement")',
+            type:'Get',
+            datatype:'json',
+            success:function(response){
+                if(response.status==true){
+                var $designationDropdown=$('#ddlDesignation');
+                $designationDropdown.empty();
+                $designationDropdown.append('<option selected disabled>- Select Designation Name-</option>');
+                $.each(response.data, function(index, item){
+                    $designationDropdown.append('<option value="'+ item.CODE +'">'+ item.NAME +'</option>');
+                });
+                }else{
+                    toastr.error("Country Name Load failed");
+                }
+            },
+            error:function(xhr,status, error){
+            toastr.error("Country Name Load failed", xhr.error);
+            }
+
+        });
+    }
+
+    function GetDepartmentList()
+    {
+        $.ajax({
+            url: '@Url.Action("DepartmentList", "NewEmployeeRequirement")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $departmentDropdown = $('#ddlDepartment');
+                    $departmentDropdown.empty();
+                    $departmentDropdown.append('<option selected disabled>- Select Department Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $departmentDropdown.append('<option value="' + item.CODE + '">' + item.NAME + '</option>');
+                    });
+                } else {
+                    toastr.error("Department Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Department Name Load failed", xhr.error);
+            }
+        });
+    }
+
+    function GetWorkPlaceList() {
+        $.ajax({
+            url: '@Url.Action("WorkPlaceList", "NewEmployeeRequirement")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    var $workPlaceDropdown = $('#ddlWorkPlace');
+                    $workPlaceDropdown.empty();
+                    $workPlaceDropdown.append('<option selected disabled>- Select Work Place -</option>');
+                    $.each(response.data, function (index, item) {
+                        $workPlaceDropdown.append('<option value="' + item.CODE + '">' + item.NAME + '</option>');
+                    });
+                } else {
+                    toastr.error("Work Place Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Work Place Load failed", xhr.error);
+            }
+        });
+    }
+
+</script>

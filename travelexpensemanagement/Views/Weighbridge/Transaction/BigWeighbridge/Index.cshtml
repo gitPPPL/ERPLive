@@ -1,0 +1,1242 @@
+﻿@{
+    ViewBag.Title = "Big Weighbridge Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Big Weighbridge</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "BigWeighbridgeList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="BigWeighbridgeForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDocType">Doc Type <span class="required">*</span></label>
+                    <select class="form-control" id="ddlDocType">
+                        @* <option value="">--Select DOC Type--</option> *@
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlWBType">WB Type <span class="required">*</span></label>
+                    <select class="form-control" id="ddlWBType">
+                        <option value="">Select WB Type</option>
+                        <option>Raw Material</option>
+                        <option>Store</option>
+                        <option>Fuel</option>
+                        <option>Sales</option>
+                        <option>Outsider</option>
+                        <option>Misc</option>
+                        <option>JobWork</option>
+                        <option>RGP</option>
+                        <option>Sales Return</option>
+
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtQRCode">QR Code</label>
+                    <input type="text" class="form-control" id="TxtQRCode" placeholder="Enter QR Code">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DdlGateNo">Gate No <span class="required">*</span></label>
+                    <select class="form-control" id="DdlGateNo">
+                        <option value="">-select Gate No.-</option>
+                    </select>
+                    @* <input type="number" class="form-control" id="DdlGateNo" placeholder="Enter Gate No"> *@
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPartyName">Party Name</label>
+                    <select class="form-control" id="ddlPartyName" disabled>
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtVehicleNo">Vehicle No</label>
+                    <input type="text" maxlength="20" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumPartyGrossWeight">Party Gross Weight</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="NumPartyGrossWeight">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumTrWeight">Tr Weight</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="NumTrWeight">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumNetWeight">Net Weight</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="NumNetWeight">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtPartyWBNo">Party WB No.</label>
+                    <input type="text" maxlength="20" class="form-control" id="TxtPartyWBNo" placeholder="Enter WayBill InvNo">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumNoBag25">No of Bags(25 Kg)</label>
+                    <input type="text" maxlength="8" class="form-control" oninput="allowOnlyNumbers(this)" id="NumNoBag25">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumNoBag500">No of Bags(500 Kg)</label>
+                    <input type="text" maxlength="8" class="form-control" oninput="allowOnlyNumbers(this)" id="NumNoBag500">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumNoBag1000">No of Bags(1000 Kg)</label>
+                    <input type="text" maxlength="8" class="form-control" oninput="allowOnlyNumbers(this)" id="NumNoBag1000">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="txtRemarks">Remarks</label>
+                    <textarea type="text" maxlength="500" class="form-control" id="txtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <label class="checkbox-input-mx button-right">
+                    <input type="checkbox" id="ChkCrystalReport" />
+                    Crystal Report
+                    <button id="btn-print" type="button" class="btn btn-success"><i class="fa fa-save"></i>Print Gatepass</button>
+                </label>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblBigWeighbridge" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Weight</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Item</th>
+                            <th>From Place</th>
+                            <th>To Place</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlStatus">Status</label>
+                        <select class="form-control" id="ddlStatus">
+                            <option value="1">Open</option>
+                            <option value="0">Close</option>
+                            <option value="2">Cancel</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtStatusDate">Date</label>
+                        <input type="datetime-local" id="DtStatusDate" class="form-control" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+
+    const allFieldIds = [
+      "DtDocDate","ddlWBType","TxtQRCode","DdlGateNo","ddlPartyName",
+      "NumPartyGrossWeight","NumTrWeight","NumNetWeight","TxtVehicleNo",
+      "TxtPartyWBNo","ChkCrystalReport","txtRemarks","NumNoBag25","NumNoBag500","NumNoBag1000"
+    ];
+
+    const itemRecords = [
+      "TxtWeight","TxtDate","TxtTime","ddlItemname","DdlFromPlace","DdlToPlace"
+    ];
+
+    let docId = "", readOnly;
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await GetDocTypeAsync();
+        await handleDocLoad();
+        addItemRecordRow();
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+      $('#ddlWBType').on('change', function(){
+         var wbType =$(this).val();
+         if(wbType === "Outsider" || wbType === "Sales Return"){
+            $('#ddlPartyName').prop('disabled', false);
+            $('#TxtVehicleNo').prop('readOnly', false);
+            GetPartyList();
+         } else {
+            $('#ddlPartyName').prop('disabled', true).val('').trigger('change');
+            $('#TxtVehicleNo').prop('readOnly', true);
+         }
+         GetGateEntryList($('#ddlWBType').val());
+      });
+
+      $("#NumPartyGrossWeight, #NumTrWeight").on('input', updateNetWeight);
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+        var wbType=$('#ddlWBType').val();
+           if (wbType !== "Outsider" && wbType !== "Sales Return") {
+           if (!validateRequiredField('#DdlGateNo', 'Gate No')) return;
+           }
+
+      if (!validateRequiredField('#ddlDocType','Doc Type') ||
+            !validateRequiredField('#NumDocNo','Doc No') ||
+            !validateRequiredField('#DtDocDate','Doc Date') ||
+            !validateRequiredField('#ddlWBType','WB Type') ||
+            !validateRequiredField('#TxtVehicleNo','Vehicle No.')) return;
+
+        if (!validateBigWeighbridgeTable()) {
+        return;
+        }
+
+       if (!validateWeightOrder()) {
+       return;
+       }
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+      });
+
+      $('#ddlDocType').on('change', () => {
+        const val = $('#ddlDocType').val();
+        if (val) GetDocid(val);
+      });
+
+      $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        const tbody = $(this).closest('tbody');
+        if (tbody.find('tr').length > 1) {
+          $(this).closest('tr').remove();
+        } else {
+          alert('Cannot delete the first row.');
+        }
+      });
+
+
+    // $(document).on('click', '.btn-Itemadd-action', function () {
+    //      if (!docId) {
+    //         return;
+    //      }
+    //      addItemRecordRow();
+    // });
+
+    $('#DdlGateNo').on('change', function () {
+        var gateNo = $(this).val();
+        var selectedOption = $(this).find('option:selected');
+        if (gateNo) {
+            $('#TxtVehicleNo').val(selectedOption.data('vehicalno') || '');
+            var partyCode = selectedOption.data('party');
+            var partyName = selectedOption.data('partynm');
+            ensureOption($('#ddlPartyName'), partyCode, partyName);
+            $('#ddlPartyName').val(partyCode).trigger('change');
+        } else {
+            $('#TxtVehicleNo').val('');
+            $('#ddlPartyName').val('').trigger('change');
+        }
+    });
+
+    function ensureOption($dropdown, code, name) {
+        if (code && $dropdown.find(`option[value="${code}"]`).length === 0) {
+            $dropdown.append(`<option value="${code}">${name}</option>`);
+        }
+    }
+
+    }
+
+</script>
+
+<script>
+
+
+    function validateWeightOrder() {
+        const wbType = $('#ddlWBType').val()?.trim();
+        if (!wbType) return true; // skip if not selected
+
+        const rows = $('#tblBigWeighbridge tbody tr');
+        const weights = [];
+
+        rows.each(function () {
+            const idx = this.id.replace('row', '');
+            const weightVal = parseFloat($(`#TxtWeight${idx}`).val());
+
+            if (!isNaN(weightVal)) {
+                weights.push(weightVal);
+            }
+        });
+
+        // Skip validation for Misc, JobWork, Outsider
+        if (['Misc', 'JobWork', 'Outsider'].includes(wbType)) {
+            return true;
+        }
+
+        let isValid = true;
+
+        if (['Sales', 'Sales Return'].includes(wbType)) {
+            // Ascending check
+            for (let i = 1; i < weights.length; i++) {
+                if (weights[i] < weights[i - 1]) {
+                    isValid = false;
+                    break;
+                }
+            }
+
+            if (!isValid) {
+                toastr.error('Weight must be in ascending order for Sales or Sales Return.');
+                return false;
+            }
+        }
+
+        if (['Raw Material', 'Store', 'RGP', 'Fuel'].includes(wbType)) {
+            // Descending check
+            for (let i = 1; i < weights.length; i++) {
+                if (weights[i] > weights[i - 1]) {
+                    isValid = false;
+                    break;
+                }
+            }
+
+            if (!isValid) {
+                toastr.error('Weight must be in descending order for Raw Material, Store, RGP, or Fuel.');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+     function validateBigWeighbridgeTable() {
+        let isValid = true;
+        let errorMessage = '';
+        const rows = $('#tblBigWeighbridge tbody tr');
+
+        rows.each(function () {
+            const rowId = this.id;
+            const idx = rowId.replace('row', '');
+
+            const weight = $(`#TxtWeight${idx}`).val()?.trim();
+            const date = $(`#TxtDate${idx}`).val()?.trim();
+            const time = $(`#TxtTime${idx}`).val()?.trim();
+            const itemName = $(`#ddlItemname${idx}`).val()?.trim();
+            const fromPlace = $(`#DdlFromPlace${idx}`).val()?.trim();
+            const toPlace = $(`#DdlToPlace${idx}`).val()?.trim();
+
+            // Ensure docId is defined somewhere globally or passed in
+            if (typeof docId !== 'undefined' && docId) {
+                const isWeightEditable = !$(`#TxtWeight${idx}`).prop('readonly');
+                if (!isWeightEditable) return;
+
+                if (parseFloat(weight) > 0) {
+                    if (!weight || !date || !time || !itemName || !fromPlace || !toPlace) {
+                        isValid = false;
+                        errorMessage = `Please fill required fields in row ${idx}: Weight, Date, Time, Item Name, From Place, and To Place.`;
+                        return false;  
+                    }
+                }
+            } else {
+                if (!weight || !date || !time) {
+                    isValid = false;
+                    errorMessage = `Please fill required fields in row ${idx}: Weight, Date, and Time.`;
+                    return false;  
+                }
+            }
+        });
+
+        if (!isValid) {
+            toastr.error(errorMessage);
+        }
+
+        return isValid;
+    }
+    
+    // function validateBigWeighbridgeTable() {
+    //     let isValid = true;
+    //     let errorMessage = '';
+    //     const rows = $('#tblBigWeighbridge tbody tr');
+
+    //     rows.each(function () {
+    //         const rowId = this.id;
+    //         const idx = rowId.replace('row', '');
+
+    //         const weight = $(`#TxtWeight${idx}`).val()?.trim();
+    //         const date = $(`#TxtDate${idx}`).val()?.trim();
+    //         const time = $(`#TxtTime${idx}`).val()?.trim();
+
+    //         if (!weight || !date || !time) {
+    //             isValid = false;
+    //             errorMessage = `Please fill required fields in row ${idx}: Weight, Date, and Time.`;
+    //             return false; 
+    //         }
+
+    //         if(docId)
+    //         {          
+    //         const isWeightEditable = !$(`#TxtWeight${idx}`).prop('readonly');
+    //         if (!isWeightEditable) return;
+    //         const Weight = $(`#TxtWeight${idx}`).val();
+    //         if(weight > 0)
+    //         {
+    //            const itemName = $(`#ddlItemname${idx}`).val()?.trim();
+    //            const fromPlace = $(`#DdlFromPlace${idx}`).val()?.trim();
+    //            const toPlace = $(`#DdlToPlace${idx}`).val()?.trim();
+
+    //            if (!itemName || !fromPlace || !toPlace) {
+    //                isValid = false;
+    //                errorMessage = `Please fill required fields in row ${idx}: Item Name, From Place, and To Place.`;
+    //                return false;
+    //            }
+    //         }
+           
+    //         }
+
+    //     });
+
+    //     if (!isValid) {
+    //         toastr.error(errorMessage);
+    //     }
+
+    //     return isValid;
+    // }
+
+    function updateNetWeight() {
+      const g = parseFloat($("#NumPartyGrossWeight").val()) || 0;
+      const t = parseFloat($("#NumTrWeight").val()) || 0;
+      $("#NumNetWeight").val((g - t).toFixed(2));
+    }
+
+    async function handleDocLoad() {
+             docId = getQueryParam('id');
+             readOnly = getQueryParam('readOnly');
+            if (docId) {
+                $('#ddlDocType').prop('disabled', true);
+                await GetDocData(docId, readOnly);
+
+              var wbType =$('#ddlWBType').val();
+              if(wbType === "Outsider" || wbType === "Sales Return"){
+                $('#ddlPartyName').prop('disabled', false);
+                $('#TxtVehicleNo').prop('readOnly', false);
+                var partyCode=$('#ddlPartyName').val();
+                GetPartyList(partyCode);
+              } else {
+                $('#ddlPartyName').prop('disabled', true);
+                $('#TxtVehicleNo').prop('readOnly', true);
+              }
+
+            } else {
+                $('#ddlDocType').prop('selectedIndex', 0);
+                const Vtype = $('#ddlDocType').val();
+                if(Vtype)
+                {
+                  GetDocid(Vtype);
+                }
+                GetGateEntryList();
+                const today = new Date();
+                const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+                    $('#DtDocDate').val(todayDate);
+
+
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const formattedDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            $('#DtStatusDate').val(formattedDateTime);
+
+
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateWeighBridgeEntry", "BigWeighbridge")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/BigWeighbridgeList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateWeighBridgeEntry", "BigWeighbridge")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");
+                    // showFlashMessageByKey('update', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/BigWeighbridgeList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillHeaderData(headdata) {
+       if (!Array.isArray(headdata) || headdata.length === 0) {
+        console.error("Invalid or empty header data:", headdata);
+        toastr.error("No header data found to populate the form.");
+        return;
+       }
+        const data = headdata[0];
+        $("#TxtDocId").val(data.DOC_ID ?? "");
+        $("#ddlDocType").val(data.V_TYPE ?? "");
+        $("#NumDocNo").val(data.V_NO ?? "");
+        $("#DtDocDate").val((data.V_DATE || '').substring(0, 10));
+        $('#DtStatusDate').val(data.STATUS_DATE || '');
+        $("#ddlWBType").val(data.WB_TYPE ?? "").trigger('change');
+        $("#txtRemarks").val(data.REMARKS ?? "");
+        $("#NumNetWeight").val(data.PARTY_QTY ?? "");
+        $("#NumPartyGrossWeight").val(data.PARTY_GROSSWT ?? "");
+        $("#NumTrWeight").val(data.PARTY_TRWT ?? "");
+        $("#TxtPartyWBNo").val(data.PARTY_WBNO ?? "");
+        $("#NumNoBag25").val(data.SMALL_BAG ?? "");
+        $("#NumNoBag500").val(data.MEDIUM_BAG ?? "");
+        $("#NumNoBag1000").val(data.LARGE_BAG ?? "");
+        $('#TxtVehicleNo').val(data.VEHICLE_NO?? "");
+        $('#ddlStatus').val(data.STATUS ?? "").trigger('change');
+        var wbType= $("#ddlWBType").val();
+        GetGateEntryList(wbType, data.GATE_NO);
+        bindDropdownValue('#ddlPartyName', data.PARTY_CODE, data.partyname);
+    }
+
+    function bindDropdownValue(selector, value, text = null) {
+        const $el = $(selector);
+        const valStr = String(value ?? '');
+        if (!$el.length) {
+            console.warn(`Dropdown ${selector} not found`);
+            return;
+        }
+        const optionExists = $el.find("option").filter(function () {
+            return $(this).val() == valStr;
+        }).length > 0;
+        if (!optionExists) {
+            const displayText = text ?? valStr;
+            $el.append(new Option(displayText, valStr));
+            console.log(`Appended missing option to ${selector}: [${valStr}] ${displayText}`);
+        }
+        $el.val(valStr).trigger('change');
+    }
+
+    async function collectFormData() {
+        // const WB2Items = await collectItemsDetail();
+        const { items: WB2Items, finalWeight } = await collectItemsDetail();
+        const selectedOption = $('#DdlGateNo option:selected');
+        const vtype = selectedOption.data('vtype');
+
+        return {
+            DOC_ID: toNullableString(document.getElementById("TxtDocId")?.value),
+            V_TYPE: toNullableString($("#ddlDocType").val()),
+            V_NO: parseIntSafe($("#NumDocNo").val()),
+            V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
+            V_SHIFT: null,
+            WB_TYPE: toNullableString($("#ddlWBType").val()),
+            GATE_TYPE: vtype,
+            GATE_NO: parseIntSafe($("#DdlGateNo").val()),
+            PARTY_QTY: parseDecimalSafe($("#NumNetWeight").val()),
+            PARTY_CODE: parseIntSafe($("#ddlPartyName").val()),
+            GROSS_NO: null,
+            TARE_NO: null,
+            VEHICLE_NO: toNullableString($("#TxtVehicleNo").val()),
+            REMARKS: toNullableString($("#txtRemarks").val()),
+            STATUS: parseIntSafe($('#ddlStatus').val()),
+            // STATUS_DATE: document.getElementById("DtStatusDate").value,
+            NET_WGT: finalWeight,
+            FINAL_TYPE: null,
+            FINAL_REM: null,
+            PARTY_GROSSWT: parseDecimalSafe($("#NumPartyGrossWeight").val()),
+            PARTY_TRWT: parseDecimalSafe($("#NumTrWeight").val()),
+            PARTY_WBNO: toNullableString($("#TxtPartyWBNo").val()),
+            SMALL_BAG: toNullableString($("#NumNoBag25").val()),
+            MEDIUM_BAG: toNullableString($("#NumNoBag500").val()),
+            LARGE_BAG: toNullableString($("#NumNoBag1000").val()),
+            SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update",
+            WB2Data: WB2Items
+        };
+    }
+
+    // async function collectItemsDetail() {
+    //     const items = [];
+    //     let previousWeight = 0;
+
+    //     $('#tblBigWeighbridge tbody tr').each(function (index) {
+    //         const idx = this.id.replace('row', '');
+    //         const $r = $(this);
+
+    //         const currentWeight = parseDecimalSafe($r.find(`#TxtWeight${idx}`).val());
+    //         let netWeight = 0;
+
+    //         if (index > 0) {
+    //             netWeight = currentWeight - previousWeight;
+    //         }
+
+    //         previousWeight = currentWeight;
+
+    //         items.push({
+    //             SNO: parseIntSafe(idx),
+    //             WEIGHT: currentWeight,
+    //             WGT_DATE: toNullableDate($r.find(`#TxtDate${idx}`).val()),
+    //             WGT_TIME: toNullableString($r.find(`#TxtTime${idx}`).val()),
+    //             ITEM_CODE: parseIntSafe($r.find(`#ddlItemname${idx}`).val()),
+    //             ITEM_NAME: $r.find(`#ddlItemname${idx}`).val() ? $r.find(`#ddlItemname${idx} option:selected`).text() : null,
+    //             FROM_PLACE: parseIntSafe($r.find(`#DdlFromPlace${idx}`).val()),
+    //             TO_PLACE: parseIntSafe($r.find(`#DdlToPlace${idx}`).val()),
+    //             V_SHIFT: null,
+    //             TYPE: null,
+    //             TARE_WGT: null,
+    //             NET_WGT: netWeight,
+    //             FROM_NAME: $r.find(`#DdlFromPlace${idx}`).val() ? $r.find(`#DdlFromPlace${idx} option:selected`).text() : null,
+    //             TO_NAME: $r.find(`#DdlToPlace${idx}`).val() ? $r.find(`#DdlToPlace${idx} option:selected`).text() : null,
+    //             REMARKS: null,
+    //             STATUS: null,
+    //             Ref_type: null,
+    //             Ref_no: null,
+    //             wb_time: null,
+    //             COND: null,
+    //             MOIS_PER: null,
+    //             MOIS_WT: null
+    //         });
+    //     });
+
+    //     return items;
+    // }
+
+
+    // async function collectFormData() {
+    //     // Destructure the result from collectItemsDetail
+    //     const { items: WB2Items, finalWeight } = await collectItemsDetail();
+
+    //     const selectedOption = $('#DdlGateNo option:selected');
+    //     const vtype = selectedOption.data('vtype');
+
+    //     const docId = document.getElementById("TxtDocId")?.value;
+
+    //     return {
+    //         DOC_ID: toNullableString(docId),
+    //         V_TYPE: toNullableString($("#ddlDocType").val()),
+    //         V_NO: parseIntSafe($("#NumDocNo").val()),
+    //         V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
+    //         V_SHIFT: null,
+    //         WB_TYPE: toNullableString($("#ddlWBType").val()),
+    //         GATE_TYPE: vtype,
+    //         GATE_NO: parseIntSafe($("#DdlGateNo").val()),
+    //         PARTY_QTY: parseDecimalSafe($("#NumNetWeight").val()),
+    //         PARTY_CODE: parseIntSafe($("#ddlPartyName").val()),
+    //         GROSS_NO: null,
+    //         TARE_NO: null,
+    //         VEHICLE_NO: toNullableString($("#TxtVehicleNo").val()),
+    //         REMARKS: toNullableString($("#txtRemarks").val()),
+    //         STATUS: parseIntSafe($('#ddlStatus').val()),
+    //         // STATUS_DATE: document.getElementById("DtStatusDate").value,
+    //         NET_WGT: finalWeight, // ✅ Final weight passed here
+    //         FINAL_TYPE: null,
+    //         FINAL_REM: null,
+    //         PARTY_GROSSWT: parseDecimalSafe($("#NumPartyGrossWeight").val()),
+    //         PARTY_TRWT: parseDecimalSafe($("#NumTrWeight").val()),
+    //         PARTY_WBNO: toNullableString($("#TxtPartyWBNo").val()),
+    //         SMALL_BAG: toNullableString($("#NumNoBag25").val()),
+    //         MEDIUM_BAG: toNullableString($("#NumNoBag500").val()),
+    //         LARGE_BAG: toNullableString($("#NumNoBag1000").val()),
+    //         SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update",
+    //         WB2Data: WB2Items
+    //     };
+    // }
+
+    async function collectItemsDetail() {
+        const items = [];
+        let previousWeight = 0;
+        let firstWeight = null;
+        let lastWeight = null;
+
+        $('#tblBigWeighbridge tbody tr').each(function (index) {
+            const idx = this.id.replace('row', '');
+            const $r = $(this);
+
+            const currentWeight = parseDecimalSafe($r.find(`#TxtWeight${idx}`).val());
+            let netWeight = 0;
+
+            if (index === 0) {
+                firstWeight = currentWeight;
+            } else {
+                netWeight = currentWeight - previousWeight;
+            }
+
+            previousWeight = currentWeight;
+            lastWeight = currentWeight;
+
+            items.push({
+                SNO: parseIntSafe(idx),
+                WEIGHT: currentWeight,
+                WGT_DATE: toNullableDate($r.find(`#TxtDate${idx}`).val()),
+                WGT_TIME: toNullableString($r.find(`#TxtTime${idx}`).val()),
+                ITEM_CODE: parseIntSafe($r.find(`#ddlItemname${idx}`).val()),
+                ITEM_NAME: $r.find(`#ddlItemname${idx}`).val() ? $r.find(`#ddlItemname${idx} option:selected`).text() : null,
+                FROM_PLACE: parseIntSafe($r.find(`#DdlFromPlace${idx}`).val()),
+                TO_PLACE: parseIntSafe($r.find(`#DdlToPlace${idx}`).val()),
+                V_SHIFT: null,
+                TYPE: null,
+                TARE_WGT: null,
+                NET_WGT: netWeight,
+                FROM_NAME: $r.find(`#DdlFromPlace${idx}`).val() ? $r.find(`#DdlFromPlace${idx} option:selected`).text() : null,
+                TO_NAME: $r.find(`#DdlToPlace${idx}`).val() ? $r.find(`#DdlToPlace${idx} option:selected`).text() : null,
+                REMARKS: null,
+                STATUS: null,
+                Ref_type: null,
+                Ref_no: null,
+                wb_time: null,
+                COND: null,
+                MOIS_PER: null,
+                MOIS_WT: null
+            });
+        });
+
+        const finalWeight = firstWeight !== null && lastWeight !== null
+            ? lastWeight - firstWeight
+            : 0;
+
+        return {
+            items,
+            finalWeight
+        };
+    }
+
+    async function fillItemDetailTable(itemsData) {
+        // if (!Array.isArray(itemsData)) return;
+        const $tbody = $('#tblBigWeighbridge tbody');
+        $tbody.empty();
+        console.log(itemsData, itemsData.length);
+        for (let index = 0; index < itemsData.length; index++) {
+            const item = itemsData[index];
+            const idx = index + 1;
+            addItemRecordRow();
+            await bindDropdownData(idx);
+    $(`#TxtWeight${idx}`).val(item.WEIGHT ?? "");
+    $(`#TxtDate${idx}`).val((item.WGT_DATE || '')); 
+    $(`#ddlItemname${idx}`).val(item.ITEM_CODE ?? "").trigger('change');
+    $(`#DdlFromPlace${idx}`).val(item.FROM_PLACE ?? "").trigger('change');
+    $(`#DdlToPlace${idx}`).val(item.TO_PLACE ?? "").trigger('change');
+    const formattedTime = convertTo24HourFormat(item.WGT_TIME ?? "");
+    $(`#TxtTime${idx}`).val(formattedTime);
+
+        $(`#TxtWeight${idx}`).prop('readonly', true);
+        $(`#TxtDate${idx}`).prop('readonly', true);
+        $(`#TxtTime${idx}`).prop('readonly', true);
+        $(`#DdlFromPlace${idx}`).prop('disabled', true);
+        $(`#DdlToPlace${idx}`).prop('disabled', true);
+        $(`#ddlItemname${idx}`).prop('disabled', true);  // for dropdown
+        $(`#row${idx} .btn-Itemdelete-action`).hide(); // hide delete icon
+    }
+
+    }
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "BigWeighbridge")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid(VType) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "BigWeighbridge")',
+            type: 'GET',
+            data:{V_type:VType},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function GetGateEntryList(wbType = null, selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetgateNo", "BigWeighbridge")',
+            type: 'GET',
+            dataType: 'json',
+            data: { wbType: wbType },
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#DdlGateNo');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Gate No -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option
+                                data-VType="${item.V_TYPE}"
+                                data-VehicalNo="${item.TRUCK_NO}"
+                                data-party="${item.PARTY_CODE}"
+                                data-partynm="${item.partyName}"
+                                value="${item.V_NO}">
+                                ${item.V_NO} || ${item.V_TYPE} || ${item.TRUCK_NO}
+                            </option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Gate No. Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Gate No. Load failed", error);
+            }
+        });
+    }
+
+    function GetPartyList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "BigWeighbridge")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlPartyName');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Party Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Transport Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Party Name Load failed", error);
+            }
+        });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/BigWeighbridge/GetWeighBridgeById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                await fillHeaderData(response.header);
+                await fillItemDetailTable(response.detail);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblBigWeighbridge tbody');
+        let rowCount = tbody.find('tr').length + 1;
+        let newRow = `
+        <tr class="no-border-input" id="row${rowCount}">
+            <td><input type="text" style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyDecimal(this)" id="TxtWeight${rowCount}" /></td>
+            <td><input type="datetime-local" style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtDate${rowCount}" /></td>
+            <td><input type="time" style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtTime${rowCount}" /></td>
+            <td>
+                <select style="min-width: 500px;" class="form-control" id="ddlItemname${rowCount}">
+                    <option value="">-select item Name-</option>
+                </select>
+            </td>
+            <td>
+                    <select class="form-control" id="DdlFromPlace${rowCount}">
+                        <option value="">Select From</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control" id="DdlToPlace${rowCount}">
+                        <option value="">Select To</option>
+                    </select>
+                </td>
+                <td>
+              
+                <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
+            </td>
+        </tr>
+        `;
+        tbody.append(newRow);
+           // Auto-fill date and time when weight is entered
+        $(`#TxtWeight${rowCount}`).on('input', function () {
+        let currentDate = new Date();
+        let yyyy = currentDate.getFullYear();
+        let mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+        let dd = String(currentDate.getDate()).padStart(2, '0');
+        let hours = String(currentDate.getHours()).padStart(2, '0');
+        let minutes = String(currentDate.getMinutes()).padStart(2, '0');
+
+        // let formattedDate = `${yyyy}-${mm}-${dd}`;
+        // let formattedTime = `${hours}:${minutes}`;
+
+        // $(`#TxtDate${rowCount}`).val(formattedDate);
+        // $(`#TxtTime${rowCount}`).val(formattedTime);
+         let formattedDateTime = `${yyyy}-${mm}-${dd} ${hours}:${minutes}`;
+         let formattedTime = `${hours}:${minutes}`;
+         $(`#TxtDate${rowCount}`).val(formattedDateTime);
+         $(`#TxtTime${rowCount}`).val(formattedTime);
+          $(`#TxtDate${rowCount}`).prop('readonly', true);
+          $(`#TxtTime${rowCount}`).prop('readonly', true);
+        });
+        console.log(docId);
+        if(!docId)
+        {
+            $(`#TxtDate${rowCount}`).prop('readonly', true);
+            $(`#TxtTime${rowCount}`).prop('readonly', true);
+            $(`#ddlItemname${rowCount}`).prop('disabled', true);
+            $(`#DdlFromPlace${rowCount}`).prop('disabled', true);
+            $(`#DdlToPlace${rowCount}`).prop('disabled', true);
+        }
+
+        bindDropdownData(rowCount);
+        // setEnterKeyFocusOnTable(itemRecords, rowCount);
+    }
+
+    function bindDropdownData(rowCount) {
+        const itemSelect = $(`#ddlItemname${rowCount}`);
+        const fromAddSelect = $(`#DdlFromPlace${rowCount}`);
+        const toAddSelect = $(`#DdlToPlace${rowCount}`);
+
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: defaultText
+                                })
+                            );
+
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '300px',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: 0
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} load failed`);
+                            resolve();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(`Error loading ${defaultText}: ${error}`);
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+        return Promise.all([
+            loadDropdown(
+                '@Url.Action("GetPlaceMast", "BigWeighbridge")',
+                fromAddSelect,
+                "- Select From Place -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetPlaceMast", "BigWeighbridge")',
+                toAddSelect,
+                "- Select To Place -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetItemList", "BigWeighbridge")',
+                itemSelect,
+                "- Select Item -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            )
+        ]);
+    }
+
+    function convertTo24HourFormat(timeStr) {
+        if (!timeStr) return '';
+
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
+            return timeStr.substring(0, 5);
+        }
+
+        const [time, modifier] = timeStr.split(' ');
+        if (!time || !modifier) return '';
+
+        let [hours, minutes] = time.split(':');
+
+        if (modifier.toUpperCase() === 'PM' && hours !== '12') {
+            hours = String(Number(hours) + 12);
+        } else if (modifier.toUpperCase() === 'AM' && hours === '12') {
+            hours = '00';
+        }
+
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+
+</script>

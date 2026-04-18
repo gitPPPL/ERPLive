@@ -1,0 +1,344 @@
+﻿@{
+    ViewBag.Title = "Approval Stage Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;  // Exit loop once found current menu permission
+        }
+    }
+}
+
+<fieldset id="PrintID">
+    <legend class="legend-field">Approval Stage Master List</legend>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "ApprovalStageMaster")'" type="submit" class="btn btn-add">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approve
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblApprovalStageMaster" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">Code</th>
+                        <th>Document Code</th>
+                        <th>Document Name</th>
+                        <th>No. Of Users</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- Pagination container -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</fieldset>
+
+<script>
+ var canAdd = @canAdd.ToString().ToLower();
+ var canEdit = @canEdit.ToString().ToLower();
+ var canDelete = @canDelete.ToString().ToLower();
+ var canPrint = @canPrint.ToString().ToLower();
+ var canExport = @canExport.ToString().ToLower();
+ var canMail = @canMail.ToString().ToLower();
+ var canApproval = @canApproval.ToString().ToLower();
+ var canDocDetail = @canDocDetail.ToString().ToLower();
+
+ let currentPage = 1;
+ let pageSize = 10;
+
+ $(document).ready(function () {
+        loadDocumentStages();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadDocumentStages();
+        });
+    });
+
+ function loadDocumentStages() {
+ const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/ApprovalStageMasterList/GetAllDocs',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                const docs = res.items || res.data || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#tblApprovalStageMaster tbody');
+                tbody.empty();
+
+                if (docs.length === 0) {
+                    tbody.append(`<tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>`);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    const docCode = doc.doC_CODE;
+                    const row = $(`
+                        <tr>
+                            <td>${docCode}</td>
+                            <td>${doc.doC_NAME || ''}</td>
+                            <td>${doc.useR_NO || '0'}</td>
+                            <td>
+                                   ${canEdit ? `<i class="fa fa-edit btn-edit" data-doc="${docCode}" data-bs-toggle="tooltip" title="Edit"></i>` : ''}
+    <i class="fa fa-eye btn-view" data-doc="${docCode}" data-bs-toggle="tooltip" title="View"></i>
+    ${canDelete ? `<i class="fa fa-trash btn-delete" data-doc="${docCode}" data-bs-toggle="tooltip" title="Delete"></i>` : ''}
+    <i class="fa fa-file btn-details btn-document" data-doc="${docCode}" data-bs-toggle="tooltip" title="Details"></i>
+
+                            </td>
+                        </tr>
+                    `);
+                    tbody.append(row);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+ let html = '';
+ if (currentPage > 1) {
+     html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+     html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+ }
+ const startPage = Math.max(1, currentPage - 2);
+ const endPage = Math.min(totalPages, currentPage + 2);
+ for (let i = startPage; i <= endPage; i++) {
+     html += `
+         <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+ }
+ if (currentPage < totalPages) {
+     html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+     html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+ }
+ pagination.html(html);
+ }
+ function goToPage(page) {
+     currentPage = page;
+     loadDocumentStages();
+ }
+ // Delegate click handlers
+ $(document).on('click', '.btn-edit', function() {
+     const docCode = $(this).data('doc');
+     editDocStage(docCode);
+ });
+ $(document).on('click', '.btn-view', function() {
+     const docCode = $(this).data('doc');
+     viewDocStage(docCode);
+ });
+ $(document).on('click', '.btn-delete', function() {
+     const docCode = $(this).data('doc');
+     deleteDocStage(docCode);  // Make sure this function exists
+ });
+ $(document).on('click', '.btn-details', function() {
+     const docCode = $(this).data('doc');
+     showDocumentPopup(docCode);  // Your popup function
+ });
+ function editDocStage(docCode) {
+     window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
+ }
+ function viewDocStage(docCode) {
+     window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+ }
+
+ function deleteDocStage(docCode) {
+     Swal.fire({
+         title: 'Are you sure?',
+         text: "You won't be able to revert this deletion!",
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/ApprovalStageMasterList/DeleteDocByCode',
+                    type: 'POST',
+                    data: { docCode: docCode },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Record deleted successfully.");
+                            loadDocumentStages();
+                        } else {
+                            toastr.warning("Delete failed.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while deleting.");
+                    }
+             });
+         }
+     });
+ }
+    // Export to Excel Page
+ function exportToExcel() {
+    fetch('/ApprovalStageMasterList/ExportAllDocs')
+        .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+        })
+        .then(data => {
+            const filteredData = data.map(item => ({
+                DOC_CODE: item.doC_CODE,
+                DOC_NAME: item.doC_NAME,
+                USER_NO: item.useR_NO
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(filteredData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+            const pageName = "Approval_Stage_Master_List";
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+            const fileName = `${pageName}_${timestamp}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+        })
+        .catch(error => {
+            console.error("Export failed:", error);
+            toastr.error("Failed to export data.");
+      });
+ }
+ function callGetReportAsPdf() {
+     var reportName = "rpt_city_master";
+     var now = new Date();
+     var day = String(now.getDate()).padStart(2, '0');
+     var month = String(now.getMonth() + 1).padStart(2, '0');
+     var year = String(now.getFullYear()).slice(-2);
+     var hours = String(now.getHours()).padStart(2, '0');
+     var minutes = String(now.getMinutes()).padStart(2, '0');
+     var seconds = String(now.getSeconds()).padStart(2, '0');
+     var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+     $.ajax({
+         url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+         type: 'GET',
+         data: { Reportname: reportName },
+         xhrFields: {
+             responseType: 'blob'
+         },
+         success: function (response) {
+             console.log('PDF response:', response);
+             var file = new Blob([response], { type: 'application/pdf' });
+             var fileName = `${reportName}_${timestamp}.pdf`;
+
+             var link = document.createElement('a');
+             link.href = URL.createObjectURL(file);
+             link.download = fileName;
+             document.body.appendChild(link);
+             link.click();
+             document.body.removeChild(link);
+         },
+         error: function (xhr, status, error) {
+             console.error('Error generating report:', error);
+         }
+     });
+ }
+ function showDocumentPopup(docCode) {
+     $.ajax({
+         url: '/ApprovalStageMasterList/DocDetailsCode',
+         type: 'POST',
+         dataType: 'json',  // important
+         data: { docCode: docCode },
+         success: function(response) {
+             if(response.success) {
+                 showDocumentPopupjQuery(response.data, docCode);
+             } else {
+                 toastr.error("Failed to get document details.");
+             }
+         },
+         error: function() {
+             toastr.error("An error occurred while fetching document details.");
+         }
+     });
+ }
+
+</script>

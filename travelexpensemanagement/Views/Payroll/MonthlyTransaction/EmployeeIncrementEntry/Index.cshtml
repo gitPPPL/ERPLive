@@ -1,0 +1,1743 @@
+﻿@{
+    ViewBag.Title = "Employee Increment Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Employee Increment Entry</legend>
+    <form id="EmployeeIncrementEntryForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumEmpCode">Emp Code</label>
+                    <input type="number" class="form-control" id="NumEmpCode" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtVDate">VDate</label>
+                    <input type="date" class="form-control" id="DtVDate">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <fieldset>
+                    <legend class="sub-legend">Basic Data Old</legend>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlTitle">Title</label>
+                                <select class="form-control" id="ddlTitle">
+                                    <option value="">Select Title</option>
+                                    <option>Mr</option>
+                                    <option>Ms</option>
+                                    <option>Mrs</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtFirstName">First Name</label>
+                                <input type="text" class="form-control" id="TxtFirstName" placeholder="Enter First Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtMiddleName">Middle Name</label>
+                                <input type="text" class="form-control" id="TxtMiddleName" placeholder="Enter Middle Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtLastName">Last Name</label>
+                                <input type="text" class="form-control" id="TxtLastName" placeholder="Enter Last Name" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtEmployeeName">Employee Name</label>
+                                <input type="text" class="form-control" id="TxtEmployeeName" placeholder="Enter Employee Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtJoinDate">Join Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtJoinDate" name="JoinDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkJoinDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtResignDate">Resign Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtResignDate" name="ResignDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkResignDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtPermanentDate">Permanent Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtPermanentDate" name="PermanentDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkPermanentDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlDepartment">Department</label>
+                                <select class="form-control" id="ddlDepartment">
+                                    <option value="">Select Department</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlDesignation">Designation</label>
+                                <select class="form-control" id="ddlDesignation">
+                                    <option value="">Select Designation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlPlace">Place</label>
+                                <select class="form-control" id="ddlPlace">
+                                    <option value="">Select Place</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlGrade">Grade</label>
+                                <select class="form-control" id="ddlGrade">
+                                    <option value="">Select Grade</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlPFApplicable">PF Applicable</label>
+                                <select class="form-control" id="ddlPFApplicable">
+                                    <option value="">Select PF Applicable</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumPFNo">PF No</label>
+                                <input type="number" class="form-control" id="NumPFNo" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtPFDate">PF Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtPFDate" name="PFDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkPFDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlESIApplicable">ESI Applicable</label>
+                                <select class="form-control" id="ddlESIApplicable">
+                                    <option value="">Select ESI Applicable</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumESINo">ESI No</label>
+                                <input type="number" class="form-control" id="NumESINo" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtESIDate">ESI Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtESIDate" name="ESIDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkESIDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend class="sub-legend">Salary Rate Old</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="DtLastEffective">Last Effective Date</label>
+                                <input type="date" class="form-control" id="DtLastEffective" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumDutyHrs">Duty Hrs</label>
+                                <input type="number" class="form-control" id="NumDutyHrs" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumBasic">Basic</label>
+                                <input type="number" class="form-control" id="NumBasic" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumHRA">HRA</label>
+                                <input type="number" class="form-control" id="NumHRA" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumSecurityAmount">Security Amount</label>
+                                <input type="number" class="form-control" id="NumSecurityAmount" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumConveyance">Conveyance</label>
+                                <input type="number" class="form-control" id="NumConveyance" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumOthers">Others</label>
+                                <input type="number" class="form-control" id="NumOthers" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumCommunity">Community</label>
+                                <input type="number" class="form-control" id="NumCommunity" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumUniform">Uniform</label>
+                                <input type="number" class="form-control" id="NumUniform" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumWashAllowance">Wash Allowance</label>
+                                <input type="number" class="form-control" id="NumWashAllowance" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumSpecialAllowance">Special Allowance 2</label>
+                                <input type="number" class="form-control" id="NumSpecialAllowance" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumMobileAllowance">Mobile Allowance</label>
+                                <input type="number" class="form-control" id="NumMobileAllowance" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumTotalSalary">Total Salary</label>
+                                <input type="number" class="form-control" id="NumTotalSalary" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumGWSalary">GW Salary</label>
+                                <input type="number" class="form-control" id="NumGWSalary" />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend class="sub-legend">Bank Detail Old</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ddlBankName">Bank Name</label>
+                                <select class="form-control" id="ddlBankName">
+                                    <option value="">Select Bank Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="TxtBranch">Branch</label>
+                                <input type="text" class="form-control" id="TxtBranch" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumAccountNo">Account No</label>
+                                <input type="text" class="form-control" id="NumAccountNo" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="TxtIFSCCode">IFSC Code</label>
+                                <input type="text" class="form-control" id="TxtIFSCCode" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="TxtAccountType">Account Type</label>
+                                <input type="text" class="form-control" id="TxtAccountType" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ddlBankVerified">Bank Verified</label>
+                                <select class="form-control" id="ddlBankVerified">
+                                    <option value="">Yes</option>
+                                    <option value="">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-6">
+                <fieldset>
+                    <legend class="sub-legend">
+                        <label class="checkbox-input-b">
+                            <input type="checkbox" id="ChkBasicDataNew" />
+                            Basic Data New
+                        </label>
+                    </legend>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewTitle">Title</label>
+                                <select class="form-control" id="ddlNewTitle">
+                                    <option value="">Select Title</option>
+                                    <option>Mr</option>
+                                    <option>Ms</option>
+                                    <option>Mrs</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtNewFirstName">First Name</label>
+                                <input type="text" class="form-control" id="TxtNewFirstName" placeholder="Enter First Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtNewMiddleName">Middle Name</label>
+                                <input type="text" class="form-control" id="TxtNewMiddleName" placeholder="Enter Middle Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtNewLastName">Last Name</label>
+                                <input type="text" class="form-control" id="TxtNewLastName" placeholder="Enter Last Name" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TxtNewEmployeeName">Employee Name</label>
+                                <input type="text" class="form-control" id="TxtNewEmployeeName" placeholder="Enter Employee Name" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtNewJoinDate">Join Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtNewJoinDate" name="JoinDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkNewJoinDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtNewResignDate">Resign Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtNewResignDate" name="ResignDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkNewResignDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtNewPermanentDate">Permanent Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtNewPermanentDate" name="PermanentDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkNewPermanentDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewDepartment">Department</label>
+                                <select class="form-control" id="ddlNewDepartment">
+                                    <option value="">Select Department</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewDesignation">Designation</label>
+                                <select class="form-control" id="ddlNewDesignation">
+                                    <option value="">Select Designation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewPlace">Place</label>
+                                <select class="form-control" id="ddlNewPlace">
+                                    <option value="">Select Designation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewGrade">Grade</label>
+                                <select class="form-control" id="ddlNewGrade">
+                                    <option value="">Select Grade</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewPFApplicable">PF Applicable</label>
+                                <select class="form-control" id="ddlNewPFApplicable">
+                                    <option value="">Select PF Applicable</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumNewPFNo">PF No</label>
+                                <input type="number" class="form-control" id="NumNewPFNo" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtNewPFDate">PF Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtNewPFDate" name="PFDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkNewPFDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="ddlNewESIApplicable">ESI Applicable</label>
+                                <select class="form-control" id="ddlNewESIApplicable">
+                                    <option value="">Select ESI Applicable</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="NumNewESINo">ESI No</label>
+                                <input type="number" class="form-control" id="NumNewESINo" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group position-relative">
+                                <label for="DtNewESIDate">ESI Date</label>
+                                <div class="calender-check">
+                                    <input type="date" class="form-control" id="DtNewESIDate" name="ESIDate" style="padding-left: 30px;">
+                                    <input type="checkbox" id="chkNewESIDate" class="checkbox-inside">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend class="sub-legend">
+                        <label class="checkbox-input-b">
+                            <input type="checkbox" id="ChkSalaryRateNew" />
+                            Salary Rate New
+                        </label>
+                    </legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="DtNewLastEffective">Last Effective Date</label>
+                                <input type="date" class="form-control" id="DtNewLastEffective" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewDutyHrs">Duty Hrs</label>
+                                <input type="number" class="form-control" id="NumNewDutyHrs" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewBasic">Basic</label>
+                                <input type="number" class="form-control" id="NumNewBasic" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewHRA">HRA</label>
+                                <input type="number" class="form-control" id="NumNewHRA" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewSecurityAmount">Security Amount</label>
+                                <input type="number" class="form-control" id="NumNewSecurityAmount" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewConveyance">Conveyance</label>
+                                <input type="number" class="form-control" id="NumNewConveyance" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewOthers">Others</label>
+                                <input type="number" class="form-control" id="NumNewOthers" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewCommunity">Community</label>
+                                <input type="number" class="form-control" id="NumNewCommunity" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewUniform">Uniform</label>
+                                <input type="number" class="form-control" id="NumNewUniform" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewWashAllowance">Wash Allowance</label>
+                                <input type="number" class="form-control" id="NumNewWashAllowance" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewSpecialAllowance">Special Allowance 2</label>
+                                <input type="number" class="form-control" id="NumNewSpecialAllowance" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewMobileAllowance">Mobile Allowance</label>
+                                <input type="number" class="form-control" id="NumNewMobileAllowance" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewTotalSalary">Total Salary</label>
+                                <input type="number" class="form-control" id="NumNewTotalSalary" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewGWSalary">GW Salary</label>
+                                <input type="number" class="form-control" id="NumNewGWSalary" />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend class="sub-legend">
+                        <label class="checkbox-input-b">
+                            <input type="checkbox" id="ChkBankDetailNew" />
+                            Bank Detail New
+                        </label>
+                    </legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ddlNewBankName">Bank Name</label>
+                                <select class="form-control" id="ddlNewBankName">
+                                    <option value="">Select Bank Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="TxtNewBranch">Branch</label>
+                                <input type="text" class="form-control" id="TxtNewBranch" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="NumNewAccountNo">Account No</label>
+                                <input type="text" class="form-control" id="NumNewAccountNo" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="TxtNewIFSCCode">IFSC Code</label>
+                                <input type="text" class="form-control" id="TxtNewIFSCCode" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="TxtNewAccountType">Account Type</label>
+                                <input type="text" class="form-control" id="TxtNewAccountType" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ddlNewBankVerified">Bank Verified</label>
+                                <select class="form-control" id="ddlNewBankVerified">
+                                    <option value="">Yes</option>
+                                    <option value="">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblEmployeeIncrement1" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Date</th>
+                                    <th>Loom No</th>
+                                    <th>Type</th>
+                                    <th>Item Type</th>
+                                    <th>Width</th>
+                                    <th>Gram</th>
+                                    <th>Denier</th>
+                                    <th>ActProd</th>
+                                    <th style="display:none;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination container -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblEmployeeIncrement2" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Month</th>
+                                    <th>Attendance</th>
+                                    <th>GatePass</th>
+                                    <th style="display:none;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination container -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "EmployeeIncrementList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+        
+    const allFieldIdsOld = [
+      // Header / Main
+      // "TxtDocId", "NumEmpCode", "DtVDate",
+      // Basic Data Old
+      "ddlTitle", "TxtFirstName", "TxtMiddleName", "TxtLastName", "TxtEmployeeName",
+      "DtJoinDate", "chkJoinDate", "DtResignDate", "chkResignDate", "DtPermanentDate", "chkPermanentDate",
+      "ddlDepartment", "ddlDesignation", "ddlPlace", "ddlGrade", "ddlPFApplicable", "NumPFNo",
+      "DtPFDate", "chkPFDate", "ddlESIApplicable", "NumESINo", "DtESIDate", "chkESIDate",
+      // Salary Rate Old
+      "DtLastEffective", "NumDutyHrs", "NumBasic", "NumHRA", "NumSecurityAmount",
+      "NumConveyance", "NumOthers", "NumCommunity", "NumUniform", "NumWashAllowance",
+      "NumSpecialAllowance", "NumMobileAllowance", "NumTotalSalary", "NumGWSalary",
+      // Bank Detail Old
+      "ddlBankName", "TxtBranch", "NumAccountNo", "TxtIFSCCode", "TxtAccountType", "ddlBankVerified"     
+    ];
+     // "ChkBasicDataNew", "ChkSalaryRateNew","ChkBankDetailNew",
+    const allFieldsNew=[
+         // Basic Data New
+      "ddlNewTitle", "TxtNewFirstName", "TxtNewMiddleName", "TxtNewLastName",
+      "TxtNewEmployeeName", "DtNewJoinDate", "chkNewJoinDate", "DtNewResignDate", "chkNewResignDate",
+      "DtNewPermanentDate", "chkNewPermanentDate", "ddlNewDepartment", "ddlNewDesignation",
+      "ddlNewPlace", "ddlNewGrade", "ddlNewPFApplicable", "NumNewPFNo", "DtNewPFDate",
+      "chkNewPFDate", "ddlNewESIApplicable", "NumNewESINo", "DtNewESIDate", "chkNewESIDate",
+      // Salary Rate New
+      "DtNewLastEffective", "NumNewDutyHrs", "NumNewBasic", "NumNewHRA",
+      "NumNewSecurityAmount", "NumNewConveyance", "NumNewOthers", "NumNewCommunity",
+      "NumNewUniform", "NumNewWashAllowance", "NumNewSpecialAllowance", "NumNewMobileAllowance",
+      "NumNewTotalSalary", "NumNewGWSalary",
+      // Bank Detail New
+      "ddlNewBankName", "TxtNewBranch", "NumNewAccountNo",
+      "TxtNewIFSCCode", "TxtNewAccountType", "ddlNewBankVerified"
+    ];
+    allFieldsBasic=[
+      "ddlNewTitle", "TxtNewFirstName", "TxtNewMiddleName", "TxtNewLastName",
+      "TxtNewEmployeeName", "DtNewJoinDate", "chkNewJoinDate", "DtNewResignDate", "chkNewResignDate",
+      "DtNewPermanentDate", "chkNewPermanentDate", "ddlNewDepartment", "ddlNewDesignation",
+      "ddlNewPlace", "ddlNewGrade", "ddlNewPFApplicable", "NumNewPFNo", "DtNewPFDate",
+      "chkNewPFDate", "ddlNewESIApplicable", "NumNewESINo", "DtNewESIDate", "chkNewESIDate"
+    ];
+    allFieldsSalary=[
+          "DtNewLastEffective", "NumNewDutyHrs", "NumNewBasic", "NumNewHRA",
+          "NumNewSecurityAmount", "NumNewConveyance", "NumNewOthers", "NumNewCommunity",
+          "NumNewUniform", "NumNewWashAllowance", "NumNewSpecialAllowance", "NumNewMobileAllowance",
+          "NumNewTotalSalary", "NumNewGWSalary"
+    ];
+    allFieldsBank=[
+         "ddlNewBankName", "TxtNewBranch", "NumNewAccountNo",
+      "TxtNewIFSCCode", "TxtNewAccountType", "ddlNewBankVerified"
+    ];
+
+    let docId = "", readOnly;
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await handleDocLoad();
+        // setEnterKeyFocus(allFieldIdsOld);
+        setEnterKeyFocus(allFieldsNew);
+        disableAllFieldsOld();
+        disableAllFieldsNew();
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+        try {
+          const data = await collectFormData();
+          console.log(data);
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+      });
+       
+
+
+        $(document).on('keydown', '#NumEmpCode', function(e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+
+            var empCode = $(this).val();
+            var Vdate=$('#DtVDate').val();
+            if (empCode) {
+                $.ajax({
+                    url: '/EmployeeIncrementEntry/GetEmployeeAndSalaryDetails', // This could be a new combined endpoint
+                    type: 'GET',
+                    data: { empCode: empCode, Vdate:Vdate },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status) {
+                            const { employee, salary, attendence, loomDetail } = response.data;
+                            console.log('loomDetail Data:', loomDetail);
+                            console.log('attendence Data:', attendence);
+
+                            fillEmployeeData(employee);   
+                            loadSalaryDetails(salary); 
+                            fillLoomTable(loomDetail);
+                            fillAttendenceTable(attendence);
+                        } else {
+                            console.log('No data found or status is false');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error);
+                    }
+                });
+            } else {
+                console.log('Employee Code is empty');
+            }
+        }
+    });
+    
+    $(document).on('click', '#ChkBasicDataNew', function(){
+         var isCheck=$(this).prop('checked');
+         if(isCheck){
+             enableAllFieldsNewBasic();
+         }else{
+          disableAllFieldsNewBasic();
+         }
+
+    });
+    $(document).on('click', '#ChkSalaryRateNew', function(){
+           var isCheck=$(this).prop('checked');
+            if(isCheck){
+             enableAllFieldsNewSalary();
+            }else{
+             disableAllFieldsNewSalary();
+            }
+
+    });
+    $(document).on('click', '#ChkBankDetailNew', function(){
+       var isCheck=$(this).prop('checked');
+         if(isCheck){
+             enableAllFieldsNewBank();
+         }else{
+           disableAllFieldsNewBank();
+         }
+
+    });
+
+    }
+
+</script>
+
+<script>
+
+    function fillAttendenceTable(attendence) {
+      const table = $('#tblEmployeeIncrement1 tbody');
+      table.empty();
+
+      attendence.forEach(function(item) {
+        const row = $('<tr>');         
+        row.append(`<td>${item.Date}</td>`);
+        row.append(`<td>${item.LOOM_CODE}</td>`);
+        row.append(`<td>${item.LoomNo}</td>`)
+        row.append(`<td>${item.Type}</td>`);
+        row.append(`<td>${item.ItemType}</td>`);
+        row.append(`<td>${item.Width}</td>`);
+        row.append(`<td>${item.Gram}</td>`);
+        row.append(`<td>${item.Denier}</td>`);
+        row.append(`<td>${item.ActProd}</td>`);
+        row.append('<td style="display:none;">Action</td>');
+        table.append(row);
+      });
+    }
+
+    function fillLoomTable(loomDetail) {
+      const table = $('#tblEmployeeIncrement2 tbody');
+      table.empty();
+
+      loomDetail.forEach(function(item) {
+        const row = $('<tr>');
+        row.append(`<td>${item.Month}</td>`);
+        row.append(`<td>${item.Attendence}</td>`);
+        row.append(`<td>${item.Gatepass}</td>`);
+        row.append('<td style="display:none;">Action</td>');
+        table.append(row);
+      });
+    }
+
+
+    function loadSalaryDetails(data) {
+        // Salary Rate Old
+        $('#DtLastEffective').val(data.SALARY_EFFDATE || '');  
+        $('#NumDutyHrs').val(data.DUTY || '');
+        $('#NumBasic').val(data.FIXED_SALARY || data.MIN_SALARY || '');
+        $('#NumHRA').val(data.HRA_DEDUCT || '');
+        $('#NumSecurityAmount').val(data.SECURITY || '');
+        $('#NumConveyance').val(data.CONVEYANCE || '');
+        $('#NumOthers').val(data.OTHERS || '');
+        $('#NumCommunity').val(data.COMMUITY || '');
+        $('#NumUniform').val(data.UNIFORM || '');
+        $('#NumWashAllowance').val(data.WSID || '');
+        $('#NumSpecialAllowance').val(data.SPL_ALLOW || '');
+        $('#NumMobileAllowance').val(data.MOBILE_ALLOW || '');
+        $('#NumTotalSalary').val(data.TOT_SALARY || '');
+        $('#NumGWSalary').val(data.GW_SALARY || '');
+        
+        // Salary Rate New
+        $('#ChkSalaryRateNew').prop('checked', data.FAPROV_STATUS === 'Approved');  // Assuming you want to check this if status is 'Approved'
+        $('#DtNewLastEffective').val(data.SALARY_EFFDATE || '');
+        $('#NumNewDutyHrs').val(data.DUTY || '');
+        $('#NumNewBasic').val(data.FIXED_SALARY || data.MIN_SALARY || '');
+        $('#NumNewHRA').val(data.HRA_DEDUCT || '');
+        $('#NumNewSecurityAmount').val(data.SECURITY || '');
+        $('#NumNewConveyance').val(data.CONVEYANCE || '');
+        $('#NumNewOthers').val(data.OTHERS || '');
+        $('#NumNewCommunity').val(data.COMMUITY || '');
+        $('#NumNewUniform').val(data.UNIFORM || '');
+        $('#NumNewWashAllowance').val(data.WSID || '');
+        $('#NumNewSpecialAllowance').val(data.SPL_ALLOW || '');
+        $('#NumNewMobileAllowance').val(data.MOBILE_ALLOW || '');
+        $('#NumNewTotalSalary').val(data.TOT_SALARY || '');
+        $('#NumNewGWSalary').val(data.GW_SALARY || '');
+                
+    }
+     
+    
+    function fillEmployeeData(data) {
+    console.log(data);
+    // Basic Data
+    $('#ddlTitle').val(data.TITLE).trigger('change');
+    $('#TxtFirstName').val(data.FIRSTNAME);
+    $('#TxtMiddleName').val(data.MIDDLENAME);
+    $('#TxtLastName').val(data.LASTNAME);
+    $('#TxtEmployeeName').val(data.NAME);
+    $('#DtJoinDate').val(data.JOIN_DATE ? data.JOIN_DATE.substring(0, 10) : '');
+    $('#chkJoinDate').prop('checked', data.JOIN_DATE ? true : false);
+    $('#DtResignDate').val(data.RESIGN_DATE ? data.RESIGN_DATE.substring(0, 10) : '');
+    $('#chkResignDate').prop('checked', data.RESIGN_DATE ? true : false);
+    $('#DtPermanentDate').val(data.PERMANENT_DATE ? data.PERMANENT_DATE.substring(0, 10) : '');
+    $('#chkPermanentDate').prop('checked', data.PERMANENT_DATE ? true : false);
+    $('#ddlGrade').val(data.GRADE_CODE);
+    $('#ddlPFApplicable').val(data.PF_APPL).trigger('change');
+    $('#NumPFNo').val(data.PF_NO ? data.PF_NO : '');
+    $('#DtPFDate').val(data.PF_DATE ? data.PF_DATE.substring(0, 10) : '');
+    $('#chkPFDate').prop('checked', data.PF_DATE ? true : false);
+    $('#ddlESIApplicable').val(data.ESI_APPL).trigger('change');
+    $('#NumESINo').val(data.ESI_NO ? data.ESI_NO : '');
+    $('#DtESIDate').val(data.ESI_DATE ? data.ESI_DATE.substring(0, 10) : '');
+    $('#chkESIDate').prop('checked', data.ESI_DATE ? true : false);
+
+    // New Basic Data
+    $('#ChkBasicDataNew').prop('checked', data.DATA_FLAG ? true : false);
+    $('#ddlNewTitle').val(data.TITLE).trigger('change');
+    $('#TxtNewFirstName').val(data.FIRSTNAME);
+    $('#TxtNewMiddleName').val(data.MIDDLENAME);
+    $('#TxtNewLastName').val(data.LASTNAME);
+    $('#TxtNewEmployeeName').val(data.NAME);
+    $('#DtNewJoinDate').val(data.JOIN_DATE ? data.JOIN_DATE.substring(0, 10) : '');
+    $('#chkNewJoinDate').prop('checked', data.JOIN_DATE ? true : false);
+    $('#DtNewResignDate').val(data.RESIGN_DATE ? data.RESIGN_DATE.substring(0, 10) : '');
+    $('#chkNewResignDate').prop('checked', data.RESIGN_DATE ? true : false);
+    $('#DtNewPermanentDate').val(data.PERMANENT_DATE ? data.PERMANENT_DATE.substring(0, 10) : '');
+    $('#chkNewPermanentDate').prop('checked', data.PERMANENT_DATE ? true : false);
+    $('#ddlNewGrade').val(data.GRADE_CODE);
+    $('#ddlNewPFApplicable').val(data.PF_APPL).trigger('change');
+    $('#NumNewPFNo').val(data.PF_NO ? data.PF_NO : '');
+    $('#DtNewPFDate').val(data.PF_DATE ? data.PF_DATE.substring(0, 10) : '');
+    $('#chkNewPFDate').prop('checked', data.PF_DATE ? true : false);
+    $('#ddlNewESIApplicable').val(data.ESI_APPL).trigger('change');
+    $('#NumNewESINo').val(data.ESI_NO ? data.ESI_NO : '');
+    $('#DtNewESIDate').val(data.ESI_DATE ? data.ESI_DATE.substring(0, 10) : '');
+    $('#chkNewESIDate').prop('checked', data.ESI_DATE ? true : false);
+
+                   GetPlaceList('ddlPlace', data.PLACE_CODE);
+                   GetDesignationList('ddlDesignation', data.DESG_CODE);
+                   GetDepartmentList('ddlDepartment',data.DEPT_CODE);
+                   GetPlaceList('ddlNewPlace', data.PLACE_CODE);
+                   GetDesignationList('ddlNewDesignation',data.DESG_CODE);
+                   GetDepartmentList('ddlNewDepartment', data.DEPT_CODE);
+                   GetGradeList('ddlGrade', data.GRADE_CODE);
+                   GetGradeList('ddlNewGrade', data.GRADE_CODE);
+                   GetBankList('ddlBankName', data.BANK_CODE);
+                   GetBankList('ddlNewBankName', data.BANK_CODE);
+
+        // Bank Detail Old       
+        $('#TxtBranch').val(data.BRANCH || '');
+        $('#NumAccountNo').val(data.AC_NO || '');
+        $('#TxtIFSCCode').val(data.IFSC_CODE || '');
+        $('#TxtAccountType').val(data.AC_TYPE || '');
+        $('#ddlBankVerified').val(data.BANK_VERIFY || '').trigger('change');
+        // Bank Detail New
+        $('#ChkBankDetailNew').prop('checked', data.BANK_VERIFY === 'Yes');        
+        $('#TxtNewBranch').val(data.BRANCH || '');
+        $('#NumNewAccountNo').val(data.AC_NO || '');
+        $('#TxtNewIFSCCode').val(data.IFSC_CODE || '');
+        $('#TxtNewAccountType').val(data.AC_TYPE || '');
+        $('#ddlNewBankVerified').val(data.BANK_VERIFY || '').trigger('change');
+
+    }
+
+
+    async function handleDocLoad() {
+            docId = getQueryParam('id');
+            readOnly = getQueryParam('readOnly');
+            if (docId) {              
+                await GetDocData(docId, readOnly);
+
+            } else {   
+                    const today = new Date();
+                    const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+                    $('#DtVDate').val(todayDate);
+
+                   GetPlaceList('ddlPlace');
+                   GetDesignationList('ddlDesignation');
+                   GetDepartmentList('ddlDepartment');
+                   GetPlaceList('ddlNewPlace');
+                   GetDesignationList('ddlNewDesignation');
+                   GetDepartmentList('ddlNewDepartment');
+                   GetGradeList('ddlGrade');
+                   GetGradeList('ddlNewGrade');
+                   GetBankList('ddlBankName');
+                   GetBankList('ddlNewBankName');
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateEmpIncrementEntry", "EmployeeIncrementEntry")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/EmployeeIncrementList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateEmpIncrementEntry", "EmployeeIncrementEntry")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");
+                    // showFlashMessageByKey('update', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/EmployeeIncrementList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillHeaderData(data) {
+        if (!data) return;
+
+        // === Basic Data ===
+        document.getElementById("ddlNewTitle").value = data.TITLE ?? "";
+        document.getElementById("TxtNewFirstName").value = data.FIRSTNAME ?? "";
+        document.getElementById("TxtNewMiddleName").value = data.MIDDLENAME ?? "";
+        document.getElementById("TxtNewLastName").value = data.LASTNAME ?? "";
+        document.getElementById("TxtNewEmployeeName").value = data.NAME ?? "";
+
+        document.getElementById("DtNewJoinDate").value = toInputDate(data.JOIN_DATE);
+        document.getElementById("DtNewResignDate").value = toInputDate(data.RESIGN_DATE);
+        document.getElementById("DtNewPermanentDate").value = toInputDate(data.PERMANENT_DATE);
+
+        // document.getElementById("ddlNewDepartment").value = data.DEPT_CODE ?? "";
+        // document.getElementById("ddlNewDesignation").value = data.DESG_CODE ?? "";
+        // document.getElementById("ddlNewPlace").value = data.PLACE_CODE ?? "";
+        // document.getElementById("ddlNewGrade").value = data.GRADE_CODE ?? "";
+
+        // PF / ESI
+        document.getElementById("ddlNewPFApplicable").checked = (data.PF_APPL === "Yes");
+        document.getElementById("NumNewPFNo").value = data.PF_NO ?? "";
+        document.getElementById("DtNewPFDate").value = toInputDate(data.PF_DATE);
+
+        document.getElementById("ddlNewESIApplicable").checked = (data.ESI_APPL === "Yes");
+        document.getElementById("NumNewESINo").value = data.ESI_NO ?? "";
+        document.getElementById("DtNewESIDate").value = toInputDate(data.ESI_DATE);
+
+        // === Salary Rate ===
+        document.getElementById("DtNewLastEffective").value = toInputDate(data.EFF_DATE);
+        document.getElementById("NumNewDutyHrs").value = data.DUTY ?? "";
+        document.getElementById("NumNewBasic").value = data.BASIC ?? "";
+        document.getElementById("NumNewHRA").value = data.HRA ?? "";
+        document.getElementById("NumNewSecurityAmount").value = data.SECURITY ?? "";
+        document.getElementById("NumNewConveyance").value = data.CONVEYANCE ?? "";
+        document.getElementById("NumNewOthers").value = data.OTHERS ?? "";
+        document.getElementById("NumNewCommunity").value = data.COMMUITY ?? "";
+        document.getElementById("NumNewUniform").value = data.UNIFORM ?? "";
+        document.getElementById("NumNewWashAllowance").value = data.INSURANCE ?? "";
+        document.getElementById("NumNewSpecialAllowance").value = data.SPL_ALLOW ?? "";
+        document.getElementById("NumNewMobileAllowance").value = data.MOBILE_ALLOW ?? "";
+        document.getElementById("NumNewTotalSalary").value = data.TOT_SALARY ?? "";
+        document.getElementById("NumNewGWSalary").value = data.GW_SALARY ?? "";
+
+        // === Bank Details ===
+        // document.getElementById("ddlNewBankName").value = data.BANK_NAME ?? "";
+        document.getElementById("TxtNewBranch").value = data.BRANCH ?? "";
+        document.getElementById("NumNewAccountNo").value = data.AC_NO ?? "";
+        document.getElementById("TxtNewIFSCCode").value = data.IFSC_CODE ?? "";
+        document.getElementById("TxtNewAccountType").value = data.AC_TYPE ?? "";
+        document.getElementById("ddlNewBankVerified").checked = (data.BANK_VERIFY === "Yes");
+
+        // === Header Info ===
+        document.getElementById("NumEmpCode").value = data.CODE ?? "";
+        document.getElementById("DtVDate").value = toInputDate(data.V_DATE);
+        document.getElementById("TxtDocId").value = data.V_NO ?? "";
+
+        // Optional flags
+        document.getElementById("ChkBasicDataNew").checked = true;
+        document.getElementById("ChkSalaryRateNew").checked = true;
+        document.getElementById("ChkBankDetailNew").checked = true;
+
+                   GetPlaceList('ddlNewPlace', data.PLACE_CODE);
+                   GetDesignationList('ddlNewDesignation',data.DESG_CODE);
+                   GetDepartmentList('ddlNewDepartment', data.DEPT_CODE);
+                   GetGradeList('ddlNewGrade', data.GRADE_CODE);
+                   GetBankList('ddlNewBankName', data.BANK_CODE);
+
+    }
+
+
+    async function collectFormData() {
+        // Basic Data New
+        const ChkBasicDataNew = document.getElementById("ChkBasicDataNew")?.checked;
+        const ddlNewTitle = toNullableString(document.getElementById("ddlNewTitle")?.value);
+        const TxtNewFirstName = toNullableString(document.getElementById("TxtNewFirstName")?.value);
+        const TxtNewMiddleName = toNullableString(document.getElementById("TxtNewMiddleName")?.value);
+        const TxtNewLastName = toNullableString(document.getElementById("TxtNewLastName")?.value);
+        const TxtNewEmployeeName = toNullableString(document.getElementById("TxtNewEmployeeName")?.value);
+        const DtNewJoinDate = toNullableDate(document.getElementById("DtNewJoinDate")?.value);
+        const chkNewJoinDate = document.getElementById("chkNewJoinDate")?.checked;
+        const DtNewResignDate = toNullableDate(document.getElementById("DtNewResignDate")?.value);
+        const chkNewResignDate = document.getElementById("chkNewResignDate")?.checked;
+        const DtNewPermanentDate = toNullableDate(document.getElementById("DtNewPermanentDate")?.value);
+        const chkNewPermanentDate = document.getElementById("chkNewPermanentDate")?.checked;
+        const ddlNewDepartment = toNullableString(document.getElementById("ddlNewDepartment")?.value);
+        const ddlNewDesignation = toNullableString(document.getElementById("ddlNewDesignation")?.value);
+        const ddlNewPlace = toNullableString(document.getElementById("ddlNewPlace")?.value);
+        const ddlNewGrade = toNullableString(document.getElementById("ddlNewGrade")?.value);
+        const ddlNewPFApplicable = document.getElementById("ddlNewPFApplicable")?.checked;
+        const NumNewPFNo = toNullableString(document.getElementById("NumNewPFNo")?.value);
+        const DtNewPFDate = toNullableDate(document.getElementById("DtNewPFDate")?.value);
+        const chkNewPFDate = document.getElementById("chkNewPFDate")?.checked;
+        const ddlNewESIApplicable = document.getElementById("ddlNewESIApplicable")?.checked;
+        const NumNewESINo = toNullableString(document.getElementById("NumNewESINo")?.value);
+        const DtNewESIDate = toNullableDate(document.getElementById("DtNewESIDate")?.value);
+        const chkNewESIDate = document.getElementById("chkNewESIDate")?.checked;
+
+        // Salary Rate New
+        const ChkSalaryRateNew = document.getElementById("ChkSalaryRateNew")?.checked;
+        const DtNewLastEffective = toNullableDate(document.getElementById("DtNewLastEffective")?.value);
+        const NumNewDutyHrs = toNullableNumber(document.getElementById("NumNewDutyHrs")?.value);
+        const NumNewBasic = toNullableNumber(document.getElementById("NumNewBasic")?.value);
+        const NumNewHRA = toNullableNumber(document.getElementById("NumNewHRA")?.value);
+        const NumNewSecurityAmount = toNullableNumber(document.getElementById("NumNewSecurityAmount")?.value);
+        const NumNewConveyance = toNullableNumber(document.getElementById("NumNewConveyance")?.value);
+        const NumNewOthers = toNullableNumber(document.getElementById("NumNewOthers")?.value);
+        const NumNewCommunity = toNullableNumber(document.getElementById("NumNewCommunity")?.value);
+        const NumNewUniform = toNullableNumber(document.getElementById("NumNewUniform")?.value);
+        const NumNewWashAllowance = toNullableNumber(document.getElementById("NumNewWashAllowance")?.value);
+        const NumNewSpecialAllowance = toNullableNumber(document.getElementById("NumNewSpecialAllowance")?.value);
+        const NumNewMobileAllowance = toNullableNumber(document.getElementById("NumNewMobileAllowance")?.value);
+        const NumNewTotalSalary = toNullableNumber(document.getElementById("NumNewTotalSalary")?.value);
+        const NumNewGWSalary = toNullableNumber(document.getElementById("NumNewGWSalary")?.value);
+
+        // Bank Detail New
+        const ChkBankDetailNew = document.getElementById("ChkBankDetailNew")?.checked;
+        const ddlNewBankName = toNullableString(document.getElementById("ddlNewBankName")?.value);
+        const TxtNewBranch = toNullableString(document.getElementById("TxtNewBranch")?.value);
+        const NumNewAccountNo = toNullableString(document.getElementById("NumNewAccountNo")?.value);
+        const TxtNewIFSCCode = toNullableString(document.getElementById("TxtNewIFSCCode")?.value);
+        const TxtNewAccountType = toNullableString(document.getElementById("TxtNewAccountType")?.value);
+        const ddlNewBankVerified = document.getElementById("ddlNewBankVerified")?.checked;
+       
+        // public string MType {get; set; }     
+         const Code= toNullableString(document.getElementById("NumEmpCode")?.value);
+         const VDate= toNullableDate(document.getElementById("DtVDate")?.value);
+         const VNo= toNullableString(document.getElementById("TxtDocId")?.value);
+        // ChkBasicDataNew,
+         
+         const data = {
+            // Basic Data New
+            Code:Code,
+            VDate:VDate,
+            VNo:VNo,
+            Title: ddlNewTitle,
+            FirstName: TxtNewFirstName,
+            MiddleName: TxtNewMiddleName,
+            LastName: TxtNewLastName,
+            Name: TxtNewEmployeeName,
+            JoinDate: DtNewJoinDate,
+            JoinDateChecked: chkNewJoinDate,
+            ResignDate: DtNewResignDate,
+            ResignDateChecked: chkNewResignDate,
+            PermanentDate: DtNewPermanentDate,
+            PermanentDateChecked: chkNewPermanentDate,
+            DepartmentCode: ddlNewDepartment,
+            DesignationCode: ddlNewDesignation,
+            PlaceCode: ddlNewPlace,
+            GradeCode: ddlNewGrade,
+            PFApplicable: ddlNewPFApplicable,
+            PFNo: NumNewPFNo,
+            PFDate: DtNewPFDate,
+            PFDateChecked: chkNewPFDate,
+            ESIApplicable: ddlNewESIApplicable,
+            ESINo: NumNewESINo,
+            ESIDate: DtNewESIDate,
+            ESIDateChecked: chkNewESIDate,
+
+            // Salary Rate New
+            SalaryRateChecked: ChkSalaryRateNew,
+            LastEffectiveDate: DtNewLastEffective,
+            DutyHrs: NumNewDutyHrs,
+            Basic: NumNewBasic,
+            HRA: NumNewHRA,
+            SecurityAmount: NumNewSecurityAmount,
+            Conveyance: NumNewConveyance,
+            Others: NumNewOthers,
+            Community: NumNewCommunity,
+            Uniform: NumNewUniform,
+            WashAllowance: NumNewWashAllowance,
+            SpecialAllowance: NumNewSpecialAllowance,
+            MobileAllowance: NumNewMobileAllowance,
+            TotalSalary: NumNewTotalSalary,
+            GWSalary: NumNewGWSalary,
+
+            // Bank Detail New
+            BankDetailChecked: ChkBankDetailNew,
+            BankName: ddlNewBankName,
+            Branch: TxtNewBranch,
+            AccountNo: NumNewAccountNo,
+            IFSCCode: TxtNewIFSCCode,
+            AccountType: TxtNewAccountType,
+            BankVerified: ddlNewBankVerified,
+            SaveOrUpdate:docId ? "Update" : "Save"
+        };
+
+        return data;
+    }
+
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "EmployeeGateOutEntry")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid(Doctypeval) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "EmployeeGateOutEntry")',
+            type: 'GET',
+            data:{vtype:Doctypeval},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#NumDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/EmployeeIncrementEntry/GetEmpIncrementDetailsForUpdate',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                const data=(response.data)[0];
+                await fillHeaderData(data);
+                // await fillItemDetailTable(response.data);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    // disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    // enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+     
+
+    function GetPlaceList(dropDownId ,selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetPlaceList", "EmployeeIncrementEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    console.log(response.status, response.data);
+                    // const $DropdownId = $('#ddlEmpCode');
+                    const $DropdownId = $('#'+dropDownId);
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Place -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetDesignationList(dropDownId,selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDesignationList", "EmployeeIncrementEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    // const $DropdownId = $('#ddlHodCode');
+                     const $DropdownId = $('#'+dropDownId);
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Designation -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetDepartmentList(dropDownId ,selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetDepartmentList", "EmployeeIncrementEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    // const $DropdownId = $('#ddlDepartment');
+                    const $DropdownId = $('#'+dropDownId);
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Department -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function GetGradeList(dropDownId ,selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetGradeList", "EmployeeIncrementEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    // const $DropdownId = $('#ddlDepartment');
+                    const $DropdownId = $('#'+dropDownId);
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Grade -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    
+    function GetBankList(dropDownId ,selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetBankList", "EmployeeIncrementEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    // const $DropdownId = $('#ddlDepartment');
+                    const $DropdownId = $('#'+dropDownId);
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Bank -</option>');
+
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`
+                            <option value="${item.CODE}">${item.NAME}</option>
+                        `);
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("data Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("data Load failed", error);
+            }
+        });
+    }
+
+    function toNullableString(value) {
+        return value?.trim() || null;
+    }
+
+    function toNullableNumber(value) {
+        return value && !isNaN(value) ? parseFloat(value) : null;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toInputDate(dateStr) {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        if (isNaN(date)) return "";
+        return date.toISOString().split("T")[0];
+    }
+
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+      
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    function enableAllFieldsOld() {
+      allFieldIdsOld.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function enableAllFieldsNew() {
+      allFieldsNew.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFieldsOld() {
+      allFieldIdsOld.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function disableAllFieldsNew() {
+      allFieldsNew.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function enableAllFieldsNewBasic() {
+      allFieldsBasic.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+    function enableAllFieldsNewSalary() {
+      allFieldsSalary.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+    function enableAllFieldsNewBank() {
+      allFieldsBank.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+     function disableAllFieldsNewBasic() {
+      allFieldsBasic.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+     function disableAllFieldsNewSalary() {
+      allFieldsSalary.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+     function disableAllFieldsNewBank() {
+      allFieldsBank.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+</script>
+
+
+

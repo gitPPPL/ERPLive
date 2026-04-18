@@ -1,0 +1,473 @@
+﻿@{
+	ViewBag.Title = "ItemDepartmentMaster";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Item Department Master</legend>
+
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "ItemDepartmentList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+            </div>
+		</div>
+	</div>
+
+<form id="itemForm" method="post">
+   <input type="hidden" class="form-control" name="CODE" id="txtCODE">
+   <div class="row">
+      <div class="col-md-4">
+         <div class="form-group">
+            <label>Department Name<span class="required">*</span></label>
+            <input type="text" maxlength="200" class="form-control" placeholder="Name" id="txtname">
+         </div>
+      </div>
+      <div class="col-md-4">
+         <div class="form-group">
+            <label>Short Name<span class="required">*</span></label>
+            <input type="text" class="form-control" maxlength="40" placeholder="Short Name" id="txtshortname">
+         </div>
+      </div>
+      <div class="col-md-4">
+         <div class="form-group">
+            <label>Transaction  Type<span class="required">*</span></label>
+            <select class="form-control" id="ddltranstype">
+               <option value="">-- Select Option --</option>
+               <option value="Production">Production</option>
+               <option value="Store">Store</option>
+            </select>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Production Place<span class="required">*</span></label>
+            <select class="form-control" id="ddlplacetype">
+               <option value="">Select Place Type</option>
+            </select>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Place Master</label>
+            <select class="form-control" id="ddlplace" >
+               <option value="">-- Select Option --</option>
+            </select>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Unit Name</label>
+            <select class="form-control" id="ddlunitytype" >
+               <option value="">-- Select Option --</option>
+            </select>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Cost</label>
+            <select class="form-control" id="ddlCost">
+               <option value="">Select Place Type</option>
+            </select>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Serial No</label>
+            <input type="number" class="form-control limit-length" data-maxlength="4" placeholder="Position no" id="txtpositionno">
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Report Filter Type</label>
+            <select class="form-control" id="ddlReportFilterType" >
+               <option value="">-- Select Option --</option>
+            </select>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Monthly Budget(Purchase)</label>
+            <input type="number" class="form-control limit-length" data-maxlength="9" placeholder="Purchase Budget" id="txtpurchasebudget">
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>Monthly Budget(Consumption)</label>
+            <input type="number" class="form-control limit-length" data-maxlength="9" placeholder="Consump. Budget" id="txtconsumpbudget">
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="offset-md-8 col-md-2">
+         <div class="form-group">
+            <div class="toggle-wrapper justify-content-center" id="ddlActive">
+               <input type="hidden" id="IsActive" name="IsActive" value="1" />
+               <div id="customToggle" class="custom-toggle active"></div>
+               <span id="statusLabel" class="status-label active">Active</span>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-2">
+         <div class="btn-last">
+            <button type="submit" id="btnSubmit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            <button type="button" id="btnUpdate" class="btn btn-primary"><i class="fa fa-refresh"></i>Update</button>
+         </div>
+      </div>
+   </div>
+</form>
+
+</fieldset>
+
+@* Check validation for all texbox start Block *@
+<script>
+  function limitInputLength() {
+    const inputs = document.querySelectorAll('.limit-length');
+    inputs.forEach(input => {
+      const maxLength = parseInt(input.getAttribute('data-maxlength'), 10);
+      input.addEventListener('input', () => {
+        let value = input.value;
+        if (input.type === 'number') {
+          value = value.replace(/\D/g, '');
+          if (value.length > maxLength) {
+            value = value.slice(0, maxLength);
+          }
+          input.value = value;
+        } else if (input.type === 'text') {
+          if (value.length > maxLength) {
+            input.value = value.slice(0, maxLength);
+          }
+        }
+      });
+    });
+  }
+  window.addEventListener('DOMContentLoaded', limitInputLength);
+</script>
+@* Check validation for all texbox End Block *@
+
+@* Banding Dropdown List start block *@
+<script>
+ $(document).ready(function () {
+	 ddlTransactionType();
+	 ddlProductionPlace()
+	 ddlPlace();
+	 ddlUnitName();
+	 ddlReportFilterType();
+     ddlCost();
+	 $("#btnUpdate").hide();
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        const userId = getQueryParam('id');
+		const mode = getQueryParam("mode");
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#itemForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
+     if (userId) {
+                // EDIT: Load data for editing
+				$("#btnSubmit").hide();
+				 $("#btnUpdate").show();
+                $.ajax({
+                    url: '/ItemDepartmentMaster/GetDepartmentByCode',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ code: userId }),
+                    success: function (response) {
+                        bindItemDeptForm(response); // Do not reset form here
+                    },
+                    error: function (xhr) {
+                        alert('Error: ' + xhr.responseText);
+                    }
+                });
+            }
+	 $('#itemForm').submit(function (e) {
+        e.preventDefault();
+        if (!validateRequiredField('#txtname', 'Department Name')) return;
+        if (!validateRequiredField('#txtshortname', 'Short Name')) return;
+        if (!validateRequiredField('#ddltranstype', 'Transaction Type')) return;
+        if (!validateRequiredField('#ddlplacetype', 'Production Place')) return;
+  
+            const ACTIVE = $('#IsActive').val();
+            const formData = {
+                CODE: $('#txtCODE').val() ? parseInt($('#txtCODE').val()) : 0,
+                NAME: $('#txtname').val() || null,
+                SHORTNAME: $('#txtshortname').val() || null,
+                TRAN_TYPE: $('#ddltranstype').val() || null,
+                PLACE_TYPE: $('#ddlplacetype').val() || null,
+                REPORT_TYPE: $('#ddlReportFilterType').val() || null,
+                SORT_ON: $('#txtpositionno').val() ? parseInt($('#txtpositionno').val()) : 0,
+                UNIT_TYPE: $('#ddlunitytype').val() || null,
+                PLACE_CODE: $('#ddlplace').val() ? parseInt($('#ddlplace').val()) : 0,
+                MPURCH_BUDGET: $('#txtpurchasebudget').val() ? parseFloat($('#txtpurchasebudget').val()) : 0,
+                MCONSUMP_BUDGET: $('#txtconsumpbudget').val() ? parseFloat($('#txtconsumpbudget').val()) : 0,
+                ACTIVE: ACTIVE,
+				Cost: $('#ddlCost').val() ? parseInt($('#ddlCost').val()) : 0,
+            };
+			
+            $.ajax({
+                url: '/ItemDepartmentMaster/SaveItemDepartment',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+					if (response.success) {
+                    // toastr.success(response.message);  
+                    showFlashMessageByKey('insert', 'success');
+                    setTimeout(function () {
+                window.location.href = '/ItemDepartmentList/Index'; 
+            }, 1500);
+                } else {
+                    toastr.error(response.message);  
+                }
+                    $('#itemForm')[0].reset();
+                },
+                error: function (xhr) {
+                    toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        });
+
+// Update for this page - Start Block
+$("#btnUpdate").click(function () {
+    const CODE = getQueryParam('id');
+    const ACTIVE = $('#IsActive').val();
+    const formData1 = {
+        CODE: CODE ? parseInt(CODE) : 0,
+        NAME: $('#txtname').val() || null,
+        SHORTNAME: $('#txtshortname').val() || null,
+        TRAN_TYPE: $('#ddltranstype').val() || null,
+        PLACE_TYPE: $('#ddlplacetype').val() || null,
+        REPORT_TYPE: $('#ddlReportFilterType').val() || null,
+        SORT_ON: $('#txtpositionno').val() ? parseInt($('#txtpositionno').val()) : 0,
+        UNIT_TYPE: $('#ddlunitytype').val() || null,
+        PLACE_CODE: $('#ddlplace').val() ? parseInt($('#ddlplace').val()) : 0,
+        MPURCH_BUDGET: $('#txtpurchasebudget').val() ? parseFloat($('#txtpurchasebudget').val()) : 0,
+        MCONSUMP_BUDGET: $('#txtconsumpbudget').val() ? parseFloat($('#txtconsumpbudget').val()) : 0,
+        ACTIVE: ACTIVE,
+        Cost: $('#ddlCost').val() ? parseInt($('#ddlCost').val()) : 0
+    };
+    $.ajax({
+        url: '/ItemDepartmentMaster/UpdateItemDepartment',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData1),
+        success: function (response) {
+            if (response.success) {
+                toastr.success(response.message || 'Updated successfully!');
+            } else {
+                toastr.warning(response.message || 'Update failed.');
+            }
+        },
+        error: function (xhr) {
+            toastr.error('Error: ' + xhr.responseText);
+        }
+    });
+});
+// Update for this page - End Block
+ })
+
+function ddlTransactionType() {
+        return $.ajax({
+            url: '/ItemDepartmentMaster/GetTransactionType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddltranstype');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Place --</option>');
+                $.each(data, function (index, item) {
+                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading ddlplace:", xhr.responseText);
+                toastr.error('Error loading places: ' + error);
+            }
+        });
+    }
+function ddlProductionPlace() {
+        return $.ajax({
+            url: '/ItemDepartmentMaster/GetddlProductionPlace',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlplacetype');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Place --</option>');
+                $.each(data, function (index, item) {
+                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading ddlplace:", xhr.responseText);
+                toastr.error('Error loading places: ' + error);
+            }
+        });
+    }
+function ddlPlace() {
+        return $.ajax({
+            url: '/ItemDepartmentMaster/GetddlPlace',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlplace');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Place --</option>');
+                $.each(data, function (index, item) {
+                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading ddlplace:", xhr.responseText);
+                toastr.error('Error loading places: ' + error);
+            }
+        });
+    }
+function ddlUnitName() {
+        return $.ajax({
+            url: '/ItemDepartmentMaster/GetddlUnitName',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlunitytype');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Place --</option>');
+                $.each(data, function (index, item) {
+                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading ddlplace:", xhr.responseText);
+                toastr.error('Error loading places: ' + error);
+            }
+        });
+    }
+function ddlReportFilterType() {
+        return $.ajax({
+            url: '/ItemDepartmentMaster/GetddlReportFilterType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlReportFilterType');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Place --</option>');
+                $.each(data, function (index, item) {
+                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading ddlplace:", xhr.responseText);
+                toastr.error('Error loading places: ' + error);
+            }
+        });
+    }
+function ddlCost() {
+  return $.ajax({
+      url: '/ItemDepartmentMaster/GetddlCost',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+          const ddl = $('#ddlCost');
+          ddl.empty();
+          ddl.append('<option value="">-- Select Place --</option>');
+          $.each(data, function (index, item) {
+             ddl.append(`<option value="${item.value}">${item.text}</option>`);
+          });
+      },
+      error: function (xhr, status, error) {
+          console.error("Error loading ddlplace:", xhr.responseText);
+          toastr.error('Error loading places: ' + error);
+      }
+  });
+ }
+ // set vaule in textbox and dropdown list
+function bindItemDeptForm(data) {
+    console.log(data)
+    $('#txtname').val(data?.name ?? '');
+    $('#txtshortname').val(data?.shortname ?? '');
+    $('#txtreporttype').val(data?.reporT_TYPE ?? '');
+    $('#txtpositionno').val(data?.sorT_ON ?? '');
+    $('#txtpurchasebudget').val(data?.mpurcH_BUDGET ?? '');
+    $('#txtconsumpbudget').val(data?.mconsumP_BUDGET ?? '');
+     ddlTransactionType().done(function () {
+        $('#ddltranstype').val(data?.traN_TYPE ?? '');
+    });
+    ddlProductionPlace().done(function () {
+        $('#ddlplacetype').val(data?.placE_TYPE ?? '');
+    });
+     ddlCost().done(function () {
+        $('#ddlCost').val(data?.cost ?? '');
+    });
+    ddlPlace().done(function () {
+        $('#ddlplace').val(data?.placE_CODE ?? '');
+    });
+     ddlUnitName().done(function () {
+        $('#ddlunitytype').val(data?.uniT_TYPE ?? '');
+    });
+      ddlReportFilterType().done(function () {
+        $('#ddlReportFilterType').val(data?.reporT_TYPE ?? '');
+    });
+    if (data?.active === 1) {
+        $('#IsActive').val(1);
+        $('#customToggle').addClass('active');
+        $('#statusLabel').text('Active').addClass('active').removeClass('inactive');
+    } else {
+        $('#IsActive').val(0);
+        $('#customToggle').removeClass('active');
+        $('#statusLabel').text('Inactive').addClass('inactive').removeClass('active');
+    }
+}
+function setFormReadOnly() {
+        $('#itemForm input').prop('readonly', true);
+        $('#itemForm select').prop('disabled', true);
+        $('#customToggle').css('pointer-events', 'none');
+        $('#btnSubmit').hide();
+        $('#btnUpdate').hide();
+ }
+</script>
+
+@* Banding Dropdown List End block *@
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	</Script>
+@* Status Check end *@

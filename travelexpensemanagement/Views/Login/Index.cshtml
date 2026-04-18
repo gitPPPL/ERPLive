@@ -1,0 +1,307 @@
+﻿@{
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Trave Expense Index </title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="description" content="CodedThemes">
+	<meta name="keywords" content=" Admin , Responsive, Landing, Bootstrap, App, Template, Mobile, iOS, Android, apple, creative app">
+	<meta name="author" content="CodedThemes">
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,800" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="~/css/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="~/icon/themify-icons/themify-icons.css">
+	<link rel="stylesheet" type="text/css" href="~/icon/icofont/css/icofont.css">
+	<link rel="stylesheet" type="text/css" href="~/css/style.css">
+	<link rel="stylesheet" type="text/css" href="~/css/masterstyle.css">
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+	<!-- jQuery (Toastr requires it) -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<!-- Toastr JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body class="fix-menu">
+	<!-- Pre-loader start -->
+	<div class="theme-loader">
+		<div class="ball-scale">
+			<div class='contain'>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+				<div class="ring"><div class="frame"></div></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Pre-loader end -->
+	<section>
+		<!-- Container-fluid starts -->
+		<div class="wrapper__sec">
+			@* <div class="left-container">
+		</div> *@
+			<div class="right-container">
+				<div class="right-container__box">
+					<div class="col-sm-12">
+						<div class="login-card card-block auth-body mr-auto ml-auto">
+							@Html.AntiForgeryToken()
+							<div class="text-center">
+								<img class="img-login" src="~/images/auth/pashupati_logo1.svg" alt="logo.png">
+							</div>
+							<div class="form__signin">
+
+								<h1 class="top-heading text-center mb-4">Sign In </h1>
+
+								<form class="md-float-material" method="post" action="@Url.Action("GetAction", "Login")">
+									<div class="row">
+										<div class="col-lg-12">
+											<div class="input-group mb-3">
+												<span class="input-group-text"><i class="fa fa-user"></i></span>
+												<select id="ddlUserName" name="UserMasterCode" onchange="GetcompanyID()" class="form-control form-select">
+													<option value="">-- Select User Name --</option>
+												</select>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-lg-12">
+											<div class="input-group mb-3">
+												<span class="input-group-text"><i class="fa fa-building-o"></i></span>
+												<select id="ddlCompany" name="CompanyCode" class="form-control form-select">
+													<option value="">-- Select Company --</option>
+												</select>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-lg-12">
+											<div class="input-group mb-3">
+												<span class="input-group-text"><i class="fa fa-lock"></i></span>
+												<input type="password" class="form-control form-select" maxlength="30" name="Password" placeholder="Password" required>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-lg-6 mb-4">
+											<select id="ddlFinancialYear" name="FinancialYear" class="form-control form-select">
+												<option value="">-- Financial Year --</option>
+											</select>
+										</div>
+										<div class="col-lg-6 mb-4">
+											<input type="date" class="form-control form-select" name="LoginDate" id="LoginDate" placeholder="Login Date">
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-12">
+											<button type="submit" class="btn btn-primary">login</button>
+										</div>
+
+										@if (TempData["ErrorMessage"] != null)
+										{
+											<div class="alert alert-danger">
+												@TempData["ErrorMessage"]
+											</div>
+										}
+									</div>
+
+									<div class="row">
+										<div class="offset-sm-4 col-sm-8">
+											<span class="text-login">Version : PAS.2025.04.001</span>
+										</div>
+									</div>
+
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Bootstrap Registration Modal -->
+	<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content p-4">
+				<div class="modal-header border-0">
+					<h5 class="modal-title mx-auto fw-bold">Sign up. It is fast and easy.</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+				</div>
+				<div class="modal-body">
+					<!-- Registration Form -->
+					<form id="registerForm">
+						<div class="mb-3">
+							<input type="text" class="form-control p-2" placeholder="Choose Username" id="UserName" name="UserName" required>
+						</div>
+						<div class="mb-3">
+							<input type="email" class="form-control p-2" id="Email" placeholder="Your Email Address" name="Email" required>
+						</div>
+						<div class="mb-3">
+							<input type="password" class="form-control p-2" id="PasswordHash" placeholder="Choose Password" name="PasswordHash" required>
+						</div>
+
+						<!-- Terms & Conditions and Newsletter -->
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="terms" required>
+							<label class="form-check-label" for="terms">
+								I read and accept Terms & Conditions.
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="newsletter">
+							<label class="form-check-label" for="newsletter">
+								Send me the Newsletter weekly.
+							</label>
+						</div>
+
+						<!-- Register Button -->
+						<button type="submit" class="btn btn-primary w-100 mt-3 p-2 fw-bold">Sign Up Now.</button>
+					</form>
+				</div>
+				<div class="modal-footer border-0 text-center mx-auto">
+					<p class="mb-0">Thank you and enjoy our website.</p>
+					<strong class="fw-bold">Your Authentication Team</strong>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(document).ready(function () {
+			GetUserdll();
+			GetdlFinancialYear();
+		});
+		function GetUserdll() {
+			$.ajax({
+				url: '/Login/GeUserNameddl',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					console.log(data)
+					var ddl = $('#ddlUserName');
+					ddl.empty();
+					ddl.append('<option value="">-- Select Users --</option>');
+					$.each(data, function (index, item) {
+						ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+					});
+				},
+				error: function (xhr, status, error) {
+					console.error("Error: ", xhr.responseText);
+					alert('Error loading Users: ' + error);
+				}
+			});
+		}
+		function GetcompanyID() {
+			var selectedUserId = $('#ddlUserName').val();
+			if (selectedUserId) {
+				$.ajax({
+					url: '/Login/GetCompanyIDByUser',
+					type: 'POST',
+					data: { userId: selectedUserId },
+					success: function (response) {
+						var ddl = $('#ddlCompany');
+						ddl.empty();
+						ddl.append('<option value="">-- Select Company --</option>');
+						$.each(response, function (index, item) {
+							ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+						});
+					},
+					error: function (xhr, status, error) {
+						console.error("Error fetching company ID:", xhr.responseText);
+					}
+				});
+			}
+		}
+		function GetdlFinancialYear() {
+			$.ajax({
+			url: '/Login/GeddlFinancialYear',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#ddlFinancialYear');
+				ddl.empty();
+				ddl.append('<option value="">-- Financial Year --</option>');
+
+				$.each(data.financialYears, function (index, item) {
+					var selected = item.text === data.currentYearText ? ' selected' : '';
+					ddl.append('<option value="' + item.value + '"' + selected + '>' + item.text + '</option>');
+				});
+				 var today = new Date().toISOString().split('T')[0];
+				$('#LoginDate').val(today);
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading financial years: ' + error);
+			}
+		});
+		}
+
+		 $('#ddlFinancialYear').on('change', function () {
+			var selectedValue = $(this).val();
+			if (selectedValue) {
+				$.ajax({
+					url: '/Login/GetYearID', 
+					type: 'POST',
+					data: { financialYear: selectedValue },
+					success: function (response) {
+						console.log(response);
+
+					if (response.length > 0) {
+					var dateStr = response[0].text; 
+					var parts = dateStr.split('/');
+					var formattedDate = parts[2] + '-' + parts[1] + '-' + parts[0]; 
+
+					$('#LoginDate').val(formattedDate);
+				}
+					},
+					error: function () {
+						alert('Error occurred while calling the server.');
+					}
+				});
+			}
+		});
+
+
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			var today = new Date().toISOString().split('T')[0];
+			var loginDateInput = document.getElementById("LoginDate");
+			loginDateInput.setAttribute("max", today);
+			loginDateInput.addEventListener("change", function () {
+				var selectedDate = this.value;
+
+				if (selectedDate > today) {
+					alert("Future date not allowed.");
+					this.value = "";
+				}
+			});
+		});
+	</script>
+
+	<script type="text/javascript" src="~/js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
+	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="~/js/modernizr/modernizr.js"></script>
+	<script type="text/javascript" src="~/js/modernizr/css-scrollbars.js"></script>
+	<script type="text/javascript" src="~/js/common-pages.js"></script>
+</body>
+
+</html>

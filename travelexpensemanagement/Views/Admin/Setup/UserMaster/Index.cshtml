@@ -1,0 +1,607 @@
+﻿@{
+	ViewBag.Title = "Master Insert";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Form -->
+<fieldset>
+<legend class="legend-field">User Master</legend>
+
+	<form id="UserMasterForm">
+		<div class="row">
+			<div class="offset-md-10 col-md-2">
+				<div class="btn-right">
+					@* <button onclick="window.location.href='@Url.Action("Index", "UserDetailslist")'" type="submit" class="btn btn-primary">
+						<i class="fa fa-list"></i>Back to list
+					</button> *@
+					<button onclick="window.location.href='@Url.Action("Index", "UserDetailslist")'"
+							type="button" class="btn btn-primary">
+						<i class="fa fa-list"></i> Back to list
+					</button>
+
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>User Name<span class="required">*</span></label>
+					<input type="text" class="form-control" id="txtUserName" name="Name" placeholder="User Name">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Full Name<span class="required">*</span></label>
+					<input type="text" class="form-control" id="txtFullName" name="FullName" placeholder="Full Name" />
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Emp Code</label>
+					<input type="text" class="form-control" id="txtEmpCode" name="EmpCode" placeholder="Emp Code">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Password<span class="required">*</span></label>
+					<input type="password" class="form-control" maxlength="30" id="txtPassword" placeholder="Password">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>User Level</label>
+					<input type="number" class="form-control" id="txtUserLevel" placeholder="User Level">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Allow Days<span class="required">*</span></label>
+					<input type="number" class="form-control" id="txtAllowDays" placeholder="Allow Days">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>PC Name 1</label>
+					<input type="text" class="form-control" id="txtPCName1" placeholder="PC Name 1">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>PC Name 2</label>
+					<input type="text" class="form-control" id="txtPCName2" placeholder="PC Name 2">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>MAC ID</label>
+					<input type="text" class="form-control" id="txtMACID" placeholder="MAC">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>App Device ID-1</label>
+					<input type="text" class="form-control" id="txtAppDeviceID1" placeholder="App Device ID 1">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>App Device ID-2</label>
+					<input type="text" class="form-control" id="txtAppDeviceID2" placeholder="App Device ID 2">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Email ID</label>
+					<input type="email" class="form-control" id="txtEmail" placeholder="Email">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Company Name</label>
+					<div class="multiselect-dropdown" id="companyDropdown">
+						<div class="form-control" id="selectedCompanies">Select Company</div>
+						<div class="multiselect-list" id="companyCheckboxList"></div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Department</label>
+					<select id="ddlDepartment" name="Department" class="form-control">
+						<option value="">-- Select Department --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Dashboard Name</label>
+					<select id="ddlDashboard" name="Department" class="form-control">
+						<option value="">-- Select Dashboard --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Designation</label>
+					<select id="ddlDesignation" name="Designation" class="form-control">
+						<option value="">-- Select Designation --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Mobile No</label>
+					<input type="number" class="form-control" id="txtMobile" placeholder="Mobile">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<div class="form-row">
+						<input type="checkbox" id="chkPwdNeverExpire">
+						<label class="checkbox-label" for="chkPwdNeverExpire">Pwd Never Expire</label>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<div class="form-row">
+						<input type="checkbox" id="chkPwdChangeNext">
+						<label class="checkbox-label" for="chkPwdChangeNext">Password change</label>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<div class="form-row">
+						<input type="checkbox" id="chkUserAllowTask">
+						<label class="checkbox-label" for="chkUserAllowTask">Task Access</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="form-group">
+					<div class="toggle-wrapper justify-content-center" id="ddlActive">
+						<input type="hidden" id="IsActive" name="IsActive" value="1" />
+						<div id="customToggle" class="custom-toggle active"></div>
+						<span id="statusLabel" class="status-label active">Active</span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="btn-last">
+					@* <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+					<button type="button" id="btnUpdate" class="btn btn-primary"><i class="fa fa-refresh"></i>Save</button> *@
+					<button type="button" id="btnSave" class="btn btn-primary">
+					<i class="fa fa-save"></i> Save
+					</button>
+
+					<button type="button" id="btnUpdate" class="btn btn-primary">
+						<i class="fa fa-refresh"></i> Update
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+
+
+
+@* Script status Button *@
+
+<script>
+	$(document).ready(function () {
+		loadCompanyCheckboxList();
+		departmentlist();
+		Designationlist();
+		DashboardNamelist();
+
+		// Toggle dropdown
+		$('#companyDropdown').click(function (e) {
+			e.stopPropagation(); 
+			$(this).toggleClass('open');
+		});
+		// Close dropdown if clicked outside
+		$(document).click(function () {
+			$('#companyDropdown').removeClass('open');
+		});
+		// Handle checkbox selection
+		$(document).on('change', 'input[name="Company"]', function () {
+			updateSelectedCompanies();
+		});
+	});
+	// Load companies into the dropdown
+	function loadCompanyCheckboxList() {
+		$.ajax({
+			url: '/UserMaster/GetCompanyddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var container = $('#companyCheckboxList');
+				container.empty();
+				$.each(data, function (index, item) {
+					var checkbox = '<label><input type="checkbox" name="Company" value="' + item.value + '"> ' + item.text + '</label>';
+					container.append(checkbox);
+				});
+			},
+			error: function (xhr, status, error) {
+				toastr.error('Error loading Company: ' + error);
+			}
+		});
+	}
+
+	// Update selected companies in the dropdown display
+	function updateSelectedCompanies() {
+		var selectedText = [];
+		$('input[name="Company"]:checked').each(function () {
+			selectedText.push($(this).parent().text().trim());
+		});
+		if (selectedText.length > 0) {
+			$('#selectedCompanies').text('Multiple Selected');
+		} else {
+			$('#selectedCompanies').text('Select Company');
+		}
+	}
+	// Optional: Show selected company values
+	$('#btnShowSelected').click(function () {
+		var selectedValues = getSelectedCompanyValues();
+		toastr.error("Selected Companies: " + selectedValues.join(', '));
+	});
+	// Get selected company values
+	function getSelectedCompanyValues() {
+		var selectedValues = [];
+		$('input[name="Company"]:checked').each(function () {
+			selectedValues.push($(this).val());
+		});
+		return selectedValues;
+	}
+	// department list banding code start block
+	function departmentlist() {
+		$.ajax({
+			url: '/UserMaster/GetDepartmentsddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				console.log(data); // Inspect the data
+				var ddl = $('#ddlDepartment');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Department --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				toastr.error('Error loading departments: ' + error);
+			}
+		});
+	}
+	// department list banding code start block
+	function Designationlist() {
+		$.ajax({
+			url: '/UserMaster/GetDesignationddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				console.log(data); // Inspect the data
+				var ddl = $('#ddlDesignation');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Designation --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				toastr.error('Error loading Designation: ' + error);
+			}
+		});
+	}
+	function DashboardNamelist() {
+		$.ajax({
+			url: '/UserMaster/GetDashboardNameddl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				console.log(data); // Inspect the data
+				var ddl = $('#ddlDashboard ');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Dashboard  --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				toastr.error('Error loading Dashboard : ' + error);
+			}
+		});
+	}
+</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+
+	// Form submit
+	$('#btnSave').on('click', function (e) {
+		e.preventDefault();
+
+		if (!validateRequiredField('#txtUserName', 'User Name')) return;
+		if (!validateRequiredField('#txtFullName', 'Full Name')) return;
+		if (!validateRequiredField('#txtPassword', 'Password')) return;
+		if (!validateRequiredField('#txtAllowDays', 'Allow Days')) return;
+
+		const UserName = $('#txtUserName').val().trim();
+		const FullName = $('#txtFullName').val().trim();
+		const Password = $('#txtPassword').val().trim();
+		const AllowDays = $('#txtAllowDays').val().trim();
+
+		// ✅ Get toggle value properly
+		const isActive = $('#IsActive').val(); // This will be '1' or '0'
+
+	    let userData = {
+		UserName: UserName,
+		FullName: FullName,
+		EmpCode: parseInt($('#txtEmpCode').val().trim()) || 0,
+		Password: Password,
+		UserLevel: parseInt($('#txtUserLevel').val().trim()) || 0,
+		AllowDays: parseInt(AllowDays) || 0,
+		PCName1: $('#txtPCName1').val() || "",
+		PCName2: $('#txtPCName2').val() || "",
+		MACID: $('#txtMACID').val() || "",
+		AppDeviceID1: $('#txtAppDeviceID1').val() || "",
+		AppDeviceID2: $('#txtAppDeviceID2').val() || "",
+		IsActive: isActive || "0",
+		Department: $('#ddlDepartment option:selected').text() || "",
+		Dashboard: parseInt($('#ddlDashboard').val()) || 0,
+		Designation: $('#ddlDesignation option:selected').text() || "",
+		DEPT_CODE: $('#ddlDepartment').val() || "",
+		DESG_CODE: $('#ddlDesignation').val() || "",
+		Mobile: $('#txtMobile').val() || "",
+		Email: $('#txtEmail').val() || "",
+		PasswordNeverExpire: $('#chkPwdNeverExpire').prop('checked'),
+		PasswordChangeNextLogin: $('#chkPwdChangeNext').prop('checked'),
+		UserAllowForTask: $('#chkUserAllowTask').prop('checked'),
+		CompanyIds: getSelectedCompanyValues()
+	};
+		console.log(userData);
+
+		$.ajax({
+			url: '/UserMaster/InsertUser',
+			type: 'POST',
+			data: JSON.stringify(userData),
+			contentType: 'application/json; charset=utf-8',
+			success: function (response) {
+				if (response.success) {
+					toastr.success("User saved successfully!");
+					$('#UserMasterForm')[0].reset();
+				} else {
+					toastr.error(response.message || "Something went wrong.");
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error('Error saving user: ' + error);
+			}
+		});
+	});
+</script>
+
+<script>
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	function getSelectedCompanyValues() {
+		// Assuming your checkboxes are inside #companyCheckboxList container
+		let selected = [];
+		$('#companyCheckboxList input[type="checkbox"]:checked').each(function () {
+			selected.push($(this).val());
+		});
+		return selected;
+	}
+
+	function bindUserData(data) {
+		if (data && data.success && data.data) {
+			var user = data.data;
+
+			$('#txtUserName').val(user.userName);
+			$('#txtFullName').val(user.fullName);
+			$('#txtEmpCode').val(user.empCode);
+			$('#txtPassword').val(user.password);
+			$('#txtUserLevel').val(user.userLevel);
+			$('#txtAllowDays').val(user.allowDays);
+			$('#txtPCName1').val(user.pcName1);
+			$('#txtPCName2').val(user.pcName2);
+			$('#txtMACID').val(user.macid);
+			$('#txtAppDeviceID1').val(user.appDeviceID1);
+			$('#txtAppDeviceID2').val(user.appDeviceID2);
+
+			if (user.isActive === "1" || user.isActive === 1) {
+				$('#ddlActive').val('1');
+			} else if (user.isActive === "0" || user.isActive === 0) {
+				$('#ddlActive').val('2');
+			} else {
+				$('#ddlActive').val('');
+			}
+
+			if (user.companyIds && Array.isArray(user.companyIds)) {
+				user.companyIds.forEach(function (companyId) {
+					$('#companyCheckboxList input[type="checkbox"][value="' + companyId + '"]').prop('checked', true);
+				});
+			}
+
+			$('#ddlDepartment').val(user.department);
+			$('#ddlDesignation').val(user.designation);
+			$('#ddlDashboard').val(user.dashboard);
+			$('#txtMobile').val(user.mobile);
+			$('#txtEmail').val(user.email);
+
+			$('#chkPwdNeverExpire').prop('checked', user.passwordNeverExpire);
+			$('#chkPwdChangeNext').prop('checked', user.passwordChangeNextLogin);
+			$('#chkUserAllowTask').prop('checked', user.userAllowForTask);
+		}
+	}
+
+	function setFormReadOnly() {
+		// Disable all inputs, selects, textareas and checkboxes
+		$('#UserMasterForm').find('input, select, textarea').attr('disabled', true);
+		$('#UserMasterForm').find('input[type="checkbox"]').prop('disabled', true);
+
+		// Optional: Add background color to indicate read-only
+		$('#UserMasterForm input, #UserMasterForm select, #UserMasterForm textarea').css('background-color', '#f5f5f5');
+	}
+
+	$(document).ready(function () {
+		var userId = getQueryParam('id');
+		var mode = getQueryParam('mode'); // Can be 'view' or undefined
+
+		if (userId && userId.trim() !== "") {
+			if (mode === "view") {
+				$('#btnSave').hide();
+				$('#btnUpdate').hide();
+				$('#cancelBtn').hide();
+			} else {
+				$('#btnSave').hide();
+				$('#btnUpdate').show();
+			}
+			$.ajax({
+				url: '/UserMaster/EditUserDetails',
+				type: 'GET',
+				data: { id: userId },
+				success: function (response) {
+					if (response.success) {
+						bindUserData(response);
+
+						if (mode === "view") {
+							setFormReadOnly();
+							// Optionally show a read-only badge:
+							$('#formTitle').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+						}
+					} else {
+						toastr.error('Error: ' + response.message);
+					}
+				},
+				error: function () {
+					toastr.error('Error: Could not communicate with the server.');
+				}
+			});
+
+		} else {
+			$('#btnSave').show();
+			$('#btnUpdate').hide();
+		}
+
+		// Update handler
+		// $('#btnUpdate').on('click', function (e) {
+		$('#btnUpdate').click(function (e) {
+			e.preventDefault();
+
+			let userId = getQueryParam('id');
+			let userName = $('#txtUserName').val().trim();
+			let fullName = $('#txtFullName').val().trim();
+			let password = $('#txtPassword').val().trim();
+			let allowDays = $('#txtAllowDays').val().trim();
+			let isActive = $('#ddlActive').val();
+
+			let userData = {
+				UserID: userId,
+				UserName: userName,
+				FullName: fullName,
+				EmpCode: parseInt($('#txtEmpCode').val().trim()) || 0,
+				Password: password,
+				UserLevel: parseInt($('#txtUserLevel').val().trim()) || 0,
+				AllowDays: parseInt(allowDays) || 0,
+				PCName1: $('#txtPCName1').val() || "",
+				PCName2: $('#txtPCName2').val() || "",
+				MACID: $('#txtMACID').val() || "",
+				AppDeviceID1: $('#txtAppDeviceID1').val() || "",
+				AppDeviceID2: $('#txtAppDeviceID2').val() || "",
+				IsActive: isActive || "0",
+				Department: $('#ddlDepartment option:selected').text() || "",
+				Dashboard: parseInt($('#ddlDashboard').val()) || 0,
+				Designation: $('#ddlDesignation option:selected').text() || "",
+				DEPT_CODE: $('#ddlDepartment').val() || "",
+				DESG_CODE: $('#ddlDesignation').val() || "",
+				Mobile: $('#txtMobile').val() || "",
+				Email: $('#txtEmail').val() || "",
+				PasswordNeverExpire: $('#chkPwdNeverExpire').prop('checked'),
+				PasswordChangeNextLogin: $('#chkPwdChangeNext').prop('checked'),
+				UserAllowForTask: $('#chkUserAllowTask').prop('checked'),
+				CompanyIds: getSelectedCompanyValues()
+			};
+
+			$.ajax({
+				url: '/UserMaster/UpdateUser',
+				type: 'POST',
+				data: JSON.stringify(userData),
+				contentType: 'application/json; charset=utf-8',
+				success: function (response) {
+					if (response.success) {
+						toastr.success("User updated successfully!");
+						// Keep form values after update, so don't reset here
+						// $('#UserMasterForm')[0].reset();
+					} else {
+						toastr.error(response.message || "Something went wrong.");
+					}
+				},
+				error: function (xhr, status, error) {
+					toastr.error('Error saving user: ' + error);
+				}
+			});
+		});
+	});
+</script>
+
+
+
+

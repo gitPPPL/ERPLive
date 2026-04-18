@@ -1,0 +1,447 @@
+﻿@{
+	ViewBag.Title = "Email Setting";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script>
+	function redirectToDashboard() {
+		window.location.href = '@Url.Action("Index", "Dashboard")';
+	}
+</script>
+
+<fieldset>
+	<legend class="legend-field">Email Setting</legend>
+	<form id="EmailSettingForm">
+		<div class="row">
+			<div class="offset-md-10 col-md-2">
+				<div class="btn-right">
+				<a href="@Url.Action("Index", "EmailSettingList")" class="btn btn-primary">
+					<i class="fa fa-list"></i>Back to List
+				</a>
+			</div>
+		</div>
+		</div>
+
+		<div id="rowContainer">
+			<div class="row">
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>UserID<span class="required">*</span></label>
+						<input type="text" class="form-control userDropdown" id="userDropdown1" placeholder="UserID" />
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>Password<span class="required">*</span></label>
+						<input type="password" class="form-control txtPassword" id="txtPassword1" placeholder="Password" />
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>SMTP Server<span class="required">*</span></label>
+						<input type="text" class="form-control txtServer" id="txtServer1" placeholder="SMTP Server" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>SMTP Port<span class="required">*</span></label>
+						<input type="text" class="form-control txtPort" id="txtPort1" placeholder="SMTP Port" />
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>SMTP USSL<span class="required">*</span></label>
+						<input type="text" class="form-control txtUssl" id="txtUssl1" placeholder="SMTP USSL" />
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="form-group">
+						<div class="custom-dropdown" id="Documentsinserthidden">
+						<label>Documents</label>
+						
+							<div class="dropdown-label">Select Documents</div>
+							<div class="checkbox-list documentList"></div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="custom-dropdown" style="margin-top: -17px;" id="DocumentsUpdatehidden">
+							<label>Documents</label>
+							<div class="dropdown-label1">Select Documents</div>
+							<div class="checkbox-list1 documentList1"></div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div class="row">
+			<div class="offset-md-10 col-md-2">
+				<div class="btn-last">
+				<button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+				<button type="button" id="btnUpdate" class="btn btn-primary"><i class="fa fa-refresh"></i>Save</button>
+			</div>
+			</div>
+		</div>
+	
+	</form>
+
+<div id="dataList"></div>
+@* Update  *@
+<div id="dataList"></div>
+@* Update  *@
+
+<div class="card" id="emailSettingsTablehidden">
+	<div class="table-responsive">
+		<table id="emailSettingsTable" class="table-width">
+			<thead class="table-head">
+				<tr>
+					<th>UserID</th>
+					<th>Document Type</th>
+					<th>Web Password</th>
+					<th>SMTP Server</th>
+					<th>SMTP Port</th>
+					<th>SMTP USSL</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="pagination"></div>
+				</div>
+			</div>
+		</div>
+</div>
+</fieldset>
+
+
+<script>
+	function getQueryParameter(name) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(name);
+	}
+
+	$(document).ready(function () {
+		const compCode = getQueryParameter('compCode');
+		const code = getQueryParameter('codeId');
+		const mode = getQueryParameter('mode');
+
+		// Default: hide both buttons
+		$("#btnSave").hide();
+		$("#btnUpdate").hide();
+
+		if (!compCode || !code) {
+			loadDocumentsList('.documentList');
+			$('#emailSettingsTable').hide();
+			$('#DocumentsUpdatehidden').hide();
+			$('#Documentsinserthidden').show();
+
+			$('#btnSave').show();    // Show Submit button
+			$('#btnUpdate').hide();  // Hide Update button
+
+			$(document).on('click', '.dropdown-label', function (e) {
+				e.stopPropagation();
+				const $list = $(this).siblings('.checkbox-list');
+				$('.checkbox-list').not($list).hide();
+				$list.toggle();
+			});
+
+			$(document).click(function () {
+				$('.checkbox-list').hide();
+			});
+
+			$(document).on('click', '.checkbox-list', function (e) {
+				e.stopPropagation();
+			});
+
+			$(document).on('change', '.docCheckbox', function () {
+				$('#emailSettingsTable').show();
+				updateEmailSettingsTable1();
+			});
+
+			function updateEmailSettingsTable1() {
+				const tableBody = $('#emailSettingsTable tbody');
+				tableBody.empty();
+
+				const userId = $('.userDropdown').val();
+				const password = $('.txtPassword').val();
+				const server = $('.txtServer').val();
+				const port = $('.txtPort').val();
+				const ussl = $('.txtUssl').val();
+
+				$('.docCheckbox:checked').each(function () {
+					const docText = $(this).siblings('label').text();
+					const docValue = $(this).val();
+
+					const newRow = `<tr data-doc-code="${docValue}">
+						<td>${userId}</td>
+						<td>${docText}</td>
+						<td>${password}</td>
+						<td>${server}</td>
+						<td>${port}</td>
+						<td>${ussl}</td>
+						<td><button type="button" class="btn btn-danger btn-sm deleteRowBtn">Delete</button></td>
+					</tr>`;
+					tableBody.append(newRow);
+				});
+
+				$('.deleteRowBtn').off('click').on('click', function (e) {
+					e.preventDefault();
+					$(this).closest('tr').remove();
+				});
+			}
+		} else {
+			// EDIT or VIEW MODE
+			loadDocumentsWithSelection();
+
+			$('#emailSettingsTable').show();
+			$('#DocumentsUpdatehidden').show();
+			$('#Documentsinserthidden').hide();
+
+			if (mode === "view") {
+				setFormReadOnly();
+				$('#EmailSettingForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+			} else {
+				$('#btnSave').hide();    // Hide Submit
+				$('#btnUpdate').show();  // Show Update
+			}
+
+			$(document).on('click', '.dropdown-label1', function (e) {
+				e.stopPropagation();
+				const $list = $(this).siblings('.checkbox-list1');
+				$('.checkbox-list1').not($list).hide();
+				$list.toggle();
+			});
+		}
+
+		// SUBMIT BUTTON (INSERT MODE)
+		$('#btnSave').on('click', function (e) {
+			e.preventDefault();
+			if (!validateRequiredField('#userDropdown1', 'UserID')) return;
+			if (!validateRequiredField('#txtPassword1', 'Password')) return;
+			if (!validateRequiredField('#txtServer1', 'SMTP Server')) return;
+			if (!validateRequiredField('#txtPort1', 'SMTP Port')) return;
+			if (!validateRequiredField('#txtUssl1', 'SMTP USSL')) return;
+
+			const items = [];
+			let hasError = false;
+
+			$('#emailSettingsTable tbody tr').each(function (index) {
+				const row = $(this);
+				const userId = row.find('td:eq(0)').text().trim();
+				const document = row.find('td:eq(1)').text().trim();
+				const docCode = row.attr('data-doc-code');
+				const password = row.find('td:eq(2)').text().trim();
+				const server = row.find('td:eq(3)').text().trim();
+				const port = row.find('td:eq(4)').text().trim();
+				const ussl = row.find('td:eq(5)').text().trim();
+				const Insnerttype = "Insert";
+
+				// if (!userId || !document || !docCode || !password || !server || !port || !ussl) {
+				// 	toastr.error(`Row ${index + 1} has empty fields. Please fill all values.`);
+				// 	hasError = true;
+				// 	return false;
+				// }
+
+				items.push({ UserID: userId, Document: document, DocumentCode: docCode, Password: password, SmtpServer: server, SmtpPort: port, SmtpUssl: ussl, Insnerttype });
+			});
+
+			if (hasError) return;
+
+			$.ajax({
+				url: '/EmailSetting/SubmitEmailSettings',
+				type: 'POST',
+				data: JSON.stringify({ Items: items }),
+				contentType: 'application/json; charset=utf-8',
+				success: function (response) {
+					if (response.success) {
+						toastr.success(response.message);
+					} else {
+						toastr.error(response.message);
+					}
+				},
+				error: function () {
+					toastr.error('Error submitting email settings.');
+				}
+			});
+		});
+
+		// UPDATE BUTTON (EDIT MODE)
+		$('#btnUpdate').on('click', function (e) {
+			e.preventDefault();
+			const compCode = getQueryParameter('compCode');
+			const code = getQueryParameter('codeId');
+			const items = [];
+			let hasError = false;
+
+			$('#emailSettingsTable tbody tr').each(function (index) {
+				const row = $(this);
+				const userId = row.find('td:eq(0)').text().trim();
+				const document = row.find('td:eq(1)').text().trim();
+				const docCode = row.attr('data-doc-code');
+				const password = row.find('td:eq(2)').text().trim();
+				const server = row.find('td:eq(3)').text().trim();
+				const port = row.find('td:eq(4)').text().trim();
+				const ussl = row.find('td:eq(5)').text().trim();
+				const Insnerttype = "Update";
+							
+
+				items.push({
+					UserID: userId,
+					Document: document,
+					DocumentCode: docCode,
+					Password: password,
+					SmtpServer: server,
+					SmtpPort: port,
+					SmtpUssl: ussl,
+					Insnerttype,
+					compCode,
+					code
+				});
+			});
+
+			if (hasError) return;
+
+			$.ajax({
+				url: '/EmailSetting/UpdateEmailSettings',
+				type: 'POST',
+				data: JSON.stringify({ Items: items }),
+				contentType: 'application/json; charset=utf-8',
+				success: function () {
+					toastr.success("Email settings updated successfully!");
+				},
+				error: function () {
+					toastr.error('Error updating email settings.');
+				}
+			});
+		});
+	});
+
+	// Helper functions
+	function loadDocumentsList(containerSelector) {
+		$.ajax({
+			url: '/EmailSetting/GetDocument',
+			type: 'GET',
+			success: function (data) {
+				let html = '';
+				data.forEach((item, index) => {
+					html += `<div class="form-check">
+						<input class="docCheckbox" type="checkbox" id="doc_${index}" value="${item.value}">
+						<label class="form-check-label" for="doc_${index}">${item.text}</label>
+					</div>`;
+				});
+				$(containerSelector).html(html);
+			}
+		});
+	}
+
+	function loadDocumentsWithSelection() {
+		const compCode = getQueryParameter('compCode');
+		const code = getQueryParameter('codeId');
+
+		$.ajax({
+			url: '/EmailSetting/GetAlldataList',
+			type: 'GET',
+			data: { compCode, code },
+			success: function (response) {
+				const items = response.items;
+				const tbody = $('#emailSettingsTable tbody');
+				tbody.empty();
+
+				if (items && items.length > 0) {
+					$('.userDropdown').val(items[0].userId);
+					$('.txtPassword').val(items[0].password);
+					$('.txtServer').val(items[0].smtpServer);
+					$('.txtPort').val(items[0].smtpPort);
+					$('.txtUssl').val(items[0].smtpUssl);
+
+					const selectedDocs = items.map(item => item.document?.trim());
+					loadEditableDocuments(selectedDocs);
+				} else {
+					tbody.append('<tr><td colspan="7">No records found.</td></tr>');
+				}
+			},
+			error: function () {
+				console.error("Error fetching email settings.");
+			}
+		});
+	}
+
+	function loadEditableDocuments(selectedDocs = []) {
+		$.ajax({
+			url: '/EmailSetting/GetDocumentList',
+			type: 'GET',
+			success: function (docTypes) {
+				const container = $('.documentList1');
+				container.empty();
+
+				docTypes.forEach(function (doc) {
+					const isChecked = selectedDocs.includes(doc.text?.trim()) ? 'checked' : '';
+					const checkbox = `<label style="display:block;">
+						<input type="checkbox" class="docCheckbox" value="${doc.value}" data-docname="${doc.text?.trim()}" ${isChecked} />
+						${doc.text?.trim()}
+					</label>`;
+					container.append(checkbox);
+				});
+
+				updateEmailSettingsTable();
+
+				container.find('.docCheckbox').off('change').on('change', function () {
+					updateEmailSettingsTable();
+					$('#emailSettingsTablehidden').show();
+				});
+			}
+		});
+	}
+
+	function updateEmailSettingsTable() {
+		const tableBody = $('#emailSettingsTable tbody');
+		tableBody.empty();
+
+		const userId = $('.userDropdown').val();
+		const password = $('.txtPassword').val();
+		const server = $('.txtServer').val();
+		const port = $('.txtPort').val();
+		const ussl = $('.txtUssl').val();
+
+		$('.docCheckbox:checked').each(function () {
+			const docValue = $(this).val();
+			const docText = $(this).data('docname');
+
+			const newRow = `<tr data-doc-code="${docValue}">
+				<td>${userId}</td>
+				<td>${docText}</td>
+				<td>${password}</td>
+				<td>${server}</td>
+				<td>${port}</td>
+				<td>${ussl}</td>
+				<td><button type="button" class="btn btn-danger btn-sm deleteRowBtn">Delete</button></td>
+			</tr>`;
+			tableBody.append(newRow);
+		});
+
+		$('.deleteRowBtn').off('click').on('click', function (e) {
+			e.preventDefault();
+			$(this).closest('tr').remove();
+		});
+	}
+
+	function setFormReadOnly() {
+		$('#EmailSettingForm input').prop('readonly', true);
+		$('#EmailSettingForm select').prop('disabled', true);
+		$('#customToggle').css('pointer-events', 'none');
+
+		$('#btnSave').hide();
+		$('#btnUpdate').hide();
+		$('.deleteRowBtn').hide();
+	}
+</script>
+
+

@@ -1,0 +1,195 @@
+﻿@{
+	ViewBag.Title = "QC Disc Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">QC Disc Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "QCDiscMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add QC Disc
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export"> 
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblQCDiscMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>CODE</th>
+						<th>NAME</th>
+						<th>NO OF QC DISCOUNT</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<div class="pagination-wrapper">
+		<ul class="pagination" id="tablePagination"></ul>
+	</div>
+</fieldset>
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadAllQCDiscSummary();
+    });
+
+    function loadAllQCDiscSummary() {
+        const searchTerm = $('#searchBox').val();
+        $.ajax({
+            url: '/QCDiscMasterList/GetAllQCDisc',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+
+                const lists = res.lists;
+                const totalCount = res.totalCount;
+
+                let tbody = $('#tblQCDiscMaster tbody');
+                tbody.empty();
+
+                if (!lists || lists.length === 0) {
+                    tbody.append('<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                $.each(lists, function (index, item) {
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${item.item_Code}</td>
+                            <td>${item.item_Code || ''}</td>
+                            <td>${item.item_Name || ''}</td>
+                            <td>${item.item_Count || 0}</td>
+                            <td>
+                                <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editQCDisc(${item.item_Code})"></i>
+                                <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewQCDisc(${item.item_Code})"></i>
+                                <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteQCDisc(${item.item_Code})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.success('Error loading QC Disc data: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button></li>`;
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button></li>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li><button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button></li>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button></li>`;
+            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button></li>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllQCDiscSummary();
+    }
+
+    $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadAllQCDiscSummary();
+    });
+
+    function editQCDisc(code) {
+        window.location.href = '/QCDiscMaster/Index?id=' + encodeURIComponent(code);
+    }
+
+    function viewQCDisc(code) {
+        window.location.href = '/QCDiscMaster/Index?id=' + encodeURIComponent(code) + '&readOnly=true';;
+    }
+
+    function deleteQCDisc(code) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete the QC Disc entry.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/QCDiscMaster/DeleteQcDiscByCode',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                                loadAllQCDiscSummary();
+                            });
+                        } else {
+                            Swal.fire('Failed', response.message, 'warning');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'An error occurred while deleting the record.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+</script>

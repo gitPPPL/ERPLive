@@ -1,0 +1,215 @@
+﻿@{
+    ViewBag.Title = "Master Insert";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="dashboard-header">
+    <h4>Dashboard</h4>
+    <p>Welcome back ! <span>kks</span></p>
+    <div class="breadcrumb-area d-flex align-items-center gap-1">
+        <i class="fa fa-house"></i>
+        <span>/</span>
+        <a href="#">Dashboard</a>
+    </div>
+</div>
+
+@* Dashboard Card *@
+<div class="row">
+    <div class="col-12 col-md-3">
+        <div class="sb-earnings-card sb-orange" onclick="window.location.href='@Url.Action("Index", "ApprovalReceivedList")'">
+            <div class="sb-earnings-top">
+                <h2 class="sb-amount" id="ApprovalReceivedCount"></h2>
+                <div class="sb-icon-circle">
+                    <i class="fas fa-arrow-down-short-wide"></i>
+                </div>
+            </div>
+            <p class="sb-label">Approval Received</p>
+            <div class="sb-bottom-row">
+                <span>View Total Approval Received</span>
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="sb-earnings-card sb-blue" onclick="window.location.href='@Url.Action("Index", "ApprovalSendList")'">
+            <div class="sb-earnings-top">
+                <h2 class="sb-amount" id="SendRequestCount"></h2>
+                <div class="sb-icon-circle">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+            </div>
+            <p class="sb-label">Approval Send</p>
+            <div class="sb-bottom-row">
+                <span>View Total Approval Send</span>
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="sb-earnings-card sb-green">
+            <div class="sb-earnings-top">
+                <h2 class="sb-amount">90</h2>
+                <div class="sb-icon-circle">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+            <p class="sb-label">Total Approved</p>
+            <div class="sb-bottom-row">
+                <span>View Total Approved</span>
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="sb-earnings-card sb-red">
+            <div class="sb-earnings-top">
+                <h2 class="sb-amount">$450</h2>
+                <div class="sb-icon-circle">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            </div>
+            <p class="sb-label">Loss This Week</p>
+            <div class="sb-bottom-row">
+                <span>3% decline</span>
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="container_graph">
+    <div class="row">
+        <!-- Donut Chart -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">Sales Distribution</div>
+                <canvas id="donutChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- Line Chart -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">Monthly Revenue</div>
+                <canvas id="lineChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Donut Chart
+    const donutCtx = document.getElementById('donutChart').getContext('2d');
+    const donutChart = new Chart(donutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Online', 'In-Store', 'Wholesale'],
+            datasets: [{
+                label: 'Sales',
+                data: [55, 30, 15],
+                backgroundColor: ['#3b82f6', '#10b981', '#f97316'],
+                borderColor: '#fff',
+                borderWidth: 2,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#475569',
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            }
+        }
+    });
+    // Line Chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Revenue',
+                data: [3000, 4500, 3800, 5000, 6000, 7200],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#6366f1',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#64748b',
+                        font: { size: 13 }
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#64748b',
+                        font: { size: 13 }
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#requestCount').css('cursor', 'pointer');
+        $('#PendingforApproval').css('cursor', 'pointer');
+        $('#SendRequestCount').css('cursor', 'pointer');
+        $('#requestCount').click(function () {
+            window.location.href = '/RequestforTravelDetailsList/Index';
+        });
+         $('#PendingforApproval').click(function () {
+             window.location.href = '/PendingforApprovalList/Index?type=1';
+         });
+        $('#SendRequestCount').click(function () {
+            window.location.href = '/PendingforApprovalList/Index?type=2';
+        });
+        $.ajax({
+            url: '/Dashboard/GetAllDashboardCount',
+            type: 'GET',
+            success: function (response) {
+                console.log('kks',response)
+                if (response.success) {
+                    // $('#ApprovalReceivedCount').text(response.requestCount); 
+                    $('#ApprovalReceivedCount').text(response.requestCount);
+                    $('#SendRequestCount').text(response.sendRequestCount);
+                   
+                } else {
+                    toastr.error("Failed to load dashboard count.");
+                }
+            },
+            error: function () {
+                toastr.error("An error occurred while fetching dashboard count.");
+            }
+         });
+    });
+
+</script>
+
+

@@ -1,0 +1,322 @@
+﻿@{
+    ViewBag.Title = "Diwali Bonus Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+}
+
+<fieldset>
+
+    <legend class="legend-field">Diwali Bonus Master</legend>
+
+    <div class="row">
+        <div class="offset-md-4 col-md-8">
+            <div class="button-right mb-2">
+                @if (canPrint)
+                {
+                    <button class="btn btn-print">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-mail">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+
+                <button class="btn btn-send">
+                    <i class="fa fa-paper-plane"></i> Approval Send
+                </button>
+
+                @if (canApproval)
+                {
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <form id="DiwaliBonusMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlType">Type<span class="required">*</span></label>
+                    <select class="form-control" id="ddlType" name="Type">
+                        <option value="">Select Type</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtJoinDate">Join Date<span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtJoinDate" name="JoinDate" placeholder="Enter Join Date">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumPercent">Percent<span class="required">*</span></label>
+                    <input type="number" class="form-control limit-length" id="NumPercent" name="Percent" placeholder="0.00" data-maxlength="16" step="0.01">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumAmount">Amount</label>
+                    <input type="number" class="form-control limit-length" id="NumAmount" name="Amount" placeholder="0.00" data-maxlength="16" step="0.01">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <button onclick="window.location.href='@Url.Action("Index", "DiwaliBonusMasterList")'" type="button" class="btn btn-draft" id="BacktolistID">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+            <div class="offset-md-5 col-md-3">
+                <div class="button-right">
+                    <button id="btnSaves" type="Save" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const mode = urlParams.get("mode");
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        LoadDropDown().then(() => {
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadFormByID(rowId);
+                if (isReadOnly) setFormReadOnly();
+            }
+        });
+
+        if (mode === "view")
+        {
+            setFormReadOnly();
+            $('#DiwaliBonusMasterForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
+
+        $("#ddlType, #DtJoinDate, #NumPercent").on('change keyup', function () {
+            if ($(this).val().trim() !== "") {
+                $(this).removeAttr('style');
+            }
+        });
+
+
+    $("#btnSaves").click(function (e) {
+        e.preventDefault();
+
+        var TYPE = $("#ddlType").val().trim();
+        var JOIN_DATE = $("#DtJoinDate").val().trim();
+        var PERC = $("#NumPercent").val().trim();
+        var AMT = $("#NumAmount").val().trim();
+        var CODE = $("#CODE").val().trim();
+        var action = (!CODE || isNaN(CODE) || CODE <= 0) ? "INSERT" : "UPDATE";
+
+        if (!CODE) {
+            getHolidayCode().then(code => {
+                CODE = code;
+                saveData();
+            });
+        } else {
+            saveData();
+        }
+
+        function saveData() {
+            if (!TYPE) {
+                toastr.warning("Please select Type.");
+                $("#ddlType").attr("style", "border-color:red !important;").focus();
+                return;
+            }
+
+            if (!JOIN_DATE) {
+                toastr.warning("Please select Join Date.");
+                $("#DtJoinDate").attr("style", "border-color:red !important;").focus();
+                return;
+            }
+
+            if (!PERC || parseFloat(PERC) <= 0) {
+                toastr.warning("Please fill Percentage.");
+                $("#NumPercent").attr("style", "border-color:red !important;").focus();
+                return;
+            }
+
+            var formData = {
+                CODE: CODE ? parseInt(CODE) : null,
+                TYPE: TYPE,
+                JOIN_DATE: JOIN_DATE,
+                PERC: parseFloat(PERC),
+                AMT: parseFloat(AMT) || 0,
+                ACTION: action
+            };
+
+            $("#btnSaves").prop("disabled", true);
+
+            $.ajax({
+                url: '/DiwaliBonusMaster/SaveMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Data saved successfully.");
+                        window.location.href = '/DiwaliBonusMaster/Index?id=' +
+                            encodeURIComponent(CODE) + '&mode=view';
+                    } else {
+                        toastr.error(response.message || "An error occurred.");
+                    }
+                },
+                error: function () {
+                    toastr.error("Something went wrong while saving the data.");
+                },
+                complete: function () {
+                    $("#btnSaves").prop("disabled", false);
+                }
+            });
+        }
+    });
+
+
+
+        $('input[type=number]').on('input', function() {
+            var maxLength = $(this).attr('data-maxlength') || 14;  // default max length if not set
+            var value = $(this).val();
+
+            if(value.length > maxLength) {
+                $(this).val(value.slice(0, maxLength));
+            }
+        });
+
+    });
+
+    async function LoadDropDown() {
+        try {
+            await Promise.all([
+                DDlType()
+            ]);
+        } catch (error) {
+            console.error("Error in loading dropdowns:", error);
+        }
+    }
+
+    async function DDlType() {
+        try {
+            const response = await fetch('/DiwaliBonusMaster/DDLType');
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            const data = await response.json();
+            const ddl = $('#ddlType');
+            ddl.empty();
+            ddl.append('<option value="" selected>-- Select Department --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Type: ", error);
+            toastr.warning('Error loading Type: ' + error.message);
+        }
+    }
+
+    function setFormReadOnly() {
+        $('#DiwaliBonusMasterForm :input').prop('disabled', true);
+        $('#btnSaves').hide();
+        $('#BacktolistID').prop('disabled', false);
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function LoadFormByID(code) {
+        $.ajax({
+            url: '/DiwaliBonusMasterList/GetdataByCode',
+            type: 'GET',
+            data: { code },
+            success: function (res) {
+                if (!res || !res.success || !res.data) {
+                    toastr.warning("No data found for the given ID.");
+                    return;
+                }
+
+                const data = res.data;
+                $('#CODE').val($.trim(data.code || 0));
+                $('#ddlType').val(data.type || '');
+                $("#DtJoinDate").val(formatDate(data.joiN_DATE));
+                $('#NumPercent').val(data.perc || 0);
+                $('#NumAmount').val(data.amt || 0);
+            },
+            error: function (xhr) {
+                toastr.error("Error loading data: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    }
+
+    function getHolidayCode() {
+        return fetch('/DiwaliBonusMaster/Getcode')
+        .then(response => response.json())
+        .then(data => data.code)
+        .catch(() => null);
+    }
+</script>
+
+<style>
+    /* Hide number input arrows in Webkit browsers (Chrome, Safari, Edge) */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Hide number input arrows in Firefox */
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>

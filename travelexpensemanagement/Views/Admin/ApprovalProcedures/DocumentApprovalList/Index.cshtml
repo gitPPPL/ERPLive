@@ -1,0 +1,228 @@
+﻿@{
+	ViewBag.Title = "Document Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Document Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "DocumentApproval")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Document Approval
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblDocumentApproval" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Name</th>
+						<th>Code</th>
+					
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+	<div class="pagination-wrapper">
+		<ul class="pagination" id="tablePagination"></ul>
+	</div>
+</fieldset>
+<script>
+
+	let currentPage = 1;
+	let pageSize = 10;
+	let moduleMap = {};
+	let parentModuleMap = {};
+
+	$(document).ready(function () {
+		loadAllMenus();
+	});
+
+
+	function loadAllMenus() {
+			  const searchTerm = $('#searchBox').val();
+
+			  $.ajax({
+				url: '/DocumentApprovalList/GetDataList',
+				type: 'GET',
+				dataType: 'json',
+				data: {
+				  searchTerm: searchTerm,
+				  pageNumber: currentPage,
+				  pageSize: pageSize
+				},
+				success: function (res) {
+
+				 if (!res.success) {
+				toastr.error("Failed to load data.");
+				return;
+			}
+
+				  const TemperatureList = res.lists;
+				  const totalCount = res.totalCount;
+				  console.log('ss', res.lists);
+
+				  let tbody = $('#tblDocumentApproval tbody');
+				  tbody.empty();
+
+				  if (TemperatureList.length === 0) {
+					tbody.append('<tr><td colspan="8" class="text-center text-muted">No ?lIST found.</td></tr>');
+				  } else {
+				$.each(TemperatureList, function (index, item) {
+			  $('#tblDocumentApproval tbody').append(`
+				<tr>
+
+					<td>${item.doC_CODE}</td>
+					<td>${item.name}</td>
+		
+				  <td>
+						<button class="btn btn-sm btn-light">
+						<i class="fas fa-edit" style="cursor: pointer;" title="Edit" onclick="AddOrEditFunction('${item.doC_CODE}')"></i>
+						</button>
+						<button class="btn btn-sm btn-light">
+						<i class="fas fa-eye" style="cursor: pointer;" title="View Detail" onclick="viewMenuDetails('${item.doC_CODE}')"></i>
+						</button>
+						<button class="btn btn-sm btn-light btn-delete" onclick="deleteTemp('${item.doC_CODE}')">
+						<i class="fas fa-trash text-danger" title="Delete"></i>
+						</button>
+				  </td>
+				</tr>
+			  `);
+			});
+
+					renderPagination(totalCount, pageSize, currentPage);
+				  }
+				},
+				error: function (xhr) {
+				  toastr.error('Error loading menu list: ' + xhr.responseText);
+				}
+			  });
+			}
+
+			   function formatDate(dateString) {
+				  const date = new Date(dateString);
+				  const day = String(date.getDate()).padStart(2, '0');
+				  const month = String(date.getMonth() + 1).padStart(2, '0');
+				  const year = date.getFullYear();
+				  return `${day}/${month}/${year}`;
+			   }
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+
+		// Clear previous pagination
+		paginationContainer.empty();
+
+		// No records case
+		if (total === 0) {
+			paginationContainer.html('<span class="text-muted"></span>');
+			return;
+		}
+
+		// Don't render pagination if only one page
+		if (totalPages <= 1) return;
+
+		let paginationHtml = '';
+
+		// First and Prev
+		if (currentPage > 1) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) {
+			endPage = Math.min(5, totalPages);
+		}
+		if (currentPage >= totalPages - 2) {
+			startPage = Math.max(totalPages - 4, 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			paginationHtml += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		// Next and Last
+		if (currentPage < totalPages) {
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(paginationHtml);
+	}
+	function goToPage(page) {
+		currentPage = page;
+		loadAllMenus();
+	}
+
+	$('#searchBox').on('keyup', function () {
+		currentPage = 1;
+		loadAllMenus();
+	});
+
+	//Redirect to EDIT AND VIEW FROM
+	function AddOrEditFunction(code)
+	{
+	 window.location.href = '/DocumentApproval/Index?id=' + encodeURIComponent(code);
+	}
+
+	function viewMenuDetails(code)
+	{
+	 window.location.href = '/DocumentApproval/Index?id=' + encodeURIComponent(code) + '&mode=view' ;
+	}
+
+
+	function deleteTemp(code) {
+		if (!confirm('Are you sure you want to delete this Document Approval ?')) {
+			return;
+		}
+
+		$.ajax({
+			url: '/DocumentApprovalList/Delete',
+			type: 'POST',
+			data: { code: code },
+			success: function (res) {
+				if (res.success) {
+					toastr.success('Deleted successfully.');
+					loadAllMenus();
+				} else {
+					toastr.error(res.message || 'Failed to delete.');
+				}
+			},
+			error: function () {
+				toastr.error('Error deleting Document Approval.');
+			}
+		});
+	}
+
+</script>

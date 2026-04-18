@@ -1,0 +1,408 @@
+﻿@{
+    ViewBag.Title = "Document Type Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Document Type Master</legend>
+
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnBackToList" onclick="window.location.href='@Url.Action("Index", "DocumentTypeMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i> Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="DocumentTypeMasterForm">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDocumentType">Document Type<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtDocumentType" maxlength="4" name="DocumentType" placeholder="Enter Document Type">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDocumentName">Document Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtDocumentName" maxlength="50" name="DocumentName" placeholder="Enter Document Name">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlTransactionType">Transaction Type<span class="required">*</span></label>
+                    <select id="ddlTransactionType" class="form-control">
+                        <option selected disabled>- Select Transaction Type -</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlStockMethod">Stock Method</label>
+                    <select class="form-control" id="ddlStockMethod" name="StockMethod">
+                        <option selected disabled>-- Select Stock Method --</option>
+                        <option value="+">+</option>
+                        <option value="-">-</option>
+                        <option value="NA">NA</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtSno">Sorting Serial <span class="required">*</span></label>
+                    <input type="text" id="TxtSno" class="form-control" oninput="allowOnlyNumbers(this);" maxlength="5" placeholder="Enter Sorting Serial" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="DdActive" value="1" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="status-label" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+
+        let OutstandUpdateCd=0;
+        let PreviousInputDt = "";
+        let allMastData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let ModeOfControl="";
+        let getDocTypeMastDt=[];
+
+
+        $(document).ready(function(){
+         transactionDtBind();
+        const storedData = localStorage.getItem('editDocTypeMast');
+        ModeOfControl = localStorage.getItem('Mode');
+          localStorage.removeItem('Mode');
+          console.log(storedData);
+
+
+        $('#DdActive').on('change', function () {
+             let isChecked = $(this).is(':checked');
+    let status = isChecked ? 'Active' : 'Inactive';
+    let value = isChecked ? 1 : 0;
+    $('#statusText').text(status);
+    $(this).val(value);
+        })
+
+
+        if (storedData && ModeOfControl === 'Edit') {
+         getDocTypeMastDt = JSON.parse(storedData);
+         OutstandUpdateCd = getDocTypeMastDt.code;
+         PreviousInputDt = getDocTypeMastDt.code;
+
+         fillTextFields();
+         $('input').prop('readonly', false);
+        $('#ddlStockMethod, #ddlTransactionType').prop('disabled', false);
+          $('#btn-save').show();
+          $('#cancelBtn').show();
+          localStorage.removeItem('editDocTypeMast');
+
+        }
+        else if (storedData && ModeOfControl === 'View') {
+            $('#btn-save').hide();
+            $('#cancelBtn').hide();
+            getDocTypeMastDt = JSON.parse(storedData);
+           fillTextFields();
+
+          $('input').prop('readonly', true);
+        $('#ddlStockMethod, #ddlTransactionType').prop('disabled', true);
+        disableToggle();
+          localStorage.removeItem('editDocTypeMast');
+        }
+
+         $('#TxtDocumentType').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#TxtDocumentName').focus();
+                }
+            });
+            $('#TxtDocumentName').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#ddlStockMethod').focus();
+                }
+            });
+
+            $('#ddlStockMethod').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#TxtSno').focus();
+
+                }
+            });
+             $('#TxtSno').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#ddlTransactionType').focus();
+
+                }
+            });
+              $('#ddlTransactionType').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#ddActive').focus();
+
+                }
+            });
+            $('#ddActive').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#btn-save').focus();
+                }
+            });
+
+        });
+     $('#btn-save').on('click', function (e) {
+        e.preventDefault();
+
+        if (!validateRequiredField('#TxtDocumentType', 'Document Type')) return;
+        if (!validateRequiredField('#TxtDocumentName', 'Document Name')) return;
+        if (!validateRequiredField('#ddlTransactionType', 'Transaction Type')) return;
+
+        var DocType = toNullableString($('#TxtDocumentType').val());
+        var DocName = toNullableString($('#TxtDocumentName').val());
+        var TransactionType = toNullableString($('#ddlTransactionType').val());
+        var StockMethod = toNullableString($('#ddlStockMethod').val());
+        var Sno = toNullableInt($('#TxtSno').val());
+        var active = $('#DdActive').val();
+
+        var documentDt = {
+            DocType: DocType,
+            DocName: DocName,
+            TransactionType: TransactionType,
+            StockMethod: StockMethod,
+            Sno: Sno,
+            active: active
+        };
+        if (ModeOfControl === 'Edit') {
+            EditDocumentTypemast(documentDt, DocType);
+        } else {
+            saveDoctypeMastDt(documentDt, DocType);
+        }
+    });
+
+     function saveDoctypeMastDt(documentDt, DocType) {
+        checkExistOrNot(DocType)
+            .done(function (data) {
+                if (data?.status && data.exists) {
+                    toastr.warning("Duplicate Document Type Name");
+                    return;
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveDocumentMastDt", "DocumentTypeMaster")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(documentDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success('Data saved successfully.');
+                            resetFields();
+                            setTimeout(function () {
+                                window.location.href = '/DocumentTypeMasterList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX error:", xhr.responseText);
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+            })
+            .fail(function (xhr, status, error) {
+                console.error("Check Document Type failed:", error);
+                toastr.error("Error while checking Document Type.");
+            });
+    }
+
+     function EditDocumentTypemast(documentDt, DocType) {
+
+        if (PreviousInputDt !== DocType) {
+            checkExistOrNot(DocType)
+                .done(function (data) {
+                    if (data?.status && data.exists) {
+                        toastr.warning("Duplicate Document Type Name");
+                        return;
+                    }
+                    updateDocumentData(documentDt);
+                })
+                .fail(function (xhr, status, error) {
+                    console.error("Check Document Type failed:", error);
+                    toastr.error("Error while checking Document Type.");
+                });
+        } else {
+            updateDocumentData(documentDt);
+        }
+    }
+
+    function updateDocumentData(documentDt) {
+        $.ajax({
+            url: '/DocumentTypeMaster/UpdateDoctypemastDt',
+            type: 'POST',
+            data: JSON.stringify(documentDt),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success('Data updated successfully.');
+                    resetFields();
+                    setTimeout(function () {
+                        window.location.href = '/DocumentTypeMasterList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+
+        function resetFields() {
+               $('#TxtDocumentType').val('');
+               $('#TxtDocumentName').val('');
+               $('#TxtSno').val('');
+               $('#ddlStockMethod').val($('#ddlStockMethod option:first').val());
+               $('#ddlTransactionType').val($('#ddlTransactionType option:first').val());
+               $('#searchInput').val('');
+           }
+
+
+        function checkExistOrNot(doctypeData)
+        {
+             return $.ajax({
+            url: '/DocumentTypeMaster/getdocTypeExitOrNot',
+            type: 'GET',
+            dataType: 'json',
+            data: { doctype: doctypeData }
+        });
+        }
+
+
+
+       function fillTextFields()
+       {
+           $('#TxtDocumentType').val(getDocTypeMastDt.code);
+           $('#TxtDocumentName').val(getDocTypeMastDt.documentType);
+           $('#TxtSno').val(getDocTypeMastDt.sno);
+
+        transactionDtBind();
+        setTimeout(function () {
+        $('#ddlTransactionType option').filter(function () {
+            return $(this).text().trim().toLowerCase() === getDocTypeMastDt.transactionType.trim().toLowerCase();
+        }).prop('selected', true);
+        }, 300);
+         $('#ddlStockMethod').val(getDocTypeMastDt.stock);
+        setActiveStatus(getDocTypeMastDt.active);
+
+       }
+
+       function allowOnlyNumbers(input) {
+              input.value = input.value.replace(/[^0-9]/g, '');
+       }
+
+    const toNullableInt = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : parseInt(t, 10);
+    };
+
+    const toNullableString = (v) => {
+        const t = String(v ?? '').trim();
+        return t === '' ? null : t;
+    };
+
+
+        function setActiveStatus(input)
+        {
+        let isActive = input == 1;
+        $('#DdActive').prop('checked', isActive);
+        $('#DdActive').val(isActive ? 1 : 0);
+        $('#statusText').text(isActive ? 'Active' : 'Inactive');
+        }
+
+        function transactionDtBind() {
+            $.ajax({
+                url: '/DocumentTypeMaster/GettransactionDt',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.status) {
+                        TransactionName=data.data;
+                        var ddTranstype = $('#ddlTransactionType');
+                        ddTranstype.empty().append('<option selected disabled> - Select Transaction Type - </option>');
+                        $.each(data.data, function(index, item) {
+                            ddTranstype.append('<option value="' + item.name + '" data-name="' + item.name + '">' + item.name + '</option>');
+                        });
+                    } else {
+                        toastr.error("Failed to load transaction type.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error loading transaction type.');
+                }
+            });
+        }
+
+      document.getElementById("cancelBtn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel all the changes?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire(
+            'Cancelled!',
+            'Your action has been cancelled.',
+            'success'
+          )
+           if(ModeOfControl=='Edit')
+         {
+          fillTextFields();
+
+    }
+    else
+    {
+    resetFields();
+    }
+
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire(
+            'Resumed',
+            'Your action is still in progress.',
+            'info'
+          )
+        }
+      });
+    });
+</script>

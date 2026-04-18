@@ -1,0 +1,272 @@
+﻿@{
+	ViewBag.Title = "Transport Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Transport Master</legend>
+	<div class="row">
+
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "TransportMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="transportMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+
+		<div class="row"> 
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TRANSPORT_NAME" class="form-label"><span class="required">*</span>Transport Name</label>
+					<input type="text" class="form-control" id="TRANSPORT_NAME" name="TRANSPORT_NAME" placeholder="Enter Transport Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="PARTY_NAME" class="form-label"><span class="required">*</span>Party Name</label>
+					<select class="form-control" id="PARTY_NAME" name="PARTY_NAME">
+						<option value="">-- Select Party Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="OWNER_NAME" class="form-label">Owner Name</label>
+					<input type="text" class="form-control" id="OWNER_NAME" name="OWNER_NAME" placeholder="Enter Owner Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ADDRESS" class="form-label">Address</label>
+					<input type="text" class="form-control" id="ADDRESS" name="ADDRESS" placeholder="Enter Address">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="GSTIN_NO" class="form-label">GSTIN No</label>
+					<input type="text" class="form-control" id="GSTIN_NO" name="GSTIN_NO" placeholder="Enter GST No.">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="PAN_NO" class="form-label">PAN No</label>
+					<input type="text" class="form-control" id="PAN_NO" name="PAN_NO" placeholder="Enter PAN No">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TDS" class="form-label">TDS %</label>
+					<input type="number" step="0.01" class="form-control" id="TDS" name="TDS" placeholder="Enter TDS %">
+
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="EXPIRY_DATE" class="form-label">Expiry Date</label>
+					<input type="date" class="form-control" id="EXPIRY_DATE" name="EXPIRY_DATE" placeholder="Enter Expiry Date">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SALE_GROUP" class="form-label">Sale Group</label>
+					<input type="text" class="form-control" id="SALE_GROUP" name="SALE_GROUP" placeholder="Enter Sales Group">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DECELERATION_NUMBER" class="form-label">Deceleration Number</label>
+					<input type="text" class="form-control" id="DECELERATION_NUMBER" name="DECELERATION_NUMBER" placeholder="Enter Deceleration No.">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DECELERATION_DATE" class="form-label">Deceleration Date</label>
+					<input type="date" class="form-control" id="DECELERATION_DATE" name="DECELERATION_DATE" placeholder="Enter Deceleration Date">
+				</div>
+			</div>
+			
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				@* <button type="button" id="cancelBtn" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "TransportMasterList")'">Cancel</button> *@
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+
+	let today = new Date();
+	let dd = String(today.getDate()).padStart(2, '0');
+	let mm = String(today.getMonth() + 1).padStart(2, '0');
+	let yyyy = today.getFullYear();
+	let formattedDate = yyyy + '-' + mm + '-' + dd; 
+
+	$("#EXPIRY_DATE").val(formattedDate);
+	$("#DECELERATION_DATE").val(formattedDate);
+
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+		if (!isNaN(rowId) && rowId > 0) {
+			loadTransportById(rowId);
+			if (isReadOnly) {
+				 setTransportFormReadOnly();
+			}
+		}
+		loadPartyList();
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+
+	function loadPartyList(callback) {
+		$.ajax({
+			url: '/TransportMaster/GetPartyList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#PARTY_NAME');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+				if (typeof callback === "function") callback();
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				toastr.error('Error loading module: ' + error);
+			}
+		});
+	}
+
+	$('#transportMasterForm').on('submit', function (e) {
+		e.preventDefault();
+		if (!validateRequiredField('#TRANSPORT_NAME', 'Transport Name')) return;
+		if (!validateRequiredField('#PARTY_NAME', 'Party Name')) return;
+
+		const code = parseInt($('#CODE').val()) || 0;
+
+		const transportData = {
+			CODE: code,
+			COMP_CODE: 1,
+			NAME: $('#TRANSPORT_NAME').val().trim(),
+			PARTY_CODE: $('#PARTY_NAME').val(), 
+			OWNER_NAME: $('#OWNER_NAME').val().trim(),
+			ADDRESS: $('#ADDRESS').val().trim(),
+			GSTIN: $('#GSTIN_NO').val().trim(),
+			PAN: $('#PAN_NO').val().trim(),
+			TDS_PER: parseFloat($('#TDS').val()) || 0,
+			DECL_NO: $('#DECELERATION_NUMBER').val().trim(),
+			DECL_DATE: $('#DECELERATION_DATE').val() || null,
+			EXPIRY_DATE: $('#EXPIRY_DATE').val() || null,
+			SALE_GROUP: $('#SALE_GROUP').val().trim(),
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			UUSER: 1, 
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? 'E' : 'A',
+			WSID: 'WEB',
+			LIP: '127.0.0.1',
+			LID: 'WEB',
+			ACTION: code > 0 ? 'UPDATE' : 'INSERT'
+		};
+		$.ajax({
+			url: '/TransportMaster/SaveTransport',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(transportData),
+			success: function (response) {
+				if (response.success) {
+					 toastr.success(response.message);
+					// toastr.success("Transport saved successfully!");
+					setTransportFormReadOnly();
+					// $('#transportMasterForm')[0].reset();
+					// setTimeout(() => {
+					// 	window.location.href = '/TransportMasterList/Index';
+					// }, 1000);
+				} else {
+					toastr.warning(response.message || "Something went wrong while saving.");
+				}
+			},
+			error: function (xhr) {
+				const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+	function loadTransportById(code) {
+		$.ajax({
+			url: '/TransportMasterList/GetTransportByCode',
+			type: 'GET',
+			data: { code: code },
+			success: function (res) {
+				console.log('kkssdfsdf',res)
+				if (!res.success || !res.data) {
+					toastr.warning("No transport found for the given code.");
+					return;
+				}
+				const data = res.data;
+
+				$('#CODE').val(data.code);
+				$('#TRANSPORT_NAME').val(data.name);
+				// $('#PARTY_NAME').val(data.partY_CODE).trigger('change');
+				loadPartyList(function () {
+				$('#PARTY_NAME').val(data.partY_CODE);
+				});
+
+				$('#OWNER_NAME').val(data.owneR_NAME);
+				$('#ADDRESS').val(data.address);
+				$('#GSTIN_NO').val(data.gstin);
+				$('#PAN_NO').val(data.pan);
+				$('#TDS').val(data.tdS_PER);
+				$('#DECELERATION_NUMBER').val(data.decL_NO);
+				$('#DECELERATION_DATE').val(data.decL_DATE ? data.decL_DATE.split('T')[0] : '');
+				$('#EXPIRY_DATE').val(data.expirY_DATE ? data.expirY_DATE.split('T')[0] : '');
+				$('#SALE_GROUP').val(data.salE_GROUP);
+
+				const isActive = data.active === 1 || data.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText').text(isActive ? 'Active' : 'Inactive');
+			},
+			error: function (xhr) {
+				console.error("Error loading transport:", xhr);
+				toastr.error('Error: ' + (xhr.responseText || "Failed to load transport data."));
+			}
+		});
+	}
+
+	function setTransportFormReadOnly() {
+		const form = $('#transportMasterForm');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		form.find('.toggle-switch input').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled');
+	}
+
+
+
+
+</script>

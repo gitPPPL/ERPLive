@@ -1,0 +1,426 @@
+﻿@{
+	ViewBag.Title = "Check List Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var currentMenu = ViewBag.CurrentMenu as string;
+
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;  // Exit loop once found current menu permission
+		}
+	}
+}
+
+<fieldset>
+	<legend class="legend-field">CheckList Master List</legend>
+
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="tableSearch" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div> 
+		</div>
+
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				@if (canAdd)
+				{
+					<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "CheckListMaster")'" type="submit" class="btn btn-add">
+						<i class="fa fa-plus"></i>Add
+					</button>
+				}
+				@if (canPrint)
+				{
+					<button class="btn btn-print" onclick="callGetReportAsPdf()">
+						<i class="fa fa-print"></i> Print
+					</button>
+				}
+				@if (canExport)
+				{
+					<button class="btn btn-export" onclick="exportToExcel()">
+						<i class="fas fa-file-export"></i> Export
+					</button>
+				}
+				@if (canMail)
+				{
+					<button class="btn btn-mail">
+						<i class="fa fa-envelope"></i> Mail
+					</button>
+				}
+				@if (canApproval)
+				{
+					<button class="btn btn-approved">
+						<i class="fa fa-check"></i> Approve
+					</button>
+				}
+			</div>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblCheckList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Nature</th>
+						<th>Check List Name</th>
+						<th>Task Name</th>
+						<th>Responsible User</th>
+						<th>Approval User</th>
+						<th>Due Date</th>
+						<th>Frequency</th>
+						<th>Remarks</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</fieldset>
+<script>
+	var canAdd = @canAdd.ToString().ToLower();
+	var canEdit = @canEdit.ToString().ToLower();
+	var canDelete = @canDelete.ToString().ToLower();
+	var canPrint = @canPrint.ToString().ToLower();
+	var canExport = @canExport.ToString().ToLower();
+	var canMail = @canMail.ToString().ToLower();
+	var canApproval = @canApproval.ToString().ToLower();
+	var canDocDetail = @canDocDetail.ToString().ToLower();
+	let currentPage = 1;
+	let pageSize = 10;
+	let responiableUSER = {};
+	let approveUSER = {};
+
+	$(document).ready(function () {
+		$.when(
+			loadResponsibleUserList(),
+			loadApproveUserList()
+		).done(function(){
+			loadAllCheckLists();
+		})
+	});
+	function loadResponsibleUserList() {
+		return $.ajax({
+			url: '/CheckListMaster/GetUserList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#RESPONSIBLE_USER');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+					responiableUSER[item.value] = item.text;
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading responsible users: ", xhr.responseText);
+				toastr.error('Error loading users: ' + error);
+			}
+		});
+	}
+
+	function loadApproveUserList() {
+		return $.ajax({
+			url: '/CheckListMaster/GetUserList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#APPROVAL_USER');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+					approveUSER[item.value] = item.text;
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading approval users: ", xhr.responseText);
+				toastr.error('Error loading users: ' + error);
+			}
+		});
+	}
+
+	function loadAllCheckLists() {
+		const searchTerm = $('#tableSearch').val();
+
+		$.ajax({
+			url: '/CheckListMasterList/GetAllCheckLists',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				console.log(res);
+				const lists = res.lists;
+				const totalCount = res.totalCount;
+
+				let tbody = $('#tblCheckList tbody');
+				tbody.empty();
+
+				if (!lists || lists.length === 0) {
+					tbody.append('<tr><td colspan="11" class="text-center text-muted">No checklists found.</td></tr>');
+					renderPagination(0, pageSize, currentPage);
+					return;
+				}
+
+				$.each(lists, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${item.code}</td>
+							<td>${item.nature || ''}</td>
+							<td>${item.checklisT_NAME || ''}</td>
+							<td>${item.tasK_NAME || ''}</td>
+							<td>${responiableUSER[item.responsiblE_USER] || ''}</td>
+							<td>${approveUSER[item.approvaL_USER] || ''}</td>
+							<td>${item.duE_DATE ? new Date(item.duE_DATE).toLocaleDateString() : ''}</td>
+							<td>${item.frequency || ''}</td>
+							<td>${item.remarks || ''}</td>
+							<td>${item.status || ''}</td>
+							
+
+							 <td>
+								${canEdit ? `<i class="fa fa-edit btn-edit" data-doc="${item.code}" title="Edit" ></i>` : ''}
+								<i class="fa fa-eye btn-view" data-doc="${item.code}" title="View" ></i>
+								${canDelete ? `<i class="fas fa-trash btn-delete" data-doc="${item.code}" title="Delete" ></i>` : ''}
+								<i class="fa fa-file btn-details btn-document" data-doc="${item.code}" title="Details" ></i>
+							</td>
+
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading checklist: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		if (currentPage <= 3) endPage = Math.min(5, totalPages);
+		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(html);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllCheckLists();
+	}
+
+	$('#tableSearch').on('keyup', function () {
+		currentPage = 1;
+		loadAllCheckLists();
+	});
+
+	function AddOrEditCheckList(id) {
+		window.location.href = '/CheckListMaster/Index?id=' + encodeURIComponent(id);
+	}
+
+	function viewCheckListDetails(id) {
+		window.location.href = '/CheckListMaster/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	}
+
+	  $(document).on('click', '.btn-edit', function() {
+		const docCode = $(this).data('doc');
+		AddOrEditCheckList(docCode);
+	});
+
+	$(document).on('click', '.btn-view', function() {
+		const docCode = $(this).data('doc');
+		viewCheckListDetails(docCode);
+
+	});
+
+	$(document).on('click', '.btn-delete', function() {
+		const docCode = $(this).data('doc');
+		deleteCheckList(docCode);  // Make sure this function exists
+	});
+
+	$(document).on('click', '.btn-details', function() {
+		const docCode = $(this).data('doc');
+		showDocumentPopup(docCode);  
+	});
+	
+	function deleteCheckList(code) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This action will permanently delete the checkList .",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/CheckListMaster/DeleteChecklist',
+					type: 'POST',
+					data: { code: code },
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllCheckLists();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function (xhr, status, error) {
+						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+					}
+				});
+			}
+		});
+	}
+
+	// start User Rights button work
+	function exportToExcel() {
+			fetch('/CheckListMasterList/ExportAllDocs')
+				.then(response => {
+					if (!response.ok) throw new Error("Network response was not ok");
+					return response.json();
+				})
+				.then(data => {
+					const filteredData = data.map(item => ({
+						DOC_CODE: item.doC_CODE,
+						DOC_NAME: item.doC_NAME,
+						USER_NO: item.useR_NO
+					}));
+					const worksheet = XLSX.utils.json_to_sheet(filteredData);
+					const workbook = XLSX.utils.book_new();
+					XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+					const pageName = "Check List Master";
+					const now = new Date();
+					const pad = n => String(n).padStart(2, '0');
+					const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+					const fileName = `${pageName}_${timestamp}.xlsx`;
+					XLSX.writeFile(workbook, fileName);
+				})
+				.catch(error => {
+					console.error("Export failed:", error);
+					toastr.error("Failed to export data.");
+				});
+		}
+	function callGetReportAsPdf() {
+		var reportName = "CHECKLIST_MAST";
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+			type: 'GET',
+			data: { Reportname: reportName },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
+	function showDocumentPopup(docCode) {
+		$.ajax({
+			url: '/CheckListMasterList/DocDetailsCode',
+			type: 'POST',
+			dataType: 'json',  // important
+			data: { docCode: docCode },
+			success: function(response) {
+				if(response.success) {
+					showDocumentPopupjQuery(response.data, docCode);
+				} else {
+					toastr.error("Failed to get document details.");
+				}
+			},
+			error: function() {
+				toastr.error("An error occurred while fetching document details.");
+			}
+		});
+	}
+
+
+</script>

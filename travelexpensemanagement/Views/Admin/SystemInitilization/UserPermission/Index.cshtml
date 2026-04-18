@@ -1,0 +1,630 @@
+﻿@{
+    ViewBag.Title = "User Permission";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    <script>
+        function redirectToDashboard() {
+            window.location.href = '@Url.Action("Index", "Dashboard")';
+        }
+    </script>
+    <style>
+        .DepartmentCheckbox-checkbox {
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+    </style>
+}
+<fieldset>
+    <legend>Users Permission Details List</legend>
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchInput" class="form-control border-0" placeholder="Search language..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="">
+            <button id="btnPrint" class="btn btn-print">
+                <i class="fa fa-print"></i> Print
+            </button>
+            <button class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Panel -->
+            <div class="col-md-3 left-panel">
+                <div class="form-check">
+                    <label class="form-check-label" for="selectUser">Select User</label>
+                    <select id="ddlUser" name="User" class="form-control">
+                        <option value="">-- Select User --</option>
+                    </select>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="copyPermission">
+                    <label class="form-check-text" for="copyPermission">Copy Permissions from One User to Another</label>
+                </div>
+                <div id="copydatathidden">
+                    <div class="form-check">
+                        <input type="hidden" id="copyClicked" value="0" />
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <select id="ddlCopyotheruser" name="Copyotheruser" class="form-control">
+                                <option value="">-- Select Copy user --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <select name="CopyYear" id="ddlCopyYear" class="form-control">
+                                <option value="">-- Select Year --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="CopyID" class="btn btn-primary">Copy Permission</button>
+                </div>
+                <div class="d-flex" style="margin-top:10px;">
+                    <button id="submitModulesBtn" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+
+            <!-- Center Panel -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="scrollable-table">
+                        <table class="table-responsive">
+                            <thead class="table-head">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Module Name</th>
+                                </tr>
+                            </thead>
+                            <tbody id="moduleTableBody">
+                                <!-- Dynamic rows go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Panel -->
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="scrollable-table">
+                        <table class="table-responsive">
+                            <thead class="table-head">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Department</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="DepartmentlistTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Table -->
+        <div class="card-list">
+            <div class="table-responsive">
+                <table class="table table-bordered bottom-table table-sm">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Code</th>
+                            <th>Module</th>
+                            <th>Menu Name</th>
+                            <th>Access</th>
+                            <th>Add</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                            <th>Print</th>
+                            <th>Export</th>
+                            <th>Mail</th>
+                            <th>Approval</th>
+                            <th>Docdetail</th>
+                            <th>Module</th>
+                            <th>User Name</th>
+                        </tr>
+                        <tr class="table-second">
+                            <th colspan="3">Select All</th>
+                            <th><input type="checkbox" class="check-all" data-column="access" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="add" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="edit" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="delete" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="print" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="export" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="mail" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="approval" /></th>
+                            <th><input type="checkbox" class="check-all" data-column="docDetail" /></th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="moduleTableBodyList">
+                        <!-- Dynamic rows here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        var check =0;
+        Userlist();
+        ModuleNamelist();
+        Departmentlist();
+        ddlYearslist();
+        UserlistCopyotheruser();
+        $('#copydatathidden').hide();
+        $('#ddlUser').on('change', function () {
+                    var selectedUserId = $(this).val();
+                    if (selectedUserId) {
+                        $.ajax({
+                            url: '/UserPermission/GetUserDetails',
+                            type: 'GET',
+                            data: { UserID: selectedUserId },
+                            success: function (response) {
+                                renderUserDetailsTable(response);
+                            },
+                            error: function () {
+                                alert('Error: Could not communicate with the server.');
+                            }
+                        });
+                    }
+                });
+        // $('#CopyID').on('click', function () {
+        // $('#copyClicked').val("1");
+        // $(this)
+        //     .removeClass('btn-primary')
+        //     .addClass('btn-success')
+        //     .text('Copied');
+        // });
+        $('#copyPermission').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#copydatathidden').slideDown();
+             $("#submitModulesBtn").hide();
+        } else {
+            $('#copydatathidden').slideUp();
+            $('#copyClicked').val("0");
+            $("#submitModulesBtn").show();
+        }
+    });
+        $('#submitModulesBtn').on('click', function () {
+            if (!validateRequiredField('#ddlUser', 'Select User')) return;
+            const selectedUserId = $('#ddlUser').val();
+            const selectedCoyotheruser = parseInt($('#ddlCopyotheruser').val()) || 0;
+            const copyPermission = parseInt($('#copyClicked').val()) || 0;
+            let DepartmentCheckCodes = [];
+            $('.DepartmentCheckbox-checkbox:checked').each(function () {
+                DepartmentCheckCodes.push($(this).val());
+            });
+            const PubFYearCode = $('#ddlCopyYear').val();
+
+            // Remove duplicates
+            DepartmentCheckCodes = [...new Set(DepartmentCheckCodes)];
+            console.log("Final Selected Codes:", DepartmentCheckCodes);
+
+            // Gather module permission details
+            const userMenuDetail = [];
+
+            $('#moduleTableBodyList tr').each(function () {
+                const $row = $(this);
+
+                const detail = {
+                    Code: parseInt($row.find('td:eq(0)').text()),
+                    Module: $row.find('td:eq(1)').text(),
+                    Name: $row.find('td:eq(2)').text(),
+                    Access: $row.find('.col-access').is(':checked') ? 1 : 0,
+                    Add: $row.find('.col-add').is(':checked') ? 1 : 0,
+                    Edit: $row.find('.col-edit').is(':checked') ? 1 : 0,
+                    Delete: $row.find('.col-delete').is(':checked') ? 1 : 0,
+                    Print: $row.find('.col-print').is(':checked') ? 1 : 0,
+                    Export: $row.find('.col-export').is(':checked') ? 1 : 0,
+                    Mail: $row.find('.col-mail').is(':checked') ? 1 : 0,
+                    Approval: $row.find('.col-approval').is(':checked') ? 1 : 0,
+                    DocDetail: $row.find('.col-docDetail').is(':checked') ? 1 : 0,
+                    Module_CODE: parseInt($row.find('td:eq(12)').text()),
+                    FullName: $row.find('td:eq(13)').text(),
+                    CreatedBy: $row.find('td:eq(14)').text()
+                };
+                userMenuDetail.push(detail);
+            });
+
+            // Prepare final data to send
+            const data = {
+                UserID: parseInt(selectedUserId),
+                UserMenuDetail: userMenuDetail,
+                DepartmentCheckCodes: DepartmentCheckCodes,
+                CopyOtherUser: selectedCoyotheruser,
+                copyPermission: copyPermission,
+                PubFYearCode: PubFYearCode
+            };
+            // Send data via AJAX
+            $.ajax({
+                url: '/UserPermission/SubmitModulesData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                     if (response.success) {
+                        toastr.success(response.message);  
+                     }
+                     else {
+                         toastr.error(response.message);  
+                     }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error submitting module data:", error);
+                    alert("An error occurred while submitting.");
+                }
+            });
+        });
+        $('#CopyID').on('click', function() {
+            $('#copyClicked').val("1");
+            const selectedUserId = $('#ddlUser').val();
+            const selectedCoyotheruser = parseInt($('#ddlCopyotheruser').val()) || 0;
+            const copyPermission = parseInt($('#copyClicked').val()) || 0;
+            let DepartmentCheckCodes = [];
+            $('.DepartmentCheckbox-checkbox:checked').each(function () {
+                DepartmentCheckCodes.push($(this).val());
+            });
+            const PubFYearCode = $('#ddlCopyYear').val();
+
+            // Remove duplicates
+            DepartmentCheckCodes = [...new Set(DepartmentCheckCodes)];
+            console.log("Final Selected Codes:", DepartmentCheckCodes);
+
+            const userMenuDetail = [];
+
+            $('#moduleTableBodyList tr').each(function () {
+                const $row = $(this);
+
+                const detail = {
+                    Code: parseInt($row.find('td:eq(0)').text()),
+                    Module: $row.find('td:eq(1)').text(),
+                    Name: $row.find('td:eq(2)').text(),
+                    Access: $row.find('.col-access').is(':checked') ? 1 : 0,
+                    Add: $row.find('.col-add').is(':checked') ? 1 : 0,
+                    Edit: $row.find('.col-edit').is(':checked') ? 1 : 0,
+                    Delete: $row.find('.col-delete').is(':checked') ? 1 : 0,
+                    Print: $row.find('.col-print').is(':checked') ? 1 : 0,
+                    Export: $row.find('.col-export').is(':checked') ? 1 : 0,
+                    Mail: $row.find('.col-mail').is(':checked') ? 1 : 0,
+                    Approval: $row.find('.col-approval').is(':checked') ? 1 : 0,
+                    DocDetail: $row.find('.col-docDetail').is(':checked') ? 1 : 0,
+                    Module_CODE: parseInt($row.find('td:eq(12)').text()),
+                    FullName: $row.find('td:eq(13)').text(),
+                    CreatedBy: $row.find('td:eq(14)').text()
+                };
+                userMenuDetail.push(detail);
+            });
+
+            // Prepare final data to send
+            const data = {
+                UserID: parseInt(selectedUserId),
+                UserMenuDetail: userMenuDetail,
+                DepartmentCheckCodes: DepartmentCheckCodes,
+                CopyOtherUser: selectedCoyotheruser,
+                copyPermission: copyPermission,
+                PubFYearCode: PubFYearCode
+            };
+
+            // Send data via AJAX
+            $.ajax({
+                url: '/UserPermission/UserCopytoOtherUser',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                     if (response.success) {
+                        toastr.success(response.message);
+                     }
+                     else {
+                         toastr.error(response.message);    
+                     }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error submitting module data:", error);
+                    alert("An error occurred while submitting.");
+                }
+            });
+        });
+    });
+    function Userlist() {
+                $.ajax({
+                    url: '/UserPermission/GetUserListddl',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var ddl = $('#ddlUser');
+                        ddl.empty();
+                        ddl.append('<option value="">-- Select User --</option>');
+
+                        $.each(data, function (index, item) {
+                            ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading users: ", xhr.responseText);
+                        alert('Error loading users: ' + error);
+                    }
+                });
+            }
+    function ModuleNamelist() {
+                $.ajax({
+                    url: '/UserPermission/ModuleNamelist',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var tableBody = $('#moduleTableBody');
+                        tableBody.empty();
+                        $.each(data, function (index, item) {
+                            var row = `
+                                <tr>
+                                    <td><input type="checkbox" class="module-checkbox" value="${item.value}" name="moduleCheckbox" /> <label class="form-check-label" for="chk-${item.value}"> ${item.value}</label></td>
+                                    <td>${item.text}</td>
+                                </tr>`;
+                            tableBody.append(row);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading modules: ", xhr.responseText);
+                        alert('Error loading modules: ' + error);
+                    }
+                });
+            }
+    function Departmentlist() {
+            $.ajax({
+                url: '/UserPermission/Departmentlist',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log("Departmentlist", data);
+                    const tableBody = $('#DepartmentlistTableBody');
+                    tableBody.empty();
+
+                    $.each(data, function (index, item) {
+                        const row = `
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="DepartmentCheckbox-checkbox" value="${item.code}" name="DepartmentCheckbox" />
+                                    ${item.code}
+                                </td>
+                                <td>${item.name}</td>
+                                <td>${item.type}</td>
+                            </tr>`;
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Error loading departments: ", xhr.responseText);
+                    alert('Error loading departments.');
+                }
+            });
+        }
+    function UserlistCopyotheruser() {
+                $.ajax({
+                    url: '/UserPermission/GetCopyotheruser',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var ddl = $('#ddlCopyotheruser');
+                        ddl.empty();
+                        ddl.append('<option value="">-- Select User --</option>');
+
+                        $.each(data, function (index, item) {
+                            ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading users: ", xhr.responseText);
+                        alert('Error loading users: ' + error);
+                    }
+                });
+            }
+    function ddlYearslist() {
+                $.ajax({
+                    url: '/UserPermission/GetYearList',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var ddl = $('#ddlCopyYear');
+                        ddl.empty();
+                        ddl.append('<option value="">-- Select Year --</option>');  
+
+                        $.each(data, function (index, item) {
+                            ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading users: ", xhr.responseText);
+                        alert('Error loading users: ' + error);
+                    }
+                });
+            }
+    function renderUserDetailsTable(data) {
+        console.log('data',data)
+
+            const UserMenu = data.userMenuDetails;
+            const DepartmentID = data.departments;
+            const tbody = $('#moduleTableBodyList');
+            tbody.empty();
+            const selectedModuleCodes = [...new Set(UserMenu.map(row => parseInt(row.modulE_CODE)))];
+            const selectedDeptCodes = DepartmentID.map(d => d.toString());
+
+            UserMenu.forEach(row => {
+                let html = `
+                    <tr>
+                        <td>${row.code}</td>
+                        <td>${row.module}</td>
+                        <td>${row.displaY_NAME}</td>
+                        <td><input type="checkbox" class="col-access" ${row.access == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-add" ${row.add == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-edit" ${row.edit == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-delete" ${row.delete == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-print" ${row.print == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-export" ${row.export == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-mail" ${row.mail == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-approval" ${row.approval == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-docDetail" ${row.docDetail == 1 ? 'checked' : ''}></td>
+                        <td>${row.modulE_CODE}</td>
+                        <td>${row.fulL_NAME}</td>
+
+                    </tr>`;
+                tbody.append(html);
+            });
+            Departmentlist(selectedDeptCodes);
+            ModuleNamelist(selectedModuleCodes);
+        }
+    $(document).on('change', '.col-access', function () {
+        var isChecked = $(this).is(':checked');
+        var row = $(this).closest('tr');
+
+        // Check/uncheck other permission checkboxes in the same row
+        row.find('.col-add, .col-edit, .col-delete, .col-print, .col-export, .col-mail, .col-approval, .col-docDetail')
+            .prop('checked', isChecked);
+    });
+    $(document).on('change', '.check-all', function () {
+
+       let column = $(this).data('column');
+       let isChecked = $(this).is(':checked');
+       $('#moduleTableBodyList').find('input[type="checkbox"].col-' + column).prop('checked', isChecked);
+
+     });
+    $(document).on('change', '.module-checkbox', function () {
+         const isChecked = $(this).is(':checked');
+         const moduleCode = $(this).val();
+
+    if (isChecked) {
+     // alert("Module " + moduleCode + " is checked.");
+    }
+    else {
+    // alert("Module " + moduleCode + " is unchecked.");
+    $('#moduleTableBodyList').empty();
+    }
+    var selectedCodes = [];
+    $('.module-checkbox:checked').each(function () {
+        selectedCodes.push(parseInt($(this).val()));
+    });
+
+    const selectedUserId = $('#ddlUser').val();
+    if (!selectedUserId || selectedCodes.length === 0) {
+        alert("Please select a user and at least one module.");
+         $(this).prop('checked', false);
+        return;
+    }
+    var data = {
+        userID: selectedUserId,
+        userMenuDetail: selectedCodes.map(function(code) {
+            return { MODULE_CODE: code };
+        })
+    };
+    console.log("kks:", data);
+
+    $.ajax({
+        url: '/UserPermission/SubmitModules',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (data) {
+            // renderUserDetailsTableMultiple(response)
+            console.log('renderUserDetailsTableMultiple',data)
+            const tbody = $('#moduleTableBodyList');
+
+             if (isChecked) {
+              tbody.empty();
+              }
+              else {
+              }
+            // then i checkout then data not empty then use
+            const selectedModuleCodes = [...new Set(data.map(row => parseInt(row.modulE_CODE)))];
+
+            data.forEach(row => {
+                let html = `
+                    <tr>
+                        <td>${row.code ?? ''}</td>
+                        <td>${row.module ?? ''}</td>
+                        <td>${row.displaY_NAME ?? ''}</td>
+                        <td><input type="checkbox" class="col-access" ${row.access == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-add" ${row.add == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-edit" ${row.edit == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-delete" ${row.delete == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-print" ${row.print == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-export" ${row.export == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-mail" ${row.mail == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-approval" ${row.approval == 1 ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="col-docDetail" ${row.docDetail == 1 ? 'checked' : ''}></td>
+                        <td>${row.modulE_CODE ?? ''}</td>
+                        <td>${row.fulL_NAME ?? ''}</td>
+                    </tr>`;
+                tbody.append(html);
+            });
+
+            ModuleNamelist(selectedModuleCodes);
+        },
+        error: function (xhr, status, error) {
+            console.error("Error sending module codes:", error);
+            alert("An error occurred.");
+        }
+    });
+    });
+    function ModuleNamelist(selectedModuleCodes = []) {
+            $.ajax({
+                url: '/UserPermission/ModuleNamelist',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var tableBody = $('#moduleTableBody');
+                    tableBody.empty();
+
+                    $.each(data, function (index, item) {
+                        const isChecked = selectedModuleCodes.includes(parseInt(item.value)) ? 'checked' : '';
+                        const row = `
+                            <tr>
+                                <td><input type="checkbox" class="module-checkbox" value="${item.value}" name="moduleCheckbox" ${isChecked} /> ${item.value}</td>
+                                <td>${item.text}</td>
+                            </tr>`;
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading modules: ", xhr.responseText);
+                    alert('Error loading modules: ' + error);
+                }
+            });
+        }
+    function Departmentlist(selectedDeptCodes = []) {
+        $.ajax({
+            url: '/UserPermission/Departmentlist',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log("Departmentlist", data);
+                const tableBody = $('#DepartmentlistTableBody');
+                tableBody.empty();
+
+                $.each(data, function (index, item) {
+                    const isChecked = selectedDeptCodes.includes(item.code) ? 'checked' : '';
+
+                    const row = `
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="DepartmentCheckbox-checkbox" value="${item.code}" name="DepartmentCheckbox" ${isChecked} />
+                                ${item.code}
+                            </td>
+                            <td>${item.name}</td>
+                            <td>${item.type}</td>
+                        </tr>`;
+                    tableBody.append(row);
+                });
+            },
+            error: function (xhr) {
+                console.error("Error loading departments: ", xhr.responseText);
+                alert('Error loading departments.');
+            }
+        });
+    }
+</script>

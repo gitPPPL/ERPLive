@@ -1,0 +1,495 @@
+﻿@{
+    ViewBag.Title = "Notice Period Payment Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Notice Period Payment Entry</legend>
+    <form id="NoticePeriodPaymentForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <fieldset>
+            <legend class="sub-legend">Employee Details</legend>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="DocNo">Doc No</label>
+                        <input type="text" class="form-control" id="NumDocNo" readonly />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="DocDate">Doc Date</label>
+                        <input type="date" class="form-control" id="textDocDate" />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ddlEmpName">Employee Name</label>
+                        <select class="form-control" id="ddlEmpName">
+                            <option value="">Select Employee Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlDepartment">Department</label>
+                        <select class="form-control" id="ddlDepartment">
+                            <option value="">Select Department</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="ddlDesignation">Designation</label>
+                        <select class="form-control" id="ddlDesignation">
+                            <option value="">Select Designation</option>
+                        </select>
+                    </div>
+                </div>
+               
+            </div>
+           
+        </fieldset>
+
+        <fieldset>
+            <legend class="sub-legend">Employee Details</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtResignationDate">Resignation Date</label>
+                        <input type="date" class="form-control" id="DtResignationDate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtNoticeStartDate">Notice Period Start Date</label>
+                        <input type="date" class="form-control" id="DtNoticeStartDate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtNoticeEndDate">Notice Period End Date</label>
+                        <input type="date" class="form-control" id="DtNoticeEndDate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtTotalNoticePeriod">Total Notice Period (Days)</label>
+                        <input type="text" class="form-control" id="DtTotalNoticePeriod" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtDaysServed">Days Served</label>
+                        <input type="text" class="form-control" id="DtDaysServed" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtDayNotServed">Days Not Served</label>
+                        <input type="text" class="form-control" id="DtDayNotServed" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend class="sub-legend">Payment Details</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPaymentType">Payment Type</label>
+                        <select class="form-control" id="ddlPaymentType">
+                            <option value="Gross">Gross</option>
+                            <option value="Basic">Basic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlType">Type</label>
+                        <select class="form-control" id="ddlType">
+                            <option value="Add">Add</option>
+                            <option value="Deduct">Deduct</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumGrossSalary">Gross Salary (Per Day)</label>
+                        <input type="number" class="form-control" id="NumGrossSalary" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="NumTotalPayable">Total Payable / Recoverable Amount</label>
+                        <input type="number" class="form-control" id="NumTotalPayable" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="ddlPaymentMode">Payment Mode</label>
+                        <select class="form-control" id="ddlPaymentMode">
+                            <option value="">Select Payment Mode</option>
+                            <option value="1">Bank Transfer</option>
+                            <option value="2">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtPaidDate">Paid</label>
+                        <input type="text" class="form-control" id="DtPaid" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend class="sub-legend">Approval & Audit</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtPreparedBy">Prepared By</label>
+                        <input type="text" class="form-control" id="TxtPreparedBy" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtApprovedBy">Approved By</label>
+                        <input type="text" class="form-control" id="TxtApprovedBy" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtApprovalDate">Approval Date</label>
+                        <input type="date" class="form-control" id="DtApprovalDate" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="TxtRemarks">Remarks / Comments</label>
+                        <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+        </fieldset>
+        <fieldset>
+            <legend class="sub-legend">Print</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtFrom">From</label>
+                        <input type="date" class="form-control" id="DtFrom" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="DtTo">To</label>
+                        <input type="date" class="form-control" id="DtTo" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-mt">
+                        <button type="button" class="btn btn-print" id="btn_print"><i class="fa fa-print"></i>Print</button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button onclick="window.location.href='@Url.Action("Index", "NoticePeriodPaymentList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+            <div class="offset-md-5 col-md-4">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const searchCode = getQueryParam('searchCode');
+        const v_TYPE = getQueryParam('v_TYPE');
+        const v_NO = getQueryParam('v_NO');
+
+        ddlEmpName(() => {
+            ddlDepartment(() => {
+                ddlDesignation(() => {
+                    if (searchCode && v_TYPE && v_NO) {
+                        getNoticeDetails(searchCode, v_TYPE, v_NO);
+                    } else {
+                        GetDocType(() => setCurrentDate('textDocDate', 'yyyy-mm-dd'));
+                    }
+                });
+            });
+        });
+
+        setCurrentDate('DtResignationDate', 'yyyy-mm-dd');
+        setCurrentDate('DtNoticeStartDate', 'yyyy-mm-dd');
+        setCurrentDate('DtNoticeEndDate', 'yyyy-mm-dd');
+        setCurrentDate('DtApprovalDate', 'yyyy-mm-dd');
+        setCurrentDate('DtFrom', 'yyyy-mm-dd');
+        setCurrentDate('DtTo', 'yyyy-mm-dd');
+
+        $('#DtNoticeStartDate, #DtNoticeEndDate').on('change', calculateNoticePeriod);
+        $('#btn-save').click(function () {
+        debugger;
+
+        let vNo = parseInt($('#NumDocNo').val()) || 0;
+        let paidDateStr = $('#DtPaid').val();
+        let paidDateInt = paidDateStr ? parseInt(paidDateStr.replaceAll('-', '')) : null;
+
+        const data = {
+            V_NO: vNo,
+            DocDate: $('#textDocDate').val() || null,
+            EMP_CODE: parseInt($('#ddlEmpName').val()) || null,
+            EmployeeName: $('#ddlEmpName option:selected').text() || null,
+            Dep_ID: parseInt($('#ddlDepartment').val()) || null,
+            Des_ID: parseInt($('#ddlDesignation').val()) || null,
+            ResignationDate: $('#DtResignationDate').val() || null,
+            NoticePeriodStartDate: $('#DtNoticeStartDate').val() || null,
+            NoticePeriodEndDate: $('#DtNoticeEndDate').val() || null,
+            TotalNoticePeriod: parseInt($('#DtTotalNoticePeriod').val()) || null,
+            DaysServed: parseInt($('#DtDaysServed').val()) || null,
+            DaysNotServed: parseInt($('#DtDayNotServed').val()) || null,
+            NoticePayAmount: parseFloat($('#NumTotalPayable').val()) || null,
+            PaymentType: $('#ddlPaymentType').val() || null,
+            PaymentMode: $('#ddlPaymentMode').val() || null,
+
+            Type: $('#ddlType').val() || null,
+            GrossSalaryPerDay: parseFloat($('#NumGrossSalary').val()) || null,
+            TotalPayableAmount: parseFloat($('#NumTotalPayable').val()) || null,
+            Paid: paidDateInt,
+            PreparedBy: $('#TxtPreparedBy').val() || null,
+            ApprovedBy: $('#TxtApprovedBy').val() || null,
+            ApprovalDate: $('#DtApprovalDate').val() || null,
+            Remarks: $('#TxtRemarks').val() || null,
+            Action: v_NO > 0 ? "UPDATE" : "INSERT"
+        };
+
+        console.log("Data Sent to Server:", data);
+
+        $.ajax({
+            url: '/NoticePeriodPaymentEntry/SavePayNotice',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+                console.log("AJAX Response:", response);
+                if (response && response.success) {
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message || "Failed to save data.");
+                }
+            },
+            error: function (xhr) {
+                console.error("AJAX Error:", xhr);
+                toastr.error('⚠️ Error saving data: ' + xhr.statusText);
+            }
+        });
+    });
+    });
+    function getNoticeDetails(searchCode, v_TYPE, v_NO) {
+        $.ajax({
+            url: '/NoticePeriodPaymentEntry/GetNoticeDetails',
+            type: 'GET',
+            data: { searchCode: searchCode, v_TYPE: v_TYPE, v_NO: v_NO },
+            success: function (res) {
+                console.log('Response from server:', res);
+
+                if (res.message) {
+                    toastr.warning(res.message);
+                    return;
+                }
+
+                // ✅ Textbox Binding
+                $('#txtVoucherType').val(res.v_TYPE);
+                $('#txtVoucherNo').val(res.v_NO);
+                $('#NumDocNo').val(res.v_NO);
+                $('#textDocDate').val(formatDate(res.docDate));
+                $('#DtResignationDate').val(formatDate(res.resignationDate));
+                $('#DtNoticeStartDate').val(formatDate(res.noticePeriodStartDate));
+                $('#DtNoticeEndDate').val(formatDate(res.noticePeriodEndDate));
+                $('#DtApprovalDate').val(formatDate(res.approvalDate));
+
+                $('#DtTotalNoticePeriod').val(res.totalNoticePeriod);
+                $('#DtDaysServed').val(res.daysServed);
+                $('#DtDayNotServed').val(res.daysNotServed);
+                $('#NumGrossSalary').val(res.grossSalaryPerDay);
+                $('#NumTotalPayable').val(res.totalPayableAmount);
+                $('#TxtPreparedBy').val(res.preparedBy);
+                $('#TxtApprovedBy').val(res.approvedBy);
+                $('#TxtRemarks').val(res.remarks);
+                $('#DtPaid').val(res.paid);
+
+                setDropdownValue('#ddlEmpName', res.emP_CODE, res.employeeName);
+                setDropdownValue('#ddlDepartment', res.dep_ID);
+                setDropdownValue('#ddlDesignation', res.des_ID);
+                setDropdownValue('#ddlPaymentType', res.paymentType);
+                setDropdownValue('#ddlType', res.type);
+
+                if (res.paymentMode) {
+                $('#ddlPaymentMode').val(res.paymentMode);
+            } else {
+                $('#ddlPaymentMode').val('');
+            }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('❌ Failed to fetch notice details.');
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function ddlEmpName(callback) {
+        const ddl = $('#ddlEmpName');
+        $.ajax({
+            url: '/NoticePeriodPaymentEntry/GetddlEmpName',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty().append('<option value="">-- Select Employee --</option>');
+                data.forEach(item => ddl.append(new Option(item.text, item.value)));
+
+                ddl.select2({
+                    placeholder: "-- Select Employee --",
+                    allowClear: true,
+                    width: '100%',
+                });
+
+                if (typeof callback === 'function') callback();
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading employee list: ' + error);
+            }
+        });
+    }
+    function ddlDepartment(callback) {
+        $.ajax({
+            url: '/NoticePeriodPaymentEntry/GetddlDepartment',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlDepartment');
+                ddl.empty().append('<option value="">-- Select Department --</option>');
+                $.each(data, (index, item) => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+                if (typeof callback === 'function') callback();
+            },
+            error: function (xhr) {
+                toastr.error("Error loading departments.");
+            }
+        });
+    }
+    function ddlDesignation(callback) {
+        $.ajax({
+            url: '/NoticePeriodPaymentEntry/GetddlDesignation',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlDesignation');
+                ddl.empty().append('<option value="">-- Select Designation --</option>');
+                $.each(data, (index, item) => ddl.append(`<option value="${item.value}">${item.text}</option>`));
+                if (typeof callback === 'function') callback();
+            },
+            error: function (xhr) {
+                toastr.error("Error loading designations.");
+            }
+        });
+    }
+    function GetDocType(callback) {
+        $.ajax({
+            url: '/NoticePeriodPaymentEntry/GetDocType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response?.success && response?.nextVNo) {
+                    $('#NumDocNo').val(response.nextVNo);
+                }
+                if (typeof callback === 'function') callback();
+            },
+            error: function (xhr) {
+                toastr.error("Error loading document type.");
+                if (typeof callback === 'function') callback();
+            }
+        });
+    }
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const parts = dateString.split(' ')[0].split('/');
+        if (parts.length === 3) {
+            const [dd, mm, yyyy] = parts;
+            return `${yyyy}-${mm}-${dd}`;
+        }
+        return '';
+    }
+    function setDropdownValue(selector, value, text) {
+        const ddl = $(selector);
+        if (!ddl.length) return;
+
+        if (ddl.find(`option[value="${value}"]`).length) {
+            ddl.val(value).trigger('change');
+        } else if (value && text) {
+            ddl.append(new Option(text, value, true, true)).trigger('change');
+        }
+    }
+    function setCurrentDate(inputId, format = 'yyyy-mm-dd') {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const formattedDate = (format.toLowerCase() === 'dd/mm/yyyy')
+            ? `${dd}/${mm}/${yyyy}`
+            : `${yyyy}-${mm}-${dd}`;
+        document.getElementById(inputId)?.setAttribute('value', formattedDate);
+    }
+    function calculateNoticePeriod() {
+        const startDate = $('#DtNoticeStartDate').val();
+        const endDate = $('#DtNoticeEndDate').val();
+
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (end < start) {
+                toastr.warning("End Date must be after Start Date!");
+                $('#DtTotalNoticePeriod').val('');
+                return;
+            }
+
+            let totalDays = 0;
+            let currentDate = new Date(start);
+            while (currentDate <= end) {
+                const day = currentDate.getDay();
+                if (day !== 0) totalDays++;
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            $('#DtTotalNoticePeriod').val(totalDays);
+        }
+    }
+
+</script>
+
+
+
+

@@ -1,0 +1,596 @@
+﻿@{
+    ViewBag.Title = "Visitor Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Visitor Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "VisitorEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div> 
+    <form id="VisitorEntryForm" enctype="multipart/form-data">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtSlipNo">Slip No</label>
+                    <input type="text" class="form-control" id="TxtSlipNo" placeholder="Enter Slip No">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtVisitorName">Visitor Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtVisitorName" placeholder="Enter Visitor Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlCardNo">Card No</label>
+                    <input type="text" class="form-control" id="ddlCardNo" placeholder="Enter Card No.">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtOrganization">Organization</label>
+                    <input type="text" class="form-control" id="TxtOrganization" placeholder="Enter Organization">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtAddress">Address</label>
+                    <textarea type="text" class="form-control" id="TxtAddress" placeholder="Enter Address"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlMeetEmployee">Meet Employee<span class="required">*</span></label>
+                    <select class="form-control" id="ddlMeetEmployee">
+                        <option value="">Select Meet Employee</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtMeetOther">Meet Other</label>
+                    <input type="text" class="form-control" id="TxtMeetOther" placeholder="Enter Meet Other">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TMInTime">In Time</label>
+                    <input type="time" class="form-control" id="TMInTime">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group position-relative">
+                    <label for="DtOutDate">Out Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtOutDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkOutDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TMOutTime">Out Time</label>
+                    <input type="time" class="form-control" id="TMOutTime">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumMobileNo">Mobile No</label>
+                    <input type="number" class="form-control" id="NumMobileNo" placeholder="Enter Mobile No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPurpose">Purpose<span class="required">*</span></label>
+                    <select class="form-control" id="ddlPurpose">
+                        <option value="Interview">Interview</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Vendor">Vendor</option>
+                        <option value="Delivery">Delivery</option>
+                        <option value="Training">Training</option>
+                        <option value="Student">Student</option>
+                        <option value="Investors">Investors</option>
+                        <option value="Investors">Customer</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtVehicleNo">Vehicle No</label>
+                    <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtMaterial">Material</label>
+                    <input type="text" class="form-control" id="TxtMaterial" placeholder="Enter Material">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                   
+                     <!-- Live webcam preview -->
+                    @* <video id="video" width="300" height="225" autoplay style="display:none;"></video> *@
+
+ 
+                    <!-- File upload input -->
+                    @* <input type="file" id="fileInput" accept="image/*" class="form-control" onchange="uploadPhoto(this)" /> *@
+                    <div class="form-group">
+                        <label for="VisitorImage">Upload Image</label>
+                        <input type="file" class="form-control" id="VisitorImage" name="VisitorImage" accept="image/*">
+                    </div>
+
+                    <!-- Captured or uploaded image -->
+                    <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
+                    @* <img id="previewImage" src="" style="display:none; margin-top:10px;" /> *@
+                    <img id="previewImage" src="" style="display:none; width: 100px; height: 100px; object-fit: cover; margin-top:10px;" />
+
+
+
+                    <!-- Control buttons -->
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-primary" onclick="startCamera()">Start Camera</button>
+                        <button type="button" class="btn btn-success" onclick="capturePhoto()">Capture</button>
+                        <button type="button" class="btn btn-danger" onclick="removePhoto()">Remove</button>
+                    </div>
+
+                    <!-- Hidden base64 input -->
+                    <input type="hidden" id="WebcamImage" name="WebcamImage" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="Remarks">Remarks</label>
+                    <textarea class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+@*         <div class="card">
+            <div class="table-responsive">
+                <table id="tblVisitorEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>VNo</th>
+                            <th>VDate</th>
+                            <th>SlipNo</th>
+                            <th>VisitorName</th>
+                            <th>Organization</th>
+                            <th>InTime</th>
+                            <th>OutTime</th>
+                            <th>MeetPerson</th>
+                            <th>Purpose</th>
+                            <th>Address</th>
+                            <th>Mobile</th>
+                            <th>VehicleNo</th>
+                            <th>Material</th>
+                            <th>CardNo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+ *@        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+     // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    //getting
+    const urlParams = new URLSearchParams(location.search);
+    const rowId = parseInt(urlParams.get('id'));
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+
+
+    $(document).ready(function () {
+
+        if (!isNaN(rowId) && rowId > 0) {
+            loadEmpList().then(function() {
+                loadVisitorEntry(rowId); 
+            });
+            if (isReadOnly) {
+                setVisitorEntryFormReadOnly();
+            }
+        } else {
+            loadEmpList();
+        }
+        loadNextDocNo(yearCode);
+    });
+
+    function loadNextDocNo(yearC){
+        $.ajax({
+            url: '/VisitorEntry/GetNextV_NO',
+            type: 'GET',
+            data: { yearCode : yearC },
+            success: function (response) {
+                $('#NumDocNo').val(response).attr('disabled',true);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading Item make: ' + error);
+            }
+        });
+    }
+
+    function loadEmpList() {
+        empMap = {};
+        return $.ajax({
+            url: '/VisitorEntry/GetEmpList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log('Employee list loaded');
+                var ddl = $('#ddlMeetEmployee');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Meet Employee --</option>');
+
+                $.each(data, function (index, item) {
+                    var displayText = item.text + '\u00A0\u00A0\u00A0\u00A0|\u00A0\u00A0\u00A0\u00A0' + item.value;
+                    ddl.append('<option value="' + item.value + '">' + displayText + '</option>');
+                    empMap[item.value] = item.text;
+                });
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading employee list: ' + error);
+            }
+        });
+    }
+
+
+    $('#VisitorEntryForm').on('submit', async function (e) {
+        e.preventDefault();
+
+        const visitorName = $('#TxtVisitorName').val().trim();
+        const docDate = $('#DtDocDate').val();
+        const meetEmployee = $('#ddlMeetEmployee').val();
+        const meetOtherName = $('#TxtMeetOther').val().trim();
+        const purpose = $('#ddlPurpose').val();
+
+        let isValid = true;
+
+
+        // Validation: Visitor Name
+        if (!visitorName) {
+            toastr.warning('Visitor Name is required.');
+            $('#TxtVisitorName').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#TxtVisitorName').removeClass('is-invalid');
+        }
+
+          // ✅ Doc Date validation
+        if (!docDate) {
+            toastr.warning('Doc Date is required.');
+            $('#DtDocDate').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#DtDocDate').removeClass('is-invalid');
+        }
+
+        // Validation: Purpose
+        if (!purpose) {
+            toastr.warning('Purpose is required.');
+            $('#ddlPurpose').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#ddlPurpose').removeClass('is-invalid');
+        }
+
+        // Validation: At least one of Meet Employee or Meet Other must be filled
+        if (!meetEmployee && !meetOtherName) {
+            toastr.warning('Please select Meet Employee or enter Meet Other.');
+            $('#ddlMeetEmployee').addClass('is-invalid');
+            $('#TxtMeetOther').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#ddlMeetEmployee').removeClass('is-invalid');
+            $('#TxtMeetOther').removeClass('is-invalid');
+        }
+
+        if (!isValid) return;
+
+        // Process image file
+        const fileInput = $('#VisitorImage')[0];
+        let base64Image = "";
+
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            base64Image = await toBase64(file);
+        }
+
+        // Prepare Meet Name and Code
+        const MEET_NAME = meetEmployee
+            ? $('#ddlMeetEmployee option:selected').text()
+            : meetOtherName;
+
+        const MEET_CODE = meetEmployee || 0;
+
+        const payload = {
+            Visitor: {
+                V_NO: $('#TxtCode').val(),
+                V_TYPE: 'VISI',
+                SLIP_NO: $('#TxtSlipNo').val(),
+                NAME: $('#TxtVisitorName').val(),
+                CARD_NO: $('#ddlCardNo').val(),
+                ORGANIZATION: $('#TxtOrganization').val(),
+                ADDRESS: $('#TxtAddress').val(),
+                MEET_NAME: MEET_NAME,
+                MEET_CODE: MEET_CODE,
+                REMARKS: $('#TxtRemarks').val(),
+                // REMARKS: $('#TxtMeetOther').val(),
+                IN_TIME: $('#TMInTime').val(),
+                OUT_DATE: $('#DtOutDate').val(),
+                OUT_TIME: $('#TMOutTime').val(),
+                MOBILE_NO: $('#NumMobileNo').val(),
+                PURPOSE: $('#ddlPurpose').val(),
+                VEHICLE_NO: $('#TxtVehicleNo').val(),
+                MATERIAL: $('#TxtMaterial').val()
+            },
+            Image: {
+                FileName: fileInput.files.length > 0 ? fileInput.files[0].name : null,
+                Base64Content: base64Image
+            }
+        };
+        
+        $.ajax({
+            url: '/VisitorEntry/SaveVisitorEntry',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Visitor saved successfully!');
+                    setTimeout(() => {
+                        window.location.href = '/VisitorEntryList/Index';
+                    }, 1000);
+                } else {
+                    toastr.error('Failed to save visitor: ' + response.message);
+                }            },
+            error: function (err) {
+                alert("Error occurred.");
+                console.error(err);
+            }
+        });
+    });
+
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    function loadVisitorEntry(vNo) {
+        $.ajax({
+            url: '/VisitorEntryList/GetVisitorByVno',
+            type: 'GET',
+            data: { vNo },
+            success: function (res) {
+                console.log(res);
+                if (!res.success || !res.data) {
+                    toastr.warning("Visitor record not found.");
+                    return;
+                }
+
+                const visitor = res.data;
+                $('#TxtCode').val(visitor.v_NO || '');
+                $('#NumDocNo').val(visitor.v_NO || '');
+                $('#DtDocDate').val(visitor.v_DATE ? visitor.v_DATE.substring(0, 10) : '');
+                $('#TxtSlipNo').val(visitor.sliP_NO || '');
+                $('#TxtVisitorName').val(visitor.name || '');
+                $('#ddlCardNo').val(visitor.carD_NO || '').trigger('change');
+                $('#TxtOrganization').val(visitor.organization || '');
+                $('#TxtAddress').val(visitor.address || '');
+
+                // 🧠 Logic to decide where to display meet name
+                const meetCode = visitor.meeT_CODE;
+                const meetName = visitor.meeT_NAME;
+
+                const empExists = $('#ddlMeetEmployee option[value="' + meetCode + '"]').length > 0;
+
+                if (empExists && meetCode) {
+                    $('#ddlMeetEmployee').val(meetCode).trigger('change');
+                    $('#TxtMeetOther').val('').prop('disabled', true);
+                } else {
+                    $('#ddlMeetEmployee').val('').trigger('change');
+                    $('#TxtMeetOther').val(meetName || '').prop('disabled', false);
+                }
+
+                $('#TMInTime').val(visitor.iN_TIME || '');
+                $('#DtOutDate').val(visitor.ouT_DATE ? visitor.ouT_DATE.substring(0, 10) : '');
+                $('#chkOutDate').prop('checked', !!visitor.ouT_DATE);
+                $('#TMOutTime').val(visitor.ouT_TIME || '');
+                $('#NumMobileNo').val(visitor.mobilE_NO || '');
+                $('#ddlPurpose').val(visitor.purpose || '').trigger('change');
+                $('#TxtVehicleNo').val(visitor.vehiclE_NO || '');
+                $('#TxtMaterial').val(visitor.material || '');
+                $('#TxtRemarks').val(visitor.remarks || '');
+
+                const base64Image = res.base64Image;
+
+                // ✅ Handle Image Preview
+                if (base64Image && base64Image.length > 0) {
+                    const imageType = visitor.filE_NAME && visitor.filE_NAME.toLowerCase().endsWith('.png')
+                        ? 'png'
+                        : 'jpeg';
+
+                    $('#previewImage')
+                        .attr('src', 'data:image/' + imageType + ';base64,' + base64Image)
+                        .css('display', 'inline-block');
+
+                    $('#WebcamImage').val(base64Image);
+                    $('#VisitorImage').val('');
+                } else {
+                    $('#previewImage').hide().attr('src', '');
+                    $('#WebcamImage').val('');
+                }
+            },
+            error: function (xhr) {
+                toastr.error("Failed to load visitor data: " + xhr.responseText);
+            }
+        });
+    }
+
+
+    function setVisitorEntryFormReadOnly() {
+        const form = $('#VisitorEntryForm');
+
+        // Disable all input, select, textarea inside the form
+        form.find('input, select, textarea, button[type="submit"]').prop('disabled', true);
+
+        // Disable custom buttons (webcam, capture, remove)
+        form.find('button').not('#btnbacklist').prop('disabled', true);
+
+        // Optionally hide or disable file input manually
+        $('#VisitorImage').prop('disabled', true);
+
+        // Disable image capture controls
+        $('#canvas').hide();
+        $('#previewImage').css('pointer-events', 'none');
+
+        // Optional: visually indicate the form is read-only
+        form.css('opacity', '0.95');
+    }
+
+
+    // function loadVisitorEntry(vNo) {
+    //     $.ajax({
+    //         url: '/VisitorEntryList/GetVisitorByVno',
+    //         type: 'GET',
+    //         data: { vNo },
+    //         success: function(res) {
+    //             console.log(res);
+    //             if (!res.success || !res.data) {
+    //                 toastr.warning("Visitor record not found.");
+    //                 return;
+    //             }
+
+    //             const visitor = res.data;
+
+    //             $('#TxtCode').val(visitor.doC_ID || '');
+    //             $('#NumDocNo').val(visitor.v_NO || '');
+    //             $('#DtDocDate').val(visitor.v_DATE ? visitor.v_DATE.substring(0, 10) : '');
+    //             $('#TxtSlipNo').val(visitor.sliP_NO || '');
+    //             $('#TxtVisitorName').val(visitor.name || '');
+    //             $('#ddlCardNo').val(visitor.carD_NO || '').trigger('change');
+    //             $('#TxtOrganization').val(visitor.organization || '');
+    //             $('#TxtAddress').val(visitor.address || '');
+    //             $('#ddlMeetEmployee').val(visitor.meeT_CODE || '').trigger('change');
+    //             $('#TxtMeetOther').val(visitor || '');
+    //             $('#TMInTime').val(visitor.iN_TIME || '');
+    //             $('#DtOutDate').val(visitor.ouT_DATE ? visitor.ouT_DATE.substring(0, 10) : '');
+    //             $('#chkOutDate').prop('checked', !!visitor.ouT_DATE);
+    //             $('#TMOutTime').val(visitor.ouT_TIME || '');
+    //             $('#NumMobileNo').val(visitor.mobilE_NO || '');
+    //             $('#ddlPurpose').val(visitor.purpose || '').trigger('change');
+    //             $('#TxtVehicleNo').val(visitor.vehiclE_NO || '');
+    //             $('#TxtMaterial').val(visitor.material || '');
+    //             $('#TxtRemarks').val(visitor.remarks || '');
+
+    //             const base64Image = res.base64Image;
+
+    //             // ✅ Handle Image Preview
+    //             if (base64Image && base64Image.length > 0) {
+    //                 const imageType = visitor.filE_NAME && visitor.filE_NAME.toLowerCase().endsWith('.png')
+    //                     ? 'png'
+    //                     : 'jpeg'; 
+
+    //                 $('#previewImage')
+    //                     .attr('src', 'data:image/' + imageType + ';base64,' + base64Image)
+    //                     .css('display', 'inline-block');
+
+    //                 $('#WebcamImage').val(base64Image);
+    //                 $('#VisitorImage').val('');
+    //             } else {
+    //                 $('#previewImage').hide().attr('src', '');
+    //                 $('#WebcamImage').val('');
+    //             }
+    //         },
+    //         error: function(xhr) {
+    //             toastr.error("Failed to load visitor data: " + xhr.responseText);
+    //         }
+    //     });
+    // }
+
+</script>
+
+@* FOR IMAGE PRIVIEW  *@
+<script>
+    document.getElementById('VisitorImage').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        toastr.warning("Please select a valid image file.");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const base64Image = e.target.result; 
+
+        const previewImage = document.getElementById('previewImage');
+        previewImage.src = base64Image;
+        previewImage.style.display = 'block';
+
+        document.getElementById('canvas').style.display = 'none';
+
+        document.getElementById('WebcamImage').value = base64Image.split(',')[1]; 
+    };
+
+    reader.readAsDataURL(file); 
+});
+
+</script>

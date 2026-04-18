@@ -1,0 +1,229 @@
+﻿@{
+    ViewBag.Title = "Earn Leave Opening Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Earn Leave Opening Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "EarnLeaveOpeningEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="EarnLeaveOpeningEntryForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDocNo">Doc. No</label>
+                    <input type="text" class="form-control" id="TxtDocNo" name="DocNo" placeholder="Enter Document Number" readonly>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+					<label for="DtDocDate">Doc. Date<span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocDate" name="DocDate" placeholder="dd/mm/yyyy">
+                </div>
+            </div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlEmployee1">Select Employee<span class="required">*</span></label>
+					<select id="ddlEmployee" class="form-control">
+						<option>--Select Employee--</option>
+					</select>
+				</div>
+			</div>
+            <div class="col-md-2">
+                <div class="form-group">
+					<label for="NumDays">Days<span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumDays" name="Days" placeholder="Enter Number of Days">
+                </div>
+            </div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label for="ddlLeaveType">Leave Type<span class="required">*</span></label>
+					<select id="ddlLeaveType" class="form-control" name="LeaveType">
+						<option value="">Select Leave Type</option>
+					</select>
+				</div>
+			</div>
+        </div>
+	        
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+         
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+					<button id="btnSaves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+   
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+
+<script>
+	$(document).ready(function () {
+	  const urlParams = new URLSearchParams(location.search);
+	  const rowId = urlParams.get('id');
+	  const mode = urlParams.get('mode');
+	  const isReadOnly = urlParams.get('readOnly') === 'true';
+
+	  if (!rowId) {
+		GetVNo();
+	  }
+
+	  $.when(LoadDropDown()).then(() => {
+		if (rowId) {
+		  $.when(LoadFormByID(rowId)).then(() => {
+			if (isReadOnly) setFormReadOnly();
+		  });
+		}
+	  });
+
+	  if (mode === "view") {
+		setFormReadOnly();
+		$('#EarnLeaveOpeningEntryForm').after(
+		  '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+		);
+	  }
+
+	  $("#btnSaves").click(async function (e) {
+		e.preventDefault();
+
+		const formData = {
+		  DOC_ID: $("#CODE").val() || null,
+		  V_NO: $("#TxtDocNo").val(),
+		  V_DATE: $("#DtDocDate").val(),
+		  EMP_CODE: $("#ddlEmployee").val(),
+		  OP_DAYS: $("#NumDays").val(),
+		  LEAVE_CODE: $("#ddlLeaveType").val(),
+		  LEAVE_TYPE: $("#ddlLeaveType option:selected").text(),
+		  V_TYPE: 'BAL',
+		  ACTION: $("#CODE").val() ? 'UPDATE' : 'INSERT'
+		};
+
+		if (!formData.V_NO) return toastr.warning("Please Fill Doc.No.");
+		if (!formData.V_DATE) return toastr.warning("Please Select Date.");
+		if (!formData.EMP_CODE) return toastr.warning("Please Select Employee .");
+		if (!formData.OP_DAYS) return toastr.warning("Please Fill Days .");
+		if (!formData.LEAVE_CODE) return toastr.warning("Please Select Leave Type.");
+
+
+
+		$(this).prop("disabled", true);
+		try {
+		  const res = await $.ajax({
+			url: '/EarnLeaveOpeningEntry/SavedData',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(formData)
+		  });
+		  toastr.success(res.message || "Saved successfully!");
+		  $("#EarnLeaveOpeningEntryForm")[0].reset();
+		  setTimeout(() => window.location.href = '/EarnLeaveOpeningEntryList/Index', 1000);
+		} catch (xhr) {
+		  console.error(xhr.responseText);
+		  toastr.error("Something went wrong.");
+		} finally {
+		  $(this).prop("disabled", false);
+		}
+	  });
+
+	});
+
+     function LoadFormByID(code) {
+		return $.ajax({
+		  url: '/EarnLeaveOpeningEntryList/GetDataByCode',
+		  type: 'GET',
+		  data: { code },
+		  success(res) {
+			const d = res.data;
+			$("#CODE").val(d.doC_ID);
+			$("#TxtDocNo").val(d.v_NO);
+			$("#DtDocDate").val(formatDate(d.v_DATE));
+			$("#ddlEmployee").val(d.emP_CODE);
+			$("#NumDays").val(d.oP_DAYS);
+			$("#ddlLeaveType").val(String(d.leavE_CODE)).trigger('change');
+		  },
+		  error(xhr) {
+				toastr.error("Error loading data: " + xhr.responseText);
+		  }
+		});
+	  }
+
+	function formatDate(s) {
+		const dt = new Date(s);
+		return [
+		  dt.getFullYear(),
+		  String(dt.getMonth()+1).padStart(2,'0'),
+		  String(dt.getDate()).padStart(2,'0')
+		].join('-');
+	  }
+
+	async function LoadDropDown() {
+		await Promise.all([DDlleavetype(), DDlEmp()]);
+	  }
+
+	async function DDlleavetype() {
+		try {
+		  const res = await fetch('/EarnLeaveOpeningEntry/DDLLeaveType');
+		  if (!res.ok) throw new Error(res.statusText);
+		  const data = await res.json();
+		  const ddl = $('#ddlLeaveType').empty();
+		  ddl.append('<option value="" selected>-- Select Department --</option>');
+		  data.forEach(item => ddl.append(`<option value="${item.text}">${item.value}</option>`));
+		} catch (e) {
+		  console.error(e);
+			toastr.error('Error loading Leave Type: ' + e.message);
+		}
+	  }
+
+	async function DDlEmp() {
+		try {
+		  const res = await fetch('/EarnLeaveOpeningEntry/DDLEmployee');
+		  if (!res.ok) throw new Error(res.statusText);
+		  const data = await res.json();
+		  const ddl = $('#ddlEmployee').empty();
+		  ddl.append('<option value="" selected>-- Select Employee --</option>');
+		  data.forEach(item => ddl.append(`<option value="${item.text}">${item.value}</option>`));
+		} catch (e) {
+		  console.error(e);
+			toastr.error('Error loading Employee: ' + e.message);
+		}
+	  }
+
+	async function GetVNo() {
+		try {
+		  const res = await fetch('/EarnLeaveOpeningEntry/GetVNo');
+		  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		  const data = await res.json();
+		  if (!data.v_NO) throw new Error('Response missing v_NO');
+		  $('#TxtDocNo').val(data.v_NO);
+		} catch (e) {
+
+			toastr.error('Error loading Document Number: ' + e.message);
+		}
+	  }
+
+  function setFormReadOnly() {
+		$('#EarnLeaveOpeningEntryForm :input').prop('disabled', true);
+		$('#btnSaves').hide();
+	  }
+
+
+
+</script>
+
+
+

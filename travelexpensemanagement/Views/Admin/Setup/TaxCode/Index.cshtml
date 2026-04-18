@@ -1,0 +1,316 @@
+﻿@{
+	ViewBag.Title = "TaxCodeList";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Tax Code Master</legend>
+
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "TaxCodeList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+			</div>
+		</div>
+	</div>
+
+<form id="fromTaxCodeMaster">
+   <input type="hidden" class="form-control" name="CODE" id="">
+   <div class="row">
+      <div class="col-md-4">
+         <div class="form-group">
+            <label>Name<span class="required">*</span></label>
+            <input type="text" class="form-control" placeholder="Name" id="txtName">
+         </div>
+      </div>
+      <div class="col-md-4">
+         <div class="form-group">
+            <label>Text Description</label>
+            <input type="text" class="form-control" placeholder="Description" id="txtDescription">
+         </div>
+      </div>
+      <div class="col-md-4">
+         <div class="form-group">
+            <label>Text Type</label>
+            <select class="form-control" id="txtType">
+               <option value="GST">GST</option>
+               <option value="TCS">TCS</option>
+               <option value="TDS">TDS</option>
+               <option value="Other">Other</option>
+            </select>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>CGST %</label>
+            <input type="number" placeholder="CGST %" class="form-control" name="CGST" id="txtCGST">
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>SGST %</label>
+            <input type="number" class="form-control" placeholder="SGST %" name="SGST" id="txtSGST">
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>IGST %</label>
+            <input type="number" class="form-control" placeholder="IGST %" name="IGST" id="txtIGST">
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>VAT %</label>
+            <input type="number" class="form-control" placeholder="VAT %" name="VAT" id="txtVAT">
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>TDS %</label>
+            <input type="number" class="form-control" placeholder="TDS %" name="TDS" id="txtTDS">
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="form-group">
+            <label>TCS %</label>
+            <input type="number" class="form-control" name="TCS" placeholder="TCS %" id="txtTCS">
+         </div>
+      </div>
+      <div class="col-md-2">
+         <div class="form-group">
+            <label>OTH %</label>
+            <input type="number" class="form-control" placeholder="OTH %" name="OTH" id="txtOTH">
+         </div>
+      </div>
+      <div class="col-md-2">
+         <div class="form-group">
+            <label>OTH2 %</label>
+            <input type="number" class="form-control" placeholder="OTH2 %" name="OTH2" id="txtOTH2">
+         </div>
+      </div>
+      @* <div class="col-md-2">
+         <div class="form-group form-check mt-4">
+            <input type="checkbox" class="form-check-input" id="ChkPacking">
+            <label class="form-check-label" for="ChkPacking">Packing on Basic</label>
+         </div>
+      </div> *@
+      <div class="col-md-2">
+          <label class="checkbox-input-mt">
+            <input type="checkbox" id="ChkPacking" />
+                Packing on Basic
+          </label>
+      </div>
+   </div>
+   
+   <div class="row">
+      <div class="offset-md-8 col-md-2">
+         <div class="form-group">
+            <div class="toggle-wrapper justify-content-center" id="ddlActive">
+               <input type="hidden" id="IsActive" name="IsActive" value="1" />
+               <div id="customToggle" class="custom-toggle active"></div>
+               <span id="statusLabel" class="status-label active">Active</span>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-2">
+         <div class="btn-last">
+            <button type="submit" id="btnSubmit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            <button type="button" id="btnUpdate" class="btn btn-primary"><i class="fa fa-refresh"></i>Save</button>
+         </div>
+      </div>
+   </div>
+</form>
+
+</fieldset>
+
+@* Send data in Action Method start Block *@
+
+@* ====================================================================================== *@
+<script>
+    $(document).ready(function () {
+        // Hide Update button initially
+        $("#btnUpdate").hide();
+
+        // Utility: Get URL query string parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const srno = getQueryParam('srno');
+        const mode = getQueryParam("mode");
+
+        // Active checkbox toggle
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+
+        // Handle Create (Insert)
+       $('#btnSubmit').click(function (e) {
+            e.preventDefault();
+
+			if (!validateRequiredField('#txtName', 'Name')) return;
+			
+            const data = {
+                NAME: $('#txtName').val(),
+                TAX_DESCRIPTION: $('#txtDescription').val(),
+                TAX_TYPE: $('#txtType').val(),
+                CGST_PER: parseFloat($('#txtCGST').val()) || 0,
+                SGST_PER: parseFloat($('#txtSGST').val()) || 0,
+                IGST_PER: parseFloat($('#txtIGST').val()) || 0,
+                VAT_PER: parseFloat($('#txtVAT').val()) || 0,
+                TDS_PER: parseFloat($('#txtTDS').val()) || 0,
+                TCS_PER: parseFloat($('#txtTCS').val()) || 0,
+                OTH_PER: parseFloat($('#txtOTH').val()) || 0,
+                OTH_PER2: parseFloat($('#txtOTH2').val()) || 0,
+                PACK_ONBASIC: $('input[type="checkbox"]').is(":checked") ? 1 : 0,
+                ACTIVE: $('#IsActive').val()
+            };
+            $.ajax({
+                url: '/TaxCode/SaveTaxCode',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+						 $('#fromTaxCodeMaster')[0].reset(); 
+                    } else {
+                        toastr.error("Error: " + response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("Failed to save data.");
+                }
+            });
+        });
+
+        // Handle Update
+        $('#btnUpdate').on('click', function (e) {
+			e.preventDefault();
+            const data = {
+				SRNO:srno,
+                NAME: $('#txtName').val(),
+                TAX_DESCRIPTION: $('#txtDescription').val(),
+                TAX_TYPE: $('#txtType').val(),
+                CGST_PER: parseFloat($('#txtCGST').val()) || 0,
+                SGST_PER: parseFloat($('#txtSGST').val()) || 0,
+                IGST_PER: parseFloat($('#txtIGST').val()) || 0,
+                VAT_PER: parseFloat($('#txtVAT').val()) || 0,
+                TDS_PER: parseFloat($('#txtTDS').val()) || 0,
+                TCS_PER: parseFloat($('#txtTCS').val()) || 0,
+                OTH_PER: parseFloat($('#txtOTH').val()) || 0,
+                OTH_PER2: parseFloat($('#txtOTH2').val()) || 0,
+                PACK_ONBASIC: $('input[type="checkbox"]').is(":checked") ? 1 : 0,
+                ACTIVE: $('#IsActive').val()
+            };
+            $.ajax({
+                url: '/TaxCode/UpdateTaxCode',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+						 $('#fromTaxCodeMaster')[0].reset(); 
+                    } else {
+                        toastr.error("Error: " + response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("Failed to save data.");
+                }
+            });
+        });
+        // If editing existing record
+        if (srno) {
+            $("#btnSubmit").hide();
+            $("#btnUpdate").show();
+
+            $.ajax({
+				url: '/TaxCode/GetTaxCodeBySrno',
+				type: 'GET',
+				data: { srno: srno },
+				success: function (response) {
+					if (response.success) {
+						const data = response.data;
+						console.log(data)
+						$('#txtName').val(data.name);
+						$('#txtDescription').val(data.taX_DESCRIPTION);
+						$('#txtType').val(data.taX_TYPE);
+						$('#txtCGST').val(data.cgsT_PER);
+						$('#txtSGST').val(data.sgsT_PER);
+						$('#txtIGST').val(data.igsT_PER);
+						$('#txtVAT').val(data.vaT_PER);
+						$('#txtTDS').val(data.tdS_PER);
+						$('#txtTCS').val(data.tcS_PER);
+						$('#txtOTH').val(data.otH_PER);
+						$('#txtOTH2').val(data.otH_PER2);
+						$('#chkPackOnBasic').prop('checked', data.pacK_ONBASIC === 1);
+						$('#IsActive').val(data.active === 1 ? '1' : '0');
+					} else {
+						toastr.error('Error: ' + response.message);
+					}
+				},
+				error: function () {
+					toastr.error('Request failed');
+				}
+			});
+        }
+        // Handle view-only mode
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#fromTaxCodeMaster').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
+        // Read-only mode
+        function setFormReadOnly() {
+            $('#fromTaxCodeMaster input, #fromTaxCodeMaster select').prop('disabled', true);
+            $('#customToggle').css('pointer-events', 'none');
+            $('#btnSubmit, #btnUpdate').hide();
+        }
+    });
+</script>
+
+@* ====================================================================================== *@
+
+@* Send data in Action Method End Block *@
+
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+			hiddenInput.value = isActive ? '1' : '0';
+		});
+	});
+	</Script>
+@* Status Check end *@
+

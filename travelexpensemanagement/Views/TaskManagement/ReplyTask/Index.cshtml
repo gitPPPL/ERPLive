@@ -1,0 +1,627 @@
+﻿@{
+    ViewBag.Title = "Reply Task";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int userCode = ViewBag.userCode != null ? Convert.ToInt32(ViewBag.userCode) : 0;
+}
+<style>
+    .task_fieldset {
+        border-radius: 5px !important;
+        padding: 15px 25px 15px 25px !important;
+        background-color: #f9f9f9 !important;
+        border: none !important;
+    }
+
+    .task_subheading {
+        font-size: 20px;
+        padding: 5px 14px;
+        background: linear-gradient(135deg, #003366, #dff4ff);
+        color: white;
+        border-radius: 6px;
+        box-shadow: 5px 4px 14px rgba(0, 0, 0, 0.3), -5px -5px 0px rgba(255, 255, 255, 0.3);
+        /*  margin-bottom: 20px; */
+    }
+
+    .btn-viewlist {
+        padding: 8px 18px;
+        background-color: #122f4d;
+        border-radius: 5px;
+        color: white;
+        font-size: 12px;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+        .btn-viewlist:hover {
+            padding: 8px 18px;
+            background-color: #ffffff;
+            border: 1px solid #122f4d;
+            border-radius: 5px;
+            color: #122f4d;
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+    .button-right-mg {
+        float: right;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-imageview{
+        background-color: #33713a;
+        color: #ffffff;
+        padding: 4px;
+        border: none;
+        border-radius: 4px;
+        cursor:pointer;
+    }
+</style>
+
+<fieldset class="task_fieldset">
+
+    <h2 class="task_subheading">Task Reply</h2>
+
+    <div class="row">
+        <div class="offset-md-9 col-md-3">
+            <div class="button-right-mg">
+                <button id="btn_TaskList" type="button" class="btn btn-viewlist">
+                    <i class="fa fa-list"></i>Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Task Date</label>
+                <input type="date" class="form-control" id="TastDate" readonly />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Task No</label>
+                <input type="text" class="form-control" id="txtVNo" readonly />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Current Status</label>
+                <input type="text" class="form-control" id="CurrentStatus" readonly />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label> Priority </label>
+                <input type="text" class="form-control" id="txtPriority" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Assigned By</label>
+                <input class="d-none" id="txtAssignedByCode" />
+                <input type="text" class="form-control" id="AssignedBy" readonly />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Expected Date</label>
+                <input type="date" class="form-control" id="completionDate" readonly />
+            </div>
+        </div>
+
+        
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Task Title</label>
+                <input type="text" class="form-control" id="txtTaskdetail" style="height:50px" readonly />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Task Description</label>
+                <input type="text" class="form-control" id="txttask" style="height:50px" readonly />
+            </div>
+        </div>
+        <!-- Main Reply -->
+        <div class="col-md-3 d-none" id="ReplySection">
+            <div class="form-group">
+                <label>Reply</label>
+                <textarea class="form-control" id="txt_Reply" style="height:50px"></textarea>
+            </div>
+        </div>
+        <!-- Main File -->
+        <div class="col-md-3 d-none" id="FileSection">
+            <div class="form-group">
+                <label style="display: inline-block; font-weight: 600;">
+                    File Attached
+                    <span id="txt_file1" style="margin-left: 8px; color: #007bff; font-weight: normal;">             
+                    </span>
+                </label>
+
+                <div class="input-group">
+                    <input type="file" class="form-control" id="FileAttachment" accept="image/*">
+
+                    <button class="btn-imageview" type="button" id="btnPreviewImage">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CC Reply -->
+        <div class="col-md-3 d-none" id="ccReplySection">
+            <div class="form-group">
+                <label style="display: inline-block; font-weight: 600;">
+                    CC Reply
+                </label>
+                <textarea class="form-control" id="txtCCReply" style="height:50px"></textarea>
+            </div>
+        </div>
+
+        <!-- CC File -->
+        <div class="col-md-3 d-none" id="ccFileSection">
+            <div class="form-group">
+                <label>CC File Attached</label>
+                <span id="txt_file2" style="margin-left: 8px; color: #007bff; font-weight: normal;">
+                </span>
+                <div class="input-group">
+                    <input type="file" class="form-control" id="CCFileAttachment" />
+                    <button class="btn-imageview" type="button" id="btnccPreviewImage">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BCC Reply -->
+        <div class="col-md-3 d-none" id="bccReplySection">
+            <div class="form-group">
+                <label>BCC Reply</label>
+                <textarea class="form-control" id="txtBCCReply" style="height:50px"></textarea>
+            </div>
+        </div>
+
+        <!-- BCC File -->
+        <div class="col-md-3 d-none" id="bccFileSection">
+            <div class="form-group">
+                <label>BCC File Attached</label>
+                <span id="txt_file3" style="margin-left: 8px; color: #007bff; font-weight: normal;">
+                </span>
+                <div class="input-group">
+                    <input type="file" class="form-control" id="BCCFileAttachment" />
+                    <button class="btn-imageview" type="button" id="btnBccPreviewImage">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body p-0" style="height:90vh;">
+                    <img id="previewImage"
+                         style="width:100%; height:100%; object-fit:contain;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="display:none;">
+        <div class="col-md-3" style="display:none;">
+            <div class="form-group">
+                <label>Assigned To</label>
+                <input class="d-none" id="txtAssignedToCode" />
+                <input type="text" class="form-control" id="txtAssignedTo" readonly />
+            </div>
+        </div>
+        <div class="col-md-3" style="display:none;">
+            <div class="form-group">
+                <label>CC to</label>
+                <input class="d-none" id="txtCCToCode" />
+                <input type="text" class="form-control" id="txtCCTo" readonly />
+            </div>
+        </div>
+        <div class="col-md-3" style="display:none;">
+            <div class="form-group">
+                <label>BCC to</label>
+                <input class="d-none" id="txtBCCToCode" />
+                <input type="text" class="form-control" id="txtBCCTo" readonly />
+            </div>
+        </div>
+        <div class="col-md-3" style="display:none;">
+            <div class="form-group">
+                <label>Start Date </label>
+                <input type="date" class="form-control" id="txtStartDate" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <label class="checkbox-input">
+                <input type="checkbox" id="TaskComplete" />
+                <b>Task Complete</b>
+            </label>
+        </div>
+        <div class="offset-md-6 col-md-3">
+            <div class="button-right-mg">
+                <button type="button" class="btn btn-success" id="btn_update">
+                    <i class="fa fa-download"></i> Update
+                </button>
+            </div>
+        </div>
+    </div>
+
+</fieldset>
+
+<script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const Vno = urlParams.get('Vno');
+        const userCode = @userCode;
+     
+    $(document).ready(function () {
+
+        if (Vno)
+            {
+                FetchDataforremarkBtn(Vno);
+                FetchDataTaskDetail(Vno);
+            }
+
+        document.getElementById("FileAttachment").addEventListener("change", function () {
+                const fileNameSpan = document.getElementById("txt_file1");
+                if (this.files.length > 0)
+                {
+                 fileNameSpan.textContent = this.files[0].name;
+                } 
+                else
+                {
+                 fileNameSpan.textContent = "";
+                }
+            });
+      
+        document.getElementById("CCFileAttachment").addEventListener("change", function () {
+                const fileNameSpan = document.getElementById("txt_file2");
+
+                if (this.files.length > 0) {
+                    fileNameSpan.textContent = this.files[0].name;
+                } else {
+                    fileNameSpan.textContent = "";
+                }
+            });
+       
+        document.getElementById("BCCFileAttachment").addEventListener("change", function () {
+                const fileNameSpan = document.getElementById("txt_file3");
+
+                if (this.files.length > 0) {
+                    fileNameSpan.textContent = this.files[0].name;
+                } else {
+                    fileNameSpan.textContent = "";
+                }
+            });
+
+        $('#FileAttachment').on('change', function () {
+            const file = this.files[0];
+
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                toastr.warning("Please select an image file.");
+                selectedImageURL = null;
+                return;
+            }
+
+            selectedImageURL = URL.createObjectURL(file);
+        });
+         
+        $('#CCFileAttachment').on('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                toastr.warning("Please select an image file.");
+                selectedImageURL = null;
+                return;
+            }
+            selectedImageURL = URL.createObjectURL(file);
+        });
+               
+        $('#BCCFileAttachment').on('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                toastr.warning("Please select an image file.");
+                selectedImageURL = null;
+                return;
+            }
+            selectedImageURL = URL.createObjectURL(file);
+        });
+                
+        $('#btnPreviewImage').on('click', function () {
+                debugger
+            let filename = $('#txt_file1').text().trim();
+            if (!filename) {
+                toastr.warning("No image selected.");
+                return;
+            }
+            let imagePath = '/images/Task_File/' + filename;
+            $('#previewImage').attr('src', imagePath);
+            const modal = new bootstrap.Modal(
+            document.getElementById('imagePreviewModal')
+            );
+            modal.show();
+        });
+                
+        $('#btnccPreviewImage').on('click', function () {
+                debugger
+            let filename = $('#txt_file2').text().trim();
+            if (!filename) {
+                toastr.warning("No image selected.");
+                return;
+            }         
+            let imagePath = '/images/Task_File/' + filename;
+            $('#previewImage').attr('src', imagePath);
+            const modal = new bootstrap.Modal(
+                document.getElementById('imagePreviewModal')
+            );
+            modal.show();
+        });
+
+        $('#btnBccPreviewImage').on('click', function () {
+                debugger
+            let filename = $('#txt_file3').text().trim();
+            if (!filename) {
+                toastr.warning("No image selected.");
+                return;
+            }
+            let imagePath = '/images/Task_File/' + filename;
+            $('#previewImage').attr('src', imagePath);
+            const modal = new bootstrap.Modal(
+                document.getElementById('imagePreviewModal')
+            );
+            modal.show();
+        });
+ 
+        $('#btn_TaskList').on('click', function () {
+            window.location.href = '/TaskDashboard/Index';
+        });
+
+        $("#btn_update").on("click", function (e) {
+          e.preventDefault();
+          debugger
+        // ===== Collect Values =====
+            const V_NO = $.trim($("#txtVNo").val()) ? parseInt($.trim($("#txtVNo").val()), 10)  : null;
+            const V_DATE = $("#TastDate").val() ? formatDate($("#TastDate").val()) : null;
+            const ORDER_NO = $.trim($("#txtVNo").val())  ? parseInt($.trim($("#txtVNo").val()), 10) : null;
+            const ITEM_NAME = $.trim($("#txttask").val()) || "";
+            const STATUS = $("#TaskComplete").is(":checked") ? "Complete" : "Pending";
+            const REMARKS = $.trim($("#txt_Reply").val()) || "";
+            const REMARKS2 = $.trim($("#txtTaskdetail").val()) || "";
+            const REMARKS3 = $.trim($("#txtCCReply").val()) || "";
+            const REMARKS4 = $.trim($("#txtBCCReply").val()) || "";
+            const RFILE_PATH = $('#txt_file1').text().trim()|| "";
+            const CCFILEPATH = $('#txt_file2').text().trim()|| "";
+            const BCCFILEPATH = $('#txt_file3').text().trim()|| "";
+            const FROM_DEPT = $.trim($("#txtAssignedByCode").val()) ? parseInt($.trim($("#txtAssignedByCode").val()), 10) : null;
+            const FROM_DEPTNAME = $.trim($("#AssignedBy").val()) || "";
+            const DEPT_CODE = $.trim($("#txtAssignedToCode").val()) ? parseInt($.trim($("#txtAssignedToCode").val()), 10) : null;
+            const DEPT_NAME = $.trim($("#txtAssignedTo").val()) || "";
+            const USER_CODE = $.trim($("#txtCCToCode").val()) ? parseInt($.trim($("#txtCCToCode").val()), 10) : null;
+            const UOM_CODE = $.trim($("#txtBCCToCode").val()) ? parseInt($.trim($("#txtBCCToCode").val()), 10) : null;
+            const DEPT_STATUSDATE = $("#txtStartDate").val() ? formatDate($("#txtStartDate").val()) : null;
+            const QC_STATUSDATE = $("#completionDate").val() ? formatDate($("#completionDate").val()) : null;
+            const UOM_NAME = $.trim($("#CurrentStatus").val()) || "";
+            const MAKE_NAME = $.trim($("#txtPriority").val()) || "";
+        // ===== Payload =====
+        const data = {
+            V_NO,
+            V_DATE,
+            ITEM_NAME,
+            STATUS,
+            REMARKS,
+            REMARKS2,
+            REMARKS3,
+            REMARKS4,
+            RFILE_PATH,
+            FROM_DEPT,
+            FROM_DEPTNAME,
+            DEPT_CODE,
+            DEPT_NAME,
+            USER_CODE,
+            UOM_CODE,
+            DEPT_STATUSDATE,
+            QC_STATUSDATE,
+            UOM_NAME,
+            MAKE_NAME,
+            ORDER_NO,
+            CCFILEPATH,
+            BCCFILEPATH
+        };
+
+
+
+
+
+
+        console.log("Payload =>", JSON.stringify(data));
+
+        $("#btn_update").prop("disabled", true);
+
+        $.ajax({
+            url: "/ReplyTask/SaveData",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
+
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Saved successfully!");
+                    FetchDataTaskDetail(V_NO);
+                } else {
+                    toastr.error(response.message || "Save failed.");
+                }
+            },
+
+            error: function (xhr) {
+                let errorMessage = "Unexpected error.";
+
+                if (xhr.status === 400) {
+                    errorMessage = "Bad Request: " + xhr.responseText;
+                } else if (xhr.status === 500) {
+                    errorMessage = "Server error: " + xhr.responseText;
+                }
+
+                console.error(errorMessage);
+                toastr.error(errorMessage);
+            },
+
+            complete: function () {
+                $("#btn_update").prop("disabled", false);
+            }
+        });
+    });
+
+    });
+
+    async function FetchDataTaskDetail(vno) {
+        try {
+            const res = await $.ajax({
+                url: '/ReplyTask/GetTaskDetail',
+                type: 'GET',
+                data: { vno: vno }
+            });
+
+            const data = res.data?.[0];
+            if (!data) return;
+
+            console.log("Task Detail:", data);
+
+            $('#txtVNo').val(data.ORDER_NO || '');
+            $('#TastDate').val(data.V_DATE ? formatDate(data.V_DATE) : '');
+            $('#txttask').val(data.ITEM_NAME || '');
+
+            // Assigned To
+            $('#txtAssignedToCode').val(data.DEPT_CODE || '');
+            $('#txtAssignedTo').val(data.AssignedPerson || '');
+
+            // Assigned By
+            $('#txtAssignedByCode').val(data.FROM_DEPT || '');
+            $('#AssignedBy').val(data.SupervisionBy || '');
+
+            // CC
+            $('#txtCCToCode').val(data.USER_CODE || '');
+            $('#txtCCTo').val(data.CCTo || '');
+
+            // BCC
+            $('#txtBCCToCode').val(data.UOM_CODE || '');
+            $('#txtBCCTo').val(data.BCCTo || '');
+
+            // Task Details
+            $('#txtTaskdetail').val(data.REMARKS2 || '');
+
+            // Dates
+            $('#txtStartDate').val(data.DEPT_STATUSDATE ? formatDate(data.DEPT_STATUSDATE) : '');
+            $('#completionDate').val(data.QC_STATUSDATE ? formatDate(data.QC_STATUSDATE) : '');
+
+            // Priority & Status
+            $('#txtPriority').val(data.MAKE_NAME || '');
+            $('#CurrentStatus').val(data.UOM_NAME || '');
+
+            // Replies
+            $('#txt_Reply').val(data.REMARKS || '');
+            $('#txtCCReply').val(data.REMARKS3 || '');
+            $('#txtBCCReply').val(data.REMARKS4 || '');
+
+            // Files
+            $('#txt_file1').text(data.FileName || '');
+            $('#txt_file2').text(data.CCFileName || '');
+            $('#txt_file3').text(data.BCCFileName || '');
+
+            // Task Complete Checkbox
+            $('#TaskComplete').prop('checked', data.UOM_NAME === "Complete");
+
+        } catch (error) {
+            console.error("Error fetching task detail:", error);
+        }
+    }
+
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    async function FetchDataforremarkBtn(Vno) {
+        try {
+            const res = await $.ajax({
+                url: '/ReplyTask/GetCode',
+                type: 'GET',
+                data: { Vno: Vno }
+            });
+
+            if (!res || !res.status || !res.data?.length) return;
+            console.log('User Data' , res);
+            const ccCode = parseInt(res.data[0].cC_CODE) || 0;
+            const bccCode = parseInt(res.data[0].bcC_CODE) || 0;
+            const AssignedTo = parseInt(res.data[0].assigN_PERSON_CODE) || 0;
+            const supervisoR_CODE = parseInt(res.data[0].supervisoR_CODE) || 0;
+            const currentUser = parseInt(userCode) || 0;
+
+            $('#ReplySection, #FileSection ,#ccReplySection, #ccFileSection, #bccReplySection, #bccFileSection')
+                .addClass('d-none');
+
+            if (supervisoR_CODE === currentUser) {
+             $('#ReplySection, #FileSection ,#ccReplySection, #ccFileSection, #bccReplySection, #bccFileSection').removeClass('d-none');
+                  // Make textareas readonly
+                $('#txt_Reply, #txtCCReply, #txtBCCReply').prop('readonly', true);
+
+                // Disable file inputs
+                $('#FileAttachment, #CCFileAttachment, #BCCFileAttachment').prop('disabled', true);
+
+                // Disable checkbox and update button if needed
+                $('#TaskComplete').prop('disabled', true);
+                $('#btn_update').prop('disabled', true);
+            
+            }
+
+            if (AssignedTo === currentUser) {
+             $('#ReplySection, #FileSection').removeClass('d-none');
+            }
+       
+            if (ccCode === currentUser) {
+             $('#ccReplySection, #ccFileSection').removeClass('d-none');
+            }
+
+            if (bccCode === currentUser) {
+                $('#bccReplySection, #bccFileSection').removeClass('d-none');
+            }
+
+        } catch (error) {
+            toastr.error("Something went wrong");
+            console.error(error);
+        }
+    }
+
+</script>
+

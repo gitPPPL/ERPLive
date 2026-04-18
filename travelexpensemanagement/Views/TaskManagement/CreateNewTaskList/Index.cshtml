@@ -1,0 +1,613 @@
+﻿@{
+    ViewBag.Title = "Create New Task List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .task_fieldset {
+        border-radius: 5px !important;
+        padding: 15px 25px 15px 25px !important;
+        background-color: #f9f9f9 !important;
+        border: none !important;
+    }
+
+    .task_subheading {
+        font-size: 20px;
+        padding: 5px 14px;
+        background: linear-gradient(135deg, #003366, #dff4ff);
+        color: white;
+        border-radius: 6px;
+        box-shadow: 5px 4px 14px rgba(0, 0, 0, 0.3), -5px -5px 0px rgba(255, 255, 255, 0.3);
+        margin-bottom: 20px;
+    }
+
+    .tasktable-head th {
+        position: sticky;
+        top: 0;
+        background-color: #d7d7d7;
+        color: #262626;
+        z-index: 50;
+        border-bottom: 1px Solid #525252;
+        font-weight: 600;
+    }
+
+    .tasktable-width th {
+        vertical-align: middle;
+        padding: 6px 12px;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .tasktable-width {
+        width: max-content;
+        min-width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+   
+    .btn-backtask {
+        background-color: #043668; /* Dark blue background on hover */
+        color: white; /* Text color changes to white */
+        border-color: #001a32; /* Border color changes */
+        border-radius: 18px;
+        font-weight: 400;
+        /* transition: all 0.3s ease; /* Smooth transition */ */
+        padding: 7px 16px;
+    }
+
+        .btn-backtask:hover {
+            border: 1px solid #043668;
+            background-color: white;
+            color: #001a32;
+            font-weight: 600;
+        }
+
+    .taskpagination-end {
+        justify-content: flex-end !important;
+        display: flex !important;
+        margin-top: 10px;
+    }
+    /* General styling for the search container */
+
+    /* Search Container */
+    .tasksearch-container {
+        display: flex;
+        align-items: center;
+        background-color: #e6e9ef; /* Light Grey */
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        max-width: 420px;
+        height: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s ease;
+    }
+
+        /* Focus Glow */
+        .tasksearch-container:focus-within {
+            box-shadow: 0 0 0 2px rgb(30 136 229 / 25%), 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Input */
+        .tasksearch-container input {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #1a2a4f; /* Dark navy text */
+            font-size: 14px;
+        }
+
+            /* Placeholder Navy */
+            .tasksearch-container input::placeholder {
+                color: #1a2a4f; /* Dark Navy Blue */
+                opacity: 0.7; /* Slightly soft */
+            }
+
+        /* Button */
+        .tasksearch-container button {
+            background-color: #1e88e5;
+            border: none;
+            width: 44px;
+            height: 100%;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+            .tasksearch-container button:hover {
+                background-color: #1565c0;
+            }
+
+    .card {
+        border-radius: 5px;
+        box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.12);
+        border: none;
+        margin-top: 14px;
+        display: flex;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #fff;
+        background-clip: border-box;
+        position: relative;
+    }
+    /* Alternate Row Highlight */
+    #tblTaskList tbody tr:nth-child(even) {
+        background-color: #e0f2ff; /* Light highlight */
+    }
+    /* Hover Effect */
+    #tblTaskList tbody tr:hover {
+        background-color: #dce6f8;
+        transition: 0.2s ease;
+    }
+    /* Action Button */
+    .btn-action {
+        padding: 4px 10px;
+        background-color: #1e88e5;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+        .btn-action:hover {
+            background-color: #1565c0;
+        }
+
+    table td{
+        border: 1px solid #d1d1d1;
+        /* padding: 5px 5px; */
+        position: relative;
+        vertical-align: middle;
+        font-weight: 200;
+        text-align: left;
+        padding: 4px 6px;
+        white-space: nowrap;
+        color: #2c2c2c;
+    }
+    /* Create button */
+    .btn-create {
+        background: linear-gradient(135deg, #3f8a46, #2a5f30);
+        color: #fff;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 6px;
+    }
+
+    .btn-taskview{
+        color: #167c23;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 12px;
+        background-color: #c6ffcd;
+        margin: 4px 4px;
+        border-radius: 6px;
+    }
+
+    .btn-taskupdate {
+        color: #00559f;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 12px;
+        background-color: #b3dcff;
+        margin: 4px 4px;
+        border-radius: 6px;
+    }
+
+    .btn-tasksave {
+        color: #011162;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 12px;
+        background-color: #ced6ff;
+        margin: 4px 4px;
+        border-radius: 6px;
+    }
+
+    .btn-taskcancel {
+        color: #ff0000;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 12px;
+        background-color: #ffc4c4;
+        margin: 4px 4px;
+        border-radius: 6px;
+    }
+ 
+</style>
+<fieldset class="task_fieldset">
+    <h2 class="task_subheading">View All Task</h2>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="tasksearch-container">
+                <input type="text" id="searchBox" placeholder="Search by All Columns Name..." />
+                <button type="button">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                <button onclick="window.location.href='@Url.Action("Index", "CreateNewTask")'" type="button" class="btn btn-create">
+                    <i class="fa fa-plus"></i>Add New Task
+                </button>
+                <button onclick="window.location.href='@Url.Action("Index", "TaskDashboard")'" type="button" class="btn btn-backtask">
+                    <i class="fa fa-arrow-left"></i>Back To Task Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblTaskList" class="tasktable-width">
+
+                <colgroup>
+                    <col style="width: 90px;">   <!-- Task No -->
+                    <col style="width: 120px;">  <!-- Task Date -->
+                    <col style="width: 180px;">  <!-- Task Subject -->
+                    <col style="width: 250px;">  <!-- Task Description -->
+                    <col style="width: 140px;">  <!-- Assigned To -->
+                    <col style="width: 140px;">  <!-- CC To -->
+                    <col style="width: 140px;">  <!-- BCC To -->
+                    <col style="width: 120px;">  <!-- Start Date -->
+                    <col style="width: 120px;">  <!-- Target Date -->
+                    <col style="width: 90px;">   <!-- Priority -->
+                    <col style="width: 110px;">  <!-- Status -->
+                    <col style="width: 110px;">  <!-- Action -->
+                </colgroup>
+
+
+                <thead class="tasktable-head">
+                    <tr>
+                        <th>Task No</th>
+                        <th>Task Date</th>
+                        <th>Task Subject</th>
+                        <th>Task Description</th>
+                        <th>Assigned To</th>
+                        <th>CC To</th>
+                        <th>BCC To</th>
+                        <th>Start Date</th>
+                        <th>Target Date</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination container -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="taskpagination-end">
+                <div class="custom-pagination" id="tasktablePagination"></div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+    let employeeList = [];
+    $(document).ready(function () {
+        loadAssignedToDropdown(function () {
+            loadAllMenus();
+        });
+        // ================= EDIT BUTTON =================
+        $(document).on("click", ".btn-taskupdate", function () {
+                     
+            $("#tblTaskList tbody tr").each(function () {
+                $(this).find("select").prop("disabled", true);
+                $(this).find(".StartDate, .EndDate").prop("readonly", true);
+                $(this).removeClass("editing-row");
+            });
+
+            let currentRow = $(this).closest("tr");
+
+            currentRow.find(".AssignedTo, .CCTo, .BCCTo, .priority-dropdown, .status-dropdown")
+                      .prop("disabled", false);
+
+            currentRow.find(".StartDate, .EndDate")
+                      .prop("readonly", false);
+
+            currentRow.addClass("editing-row");
+        });
+
+        // ================= CANCEL BUTTON =================
+    
+        // ================= SEARCH =================
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllMenus();
+        });
+
+    });
+
+
+    // ================= LOAD DATA =================
+    function loadAllMenus() {
+
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/CreateNewTaskList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+
+                if (!res.success) {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
+
+                const list = res.lists;
+                const totalCount = res.totalCount;
+
+                let tbody = $('#tblTaskList tbody');
+                tbody.empty();
+
+                if (!list || list.length === 0) {
+                    tbody.append('<tr><td colspan="13" class="text-center text-muted">No Task Found.</td></tr>');
+                } else {
+                    $.each(list, function (index, item) {
+                        addRow(item);
+                    });
+                }
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading task list');
+            }
+        });
+    }
+        // ================= ADD ROW =================
+    function addRow(data) {
+
+        let statusOptions = `
+            <option value="Close" ${data.status === 'Close' ? 'selected' : ''}>Close</option>
+            <option value="Complete" ${data.status === 'Complete' ? 'selected' : ''}>Complete</option>
+            <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
+        `;
+
+        let priorityOptions = `
+            <option value="Non Urgent" ${data.priority === 'Non Urgent' ? 'selected' : ''}>Non Urgent</option>
+            <option value="Urgent" ${data.priority === 'Urgent' ? 'selected' : ''}>Urgent</option>
+        `;
+
+        function buildEmployeeOptions(selectedValue) {
+            let options = `<option value="">Select</option>`;
+            employeeList.forEach(function (emp) {
+                options += `<option value="${emp.value}" ${emp.value == selectedValue ? 'selected' : ''}>${emp.text}</option>`;
+            });
+            return options;
+        }
+
+        let row = `
+        <tr class="no-border-input">
+           <td><input class="form-control TaskNo" value="${data.v_NO || ''}" readonly /></td>
+           <td><input type="date" class="form-control TaskDate" value="${formatDate(data.v_DATE)}" readonly /></td>
+           <td><input class="form-control TaskSubject" value="${data.tasK_SUBJECT || ''}" readonly /></td>
+           <td><input class="form-control TaskDesc" value="${data.tasK_DESC || ''}" readonly /></td>
+
+           <td><select class="form-control AssignedTo" disabled>${buildEmployeeOptions(data.assigN_PERSON_CODE)}</select></td>
+           <td><select class="form-control CCTo" disabled>${buildEmployeeOptions(data.cC_CODE)}</select></td>
+           <td><select class="form-control BCCTo" disabled>${buildEmployeeOptions(data.bcC_CODE)}</select></td>
+
+           <td><input type="date" class="form-control StartDate" value="${formatDate(data.starT_DATETIME)}" readonly /></td>
+           <td><input type="date" class="form-control EndDate" value="${formatDate(data.enD_DATETIME)}" readonly /></td>
+
+           <td><select class="form-control priority-dropdown" disabled>${priorityOptions}</select></td>
+           <td><select class="form-control status-dropdown" disabled>${statusOptions}</select></td>
+
+           <td>
+                <i class="fas fa-eye btn-taskview" title="View"
+               onclick="viewMenuDetails('${data.doC_ID}')"
+               style="cursor:pointer;"></i>
+
+
+            <i class="fas fa-edit btn-taskupdate" title="Update"></i>
+       
+            <i class="fas fa-save btn-tasksave"
+               onclick="UpdateData(this)"></i>
+            <i class="fas fa-times btn-taskcancel" onclick="CloseTask(this)"></i>
+           </td>
+        </tr>`;
+
+        $("#tblTaskList tbody").append(row);
+    }
+
+
+    // ================= SAVE FUNCTION =================
+    function UpdateData(element) {
+        debugger
+        let currentRow = $(element).closest("tr");
+             let rowData = {
+        V_NO: currentRow.find(".TaskNo").val() !== ""
+                ? parseInt(currentRow.find(".TaskNo").val())
+                : null,
+
+        ASSIGN_PERSON_CODE: currentRow.find(".AssignedTo").val() !== ""
+                ? parseInt(currentRow.find(".AssignedTo").val())
+                : null,
+
+        ASSIGN_PERSON: currentRow.find(".AssignedTo option:selected").text() !== "Select"
+                ? currentRow.find(".AssignedTo option:selected").text()
+                : null,
+
+        CC_CODE: currentRow.find(".CCTo").val() !== ""
+                ? parseInt(currentRow.find(".CCTo").val())
+                : null,
+
+        CC_PERSON: currentRow.find(".CCTo option:selected").text() !== "Select"
+                ? currentRow.find(".CCTo option:selected").text()
+                : null,
+
+        BCC_CODE: currentRow.find(".BCCTo").val() !== ""
+                ? parseInt(currentRow.find(".BCCTo").val())
+                : null,
+
+        BCC_PERSON: currentRow.find(".BCCTo option:selected").text() !== "Select"
+                ? currentRow.find(".BCCTo option:selected").text()
+                : null,
+
+        START_DATETIME: currentRow.find(".StartDate").val() !== ""
+                ? new Date(currentRow.find(".StartDate").val()).toISOString()
+                : null,
+
+        END_DATETIME: currentRow.find(".EndDate").val() !== ""
+                ? new Date(currentRow.find(".EndDate").val()).toISOString()
+                : null,
+
+        PRIORITY: currentRow.find(".priority-dropdown option:selected").text() !== "Select"
+                ? currentRow.find(".priority-dropdown option:selected").text()
+                : null,
+
+        STATUS: currentRow.find(".status-dropdown option:selected").text() !== "Select"
+                ? currentRow.find(".status-dropdown option:selected").text()
+                : null
+    };
+
+        console.log('rowData',rowData);
+
+
+        $.ajax({
+            url: '/CreateNewTaskList/Update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(rowData),
+            success: function (res) {
+               
+                console.log("res",res);
+                
+                
+                if (res.success === true) {
+                    toastr.success("Saved Successfully");
+                    loadAllMenus(); 
+                } else {
+                    toastr.error("Update Failed");
+                }
+            },
+            error: function () {
+                toastr.error("Server Error");
+            }
+        });
+    }
+
+    function CloseTask(element) {
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to close this task?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, Close it",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+
+            if (!result.isConfirmed) return;
+
+            let currentRow = $(element).closest("tr");
+
+            let rowData = {
+                V_NO: currentRow.find(".TaskNo").val(),
+                STATUS: "Close"
+            };
+
+            $.ajax({
+                url: '/CreateNewTaskList/CloseTask',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(rowData),
+                success: function (res) {
+
+                    if (res.success === true) {
+                        toastr.success("Task Closed Successfully");
+                        loadAllMenus();
+                    } else {
+                        toastr.error("Update Failed");
+                    }
+                },
+                error: function () {
+                    toastr.error("Server Error");
+                }
+            });
+
+        });
+    }
+
+
+    // ================= DATE FORMAT =================
+    function formatDate(dateStr) {
+          if (!dateStr) return '';
+
+          const d = new Date(dateStr);
+          if (isNaN(d)) return '';
+
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+
+          return `${year}-${month}-${day}`;
+      }
+
+
+    // ================= PAGINATION =================
+    function renderPagination(total, pageSize, currentPage) {
+
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = $('#tasktablePagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        for (let i = 1; i <= totalPages; i++) {
+            pagination.append(`
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+                        onclick="goToPage(${i})">${i}</button>`);
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllMenus();
+    }
+
+
+    // ================= VIEW =================
+    function viewMenuDetails(code) {
+        window.location.href = '/CreateNewTask/Index?id=' + encodeURIComponent(code) + '&mode=view';
+    }
+
+
+    // ================= DROPDOWN LOAD =================
+    function loadAssignedToDropdown(callback) {
+
+        $.ajax({
+            url: '/CreateNewTaskList/Dropdown_CCTo',
+            type: 'GET',
+            success: function (res) {
+                employeeList = res || [];
+                if (callback) callback();
+            },
+            error: function () {
+                toastr.error("Failed to load dropdown");
+            }
+        });
+    }
+
+</script>

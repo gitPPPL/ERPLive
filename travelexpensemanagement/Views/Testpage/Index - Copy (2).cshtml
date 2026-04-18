@@ -1,0 +1,879 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Business Card Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/VisitorStyle.css" />
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .media-box {
+            width: 100%;
+            min-height: 320px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        video, img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .visiting_fieldset{
+            border-radius: var(--bs-border-radius) !important;
+            padding: 1rem !important;
+            border: var(--bs-border-width) var(--bs-border-style) #c5c5c5 !important;
+            background-color: #f5f4f4;
+            margin-top: 14px;
+        }
+
+        .visiting_legend{
+            background-color: #198754;
+            padding: 0px 0px;
+            color: #ffffff;
+            font-size: 18px;
+            width: auto !important;
+            border-radius: 5px;
+            font-weight: 500 !important;
+            padding-right: 1rem !important;
+            padding-left: 1rem !important;
+            float: none !important;
+        }
+
+        .form-control:focus {
+            color: var(--bs-body-color);
+            background-color: var(--bs-body-bg);
+            border-color: #038119d9;
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, .25);
+        }
+
+        .form-select:focus {
+            border-color: #038119d9;
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, .25);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="visitor_header">
+        <div class="visitor_logo_container">
+            <a href="/" class="visitor_logo">
+                <img src="~/ProductPortfolio/images/web-logo.webp" alt="Pashupati Logo" />
+            </a>
+        </div>
+
+    </header>
+    <section class="main_body">
+        <div class="container">
+            @*  <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div> *@
+            @*  <h3 class="visiting_heading">
+                <i class="bi bi-camera"></i> Business Card Scanner
+            </h3> *@
+
+            <div class="row">
+                <!-- Label for Camera Select -->
+                <div class="col-md-3">
+                    @* <label for="cameraSelect" class="form-label">Select Camera</label> *@
+                    <!-- Select Camera Options -->
+                    <select id="cameraSelect" class="form-select mb-2" onchange="switchCamera()">
+                        <option value="environment">Back Camera</option>
+                        <option value="user">Front Camera</option>
+                    </select>
+                </div>
+            </div>
+            <section class="visiting_main_section">
+                <div class="row">
+
+                    <!-- Live Camera Feed -->
+                    <div class="col-md-6">
+                        <div class="camera-card">
+                            @*  <div class="card-header">
+                                <i class="bi bi-camera"></i>
+                                <span>Live Camera Feed</span>
+                            </div> *@
+
+                            <div class="camera-placeholder">
+                                <video id="video" autoplay playsinline muted></video>
+
+                                <div class="placeholder-content" id="videoPlaceholder">
+                                    <i class="bi bi-camera"></i>
+                                    <p>Live Camera Feed</p>
+                                    <canvas id="canvas" class="d-none"></canvas>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
+
+                                <button id="cameraBtn"
+                                        class="btn btn-primary mt-2"
+                                        onclick="openOrCapture()">
+                                    Open Camera
+                                </button>
+
+                                
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                                <button id="ReloadBtn"
+                                        class="btn btn-primary mt-2"
+                                        onclick="reloadPage()">
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Captured Image Preview -->
+                    <div class="col-md-6 d-none" id="previewColumn">
+                        <div class="camera-card">
+                            @* <div class="card-header">
+                                <i class="bi bi-image"></i>
+                                <span>Captured Image Preview</span>
+                            </div> *@
+
+                            <div class="camera-placeholder">
+                                <img id="photo" />
+
+                                <div class="placeholder-content" id="imagePlaceholder">
+                                    <i class="bi bi-person-badge"></i>
+                                    <p>Captured Image Preview</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <hr />
+
+            <section class="visiting_main_section">
+                <h5 class="main_visitor_heading"><i class="bi bi-person-badge"></i> Business Card Details</h5>
+                <div class="row">
+
+                    <!-- Name -->
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @*  <label class="form-label">Name <span class="text-danger">*</span></label> *@
+                            <input id="txtName" class="form-control" placeholder="Enter Name *" />
+                            
+                        </div>
+
+                    </div>
+
+                    <!-- Sex -->
+                   @*  <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                           
+                            <select id="gender" class="form-select">
+                                <option value="Male" selected>Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div> *@
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @* <label class="form-label">Email Address</label> *@
+                            <input id="txtEmail" class="form-control" placeholder="Email Address" />
+                        </div>
+                    </div>
+                    <!-- Mobile -->
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @* <label class="form-label">Mobile No <span class="text-danger">*</span></label> *@
+                            <input id="NumMobileNumber" class="form-control" placeholder="Mobile Number *" />
+                        </div>
+                    </div>
+                </div>
+                <!-- Email -->
+                <div class="row">
+                   
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @* <label class="form-label">Email Address</label> *@
+                            <input id="txtWeburl" class="form-control" placeholder="Website Url" />
+                        </div>
+                    </div>
+                    <!-- Company -->
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @* <label class="form-label">Company Name</label> *@
+                            <input id="txtCompany" class="form-control" placeholder="Company Name" />
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @*  <label class="form-label">Address</label> *@
+                            <input id="txtAddress" class="form-control" placeholder="Address" />
+                        </div>
+                    </div>
+                </div>
+                <!-- Trade Type -->
+                <div class="row">
+                    
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @* <label class="form-label">Trade Type</label> *@
+                            <select id="TradeType" class="form-select">
+                                <option value="Manufacturer">Manufacturer</option>
+                                <option value="RMSupplier">RMSupplier</option>
+                                <option value="Service Provider">Service Provider</option>
+                                <option value="Trader" selected>Trader</option>
+                               @*  <option value="Agent">Agent</option> *@
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            @* <label class="form-label">Our User Feedback</label> *@
+                            <textarea id="txtOursUserFeedback" class="form-control" rows="2" placeholder="Our User Feedback"></textarea>
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <!-- Product Container -->
+                <div id="productTabsContent">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Customer Fieldset -->
+                            <fieldset class="visiting_fieldset" id="customer">
+                                <legend class="visiting_legend">
+                                    Customer
+                                </legend>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rGranuleschk">
+                                            <label class="form-check-label">rGranules</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rFlakeschk">
+                                            <label class="form-check-label">rFlakes</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rPSFchk">
+                                            <label class="form-check-label">rPSF</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Fabricchk">
+                                            <label class="form-check-label">Fabric</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Sackschk">
+                                            <label class="form-check-label">Sacks</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="FIBCchk">
+                                            <label class="form-check-label">FIBC</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Polyolefinchk">
+                                            <label class="form-check-label">Polyolefin</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Otherschk">
+                                            <label class="form-check-label">Others</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Supplier Fieldset -->
+                            <fieldset class="visiting_fieldset" id="supplier">
+                                <legend class="visiting_legend">
+                                     Supplier
+                                </legend>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PetBottlechk">
+                                            <label class="form-check-label">PetBottle</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PetLumpschk">
+                                            <label class="form-check-label">Pet Lumps</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PetWastechk">
+                                            <label class="form-check-label">Pet Waste</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PolyolefinRMchk">
+                                            <label class="form-check-label">PolyolefinRM</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Fillerchk">
+                                            <label class="form-check-label">Filler</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Otherschk">
+                                            <label class="form-check-label">Others</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                </div>
+
+                @* <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                        <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active"
+                                        id="customer-tab"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#customer"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="customer"
+                                        aria-selected="true">
+                                    Customer
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        id="supplier-tab"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#supplier"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="supplier"
+                                        aria-selected="false">
+                                    Supplier
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content border" id="productTabsContent">
+
+                            <div class="tab-pane fade show active"
+                                 id="customer"
+                                 role="tabpanel"
+                                 aria-labelledby="customer-tab">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rGranuleschk">
+                                            <label class="form-check-label">
+                                                rGranules
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rFlakeschk">
+                                            <label class="form-check-label">
+                                                rFlakes
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rPSFchk">
+                                            <label class="form-check-label">
+                                                rPSF
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Fabricchk">
+                                            <label class="form-check-label">
+                                                Fabric
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Sackschk">
+                                            <label class="form-check-label">
+                                                Sacks
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="FIBCchk">
+                                            <label class="form-check-label">
+                                                FIBC
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Polyolefinchk">
+                                            <label class="form-check-label">
+                                                Polyolefin
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Otherschk">
+                                            <label class="form-check-label" for="cust3">
+                                                Others
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade"
+                                 id="supplier"
+                                 role="tabpanel"
+                                 aria-labelledby="supplier-tab">
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PetBottlechk">
+                                            <label class="form-check-label">
+                                                PetBottle
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PetLumpschk">
+                                            <label class="form-check-label">
+                                                Pet Lumps
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PetWastechk">
+                                            <label class="form-check-label">
+                                                Pet Waste
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="PolyolefinRMchk">
+                                            <label class="form-check-label">
+                                                PolyolefinRM
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Fillerchk">
+                                            <label class="form-check-label">
+                                                Filler
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="Otherschk">
+                                            <label class="form-check-label">
+                                                Others
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    
+
+                </div> *@
+
+                <button class="btn btn-primary" onclick="saveData()" style="margin-top: 15px;">
+                    Submit
+                </button>
+            </section>
+        </div>
+    </section>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const photo = document.getElementById("photo");
+        const cameraSelect = document.getElementById("cameraSelect");
+        const cameraBtn = document.getElementById("cameraBtn");
+        const previewColumn = document.getElementById("previewColumn");
+
+        const imagePlaceholder = document.getElementById("imagePlaceholder");
+        const videoPlaceholder = document.getElementById("videoPlaceholder");
+
+        const txtName = document.getElementById("txtName");
+        // const gender = document.getElementById("gender");
+        const NumMobileNumber = document.getElementById("NumMobileNumber");
+        const txtEmail = document.getElementById("txtEmail");
+        const txtCompany = document.getElementById("txtCompany");
+        const txtAddress = document.getElementById("txtAddress");
+        const TradeType = document.getElementById("TradeType");
+        // const txtInterestedProduct = document.getElementById("txtInterestedProduct");
+        const txtOursUserFeedback = document.getElementById("txtOursUserFeedback");
+        const txtWeburl = document.getElementById("txtWeburl");
+
+        let stream = null;
+        let opened = false;
+        let ocrText = "";
+
+        async function openOrCapture() {
+            try {
+                if (!opened) {
+                    clearForm();
+                    previewColumn.classList.add("d-none");
+                    imagePlaceholder.style.display = "flex";
+                    videoPlaceholder.style.display = "block";
+
+                    if (stream) stream.getTracks().forEach(t => t.stop());
+
+                    const constraints = {
+                        video: {
+                            facingMode: cameraSelect.value,
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        }
+                    };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    opened = true;
+                    cameraBtn.innerText = "Take Photo";
+
+                } else {
+                    // Capture photo
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const base64 = canvas.toDataURL("image/jpeg", 1.0);
+                    photo.src = base64;
+                    photo.style.display = "block";            // make image visible
+        video.style.display = "none";             // hide video
+        videoPlaceholder.style.display = "none";  // hide placeholder text
+        imagePlaceholder.style.display = "none";  // hide image placeholder text
+
+
+                    previewColumn.classList.remove("d-none");
+                    imagePlaceholder.style.display = "none";
+
+                    if (stream) stream.getTracks().forEach(t => t.stop());
+                    opened = false;
+                    cameraBtn.innerText = "Open Camera";
+
+                    scanOCR(base64);
+                }
+            } catch (err) {
+                alert("Camera access failed ❌");
+                console.error(err);
+            }
+        }
+
+        async function switchCamera() {
+            if (!opened) return;
+            if (stream) stream.getTracks().forEach(t => t.stop());
+
+            const constraints = { video: { facingMode: cameraSelect.value } };
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream;
+        }
+
+        function scanOCR(img) {
+            fetch('/Testpage/ScanBase64', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageData: img })
+            })
+            .then(r => r.json())
+            .then(d => {
+                console.log('OCR Result:', d);
+                txtName.value = d.name || "";
+                txtCompany.value = d.company || "";
+                txtEmail.value = d.email || "";
+                NumMobileNumber.value = d.phone || "";
+                txtAddress.value = d.address || "";
+                ocrText = d.ocrText || "";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("OCR failed ❌");
+            });
+        }
+
+        function getCheckedValues(containerId) {
+           return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`))
+                .map(cb => cb.id.replace('chk', '')); // Extracts the text or ID you want to send
+        }
+
+        function saveData() {
+            const name = txtName.value.trim();
+            // const sex = gender.value.trim();
+            const mobile = NumMobileNumber.value.trim();
+
+            if (!name) { alert("Name is required"); txtName.focus(); return; }
+            // if (!sex) { alert("Sex is required"); gender.focus(); return; }
+            if (!mobile) { alert("Mobile number is required"); NumMobileNumber.focus(); return; }
+            if (!/^[6-9]\d{9}$/.test(mobile)) { alert("Enter a valid 10-digit mobile number"); NumMobileNumber.focus(); return; }
+
+            const device = getDeviceInfo();
+
+            const obj = {
+            Name: name || null,
+            // Gender: sex || null,
+            MobileNo: mobile || null,
+            Email: txtEmail.value || null,
+            Company: txtCompany.value || null,
+            Address: txtAddress.value || null,
+            TradeType: TradeType.value || null,
+            UserFeedback: txtOursUserFeedback.value || null,
+            ImageBase64: photo.src || null,
+            OcrText: ocrText || null,
+            CustomerProducts: getCheckedValues("customer"),
+            SupplierProducts: getCheckedValues("supplier"),
+            DeviceId: device.deviceId,
+            DeviceName: device.deviceName,
+            Website: txtWeburl.value || null  // Ensure this is null or an empty string
+        };
+
+
+            console.log('Sending Data:', obj);
+
+            // Send the data to the server (action method)
+            fetch('/Testpage/SaveBusinessCard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(obj)
+            })
+            .then(r => r.json())
+            .then(d => { alert(d.message); })
+            .catch(err => { console.error(err); alert("Save failed ❌"); });
+        }
+
+
+
+        // function saveData() {
+        //     const name = txtName.value.trim();
+        //     const sex = gender.value.trim();
+        //     const mobile = NumMobileNumber.value.trim();
+
+        //     if (!name) { alert("Name is required"); txtName.focus(); return; }
+        //     if (!sex) { alert("Sex is required"); gender.focus(); return; }
+        //     if (!mobile) { alert("Mobile number is required"); NumMobileNumber.focus(); return; }
+        //     if (!/^[6-9]\d{9}$/.test(mobile)) { alert("Enter a valid 10-digit mobile number"); NumMobileNumber.focus(); return; }
+
+        //     const device = getDeviceInfo();
+        //     // const obj = {
+        //     //     Name: name,
+        //     //     Gender: sex,
+        //     //     MobileNo: mobile,
+        //     //     Email: txtEmail.value,
+        //     //     Company: txtCompany.value,
+        //     //     Address: txtAddress.value,
+        //     //     TradeType: TradeType.value,
+        //     //     UserFeedback: txtOursUserFeedback.value,
+        //     //     ImageBase64: photo.src,
+        //     //     OcrText: ocrText,
+        //     //     CustomerProducts: getCheckedValues("customer"),
+        //     //     SupplierProducts: getCheckedValues("supplier"),
+        //     //     DeviceId: device.deviceId,
+        //     //     DeviceName: device.deviceName,
+        //     //     Website: txtWeburl
+        //     // };
+
+        //     const obj = {
+        //     Name: name,
+        //     Gender: sex ||null,
+        //     MobileNo: mobile ||null,
+        //     Email: txtEmail.value ||null,
+        //     Company: txtCompany.value ||null,
+        //     Address: txtAddress.value ||null,
+        //     TradeType: TradeType.value ||null,
+        //     UserFeedback: txtOursUserFeedback.value ||null,
+        //     ImageBase64: photo.src || null,
+        //     OcrText: ocrText || null,
+        //     CustomerProducts: getCheckedValues("customer"),
+        //     SupplierProducts: getCheckedValues("supplier"),
+        //     DeviceId: device.deviceId,
+        //     DeviceName: device.deviceName,
+        //     Website: txtWeburl || null
+        // };
+
+
+
+        //     console.log('obj',obj)
+
+        //     fetch('/Testpage/SaveBusinessCard', {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify(obj)
+        //     })
+        //     .then(r => r.json())
+        //     .then(d => { alert(d.message); })
+        //     .catch(err => { console.error(err); alert("Save failed ❌"); });
+        // }
+
+        function clearForm() {
+            txtName.value = "";
+            // gender.value = "Male";
+            NumMobileNumber.value = "";
+            txtEmail.value = "";
+            txtCompany.value = "";
+            txtAddress.value = "";
+            TradeType.value = "Trader";
+            // txtInterestedProduct.value = "";
+            txtOursUserFeedback.value = "";
+            photo.src = "";
+            ocrText = "";
+        }
+
+        video.addEventListener("loadedmetadata", () => {
+            videoPlaceholder.style.display = "none";
+        });
+    </script>
+    <script>
+         // document.addEventListener("DOMContentLoaded", function () {
+
+         //     const tabContent = document.getElementById("productTabsContent");
+         //     const tabButtons = document.querySelectorAll('#productTabs button[data-bs-toggle="tab"]');
+
+         //     tabButtons.forEach(btn => {
+         //         btn.addEventListener("click", function () {
+         //             tabContent.style.display = "block";
+         //         });
+         //     });
+         // });
+
+
+         function getDeviceInfo() {
+             let deviceId = localStorage.getItem("DEVICE_ID");
+
+             if (!deviceId) {
+                 deviceId = 'DEV-' + crypto.randomUUID();
+                 localStorage.setItem("DEVICE_ID", deviceId);
+             }
+
+             let deviceType = "Desktop";
+
+             if (/Mobi/i.test(navigator.userAgent)) {
+                 deviceType = "Mobile";
+             } else if (/Tablet|iPad/i.test(navigator.userAgent)) {
+                 deviceType = "Tablet";
+             }
+
+             return {
+                 deviceId: deviceId,
+                 deviceName: deviceType + " - " + navigator.platform,
+                 userAgent: navigator.userAgent
+             };
+         }
+
+
+        function getDeviceInfo() {
+             let deviceId = localStorage.getItem("DEVICE_ID");
+
+             if (!deviceId) {
+                 deviceId = 'DEV-' + crypto.randomUUID();
+                 localStorage.setItem("DEVICE_ID", deviceId);
+             }
+
+             let deviceType = "Desktop";
+
+             if (/Mobi/i.test(navigator.userAgent)) {
+                 deviceType = "Mobile";
+             } else if (/Tablet|iPad/i.test(navigator.userAgent)) {
+                 deviceType = "Tablet";
+             }
+
+             return {
+                 deviceId: deviceId,
+                 deviceName: deviceType + " - " + navigator.platform,
+                 userAgent: navigator.userAgent
+             };
+         }
+             function reloadPage() {
+            location.reload();   // page reload
+        }
+    </script>
+
+
+
+
+</body>
+</html>

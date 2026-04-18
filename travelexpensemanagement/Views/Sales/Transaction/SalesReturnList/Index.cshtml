@@ -1,0 +1,289 @@
+﻿@{
+	ViewBag.Title = "Sales Return List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Sales Return List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "SalesReturn")'" type="button" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print" onclick="printCityMasterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblSalesReturnList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Voucher Name</th>
+						<th>Voucher No.</th>
+						<th>Date</th>
+						<th>Bill Name</th>
+						<th>Bill Address1</th>
+						<th>Bill Address2</th>
+						<th>Bill Address3</th>
+						<th>Bill City</th>
+						<th>Agent</th>
+						<th>Ship Name</th>
+						<th>Ship Address1</th>
+						<th>Ship Address2</th>
+						<th>Ship Address3</th>
+						<th>S Name</th>
+						<th>Tax Name</th>
+						<th>Item Type</th>
+						<th>Wb No</th>
+						<th>Pack No</th>
+						<th>Amount</th>
+						<th>Pack Per</th>
+						<th>Pack Amount</th>
+						<th>Amount</th>
+						<th>Cgst Per</th>
+						<th>Cgst Amount</th>
+						<th>Sgst Per</th>
+						<th>Sgst AAmountmt</th>
+						<th>Igst Per</th>
+						<th>Igst Amount</th>
+						<th>Cess Per</th>
+						<th>Cess Amount</th>
+						<th>Load Per</th>
+						<th>Load Ac</th>
+						<th>Load Amount</th>
+						<th>Wb Amount</th>
+						<th>Wb Ac</th>
+						<th>Tot Nos</th>
+						<th>Frt Amount</th>
+						<th>Round Off</th>
+						<th>Tot Net</th>
+						<th>Insu Per</th>
+						<th>Insu Amount</th>
+						<th>Tds Per</th>
+						<th>Tds Amount</th>
+						<th>Load Rem</th>
+						<th>Wb Rem</th>
+						<th>Tot Gross</th>
+						<th>Gr No</th>
+						<th>Gr Date</th>
+						<th>Vehicle No</th>
+						<th>Transport Code</th>
+						<th>Transport Name</th>
+						<th>Driver Name</th>
+						<th>Driver No</th>
+						<th>Waybill No</th>
+						<th>Remark</th>
+						<th>Frt Topay</th>
+						<th>Wb Quantity</th>
+						<th>Disc Per</th>
+						<th>Disc Amount</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</fieldset>
+
+
+<script>
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadSalesReturnList();
+
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			loadSalesReturnList();
+		});
+	});
+
+	function loadSalesReturnList() {
+		$.ajax({
+			url: '/SalesReturnList/GetAlldataList',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: $('#searchBox').val(),
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				console.log('Response:', res);
+
+				const docs = res.data || [];
+				const totalCount = res.totalCount || 0;
+
+				const tbody = $('#tblSalesReturnList tbody'); // ✅ FIXED
+				tbody.empty();
+
+				if (docs.length === 0) {
+					tbody.append(`
+						<tr>
+							<td colspan="70" class="text-center text-muted">
+								No records found
+							</td>
+						</tr>
+					`);
+					renderPagination(0);
+					return;
+				}
+
+				docs.forEach(d => {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${d.DOC_ID ?? ''}</td>
+							<td>${d.VoucherName ?? ''}</td>
+							<td>${d.VoucherNo ?? ''}</td>
+							<td style="display:none;">${d.vtype ?? ''}</td>
+							<td>${d.Date ?? ''}</td>
+							<td>${d.BILL_NAME ?? ''}</td>
+							<td>${d.BILL_ADD1 ?? ''}</td>
+							<td>${d.BILL_ADD2 ?? ''}</td>
+							<td>${d.BILL_ADD3 ?? ''}</td>
+							<td>${d.BillCity?.NAME ?? ''}</td>
+							<td>${d.Agent?.NAME ?? ''}</td>
+							<td>${d.SHIP_NAME ?? ''}</td>
+							<td>${d.SHIP_ADD1 ?? ''}</td>
+							<td>${d.SHIP_ADD2 ?? ''}</td>
+							<td>${d.SHIP_ADD3 ?? ''}</td>
+							<td>${d.ShipCity?.NAME ?? ''}</td>
+							<td>${d.TaxName ?? ''}</td>
+							<td>${d.ITEM_TYPE ?? ''}</td>
+							<td>${d.WB_NO ?? ''}</td>
+							<td>${d.PACK_NO ?? 0}</td>
+							<td>${d.AMOUNT ?? 0}</td>
+							<td>${d.PACK_PER ?? 0}</td>
+							<td>${d.PACK_AMT ?? 0}</td>
+							<td>${d.NAMOUNT ?? 0}</td>
+							<td>${d.CGST_PER ?? 0}</td>
+							<td>${d.CGST_AMT ?? 0}</td>
+							<td>${d.SGST_PER ?? 0}</td>
+							<td>${d.SGST_AMT ?? 0}</td>
+							<td>${d.IGST_PER ?? 0}</td>
+							<td>${d.IGST_AMT ?? 0}</td>
+							<td>${d.CESS_PER ?? 0}</td>
+							<td>${d.CESS_AMT ?? 0}</td>
+							<td>${d.LOAD_PER ?? 0}</td>
+							<td>${d.LOAD_AC ?? ''}</td>
+							<td>${d.LOAD_AMT ?? 0}</td>
+							<td>${d.WB_AMT ?? 0}</td>
+							<td>${d.WB_AC ?? ''}</td>
+							<td>${d.TOT_NOS ?? ''}</td>
+							<td>${d.FRT_AMT ?? 0}</td>
+							<td>${d.ROUND_OFF ?? 0}</td>
+							<td>${d.TOT_NET ?? 0}</td>
+							<td>${d.INSU_PER ?? 0}</td>
+							<td>${d.INSU_AMT ?? 0}</td>
+							<td>${d.TDS_PER ?? 0}</td>
+							<td>${d.TDS_AMT ?? 0}</td>
+							<td>${d.LOAD_REM ?? ''}</td>
+							<td>${d.WB_REM ?? ''}</td>
+							<td>${d.TOT_GROSS ?? 0}</td>
+							<td>${d.GR_NO ?? ''}</td>
+							<td>${d.GR_DATE ?? ''}</td>
+							<td>${d.VEHICLE_NO ?? ''}</td>
+							<td>${d.TRANSPORT_CODE ?? ''}</td>
+							<td>${d.TRANSPORT_NAME ?? ''}</td>
+							<td>${d.DRIVER_NAME ?? ''}</td>
+							<td>${d.DRIVER_NO ?? ''}</td>
+							<td>${d.WAYBILL_NO ?? ''}</td>
+							<td>${d.REMARK ?? ''}</td>
+							<td>${d.FRT_TOPAY ?? 0}</td>
+							<td>${d.WB_QTY ?? 0}</td>
+							<td>${d.DISC_PER ?? 0}</td>
+							<td>${d.DISC_AMT ?? 0}</td>
+							<td>
+								<div class="action-icons">
+									<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editSalesReturn('${d.vtype}', '${d.VoucherNo}')"></i>
+									<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewSalesReturn('${d.vtype}', '${d.VoucherNo}')"></i>
+									<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteSalesReturn('${d.vType}', '${d.VoucherNo}')"></i>
+									<i class="fa fa-file btn-document" data-bs-toggle="tooltip" title="Document Details" onclick="showDocumentPopup('${d.VoucherNo}')"></i>
+								</div>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount);
+			},
+			error: function () {
+				toastr.error('Failed to load sales return list');
+			}
+		});
+	}
+		function renderPagination(total, pageSize = 10, currentPageParam = currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const pagination = $('#tablePagination');
+		pagination.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPageParam > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPageParam - 1})">Prev</button>`;
+		}
+
+		const startPage = Math.max(1, currentPageParam - 2);
+		const endPage = Math.min(totalPages, currentPageParam + 2);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `
+				<button class="btn btn-sm ${i === currentPageParam ? 'btn-primary' : 'btn-light'} mx-1"
+						onclick="goToPage(${i})">${i}</button>
+			`;
+		}
+
+		if (currentPageParam < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPageParam + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		pagination.html(html);
+	}
+	function goToPage(page) {
+		currentPage = page;
+		loadSalesReturnList();
+	}
+	function editSalesReturn(vType, VoucherNo) {
+		window.location.href = `/SalesReturn/Index?vType=${encodeURIComponent(vType)}&VoucherNo=${encodeURIComponent(VoucherNo)}`;
+	}
+	function viewSalesReturn(vType, VoucherNo) {
+		window.location.href = `/SalesReturn/Index?vType=${encodeURIComponent(vType)}&VoucherNo=${encodeURIComponent(VoucherNo)}&mode=view`;
+	}
+	function deleteSalesReturn(vType, VoucherNo) {
+		window.location.href = `/SalesReturn/Index?vType=${encodeURIComponent(vType)}&VoucherNo=${encodeURIComponent(VoucherNo)}`;
+	}
+</script>

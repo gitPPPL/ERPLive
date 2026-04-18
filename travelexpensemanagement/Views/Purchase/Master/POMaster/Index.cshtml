@@ -1,0 +1,440 @@
+﻿@{
+	ViewBag.Title = "PO Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+	.flatpickr-month {
+		background-color: #122f4d !important;
+		color: white !important;
+	}
+
+	.flatpickr-months .flatpickr-prev-month:hover svg {
+		fill: red !important;
+	}
+
+	.flatpickr-months .flatpickr-prev-month svg path, .flatpickr-months .flatpickr-next-month svg path {
+		-webkit-transition: fill .1s;
+		transition: fill .1s;
+		fill: #ffffff !important;
+	}
+
+	.span.flatpickr-weekday {
+		color: #2e2e2e !important;
+	}
+
+	select.flatpickr-monthDropdown-months {
+		font-size: 16px !important;
+	}
+
+	.flatpickr-day.today:hover, .flatpickr-day.today:focus {
+		border-color: #959ea9;
+		background: #122f4d !important;
+		color: #fff;
+	}
+
+	.flatpickr-day:hover {
+		cursor: pointer;
+		outline: 0;
+		background: #122f4d !important;
+		border-color: #e6e6e6;
+		color: white !important;
+	}
+</style>
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<fieldset>
+	<legend class="legend-field">PO Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "POMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="POMasterform">
+		<input type="hidden" class="form-control" id="TxtVNo" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtDocNo" class="form-label">Doc No <span class="required">*</span></label>
+					<input type="text" class="form-control" id="TxtDocNo" name="DocNo" maxlength="16" readonly placeholder="Enter Doc No">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DtDocDate" class="form-label">Doc Date <span class="required">*</span> </label>
+					<input type="date" class="form-control flatpickr" id="DtDocDate" name="DocDate" placeholder="Select Date">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DtFromDate" class="form-label">From Date<span class="required">*</span> </label>
+					<input type="date" class="form-control flatpickr" id="DtFromDate" name="FromDate" placeholder="Select Date">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DtToDate" class="form-label">To Date <span class="required">*</span></label>
+					<input type="date" class="form-control flatpickr" id="DtToDate" name="ToDate" placeholder="Select Date">
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NumStoreAmount" class="form-label">Store Amount <span class="required">*</span></label>
+					<input type="text" class="form-control" id="NumStoreAmount" name="StoreAmount" oninput="allowOnlyNumbers(this);" maxlength="18" placeholder="Enter Store Amount">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NumCapitalAmount" class="form-label">Capital Amount <span class="required">*</span></label>
+					<input type="text" class="form-control" id="NumCapitalAmount" name="CapitalAmount" oninput="allowOnlyNumbers(this);" maxlength="18" placeholder="Enter Capital Amount">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TxtRemarks" class="form-label">Remarks</label>
+					<textarea type="text" class="form-control" id="TxtRemarks" name="Remarks" placeholder="Enter Remarks"></textarea>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlStatus" class="form-label">Status</label>
+					<select class="form-control" id="ddlStatus" name="Status">
+						<option value="1">Open</option>
+						<option value="2">Cancel</option>
+						<option value="0">Close</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2 btn-align">
+				<button id="btn-save" type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+
+<script>
+	flatpickr(".flatpickr", {
+	  dateFormat: "d-m-Y",
+	  allowInput: true
+	});
+</script>
+
+<script>	 
+	  let docId="";
+	  let readOnly;
+
+	 $(document).ready(function(){
+	 docId = getQueryParam('id');
+	 readOnly = getQueryParam('readOnly');
+	 
+ 	 if (docId) { 
+		GetDocData(docId, readOnly);
+	 } else { 
+		GetDocid();  
+		const today = new Date();
+		const todayDate = today.getDate().toString().padStart(2, '0') + '-' +
+						  (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+						  today.getFullYear();
+
+		$('#DtDocDate').val(todayDate);
+		$('#DtFromDate').val(todayDate);
+		$('#DtToDate').val(todayDate);
+
+	 }
+		$('#TxtDocNo').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DtDocDate').focus();
+			}
+		});
+		$('#DtDocDate').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DtFromDate').focus();
+			}
+		});
+
+		$('#DtFromDate').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#DtToDate').focus();
+			}
+		});
+		$('#DtToDate').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#NumStoreAmount').focus();
+			}
+		});
+		 $('#NumStoreAmount').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#NumCapitalAmount').focus();
+			}
+		});
+		$('#NumCapitalAmount').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtRemarks').focus();
+			}
+		});
+
+		$('#TxtRemarks').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#ddlStatus').focus();
+			}
+		});
+		$('#ddlStatus').on('keypress', function(e){
+			if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#btn-save').focus();
+			}
+		});
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+		const POmastDt = collectFormData();
+		console.log(POmastDt);
+		if (!POmastDt.DocId || !POmastDt.DocDate || !POmastDt.FromDate || !POmastDt.ToDate ||
+			!POmastDt.StoreAmt || !POmastDt.CapitalAmt) {
+			toastr.warning("Please fill all required fields");
+			return;
+		}
+		
+		if (docId !== null && docId !== "") {
+			updateDocumentData(POmastDt);
+		} else {
+			saveDoctypeMastDt(POmastDt);
+		}
+	 });
+	 });
+
+	  function saveDoctypeMastDt(POmastDt) {
+				$.ajax({
+					url: '@Url.Action("SavePOMast", "POMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(POmastDt),
+					success: function (response) {
+						if (response?.status) {
+							toastr.success('Data saved successfully.');
+							resetFields();
+							setTimeout(function () {
+								window.location.href = '/POMasterList/Index';
+							}, 1500);
+						} else {
+							toastr.error(response?.message || "Save failed. Please try again.");
+						}
+					},
+					error: function (xhr, status, error) {						 
+						toastr.error("Error occurred while saving. Please contact admin.");
+					}
+				});
+	}
+
+	function updateDocumentData(POmastDt) {
+		$.ajax({
+			url: '/POMaster/UpdatePOMast',
+			type: 'POST',
+			data: JSON.stringify(POmastDt),
+			contentType: 'application/json',
+			dataType: 'json',
+			success: function (response) {
+				if (response?.status) {
+					toastr.success('Data updated successfully.');
+					resetFields();
+					setTimeout(function () {
+						window.location.href = '/POMasterList/Index';
+					}, 1500);
+				} else {
+					alert("Update failed: " + (response?.message || "Unknown error."));
+				}
+			},
+			error: function (xhr, status, error) {				 
+				toastr.error("Data not updated: " + error);
+			}
+		});
+	}
+
+	function getQueryParam(param) {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get(param);
+	}
+
+	 function GetDocData(docId, readOnly) {
+		$.ajax({
+			url: '/POMaster/GetPODetailsById', 
+			type: 'GET',
+			data: { id: docId },
+			success: function (res) {
+				if (res.status && res.data) {
+					fillFormFields(res.data);
+					if (readOnly === 'true') {
+						$('input, textarea, #ddlStatus').prop('disabled', true);
+						$('#btn-save').hide();
+						$('#cancelBtn').hide();
+					}
+					else{
+						$('input, textarea, #ddlStatus').prop('disabled', false);
+						$('#btn-save').show();
+						$('#cancelBtn').show();
+					}
+				} else {
+					toastr.warning('No data found for this ID.');
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load PO data.');
+			}
+		});
+	}
+
+	 function resetFields() {
+			   $('#TxtVNo').val('');
+			   $('#DtDocDate').val('');
+			   $('#DtFromDate').val('');
+			   $('#DtToDate').val('');
+			   $('#NumStoreAmount').val('');
+			   $('#NumCapitalAmount').val('');
+			   $('#TxtRemarks').val('');
+			   $('#ddlStatus').val($('#ddlStatus option:first').val());
+			   $('#searchInput').val('');
+	 }
+
+	 function fillFormFields(dt) {	 
+	  $('#TxtVNo').val(dt.V_NO);
+	  $('#TxtDocNo').val(dt.DOC_ID);
+	  $('#DtDocDate').val(formatDate(dt.V_DATE));
+	  $('#DtFromDate').val(formatDate(dt.FROM_DATE));
+	  $('#DtToDate').val(formatDate(dt.TO_DATE));
+	  $('#NumStoreAmount').val(dt.STORE_AMT);
+	  $('#NumCapitalAmount').val(dt.CAPITAL_AMT);
+	  $('#TxtRemarks').val(dt.REMARK);
+	  $('#ddlStatus').val(dt.STATUS);
+	}
+
+
+		function collectFormData() {
+		return {
+			VNo : toNullableInt($('#TxtVNo').val()),
+			DocId: toNullableString($('#TxtDocNo').val()),
+			DocDate: toNullableString($('#DtDocDate').val()),
+			FromDate: toNullableString($('#DtFromDate').val()),
+			ToDate: toNullableString($('#DtToDate').val()),
+			StoreAmt: toNullableInt($('#NumStoreAmount').val()),
+			CapitalAmt: toNullableInt($('#NumCapitalAmount').val()),
+			Remarks: toNullableString($('#TxtRemarks').val()),
+			Status: toNullableInt($('#ddlStatus').val())
+		};
+	}
+
+		function checkExistOrNot(doctypeData)
+		{
+			 return $.ajax({
+			url: '/POMaster/getdocTypeExitOrNot',
+			type: 'GET',
+			dataType: 'json',
+			data: { doctype: doctypeData }
+		});
+		}
+
+
+		function GetDocid() {
+		$.ajax({
+			url: '@Url.Action("GetDocid", "POMaster")',
+			type: 'GET',
+			success: function (data) {
+				console.log(data);
+				if (data.status === true) {
+					$('#TxtDocNo').val(data.docId);
+				} else {
+					$('#TxtDocNo').val(0);
+				}
+			},
+			error: function (xhr, status, error) {
+				toastr.error('Error fetching Doc ID:', error);
+			}
+		});
+	}
+
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		if (docId !== null && docId !== "") 
+		 {
+		 GetDocData(docId, readOnly);
+	    }
+	    else
+	    {
+     	resetFields();
+	    }
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+	   function allowOnlyNumbers(input) {
+			  input.value = input.value.replace(/[^0-9]/g, '');
+	   }
+
+	   function formatDate(dateStr) {
+		if (!dateStr) return '';
+
+		const date = new Date(dateStr);
+		if (isNaN(date)) return dateStr;
+
+		const day = String(date.getDate()).padStart(2, '0');
+		const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+							"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+		const month = monthNames[date.getMonth()];
+		const year = date.getFullYear();
+
+		return `${day}-${month}-${year}`;
+	}
+
+
+</script>

@@ -1,0 +1,829 @@
+﻿@{
+    ViewBag.Title = "QC Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .btn-plus {
+        padding: 5px !important;
+    }
+    .btn-plus i {
+        margin: 0px !important;
+    }
+</style>
+<fieldset>
+    <legend class="legend-field">QC Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="window.location.href='@Url.Action("Index", "QCMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📝 Form starts -->
+    <form id="QCMasterform">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName">Name</label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName">Short Name</label>
+                    <input type="text" class="form-control" id="TxtShortName" name="Short Name" placeholder="Enter Short Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlQCGroup">QC Group</label>
+                    <select class="form-control" id="ddlQCGroup" name="QCGroup">
+                        <option value="">--Select QC Group--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtMaxPPM">Max PPM</label>
+                    <input type="number" class="form-control" id="TxtMaxPPM" name="Max PPM" placeholder="Enter Max PPM">
+                </div>
+            </div>
+        </div>
+
+        <!-- Trigger Button -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="btn-align">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qcReportModal">
+                        <i class="fa fa-file-alt"></i> Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtParameter">Parameter</label>
+                    <select class="form-control" id="ddlParameter" name="DeductType">
+                        <option value="">--Select Deduct Type--</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtUnit">Unit</label>
+                    <input type="text" class="form-control" id="TxtUnit" name="Unit" placeholder="Unit">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtStdResult">Std Result</label>
+                    <input type="number" class="form-control" id="TxtStdResult" name="StdResult" placeholder="Std Result">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtDeductQty">Deduct Qty</label>
+                    @* <input type="text" class="form-control" id="TxtDeductQty" name="DeductQty" placeholder="Qty"> *@
+                    <select class="form-control" id="ddlDeductQty" name="ddlDeductQty">
+                        <option value="">--Select Deduct Qty--</option>
+                        <option value="Fix">Fix</option>
+                        <option value="%">%</option>
+                        <option value="Wgt">Wgt</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlDeductType">Deduct Type</label>
+                    <select class="form-control" id="ddlDeductType" name="DeductType">
+                        <option value="">--Select Deduct Type--</option>
+                        <option value="Landed">Landed</option>
+                        <option value="Fix">Fix</option>
+                        <option value="ColDiff">ColDiff</option>
+                        <option value="BasePrice">BasePrice</option>
+                        <option value="BaseLanded">BaseLanded</option>
+                        <option value="GraceBaseLanded">GraceBaseLanded</option>
+                        <option value="NA">NA</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlPPM">Ppm Yes/No</label>
+                    <select class="form-control" id="ddlPPM" name="Ppm">
+                        <option value="">--Select--</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtBasePrice">Base Price</label>
+                    <input type="number" class="form-control" id="TxtBasePrice" name="BasePrice" placeholder="Price">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <input type="text" class="form-control" id="TxtRemarks" name="Remarks" placeholder="Remarks">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-align">
+                    <button type="button" class="btn btn-success">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-2">
+            <div class="table-responsive">
+                <table id="tblQCMasteradd" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Code</th>
+                            <th>Parameter</th>
+                            <th>Unit</th>
+                            <th>Std Result</th>
+                            <th>Deduct Qty</th>
+                            <th>Deduct Type</th>
+                            <th>Ppm Yes/No</th>
+                            <th>Base Price</th>
+                            <th>Remarks</th>
+                            <th colspan="2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="pagination-wrapper">
+            <ul class="pagination" id="tablePagination"></ul>
+        </div>
+
+        <!-- Final Buttons Row -->
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    @* <button type="submit" id="btnSubmit" class="btn btn-primary">Submit</button> *@
+                    <button type="button" id="btnUpdate" class="btn btn-primary">Update</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- 📝 Form ends -->
+</fieldset>
+
+<!-- 🧾 Modal Moved Outside the Form -->
+<div class="modal fade" id="qcReportModal" tabindex="-1" aria-labelledby="qcReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="popup-header">
+                <h5 class="popup-title" id="qcReportModalLabel">Print Report</h5>
+                <i class="fa fa-close btn-close" data-bs-dismiss="modal"></i>
+            </div>
+            <div class="modal-body">
+                <form id="qcReportForm">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-text">
+                                <label>QC Group</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" id="ddlQCGroupPR" name="QCGroupPR">
+                                <option value="">--Select Group--</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 radio-text">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="reportType" id="report1" value="Report 1" style="gap:10px;" checked>
+                                <label class="form-check-label" for="report1">Report 1</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="reportType" id="report2" value="Report 2">
+                                <label class="form-check-label" for="report2">Report 2</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblPrintReport" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>QC Group</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="pagination-wrapper">
+                        <ul class="pagination" id="tablePagination"></ul>
+                    </div>
+
+                    <div class="custom-footer-btn btn-last">
+                        <button type="button" class="btn btn-print">
+                            <i class="fa fa-print"></i> Print
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Parameter Popup-->
+<div class="modal fade" id="qcparameterbtnadd" tabindex="-1" aria-labelledby="qcparameterbtnaddLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="popup-header">
+                <h5 class="popup-title" id="qcparameterbtnaddLabel">QC Deduct Rate</h5>
+                <i class="fa fa-close btn-close" data-bs-dismiss="modal"></i>
+            </div>
+            <div class="modal-body">
+                <form id="qcDeductRateForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Parameter: <span id="lblParameterText" class="fw-bold text-primary"></span></label>
+                                
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Deduct Type: <span id="lblDeductTypeText" class="fw-bold text-primary"></span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblParameterDR" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Rate</th>
+                                        <th>Type</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="number" class="form-control form-control-sm" placeholder="From"></td>
+                                        <td><input type="number" class="form-control form-control-sm" placeholder="To"></td>
+                                        <td><input type="number" class="form-control form-control-sm" placeholder="Type"></td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="Base">Base</option>
+                                                <option value="Percent">Percent</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-success btn-sm btn-add-row">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="pagination-wrapper">
+                        <ul class="pagination" id="tablePagination"></ul>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="btn-last">
+                            <button id="btnSaveQCDeductRate" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                            <button type="button" id="cancelBtnQCDeductRate" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="hdnCode" />
+                    <input type="hidden" id="hdnnextQcpCode" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+ $(document).ready(function () {
+   $("#btnUpdate").hide();
+   function getQueryParam(param) {
+             const urlParams = new URLSearchParams(window.location.search);
+             return urlParams.get(param);
+         }
+   const code = getQueryParam('id');
+   const mode = getQueryParam("mode");
+   if (code) {
+             $("#btnSave").hide();
+             $("#btnUpdate").show();
+             $.ajax({
+                    url: '/QCMaster/GetQCMasterListByCode',
+                 type: 'POST',
+                 contentType: 'application/json',
+                 data: JSON.stringify({ code: parseInt(code) }),
+                 success: function (response) {
+                      bindItemDeptForm(response);
+                 },
+                 error: function (xhr) {
+                     alert('Error: ' + xhr.responseText);
+                 }
+             });
+         }
+   var currentCode = 0;
+   var nextQcpCode = 0;
+   GetLastCode().done(function(response) {
+            if (response && response.lastCode !== undefined) {
+                currentCode = response.lastCode;
+                if (currentCode < 0) currentCode = 0; // safety
+
+               initializeQcpCode(currentCode).then(function(nextCode) {
+                nextQcpCode = nextCode.lastQCPCODE;
+            });
+
+            } else {
+                currentCode = 0;
+                nextQcpCode = 1;
+            }
+        }).fail(function() {
+       currentCode = 0;
+       nextQcpCode = 1;
+       alert('Failed to fetch last code from server.');
+   });
+   if (mode === "view") {
+     setFormReadOnly();
+     $('#QCMasterform').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+    }
+
+   $('#ACTIVE').on('change', function () {
+             let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+             $('#statusText').text(status);
+         });
+
+   // Add row button click
+   $('.btn-success').on('click', function() {
+            // Increment codes locally
+            currentCode++;
+            nextQcpCode++;
+
+            const parameter = $('#ddlParameter').val();
+            const parameterText = $('#ddlParameter option:selected').text();
+            const unit = $('#TxtUnit').val();
+            const stdResult = $('#TxtStdResult').val();
+            const deductQtyText = $('#ddlDeductQty option:selected').text();
+            const deductTypeText = $('#ddlDeductType option:selected').text();
+            const ppmText = $('#ddlPPM option:selected').text();
+            const basePrice = $('#TxtBasePrice').val();
+            const remarks = $('#TxtRemarks').val();
+
+            if (!parameter) {
+                toastr.warning('Please select a Parameter');
+                return;
+            }
+            const newRow = `
+                <tr>
+                    <td>${nextQcpCode}</td>
+                    <td style="display:none;">${currentCode}</td>
+                   <td data-id="${parameter}">${parameterText}</td>
+                    <td>${unit}</td>
+                    <td>${stdResult}</td>
+                    <td>${deductQtyText}</td>
+                    <td>${deductTypeText}</td>
+                    <td>${ppmText}</td>
+                    <td>${basePrice}</td>
+                    <td>${remarks}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete">Delete</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-plus" data-bs-toggle="modal" data-bs-target="#qcparameterbtnadd">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            $('#tblQCMasteradd tbody').append(newRow);
+            // Clear form fields
+            $('#ddlParameter').val('');
+            $('#TxtUnit').val('');
+            $('#TxtStdResult').val('');
+            $('#ddlDeductQty').val('');
+            $('#ddlDeductType').val('');
+            $('#ddlPPM').val('');
+            $('#TxtBasePrice').val('');
+            $('#TxtRemarks').val('');
+        });
+
+   // Delete row button click
+   $('#tblQCMasteradd tbody').on('click', '.btn-delete', function() {
+            $(this).closest('tr').remove();
+        });
+
+   // Add row in Master2 table
+   $(document).on('click', '.btn-add-row', function () {
+            const newRow = `
+                <tr>
+                    <td><input type="number" class="form-control form-control-sm" value=""></td>
+                    <td><input type="number" class="form-control form-control-sm" value=""></td>
+                    <td><input type="number" class="form-control form-control-sm" value=""></td>
+                    <td>
+                        <select class="form-control form-control-sm">
+                            <option value="Base">Base</option>
+                            <option value="Percent">Percent</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm btn-add-row">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $('#tblParameterDR tbody').append(newRow);
+        });
+
+   // Popup open from plus button click
+   $('#tblQCMasteradd').on('click', '.btn-plus', function () {
+            const $row = $(this).closest('tr');
+            //const nextQcpCode = $row.find('td:eq(0)').text().trim();
+            const code = $row.find('td:eq(0)').text().trim();
+            const parameterText = $row.find('td:eq(2)').text().trim();
+            const deductTypeText = $row.find('td:eq(6)').text().trim();
+            const parameterId = $row.find('td:eq(2)').data('id')?.toString().trim() || '';
+
+            $('#lblParameterText').text(parameterText);
+            $('#lblDeductTypeText').text(deductTypeText);
+            $('#hdnCode').val(code);
+            $('#hdnnextQcpCode').val(parameterId);
+             Checkdata(code, parameterId);
+        });
+   $('#btnSaveQCDeductRate').on('click', function(e) {
+            e.preventDefault();
+            const code = $('#hdnCode').val();
+            const nextQcpCode = $('#hdnnextQcpCode').val();
+            let rowData = [];
+            $('#tblParameterDR tbody tr').each(function () {
+                const from = $(this).find('td:eq(0) input').val();
+                const to = $(this).find('td:eq(1) input').val();
+                const rate = $(this).find('td:eq(2) input').val();
+                const type = $(this).find('td:eq(3) select').val();
+                rowData.push({
+                    From: parseFloat(from),
+                    To: parseFloat(to),
+                    Rate: parseFloat(rate),
+                    Type: type,
+                    Code: code,
+                    nextQcpCode: nextQcpCode,
+                });
+            });
+            $.ajax({
+                url: '/QCMaster/SaveDeductRates',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(rowData),
+                success: function(response) {
+                     toastr.success('Data saved successfully!');
+                },
+                error: function(xhr, status, error) {
+                     toastr.error('Error saving data: ' + error);
+                }
+            });
+        });
+   // Submit main form
+   $('#QCMasterform').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                Name: $('#TxtName').val(),
+                ShortName: $('#TxtShortName').val(),
+                QCGroup: $('#ddlQCGroup').val(),
+                MaxPPM: $('#TxtMaxPPM').val(),
+                active: $('#ACTIVE').is(':checked') ? 1 : 0,
+                Details: []
+            };
+
+            $('#tblQCMasteradd tbody tr').each(function() {
+                const $tds = $(this).find('td');
+                formData.Details.push({
+                     Code: $tds.eq(0).text().trim(),
+                     Parameter: $tds.eq(2).data('id')?.toString().trim() || '',
+                     Unit: $tds.eq(3).text().trim(),
+                     StdResult: $tds.eq(4).text().trim(),
+                     DeductQty: $tds.eq(5).text().trim(),
+                     DeductType: $tds.eq(6).text().trim(),
+                     Ppm: $tds.eq(7).text().trim(),
+                     BasePrice: $tds.eq(8).text().trim(),
+                     Remarks: $tds.eq(9).text().trim(),
+                     CurrentCode: $tds.eq(1).text().trim()
+                });
+            });
+            $.ajax({
+                url: '/QCMaster/InsertDataQcMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    alert('Data saved successfully!');
+                    // Optionally clear form/table here
+                },
+                error: function(xhr, status, error) {
+                    alert('Error: ' + error);
+                }
+            });
+
+        });
+   // Load dropdowns
+
+   // Update on Click start Block
+   $('#btnUpdate').on('click', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                Name: $('#TxtName').val(),
+                ShortName: $('#TxtShortName').val(),
+                QCGroup: $('#ddlQCGroup').val(),
+                MaxPPM: $('#TxtMaxPPM').val(),
+                active: $('#ACTIVE').is(':checked') ? 1 : 0,
+                Details: []
+            };
+
+            $('#tblQCMasteradd tbody tr').each(function () {
+        const $tds = $(this).find('td');
+
+        formData.Details.push({
+            Code: $tds.eq(0).text().trim(),                            
+            CurrentCode: $tds.eq(1).text().trim() || null,            
+            Parameter: $tds.eq(2).data('id')?.toString().trim() || '',
+            Unit: $tds.eq(3).text().trim(),
+            StdResult: $tds.eq(4).text().trim(),
+            DeductQty: $tds.eq(5).text().trim(),
+            DeductType: $tds.eq(6).text().trim(),
+            Ppm: $tds.eq(7).text().trim(),
+            BasePrice: $tds.eq(8).text().trim(),
+            Remarks: $tds.eq(9).text().trim()
+        });
+    });
+            console.log('Collected form data Update:', formData);
+            $.ajax({
+                url: '/QCMaster/UpdateDataQcMaster',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    alert('Update successfully!');
+                },
+                error: function(xhr, status, error) {
+                    alert('Error: ' + error);
+                }
+            });
+
+        });
+   // Update on Click End Block
+   ddlQCGroup();
+   ddlParameter();
+ });
+ // Functions
+ function GetLastCode() {
+        return $.ajax({
+            url: '/QCMaster/GetLastCode',
+            type: 'POST',  // or 'GET'
+            contentType: 'application/json',
+            data: '{}',
+            dataType: 'json'
+        });
+    }
+ function initializeQcpCode(code) {
+        return $.ajax({
+            url: '/QCMaster/GetLastQCPCODE',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ Code: code }),
+            dataType: 'json'
+        }).done(function (res) {
+            let lastCode = 0;
+            if (res && res.lastQCPCODE !== undefined && !isNaN(res.lastQCPCODE)) {
+                lastCode = parseInt(res.lastQCPCODE);
+            }
+            if (lastCode > 0) {
+                nextQcpCode = lastCode + 1;
+            } else {
+                nextQcpCode = 1; // default start at 1
+            }
+        }).fail(function () {
+            alert("Failed to fetch QCP_CODE.");
+            nextQcpCode = 1;
+        });
+    }
+ function ddlQCGroup(callback) {
+        $.ajax({
+            url: '/QCMaster/GetddlQCGroup',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                const $ddl1 = $('#ddlQCGroup');
+                const $ddl2 = $('#ddlQCGroupPR');
+                $ddl1.empty().append('<option value="">-- Select QC Group --</option>');
+                $ddl2.empty().append('<option value="">-- Select Group --</option>');
+
+                $.each(data, function(i, item) {
+                    const option = `<option value="${item.value}">${item.text}</option>`;
+                    $ddl1.append(option);
+                    $ddl2.append(option);
+                });
+                 if (typeof callback === "function") callback();
+            },
+            error: function(xhr, status, error) {
+                console.error("Error loading QC groups:", error);
+            }
+        });
+    }
+ function ddlParameter() {
+        $.ajax({
+            url: '/QCMaster/GetddlParameter',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                const $ddl = $('#ddlParameter');
+                $ddl.empty().append('<option value="">-- Select Parameter --</option>');
+                $.each(data, function(i, item) {
+                    $ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("Error loading parameters:", error);
+            }
+        });
+    }
+ function bindItemDeptForm(response) {
+        if (!response.success || !response.data || !response.data.details) {
+            toastr.warning('No details found to bind.');
+            return;
+        }
+
+        const data = response.data;
+
+        $('#TxtName').val(data.name);
+        $('#TxtShortName').val(data.shortName);
+        $('#TxtMaxPPM').val(data.maxPPM);
+        $('#ACTIVE').prop('checked', data.active === 1);
+        // Load QCGroup dropdown then set value
+        ddlQCGroup(function () {
+            $('#ddlQCGroup').val(data.qcGroup);
+        });
+        const details = data.details;
+        const tbody = $('#tblQCMasteradd tbody');
+        tbody.empty();
+        details.forEach(function (item) {
+            const newRow = `
+                <tr>
+                    <td>${item.code}</td>
+                    <td style="display:none;">${item.currentCode || ''}</td>
+
+                    <!-- Show parameter name, store ID in data-id -->
+                    <td data-id="${item.parameterValue}">${item.parameter}</td>
+
+                    <td>${item.unit}</td>
+                    <td>${item.stdResult}</td>
+                    <td>${item.deductQty}</td>
+                    <td>${item.deductType}</td>
+                    <td>${item.ppm}</td>
+                    <td>${item.basePrice}</td>
+                    <td>${item.remarks}</td>
+
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete">Delete</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm btn-plus" data-bs-toggle="modal" data-bs-target="#qcparameterbtnadd">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.append(newRow);
+        });
+    }
+ function Checkdata(code, parameterId) {
+        $.ajax({
+            url: '/QCMaster/CheckDeductRates',
+            type: 'POST',
+            data: JSON.stringify({ code: code, parameterId: parameterId }),
+            contentType: 'application/json',
+            success: function(response) {
+               if (response && response.length > 0) {
+                   showDeductRateListPopup(response);
+               } else {
+                   // Agar data nahi mila to ek blank empty row dikhao
+                   showDeductRateListPopup([]);
+               }
+            },
+            error: function(xhr, status, error) {
+                alert('Error retrieving data: ' + error);
+            }
+        });
+    }
+ function showDeductRateListPopup(deductRates) {
+        console.log('deductRates', deductRates);
+        const $tbody = $('#tblParameterDR tbody');
+        $tbody.empty(); 
+        if (!Array.isArray(deductRates) || deductRates.length === 0) {
+            // Agar data empty hai to blank input row dikhana
+            const emptyRow = `
+                <tr>
+                    <td><input type="number" class="form-control form-control-sm" placeholder="From" value=""></td>
+                    <td><input type="number" class="form-control form-control-sm" placeholder="To" value=""></td>
+                    <td><input type="number" class="form-control form-control-sm" placeholder="Rate" value=""></td>
+                    <td>
+                        <select class="form-control form-control-sm">
+                            <option value="Base">Base</option>
+                            <option value="Percent">Percent</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm btn-add-row">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $tbody.append(emptyRow);
+            return;
+        }
+        deductRates.forEach(rate => {
+            const rowHtml = `
+                <tr>
+                    <td><input type="number" class="form-control form-control-sm" placeholder="From" value="${rate.fromResult ?? ''}"></td>
+                    <td><input type="number" class="form-control form-control-sm" placeholder="To" value="${rate.toResult ?? ''}"></td>
+                    <td><input type="number" class="form-control form-control-sm" placeholder="Rate" value="${rate.deductRate ?? ''}"></td>
+                    <td>
+                        <select class="form-control form-control-sm">
+                            <option value="Base" ${rate.deductType === 'Base' ? 'selected' : ''}>Base</option>
+                            <option value="Percent" ${rate.deductType === 'Percent' ? 'selected' : ''}>Percent</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm btn-add-row">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $tbody.append(rowHtml);
+        });
+    }
+ function setFormReadOnly() {
+   $('#QCMasterform input, #QCMasterform select').prop('disabled', true);
+   $('#customToggle').css('pointer-events', 'none');
+   $('#btnSubmit, #btnUpdate, ').hide();
+   $('.btn-delete').hide();
+  }
+
+
+</script>
+
+
+
+

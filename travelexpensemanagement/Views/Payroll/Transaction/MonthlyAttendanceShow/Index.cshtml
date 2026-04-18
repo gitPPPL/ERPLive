@@ -1,0 +1,513 @@
+﻿@{
+    ViewBag.Title = "Monthly Attendance Show";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Monthly Attendance Show</legend>
+    <form id="MonthlyAttendanceShowForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE" />
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtMonthYear">Month/Year</label>
+                    <input type="month" class="form-control" id="DtMonthYear" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group btn-mt">
+                    <label class="radio-label">
+                        <input type="radio" name="filterType" value="Department" id="rdDepartment" />
+                        Department
+                    </label>
+                    <select class="form-control" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-mt">
+                    <button id="btn_Fill" type="button" class="btn btn-success"><i class="fa fa-fill"></i> Fill Data</button>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="TxtEmpCode">Emp Code</label>
+                    <input type="text" class="form-control" id="TxtEmpCode" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-mt button-right">
+                    <button id="btn_Print" type="button" class="btn btn-print"><i class="fa fa-print"></i> Print</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblMonthlyAttendanceShow" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>SNo</th>
+                            <th>Department</th>
+                            <th>Emp code</th>
+                            <th>Employee name</th>
+                            <th>Designation</th>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>4</th>
+                            <th>5</th>
+                            <th>6</th>
+                            <th>7</th>
+                            <th>8</th>
+                            <th>9</th>
+                            <th>10</th>
+                            <th>11</th>
+                            <th>12</th>
+                            <th>13</th>
+                            <th>14</th>
+                            <th>15</th>
+                            <th>16</th>
+                            <th>17</th>
+                            <th>18</th>
+                            <th>19</th>
+                            <th>20</th>
+                            <th>21</th>
+                            <th>22</th>
+                            <th>23</th>
+                            <th>24</th>
+                            <th>25</th>
+                            <th>26</th>
+                            <th>27</th>
+                            <th>28</th>
+                            <th>29</th>
+                            <th>30</th>
+                            <th>31</th>
+                            <th>WDay</th>
+                            <th>OT</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+         
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</fieldset>
+
+
+
+<script>
+    $(document).ready(function () {
+        LoadDropDown();
+
+        $('#btn_Fill').on('click', function () {
+            const monthInput = $('#DtMonthYear').val();
+            const isDepartmentSelected = $('#rdDepartment').is(':checked');
+            const pass = isDepartmentSelected ? 1 : 0;
+            const DeptCode = $('#ddlDepartment').val();
+            const Empcode = $('#TxtEmpCode').val();
+            const Vdate = monthInput;
+
+            if (!monthInput) {
+                alert('Please select a valid month and year first.');
+                return;
+            }
+
+            const [year, month] = monthInput.split('-').map(Number);
+            const days = getDaysInMonth(year, month);
+            adjustDayColumns(days);
+            LoadData(DeptCode, Empcode, pass, Vdate);
+        });
+
+        // Adjust columns on page load based on current DtMonthYear value
+        const defaultDate = $('#DtMonthYear').val();
+        if (defaultDate) {
+            const [year, month] = defaultDate.split('-').map(Number);
+            const days = getDaysInMonth(year, month);
+            adjustDayColumns(days);
+        }
+
+       
+        $(document).on('input', 'input.attendance-day', function () {
+            const $row = $(this).closest('tr');
+            let presentCount = 0;
+
+            $row.find('input[class*="Day"]').each(function () {
+                let $input = $(this);
+                let status = $input.val()?.trim().toUpperCase() || '';
+
+                $input.val(status);
+
+                const validStatuses = ['P', 'O', 'R', 'E', 'A', 'L'];
+
+                if (!status) {
+                    $input.css('background-color', '');
+                    return;
+                }
+
+                if (!validStatuses.includes(status)) {
+                    $input.val('');
+                    $input.css('background-color', '#ff9999'); // red for invalid
+                    return;
+                }
+
+                // Set colors based on status
+                switch (status) {
+                    case 'P':
+                        $input.css('background-color', 'lightgreen');
+                        presentCount++;
+                        break;
+                    case 'O':
+                        $input.css('background-color', 'lightyellow');
+                        break;
+                    case 'E':
+                        $input.css('background-color', '#ADD8E6'); // light blue
+                        break;
+                    case 'A':
+                        $input.css('background-color', '#ff6666'); // red
+                        break;
+                    case 'L':
+                        $input.css('background-color', '#FFA500'); // orange
+                        break;
+                    default:
+                        $input.css('background-color', '');
+                }
+            });
+
+            $row.find('.WDay').val(presentCount);
+        });
+               
+        
+        
+        $(document).on('blur', 'input.attendance-day', function () {
+              $(this).closest('tr').addClass('edited-row');
+            saveEditedAttendanceData('Save');
+        });
+
+         
+
+
+
+  
+
+            $(document).on('change', '.attendance-day', function () {
+                const $input = $(this);
+                const $row = $input.closest('tr');
+                $row.addClass('edited-row');        
+                $input.addClass('edited');          
+            });
+
+
+    });
+
+    // Load Department dropdown
+    async function DDLDocType() {
+        try {
+            const response = await fetch('/MonthlyAttendanceShow/DDlDeptType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlDepartment');
+            ddl.empty().append('<option value="">-- Select Department --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Department:", error);
+            toastr.error('Error loading Department: ' + error.message);
+        }
+    }
+
+    // Load dropdowns
+    async function LoadDropDown() {
+        await DDLDocType();
+    }
+
+    // Get number of days in a month
+    function getDaysInMonth(year, month) {
+        return new Date(year, month, 0).getDate();
+    }
+
+    // Show/hide day columns 1 to 31 based on daysCount
+    function adjustDayColumns(daysCount) {
+        const table = document.getElementById('tblMonthlyAttendanceShow');
+        if (!table) return;
+
+        const headers = table.querySelectorAll('thead th');
+        const rows = table.querySelectorAll('tbody tr');
+
+        // Assuming first 6 columns are fixed (SNO, Emp Code, Dept, Emp Name, Designation)
+        for (let day = 1; day <= 31; day++) {
+            const headerIndex = day + 5; // headers start after first 6 columns
+            if (headers[headerIndex]) {
+                headers[headerIndex].style.display = (day <= daysCount) ? '' : 'none';
+            }
+        }
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            for (let day = 1; day <= 31; day++) {
+                const cellIndex = day + 5;
+                if (cells[cellIndex]) {
+                    cells[cellIndex].style.display = (day <= daysCount) ? '' : 'none';
+                }
+            }
+        });
+    }
+
+    // Load attendance data
+    function LoadData(deptcode, EMP_ID, DeptCheack, Vdate) {
+        $.ajax({
+            url: '/MonthlyAttendanceShow/LoadData',
+            type: 'GET',
+            data: { deptcode, EMP_ID, DeptCheack, Vdate },
+            success: function (response) {
+                if (!response.success || !response.data || response.data.length === 0) {
+                    $('#tblMonthlyAttendanceShow thead').empty();
+                    $('#tblMonthlyAttendanceShow tbody').empty();
+
+                    if (Vdate) {
+                        const [year, month] = Vdate.split('-').map(Number);
+                        const daysInMonth = getDaysInMonth(year, month);
+
+                        let headerHtml = '<tr>';
+                        headerHtml += '<th>SNO</th><th>Emp Code</th><th>Dept</th><th>Emp Name</th><th>Designation</th>';
+                        for (let d = 1; d <= daysInMonth; d++) {
+                            headerHtml += `<th>${d}</th>`;
+                        }
+                        headerHtml += '<th>WDay</th><th>OT</th></tr>';
+
+                        $('#tblMonthlyAttendanceShow thead').append(headerHtml);
+
+                        let emptyRow = `<tr><td colspan="${6 + daysInMonth + 2}" style="text-align:center;">No data found</td></tr>`;
+                        $('#tblMonthlyAttendanceShow tbody').append(emptyRow);
+
+                        adjustDayColumns(daysInMonth);
+                    }
+
+                    toastr.info(response.message || 'No data found.');
+                    return;
+                }
+
+                const records = response.data;
+
+
+                console.log('records',records);
+
+
+
+                // Collect unique employees with their attendance info
+                const empMap = {};
+                records.forEach(rec => {
+                    const empCode = rec.EMP_CODE ?? rec.emP_CODE;
+                    if (!empMap[empCode]) {
+                        empMap[empCode] = {
+                            EMP_CODE: empCode,
+                            DEPT_NAME: rec.DEPT_NAME ?? rec.depT_NAME,
+                            EMP_NAME: rec.EMP_NAME ?? rec.emP_NAME,
+                            designation: rec.Designation ?? rec.designation,
+                            sno: rec.SNO ?? rec.sno,
+                            WDay: 0,
+                            OT: rec.ot ?? '',
+                            dayStatus: {}
+                        };
+                    }
+
+                    // Get day from V_DATE
+                    let rawDate = rec.V_DATE ?? rec.v_DATE;
+                    if (rawDate) {
+                        let dt = new Date(rawDate);
+                        let day = dt.getDate();
+                        const status = rec.STATUS ?? rec.status;
+                        empMap[empCode].dayStatus[day] = status;
+
+                        if (status === 'P') empMap[empCode].WDay++;
+                    }
+                });
+
+                // Figure out days to show in table header
+                let daysToShow = [];
+                if (response.startDay && response.endDay) {
+                    for (let d = response.startDay; d <= response.endDay; d++) daysToShow.push(d);
+                } else {
+                    // fallback to days in month from Vdate
+                    if (Vdate) {
+                        const [year, month] = Vdate.split('-').map(Number);
+                        const daysInMonth = getDaysInMonth(year, month);
+                        for (let d = 1; d <= daysInMonth; d++) daysToShow.push(d);
+                    } else {
+                        // fallback: use max day found
+                        const maxDay = Math.max(...records.map(r => new Date(r.V_DATE ?? r.v_DATE).getDate()));
+                        for (let d = 1; d <= maxDay; d++) daysToShow.push(d);
+                    }
+                }
+
+                // Build table header
+                let headerHtml = '<tr>';
+                headerHtml += '<th>SNO</th><th>Emp Code</th><th>Dept</th><th>Emp Name</th><th>Designation</th>';
+                daysToShow.forEach(d => {
+                    headerHtml += `<th>${d}</th>`;
+                });
+                headerHtml += '<th>WDay</th><th>OT</th></tr>';
+
+                $('#tblMonthlyAttendanceShow thead').empty().append(headerHtml);
+                $('#tblMonthlyAttendanceShow tbody').empty();
+
+                // Add rows for each employee
+                Object.values(empMap).forEach(emp => {
+                    addRow(emp, daysToShow);
+                });
+
+                // Adjust day columns display
+                if (Vdate) {
+                    const [year, month] = Vdate.split('-').map(Number);
+                    const days = getDaysInMonth(year, month);
+                    adjustDayColumns(days);
+                }
+            },
+            error: function (error) {
+                toastr.error('Error fetching data: ' + (error.responseText || error.statusText));
+            }
+        });
+    }
+
+
+
+    function addRow(empData, daysToShow) {
+        let rowHtml = `<tr class="no-border-input">`;
+        rowHtml += `<td style="display:none;">${empData.EMP_CODE || ''}</td>`;
+        rowHtml += `<td><input type="text" class="form-control SNO" value="${empData.sno || ''}" readonly /></td>`;
+        rowHtml += `<td><input type="text" class="form-control Empcode" value="${empData.EMP_CODE || ''}" style="width: 80px;" readonly /></td>`;
+        rowHtml += `<td><input type="text" class="form-control DEPT" value="${empData.DEPT_NAME || ''}" readonly style="width: 180px;" /></td>`;
+        rowHtml += `<td><input type="text" class="form-control Emp" value="${empData.EMP_NAME || ''}" style="width: 150px;" readonly /></td>`;
+        rowHtml += `<td><input type="text" class="form-control DESIGNA" value="${empData.designation || ''}" readonly style="width: 180px;" /></td>`;
+
+        daysToShow.forEach(day => {
+            const status = (empData.dayStatus[day] || '').toUpperCase();
+            let colorStyle = '';
+            switch (status) {
+                case 'P': colorStyle = 'background-color: lightgreen;'; break;
+                case 'O': colorStyle = 'background-color: lightyellow;'; break;
+                case 'E': colorStyle = 'background-color: #ADD8E6;'; break;
+                case 'A': colorStyle = 'background-color: #ff6666;'; break;
+                case 'L': colorStyle = 'background-color: #FFA500;'; break;
+                default: colorStyle = '';
+            }
+            rowHtml += `<td><input type="text" class="form-control Day${day} attendance-day" value="${status}" style="width: 30px; ${colorStyle}" /></td>`;
+        });
+
+        rowHtml += `<td><input type="text" class="form-control WDay" value="${empData.WDay || ''}" readonly /></td>`;
+        rowHtml += `<td><input type="text" class="form-control OT" value="${empData.OT || ''}" readonly style="width: 80px;" /></td>`;
+        rowHtml += `</tr>`;
+
+        $('#tblMonthlyAttendanceShow tbody').append(rowHtml);
+    }
+
+        function saveEditedAttendanceData() {
+        const editedRows = $('#tblMonthlyAttendanceShow tbody tr.edited-row');
+        if (editedRows.length === 0) return;
+
+        const Vdate = $('#DtMonthYear').val();
+        if (!Vdate) {
+            toastr.error('Please select month and year before saving.');
+            return;
+        }
+
+        const [year, month] = Vdate.split('-').map(Number);
+        const daysInMonth = getDaysInMonth(year, month);
+
+        const attendanceData = [];
+
+        editedRows.each(function () {
+            const $row = $(this);
+            const empCode = $row.find('input.Empcode').val();
+            if (!empCode) return; // skip empty
+
+            // Only inputs with class 'edited' within this row
+            $row.find('input.attendance-day.edited').each(function () {
+                const $dayInput = $(this);
+                const classList = $dayInput.attr('class').split(/\s+/);
+                const dayClass = classList.find(c => c.startsWith('Day'));
+                if (!dayClass) return;
+
+                const day = parseInt(dayClass.replace('Day', ''));
+                if (day < 1 || day > daysInMonth) return;
+
+                const status = $dayInput.val()?.trim().toUpperCase() || '';
+                if (!status) return;
+
+                const validStatuses = ['P', 'O', 'R', 'E', 'A', 'L'];
+                if (!validStatuses.includes(status)) return;
+
+                const dayStr = day < 10 ? '0' + day : day;
+                const monthStr = month < 10 ? '0' + month : month;
+                const dateStr = `${year}-${monthStr}-${dayStr}`;
+
+                attendanceData.push({
+                    EMP_CODE: empCode,
+                    V_DATE: dateStr,
+                    STATUS: status
+                });
+            });
+        });
+
+        console.log('attendanceData', attendanceData);
+
+            if (attendanceData.length === 0) {
+
+            return;
+            }
+
+        $.ajax({
+            url: '/MonthlyAttendanceShow/SaveAttendance',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({data: attendanceData }),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message || 'Attendance data saved successfully.');
+                    
+                    $('#tblMonthlyAttendanceShow tbody tr.edited-row').removeClass('edited-row');
+                    $('#tblMonthlyAttendanceShow tbody tr input.attendance-day.edited').removeClass('edited');
+                } else {
+                    toastr.error(response.message || 'Failed to save attendance data.');
+                }
+            },
+            error: function (xhr) {
+                toastr.error('Error saving attendance data: ' + xhr.statusText);
+            }
+        });
+    }
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

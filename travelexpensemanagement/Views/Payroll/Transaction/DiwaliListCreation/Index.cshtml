@@ -1,0 +1,195 @@
+﻿@{
+    ViewBag.Title = "Diwali List Creation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Diwali List Creation</legend>
+    <form id="DiwaliListCreationForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtCreateDate">Create Date</label>
+                    <input type="date" class="form-control" id="DtCreateDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt button-right">
+                    <button type="button" class="btn btn-success" id="btn_calculatefill"><i class="fa fa-fill"></i>Calculate and Fill</button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-primary" id="btn_payment"><i class="fa fa-print"></i>Payment Sheet</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                    <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+                </div>
+            </div>
+            
+        </div>
+       
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblDiwaliListCreation" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Emp Code</th>
+                            <th style="width:200px;">Employee Name</th>
+                            <th style="width:150px;">Designation</th>
+                            <th>Join Date</th>
+                            <th>Month</th>
+                            <th>Pavg</th>
+                            <th>Wages</th>
+                            <th>%</th>
+                            <th>Amount</th>
+                            <th style="width:100px;">Pay Amount</th>
+                            <th>Cond</th>
+                            <th style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+ 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+<script>	
+
+		let currentPage = 1;
+		let pageSize = 10;
+
+		$(document).ready(function () {
+            var todayDate=getTodayDate();
+            $('#DtCreateDate').val(todayDate);
+                       			
+			$('#searchBox').on('keyup', function () {
+                var cDate=$('#DtCreateDate').val();
+				currentPage = 1;
+                GetMasterDataList(cDate);
+			});
+
+            $(document).on('click', '#btn_calculatefill', function(){              
+                var cDate=$('#DtCreateDate').val();                
+                GetMasterDataList(cDate);
+            });
+
+		});
+
+        function GetMasterDataList(cDate) {
+			const searchTerm = $('#searchBox').val().trim();        
+			$.ajax({
+            url: '@Url.Action("GetDiwaliBonusList", "DiwaliListCreation")',
+				type: 'GET',
+				dataType: 'json',
+				data: {
+					searchTerm: searchTerm,
+					pageNumber: currentPage,
+					pageSize: pageSize,
+                    CDate:cDate
+				},
+				success: function (res) {
+					const mastListData = res.data || [];
+					const totalCount = res.totalCount || 0;
+                let tbody = $('#tblDiwaliListCreation tbody');
+					tbody.empty();
+					console.log(mastListData);
+					if (mastListData.length === 0) {
+						tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+						return;
+					}
+            $.each(mastListData, function (index, item) {
+            tbody.append(`
+            <tr>
+                <td class="d-none code">${item.SNO ?? ''}</td>
+                <td>${item.EMP_CODE ?? ''}</td>
+                <td>${item.EMP_NAME ?? ''}</td>
+                <td>${item.DESG_NAME ?? ''}</td>
+                <td>${item.JOIN_DATE ? item.JOIN_DATE.substring(0, 10) : ''}</td>
+                <td>${item.WORK_MNTH ?? ''}</td>
+                <td>${item.PAVG ?? ''}</td>
+                <td>${item.WAGES ?? ''}</td>
+                <td>${item.PERC ?? ''}</td>
+                <td>${item.AMOUNT ?? ''}</td>
+                <td>${item.PAY_AMT ?? ''}</td>
+                <td>${item.COND ?? ''}</td>
+                <td class="d-none">${item.V_DATE ? item.V_DATE.substring(0, 10) : ''}</td> <!-- hidden Action or date -->
+            </tr>
+            `);
+            });
+			    renderPagination(totalCount, pageSize, currentPage);
+
+				},
+				error: function (xhr) {
+					toastr.error('Error loading Shift Data list: ' + xhr.responseText);
+				}
+			});
+		}
+
+		function renderPagination(total, pageSize, currentPage) {
+			const totalPages = Math.ceil(total / pageSize);
+			const paginationContainer = $('#tablePagination');
+			paginationContainer.empty();
+
+			if (total <= 0 || totalPages <= 1) return;
+
+			let paginationHtml = '';
+
+			if (currentPage > 1) {
+            paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+			}
+
+			let startPage = Math.max(1, currentPage - 2);
+			let endPage = Math.min(totalPages, currentPage + 2);
+
+			if (currentPage <= 3) endPage = Math.min(5, totalPages);
+			if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+			for (let i = startPage; i <= endPage; i++) {
+				paginationHtml += `
+                <button type="button" class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+							onclick="goToPage(${i})">${i}</button>`;
+			}
+
+			if (currentPage < totalPages) {
+            paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            paginationHtml += `<button type="button" class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+			}
+
+			paginationContainer.html(paginationHtml);
+		}
+
+		function goToPage(page) {  
+			currentPage = page;
+            var CDate=$('#DtCreateDate').val();
+            GetMasterDataList(CDate);
+		}
+ 
+         function getTodayDate(){
+            const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+            return todayDate ;
+
+         }
+		 
+</script>
+ 

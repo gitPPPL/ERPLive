@@ -1,0 +1,215 @@
+﻿@{
+	ViewBag.Title = "Mobile Bill List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<fieldset>
+	<legend class="legend-field">Mobile Bill List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				<button onclick="window.location.href='@Url.Action("Index", "MobileBillEntry")'" type="submit" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print" onclick="printCityMasterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblMobileBillList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Document ID</th>
+						<th>Doc Date</th>
+						<th>Bill Amount</th>
+						<th>Deduct Amount</th>
+						<th>BilL Ac Name (Dr)</th>
+						<th>BilL Ac Name (Cr)</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+
+
+<script>
+
+
+    const jsMobileEntryList = {
+
+        currentPage :1,
+        pageSize : 10,
+
+        //Load main grid...............
+         loadDocumentData : function() {
+            const searchTerm = $('#searchBox').val();
+            $.ajax({
+                url: '/MobileBillList/GetAllDocs',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    searchTerm,
+                    pageNumber: jsMobileEntryList.currentPage,
+                    pageSize: jsMobileEntryList.pageSize
+                },
+                success: function (res) {
+                    console.log(res);
+                    const docs = res.items || res.data || [];
+                    const totalCount = res.totalCount || 0;
+
+                    const tbody = $('#tblMobileBillList tbody');
+                    tbody.empty();
+
+                    if (docs.length === 0) {
+                        tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                        jsMobileEntryList.renderPagination(0, this.pageSize, this.currentPage);
+                        return;
+                    }
+
+                    docs.forEach(doc => {
+                        tbody.append(`
+                            <tr>
+                                <td style="display:none;">${doc.docNo || doc.docNo || ''}</td>
+                                <td>${doc.docId || ''}</td>
+                                <td>${doc.docDate || '0'}</td>
+                                <td>${doc.billAmount || '0'}</td>
+                                <td>${doc.deductAmount || '0'}</td>
+                                <td>${doc.dr_bill_name || ''}</td>
+                                <td>${doc.cr_bill_name || ''}</td>
+                                <td>
+                                  <div class="action-icons">
+                                  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="jsMobileEntryList.editDocStage('${doc.docNo}')"></i>
+                                  <i class="fa fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="jsMobileEntryList.viewDocStage('${doc.docNo}')"></i>
+                                  <i class="fa fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="jsMobileEntryList.deleteDocStage('${doc.docNo}')"></i>
+                                  <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="jsMobileEntryList.showDocumentPopup('${doc.docNo}')"></i>
+                                  </div>
+
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    jsMobileEntryList.renderPagination(totalCount, jsMobileEntryList.pageSize, jsMobileEntryList.currentPage);
+                },
+                error: function (xhr) {
+                    toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+                }
+            });
+        },
+
+        renderPagination : function(total, pageSize, currentPage) {
+            const totalPages = Math.ceil(total / pageSize);
+            const pagination = $('#tablePagination');
+            pagination.empty();
+
+            if (totalPages <= 1) return;
+
+            let html = '';
+
+            if (currentPage > 1) {
+                html += `<button class="btn btn-sm btn-light mx-1" onclick="jsMobileEntryList.goToPage(1)">First</button>`;
+                html += `<button class="btn btn-sm btn-light mx-1" onclick="jsMobileEntryList.goToPage(${currentPage - 1})">Prev</button>`;
+            }
+
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="jsMobileEntryList.goToPage(${i})">${i}</button>`;
+            }
+
+            if (currentPage < totalPages) {
+                html += `<button class="btn btn-sm btn-light mx-1" onclick="jsMobileEntryList.goToPage(${currentPage + 1})">Next</button>`;
+                html += `<button class="btn btn-sm btn-light mx-1" onclick="jsMobileEntryList.goToPage(${totalPages})">Last</button>`;
+            }
+
+            pagination.html(html);
+        },
+
+        goToPage : function(page) {
+            this.currentPage = page;
+            this.loadDocumentData();
+        },
+
+        editDocStage : function (docCode) {
+            window.location.href = `/MobileBillEntry/Index?id=${encodeURIComponent(docCode)}`;
+        },
+
+        viewDocStage : function (docCode) {
+            window.location.href = `/MobileBillEntry/Index?id=${encodeURIComponent(docCode)}&readOnly=true`;
+        },
+
+        deleteDocStage : function (docNo) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this deletion!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/MobileBillList/DeleteDocByCode',
+                        type: 'POST',
+                        data: { DocNo: docNo },
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success(response.message || "Record deleted successfully.");
+                                jsMobileEntryList.loadDocumentData();
+                            } else {
+                                toastr.warning("Delete failed."+ response.message);
+                            }
+                        },
+                        error: function () {
+                            toastr.error("An error occurred while deleting.");
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    $(document).ready(function () {
+        debugger;
+        jsMobileEntryList.loadDocumentData();
+        $('#searchBox').on('keyup', function () {
+            jsMobileEntryList.currentPage = 1;
+            jsMobileEntryList.loadDocumentData();
+        });
+    });
+
+
+</script>
+

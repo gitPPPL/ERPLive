@@ -1,0 +1,161 @@
+﻿@{
+    ViewBag.Title = "Item Make Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Item Make Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "ItemMakeMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="ItemMakeMasterform">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+        <!-- Row 1 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group"> 
+                    <label for="TxtName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName" class="form-label">Short Name</label>
+                    <input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Enter Short Name">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = parseInt(urlParams.get('id'));
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+            if (!isNaN(rowId) && rowId > 0) {
+                loadItemMakeById(rowId);
+                if (isReadOnly) {
+                    setItemMakeFormReadOnly();
+                }
+            }
+        });
+
+        $('#cancelBtn').on('click', function () {
+            window.location.href = '/ColorGroupList/Index';
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+    });
+
+    function loadItemMakeById(code) {
+        $.ajax({
+            url: '/ItemMakeMasterList/GetItemMakeByCode',
+            type: 'GET',
+            data: { code },
+            success: function (response) {
+                const data = response.data;
+                if (!data) {
+                    toastr.warning("No data found.");
+                    return;
+                }
+
+                $('#CODE').val(data.code);
+                $('#TxtName').val(data.name);
+                $('#TxtShortName').val(data.shortname);
+                $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+            },
+            error: function (xhr) {
+                console.error("Error loading color group by ID:", xhr);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    $('#ItemMakeMasterform').on('submit', function (e) {
+        e.preventDefault();
+
+        const code = parseInt($('#CODE').val()) || 0;
+        const name = $('#TxtName').val().trim();
+        const shortname = $('#TxtShortName').val().trim();
+        const isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+
+        if (!name) {
+            toastr.warning('Please enter Name.');
+            $('#TxtName').focus();
+            return;
+        }
+
+        const payload = {
+            CODE: code,
+            NAME: name,
+            SHORTNAME: shortname,
+            ACTIVE: isActive,
+            UDATE: new Date().toISOString(),
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? 'U' : 'A',
+            ACTION: code > 0 ? 'UPDATE' : 'INSERT',
+            WSID: 'WEB',
+            UUSER: 1,
+            EUSER: 1
+        };
+
+        $.ajax({
+            url: '/ItemMakeMaster/SaveItemMakeGroup',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Item Make saved successfully!");
+                    $('#ItemMakeMasterform')[0].reset();
+                    setTimeout(function () {
+                        window.location.href = '/ItemMakeMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning(response.message || "Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function setItemMakeFormReadOnly() {
+        const form = $('#ItemMakeMasterform');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        $('#ACTIVE').prop('disabled', true);
+        $('#statusText').addClass('text-muted');
+    }
+
+</script>
+

@@ -1,0 +1,229 @@
+﻿@{
+	ViewBag.Title = "Notice Period Payment List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<fieldset>
+	<legend class="legend-field">Notice Period Payment List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control mb-3" placeholder="Search by employee, code, or voucher..." />
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "NoticePeriodPaymentEntry")'" type="submit" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print" onclick="printCityMasterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblNoticePeriodPaymentList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th>Code</th>
+						<th>Voucher Type</th>
+						<th>Voucher No</th>
+						<th>Voucher Date</th>
+						<th>Employee Code</th>
+						<th>Days</th>
+						<th>Gross</th>
+						<th>Rate</th>
+						<th>Amount</th>
+						<th>Updated By</th>
+						<th>Updated Date</th>
+						<th>Entered By</th>
+						<th>Entered Date</th>
+						<th>AED</th>
+						<th>WSID</th>
+						<th>LIP</th>
+						<th>LID</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+<script>
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadNoticePeriodPayments();
+
+		// Search
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			loadNoticePeriodPayments();
+		});
+	});
+
+	function loadNoticePeriodPayments() {
+		const searchTerm = $('#searchBox').val();
+
+		$.ajax({
+			url: '/NoticePeriodPaymentList/GetNoticePeriodPaymentList', // 🔹 Replace with actual controller route
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const records = res.items || res.data || [];
+				const totalCount = res.totalCount || 0;
+				const tbody = $('#tblNoticePeriodPaymentList tbody');
+				tbody.empty();
+
+				if (records.length === 0) {
+					tbody.append(`<tr><td colspan="17" class="text-center text-muted">No records found.</td></tr>`);
+					renderPagination(0, pageSize, currentPage);
+					return;
+				}
+
+						records.forEach(item => {
+		tbody.append(`
+			<tr>
+				<td>${item.searchCode || ''}</td>
+				<td>${item.v_TYPE || ''}</td>
+				<td>${item.v_NO || ''}</td>
+				<td>${item.docDate || ''}</td>
+				<td>${item.emP_CODE || ''}</td>
+				<td>${item.days || ''}</td>
+				<td>${item.gross || ''}</td>
+				<td>${item.rate || ''}</td>
+				<td>${item.amount || ''}</td>
+				<td>${item.uuser || ''}</td>
+				<td>${item.udate || ''}</td>
+				<td>${item.euser || ''}</td>
+				<td>${item.edate || ''}</td>
+				<td>${item.aed || ''}</td>
+				<td>${item.wsid || ''}</td>
+				<td>${item.lip || ''}</td>
+				<td>${item.lid || ''}</td>
+				 <td>
+				<div class="action-icons">
+					<i class="fa fa-edit btn-edit" title="Edit"
+						onclick="editNotice('${item.searchCode}', '${item.v_TYPE}', '${item.v_NO}')"></i>
+					<i class="fa fa-eye btn-view" title="View"
+						onclick="viewNotice('${item.searchCode}', '${item.v_TYPE}', '${item.v_NO}')"></i>
+				</div>
+			</td>
+			</tr>
+		`);
+	});
+
+
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('❌ Error loading Notice Period Payments: ' + (xhr.responseJSON?.message || xhr.statusText));
+			}
+		});
+	}
+
+	// ✅ Pagination Renderer
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const pagination = $('#tablePagination');
+		pagination.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		const startPage = Math.max(1, currentPage - 2);
+		const endPage = Math.min(totalPages, currentPage + 2);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `
+				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+		pagination.html(html);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadNoticePeriodPayments();
+	}
+		function editNotice(searchCode, v_TYPE, v_NO) {
+		// Build URL with parameters
+		const url = `/NoticePeriodPaymentEntry/Index?searchCode=${encodeURIComponent(searchCode)}&v_TYPE=${encodeURIComponent(v_TYPE)}&v_NO=${encodeURIComponent(v_NO)}`;
+		// ✅ Redirect to that URL
+		window.location.href = url;
+	}
+	function viewNotice(searchCode, v_TYPE, v_NO) {
+		const url = `/NoticePeriodPaymentEntry/Index?searchCode=${encodeURIComponent(searchCode)}&v_TYPE=${encodeURIComponent(v_TYPE)}&v_NO=${encodeURIComponent(v_NO)}`;
+	    window.location.href = url;
+	}
+
+	function deleteNotice(code) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This record will be permanently deleted!",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/NoticePeriodPaymentEntry/Delete',
+					type: 'POST',
+					data: { searchCode: code },
+					success: function (response) {
+						if (response.success) {
+							toastr.success(response.message || "Record deleted successfully.");
+							loadNoticePeriodPayments();
+						} else {
+							toastr.warning("Delete failed.");
+						}
+					},
+					error: function () {
+						toastr.error("An error occurred while deleting.");
+					}
+				});
+			}
+		});
+	}
+</script>
+

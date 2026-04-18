@@ -1,0 +1,391 @@
+﻿@{
+	ViewBag.Title = "Godown Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;  // Exit loop once found current menu permission
+        }
+    }
+}
+
+<fieldset>
+	<legend class="legend-field">Godown Master List</legend>
+	<div class="row">
+		<div class="col-lg-3">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+
+
+        <div class="col-lg-9">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "GodownMaster")'" type="submit" class="btn btn-primary">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-info">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-dark">
+                        <i class="fa fa-check"></i> Approve
+                    </button>
+                }
+            </div>
+        </div>
+
+
+	</div>
+	<div class="card shadow-sm border-0 mt-1">
+		<div class="table-responsive">
+            <table id="tblGodownMaster" class="table-width">
+				<thead class="table-head">
+					<tr>
+                        <th style="display:none;">Code</th>
+						<th>Name</th>
+						<th>Comp Name</th>
+						<th>Pincode</th>
+						<th>Address</th>
+						<th>Address 2</th>
+						<th>City</th>
+						<th>State Code</th>
+						<th>Wb y/n</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<!-- Pagination container -->
+		<div class="row p-3">
+			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+		</div>
+	</div>
+</fieldset>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    var canAdd = @canAdd.ToString().ToLower();
+    var canEdit = @canEdit.ToString().ToLower();
+    var canDelete = @canDelete.ToString().ToLower();
+    var canPrint = @canPrint.ToString().ToLower();
+    var canExport = @canExport.ToString().ToLower();
+    var canMail = @canMail.ToString().ToLower();
+    var canApproval = @canApproval.ToString().ToLower();
+    var canDocDetail = @canDocDetail.ToString().ToLower();
+
+    let currentPage = 1;
+    let pageSize = 10;
+    let mapCity = {};
+    let mapState = {};
+
+    $(document).ready(function () {
+        $.when(
+            loadCityList(),
+            loadStateList()
+        ).done(function () {
+            loadAllGodowns();
+        });
+
+        if (canExport) {
+            $('#btnExport').show();
+        }
+    });
+
+    function loadCityList() {
+        return $.ajax({
+            url: '/GodownMaster/GetCityList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlCITY_NAME');
+                ddl.empty().append('<option value="">-- Select City --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    mapCity[item.value] = item.text;
+                });
+            },
+            error: function (xhr) {
+                toastr.error('Error loading cities: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function loadStateList() {
+        return $.ajax({
+            url: '/GodownMaster/GetStateList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#ddlState_NAME');
+                ddl.empty().append('<option value="">-- Select State --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    mapState[item.value] = item.text;
+                });
+            },
+            error: function (xhr) {
+                toastr.error('Error loading states: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function loadAllGodowns() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/GodownMasterList/GetGodowns',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm,
+                pageNumber: currentPage,
+                pageSize
+            },
+            success: function (res) {
+                const lists = res.lists || [];
+                const totalCount = res.totalCount || 0;
+                const tbody = $('#tblGodownMaster tbody');
+                tbody.empty();
+
+                if (lists.length === 0) {
+                    tbody.append('<tr><td colspan="11" class="text-center text-muted">No records found.</td></tr>');
+                } else {
+                    $.each(lists, function (index, item) {
+                        tbody.append(`
+                            <tr>
+                                <td style="display:none;">${item.code}</td>
+                                <td>${item.name || ''}</td>
+                                <td>${item.comP_NAME || ''}</td>
+                                <td>${item.pincode || ''}</td>
+                                <td>${item.address || ''}</td>
+                                <td>${item.addresS2 || ''}</td>
+                                <td>${mapCity[item.city] || item.city || ''}</td>
+                                <td>${mapState[item.statE_CODE] || item.statE_CODE || ''}</td>
+                                <td>${item.wB_YN || ''}</td>
+                                <td>${item.active ? 'Yes' : 'No'}</td>
+                                <td>
+                                    ${canEdit ? `<i class="fa fa-edit btn-edit" data-doc="${item.code}" title="Edit"></i>` : ''}
+                                    <i class="fa fa-eye btn-view" data-doc="${item.code}" title="View"></i>
+                                    ${canDelete ? `<i class="fa fa-trash btn-delete" data-doc="${item.code}" title="Delete"></i>` : ''}
+                                    ${canDocDetail ? `<i class="fa fa-file btn-details btn-document" data-doc="${item.code}" title="Details"></i>` : ''}
+                                </td>
+                            </tr>
+                        `);
+                    });
+                }
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading godown list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button onclick="goToPage(1)">First</button>`;
+            html += `<button onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllGodowns();
+    }
+
+    $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadAllGodowns();
+    });
+
+    $(document).on('click', '.btn-edit', function () {
+        window.location.href = `/GodownMaster/Index?id=${encodeURIComponent($(this).data('doc'))}`;
+    });
+
+    $(document).on('click', '.btn-view', function () {
+        window.location.href = `/GodownMaster/Index?id=${encodeURIComponent($(this).data('doc'))}&readOnly=true`;
+    });
+
+    $(document).on('click', '.btn-delete', function () {
+        const code = $(this).data('doc');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete the godown record.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/GodownMaster/DeleteGodownByCode',
+                    type: 'POST',
+                    data: { code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success').then(loadAllGodowns);
+                        } else {
+                            Swal.fire('Failed', response.message, 'warning');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'Failed to delete the record.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-details', function () {
+        const docCode = $(this).data('doc');
+        showDocumentPopup(docCode);
+    });
+
+    function showDocumentPopup(docCode) {
+        $.ajax({
+            url: '/GodownMasterList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("An error occurred while fetching document details.");
+            }
+        });
+    }
+
+    function exportToExcel() {
+        fetch('/GodownMasterList/ExportAllDocs')
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(data => {
+                console.log('Export data', data);
+
+                const filteredData = data.map(item => ({
+                    "Code": item.code,
+                    "Name": item.name,
+                    "Company Name": item.comP_NAME,
+                    "Pincode": item.pincode,
+                    "Address Line 1": item.address,
+                    "Address Line 2": item.addresS2,
+                    "City": item.city,
+                    "State": item.statE_CODE,
+                    "Active": item.active,
+                    "WeighBridge (Y/N)": item.wB_YN
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+                XLSX.writeFile(workbook, `Godown_Master_List_${timestamp}.xlsx`);
+            })
+            .catch(error => {
+                console.error("Export failed:", error);
+                toastr.error("Failed to export data.");
+            });
+    }
+
+
+    function callGetReportAsPdf() {
+        var reportName = "rpt_city_master";
+        var now = new Date();
+        var timestamp = `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getFullYear()).slice(-2)}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+
+        $.ajax({
+            url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+            type: 'GET',
+            data: { Reportname: reportName },
+            xhrFields: { responseType: 'blob' },
+            success: function (response) {
+                var blob = new Blob([response], { type: 'application/pdf' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${reportName}_${timestamp}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    }
+</script>

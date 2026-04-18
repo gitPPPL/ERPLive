@@ -1,0 +1,340 @@
+﻿@{
+	ViewBag.Title = "Assets Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+}
+
+<fieldset>
+	<legend>Assets Master List</legend>
+
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		
+
+        <div class="">
+            @foreach (var permission in Model.UserMenuPermissions)
+            {
+                if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+                {
+                    <div class="">
+                        <div class="col-md-12">
+                            @* Add Button *@
+                            @if (Model.UserLevel == 1 || permission._ADD == 1)
+                            {
+                                <button class="btn btn-primary" onclick="window.location.href='@Url.Action("Index", "AssetsMaster")'">
+                                    <i class="fa fa-plus"></i> Add Assets
+                                </button>
+                            }
+                            @* Edit Button *@
+                            @if (Model.UserLevel == 1 || permission._EDIT == 1)
+                            {
+                                <button class="btn btn-warning">
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
+                            }
+                            @* Delete Button *@
+                            @if (Model.UserLevel == 1 || permission._DELETE == 1)
+                            {
+                                <button class="btn btn-danger">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            }
+                            @* Print Button *@
+                            @if (Model.UserLevel == 1 || permission._PRINT == 1)
+                            {
+                                <button class="btn btn-secondary">
+                                    <i class="fa fa-print"></i> Print
+                                </button>
+                            }
+                            @* Export Button *@
+                            @if (Model.UserLevel == 1 || permission._EXPORT == 1)
+                            {
+                                <button class="btn btn-success">
+                                    <i class="fa fa-file-excel-o"></i> Export
+                                </button>
+                            }
+                            @* Mail Button *@
+                            @if (Model.UserLevel == 1 || permission._MAIL == 1)
+                            {
+                                <button class="btn btn-info">
+                                    <i class="fa fa-envelope"></i> Mail
+                                </button>
+                            }
+                            @* Approval Button *@
+                            @if (Model.UserLevel == 1 || permission._APPROVAL == 1)
+                            {
+                                <button class="btn btn-dark">
+                                    <i class="fa fa-check"></i> Approve
+                                </button>
+                            }
+                            @* Doc Detail Button *@
+                            @if (Model.UserLevel == 1 || permission._DOCDETAIL == 1)
+                            {
+                                <button class="btn btn-primary">
+                                    <i class="fa fa-file-text"></i> Doc Detail
+                                </button>
+                            }
+                        </div>
+                    </div>
+                    break;
+                }
+            }
+
+        </div>
+	</div>
+
+
+
+    <table id="AssetTable" class="table-width">
+        <thead class="table-head">
+            <tr>
+                <th>Code</th>
+                <th>Account Name</th>
+                <th>OpAmt</th>
+                <th>DepAmt</th>
+                <th>DepRate</th>
+                <th>Life</th>
+                <th>ShiftCalc</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <ul id="pagination" class="pagination justify-content-end mt-2"></ul>
+
+
+</fieldset>
+
+@* <script>
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function () {
+        loadAllAsset();
+    });
+
+    function loadAllAsset(page = 1) {
+        currentPage = page;
+
+        $.ajax({
+            url: '/AssetsMasterList/GetAllAssets',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const groups = res.groups || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#AssetTable tbody');
+                tbody.empty();
+
+                if (groups.length === 0) {
+                    tbody.append(`
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No assets found.</td>
+                        </tr>
+                    `);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                groups.forEach(group => {
+                    tbody.append(`
+                        <tr>
+                            <td>${htmlEncode(group.aC_CODE)}</td>
+                            <td>${htmlEncode(group.aC_NAME)}</td>
+                            <td>${htmlEncode(group.oP_AMT)}</td>
+                            <td>${htmlEncode(group.deP_AMT)}</td>
+                            <td>${htmlEncode(group.deP_RATE)}</td>
+                            <td>${htmlEncode(group.life)}</td>
+                            <td>${htmlEncode(group.shifT_CALC)}</td>
+                            <td style="display: none;">${htmlEncode(group.srno)}</td>
+                            <td>
+                                <i class="fas fa-edit text-primary" style="cursor: pointer;" title="Edit" onclick="AddOrEditItemGroup(${group.srno})"></i>
+                                <i class="fas fa-eye text-secondary ms-2" style="cursor: pointer;" title="View" onclick="viewItemGroupDetails(${group.srno})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading asset list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(totalCount, pageSize, currentPage) {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        const pagination = $('#pagination');
+        pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        pagination.append(`
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="loadAllAsset(${currentPage - 1}); return false;">&laquo;</a>
+            </li>
+        `);
+
+        for (let i = 1; i <= totalPages; i++) {
+            pagination.append(`
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadAllAsset(${i}); return false;">${i}</a>
+                </li>
+            `);
+        }
+
+        pagination.append(`
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="loadAllAsset(${currentPage + 1}); return false;">&raquo;</a>
+            </li>
+        `);
+    }
+
+    function AddOrEditItemGroup(id) {
+        console.log(encodeURIComponent(id))
+        if (id != null) {
+            window.location.href = '/AssetsMaster/Index?id=' + encodeURIComponent(id);
+        }
+    }
+
+    function viewItemGroupDetails(id) {
+        if (id != null) {
+            window.location.href = '/AssetsMaster/Index?id=' + encodeURIComponent(id) + '&mode=view';
+        }
+    }
+
+    // Safe HTML encoding function to prevent XSS injection
+    function htmlEncode(value) {
+        if (value == null) return '';
+        return $('<div/>').text(value).html();
+    }
+</script> *@
+
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function () {
+        loadAllAsset(currentPage);
+
+        // Optional: Search with Enter key or delay
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllAsset(currentPage);
+        });
+    });
+
+    function loadAllAsset(page = 1) {
+        currentPage = page;
+        const searchTerm = $('#searchBox').val() || '';
+
+        $.ajax({
+            url: '/AssetsMasterList/GetAllAssets',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                pageNumber: currentPage,
+                pageSize: pageSize,
+                searchTerm: searchTerm
+            },
+            success: function (res) {
+                console.log(res);
+                const groups = res.groups || [];
+                const totalCount = res.totalCount || 0;
+
+                const tbody = $('#AssetTable tbody');
+                tbody.empty();
+
+                if (groups.length === 0) {
+                    tbody.append(`
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">No assets found.</td>
+                        </tr>
+                    `);
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                groups.forEach(group => {
+                    tbody.append(`
+                        <tr>
+                            <td>${htmlEncode(group.aC_CODE)}</td>
+                            <td>${htmlEncode(group.aC_NAME)}</td>
+                            <td>${htmlEncode(group.oP_AMT)}</td>
+                            <td>${htmlEncode(group.deP_AMT)}</td>
+                            <td>${htmlEncode(group.deP_RATE)}</td>
+                            <td>${htmlEncode(group.life)}</td>
+                            <td>${htmlEncode(group.shifT_CALC)}</td>
+                            <td style="display: none;">${htmlEncode(group.srno)}</td>
+                            <td>
+                                <i class="fas fa-edit text-primary" style="cursor: pointer;" title="Edit" onclick="AddOrEditItemGroup(${group.srno})"></i>
+                                <i class="fas fa-eye text-secondary ms-2" style="cursor: pointer;" title="View" onclick="viewItemGroupDetails(${group.srno})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                toastr.error('Error loading asset list: ' + xhr.responseText);
+            }
+        });
+    }
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const container = $('#pagination');
+        container.empty();
+
+        if (total === 0 || totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="loadAllAsset(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="loadAllAsset(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="loadAllAsset(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="loadAllAsset(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="loadAllAsset(${totalPages})">Last</button>`;
+        }
+        container.html(html);
+    }
+    function AddOrEditItemGroup(id) {
+        if (id != null) {
+            window.location.href = '/AssetsMaster/Index?id=' + encodeURIComponent(id);
+        }
+    }
+    function viewItemGroupDetails(id) {
+        if (id != null) {
+            window.location.href = '/AssetsMaster/Index?id=' + encodeURIComponent(id) + '&mode=view';
+        }
+    }
+    function htmlEncode(value) {
+        if (value == null) return '';
+        return $('<div/>').text(value).html();
+    }
+</script>
+

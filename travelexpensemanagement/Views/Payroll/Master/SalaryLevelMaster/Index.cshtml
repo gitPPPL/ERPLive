@@ -1,0 +1,407 @@
+﻿@{
+    ViewBag.Title = "Salary Level Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+}
+
+<fieldset>
+    <legend class="legend-field">Salary Level Master</legend>
+
+    <!-- Header buttons aligned to the right -->
+    <div class="header-buttons" style="text-align: right; margin-bottom: 20px;">
+
+        @if (canPrint)
+        {
+            <button class="btn btn-print">
+                <i class="fa fa-print"></i> Print
+            </button>
+        }
+        @if (canExport)
+        {
+            <button class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+        }
+        @if (canMail)
+        {
+            <button class="btn btn-mail">
+                <i class="fa fa-envelope"></i> Mail
+            </button>
+        }
+
+        <button class="btn btn-send">
+            <i class="fa fa-paper-plane"></i> Approval Send
+        </button>
+
+        @if (canApproval)
+        {
+            <button class="btn btn-approved">
+                <i class="fa fa-check"></i> Approved
+            </button>
+        }
+    </div>
+
+    <form id="SalaryLevelMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+
+        <!-- Salary Level Details -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtName">Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name" maxlength="30">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumBasic">Basic<span class="required">*</span></label>
+                    <input type="number" class="form-control limit-length" id="NumBasic" name="Basic" placeholder="0.00" data-maxlength="12">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumHRA">HRA</label>
+                    <input type="number" class="form-control limit-length" id="NumHRA" name="HRA" placeholder="0.00" data-maxlength="12">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumConvenience">Convenience</label>
+                    <input type="number" class="form-control limit-length" id="NumConvenience" name="Convenience" placeholder="0.00" data-maxlength="12">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumOther">Other</label>
+                    <input type="number" class="form-control limit-length" id="NumOther" name="Other" placeholder="0.00" data-maxlength="12">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumTotal">Total<span class="required">*</span></label>
+                    <input type="number" class="form-control limit-length" id="NumTotal" name="Total" placeholder="0.00" data-maxlength="12" readonly>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumGWAmount">G. W. Amount<span class="required">*</span></label>
+                    <input type="number" class="form-control limit-length" id="NumGWAmount" name="GWAmount" placeholder="0.00" data-maxlength="12">
+                </div>
+            </div>
+        </div>
+
+        <!-- Active status toggle -->
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with action buttons -->
+        <div class="row" style="margin-top: 20px;">
+            <!-- Back to List button on the left -->
+            <div class="col-md-4">
+                <button onclick="window.location.href='@Url.Action("Index", "SalaryLevelMasterList")'" type="button" class="btn btn-draft" id="BacktolistID">
+                    <i class="fa fa-list"></i> Back to list
+                </button>
+            </div>
+
+            <!-- Save button on the right -->
+            <div class="col-md-3 offset-md-5">
+                <div class="btn-last">
+                    <button id="btnSaves" type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+
+<script>
+    $(document).ready(function() {
+
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const mode = urlParams.get("mode");
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        $('#ACTIVE').on('change', function() {
+            const isChecked = $(this).is(':checked');
+            const status = isChecked ? 'Active' : 'Inactive';
+            $('#statusText')
+                .text(status)
+                .removeClass('active inactive')
+                .addClass(isChecked ? 'active' : 'inactive');
+        });
+
+        if (!isNaN(rowId) && rowId > 0) {
+            loadMasterById(rowId);
+            if (isReadOnly) {
+                setFormReadOnly();
+            }
+        }
+         
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#SalaryLevelMasterForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
+             
+        $("#TxtName").autocomplete({
+            minLength: 1,
+            source: function(request, response) {
+                $.ajax({
+                    url: "/SalaryLevelMaster/SearchNames",
+                    type: "GET",
+                    data: { term: request.term },
+                    success: function(data) {
+                        response(data);
+                    }
+                });
+            },
+            select: function(event, ui) {
+                $("#TxtName").val(ui.item.value);
+            }
+        });
+
+        $("#btnSaves").click(function(e) {
+            e.preventDefault();
+
+            var Name = $("#TxtName").val().trim();
+            var BASIC = $("#NumBasic").val().trim();
+            var HRA = $("#NumHRA").val().trim();
+            var CONV = $("#NumConvenience").val().trim();
+            var OTHERS = $("#NumOther").val().trim();
+            var TOT_AMT = $("#NumTotal").val().trim();
+            var GW_AMT = $("#NumGWAmount").val().trim();
+            var CODE = $("#CODE").val().trim();
+            var isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+            const Action = (!rowId || rowId <= 0) ? 'INSERT' : 'UPDATE';
+
+            // Form validation
+            if (!Name) {
+                toastr.warning("Please enter a Name.");
+                $("#TxtName").attr("style", "border-color:red !important;").focus();
+                return;
+            }
+
+            if (!BASIC || isNaN(BASIC)) {
+                toastr.warning("Please enter a valid BASIC.");
+                 $("#NumBasic").attr("style", "border-color:red !important;").focus();
+          
+                return;
+            }
+
+            if (!TOT_AMT || isNaN(TOT_AMT)) {
+                toastr.warning("Please enter a valid Total.");
+                $("#NumTotal").attr("style", "border-color:red !important;").focus();
+
+
+
+                return;
+            }
+
+            if (!GW_AMT || isNaN(GW_AMT)) {
+                toastr.warning("Please enter a valid G. W. Amount.");
+               $("#NumGWAmount").attr("style", "border-color:red !important;").focus();
+
+
+                return;
+            }
+
+            // Fallback defaults
+            OTHERS = isNaN(OTHERS) ? 0 : parseFloat(OTHERS);
+            TOT_AMT = isNaN(TOT_AMT) ? 0 : parseFloat(TOT_AMT);
+            GW_AMT = isNaN(GW_AMT) ? 0 : parseFloat(GW_AMT);
+
+            var formData = {
+                NAME: Name,
+                CODE: CODE && !isNaN(CODE) ? parseInt(CODE) : null,
+                BASIC: parseFloat(BASIC),
+                HRA: parseFloat(HRA),
+                CONV: parseFloat(CONV) || 0,
+                OTHERS: OTHERS,
+                TOT_AMT: TOT_AMT,
+                GW_AMT: GW_AMT,
+                ACTIVE: isActive,
+                Action: Action
+            };
+
+            const saveData = function() {
+                $("#btnSaves").prop("disabled", true);
+
+                $.ajax({
+                    url: '/SalaryLevelMaster/SaveMaster',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message || "Saved successfully!");
+                            window.location.href = '/SalaryLevelMaster/Index?id=' +
+                                encodeURIComponent(formData.CODE) + '&mode=view';
+                        } else {
+                            toastr.error(response.message || "Save failed.");
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Error:", xhr.responseText);
+                        toastr.error("Server error occurred.");
+                    },
+                    complete: function() {
+                        $("#btnSaves").prop("disabled", false);
+                    }
+                });
+            };
+
+            // Handle async CODE fetching if not present
+            if (!formData.CODE) {
+                getCode().then(code => {
+                    formData.CODE = code;
+                    saveData();
+                });
+            } else {
+                saveData();
+            }
+        });
+          
+        $('input[type=number]').on('input', function() {
+            var maxLength = $(this).attr('data-maxlength') || 14;
+            var value = $(this).val();
+            if (value.length > maxLength) {
+                $(this).val(value.slice(0, maxLength));
+            }
+        });
+            
+        $('#NumBasic, #NumHRA, #NumConvenience, #NumOther, #NumGWAmount').on('input', calculation);
+
+        $("#TxtName, #NumBasic, #NumTotal, #NumGWAmount").on('change keyup', function () {
+            if ($(this).val().trim() !== "") {
+            $(this).removeAttr('style');
+            }
+        });
+
+    });
+
+    function loadMasterById(code) {
+        $.ajax({
+            url: '/SalaryLevelMasterList/GetsalarylevelByCode',
+            type: 'GET',
+            data: { code },
+            success: function(res) {
+               
+                console.log("Data",res.data);
+                
+                if (!res.success || !res.data) {
+                    toastr.warning("No Salary Level Master found for the given ID.");
+                    return;
+                }
+                populateForm(res.data);
+            },
+            error: function(xhr) {
+                toastr.error("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    function populateForm(data) {
+        $("#TxtName").val($.trim(data.name));
+        $("#NumBasic").val($.trim(data.basic));
+        $("#NumConvenience").val($.trim(data.conv));
+        $("#NumHRA").val($.trim(data.hra));
+        $("#NumOther").val($.trim(data.others));
+        $("#NumTotal").val($.trim(data.toT_AMT));
+        $("#NumGWAmount").val($.trim(data.gW_AMT));
+        $("#CODE").val($.trim(data.code));
+
+        const isActive = data.active === 1 || data.active === true;
+        $('#ACTIVE').prop('checked', isActive);
+        $('#statusText')
+            .text(isActive ? 'Active' : 'Inactive')
+            .removeClass('active inactive')
+            .addClass(isActive ? 'active' : 'inactive');
+    }
+
+    function setFormReadOnly() {
+        $('#SalaryLevelMasterForm :input').prop('disabled', true);
+        $('#btnSaves').hide();
+        $('#BacktolistID').prop('disabled', false);
+    }
+      
+    function calculation() {
+        var BASIC = parseFloat($("#NumBasic").val().trim()) || 0;
+        var HRA = parseFloat($("#NumHRA").val().trim()) || 0;
+        var CONV = parseFloat($("#NumConvenience").val().trim()) || 0;
+        var OTHERS = parseFloat($("#NumOther").val().trim()) || 0;
+
+        var TOT_AMT = BASIC + HRA + CONV + OTHERS;
+        $("#NumTotal").val(TOT_AMT.toFixed(2));
+    }
+     
+    function getCode() {
+        return fetch('/SalaryLevelMaster/Getcode')
+            .then(response => response.json())
+            .then(data => data.code)
+            .catch(() => null);
+    }
+
+</script>
+
+<style>
+    .error-border {
+        border-color: red !important;
+        box-shadow: 0 0 5px red !important;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>

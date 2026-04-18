@@ -1,0 +1,173 @@
+﻿@{
+	ViewBag.Title = "Production Place Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<fieldset>
+	<legend class="legend-field">Production Place Master</legend>
+
+	<div class="row">
+		<div class="offset-md-10 col-md-2">
+			<div class="btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "ProductionPlaceMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+			</div>
+		</div>
+	</div> 
+
+	<form id="ProductionPlace">
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Name<span class="required">*</span></label>
+					<input type="text" class="form-control" placeholder="Name" name="NAME" id="NAME">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Short Name</label>
+					<input type="text" class="form-control" placeholder="Short Name" name="SHORTNAME" id="SHORTNAME">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Select Place</label>
+					<select class="form-control" id="PLACE_CODE" name="PLACE_CODE">
+						<option value="">-- Select Place --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-10 col-md-2">
+				<div class="btn-last">
+				<button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+			</div>
+			</div>
+		</div>
+	</form>
+
+</fieldset>
+
+<script>
+
+	$(document).ready(function () {
+		$(function () {
+			const urlParams = new URLSearchParams(location.search);
+			const rowId = parseInt(urlParams.get('id'));
+			const isReadOnly = urlParams.get('readOnly') === 'true';
+			if (!isNaN(rowId) && rowId > 0) {
+				LoadProdPlaceMastByCode(rowId);
+
+				if (isReadOnly) {
+					 setProductionPlaceFormReadOnly();
+				}
+			}
+		});
+		loadPlacesList();
+	});
+
+	function loadPlacesList() {
+		$.ajax({
+			url: '/ProductionPlaceMaster/GetPlaceList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#PLACE_CODE');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Main Group --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				toastr.error('Error loading module: ' + error);
+			}
+		});
+	}
+
+
+	$('#ProductionPlace').on('submit', function (e) {
+		e.preventDefault();
+
+		if (!validateRequiredField('#NAME', 'Name')) return;
+
+		var code = parseInt($('#CODE').val()) || 0;
+		var prodPlaceData = {
+			CODE: code,
+			COMP_CODE: 1, // Replace dynamically if needed
+			NAME: $('#NAME').val(),
+			SHORTNAME: $('#SHORTNAME').val(),
+			PLACE_CODE: $('#PLACE_CODE').val() || null,
+			UUSER: 1,
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? "E" : "A",
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB",
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+		$.ajax({
+			url: '/ProductionPlaceMaster/SaveProductPlace', // Update to your actual controller route
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(prodPlaceData),
+			success: function (response) {
+				if (response.success) {
+					toastr.success("Saved successfully!");
+					$('#ProductionPlace')[0].reset();
+					setTimeout(function () {
+						window.location.href = '/ProductionPlaceMasterList/Index'; // Update as needed
+					}, 1000);
+				} else {
+					toastr.warning(response.message || "Something went wrong.");
+				}
+			},
+			error: function (xhr) {
+				let errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+
+	function LoadProdPlaceMastByCode(code) {
+		$.ajax({
+			url: '/ProductionPlaceMasterList/GetProdPlaceMastByCode', 
+			type: 'GET',
+			data: { code: code },
+			success: function (data) {
+				console.log(data);
+
+				if (!data) {
+					toastr.warning("No data found.");
+					return;
+				}
+				// Set values to form fields
+				$('#CODE').val(data.code);
+				$('#NAME').val(data.name);
+				$('#SHORTNAME').val(data.shortname);
+				$('#PLACE_CODE').val(data.place_Code).trigger('change'); // Ensure it matches field in data
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading item by code:", status, error);
+				toastr.error('Error: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function setProductionPlaceFormReadOnly() {
+		const form = $('#ProductionPlace');
+		form.find('input[type="text"], select, textarea').prop('disabled', true);
+		form.find('button').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled'); // Optional visual feedback
+	}
+</script>
+
+

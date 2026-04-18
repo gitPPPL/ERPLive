@@ -1,0 +1,170 @@
+﻿@{
+    ViewBag.Title = "Unit Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Unit Master</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnSave"
+                        onclick="window.location.href='@Url.Action("Index", "UnitMasterList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="UnitMasterform">
+        <input type="hidden" class="form-control" id="CODE" name="CODE">
+        <!-- Row 1 -->
+        <div class="row"> 
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtShortName" class="form-label">Short Name</label>
+                    <input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Enter Short Name">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle btn-align">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="label-status" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-last">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        const isReadOnly = urlParams.get('readOnly') === 'true';
+
+        if (!isNaN(rowId) && rowId > 0) {
+            loadUnitById(rowId);
+
+            if (isReadOnly) {
+                setUnitFormReadOnly();
+            }
+        }
+
+        $('#cancelBtn').on('click', function () {
+            window.location.href = '/UnitMasterList/Index';
+        });
+
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+
+    });
+
+    $('#UnitMasterform').on('submit', function (e) {
+        e.preventDefault();
+
+        const code = parseInt($('#CODE').val()) || 0;
+        const name = $('#TxtName').val().trim();
+        const shortName = $('#TxtShortName').val().trim();
+        const isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
+
+        if (!name) {
+            toastr.warning('Please enter Name.');
+            $('#TxtName').focus();
+            return;
+        }
+
+        if (!shortName) {
+            toastr.warning('Please enter Short Name.');
+            $('#TxtShortName').focus();
+            return;
+        }
+
+        const payload = {
+            CODE: code,
+            NAME: name,
+            SHORTNAME: shortName,
+            ACTIVE: isActive,
+            UDATE: new Date().toISOString(),
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? 'U' : 'A',
+            ACTION: code > 0 ? 'UPDATE' : 'INSERT',
+            WSID: 'WEB',
+            UUSER: 1,
+            EUSER: 1
+        };
+
+        $.ajax({
+            url: '/UnitMaster/SaveUnit',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Unit saved successfully!");
+                    $('#UnitMasterform')[0].reset();
+                    setTimeout(function () {
+                        window.location.href = '/UnitMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning(response.message || "Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function loadUnitById(code) {
+        $.ajax({
+            url: '/UnitMasterList/GetItemUnitByCode',
+            type: 'GET',
+            data: { code },
+            success: function (response) {
+                console.log(response);
+                const data = response.data;
+                if (!data) {
+                    toastr.warning("No data found.");
+                    return;
+                }
+
+                $('#CODE').val(data.code);
+                $('#TxtName').val(data.name);
+                $('#TxtShortName').val(data.shortname);
+                $('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+                $('#statusText').text(data.active ? 'Active' : 'Inactive');
+            },
+            error: function (xhr) {
+                console.error("Error loading unit by ID:", xhr);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function setUnitFormReadOnly() {
+        const form = $('#UnitMasterform');
+        form.find('input, select, textarea, button').prop('disabled', true);
+        $('#ACTIVE').prop('disabled', true);
+        $('#statusText').addClass('text-muted');
+    }
+
+</script>
+

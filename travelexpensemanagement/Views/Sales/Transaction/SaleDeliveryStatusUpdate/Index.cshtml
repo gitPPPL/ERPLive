@@ -1,0 +1,312 @@
+﻿@{
+    ViewBag.Title = "Sale Delivery Status Update";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var LOGINDATE = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
+
+}
+
+
+<fieldset>
+    <legend class="legend-field">Sale Delivery Status Update</legend>
+    <form id="SaleDeliveryStatusUpdateForm">
+        <div class="row">
+            <div class="offset-md-4 col-md-8">
+                <div class="button-right mb-2">
+                    <button class="btn btn-send">
+                        <i class="fa fa-paper-plane"></i> Approval Send
+                    </button>
+                    <button class="btn btn-approved">
+                        <i class="fa fa-check"></i> Approved
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtAsOn">As On</label>
+                    <input type="date" class="form-control" id="DtAsOn" value="@LOGINDATE" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlCustomerName">Customer Name</label>
+                    <select class="form-control" id="ddlCustomerName">
+                        <option value="">Select Customer</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlItemType">Item Type</label>
+                    <select class="form-control" id="ddlItemType">
+                        <option value="">Select Item Type</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+       <div class="row">
+           <div class="offset-md-6 col-md-6">
+               <div class="button-right btn-mt">
+                   <button type="button" class="btn btn-success" id="btn_load"><i class="fa fa-download"></i> Load Data</button>
+               </div>
+           </div>
+       </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblSaleDeliveryStatusUpdate" class="table-width">
+                    <colgroup>
+                        <col style="width: 80px;">   
+                        <col style="width: 100px;">  
+                        <col style="width: 200px;"> 
+                        <col style="width: 100px;"> 
+                        <col style="width: 100px;">  
+                        <col style="width: 300px;">  
+                        <col style="width: 120px;">  
+                        <col style="width: 120px;">  
+                        <col style="width: 120px;"> 
+                        <col style="width: 120px;">  
+                        <col style="width: 100px;">
+                        <col style="width: 200px;">  
+                        <col style="width: 100px;"> 
+                    </colgroup>
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>Voucher Type</th>
+                            <th>Voucher No</th>
+                            <th>Customer Name</th>
+                            <th>Icode</th>
+                            <th>Serial No</th>
+                            <th>Item Name</th>
+                            <th>Delivery Quantity</th>
+                            <th>Sale Quantity</th>
+                            <th>Bal Quantity</th>
+                            <th>Disp Date</th>
+                            <th>Alert</th>
+                            <th>Dispatch Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+         
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="button-right btn-mt">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    const $tbody = $('#tblSaleDeliveryStatusUpdate tbody');
+    const refTypeOptions = ["PO", "Indent", "Manual"];
+    const logindate = "@LOGINDATE"; 
+
+    $(document).ready(function () {
+        
+        $('#DtAsOn').attr("Max", logindate);
+            
+        LoadDropDown();
+             
+        $('#btn_load').on('click', function () {
+            loadTableData();
+         });
+            
+        $("#btn-save").click(async function (e) {
+            e.preventDefault();
+
+            const tableData = collectTableRowData();
+            console.log("tableData", tableData);
+
+            $("#btn-save").prop("disabled", true);
+
+            $.ajax({
+                type: "POST",
+                url: "/SaleDeliveryStatusUpdate/SaveDispatchDetails",
+                contentType: "application/json",
+                data: JSON.stringify(tableData),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message || "Saved successfully!");
+                         loadTableData();
+                    } else {
+                        toastr.error(response.message || "An error occurred.");
+                    }
+                },
+                error: function () {
+                    toastr.error("Error while saving attendance");
+                },
+                complete: function () {
+                    $("#btn-save").prop("disabled", false);
+                }
+            });
+        });
+    });
+
+    async function LoadDropDown() {
+        try {
+            await Promise.all([
+                loadCustomerDropdown(),
+                loadItemTypeDropdown()
+            ]);
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+
+    function addRow(data = {}) {
+        $tbody.find('.btn-add-action').remove();  
+
+        const row = `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td><input type="text" class="form-control voucherType" value="${data.voucherType || ''}" /></td>
+                <td><input type="text" class="form-control voucherNo" value="${data.voucherNo || ''}" /></td>
+                <td><input type="text" class="form-control customerName" value="${data.customerName || ''}" /></td>
+                <td><input type="text" class="form-control icode" value="${data.icode || ''}" /></td>
+                <td><input type="text" class="form-control serialNo" value="${data.serialNo || ''}" /></td>
+                <td><input type="text" class="form-control itemName" value="${data.itemName || ''}" /></td>
+                <td><input type="number" class="form-control deliveryQty" value="${data.deliveryQty || ''}" /></td>
+                <td><input type="number" class="form-control saleQty" value="${data.saleQty || ''}" /></td>
+                <td><input type="number" class="form-control balQty" value="${data.balQty || ''}" /></td>
+                <td><input type="date" class="form-control dispDate" value="${data.dispDate || ''}" /></td>
+                <td><input type="text" class="form-control alert" value="${data.alert || ''}" /></td>
+                <td><input type="text" class="form-control dispatchRemarks" value="${data.dispatchRemarks || ''}" /></td>
+            </tr>
+        `;
+        $tbody.append(row);
+    }
+
+    async function loadCustomerDropdown() {
+        try {
+            const response = await fetch('/SaleDeliveryStatusUpdate/DDlcustomerName');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlCustomerName');
+            ddl.empty().append('<option value="">-- Select Customer Name --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
+            });
+
+            ddl.select2({
+                placeholder: '-- Select Customer Name --',
+                width: '100%'
+            });
+        } catch (error) {
+            console.error("Error loading Customer Name:", error);
+            toastr.error('Error loading Customer Name: ' + error.message);
+        }
+    }
+      
+    async function loadItemTypeDropdown() {
+        try {
+            const response = await fetch('/SaleDeliveryStatusUpdate/DDlItemType');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            const ddl = $('#ddlItemType');
+            ddl.empty().append('<option value="">-- Select Item Type --</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item}">${item}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Item Type:", error);
+            toastr.error('Error loading Item Type: ' + error.message);
+        }
+    }
+       
+    function formatDate(dateStr) {
+        if (!dateStr) return null;
+        const date = new Date(dateStr);
+        if (isNaN(date)) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+     
+    function collectTableRowData() {
+        const rowsData = [];
+
+        $tbody.find('tr').each(function () {
+            const $row = $(this);
+            const rawDate = $row.find('.dispDate').val();
+            const formattedDate = rawDate; // Format if needed
+
+            const rowData = {
+                V_NO: parseInt($row.find('.voucherNo').val()) || null,
+                SNO: parseInt($row.find('.serialNo').val()) || null,
+                ITEM_CODE: parseInt($row.find('.icode').val()) || null,
+                Delivery_Date: formattedDate,
+                Remarks: $row.find('.dispatchRemarks').val() || null
+            };
+
+            // Push only valid rows
+            if (rowData.V_NO || rowData.SNO || rowData.ITEM_CODE) {
+                rowsData.push(rowData);
+            }
+        });
+
+        console.log("rowsData", rowsData);
+        return rowsData;
+    }
+
+    function loadTableData() {
+        const tbody = $('#tblSaleDeliveryStatusUpdate tbody');
+        tbody.empty(); // Clear existing rows
+
+        // Get values from the form inputs
+        const VDate = $('#DtAsOn').val();
+        const PARTY_CODE = document.getElementById("ddlCustomerName").value;
+        const MGROUP_TYPE = document.getElementById("ddlItemType").options[document.getElementById("ddlItemType").selectedIndex].text;
+
+        // AJAX request to fetch the data
+        $.ajax({
+            url: '@Url.Action("FillData", "SaleDeliveryStatusUpdate")',
+            type: 'POST',
+            data: {
+                PARTY_CODE: PARTY_CODE,
+                MGROUP_TYPE: MGROUP_TYPE,
+                VDate: VDate
+            },
+            success: function (response) {
+                // Populate the table with the fetched data
+                response.forEach(item => {
+                    addRow({
+                        voucherType: item.v_Type,
+                        voucherNo: item.v_No,
+                        customerName: item.name,
+                        icode: item.item_Code,
+                        serialNo: item.sNo,
+                        itemName: item.item_Name,
+                        deliveryQty: item.qty,
+                        saleQty: item.recQty,
+                        balQty: item.balQty,
+                        dispDate: formatDate(item.delivery_Date),
+                        alert: item.alert,
+                        dispatchRemarks: item.remarks
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                alert('AJAX error: ' + error);
+            }
+        });
+    }
+
+
+
+</script>

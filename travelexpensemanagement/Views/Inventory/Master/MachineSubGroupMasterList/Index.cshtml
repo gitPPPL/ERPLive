@@ -1,0 +1,196 @@
+﻿@{
+	ViewBag.Title = "Machine Sub Group Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Machine Sub Group Master List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="tableSearch" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8 btn-align">
+			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "MachineSubGroupMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-plus"></i>Add Machine Sub
+			</button>
+			<button class="btn btn-print">
+				<i class="fa fa-print"></i> Print
+			</button>
+			<button class="btn btn-export">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mailb 
+			</button>
+			<button class="btn btn-send">
+				<i class="fa fa-paper-plane"></i> Approval Send
+			</button>
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		</div>
+	</div>
+	<div class="card shadow-sm border-0 mt-1">
+		<div class="table-responsive">
+			<table id="tblMachineSubGroup" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Subgroup</th>
+						<th>MainGroup</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<!-- Pagination container -->
+		<div class="row p-3">
+			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
+		</div>
+	</div>
+</fieldset>
+<script>
+
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		loadAllMachineSubGroups();
+	});
+
+	function loadAllMachineSubGroups() {
+		const searchTerm = $('#tableSearch').val();
+
+		$.ajax({
+			url: '/MachineSubGroupMasterList/GetAllMachingSubGrp',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				const list = res.list;
+				const totalCount = res.totalCount;
+				let tbody = $('#tblMachineSubGroup tbody');
+				tbody.empty();
+
+				if (!list || list.length === 0) {
+					tbody.append('<tr><td colspan="9" class="text-center text-muted">No records found.</td></tr>');
+					renderPagination(0, pageSize, currentPage);
+					return;
+				}
+
+				$.each(list, function (index, item) {
+					tbody.append(`
+						<tr>
+							<td style="display:none;">${item.code}</td>
+							<td>${item.name || ''}</td>
+							<td>${item.shortname || ''}</td>
+							<td>${item.active === 1 ? 'Active' : 'Inactive'}</td>
+							<td>
+								<i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editMachineSubGroup(${item.code})"></i>
+								<i class="fas fa-eye text-secondary ms-2" style="cursor:pointer;" title="View" onclick="viewMachineSubGroup(${item.code})"></i>
+								<i class="fas fa-trash text-danger" style="cursor:pointer;" title="Delete" onclick="deleteMachineSubGroup(${item.code})"></i>
+							</td>
+						</tr>
+					`);
+				});
+
+				renderPagination(totalCount, pageSize, currentPage);
+			},
+			error: function (xhr) {
+				toastr.error('Error loading data: ' + xhr.responseText);
+			}
+		});
+	}
+
+	function renderPagination(total, pageSize, currentPage) {
+		const totalPages = Math.ceil(total / pageSize);
+		const paginationContainer = $('#tablePagination');
+		paginationContainer.empty();
+
+		if (totalPages <= 1) return;
+
+		let html = '';
+
+		if (currentPage > 1) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+		}
+
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, currentPage + 2);
+
+		for (let i = startPage; i <= endPage; i++) {
+			html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+		}
+
+		if (currentPage < totalPages) {
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+		}
+
+		paginationContainer.html(html);
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadAllMachineSubGroups();
+	}
+
+	$('#tableSearch').on('keyup', function () {
+		currentPage = 1;
+		loadAllMachineSubGroups();
+	});
+
+
+	function editMachineSubGroup(rowId) {
+		window.location.href = '/MachineSubGroupMaster/Index?id=' + encodeURIComponent(rowId);
+	}
+	function viewMachineSubGroup(rowId) {
+		window.location.href = '/MachineSubGroupMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+
+	function deleteMachineSubGroup(code) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This action will permanently delete the sub group.",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/MachineSubGroupMaster/DeleteMachineSubGroupByCode',
+					type: 'POST',
+					data: { code: code },
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllMachineSubGroups();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function (xhr) {
+						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+					}
+				});
+			}
+		});
+	}
+
+
+</script>

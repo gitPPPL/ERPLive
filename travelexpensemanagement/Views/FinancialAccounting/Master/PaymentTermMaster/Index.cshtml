@@ -1,0 +1,216 @@
+﻿@{
+	ViewBag.Title = "Payment Term Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Payment Term Master</legend>
+	<div class="row">
+
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "PaymentTermMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div> 
+	<form id="paymentTermtbl">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NAME" class="form-label"><span class="required">*</span>Name</label>
+					<input type="text" class="form-control" id="NAME" name="NAME" placeholder="Enter Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SHORT_NAME" class="form-label">Short Name</label>
+					<input type="text" class="form-control" id="SHORT_NAME" name="SHORT_NAME" placeholder="Enter Short Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DAY" class="form-label">Day (in num.)</label>
+					<input type="number" class="form-control" id="DAY" name="DAY" placeholder="Enter Day">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DUE_BASE_ON" class="form-label"><span class="required">*</span>Due Base On</label>
+					<input type="text" class="form-control" id="DUE_BASE_ON" name="DUE_BASE_ON" required>
+
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="DAY_PLUS" class="form-label">Day Plus</label>
+					<input type="number" class="form-control" id="DAY_PLUS" name="DAY_PLUS" placeholder="Enter Day Plus">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="CREDIT_TYPE" class="form-label">Credit Type</label>
+					<select class="form-control" id="CREDIT_TYPE" name="CREDIT_TYPE">
+						<option value="">-- Select credit Type --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="TOLRENCE_DAY" class="form-label">Tolrence Day</label>
+					<input type="number" class="form-control" id="TOLRENCE_DAY" name="TOLRENCE_DAY" placeholder="Enter Tolrence Day">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save	</button>
+				@* <button type="button" id="cancelBtn" class="btn btn-danger" onclick="window.location.href='@Url.Action("Index", "PaymentTermMasterList")'">Cancel</button> *@
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+		if (!isNaN(rowId) && rowId > 0) {
+			LoadPaymentTermById(rowId);
+			if (isReadOnly) {
+				setPaymentTermFormReadOnly();
+			}
+		}
+		loadGroupTypeList();
+
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+
+	function loadGroupTypeList() {
+		$.ajax({
+			url: '/PaymentTermMaster/GetCreditTypeList', // Adjust the controller name if needed
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var dropdown = $('#CREDIT_TYPE');
+				dropdown.empty();
+				dropdown.append('<option value="">-- Select Option --</option>');
+
+				$.each(data, function (index, value) {
+					dropdown.append(`<option value="${value}">${value}</option>`);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Failed to load group types:", error);
+			}
+		});
+	}
+
+	$('#paymentTermtbl').on('submit', function (e) {
+		e.preventDefault();
+		if (!validateRequiredField('#NAME', 'Name')) return;
+		if (!validateRequiredField('#DUE_BASE_ON', 'Due Base On')) return;
+
+		const code = parseInt($('#CODE').val()) || 0;
+
+		const paymentTermData = {
+			CODE: code,
+			COMP_CODE: 1, // Replace with actual company code dynamically
+			NAME: $('#NAME').val().trim(),
+			SHORTNAME: $('#SHORT_NAME').val().trim(),
+			DUEBASEON: $('#DUE_BASE_ON').val().trim(),
+			DAY_PLUS: parseInt($('#DAY_PLUS').val()) || 0,
+			TOLRENCEDAY: parseInt($('#TOLRENCE_DAY').val()) || 0,
+			DAY_INT: parseInt($('#DAY').val()) || 0,
+			CREDIT_TYPE: $('#CREDIT_TYPE').val(),
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			UUSER: 1, // Replace dynamically
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? 'E' : 'A',
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB",
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+		$.ajax({
+			url: '/PaymentTermMaster/SavePaymentTerm', 
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(paymentTermData),
+			success: function (response) {
+				if (response.success) {
+					toastr.success("Payment term saved successfully!");
+					setPaymentTermFormReadOnly();
+					// $('#paymentTermtbl')[0].reset();
+					// setTimeout(function () {
+					// 	window.location.href = '/PaymentTermMasterList/Index';
+					// }, 1000);
+				} else {
+					toastr.warning(response.message || "Something went wrong while saving.");
+				}
+			},
+			error: function (xhr) {
+				const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+
+	function LoadPaymentTermById(code) {
+		$.ajax({
+			url: '/PaymentTermMasterList/GetPaymentTermByCode',
+			type: 'GET',
+			data: { code: code },
+			success: function (data) {
+				if (!data.success || !data.data) {
+					toastr.warning("No data found for the given code.");
+					return;
+				}
+				const term = data.data;
+				$('#CODE').val(term.code);
+				$('#NAME').val(term.name);
+				$('#SHORT_NAME').val(term.shortname);
+				$('#DUE_BASE_ON').val(term.duebaseon);
+				$('#DAY_PLUS').val(term.daY_PLUS);
+				$('#TOLRENCE_DAY').val(term.tolrenceday);
+				$('#DAY').val(term.daY_INT);
+				$('#CREDIT_TYPE').val(term.crediT_TYPE);
+
+				const isActive = term.active === 1 || term.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText').text(isActive ? 'Active' : 'Inactive');
+			},
+			error: function (xhr) {
+				toastr.error("Error loading payment term: " + xhr.responseText);
+			}
+		});
+	}
+
+	function setPaymentTermFormReadOnly() {
+		const form = $('#paymentTermtbl');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		form.find('.toggle-switch input').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled'); // Optional visual feedback
+	}
+
+
+</script>

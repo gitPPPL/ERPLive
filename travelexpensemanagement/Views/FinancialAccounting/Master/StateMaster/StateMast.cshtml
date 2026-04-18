@@ -1,0 +1,495 @@
+﻿@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend>State Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "StateMaster")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="form-container">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="TxtStatename" class="form-label">State Name <span class="required">*</span></label>
+					<input type="text" id="TxtStatename" class="form-control" placeholder="State Name" maxlength="30" />
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="TxtShortname" class="form-label">Short Name </label>
+					<input type="text" id="TxtShortname" class="form-control" placeholder="Short Name" maxlength="20" />
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="TxtGstCode" class="form-label">GST Code </label>
+					<input type="text" id="TxtGstCode" class="form-control" maxlength="10" placeholder="GST Code" oninput="allowOnlyNumbers(this);" />
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="TxtEcode" class="form-label">E Code </label>
+					<input type="text" id="TxtEcode" class="form-control" placeholder="E Code" maxlength="10" oninput="allowOnlyNumbers(this);" />
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="DdCountry" class="form-label">Country Name <span class="required">*</span></label>
+					<select id="DdCountry" class="form-control">
+						<option selected disabled>- Select Country Name -</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="DdUnionTertry" class="form-label">Union Teritory <span class="required">*</span></label>
+					<select id="DdUnionTertry" class="form-control">
+						<option value="Yes">Yes</option>
+						<option value="No">No</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="DdStateTyp" class="form-label">State Type <span class="required">*</span></label>
+					<select id="DdStateTyp" class="form-control">
+						<option value="Import">Import</option>
+						<option value="Local">Local</option>
+						<option value="Central">Central</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="form-group">
+					<div class="toggle-wrapper justify-content-center" id="">
+						<input type="hidden" id="DdActive" name="IsActive" value="1" />
+
+						<div id="customToggle" class="custom-toggle active"></div>
+						<span id="statusLabel" class="status-label active">Active</span>
+
+					</div>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button type="submit" class="btn btn-primary" id="btn-save">Save</button>
+				@* <button type="button" id="cancelBtn" style="display:none" class="btn btn-danger">Cancel</button> *@
+			</div>
+		</div>
+
+	</form>
+</fieldset>
+
+<script>
+
+	 const toggle = document.getElementById("customToggle");
+	 const statusLabel = document.getElementById("statusLabel");
+	 const hiddenInput = document.getElementById("DdActive");
+	 toggle.addEventListener("click", function () {
+	   if (toggle.classList.contains("disabled")) return;
+	   toggle.classList.toggle("active");
+	   const isActive = toggle.classList.contains("active");
+
+	   hiddenInput.value = isActive ? "1" : "0";
+	   statusLabel.textContent = isActive ? "Active" : "Inactive";
+	   statusLabel.classList.toggle("active", isActive);
+	   statusLabel.classList.toggle("inactive", !isActive);
+	 });
+	 function disableToggle() {
+	   toggle.classList.add("disabled");
+	 }
+	 function enableToggle() {
+	   toggle.classList.remove("disabled");
+	 }
+	function setToggleState(value) {
+	  const toggle = document.getElementById("customToggle");
+	  const label = document.getElementById("statusLabel");
+	  const hiddenInput = document.getElementById("DdActive");
+	  const isActive = Number(value) === 1;
+	  toggle.classList.toggle("active", isActive);
+	  label.textContent = isActive ? "Active" : "Inactive";
+	  label.classList.toggle("active", isActive);
+	  label.classList.toggle("inactive", !isActive);
+	  hiddenInput.value = isActive ? "1" : "0";
+
+	}
+
+</script>
+
+<script>
+	let stateUpdateCode=0;
+	let PreviousInputDt = "";
+	let allMastData = [];
+	let filteredData = [];
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	let ModeOfControl="";
+	let getstateDt=[];
+	const storedData = localStorage.getItem('editstate');
+	ModeOfControl = localStorage.getItem('Mode');
+	localStorage.removeItem('Mode');
+	$(document).ready(function(){
+		CountryNamebind();
+
+		if (storedData && ModeOfControl === 'Edit') {
+		  getstateDt = JSON.parse(storedData);
+		 stateUpdateCode = getstateDt.code;
+		 PreviousInputDt = getstateDt.Statename;
+
+	   $('#TxtStatename').val(getstateDt.Statename);
+	   $('#TxtShortname').val(getstateDt.Shortname);
+	   $('#TxtGstCode').val(getstateDt.gstCode);
+	   $('#TxtEcode').val(getstateDt.ECode);
+
+		 $('#DdStateTyp').val(getstateDt.statetype);
+		 $('#DdUnionTertry').val(getstateDt.UnionTeritory);
+		CountryNamebind();
+		setTimeout(function () {
+		$('#DdCountry option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getstateDt.CountryNm.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		 setToggleState(getstateDt.active);
+
+		  $('input').prop('readonly', false);
+		$('#DdCountry, #DdStateTyp, #DdUnionTertry').prop('disabled', false);
+		  $('#btn-save').show();
+		  $('#cancelBtn').show();
+		  localStorage.removeItem('editstate');
+
+		}
+		else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getstateDt = JSON.parse(storedData);
+			 $('#TxtStatename').val(getstateDt.Statename);
+	   $('#TxtShortname').val(getstateDt.Shortname);
+	   $('#TxtGstCode').val(getstateDt.gstCode);
+	   $('#TxtEcode').val(getstateDt.ECode);
+
+		 $('#DdStateTyp').val(getstateDt.statetype);
+		 $('#DdUnionTertry').val(getstateDt.UnionTeritory);
+		CountryNamebind();
+		setTimeout(function () {
+		$('#DdCountry option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getstateDt.CountryNm.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+
+		  $('#DdActive').val(getstateDt.active);
+		  setToggleState(getstateDt.active);
+		   $('input').prop('readonly', true);
+		$('#DdCountry, #DdStateTyp, #DdUnionTertry').prop('disabled', true);
+		disableToggle();
+		  localStorage.removeItem('editstate');
+		}
+
+
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+
+		if (!validateRequiredField('#TxtStatename', 'State Name')) return;
+		if (!validateRequiredField('#DdCountry', 'Country Name')) return;
+		if (!validateRequiredField('#DdUnionTertry', 'Union Teritory')) return;
+		if (!validateRequiredField('#DdStateTyp', 'State Type')) return;
+
+			var Statename = toNullableString($('#TxtStatename').val());
+			var shortname = toNullableString($('#TxtShortname').val());
+			var GstCode = toNullableString($('#TxtGstCode').val());
+			var Ecode = toNullableString($('#TxtEcode').val());
+			var countryId=toNullableInt($('#DdCountry').val());
+			var UnionTerry=toNullableString($('#DdUnionTertry').val());
+			var Statetype=toNullableString($('#DdStateTyp').val());
+
+		var active = document.getElementById("DdActive").value;
+
+		// if (!Statename || !UnionTerry || !countryId || !Statetype || !active) {
+		// 	toastr.warning("Please fill all required fields.");
+		// 	return;
+		// }
+
+		if(ModeOfControl=='Edit')
+		{
+
+			 var CountryDt = {
+				   code: toNullableInt(stateUpdateCode),
+				   StateName: Statename,
+				   ShortName: shortname,
+				   GstCode: GstCode,
+				   Ecode: Ecode,
+				   CountryId: countryId,
+				   UnionTerritory:UnionTerry,
+				   StateType:Statetype,
+				   Active: active
+			   };
+			 Editcountrymast(CountryDt, Statename)
+		}
+		else
+		{
+
+			 var CountryDt = {
+				   StateName: Statename,
+				   ShortName: shortname,
+				   GstCode: GstCode,
+				   Ecode: Ecode,
+				   CountryId: countryId,
+				   UnionTerritory:UnionTerry,
+				   StateType:Statetype,
+				   Active: active
+			   };
+				console.log(CountryDt);
+		 savecountryMastDt(CountryDt, Statename);
+		}
+	});
+
+			$('#TxtStatename').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtShortname').focus();
+			}
+		});
+		$('#TxtShortname').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtGstCode').focus();
+			}
+		});
+		$('#TxtGstCode').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#TxtEcode').focus();
+			}
+		});
+		$('#TxtEcode').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#DdCountry').val($('#DdCountry option:first').val());
+				$('#DdCountry').focus();
+			}
+		});
+		$('#DdCountry').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#DdUnionTertry').val($('#DdUnionTertry option:first').val());
+				$('#DdUnionTertry').focus();
+			}
+		});
+		$('#DdUnionTertry').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#DdStateTyp').val($('#DdStateTyp option:first').val());
+				$('#DdStateTyp').focus();
+			}
+		});
+		$('#DdStateTyp').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				$('#btn-save').focus();
+			}
+		});
+
+
+		});
+	function savecountryMastDt(CountryDt, name)
+	{
+		checkExistOrNot(name)
+			  .done(function (data) {
+			   if (data.status === true && data.exists === true) {
+				toastr.warning("Duplicate State Name");
+				return;
+			   }
+
+				$.ajax({
+					url:'@Url.Action("saveStateMastDt", "StateMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(CountryDt),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							// resetFields();
+							// setTimeout(function () {
+							// 	  window.location.href ='/StateMaster/Index';
+							// 	}, 1500);
+							setSubGroupFormReadOnly();
+
+						} else {
+							toastr.error(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						console.error(xhr.responseText);
+						toastr.error("Error occurred while saving.");
+					}
+				});
+			  })
+			.fail(function (xhr, status, error) {
+			console.error("Check State failed:", error);
+			toastr.error("Error while checking State type.");
+			});
+	}
+	function Editcountrymast(CountryDt, name){
+		if (PreviousInputDt !== name) {
+				  checkExistOrNot(name)
+					  .done(function (data) {
+					   if (data.status === true && data.exists === true) {
+						toastr.warning("Duplicate State Name");
+						return;
+					   }
+						updateCurrencyData(CountryDt, name);
+
+					  })
+					.fail(function (xhr, status, error) {
+					console.error("Check State failed:", error);
+					toastr.error("Error while checking State type.");
+					});
+				 }
+				 else{
+					 updateCurrencyData(CountryDt, name);
+				 }
+
+	}
+	function updateCurrencyData(CountryDt, name) {
+			$.ajax({
+				url: '/StateMaster/UpdateStateDt',
+				type: 'POST',
+				data:JSON.stringify(CountryDt),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/StateMaster/Index';
+								}, 1500);
+					} else {
+						toastr.error("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					toastr.error("Data not updated: " + error);
+				}
+			});
+		}
+	function resetFields() {
+		$('#TxtStatename').val('');
+		$('#TxtShortname').val('');
+		$('#TxtGstCode').val('');
+		$('#TxtEcode').val('');
+		$('#DdCountry').val($('#DdCountry option:first').val());
+		$('#DdUnionTertry').val($('#DdUnionTertry option:first').val());
+		$('#DdStateTyp').val($('#DdStateTyp option:first').val());
+		$('#DdActive').val($('#DdActive option:first').val());
+	}
+	function setSubGroupFormReadOnly() {
+		const form = $('#form-container');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		form.find('.toggle-switch input').prop('disabled', true);
+		form.find('#customToggle').addClass('disabled');
+	}
+	function checkExistOrNot(inputData)
+	   {
+		   return $.ajax({
+		   url: '/StateMaster/getExitOrNot',
+		   type: 'GET',
+		   dataType: 'json',
+		   data: { inputData: inputData }
+	   });
+	   }
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		 if(ModeOfControl=='Edit')
+		 {
+		  $('#TxtStatename').val(getstateDt.Statename);
+	   $('#TxtShortname').val(getstateDt.Shortname);
+	   $('#TxtGstCode').val(getstateDt.gstCode);
+	   $('#TxtEcode').val(getstateDt.ECode);
+
+		 $('#DdStateTyp').val(getstateDt.statetype);
+		 $('#DdUnionTertry').val(getstateDt.UnionTeritory);
+		CountryNamebind();
+		setTimeout(function () {
+		$('#DdCountry option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getstateDt.CountryNm.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+		  setToggleState(getstateDt.active);
+	}
+	else
+	{
+	resetFields();
+	}
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+	function allowOnlyNumbers(input) {
+		   input.value = input.value.replace(/[^0-9]/g, '');
+	}
+	function CountryNamebind(){
+		$.ajax({
+			url:'/Statemaster/GetCountryname',
+			type:'Get',
+			datatype:'json',
+			success:function(response){
+				if(response.status==true){
+				var countryId=$('#DdCountry');
+				countryId.empty();
+				countryId.append('<option selected disabled>- Select Country Name-</option>');
+				$.each(response.data, function(index, item){
+					countryId.append('<option value="'+ item.id +'">'+ item.country +'</option>');
+				});
+				}else{
+					toastr.error("Country Name Load failed");
+				}
+			},
+			error:function(xhr,status, error){
+			toastr.error("Country Name Load failed", xhr.error);
+			}
+
+		});
+	}
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+</script>

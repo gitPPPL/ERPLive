@@ -1,0 +1,299 @@
+﻿@{
+	ViewBag.Title = "Branch Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset> 
+	<legend>Branch Master</legend>
+
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button onclick="window.location.href='@Url.Action("Index", "BranchMasterList")'" type="submit" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+
+	<form id="BranchMaster"> 
+
+		<input type="hidden" class="form-control" name="CODE" id="CODE">
+
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Branch Name<span class="required">*</span></label>
+					<input type="text" class="form-control" name="NAME" id="NAME">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="form-label">Location</label>
+					<select class="form-select form-control" id="LOCATION" name="LOCATION">
+						<option value="">-- Select Location --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					@* <label class="form-label">Select Place</label>
+					<select class="form-select form-control" id="" name="SELECT_PLACE">
+						<option value="">-- Select Place --</option>
+					</select> *@
+				</div>
+			</div>
+		</div>
+		<div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+			<div class="col-md-3 btn-align">
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+			</div>
+		</div>
+	</form>
+
+</fieldset>
+
+
+<script>
+	$(document).ready(function () {
+		$(function () {
+			const urlParams = new URLSearchParams(location.search);
+			const rowId = parseInt(urlParams.get('id'));
+			const isReadOnly = urlParams.get('readOnly') === 'true';
+			if (!isNaN(rowId) && rowId > 0) {
+				LoadBranchById(rowId);
+
+				if (isReadOnly) {
+					 setBranchFormReadOnly(); 
+				}
+			}
+		});
+		loadLoactionList();
+		 $('#ACTIVE').on('change', function () {
+            const status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
+	});
+
+	function loadLoactionList() {
+		$.ajax({
+			url: '/BranchMaster/GetLoactionList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#LOCATION');
+				ddl.empty();
+				ddl.append('<option value="">-- Select Location --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				alert('Error loading module: ' + error);
+			}
+		});
+	}
+
+	$('#BranchMaster').on('submit', function (e) {
+		e.preventDefault();
+
+		const code = parseInt($('#CODE').val()) || 0;
+
+		const branchData = {
+			CODE: code,
+			COMP_CODE: 1, // You can update dynamically based on your app context
+			NAME: $('#NAME').val(),
+			LOCATION: $('#LOCATION').val(),
+            ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			UUSER: 1, // Set to current user ID
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? "E" : "A",
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB",
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+
+		$.ajax({
+			url: '/BranchMaster/SaveBranch', // 🔁 Update this to match your controller route
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(branchData),
+			success: function (response) {
+				console.log(response);
+				if (response.success) {
+					toastr.success("Branch saved successfully!");
+					$('#BranchMaster')[0].reset();
+					setTimeout(function () {
+						window.location.href = '/BranchMasterList/Index'; // 🔁 Update to list view route
+					}, 1000);
+				} else {
+					const message = response.message || "Something went wrong while saving.";
+					toastr.warning(message);				
+				}
+			},
+			error: function (xhr) {
+				const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+
+	function LoadBranchById(code) {
+		$.ajax({
+			url: '/BranchMasterList/GetBranchByCode', 
+			type: 'GET',
+			data: { code: code },
+			success: function (data) {
+				console.log(data);
+				if (!data) {
+					toastr.warning("No data found.");
+					return;
+				}
+				$('#CODE').val(data.code);
+				$('#NAME').val(data.name);
+				$('#LOCATION').val(data.location).trigger('change');
+				$('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
+			    $('#statusText').text(data.active ? 'Active' : 'Inactive');
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading branch:", status, error);
+				toastr.error("Error: " + xhr.responseText);
+			}
+		});
+	}
+
+	function setBranchFormReadOnly() {
+		const form = $('#BranchMaster');
+		form.find('input, select, textarea').prop('disabled', true);
+		form.find('button').prop('disabled', true);
+		$('#customToggle').addClass('disabled'); // for toggle visual feedback
+	}
+
+
+</script>
+
+
+
+@* Cancel Button Popup *@
+<script>
+	document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+</script>
+
+@* Cancel button end *@
+@* status check *@
+<script>
+	const toggle = document.getElementById('customToggle');
+	const label = document.getElementById('statusLabel');
+
+	toggle.addEventListener('click', () => {
+	  toggle.classList.toggle('1');
+	  const isActive = toggle.classList.contains('1');
+
+	  label.textContent = isActive ? '1' : '0';
+	  label.classList.toggle('1', isActive);
+	  label.classList.toggle('0', !isActive);
+	  document.getElementById('0').value = isActive ? '1' : '0';
+	});
+</script>
+<script>
+		document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	</Script>
+@* Status Check end *@
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+
+		// Handle toggle click
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+
+			hiddenInput.value = isActive ? '1' : '0';
+
+			console.log("Toggle value:", hiddenInput.value); // Will show 1 or 0
+		});
+	});
+
+</script>
+
+@* Script status Button *@

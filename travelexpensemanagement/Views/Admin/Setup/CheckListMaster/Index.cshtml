@@ -1,0 +1,331 @@
+﻿@{
+    ViewBag.Title = "Check List Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Check List Master</legend>
+
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button onclick="window.location.href='@Url.Action("Index", "CheckListMasterList")'" type="submit" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="CheckListForm">
+        <input type="hidden" class="form-control" name="CODE" id="CODE">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NATURE">Nature<span class="required">*</span></label>
+                    <select class="form-select form-control" id="NATURE" name="NATURE">
+                        <option value="Complacency">Complacency</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="CHECK_LIST_NAME">Check List Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" name="CHECK_LIST_NAME" id="CHECK_LIST_NAME" placeholder="Enter Checklist Name">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TASK_NAME">Task Name<span class="required">*</span></label>
+                    <input type="text" class="form-control" name="TASK_NAME" id="TASK_NAME" placeholder="Enter Task Name">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="RESPONSIBLE_USER">Responsible User<span class="required">*</span></label>
+                    <select class="form-control" id="RESPONSIBLE_USER" name="RESPONSIBLE_USER">
+                        <option value="">-- Select --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="AlertBefore1">Alert Before</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="ALERT_DAYS" id="ALERT_DAYS" placeholder="Enter Days For RESPONSIBLE USER">
+                        <span class="days-text">days</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="FREQUENCY">Frequency</label>
+                    <select class="form-control" id="FREQUENCY_CODE" name="FREQUENCY_CODE">
+                        <option value="1">15 Days</option>
+                        <option value="2">One Month</option>
+                        <option value="3">Three Months</option>
+                        <option value="4">Six Months</option>
+                        <option value="5">Annually</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="STATUS">Status</label>
+                    <select class="form-control" id="STATUS" name="STATUS">
+                        <option value="Open">Open</option>
+                        <option value="Close">Close</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="APPROVAL_USER">Approval User</label>
+                    <select class="form-control" id="APPROVAL_USER" name="APPROVAL_USER">
+                        <option value="">-- Select --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="AlertBefore2">Alert Before</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="ALERT_DAYS2" id="ALERT_DAYS2" placeholder="Enter Days For APPROVAL USER">
+                        <span class="days-text">days</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="Due Date">Due Date</label>
+                    <input type="date" id="DueDate" name="DueDate" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="Remarks">Remarks</label>
+                    <textarea type="text" class="form-control" name="REMARKS" id="REMARKS"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        $(function () {
+            const urlParams = new URLSearchParams(location.search);
+            const rowId = parseInt(urlParams.get('id'));
+            const isReadOnly = urlParams.get('readOnly') === 'true';
+            if (!isNaN(rowId) && rowId > 0) {
+                LoadCheckListById(rowId);
+
+                if (isReadOnly) {
+                     setCheckListFormReadOnly();
+                }
+            }
+        });
+        loadResponsibleUserList();
+        loadApproveUserList();
+    });
+
+    function loadResponsibleUserList() {
+        $.ajax({
+            url: '/CheckListMaster/GetUserList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#RESPONSIBLE_USER');
+                ddl.empty();
+                ddl.append('<option value="">-- Select User --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    function loadApproveUserList() {
+        $.ajax({
+            url: '/CheckListMaster/GetUserList',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var ddl = $('#APPROVAL_USER');
+                ddl.empty();
+                ddl.append('<option value="">-- Select User --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading module: ", xhr.responseText);
+                toastr.error('Error loading module: ' + error);
+            }
+        });
+    }
+
+    $('#CheckListForm').on('submit', function (e) {
+        e.preventDefault();
+        const code = parseInt($('#CODE').val()) || 0;
+
+        if (!validateRequiredField('#CHECK_LIST_NAME', 'Check List Name')) return;
+        if (!validateRequiredField('#TASK_NAME', 'Task Name')) return;
+        if (!validateRequiredField('#RESPONSIBLE_USER', 'Responsible User')) return;
+
+          // Gather values
+        const formValues = {
+            CODE: parseInt($('#CODE').val()) || 0,
+            CHECKLIST_NAME: $('#CHECK_LIST_NAME').val().trim(),
+            TASK_NAME: $('#TASK_NAME').val().trim(),
+            RESPONSIBLE_USER: $('#RESPONSIBLE_USER').val(),
+            APPROVAL_USER: $('#APPROVAL_USER').val(),
+            FREQUENCY_CODE: $('#FREQUENCY_CODE').val(),
+            DUE_DATE: $('#DueDate').val(),
+            ALERT_DAYS: $('#ALERT_DAYS').val(),
+            ALERT_DAYS2: $('#ALERT_DAYS2').val(),
+            STATUS: $('#STATUS').val(),
+            REMARKS: $('#REMARKS').val()
+        };
+
+        // Validation
+        // const fields = [
+        // 	{ key: 'CHECKLIST_NAME', message: 'Please enter Checklist Name.' },
+        // 	{ key: 'TASK_NAME', message: 'Please enter Task Name.' },
+        // 	{ key: 'RESPONSIBLE_USER', message: 'Please select Responsible User.' },
+        // 	{ key: 'APPROVAL_USER', message: 'Please select Approval User.' },
+        // 	{ key: 'FREQUENCY_CODE', message: 'Please select Frequency.' },
+        // 	{ key: 'DUE_DATE', message: 'Please select a Due Date.' }
+        // ];
+
+        for (const field of fields) {
+            if (!formValues[field.key]) {
+                toastr.warning(field.message);
+                $(`#${field.key}`).focus();
+                return;
+            }
+        }
+
+        // Check if Alert Days are numbers
+        if (isNaN(formValues.ALERT_DAYS) || isNaN(formValues.ALERT_DAYS2)) {
+            toastr.warning('Alert Days must be a number.');
+            $('#ALERT_DAYS').focus();
+            return;
+        }
+
+        const checklistData = {
+            CODE: code,
+            COMP_CODE: 1, // Update dynamically as needed
+            NATURE: $('#NATURE').val(),
+            CHECKLIST_NAME: $('#CHECK_LIST_NAME').val(),
+            TASK_NAME: $('#TASK_NAME').val(),
+            RESPONSIBLE_USER: parseInt($('#RESPONSIBLE_USER').val()) || null,
+            APPROVAL_USER: parseInt($('#APPROVAL_USER').val()) || null,
+            DUE_DATE: $('#DueDate').val() ? new Date($('#DueDate').val()).toISOString() : null,
+            FREQUENCY_CODE: parseInt($('#FREQUENCY_CODE').val()) || null,
+            FREQUENCY: $('#FREQUENCY_CODE option:selected').text(),
+            ALERT_DAYS: parseInt($('#ALERT_DAYS').val()) || 0,
+            ALERT_DAYS2: parseInt($('#ALERT_DAYS2').val()) || 0,
+            STATUS: $('#STATUS').val(),
+            REMARKS: $('#REMARKS').val(),
+            UUSER: 1, // Replace with current user ID
+            UDATE: new Date().toISOString(),
+            EUSER: 1,
+            EDATE: new Date().toISOString(),
+            AED: code > 0 ? "E" : "A",
+            WSID: "WEB",
+            LIP: "127.0.0.1",
+            LID: "WEB",
+            ACTION: code > 0 ? "UPDATE" : "INSERT"
+        };
+
+        $.ajax({
+            url: '/CheckListMaster/SaveCheckList',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(checklistData),
+            success: function (response) {
+                if (response.success) {
+                    toastr.success("Checklist saved successfully!");
+                    $('#CheckListForm')[0].reset();
+                    setTimeout(function () {
+                        window.location.href = '/CheckListMasterList/Index';
+                    }, 1000);
+                } else {
+                    toastr.warning("Something went wrong while saving.");
+                }
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+                toastr.error("Error: " + errorMsg);
+            }
+        });
+    });
+
+    function LoadCheckListById(code) {
+        $.ajax({
+            url: '/CheckListMasterList/GetCheckListByCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (data) {
+                // Fill input fields
+                $('#CODE').val(data.code);
+                $('#NATURE').val(data.nature);
+                $('#CHECK_LIST_NAME').val(data.checklisT_NAME);
+                $('#TASK_NAME').val(data.tasK_NAME);
+                $('#RESPONSIBLE_USER').val(data.responsiblE_USER).trigger('change');
+                $('#APPROVAL_USER').val(data.approvaL_USER).trigger('change');
+                $('#DueDate').val(data.duE_DATE ? new Date(data.duE_DATE).toISOString().split('T')[0] : '');
+                $('#FREQUENCY_CODE').val(data.frequencY_CODE).trigger('change');
+                $('#ALERT_DAYS').val(data.alerT_DAYS);
+                $('#ALERT_DAYS2').val(data.alerT_DAYS2);
+                $('#STATUS').val(data.status).trigger('change');
+                $('#REMARKS').val(data.remarks);
+
+                // Handle IsActive toggle (if implemented in future)
+                const isActive = data.isActive === 1 || data.isActive === true;
+                $('#IsActive').val(isActive ? 1 : 0);
+                if (isActive) {
+                    $('#customToggle').addClass('active');
+                    $('#statusLabel').addClass('active').text('Active');
+                } else {
+                    $('#customToggle').removeClass('active');
+                    $('#statusLabel').removeClass('active').text('Inactive');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading checklist by code:", status, error);
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+
+    function setCheckListFormReadOnly() {
+        const form = $('#CheckListForm');
+        form.find('input, select, textarea').prop('disabled', true);
+        form.find('button').prop('disabled', true);
+        $('#customToggle').addClass('disabled'); // Toggle visual feedback if present
+    }
+
+
+</script>
+

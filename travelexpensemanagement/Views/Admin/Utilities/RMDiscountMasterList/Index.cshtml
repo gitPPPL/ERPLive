@@ -1,0 +1,157 @@
+﻿@{
+	ViewBag.Title = "RM Discount Master List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">RM Discount Master List</legend>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="input-group shadow-sm rounded-pill overflow-hidden">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="btn-rightalign">
+				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "RMDiscountMaster")'" type="submit" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print" onclick="printCityMasterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblRMDiscountMasterList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th>Code</th>
+						<th>Sitem</th>
+						<th>Icode</th>
+						<th>Sauda Item</th>
+						<th>Item Name</th>
+						<th>Effect From</th>
+						<th>Rate</th>
+						<th>Above%</th>
+						<th>Aboveamt</th>
+                        <th>Remarks</th>
+						<th>User</th>
+						<th>Update</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<!-- Pagination container -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</fieldset>
+
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadRMList();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadRMList();
+        });
+    });
+
+    function loadRMList() {
+        $.ajax({
+            url: '/RMDiscountMasterList/GetRMDiscountMasterList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log('res',res)
+                const docs = res.items;
+                const totalCount = res.totalCount;
+                const tbody = $('#tblRMDiscountMasterList tbody');
+                tbody.empty();
+
+                docs.forEach(doc => {
+
+                    tbody.append(`
+                        <tr id="row-${doc.code}">
+                            <td>${doc.code}</td>
+                            <td>${doc.sItem}</td>
+                            <td>${doc.iCode}</td>
+                            <td>${doc.saudaItemName}</td>
+                            <td>${doc.itemName}</td>
+                            <td>${doc.effectFrom}</td>
+                            <td>${doc.rate}</td>
+                            <td>${doc.abovePer}</td>
+                            <td>${doc.aboveAmt}</td>    
+                            <td>${doc.remarks}</td>
+                            <td>${doc.uuser}</td>
+                            <td>${doc.udate}</td>
+                            <td>
+                                <i class="fa fa-edit text-primary mx-2" onclick="editRow(${doc.code})" style="cursor:pointer;"></i>
+                                <i class="fa fa-trash text-danger" onclick="deleteRow(${doc.code})" style="cursor:pointer;"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+                renderPagination(totalCount, pageSize, currentPage);
+            }
+        });
+    }
+    function editRow(code) {
+      window.location.href = `/RMDiscountMaster/Index?sno=${code}`;
+    }
+    function deleteRow(code) {
+        Swal.fire({
+            title: "Delete?",
+            text: "Are you sure?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, Delete"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/RMDiscountMasterList/Delete',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            loadRMList();
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    }
+                });
+
+            }
+        });
+    }
+
+</script>

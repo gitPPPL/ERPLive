@@ -1,0 +1,358 @@
+﻿@{
+    ViewBag.Title = "Cost Center Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Cost Center Master</legend>
+
+    <div class="row">
+        <div class="offset-md-8 col-md-4 btn-align">
+            <button id="btnBackToList" onclick="window.location.href='@Url.Action("Index", "CostCenterMasterList")'" type="button" class="btn btn-primary">
+                <i class="fa fa-list"></i> Back to list
+            </button>
+        </div>
+    </div>
+
+    <form id="CostCenterMasterForm">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtName">Name</label>
+                    <input type="text" class="form-control" id="TxtName" name="Name" maxlength="50" placeholder="Enter Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtCostCode">Cost Code</label>
+                    <input type="text" class="form-control" id="TxtCostCode" name="CostCode" maxlength="20" placeholder="Enter Cost Code">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-7 col-md-2">
+                <div class="active-toggle">
+                    <label class="toggle-switch">
+						<input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ms-2" id="statusText">Active</span>
+                </div>
+            </div>
+            <div class="col-md-3 btn-align">
+				<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+                <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+		let CostCenterCd=0;
+		let PreviousInputDt = "";
+		let allMastData = [];
+		let filteredData = [];
+		let currentPage = 1;
+		const rowsPerPage = 10;
+		let ModeOfControl="";
+		let getCostCenterDt=[];
+
+		const storedData = localStorage.getItem('editCostCenter');
+		ModeOfControl = localStorage.getItem('Mode');
+		  localStorage.removeItem('Mode');
+		  console.log(storedData);
+
+		$(document).ready(function(){
+			$('#DdActive').on('change', function () {			 
+			 let isChecked = $(this).is(':checked');
+	let status = isChecked ? 'Active' : 'Inactive';
+	let value = isChecked ? 1 : 0;
+	$('#statusText').text(status);
+	$(this).val(value);
+		})
+
+		if (storedData && ModeOfControl === 'Edit') {
+		 getCostCenterDt = JSON.parse(storedData);
+		 CostCenterCd = getCostCenterDt.code;
+		 PreviousInputDt = getCostCenterDt.name;
+
+			$('#TxtName').val(getCostCenterDt.name);
+		  $('#TxtCostCode').val(getCostCenterDt.CostCd);		  
+		  setActiveStatus(getCostCenterDt.active);
+		 $('input').prop('readonly', false);
+		  $('#btn-save').show();
+		  $('#cancelBtn').show();
+		  localStorage.removeItem('editCostCenter');
+
+		}
+		else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getCostCenterDt = JSON.parse(storedData);
+		$('#TxtName').val(getCostCenterDt.name);
+		  $('#TxtCostCode').val(getCostCenterDt.CostCd);
+			setActiveStatus(getCostCenterDt.active);
+		  $('#DdActive').prop('disabled', true);
+		   $('input').prop('readonly', true);
+		  localStorage.removeItem('editCostCenter');
+		}
+
+		$('#TxtName').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#TxtCostCode').focus();
+				}
+			});
+
+			$('#TxtCostCode').on('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					$('#btn-save').focus();
+				}
+			});
+
+		});
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+		const name =  toNullableString($('#TxtName').val());
+		const code =  toNullableString($('#TxtCostCode').val());
+		var active = document.getElementById("DdActive").value;
+
+		if (!name || !code ) {
+			alert("Please fill all required fields.");
+			return;
+		}
+		console.log(ModeOfControl);
+		if(ModeOfControl=='Edit')
+		{
+
+			 var costCenterData = {
+				   Code:toNullableInt(CostCenterCd),
+				   Name: name,
+				   CostCode:code,
+				   active:active
+
+			   };
+				console.log(costCenterData);
+			 EditsalesExecutive(costCenterData, name)
+		}
+		else
+		{
+
+			var costCenterData = {
+					Name: name,
+				   CostCode:code,
+				   active:active
+			   };
+			   console.log(costCenterData);
+		 saveSalesExecutiveDt(costCenterData, name);
+		}
+	});
+
+	 function saveSalesExecutiveDt(costCenterData, Code)
+	{
+		checkExistOrNot(Code)
+			  .done(function (data) {
+			   if (data.status === true && data.exists === true) {
+				alert("Duplicate AccOutstanding Name");
+				return;
+			   }
+
+				$.ajax({
+					url:'@Url.Action("SaveSalesExecutiveMast", "CostCenterMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(costCenterData),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							resetFields();
+							setTimeout(function () {
+								  window.location.href ='/CostCenterMasterList/Index';
+								}, 1500);
+
+						} else {
+							alert(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						console.error(xhr.responseText);
+						alert("Error occurred while saving.");
+					}
+				});
+			  })
+			.fail(function (xhr, status, error) {
+			console.error("Check AccOutstanding failed:", error);
+			alert("Error while checking AccOutstanding type.");
+			});
+	}
+
+
+	function EditsalesExecutive(costCenterData, name){
+		if (PreviousInputDt != name) {
+				  checkExistOrNot(name)
+					  .done(function (data) {
+					   if (data.status === true && data.exists === true) {
+						alert("Duplicate AccOutstanding Code");
+						return;
+					   }
+						updateCurrencyData(costCenterData, name);
+
+					  })
+					.fail(function (xhr, status, error) {
+					console.error("Check AccOutstanding failed:", error);
+					alert("Error while checking AccOutstanding type.");
+					});
+				 }
+				 else{
+					 updateCurrencyData(costCenterData, name);
+				 }
+
+	}
+
+		function updateCurrencyData(costCenterData, name) {
+			$.ajax({
+				url: '/CostCenterMaster/EditSalesExecutiveMast',
+				type: 'POST',
+				data:JSON.stringify(costCenterData),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/CostCenterMasterList/Index';
+								}, 1500);
+					} else {
+						alert("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					alert("Data not updated: " + error);
+				}
+			});
+		}
+
+
+		 function resetFields() {
+			$('#TxtName').val('');
+			 $('#TxtCostCode').val('');
+		}
+
+	  function checkExistOrNot(name)
+	   {
+		   return $.ajax({
+		   url: '/CostCenterMaster/getExitOrNot',
+		   type: 'GET',
+		   dataType: 'json',
+		   data: { name:name }
+	   });
+	   }
+
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		   if(ModeOfControl=='Edit')
+		 {
+		 $('#TxtName').val(getCostCenterDt.name);
+		  $('#TxtCostCode').val(getCostCenterDt.CostCd);
+		  setActiveStatus(getCostCenterDt.active);
+	}
+	else
+	{
+	resetFields();
+	}
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+
+		function setActiveStatus(input)
+		{
+		let isActive = input == 1;
+		$('#DdActive').prop('checked', isActive);
+		$('#DdActive').val(isActive ? 1 : 0);
+		$('#statusText').text(isActive ? 'Active' : 'Inactive');
+		}
+ 
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+</script>
+
+
+
+@* 
+
+<script>
+    $(document).ready(function () {
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        })
+    });
+</script>
+ 
+<script>
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel all the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Cancelled!',
+                    'Your action has been cancelled.',
+                    'success'
+                ).then(() => {
+                    // Redirect to list page
+                    window.location.href = '@Url.Action("Index", "CostCenterMasterList")';
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire(
+                    'Resumed',
+                    'Your action is still in progress.',
+                    'info'
+                );
+            }
+        });
+    });
+</script>
+ *@

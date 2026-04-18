@@ -1,0 +1,551 @@
+﻿    @{
+        ViewBag.Title = "Employee Portal Payslip";
+        Layout = "~/Views/Shared/EmployeeLayout.cshtml";
+    }
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+    
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   
+    </head>
+
+    <body>
+        <style>
+        .emp-bar {
+            background: #ffffff;
+            padding: 6px 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 9px rgb(0 0 0 / 16%);
+            border: 1px solid #d7d7d7;
+        }
+
+        .emp-main-title {
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 1.5vw, 10px);
+            font-weight: 600;
+            font-size: clamp(13px, 2vw, 16px);
+            color: #1f4e79;
+        }
+
+            .emp-main-title i {
+                color: #fff;
+                padding: 6px;
+                border-radius: 8px;
+                font-size: 12px;
+                background: #318346;
+            }
+    </style>
+        <div class="emp-bar">
+            <div class="emp-main-title">
+            <i class="fa-solid fa-money-bill-wave"></i>
+                <span>Employee Salary Slip</span>
+            </div>
+        </div>
+   
+        <div class="emp-filter-card">
+
+            <div class="emp-filter-row">
+
+                <!-- Left Side -->
+                <div class="emp-filter-group">
+                    <label for="ddlMonth" class="emp-filter-label">
+                        Select Month
+                    </label>
+                    <select id="ddlMonth" class="form-select emp-filter-select">
+                    </select>
+                </div>
+
+                <!-- Right Side -->
+                <div class="emp-filter-action">
+                    <button class="emp-download-btn" id="btn_downloadslip">
+                        <i class="fa-solid fa-download"></i>
+                        Download
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="payslipContent">
+
+            <img id="companyLogo" src="~/images/complogo.jpeg" style="display:none;" />
+        <!-- Company & Month -->
+        <div class="emp-slip-row">
+            <div class="emp-slip-card">
+                <div class="emp-slip-item">
+                    <span class="emp-slip-label">Company Name :</span>
+                    <span id="companyName"></span>
+                    <span id="Compddress" hidden></span>
+                </div>
+            </div>
+
+            <div class="emp-slip-card">
+                <div class="emp-slip-item">
+                    <span class="emp-slip-label">For the Month :</span>
+                    <span id="salaryMonth"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Info -->
+        <div class="emp-slip-row">
+            <div class="emp-slip-card">
+                <div class="emp-slip-item"><span class="emp-slip-label">Name : </span><span id="empName"></span></div>
+                <div class="emp-slip-item"><span class="emp-slip-label">Card No : </span><span id="cardNo"></span></div>
+                <div class="emp-slip-item"><span class="emp-slip-label">Father/Husband : </span><span id="fatherName"></span></div>
+            </div>
+
+            <div class="emp-slip-card">
+                <div class="emp-slip-item"><span class="emp-slip-label">Department : </span><span id="department"></span></div>
+                <div class="emp-slip-item"><span class="emp-slip-label">Designation : </span><span id="designation"></span></div>
+                <div class="emp-slip-item"><span class="emp-slip-label">Date of Joining : </span><span id="joinDate"></span></div>
+            </div>
+        </div>
+
+        <!-- PF / ESI -->
+        <div class="emp-slip-row">
+            <div class="emp-slip-card">
+                <div class="emp-slip-item"><span class="emp-slip-label">P.F. No : </span><span id="pfNo"></span></div>
+                <div class="emp-slip-item"><span class="emp-slip-label">E.S.I No : </span><span id="esiNo"></span></div>
+            </div>
+
+            <div class="emp-slip-card">
+                <div class="emp-slip-item"><span class="emp-slip-label">Working Days : </span><span id="workDay"></span></div>
+                <div class="emp-slip-item"><span class="emp-slip-label">Leave Availed : </span><span id="leaveDay"></span></div>
+            </div>
+        </div>
+
+        <!-- Salary Table -->
+            <div class="emp-table-wrapper">
+                <table class="main">
+                    <thead>
+                        <tr class="emp-tablehead">
+                            <th>Particulars</th>
+                            <th class="col-right">Gross</th>
+                            <th class="col-right">Earnings</th>
+                            <th></th>
+                            <th>Particulars</th>
+                            <th class="col-right">Deductions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="earningBody"></tbody>
+
+                    <tfoot>
+                        <tr class="emp_tabledownrow">
+                            <td class="totals">Total</td>
+                            <td class="col-right totals" id="totalGross"></td>
+                            <td class="col-right totals" id="totalEarning"></td>
+                            <td></td>
+                            <td class="totals">Total Deduction</td>
+                            <td class="col-right totals" id="totalDeduction"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+    
+
+        <!-- Net Pay -->
+        <div class="emp-slip-net-summary">
+            <div class="emp-slip-net-label">
+                Net Payable
+            </div>
+            <div class="emp-slip-net-amount" id="netPay">
+                ₹ 0.00
+            </div>
+        </div>
+
+        <div class="small">This is a computer generated payslip.</div>
+        </div>
+    </body>
+    </html>
+
+    <script>
+     // var Comcode = sessionStorage.getItem("compCode");
+     //    var EmpCode = sessionStorage.getItem("EmpCode");
+         $(document).ready(function () {
+             bindLastThreeMonths();
+             $("#ddlMonth").change(function () {
+                 let selectedDate = $(this).val();
+                 loadPayslipDetails(selectedDate);
+             });
+
+             $('#btn_downloadslip').on('click', function(){
+                 downloadSalarySlipPDF();
+             });
+
+             loadPayslipDetails($("#ddlMonth").val());
+         });
+
+          function bindLastThreeMonths() {
+            const ddl = $("#ddlMonth");
+            ddl.empty();
+
+            const now = new Date();
+
+            for (let i = 1; i <= 12; i++) {   // start from 1 to skip current month
+
+                let d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+                let value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-01";
+
+                let text = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                ddl.append(`<option value="${value}">${text}</option>`);
+            }
+        }
+        function loadPayslipDetails(vdate) {
+        // var Comcode = sessionStorage.getItem("compCode");
+        // var EmpCode = sessionStorage.getItem("EmpCode");
+         $.ajax({
+                 url: '/EmpPayslip/PayslipDetails',
+                 type: 'GET',
+                 data: { vdate: vdate},
+                 dataType: 'json',
+                 success: function (res) {
+                     debugger;
+                     if (!res.success) {
+                         toastr.success(res.message);
+                         clearPayslipForm();
+                         return;
+                     }
+                     const p = res.payslip;
+                       console.log('p',p);
+                     $("#companyName").text(p.company);
+                         $("#Compddress").text(p.address);
+                     $("#salaryMonth").text(
+                         new Date(p.sDate).toLocaleString('default', { month: 'short', year: 'numeric' })
+                     );
+
+                     $("#empName").text(p.name);
+                     $("#cardNo").text(p.cardNo);
+                     $("#fatherName").text(p.fatherName);
+                     $("#department").text(p.department);
+                     $("#designation").text(p.designation);
+                     $("#joinDate").text(p.joinDate);
+
+                     $("#pfNo").text(p.pfNo || "-");
+                     $("#esiNo").text(p.esiNo || "-");
+                     $("#workDay").text(p.workDay);
+                     $("#leaveDay").text(p.leaveDay);
+
+                     const tbody = $("#earningBody").empty();
+
+                     tbody.append(`
+                         <tr>
+                             <td>Basic</td><td class="col-right">${p.mBasic}</td><td class="col-right">${p.basic}</td>
+                             <td></td><td>P.F.</td><td class="col-right">${p.pf}</td>
+                         </tr>
+                         <tr>
+                             <td>HRA</td><td class="col-right">${p.mhra}</td><td class="col-right">${p.hra}</td>
+                             <td></td><td>ESI</td><td class="col-right">${p.esi}</td>
+                         </tr>
+                         <tr>
+                             <td>Conveyance</td><td class="col-right">${p.mConveyance}</td><td class="col-right">${p.conv}</td>
+                             <td></td><td>Income Tax</td><td class="col-right">${p.incomeTax}</td>
+                         </tr>
+                         <tr>
+                             <td>Other Allowance</td><td class="col-right">${p.mOtherAllowance}</td><td class="col-right">${p.otherAllowance}</td>
+                             <td></td><td></td><td></td>
+                         </tr>
+                     `);
+
+                     const gross = (+p.mBasic + +p.mhra + +p.mConveyance + +p.mOtherAllowance);
+                     const earn = (+p.basic + +p.hra + +p.conv + +p.otherAllowance);
+                     const ded = (+p.pf + +p.esi + +p.incomeTax);
+
+                     $("#totalGross").text(gross.toFixed(2));
+                     $("#totalEarning").text(earn.toFixed(2));
+                     $("#totalDeduction").text(ded.toFixed(2));
+                     $("#netPay").text((earn - ded).toFixed(2));
+                 }
+             });
+         }
+
+
+        function clearPayslipForm() {
+
+            $("#companyName").text("");
+            $("#Compddress").text("");
+            $("#salaryMonth").text("");
+
+            // clear employee details
+            $("#empName").text("");
+            $("#cardNo").text("");
+            $("#fatherName").text("");
+            $("#department").text("");
+            $("#designation").text("");
+            $("#joinDate").text("");
+
+            // clear PF / ESI
+            $("#pfNo").text("");
+            $("#esiNo").text("");
+            $("#workDay").text("");
+            $("#leaveDay").text("");
+
+            // clear salary table
+            $("#earningBody").empty();
+
+            // reset totals
+            $("#totalGross").text("");
+            $("#totalEarning").text("");
+            $("#totalDeduction").text("");
+
+            // reset net pay
+            $("#netPay").text("₹ 0.00");
+
+            // hide logo if needed
+            $("#companyLogo").hide();
+
+        }
+
+
+        function downloadSalarySlipPDF() {
+
+             const { jsPDF } = window.jspdf;
+             const doc = new jsPDF("p", "mm", "a4");
+
+             let startX = 10;
+             let endX = 200;
+             let y = 1;
+
+             // ===============================
+             // LOGO CENTERED (BIGGER)
+             // ===============================
+             let logo = document.getElementById("companyLogo");
+
+             const logoWidth = 130;
+             const logoHeight = 110;
+
+             const logoX = 105 - logoWidth / 2;
+             const logoY = y;
+
+             doc.addImage(logo, 'PNG', logoX, logoY, logoWidth, logoHeight);
+
+             // ===============================
+             // COMPANY NAME (VERY LESS GAP)
+             // ===============================
+             doc.setFont("times", "bold");
+             doc.setFontSize(18);
+
+             // Reduced spacing (pulled upward)
+             let companyNameY = logoY + logoHeight - 45;
+             doc.text($("#companyName").text(), 105, companyNameY, { align: "center" });
+
+             // ===============================
+             // COMPANY ADDRESS
+             // ===============================
+             doc.setFont("times", "normal");
+             doc.setFontSize(10);
+
+             let addressY = companyNameY + 4;
+             let addressText = $("#Compddress").text();
+             let splitAddress = doc.splitTextToSize(addressText, 120);
+             doc.text(splitAddress, 105, addressY, { align: "center" });
+
+             // ===============================
+             // START CONTENT
+             // ===============================
+             y = addressY + splitAddress.length * 5 + 5;
+
+             // ===============================
+             // OUTER BORDER
+             // ===============================
+             doc.rect(startX, y, 190, 150);
+             y += 8;
+
+             // ===============================
+             // TITLE
+             // ===============================
+             doc.setFont("times", "bold");
+             doc.setFontSize(12);
+             doc.text("Pay Slip (for the month of " + $("#salaryMonth").text() + ")", 105, y, { align: "center" });
+
+             y += 6;
+             doc.line(startX, y, endX, y);
+             y += 4;
+
+             doc.setFont("times", "normal");
+             doc.setFontSize(10);
+
+             // ===============================
+             // EMPLOYEE DETAILS
+             // ===============================
+             const empRowHeight = 6;
+             const empRows = [
+                 ["EMP Code", $("#cardNo").text(), "Days", $("#workDay").text()],
+                 ["Name", $("#empName").text(), "Payable Days", $("#workDay").text()],
+                 ["Designation", $("#designation").text(), "Department", $("#department").text()],
+                 ["PF No", $("#pfNo").text(), "ESI No", $("#esiNo").text()]
+             ];
+
+             empRows.forEach((row, index) => {
+                 let rowY = y + index * empRowHeight;
+                 doc.text(row[0] + " :", 15, rowY);
+                 doc.text(row[1] || "-", 45, rowY);
+                 doc.text(row[2] + " :", 110, rowY);
+                 doc.text(row[3] || "-", 150, rowY);
+                 doc.line(startX, rowY + 2, endX, rowY + 2);
+             });
+
+             y += empRows.length * empRowHeight + 4;
+
+             // ===============================
+             // EARNINGS & DEDUCTIONS
+             // ===============================
+             const boxStartY = y;
+             const boxHeight = 30;
+             const colX = 105;
+
+             doc.rect(startX, boxStartY, 190, boxHeight);
+             doc.line(colX, boxStartY, colX, boxStartY + boxHeight);
+             doc.line(startX, boxStartY + 6, endX, boxStartY + 6);
+
+             doc.setFont("times", "bold");
+             doc.text("EARNINGS", 15, boxStartY + 4);
+             doc.text("DEDUCTIONS", 110, boxStartY + 4);
+
+             doc.setFont("times", "normal");
+
+             const earnings = [
+                 $("#earningBody tr:eq(0) td:eq(2)").text(),
+                 $("#earningBody tr:eq(1) td:eq(2)").text(),
+                 $("#earningBody tr:eq(2) td:eq(2)").text(),
+                 $("#earningBody tr:eq(3) td:eq(2)").text()
+             ];
+
+             const deductions = [
+                 $("#earningBody tr:eq(0) td:eq(5)").text(),
+                 $("#earningBody tr:eq(1) td:eq(5)").text(),
+                 $("#earningBody tr:eq(2) td:eq(5)").text()
+             ];
+
+             const labelsE = ["Basic", "HRA", "Conveyance", "Other Allowance"];
+             const labelsD = ["PF", "ESI", "Income Tax"];
+
+             const rowHeight = 6;
+
+             for (let i = 0; i < 4; i++) {
+                 let rowY = boxStartY + 6 + i * rowHeight;
+                 doc.line(startX, rowY, endX, rowY);
+
+                 doc.text(labelsE[i], 15, rowY + 4);
+                 doc.text(earnings[i] || "0.00", 85, rowY + 4, { align: "right" });
+
+                 if (i < labelsD.length) {
+                     doc.text(labelsD[i], 110, rowY + 4);
+                     doc.text(deductions[i] || "0.00", 195, rowY + 4, { align: "right" });
+                 }
+             }
+
+             y = boxStartY + boxHeight + 6;
+
+             // ===============================
+             // TOTALS
+             // ===============================
+             doc.setFont("times", "bold");
+             doc.text("Total Earnings :", 110, y);
+             doc.text($("#totalEarning").text(), 195, y, { align: "right" });
+
+             y += 6;
+             doc.text("Total Deduction :", 110, y);
+             doc.text($("#totalDeduction").text(), 195, y, { align: "right" });
+
+             y += 8;
+             doc.line(startX, y, endX, y);
+
+             // ===============================
+             // NET SALARY
+             // ===============================
+             y += 5;
+             doc.setFontSize(13);
+             doc.text("NET SALARY :", 120, y);
+             doc.text($("#netPay").text(), 195, y, { align: "right" });
+
+             y += 10;
+
+             // ===============================
+             // AMOUNT IN WORDS
+             // ===============================
+             doc.setFontSize(9);
+             doc.setFont("times", "italic");
+
+             const netPayAmount = parseFloat($("#netPay").text()) || 0;
+             const netPayInWords = numberToWords(netPayAmount);
+
+             doc.text("Amount in Words: " + netPayInWords, 15, y);
+
+             y += 6;
+             doc.text("*This is a system generated pay slip. No signature is required.", 15, y);
+
+             // ===============================
+             // SAVE PDF
+             // ===============================
+             const monthText = $("#salaryMonth").text().replace(/\s+/g, "_");
+             doc.save("Payslip_" + monthText + ".pdf");
+         }
+
+        function numberToWords(amount) {
+             const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+             const teens = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+             const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+             const thousands = ["", "Thousand", "Lakh", "Crore"];
+
+             function convertHundred(num) {
+                 let str = "";
+                 if (num > 99) {
+                     str += ones[Math.floor(num / 100)] + " Hundred ";
+                     num = num % 100;
+                 }
+                 if (num > 10 && num < 20) {
+                     str += teens[num - 11] + " ";
+                 } else {
+                     str += tens[Math.floor(num / 10)] + " ";
+                     str += ones[num % 10] + " ";
+                 }
+                 return str.trim();
+             }
+
+             function convertNumber(num) {
+                 if (num === 0) return "Zero";
+
+                 let word = "";
+                 let i = 0;
+
+                 while (num > 0) {
+                     let part;
+                     if (i === 0) {
+                         part = num % 1000;
+                         num = Math.floor(num / 1000);
+                     } else {
+                         part = num % 100;
+                         num = Math.floor(num / 100);
+                     }
+
+                     if (part > 0) {
+                         word = convertHundred(part) + " " + thousands[i] + " " + word;
+                     }
+                     i++;
+                 }
+                 return word.trim();
+             }
+
+             const [integerPart, decimalPart] = amount.toString().split(".");
+             let words = convertNumber(parseInt(integerPart, 10));
+
+             if (decimalPart && parseInt(decimalPart, 10) > 0) {
+                 words += " and " + convertNumber(parseInt(decimalPart, 10)) + " Paise";
+             }
+
+             return words + " Only";
+         }
+
+    </script>

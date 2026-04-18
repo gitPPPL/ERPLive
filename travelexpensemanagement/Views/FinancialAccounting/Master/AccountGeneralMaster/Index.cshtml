@@ -1,0 +1,338 @@
+﻿@{
+	ViewBag.Title = "Account General Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend>Account General Master</legend>
+	<div class="row">
+
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "AccountGeneralMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="subGroupMaster"> 
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="AC_CODE" class="form-label">A/C Code</label>
+					<input type="text" class="form-control" id="AC_CODE" name="AC_CODE" placeholder="Enter A/C Code">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NATURE" class="form-label">Nature</label>
+					<input type="text" class="form-control" id="NATURE" name="NATURE" placeholder="Enter Nature" readonly>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="NAME" class="form-label">Name<span class="required">*</span></label>
+					<input type="text" class="form-control" id="NAME" name="NAME" placeholder="Enter Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="SHORT_NAME" class="form-label">Short Name</label>
+					<input type="text" class="form-control" id="SHORT_NAME" name="SHORT_NAME" placeholder="Enter Short Name">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="GROUP_NAME" class="form-label">Group Name<span class="required">*</span></label>
+					<select class="form-control" id="GROUP_NAME" name="GROUP_NAME">
+						<option value="">-- Select Group Name --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ALIAS_NAME" class="form-label">Alias Name</label>
+					<input type="text" class="form-control" id="ALIAS_NAME" name="ALIAS_NAME" placeholder="Enter Alias Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ADDRESS1" class="form-label">Address 1</label>
+					<input type="text" class="form-control" id="ADDRESS1" name="ADDRESS1" placeholder="Enter Address">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ADDRESS2" class="form-label">Address 2</label>
+					<input type="text" class="form-control" id="ADDRESS2" name="ADDRESS2" placeholder="Enter Address">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ADDRESS3" class="form-label">Address 3</label>
+					<input type="text" class="form-control" id="ADDRESS3" name="ADDRESS3" placeholder="Enter Address">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="PANNO" class="form-label">Pan No.</label>
+					<input type="text" class="form-control" id="PANNO" name="PANNO" placeholder="Enter Pan No">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANKNAME" class="form-label">Bank Name</label>
+					<input type="text" class="form-control" id="BANKNAME" name="BANKNAME" placeholder="Enter Bank Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANKBRANCH" class="form-label">Bank Branch</label>
+					<input type="text" class="form-control" id="BANKBRANCH" name="BANKBRANCH" placeholder="Enter Bank Branch">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="BANKACNO" class="form-label">Bank Ac No.</label>
+					<input type="text" class="form-control" id="BANKACNO" name="BANKACNO" placeholder="Enter Bank Ac No">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="IFSCCODE" class="form-label">IFSC Code</label>
+					<input type="text" class="form-control" id="IFSCCODE" name="IFSCCODE" placeholder="Enter IFSC Code">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="REMARKS" class="form-label">Remarks</label>
+					<input type="text" class="form-control" id="REMARKS" name="REMARKS" placeholder="Enter Remarks">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-8 col-md-2">
+				<div class="active-toggle">
+					<label class="toggle-switch">
+						<input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+						<span class="slider"></span>
+					</label>
+					<span class="ms-2" id="statusText">Active</span>
+				</div>
+			</div>
+			<div class="col-md-2 btn-align">
+				<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+
+<script>
+	$(document).ready(function () {
+		const urlParams = new URLSearchParams(location.search);
+		const rowId = parseInt(urlParams.get('id'));
+		const isReadOnly = urlParams.get('readOnly') === 'true';
+		if (!isNaN(rowId) && rowId > 0) {
+			LoadSubGroupById(rowId);
+			if (isReadOnly) {
+				 setSubGroupFormReadOnly();
+			}
+		}
+		loadGroupList();
+		loadNextSubgroupCode();
+		$('#ACTIVE').on('change', function () {
+			let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+			$('#statusText').text(status);
+		})
+	});
+	function loadGroupList(callback) {
+		$.ajax({
+			url: '/AccountGeneralMaster/GetGroupList',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#GROUP_NAME');
+				ddl.empty();
+				ddl.append('<option value="">-- Select User --</option>');
+
+				$.each(data, function (index, item) {
+					ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+				});
+				if (typeof callback === "function") callback();
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading module: ", xhr.responseText);
+				toastr.error('Error loading module: ' + error);
+			}
+		});
+	}
+
+		function loadNextSubgroupCode() {
+		$.ajax({
+			url: '/AccountGeneralMaster/GetNextSubGroupId',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				$('#AC_CODE').val(data.nextId);
+				$('#AC_CODE').val(data.nextId).prop('readonly', true);
+			},
+			error: function () {
+				toastr.error("Error loading next Code.");
+			}
+		});
+	}
+	$('#GROUP_NAME').on('change', function () {
+		let selectedCode = $(this).val();
+		$.ajax({
+			url: '/AccountGeneralMaster/GetNature',
+			type: 'GET',
+			data: { id: selectedCode },
+			dataType: 'json',
+			success: function (response) {
+				if (response.success) {
+					$('#NATURE').val(response.nature);
+					$('#NATURE').val(response.nature).prop('readonly', true);
+				} else {
+					toastr.error(response.message);
+				}
+			},
+			error: function () {
+				toastr.error("Error loading nature.");
+			}
+		});
+	});
+
+	$('#subGroupMaster').on('submit', function (e) {
+		e.preventDefault();
+
+		const code = parseInt($('#CODE').val()) || 0;
+		if (!validateRequiredField('#NAME', 'Name')) return;
+		if (!validateRequiredField('#GROUP_NAME', 'Group Name')) return;
+
+		const subgroupData = {
+			CODE: code,
+			COMP_CODE: 0, 
+			//AC_NO: $('#AC_CODE').val().trim(),
+			NATURE: $('#NATURE').val().trim(),
+			NAME: $('#NAME').val().trim(),
+			SHORTNAME: $('#SHORT_NAME').val().trim(),
+			GROUP_CODE: $('#GROUP_NAME').val(), 
+			ALIASNAME: $('#ALIAS_NAME').val().trim(),
+			ADD1: $('#ADDRESS1').val().trim(),
+			ADD2: $('#ADDRESS2').val().trim(),
+			ADD3: $('#ADDRESS3').val().trim(),
+			PAN: $('#PANNO').val().trim(),
+			BANK_NAME: $('#BANKNAME').val().trim(),
+			BANK_BRANCH: $('#BANKBRANCH').val().trim(),
+			AC_NO: $('#BANKACNO').val().trim(),
+			IFSC_CODE: $('#IFSCCODE').val().trim(),
+			REMARKS: $('#REMARKS').val().trim(),
+			ACTIVE: $('#ACTIVE').is(':checked') ? 1 : 0,
+			UUSER: 1, 
+			UDATE: new Date().toISOString(),
+			EUSER: 1,
+			EDATE: new Date().toISOString(),
+			AED: code > 0 ? 'E' : 'A',
+			WSID: "WEB",
+			LIP: "127.0.0.1",
+			LID: "WEB",
+			ACTION: code > 0 ? "UPDATE" : "INSERT"
+		};
+		$.ajax({
+			url: '/AccountGeneralMaster/SaveSubgroup',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(subgroupData),
+			success: function (response) {
+				if (response.success) {
+					toastr.success("Subgroup saved successfully!");
+					// $('#subGroupMaster')[0].reset();
+					// setTimeout(function () {
+					// 	window.location.href = '/AccountGeneralMasterList/Index';
+					// }, 1000);
+					if (subgroupData.ACTION === "INSERT") {
+						GetdataList();
+						setSubGroupFormReadOnly();
+					}
+				} else {
+					toastr.warning(response.message || "Something went wrong while saving.");
+				}
+			},
+			error: function (xhr) {
+				const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
+				toastr.error("Error: " + errorMsg);
+			}
+		});
+	});
+	function LoadSubGroupById(code) {
+		$.ajax({
+			url: '/AccountGeneralMasterList/GetSubGroupByCode',
+			type: 'GET',
+			data: { code: code },
+			success: function (data) {
+				console.log(data);
+				if (!data.success || !data.data) {
+					toastr.warning("No data found for the given code.");
+					return;
+				}
+				const subgroup = data.data;
+				$('#CODE').val(subgroup.code);
+				$('#AC_CODE').val(subgroup.code);
+				$('#NATURE').val(subgroup.nature);
+				$('#NAME').val(subgroup.name);
+				$('#SHORT_NAME').val(subgroup.shortname);
+				// $('#GROUP_NAME').val(subgroup.grouP_CODE).trigger('change');
+				 loadGroupList(function () {
+					$('#GROUP_NAME').val(subgroup.grouP_CODE);
+					});
+				$('#ALIAS_NAME').val(subgroup.aliasname);
+				$('#ADDRESS1').val(subgroup.adD1);
+				$('#ADDRESS2').val(subgroup.adD2);
+				$('#ADDRESS3').val(subgroup.adD3);
+				$('#PANNO').val(subgroup.pan);
+				$('#BANKNAME').val(subgroup.banK_NAME);
+				$('#BANKBRANCH').val(subgroup.banK_BRANCH);
+				$('#BANKACNO').val(subgroup.aC_NO);
+				$('#IFSCCODE').val(subgroup.ifsC_CODE);
+				$('#REMARKS').val(subgroup.remarks);
+
+				const isActive = subgroup.active === 1 || subgroup.active === true;
+				$('#ACTIVE').prop('checked', isActive);
+				$('#statusText').text(isActive ? 'Active' : 'Inactive');
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading subgroup:", status, error);
+				toastr.error('Error: ' + xhr.responseText);
+			}
+		});
+	}
+	function setSubGroupFormReadOnly() {
+		const form = $('#subGroupMaster');
+		form.find('input, select, textarea, button').prop('disabled', true);
+		form.find('.toggle-switch input').prop('disabled', true); 
+		form.find('#customToggle').addClass('disabled'); 
+	}
+	function GetdataList() {  
+		$.ajax({
+			url: '/AccountGeneralMaster/GetID',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var code = data.nextId;
+				LoadSubGroupById(code)
+			},
+			error: function (xhr, status, error) {
+				console.error("Error loading subgroup:", status, error);
+				toastr.error('Error: ' + xhr.responseText);
+			}
+		});
+	}
+</script>

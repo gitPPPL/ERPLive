@@ -1,0 +1,709 @@
+﻿@{
+	ViewBag.Title = "Import Export Expense Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+	<legend class="legend-field">Import Export Expense Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4 btn-right">
+			<button id="btnSave"
+					onclick="window.location.href='@Url.Action("Index", "ImportExportExpenseMasterList")'" type="button" class="btn btn-primary">
+				<i class="fa fa-list"></i>Back to list
+			</button>
+		</div>
+	</div>
+	<form id="">
+		<input type="hidden" class="form-control" id="CODE" name="CODE">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlACCOUNT_GROUP" class="form-label">Account Group <span class="required">*</span></label>
+					<select class="form-control" id="ddlACCOUNT_GROUP" name="ACCOUNT_GROUP">
+						<option value="">-- Select Account Group --</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label for="ddlACCOUNT_NAME" class="form-label">Account Name<span class="required">*</span></label>
+					<select class="form-control" id="ddlACCOUNT_NAME" name="ACCOUNT_NAME">
+						<option value="">-- Select Account Name --</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3 btn-align">
+				<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
+				<button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+			</div>
+		</div>
+
+	</form>
+
+</fieldset>
+ 
+<script>
+	   document.getElementById("cancelBtn").addEventListener("click", function () {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "Do you want to cancel all the changes?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, cancel it!',
+			cancelButtonText: 'No, keep it',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire(
+					'Cancelled!',
+					'Your action has been cancelled.',
+					'success'
+				).then(() => {
+					// Redirect to home page after confirmation
+					window.location.href = '@Url.Action("Index", "ImportExportExpenseMasterList")';
+				});
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				Swal.fire(
+					'Resumed',
+					'Your action is still in progress.',
+					'info'
+				);
+			}
+		});
+	});
+
+</script>
+
+<script>
+
+		let ImpExpUpdateCd=0;
+		let previousAccCode ;
+		let previousAccGroup ;
+		let allMastData = [];
+		let filteredData = [];
+		let currentPage = 1;
+		const rowsPerPage = 10;
+		let ModeOfControl="";
+		let getImpExpData=[];
+
+
+
+		$(document).ready(function(){
+		 GetAccountGrp();
+		 const storedData = localStorage.getItem('editOutstanding');
+		 ModeOfControl = localStorage.getItem('Mode');
+		 localStorage.removeItem('Mode');
+		 localStorage.removeItem('editOutstanding');
+
+		if (storedData && ModeOfControl === 'Edit') {
+		 getImpExpData = JSON.parse(storedData);
+		 ImpExpUpdateCd=getImpExpData.code;
+		 previousAccCode = getImpExpData.partyCd;
+		 previousAccGroup = getImpExpData.groupCd;
+
+		 fillTextFields();
+		 $('#ddlACCOUNT_GROUP, #ddlACCOUNT_NAME').prop('disabled', false);
+		  $('#btn-save').show();
+		  $('#cancelBtn').show();
+		  localStorage.removeItem('editOutstanding');
+
+		}
+		else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getImpExpData = JSON.parse(storedData);
+		   fillTextFields();
+		  $('#ddlACCOUNT_GROUP, #ddlACCOUNT_NAME').prop('disabled', true);
+		  localStorage.removeItem('editOutstanding');
+		}
+
+
+		$('#ddlACCOUNT_GROUP').on('change', function () {
+		var groupCode = $('#ddlACCOUNT_GROUP').val();
+		GetAccountNme(groupCode);
+		});
+
+		});
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+		  const AccGroupCD = toNullableString($('#ddlACCOUNT_GROUP').val());
+		  const AccountCd = toNullableString($('#ddlACCOUNT_NAME').val());
+		  const AccGroupName = toNullableString($('#ddlACCOUNT_GROUP').find('option:selected').data('name'));
+		  const AccName = toNullableString($('#ddlACCOUNT_NAME').find('option:selected').data('name'));
+
+		  if (!AccName || !AccGroupName ) {
+		   toastr.error('Please fill all required fields.');
+			return;
+		}
+
+
+		 var ImportExportDt = {
+				   Code: toNullableInt(ImpExpUpdateCd),
+				   Accountcode: AccountCd,
+				   group_code:AccGroupCD,
+				   AccountName:AccName,
+				   GroupName:AccGroupName
+		 };
+		console.log(ImportExportDt);
+
+		if(ModeOfControl=='Edit')
+		{
+		EditImportExportMast(ImportExportDt, AccGroupCD, AccountCd)
+		}
+		else
+		{
+		SaveImportExportMast(ImportExportDt, AccGroupCD, AccountCd)
+		}
+
+	});
+
+	 function SaveImportExportMast(ImportExportDt, AccGroupCD, AccountCd)
+	{
+		checkExistOrNot(AccGroupCD, AccountCd)
+			  .done(function (data) {
+			   if (data.status === true && data.exists === true) {
+				toastr.warning("Duplicate Import export expense Name");
+				return;
+			   }
+
+				$.ajax({
+					url:'@Url.Action("saveImportExportMast", "ImportExportExpenseMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(ImportExportDt),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							resetFields();
+							setTimeout(function () {
+								  window.location.href ='/ImportExportExpenseMasterList/Index';
+								}, 1500);
+
+						} else {
+							toastr.info(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						 toastr.error("Error occurred while saving.");
+					}
+				});
+			  })
+			.fail(function (xhr, status, error) {
+			console.error("Check Import export expense failed:", error);
+			toastr.error("Error while checking Import export expense type.");
+			});
+	}
+
+
+	function EditImportExportMast(ImportExportDt, AccGroupCD, AccountCd){
+		if (previousAccCode !== AccountCd && previousAccGroup!==AccGroupCD) {
+				  checkExistOrNot(AccGroupCD, AccountCd)
+					  .done(function (data) {
+					   if (data.status === true && data.exists === true) {
+						toastr.warning("Duplicate Import export expense Name");
+						return;
+					   }
+						updateImportExportMast(ImportExportDt);
+
+					  })
+					.fail(function (xhr, status, error) {
+					console.error("Check Import export expense failed:", error);
+					toastr.error("Error while checking Import export expense type.");
+					});
+				 }
+				 else{
+					 updateImportExportMast(ImportExportDt);
+				 }
+
+	}
+
+		function updateImportExportMast(ImportExportDt) {
+			$.ajax({
+				url: '/ImportExportExpenseMaster/UpdateImportExportMast',
+				type: 'POST',
+				data:JSON.stringify(ImportExportDt),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/ImportExportExpenseMasterList/Index';
+								}, 1500);
+					} else {
+						alert("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					toastr.error("Data not updated: " + error);
+				}
+			});
+		}
+
+
+		 function resetFields() {
+			$('#ddlACCOUNT_GROUP').val($('#ddlACCOUNT_GROUP option:first').val());
+			$('#ddlACCOUNT_NAME').val($('#ddlACCOUNT_NAME option:first').val());
+			$('#searchInput').val();
+
+		}
+
+	  function checkExistOrNot(AccGroupCD, AccountCd)
+	   {
+		   return $.ajax({
+		   url: '/ImportExportExpenseMaster/getExitOrNot',
+		   type: 'GET',
+		   dataType: 'json',
+		   data: { groupCd: AccGroupCD, accountCd:AccountCd }
+	   });
+	   }
+
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		   if(ModeOfControl=='Edit')
+		 {
+		  fillTextFields();
+		 setToggleState(getImpExpData.active);
+
+	}
+	else
+	{
+	resetFields();
+	}
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+
+		function GetAccountGrp(){
+		   $.ajax({
+			   url:'@Url.Action("GetAccGroupList", "ImportExportExpenseMaster")',
+			   type:'Get',
+			   datatype:'json',
+			   success:function(response){
+				   if(response.status==true){
+				   console.log(response.data);
+				   var AccountGrp=$('#ddlACCOUNT_GROUP');
+				   AccountGrp.empty();
+				   AccountGrp.append('<option selected disabled>- Select Account Group -</option>');
+				   $.each(response.data, function(index, item){
+					AccountGrp.append('<option value="' + item.code + '" data-name="' + item.name + '">' + item.name + '</option>');
+				   });
+				   }else{
+					   alert("Account Group Load failed");
+				   }
+			   },
+			   error:function(xhr,status, error){
+			   alert("Account Group Load failed", xhr.error);
+			   }
+
+		   });
+		}
+
+	 function GetAccountNme(groupCode) {
+		$.ajax({
+			url: '@Url.Action("GetAccNameList", "ImportExportExpenseMaster")',
+			type: 'GET',
+			datatype: 'json',
+			data: { code: groupCode },
+			success: function (response) {
+				if (response.status === true) {
+					console.log(response.data);
+					var AccountIdName = $('#ddlACCOUNT_NAME');
+					AccountIdName.empty();
+					AccountIdName.append('<option selected disabled>- Select Account Name -</option>');
+					$.each(response.data, function (index, item) {
+					AccountIdName.append('<option value="' + item.code + '" data-name="' + item.name + '">' + item.name + '</option>');
+					});
+				} else {
+					alert("Account Name Load failed");
+				}
+			},
+			error: function (xhr, status, error) {
+				alert("Account Name Load failed: " + error);
+			}
+		});
+	}
+
+
+	   function fillTextFields()
+	   {
+		  GetAccountNme(getImpExpData.groupCd);
+		setTimeout(function () {
+		$('#ddlACCOUNT_NAME option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getImpExpData.AccountName.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		 GetAccountGrp();
+		 setTimeout(function () {
+		$('#ddlACCOUNT_GROUP option').filter(function () {
+			  return $(this).text().trim().toLowerCase() === getImpExpData.GroupName.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+
+	   }
+
+
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+
+
+</script>
+
+
+
+@* <script>
+
+		let OutstandUpdateCd=0;
+		let PreviousInputDt = "";
+		let allMastData = [];
+		let filteredData = [];
+		let currentPage = 1;
+		const rowsPerPage = 10;
+		let ModeOfControl="";
+		let getOutstandDt=[];
+
+		const storedData = localStorage.getItem('editOutstanding');
+		ModeOfControl = localStorage.getItem('Mode');
+		  localStorage.removeItem('Mode');
+		  console.log(storedData);
+
+		$(document).ready(function(){
+		 GetAccountNme();
+		  GetAccountGrp();		 
+
+		if (storedData && ModeOfControl === 'Edit') {
+		 getOutstandDt = JSON.parse(storedData);
+		 OutstandUpdateCd = getOutstandDt.code;
+		 PreviousInputDt = getOutstandDt.name;
+		 fillTextFields();	
+		 $('#ddlACCOUNT_GROUP, #ddlACCOUNT_NAME').prop('disabled', false);
+		  $('#btn-save').show();
+		  $('#cancelBtn').show();
+		  localStorage.removeItem('editOutstanding');
+
+		}
+		else if (storedData && ModeOfControl === 'View') {
+			$('#btn-save').hide();
+			$('#cancelBtn').hide();
+			getOutstandDt = JSON.parse(storedData);
+		   fillTextFields();		 
+		  $('#ddlACCOUNT_GROUP, #ddlACCOUNT_NAME').prop('disabled', false);
+			disableToggle();
+		  localStorage.removeItem('editOutstanding');
+		}
+			 
+
+		});
+
+	 $('#btn-save').on('click', function (e) {
+		e.preventDefault();
+		const name = toNullableString($('#Txtname').val());
+		const shortname = toNullableString($('#TxtShortNm').val());
+		const agentname = toNullableString($('#Ddagentname').val());
+		const AgentGroup = toNullableString($('#DdAgentGroup').val());
+		const ComsionType= toNullableString($('#DdComsionType').val());
+		const ComRate= toNullableInt($('#TxtComRate').val());
+		var AcpayName = document.getElementById("DdAcpayName").value;
+
+		var active = document.getElementById("DdActive").value;
+		if (!name || !shortname || !agentname || !AcpayName) {
+			alert("Please fill all required fields.");
+			return;
+		}
+		console.log(ModeOfControl);
+		if(ModeOfControl=='Edit')
+		{
+
+			 var AccPutstandingDt = {
+				   Code: toNullableInt(OutstandUpdateCd),
+				   Name: name,
+				   ShortName:shortname,
+				   AgentCode:agentname,
+				   AgentGroup:AgentGroup,
+				   ComType:ComsionType,
+				   ComRate:ComRate,
+				   ActPayable:AcpayName,
+				   Active: active
+			   };
+				console.log(AccPutstandingDt);
+			 Editcitymast(AccPutstandingDt, name)
+		}
+		else
+		{
+
+			var AccPutstandingDt = {
+					Name: name,
+				   ShortName:shortname,
+				   AgentCode:agentname,
+				   AgentGroup:AgentGroup,
+				   ComType:ComsionType,
+				   ComRate:ComRate,
+				   ActPayable:AcpayName,
+				   Active: active
+			   };
+			   console.log(AccPutstandingDt);
+		 saveCityMastDt(AccPutstandingDt, name);
+		}
+	});
+
+	 function saveCityMastDt(AccPutstandingDt, name)
+	{
+		checkExistOrNot(name)
+			  .done(function (data) {
+			   if (data.status === true && data.exists === true) {
+				alert("Duplicate AccOutstanding Name");
+				return;
+			   }
+
+				$.ajax({
+					url:'@Url.Action("SaveAccountOutstandingMaster", "ImportExportExpenseMaster")',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(AccPutstandingDt),
+					success: function (response) {
+						if (response.status === true) {
+							toastr.success('Data Save Successfully.');
+							resetFields();
+							setTimeout(function () {
+								  window.location.href ='/AccountOutstandingMasterList/Index';
+								}, 1500);
+
+						} else {
+							alert(response.message || "Save failed");
+						}
+					},
+					error: function (xhr, error) {
+						console.error(xhr.responseText);
+						alert("Error occurred while saving.");
+					}
+				});
+			  })
+			.fail(function (xhr, status, error) {
+			console.error("Check AccOutstanding failed:", error);
+			alert("Error while checking AccOutstanding type.");
+			});
+	}
+
+
+	function Editcitymast(AccPutstandingDt, name){
+		console.log(AccPutstandingDt, name);
+		if (PreviousInputDt != name) {
+				  checkExistOrNot(name)
+					  .done(function (data) {
+					   if (data.status === true && data.exists === true) {
+						alert("Duplicate AccOutstanding Name");
+						return;
+					   }
+						updateCurrencyData(AccPutstandingDt, name);
+
+					  })
+					.fail(function (xhr, status, error) {
+					console.error("Check AccOutstanding failed:", error);
+					alert("Error while checking AccOutstanding type.");
+					});
+				 }
+				 else{
+					 updateCurrencyData(AccPutstandingDt, name);
+				 }
+
+	}
+
+		function updateCurrencyData(AccPutstandingDt, name) {
+			$.ajax({
+				url: '/ImportExportExpenseMaster/UpdateAccountOutstandingMaster',
+				type: 'POST',
+				data:JSON.stringify(AccPutstandingDt),
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(response) {
+					if (response.status === true) {
+						 toastr.success('Data update Successfully.');
+						 resetFields();
+				   setTimeout(function () {
+								  window.location.href ='/AccountOutstandingMasterList/Index';
+								}, 1500);
+					} else {
+						alert("Update failed: " + response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error("Error occurred:", xhr.responseText);
+					alert("Data not updated: " + error);
+				}
+			});
+		}
+
+
+		 function resetFields() {			 
+			$('#ddlACCOUNT_GROUP').val($('#ddlACCOUNT_GROUP option:first').val());
+			$('#ddlACCOUNT_NAME').val($('#ddlACCOUNT_NAME option:first').val());
+			$('#searchInput').val();
+
+		}
+
+	  function checkExistOrNot(inputData)
+	   {
+		   return $.ajax({
+		   url: '/ImportExportExpenseMaster/getExitOrNot',
+		   type: 'GET',
+		   dataType: 'json',
+		   data: { inputData: inputData }
+	   });
+	   }
+
+
+	  document.getElementById("cancelBtn").addEventListener("click", function () {
+	  Swal.fire({
+		title: 'Are you sure?',
+		text: "Do you want to cancel all the changes?",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, cancel it!',
+		cancelButtonText: 'No, keep it',
+		reverseButtons: true
+	  }).then((result) => {
+		if (result.isConfirmed) {
+		  Swal.fire(
+			'Cancelled!',
+			'Your action has been cancelled.',
+			'success'
+		  )
+		   if(ModeOfControl=='Edit')
+		 {
+		  fillTextFields();
+		 setToggleState(getOutstandDt.active);
+
+	}
+	else
+	{
+	resetFields();
+	}
+
+		} else if (result.dismiss === Swal.DismissReason.cancel) {
+		  Swal.fire(
+			'Resumed',
+			'Your action is still in progress.',
+			'info'
+		  )
+		}
+	  });
+	});
+
+
+		function GetAccountGrp(){
+		   $.ajax({
+			   url:'@Url.Action("GetAccGroupList", "ImportExportExpenseMaster")',
+			   type:'Get',
+			   datatype:'json',
+			   success:function(response){
+				   if(response.status==true){
+				   console.log(response.data);
+				   var countryId=$('#DdAcpayName');
+				   countryId.empty();
+				   countryId.append('<option selected disabled>- Select Account Group -</option>');
+				   $.each(response.data, function(index, item){
+					   countryId.append('<option value="'+ item.code +'">'+ item.name +'</option>');
+				   });
+				   }else{
+					   alert("Account Group Load failed");
+				   }
+			   },
+			   error:function(xhr,status, error){
+			   alert("Account Group Load failed", xhr.error);
+			   }
+
+		   });
+		}
+	   function GetAccountNme(){
+		   $.ajax({
+			   url:'@Url.Action("GetAccNameList", "ImportExportExpenseMaster")',
+			   type:'Get',
+			   datatype:'json',
+			   success:function(response){
+				   if(response.status==true){
+				   console.log(response.data);
+				   var countryId=$('#Ddagentname');
+				   countryId.empty();
+				   countryId.append('<option selected disabled>- Select Account Name-</option>');
+				   $.each(response.data, function(index, item){
+					   countryId.append('<option value="'+ item.code +'">'+ item.name +'</option>');
+				   });
+				   }else{
+					   alert("Account Name Load failed");
+				   }
+			   },
+			   error:function(xhr,status, error){
+			   alert("Account Name Load failed", xhr.error);
+			   }
+
+		   });
+	   }
+
+	   function fillTextFields()
+	   {	
+		GetAccountNme();
+		setTimeout(function () {
+		$('#ddlACCOUNT_NAME option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getOutstandDt.actPayable.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+
+		GetAccountGrp();
+		 setTimeout(function () {
+		$('#ddlACCOUNT_GROUP option').filter(function () {
+			return $(this).text().trim().toLowerCase() === getOutstandDt.agent_code.trim().toLowerCase();
+		}).prop('selected', true);
+		}, 300);
+ 
+
+	   }
+
+	  
+	const toNullableInt = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : parseInt(t, 10);
+	};
+
+	const toNullableString = (v) => {
+		const t = String(v ?? '').trim();
+		return t === '' ? null : t;
+	};
+  
+
+</script> *@
