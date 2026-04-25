@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.Json;
 using travelexpensemanagement.Controllers.DropdownService;
 using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -12,19 +13,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
+        private readonly GlobalValidationdate _globalValidationdate;
         private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
         private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         public TruckOutTimeUpdationController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
     travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+    ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
@@ -37,120 +40,90 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(moduelList);
         }
 
+        public JsonResult ddlVehicleNo()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string ddlQuery = @"SELECT DISTINCT TRUCK_NO AS value, TRUCK_NO AS text 
+                            FROM gate1 WHERE COMP_CODE = " + getdata.PubCompCode +
+                            " AND YEAR_CODE = " + getdata.PubFYearCode + "";
+
+                var data = _dropdownService.GetDropdownList(ddlQuery);
+
+                return Json(data);
+            }
+        }
+
         [HttpGet]
-        public IActionResult GetTruckOutRecords(DateTime FromDate, DateTime ToDate, string OutType, string DocType, string VehicleNo, string QrCode, int pageNumber = 1, int pageSize = 10)
+        public JsonResult GetTruckOutRecords(
+      DateTime FromDate, DateTime ToDate,
+      string OutType, string DocType,
+      string VehicleNo, string QrCode,
+      int pageNumber = 1, int pageSize = 10)
         {
             var globelVar = _globalVariableService.GetGlobalVariables();
-            var gate1List = new List<dynamic>();
+            var list = new List<dynamic>();
             int totalCount = 0;
 
-            try
+            using (SqlConnection conn = _dbConnection.GetErpConnection())
             {
-                if (FromDate < new DateTime(1753, 1, 1)) FromDate = new DateTime(1753, 1, 1);
-                if (ToDate < new DateTime(1753, 1, 1)) ToDate = new DateTime(1753, 1, 1);
+                conn.Open();
 
-                int offset = (pageNumber - 1) * pageSize;
-
-                using (SqlConnection conn = _dbConnection.GetErpConnection())
+                using (SqlCommand cmd = new SqlCommand("sp_GetTruckOutRecords", conn))
                 {
-                    conn.Open();
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                    string query = @"SELECT 
-                            a.V_TYPE,a.DOC_ID,
-                            d.Name AS In_Type,
-                            a.V_NO,
-                            FORMAT(a.V_date, 'dd/MM/yyyy') AS V_Date,
-                            a.PARTY_CODE,
-                            b.Name AS PartyName,
-                            c.Name AS Transport,
-                            a.TRUCK_NO,
-                            a.DRIVER_NAME,
-                            a.V_TIME,
-                            a.R_TIME,
-                            FORMAT(a.OUT_DATE, 'dd/MM/yyyy') AS OUT_DATE,
-                            a.OUT_TIME,
-                            a.Remarks
-                        FROM gate1 a
-                        LEFT JOIN SUBGROUP_MAST b ON a.PARTY_CODE = b.code AND a.COMP_CODE = b.COMP_CODE
-                        LEFT JOIN TRANSPORT_MAST c ON a.TRANSPORT_CODE = c.code AND a.COMP_CODE = c.COMP_CODE
-                        LEFT JOIN Doctype_Mast d ON a.V_type = d.code
-                        WHERE 
-                            a.V_DATE BETWEEN @FromDate AND @ToDate
-                            AND (@OutType IS NULL OR a.OUT_ALLOWED = @OutType)
-                            AND (@DocType IS NULL OR a.V_TYPE = @DocType)
-                            AND (@VehicleNo IS NULL OR @VehicleNo = '' OR a.TRUCK_NO LIKE '%' + @VehicleNo + '%')
-                            AND (@QrCode IS NULL OR @QrCode = '' OR a.QRCODE_NO LIKE '%' + @QrCode + '%')
-                        ORDER BY a.V_NO DESC
-                        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
-                        
-                        -- 2. Query to get total count
-                        SELECT COUNT(*) 
-                        FROM gate1 a
-                        LEFT JOIN SUBGROUP_MAST b ON a.PARTY_CODE = b.code AND a.COMP_CODE = b.COMP_CODE
-                        LEFT JOIN TRANSPORT_MAST c ON a.TRANSPORT_CODE = c.code AND a.COMP_CODE = c.COMP_CODE
-                        LEFT JOIN Doctype_Mast d ON a.V_type = d.code
-                        WHERE 
-                            a.V_DATE BETWEEN @FromDate AND @ToDate
-                            AND (@OutType IS NULL OR a.OUT_ALLOWED = @OutType)
-                            AND (@DocType IS NULL OR a.V_TYPE = @DocType)
-                            AND (@VehicleNo IS NULL OR @VehicleNo = '' OR a.TRUCK_NO LIKE '%' + @VehicleNo + '%')
-                            AND (@QrCode IS NULL OR @QrCode = '' OR a.QRCODE_NO LIKE '%' + @QrCode + '%');
-                        ";
+                    // ✅ Required params
+                    cmd.Parameters.AddWithValue("@CompCode", globelVar.PubCompCode);
+                    cmd.Parameters.AddWithValue("@FromDate", FromDate);
+                    cmd.Parameters.AddWithValue("@ToDate", ToDate);
 
+                    // ✅ FIX: Send filters properly
+                    cmd.Parameters.AddWithValue("@OutType", string.IsNullOrEmpty(OutType) ? DBNull.Value : (object)OutType);
+                    cmd.Parameters.AddWithValue("@DocType", string.IsNullOrEmpty(DocType) ? DBNull.Value : (object)DocType);
+                    cmd.Parameters.AddWithValue("@VehicleNo", string.IsNullOrEmpty(VehicleNo) ? DBNull.Value : (object)VehicleNo);
+                    cmd.Parameters.AddWithValue("@QrCode", string.IsNullOrEmpty(QrCode) ? DBNull.Value : (object)QrCode);
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    // ✅ FIX: Use PageNumber instead of Offset
+                    cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+                    cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        cmd.Parameters.AddWithValue("@FromDate", FromDate);
-                        cmd.Parameters.AddWithValue("@ToDate", ToDate);
-                        cmd.Parameters.AddWithValue("@OutType", string.IsNullOrEmpty(OutType) ? DBNull.Value : (object)OutType);
-                        cmd.Parameters.AddWithValue("@DocType", string.IsNullOrEmpty(DocType) ? DBNull.Value : (object)DocType);
-                        cmd.Parameters.AddWithValue("@VehicleNo", string.IsNullOrEmpty(VehicleNo) ? DBNull.Value : (object)VehicleNo);
-                        cmd.Parameters.AddWithValue("@QrCode", string.IsNullOrEmpty(QrCode) ? DBNull.Value : (object)QrCode);
-                        cmd.Parameters.AddWithValue("@Offset", offset);
-                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        while (reader.Read())
                         {
-                            // First result: paged data
-                            while (reader.Read())
+                            list.Add(new
                             {
-                                gate1List.Add(new
-                                {
-                                    V_TYPE = reader["V_TYPE"]?.ToString(),
-                                    DOC_ID = reader["DOC_ID"]?.ToString(),
-                                    In_Type = reader["In_Type"]?.ToString(),
-                                    V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
-                                    V_Date = reader["V_Date"]?.ToString(),
-                                    PARTY_CODE = reader["PARTY_CODE"]?.ToString(),
-                                    PartyName = reader["PartyName"]?.ToString(),
-                                    Transport = reader["Transport"]?.ToString(),
-                                    TRUCK_NO = reader["TRUCK_NO"]?.ToString(),
-                                    DRIVER_NAME = reader["DRIVER_NAME"]?.ToString(),
-                                    V_TIME = reader["V_TIME"]?.ToString(),
-                                    R_TIME = reader["R_TIME"]?.ToString(),
-                                    OUT_DATE = reader["OUT_DATE"]?.ToString(),
-                                    OUT_TIME = reader["OUT_TIME"]?.ToString(),
-                                    REMARKS = reader["REMARKS"]?.ToString()
-                                });
-                            }
+                                doc_id = reader["DOC_ID"]?.ToString(),
+                                v_NO = Convert.ToInt32(reader["V_NO"]),
+                                in_Type = reader["In_Type"]?.ToString(),
+                                v_Date = reader["V_Date"]?.ToString(),
+                                partyName = reader["PartyName"]?.ToString(),
+                                transport = reader["Transport"]?.ToString(),
+                                trucK_NO = reader["TRUCK_NO"]?.ToString(),
+                                v_TIME = reader["V_TIME"]?.ToString(),
+                                r_TIME = reader["R_TIME"]?.ToString(),
+                                ouT_DATE = reader["OUT_DATE"]?.ToString(),
+                                ouT_TIME = reader["OUT_TIME"]?.ToString(),
+                                remarks = reader["Remarks"]?.ToString(),
+                                qrcodE_NO = reader["QRCode_No"]?.ToString(),
+                                ouT_ALLOWED = reader["Out_Allowed"]?.ToString()
+                            });
+                        }
 
-                            // Move to next result: total count
-                            if (reader.NextResult() && reader.Read())
-                            {
-                                totalCount = Convert.ToInt32(reader[0]);
-                            }
+                        // ✅ Read total count (second result set)
+                        if (reader.NextResult() && reader.Read())
+                        {
+                            totalCount = Convert.ToInt32(reader[0]);
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error fetching truck out records", error = ex.Message });
-            }
+            return Json(new { success = true, data = list, totalCount });
 
-            return Json(new { success = true, gate1List, totalCount });
         }
-
 
         [HttpPost]
         public IActionResult SaveOutTimes([FromBody] List<TruckOutRecord> records)
@@ -159,6 +132,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return BadRequest("No records received.");
 
             var globalVar = _globalVariableService.GetGlobalVariables();
+
+            int totalUpdated = 0; //  counter
 
             try
             {
@@ -169,15 +144,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     foreach (var record in records)
                     {
                         string query = @"
-                    UPDATE GATE1
-                    SET OUT_DATE = @OUT_DATE,
-                        OUT_TIME = @OUT_TIME,
-                        EDATE = GETDATE()
-                    WHERE V_NO = @V_NO
-                        AND YEAR_CODE = @YEAR_CODE
-                        AND COMP_CODE = @COMP_CODE
-                        AND BRANCH_CODE = @BRANCH_CODE
-                        AND DOC_ID = @DOC_ID";
+                UPDATE GATE1
+                SET OUT_DATE = @OUT_DATE,
+                    OUT_TIME = @OUT_TIME,
+                    EDATE = GETDATE(),
+                    REMARKS = @REMARKS
+                WHERE V_NO = @V_NO
+                    AND YEAR_CODE = @YEAR_CODE
+                    AND COMP_CODE = @COMP_CODE
+                    AND BRANCH_CODE = @BRANCH_CODE
+                    AND DOC_ID = @DOC_ID";
 
                         using (SqlCommand cmd = new SqlCommand(query, conn))
                         {
@@ -185,17 +161,32 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             cmd.Parameters.AddWithValue("@OUT_DATE", DateTime.Parse(record.OUT_DATE));
                             cmd.Parameters.AddWithValue("@OUT_TIME", record.OUT_TIME);
                             cmd.Parameters.AddWithValue("@DOC_ID", record.DOC_ID);
+                            cmd.Parameters.AddWithValue("@REMARKS", record.remarks); 
 
                             cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
                             cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BRANCH_CODE", 1); // Update if dynamic
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
 
-                            cmd.ExecuteNonQuery();
+                            int rows = cmd.ExecuteNonQuery(); //get affected rows
+                            totalUpdated += rows;
                         }
                     }
                 }
+                //  CHECK HERE
+                if (totalUpdated == 0)
+                {
+                    return Ok(new
+                    {
+                        success = false,
+                        message = "No data saved (No matching records found)."
+                    });
+                }
 
-                return Ok(new { success = true, message = "Records updated successfully." });
+                return Ok(new
+                {
+                    success = true,
+                    message = $"{totalUpdated} record(s) updated successfully."
+                });
             }
             catch (Exception ex)
             {
@@ -207,5 +198,63 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 });
             }
         }
+
+        //[HttpPost]
+        //public IActionResult SaveOutTimes([FromBody] List<TruckOutRecord> records)
+        //{
+        //    if (records == null || !records.Any())
+        //        return BadRequest("No records received.");
+
+        //    var globalVar = _globalVariableService.GetGlobalVariables();
+
+        //    try
+        //    {
+        //        using (SqlConnection conn = _dbConnection.GetErpConnection())
+        //        {
+        //            conn.Open();
+
+        //            foreach (var record in records)
+        //            {
+        //                string query = @"
+        //            UPDATE GATE1
+        //            SET OUT_DATE = @OUT_DATE,
+        //                OUT_TIME = @OUT_TIME,
+        //                EDATE = GETDATE(),
+        //                REMARKS = @REMARKS
+        //            WHERE V_NO = @V_NO
+        //                AND YEAR_CODE = @YEAR_CODE
+        //                AND COMP_CODE = @COMP_CODE
+        //                AND BRANCH_CODE = @BRANCH_CODE
+        //                AND DOC_ID = @DOC_ID";
+
+        //                using (SqlCommand cmd = new SqlCommand(query, conn))
+        //                {
+        //                    cmd.Parameters.AddWithValue("@V_NO", record.V_NO);
+        //                    cmd.Parameters.AddWithValue("@OUT_DATE", DateTime.Parse(record.OUT_DATE));
+        //                    cmd.Parameters.AddWithValue("@OUT_TIME", record.OUT_TIME);
+        //                    cmd.Parameters.AddWithValue("@DOC_ID", record.DOC_ID);
+        //                    cmd.Parameters.AddWithValue("@REMARKS", record.remarks);
+
+        //                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
+        //                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
+        //                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1); // Update if dynamic
+
+        //                    cmd.ExecuteNonQuery();
+        //                }
+        //            }
+        //        }
+
+        //        return Ok(new { success = true, message = "Records updated successfully." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new
+        //        {
+        //            success = false,
+        //            message = "Error updating records.",
+        //            details = ex.Message
+        //        });
+        //    }
+        //}
     }
 }

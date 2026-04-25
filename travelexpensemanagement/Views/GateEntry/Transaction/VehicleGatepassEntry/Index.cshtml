@@ -5,7 +5,7 @@
 <fieldset>
     <legend class="legend-field">Vehicle Gatepass Entry</legend>
    
-    <form id="VehicleGatepassEntryForm">
+    <div id="VehicleGatepassEntryForm">
         <input type="hidden" class="form-control" id="TxtCode" name="CODE">
         <div class="row">
             <div class="col-md-3">
@@ -39,7 +39,9 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="TxtVehicleNo">Vehicle No.</label>
-                    <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No.">
+                    <select class="form-control" id="ddlTxtVehicleNo">
+                        <option value="">Select Vehicle No</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-3">
@@ -60,6 +62,9 @@
                     <thead class="table-head">
                         <tr>
                             <th style="display:none;">Code</th>
+                            <th>
+                                <input type="checkbox" id="chkAll" />
+                            </th>
                             <th>Gate No</th>
                             <th>Gate Date</th>
                             <th>Wb No</th>
@@ -73,183 +78,191 @@
                             <th>Out Allowed</th>
                             <th>Wb Slip</th>
                             <th>Gate Out</th>
-                   
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
-
-
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-
-                <div class="btn-last">
-                    <button id="btn-saves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Saves</button>
-                </div>
-
-            </div>
-        </div>
-
-    </form>
+    </div>
 </fieldset>
 
 <script>
     $(document).ready(function () {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-    $("#LoadData").on("click", async function () {
-        const FromDate = $("#DtFrom").val();
-        const ToDate = $("#DtTo").val(); // <-- Fixed: ToDate should come from #DtTo
-        const WbType = $("#ddlWBType").val();
-        const VehicleNo = $("#TxtVehicleNo").val();
-    
-        if (!FromDate) {
-            toastr.warning("Please select a From Date.");
-            return;
-        }
+        $('#DtFrom').val(formattedDate);
+        $('#DtTo').val(formattedDate);
+        ddlVehicleNo();
 
-        if (!ToDate) {
-            toastr.warning("Please select a To Date.");
-            return;
-        }
-
-        await loadPendingDocuments(FromDate, ToDate, WbType, VehicleNo);
-    });
-
-    $("#btn-save").click(function (e) {
-      e.preventDefault();
-                const fromDate = formatDate($("#DtFrom").val());
-                const todate = formatDate($("#DtTo").val());
-                const wbType = $.trim($('#ddlWBType').val());
-
-
-            if (!fromDate) {
-                toastr.warning("Please select a From Date.");
-                $("#DtFrom").focus();
-                return;
-            }
-
-
-               if (!todate) {
-                    toastr.warning("Please select a To Date.");
-                    $("#DtTo").focus();
-                    return;
-            }
-
-
-                if (!wbType) {
-                    toastr.warning("Please select a WB TYPE.");
-                    $("#ddlWBType").focus();
-                    return;
-                }
-      const payload = collectTableRowData(); 
-      const dataToSend = {
-        ModelListJson: JSON.stringify(payload)
-      };
-
-
-      $.ajax({
-        url: '/VehicleGatepassEntry/SavedData',
-        type: 'POST',
-        data: dataToSend,
-        success: function (response) {
-          if (response.success) toastr.success("Saved successfully!");
-          else toastr.error(response.message || "Save failed.");
-        },
-        error: function (xhr) {
-          const err = xhr.status === 400
-            ? "Bad Request: " + xhr.responseText
-            : xhr.status === 500
-              ? "Server error: " + xhr.responseText
-              : "Unexpected error: " + xhr.statusText;
-          toastr.error(err);
-        },
-        complete: function () {
-          $("#btn-save").prop("disabled", false);
-        }
-      });
-    });
-       
+        $("#LoadData").on("click", async function () {
+            const FromDate = $("#DtFrom").val();
+            const ToDate = $("#DtTo").val();
+            const WbType = $("#ddlWBType").val();
+            const VehicleNo = $("#ddlTxtVehicleNo").val();
+            await loadPendingDocuments(FromDate, ToDate, WbType, VehicleNo);
+        });
 
     });
 
+    // Load Vehicle Dropdown
+    async function ddlVehicleNo() {
+        try {
+            const response = await fetch('/VehicleGatepassEntry/ddlVehicleNo');
+            const data = await response.json();
 
-      function loadPendingDocuments(FromDate,ToDate,WbType,VehicleNo) {
+            const ddl = $('#ddlTxtVehicleNo');
+            ddl.empty();
+            ddl.append('<option value="">Select Vehicle</option>');
+
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+
+            ddl.select2({
+                placeholder: 'Select Vehicle',
+                allowClear: true,
+                width: '100%'
+            });
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Load Table Data
+    function loadPendingDocuments(FromDate, ToDate, WbType, VehicleNo) {
+
         $.ajax({
             url: '/VehicleGatepassEntry/Getdata',
             type: 'GET',
-            data: { FromDate: FromDate,
-                    ToDate : ToDate , WbType : WbType , VehicleNo : VehicleNo  },
+            data: { FromDate, ToDate, WbType, VehicleNo },
             success: function (data) {
+                console.log('page load', data)
+
                 let tbody = $('#tblVehicleGatepassEntry tbody');
                 tbody.empty();
-                console.log('Data', data);
 
-                         if (data.length === 0) {
-                    tbody.append('<tr><td colspan="8" class="text-center">No pending documents found.</td></tr>');
-                } else {
-                    $.each(data, function (i, item) {
-                        let row = `<tr>
-                            <td>${item.gateNo}</td>
-                            <td>${formatDate(item.gateDate)}</td>
-                            <td>${item.wbNo}</td>
-                            <td>${formatDate(item.wbDate)}</td>
-                            <td>${item.wbType}</td>
-                            <td>${item.partyName}</td>
-                            <td>${item.vehicleNo}</td>
-                            <td>${item.billNo}</td>
-                            <td>${item.wbQty}</td>
-                            <td>${item.finalRemarks}</td>
-                            <td>${item.outAllowed}</td>
-                            <td>${item.partY_WBSLIPNO}</td>
-                            <td>${item.gateOut}</td>
-                        </tr>`;
-
-                        tbody.append(row);
-                    });
+                if (data.length === 0) {
+                    tbody.append('<tr><td colspan="14">No Data Found</td></tr>');
+                    return;
                 }
+                $.each(data, function (i, item) {
 
-                 
+                    let row = `<tr>
+                        <td><input type="checkbox" class="row-check" /></td>
+                        <td>${item.gateNo}</td>
+                        <td>${formatDate(item.gateDate)}</td>
+                        <td>${item.wbNo}</td>
+                        <td>${formatDate(item.wbDate)}</td>
+                        <td>${item.wbType}</td>
+                        <td>${item.partyName}</td>
+                        <td>${item.vehicleNo}</td>
+                        <td>${item.billNo}</td>
+                        <td>${item.wbQty}</td>
+                        <td>${item.finalRemarks}</td>
+                        <td>${item.outAllowed}</td>
+                        <td>${item.partY_WBSLIPNO}</td>
+                        <td>${item.gateOut}</td>
+                    </tr>`;
+
+                    tbody.append(row);
+                });
+            }
+        });
+    }
+    // Checkbox change event (MAIN LOGIC)
+    $(document).on('change', '.row-check', function () {
+
+        const checkbox = $(this);
+        const row = checkbox.closest('tr');
+        const cells = row.find('td');
+
+        const rowData = {
+            GateNo: cells.eq(1).text().trim(),
+            WbNo: cells.eq(3).text().trim(),
+            WbType: cells.eq(5).text().trim(),
+            GateOut: cells.eq(13).text().trim() // IMPORTANT COLUMN
+        };
+
+        // ✅ Check if already OUT
+        if (rowData.GateOut && rowData.GateOut.toLowerCase() === 'yes') {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Vehicle already out',
+                text: 'This vehicle is already marked as OUT.'
+            });
+
+            checkbox.prop('checked', false); // uncheck again
+            return;
+        }
+
+        //  Ask confirmation
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to mark this vehicle as OUT?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                //  Send to server
+                sendRowToServer(rowData);
+
+            } else {
+                // ❌ If NO → uncheck again
+                checkbox.prop('checked', false);
+            }
+        });
+
+    });
+
+    function sendRowToServer(rowData) {
+        $.ajax({
+            url: '/VehicleGatepassEntry/SaveSingleRow',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(rowData),
+
+            success: async function (res) {
+                console.log("Saved:", res);
+
+                // Show Toastr message
+                if (res.success) {
+                    toastr.success(res.message || "Saved successfully");
+                } else {
+                    toastr.error(res.message || "Something went wrong");
+                }
+                // Reload data
+                const FromDate = $("#DtFrom").val();
+                const ToDate = $("#DtTo").val();
+                const WbType = $("#ddlWBType").val();
+                const VehicleNo = $("#ddlTxtVehicleNo").val();
+
+                await loadPendingDocuments(FromDate, ToDate, WbType, VehicleNo);
             },
-            error: function (xhr) {
-                alert("Error loading pending documents.");
-                console.log(xhr.responseText);
+
+            error: function (err) {
+                console.log(err);
+                toastr.error("Server error occurred");
             }
         });
     }
 
-      function formatDate(dateStr) {
-      if (!dateStr) return null;
-      const date = new Date(dateStr);
-      return isNaN(date) ? null : date.toISOString().split('T')[0];
+    // Date Format
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return isNaN(d) ? '' : d.toISOString().split('T')[0];
     }
-
-      function collectTableRowData() {
-        const rows = document.querySelectorAll('#tblVehicleGatepassEntry tbody tr');
-        return Array.from(rows).map(row => {
-            const cells = row.querySelectorAll('td');
-            return {
-                GateNo: cells[0]?.textContent.trim() || '',
-                GateDate: cells[1]?.textContent.trim() || '',
-                WbNo: cells[2]?.textContent.trim() || '',
-                WbDate: cells[3]?.textContent.trim() || '',
-                WbType: cells[4]?.textContent.trim() || '',
-                PartyName: cells[5]?.textContent.trim() || '',
-                VehicleNo: cells[6]?.textContent.trim() || '',
-                BillNo: cells[7]?.textContent.trim() || '',
-                WbQty: parseFloat(cells[8]?.textContent.trim()) || 0,
-                FinalRemarks: cells[9]?.textContent.trim() || '',
-                OutAllowed: cells[10]?.textContent.trim() || '',
-                Wbslip: cells[11]?.textContent.trim() || ''
-          
-
-
-            };
-        });
-    }
-
 </script>

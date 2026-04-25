@@ -101,6 +101,7 @@ namespace travelexpensemanagement.Models.GateEntry.Transaction
         public string OUT_DATE { get; set; }  
         public string OUT_TIME { get; set; }  
         public string DOC_ID { get; set; }
+        public string remarks { get; set; }
     }
 
     public class TruckOutSaveRequest

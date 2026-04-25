@@ -132,6 +132,48 @@ namespace travelexpensemanagement.Controllers.DropdownService
             return dropdownItems;
 
         }
+
+        public List<DropdownModel> GetMultipleDropdownList(string commandText, CommandType commandType, Dictionary<string, object> parameters = null)
+        {
+            List<DropdownModel> dropdownItems = new List<DropdownModel>();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand(commandText, con))
+                {
+                    cmd.CommandType = commandType;
+
+                    //  Add parameters
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                        }
+                    }
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            dropdownItems.Add(new DropdownModel
+                            {
+                                Value = reader[0].ToString(),
+                                Text = reader[1].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return dropdownItems;
+        }
+
+        public class DropdownModel
+        {
+            public string Value { get; set; }
+            public string Text { get; set; }
+        }
+
     }
 }
 
