@@ -35,6 +35,7 @@
         public string? WSID { get; set; }
         public string? LIP { get; set; }
         public string? LID { get; set; }
+        
     }
     public class VisitorWrapper
     {
@@ -46,5 +47,7 @@
     {
         public string FileName { get; set; }
         public string Base64Content { get; set; }
+        public bool IsRemoved { get; set; }
+
     }
 }

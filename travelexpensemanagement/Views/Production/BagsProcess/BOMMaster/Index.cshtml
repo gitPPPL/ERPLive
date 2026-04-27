@@ -1,0 +1,313 @@
+﻿@{
+    ViewBag.Title = "BOM Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-box"></i>
+        </div>
+        <div class="erppage-header-title">BOM Master</div>
+    </div>
+    <div class="erppage-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "BOMList")'">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to List</span>
+        </button>
+    </div>
+</div>
+
+
+<div class="erppage-container">
+    <!-- TABS -->
+    <div class="erppage-tabs">
+        <button class="erppage-tab active" data-tab="basic">Basic Info</button>
+        <button class="erppage-tab" data-tab="bagdimension">Bag Dimension</button>
+        <button class="erppage-tab" data-tab="printingdetails">Printing Details</button>
+        <button class="erppage-tab" data-tab="additionalspecification">Additional Specification</button>
+    </div>
+    <!-- BASIC -->
+    <div class="erppage-tab-content active" id="basic">
+        <div class="erppage-accordion-header">Basic Info</div>
+        <div class="erppage-accordion-body">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-section-header">Basic Item Info</div>
+                <div class="erppage-body">
+                    <div class="erppage-grid">
+                        <div class="erppage-field">
+                            <label class="erppage-label">Item Name</label>
+                            <select id="ddlItemName" class="erppage-input">
+                                <option value="">Select Item</option>
+                            </select>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Customer Name</label>
+                            <select id="ddlCustomerName" class="erppage-input">
+                                <option value="">Select Customer Name</option>
+                            </select>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Type of Bag</label>
+                            <select id="ddlTypeBag" class="erppage-input">
+                                <option value="">Select Type of Bag</option>
+                            </select>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Fabric Color</label>
+                            <select id="ddlFabricColor" class="erppage-input">
+                                <option value="">Select Fabric Color</option>
+                            </select>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Quantity</label>
+                            <input type="number" id="NumQuantity" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Enquiry No</label>
+                            <input type="text" id="TxtEnquiryNo" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Order No</label>
+                            <input type="text" id="TxtOrderNo" class="erppage-input">
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <!-- Bag Dimension -->
+    <div class="erppage-tab-content" id="bagdimension">
+        <div class="erppage-accordion-header">Bag Dimension</div>
+        <div class="erppage-accordion-body">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-section-header">Bag Dimension</div>
+                <div class="erppage-body">
+                    <div class="erppage-grid">
+                        <div class="erppage-field">
+                            <label class="erppage-label">Length (cm)</label>
+                            <input type="number" id="txtLength" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Width (cm)</label>
+                            <input type="number" id="txtWidth" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Height (cm)</label>
+                            <input type="number" id="txtHeight" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Type</label>
+                            <select id="ddlBagType" class="erppage-input">
+                                <option value="">Select Type</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <!-- PRINTING Details -->
+    <div class="erppage-tab-content" id="printingdetails">
+        <div class="erppage-accordion-header">Printing Details</div>
+        <div class="erppage-accordion-body">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-section-header">Printing Details</div>
+                <div class="erppage-body">
+                    <div class="erppage-grid">
+                        <div class="erppage-field">
+                            <label class="erppage-label">Print Type</label>
+                            <div class="erppage-radio-group">
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdoPrintTypePrinted" name="PrintType" value="Printed">
+                                    <span>Printed</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdoPrintTypeUnPrinted" name="PrintType" value="UnPrinted">
+                                    <span>UnPrinted</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Printing Direction</label>
+                            <select id="ddlPrintDirection" class="erppage-input">
+                                <option value="">Select Direction</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="erppage-grid mt-3">
+                        <div class="erppage-field">
+                            <label class="erppage-label">Logo Size (Front)</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumLogoFrontH" class="erppage-input small-input" placeholder="H">
+                                <span class="inline-text">X</span>
+                                <input type="number" id="NumLogoFrontW" class="erppage-input small-input" placeholder="W">
+                                <span class="inline-text">cm</span>
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Logo Size (Back)</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumLogoBackH" class="erppage-input small-input" placeholder="H">
+                                <span class="inline-text">X</span>
+                                <input type="number" id="NumLogoBackW" class="erppage-input small-input" placeholder="W">
+                                <span class="inline-text">cm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="erppage-grid mt-3">
+                        <div class="erppage-field full-width">
+                            <label class="erppage-label">Front Side Colour</label>
+                            <div class="erppage-multi-select">
+                                <select id="ddlFrontColor1" class="erppage-input"></select>
+                                <select id="ddlFrontColor2" class="erppage-input"></select>
+                                <select id="ddlFrontColor3" class="erppage-input"></select>
+                                <select id="ddlFrontColor4" class="erppage-input"></select>
+                            </div>
+                        </div>
+                        <div class="erppage-field full-width">
+                            <label class="erppage-label">Back Side Colour</label>
+                            <div class="erppage-multi-select">
+                                <select id="ddlBackColor1" class="erppage-input"></select>
+                                <select id="ddlBackColor2" class="erppage-input"></select>
+                                <select id="ddlBackColor3" class="erppage-input"></select>
+                                <select id="ddlBackColor4" class="erppage-input"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <!-- Additional Specification -->
+    <div class="erppage-tab-content" id="additionalspecification">
+        <div class="erppage-accordion-header">Additional Specification</div>
+        <div class="erppage-accordion-body">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-section-header">Additional Specifications</div>
+                <div class="erppage-body">
+                    <div class="erppage-grid">
+                        <div class="erppage-field">
+                            <label class="erppage-label">Loop</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumLoop" class="erppage-input small-input">
+                                <span class="inline-text">cm</span>
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Liner (code)</label>
+                            <select id="ddlLinerCode" class="erppage-input">
+                                <option value="">Select Liner (code)</option>
+                            </select>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Liner Micron</label>
+                            <input type="number" id="NumLinerMicron" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Liner Size (L × W)</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumLinerSizeL" class="erppage-input small-input">
+                                <span class="inline-text">X</span>
+                                <input type="number" id="NumLinerSizeW" class="erppage-input small-input">
+                                <span class="inline-text">cm</span>
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">F/Spout Height</label>
+                            <input type="number" id="NumFSpoutHeight" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">F/S Normal</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumFSNormalD" class="erppage-input small-input" placeholder="D">
+                                <input type="number" id="NumFSNormalH" class="erppage-input small-input" placeholder="H">
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">D/S IRIS</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumDSIrisD" class="erppage-input small-input" placeholder="D">
+                                <input type="number" id="NumDSIrisH" class="erppage-input small-input" placeholder="H">
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">S W L</label>
+                            <div class="erppage-inline-group">
+                                <input type="number" id="NumSWLLbs" class="erppage-input small-input">
+                                <span class="inline-text">lbs</span>
+                                <input type="number" id="NumSWLKg" class="erppage-input small-input">
+                                <span class="inline-text">Kg</span>
+                            </div>
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">S F (e.g. 3:1)</label>
+                            <input type="text" id="TxtSF" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">First Skirt height</label>
+                            <input type="number" id="NumFirstSkirtHeight" class="erppage-input">
+                        </div>
+                        <div class="erppage-field">
+                            <label class="erppage-label">Fill Spots DS Type</label>
+                            <input type="text" id="TxtFillSpotsDSType" class="erppage-input">
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+   
+    
+    <div class="erppage-actions">
+        <button id="btnSave" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+
+        <button id="btnCancel" class="erppage-btn erppage-btn-cancel">
+            <i class="fa-solid fa-xmark"></i>
+            <span>Cancel</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        //====Tabs======
+        $(".erppage-tab").click(function () {
+            var tab = $(this).data("tab");
+
+            $(".erppage-tab").removeClass("active");
+            $(this).addClass("active");
+
+            $(".erppage-tab-content").removeClass("active");
+            $("#" + tab).addClass("active");
+        });
+        //====Accordion (mobile)====
+        $(".erppage-accordion-header").click(function () {
+            var parent = $(this).parent();
+
+            parent.toggleClass("active");
+            parent.find(".erppage-accordion-body").slideToggle(200);
+            });
+        });
+
+        $("#btnSave").on("click", function () {
+        var btn = $(this);
+
+        //===start loading===
+        btn.addClass("loading");
+
+        //===simulate API call (replace with real save)====
+        setTimeout(function () {
+            btn.removeClass("loading");
+        }, 2000);
+    });
+</script>
+
+<script>
+
+</script>

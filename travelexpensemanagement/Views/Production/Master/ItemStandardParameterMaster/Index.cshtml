@@ -1,0 +1,677 @@
+﻿@{
+	ViewBag.Title = "Item Standard Parameter Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+  @* Loader *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">Item Standard Parameter Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "ItemStandardParameterMasterList")'" type="button" class="btn btn-draft">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="ItemStandardParameterMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Item Name</label>
+					<select class="form-control" id="ddlitemName">
+						<option value=""> Select Item Name</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Type of Bag</label>
+					<select class="form-control" id="ddlTypeBag">
+						<option value=""> Select Type of Bag</option>
+						<option value="Normal Bag">Normal Bag</option>
+						<option value="Box Type Bag">Box Type Bag</option>
+						<option value="L Shape Bag">L Shape Bag</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Cutting Standard Weight</label>
+					<input type="number" class="form-control" id="NumCuttingStandard">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Top</label>
+					<select class="form-control" id="ddlTop">
+						<option value=""> Select Top</option>
+						<option value="HeatCut">Heat Cut</option>
+						<option value="ColdCut">Cold Cut</option>
+						<option value="ZigZag">ZigZag</option>
+						<option value="Hemming">Hemming</option>
+						<option value="Handle">Handle</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Bottom</label>
+					<select class="form-control" id="ddlBottom">
+						<option value=""> Select Bottom</option>
+						<option value="Double Fold Double Stiching">Double Fold Double Stiching</option>
+						<option value="Single Fold Single Stiching">Single Fold Single Stiching</option>
+						<option value="SIngle Fold Double Stiching">Single Fold Double Stiching</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Printing Standard Weight</label>
+					<input type="number" class="form-control" id="NumPrintingStandard">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Thread Standard Weight</label>
+					<input type="number" class="form-control" id="NumThreadStandard">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Min Standard Weight</label>
+					<input type="number" class="form-control" id="NumMinimumStandard">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Max Standard Weight</label>
+					<input type="number" class="form-control" id="NumMaximumStandard">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Mesh</label>
+					<select class="form-control" id="ddlMesh">
+						<option value=""> Select Mesh</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Color</label>
+					<select class="form-control" id="ddlColor">
+						<option value=""> Select Color</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Denier</label>
+					<input type="number" class="form-control" id="NumDenier">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Liner Microne</label>
+					<input type="number" class="form-control" id="NumLinerMicrone">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Capacity</label>
+					<input type="number" class="form-control" id="NumCapacity">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Liner Weight</label>
+					<input type="number" class="form-control" id="NumLinerWeight">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Printing Type</label>
+					<input type="text" class="form-control" id="NumPrintingType">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Cut Length</label>
+					<input type="number" class="form-control" id="txtCutLength">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Gmg Req.</label>
+					<input type="number" class="form-control" id="txtGmgRequired">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Packing</label>
+					<input type="number" class="form-control" id="txtPacking">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Gr. with Lam.</label>
+					<input type="number" class="form-control" id="txtGramWithLam">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Bag Size</label>
+					<input type="text" class="form-control" id="txtBagSize">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Width</label>
+					<input type="number" class="form-control" id="txtWidth">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Liner Size</label>
+					<input type="text" class="form-control" id="txtLinerSize">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>GSM</label>
+					<input type="number" class="form-control" id="txtGSM">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Bag Weight</label>
+					<input type="number" class="form-control" id="txtBagWeight">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Nos</label>
+					<input type="number" class="form-control" id="txtNos">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Bailing Instruction</label>
+					<input type="text" class="form-control" id="txtBailingInstruction">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Labeling Instruction</label>
+					<input type="text" class="form-control" id="txtLabelingInstruction">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Weighing Instruction</label>
+					<input type="text" class="form-control" id="txtWeighingInstruction">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Liner</label>
+					<input type="text" class="form-control" id="txtLinerInstruction">
+				</div>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="table-responsive">
+				<table id="tblItemStandardParameter" class="table-width">
+					<thead class="table-head">
+						<tr>
+							<th style="display:none;">Code</th>
+							<th>Item Code</th>
+							<th>Item Name</th>
+							<th>Standard Weight</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="btn-add-row-last">
+							<i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-md-12">
+					<div class="pagination-end">
+						<div class="custom-pagination" id="tablePagination"></div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+<script>
+	let $tbody;
+	$(document).ready(function () {
+
+     $tbody = $('#tblItemStandardParameter tbody');
+
+	});
+
+	function applySelect2ToDropdowns() {
+		// Apply select2 to all item name dropdowns in the table
+		$('#tblItemStandardParameter .ddlItemName').select2({
+			placeholder: "Select Item Type",
+			allowClear: true,
+			width: '100%'
+		});
+	}
+
+	//=========Add Row and Delete Row=======================
+	function addRow(data = {}) {
+
+		let options = '<option value="">--Select Item--</option>';
+
+		itemList.forEach(function (item) {
+			let selected = data.itemCode == item.value ? 'selected' : '';
+			options += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+		});
+
+		$tbody.find('.btn-add-action').remove();
+
+		const row = `
+			<tr>
+				<td style="display:none;">${data.code || ''}</td>
+
+				<td>
+					<input type="text" class="form-control txtItemCode"
+						   value="${data.itemCode || ''}" readonly />
+				</td>
+
+				<td>
+			     	<select class="form-control ddlItemName">
+						${options}
+					</select>
+				</td>
+
+				<td>
+					<input type="number" class="form-control txtStandardWeight"
+						   value="${data.standardWeight || ''}" />
+				</td>
+
+				<td>
+					<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+					<i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+				</td>
+		</tr>`;
+		$tbody.append(row);
+		applySelect2ToDropdowns();
+	}
+	$(document).on('click', '.btn-add-row, .btn-add-action', function () {
+		addRow();
+	});
+
+	//=============Delete Row====================
+	$(document).on('click', '.btn-delete-action', function () {
+
+		const $row = $(this).closest('tr');
+		const isLastRow = $row.is(':last-child');
+
+		$row.remove();
+
+		//===============If last row deleted → show plus on new last row ===================
+		if (isLastRow) {
+			const $lastRow = $tbody.find('tr:last');
+			if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+				$lastRow.find('td:last').prepend(
+					`<i class="fa fa-plus btn-add-action text-success"
+						title="Add Row"
+						style="cursor:pointer;"></i>`
+				);
+			}
+		}
+	});
+	$(document).on('click', '.btn-add-action', function () {
+		addRow();
+	});
+
+	$(document).on('click', '.btn-delete-action', function () {
+		$(this).closest('tr').remove();
+	});
+
+	$(document).on('change', '.ddlItemName', function () {
+		const selectedCode = $(this).val();
+		const row = $(this).closest('tr');
+		row.find('.txtItemCode').val(selectedCode);
+	});
+</script>
+
+<script>
+	let itemList = [];
+	$(document).ready(function()
+	{
+		var mode = new URLSearchParams(window.location.search).get('mode');
+		const urlParams = new URLSearchParams(window.location.search);
+		const code = urlParams.get('code');
+		
+			
+		//========Load DropDown==============
+		itemNameDDl(function() {       
+			MeshDDL(function() {      
+				ColorDDL(function() {  
+					if(code) {
+						loadEditData(code); 
+					} else{
+						addRow();
+					}
+				});
+			});
+		});
+		//===================View Mode======================
+		    if(mode==="view"){
+				$('#ItemStandardParameterMasterForm').find('input, select, textarea').prop('disabled', true);
+				$('#tblItemStandardParameter').find('input, select').prop('disabled', true);
+					
+				$('.btn-add-row').hide();
+				$('.btn-add-action').hide();
+				$('.btn-delete-action').hide();
+				$('#btnSave').hide();
+			}
+
+        //==============Save and Update Data===================
+
+		$('#btnSave').on('click',function(e){
+			e.preventDefault();
+
+			  if (!validateRequiredField('#ddlitemName', 'ItemName')) return;
+			  if (!validateRequiredField('#ddlMesh', 'Mesh')) return;
+			  if(!validateRequiredField('#ddlColor','Color')) return;
+			  if(!validateRequiredField('#ddlTypeBag','Type of Bag')) return;
+			  if(!validateRequiredField('#ddlBottom','Select Bottom')) return;
+			  
+			let detailList = [];
+
+			$('#tblItemStandardParameter tbody tr').each(function (index) {
+
+				let subItem = $(this).find('.txtItemCode').val();
+				let stdWt = $(this).find('.txtStandardWeight').val();
+
+				if (subItem) {
+					detailList.push({
+						SUB_ITEM: parseInt(subItem),
+						STD_WT: parseFloat(stdWt) || 0,
+						SRNO: index + 1
+					});
+				}
+			});
+			let formData={
+				CODE: $('#CODE').val() || 0,
+
+				ITEM_CODE: $('#ddlitemName').val() || null,
+				MESH_CODE: $('#ddlMesh').val() || null,
+				COLOR_CODE: $('#ddlColor').val() || null,
+
+				BAG_TYPE: $('#ddlTypeBag').val(),
+				CUTTING_STD_WT: $('#NumCuttingStandard').val() || 0,
+				THREAD_STD_WT: $('#NumThreadStandard').val() || 0,
+				PRINTING_STD_WT: $('#NumPrintingStandard').val() || 0,
+
+				TOP_S: $('#ddlTop').val(),
+				BOTTOM_S: $('#ddlBottom').val(),
+
+				MINSTD_WT: $('#NumMinimumStandard').val() || 0,
+				MAXSTD_WT: $('#NumMaximumStandard').val() || 0,
+
+				DENIER: $('#NumDenier').val(),
+				LINER_MICRONE: $('#NumLinerMicrone').val(),
+
+				CAPACITY: $('#NumCapacity').val() || 0,
+				LINER_WT: $('#NumLinerWeight').val() || 0,
+				PRINTING_TYPE:$('#NumPrintingType').val() ||0,
+				GMG_REQ: $('#txtGmgRequired').val() || 0,
+				PACKING: $('#txtPacking').val(),
+
+				GRAM_WITHLAM: $('#txtGramWithLam').val() || 0,
+				BAG_SIZE: $('#txtBagSize').val(),
+				WIDTH: $('#txtWidth').val() || 0,
+
+				LINER_SIZE: $('#txtLinerSize').val(),
+				GSM: $('#txtGSM').val() || 0,
+				BAG_WT: $('#txtBagWeight').val() || 0,
+
+				NOS: $('#txtNos').val() || 0,
+
+				BALING_INST: $('#txtBailingInstruction').val(),
+				LABELING_INST: $('#txtLabelingInstruction').val(),
+				WEIGHING_INST: $('#txtWeighingInstruction').val(),
+				LINER: $('#txtLinerInstruction').val(),
+				Details: detailList,
+				Action:$('#CODE').val() && $('#CODE').val() !="0" ? "Update":"Insert"
+			};
+				//show loader
+	        $('.circle-loader').css('display', 'flex');
+
+			$.ajax({
+				url:'/ItemStandardParameterMaster/SaveAndUpdateItemStandardMaster',
+				type:'Post',
+				contentType: 'application/json',
+	            data:JSON.stringify(formData),
+				success: function(res){
+					if(res.success){
+							// Hide the loader
+	                    $('.circle-loader').css('display', 'none');
+						console.log("Data Saved!!",res);
+						if(formData.Action=="Insert") showFlashMessageByKey('insert','success');
+				     	else showFlashMessageByKey('update','success');
+						setTimeout(function(){
+							window.location.href='/ItemStandardParameterMasterList/Index';
+						},500);
+					}
+					else{
+						toastr.warning(res.message,"Error while Saving Data");
+					}
+				},
+				error: function(xhr){
+					  let msg = xhr.responseText || "Unexpected error occurred";
+	                  toastr.error(msg);
+				},
+				complete:function(){
+					   $('.circle-loader').css('display', 'none');
+				}
+			});
+		});
+
+	});
+
+	//===========Load Data On Edit======================
+	function loadEditData(code){
+			//show loader
+	    $('.circle-loader').css('display', 'flex');
+
+		$.ajax({
+			url:'/ItemStandardParameterMaster/GetDataByCode',
+			type:'Get',
+			data:{code: code},
+			success: function(response){
+				 if(response.success){
+					 console.log("Response",response);
+					 let data=response.data;
+					 console.log("Edit Data",data);
+
+					 $('#CODE').val(data.code);
+					 $('#ddlitemName').val(String(data.iteM_CODE)).trigger('change');
+					 $('#ddlMesh').val(data.mesH_CODE);
+					 $('#ddlColor').val(data.coloR_CODE);
+					 $('#ddlTypeBag').val(data.baG_TYPE);
+					 $('#NumCuttingStandard').val(data.cuttinG_STD_WT);
+					 $('#NumThreadStandard').val(data.threaD_STD_WT);
+					 $('#NumPrintingStandard').val(data.printinG_STD_WT);
+
+					 $('#ddlTop').val(data.toP_S);
+					 $('#ddlBottom').val(data.bottoM_S);
+					 $('#NumMinimumStandard').val(data.minstD_WT);
+					 $('#NumMaximumStandard').val(data.maxstD_WT);
+					 
+					 $('#NumDenier').val(data.denier);
+					 $('#NumLinerMicrone').val(data.lineR_MICRONE);
+					 $('#NumCapacity').val(data.capacity);
+					 $('#NumLinerWeight').val(data.lineR_WT);
+					 $('#NumPrintingType').val(data.printinG_TYPE);
+
+					 $('#txtGmgRequired').val(data.gmG_REQ);
+					 $('#txtPacking').val(data.packing);
+					 $('#txtGramWithLam').val(data.graM_WITHLAM);
+					 $('#txtBagSize').val(data.baG_SIZE);
+					 $('#txtWidth').val(data.width);
+					
+					 $('#txtLinerSize').val(data.lineR_SIZE);
+					 $('#txtGSM').val(data.gsm);
+					 $('#txtBagWeight').val(data.baG_WT);
+					 $('#txtNos').val(data.nos);
+
+					 $('#txtBailingInstruction').val(data.balinG_INST);
+					 $('#txtLabelingInstruction').val(data.labelinG_INST);
+					 $('#txtWeighingInstruction').val(data.weighinG_INST);
+					 $('#txtLinerInstruction').val(data.liner);
+
+					//========Load Table data==================
+					$tbody.empty();
+					let detailsArray = response.details || []; 
+					if(detailsArray.length > 0){
+						detailsArray.forEach(function(d){
+							addRow({
+								code: d.code,
+								itemCode: d.suB_ITEM,
+								standardWeight: d.stD_WT
+							});
+						});
+					} else {
+						addRow(); 
+					}
+				 }
+			},
+		    complete: function () {
+	          $('.circle-loader').css('display', 'none');
+	        }
+		});
+	};
+
+  //=================Bind DropDowns=====================
+   function itemNameDDl(callback)
+	{
+	     $.ajax({
+			 url:'/ItemStandardParameterMaster/ItemNameDropdown',
+			 type:'Get',
+			 dataType:'Json',
+			 success:function(response)
+			 {
+				if(response.success){
+					itemList = response.data;
+					const itemName=$('#ddlitemName');
+					itemName.empty();
+					itemName.append('<option value="">--Select Item Type--</option>');
+					$.each(response.data, function(index, item){
+						itemName.append('<option value="' + item.value + '">' + item.text + '</option>');
+					});
+					itemName.select2({
+						placeholder: "Select Item Type",
+					  allowClear: true,
+					  width: '100%'  
+				    });
+					if (typeof callback === "function") callback();
+				} else{
+					toastr.warning("Item Type Load Failed !!");
+				}
+			 },
+			 error: function(xhr){
+				let msg = xhr.responseText || "Unexpected error occurred";
+				toastr.error(msg);
+			 }
+		});
+	}
+
+	function MeshDDL(callback){
+	    $.ajax({
+			url:'/ItemStandardParameterMaster/MeshDropdown',
+			type:'Get',
+			dataType:'Json',
+			success:function(response)
+			{
+				if(response.success){
+					const mesh=$('#ddlMesh');
+					mesh.empty();
+					mesh.append('<option value="">--Select Mesh--</option>');
+					$.each(response.data, function(index,item){
+						mesh.append('<option value="' + item.value + '">' + item.text + '</option>')
+					});
+					if(typeof callback==="function") callback();
+				} else{
+					toastr.warning("Mesh Type Load Failed");
+				}
+			},
+			error: function(){
+				  let msg = xhr.responseText || "Unexpected error occurred";
+				  toastr.error(msg);
+			}
+		});
+	}
+
+	function ColorDDL(callback){
+	 	$.ajax({
+			url:'/ItemStandardParameterMaster/ColorDropdown',
+			type:'Get',
+			dataType:'Json',
+			success:function(response)
+			{
+			if(response.success){
+				const color=$('#ddlColor');
+				color.empty();
+				color.append('<option value="">--Select Color--</option>');
+				$.each(response.data, function(index,item){
+					color.append('<option value="' + item.value + '">' + item.text + '</option>')
+				});
+				if(typeof callback==="function") callback();
+			} else{
+				toastr.warning("color Type Load Failed");
+			}
+			},
+			error: function(){
+			  let msg = xhr.responseText || "Unexpected error occurred";
+			  toastr.error(msg);
+			}
+		});
+	};
+</script>
+ 

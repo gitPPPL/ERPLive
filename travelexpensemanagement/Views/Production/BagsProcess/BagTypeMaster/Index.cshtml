@@ -1,0 +1,193 @@
+﻿@{
+	ViewBag.Title = "Bag Type Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		 Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">Bag Type Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "BagTypeMasterList")'" type="button" class="btn btn-draft">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="BagTypeMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Name</label>
+					<input type="text" class="form-control" id="txtName" name="Name" placeholder="Enter Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>ShortName</label>
+					<input type="text" class="form-control" id="txtShortName" name="ShortName" placeholder="Enter Short Name">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="btn-mt">
+					<div class="toggle-wrapper justify-content-center" id="ddlActive">
+						<input type="hidden" id="IsActive" name="IsActive" value="1">
+						<div id="customToggle" class="custom-toggle active"></div>
+						<span id="statusLabel" class="status-label 0 active">Active</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+<script>
+	const mode = new URLSearchParams(window.location.search).get('mode');
+	const urlParams = new URLSearchParams(window.location.search);
+	const code = urlParams.get('code');
+
+	//======FOR TOGGLE======
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.getElementById('customToggle');
+		const label = document.getElementById('statusLabel');
+		const hiddenInput = document.getElementById('IsActive');
+		toggle.addEventListener('click', function () {
+			toggle.classList.toggle('active');
+			const isActive = toggle.classList.contains('active');
+
+			label.textContent = isActive ? 'Active' : 'Inactive';
+			label.classList.toggle('active', isActive);
+			label.classList.toggle('inactive', !isActive);
+			hiddenInput.value = isActive ? '1' : '0';
+			console.log("Toggle value:", hiddenInput.value);
+		});
+	});
+
+	$(document).ready(async function(){
+
+		if(code){
+			loadDataOnEdit();
+		}
+
+		if(mode==='view'){
+			readOnlyMode();
+		}
+
+		$('#btnSave').on('click' ,async function(e){
+			e.preventDefault();
+
+			try{
+				$('.circle-loader').css('display', 'flex');
+				let model={
+					CODE: $('#CODE').val() ? parseInt($('#CODE').val()) : 0,
+					NAME: $('#txtName').val() || null,
+					SHORTNAME: $('#txtShortName').val() || null,
+					ACTIVE: parseInt($('#IsActive').val())
+				}
+				const res= await fetch('/BagTypeMaster/SaveAndUpdateData',{
+					method: 'POST',
+					headers:{
+						'content-type':'application/json'
+					},
+					body: JSON.stringify(model)
+				});
+
+				if(!res.ok) throw new Error("HTTP error " + res.status);
+				const data= await res.json();
+
+				if(data.success){
+					if (model.CODE > 0) {
+						showFlashMessageByKey('update', 'success');
+					} else {
+						showFlashMessageByKey('insert', 'success');
+					}
+					setTimeout(function(){
+					  window.location.href='/BagTypeMasterList/Index';
+					},500)
+				} else{
+					toastr.error(data.message || "Duplicate entry");
+				}
+			}catch(err){
+				toastr.error(err.message|| "Something went wrong");
+			}finally{
+			    $('.circle-loader').css('display', 'none');
+		    }
+		});
+	});
+	
+	//======Load on Edit======
+	async function loadDataOnEdit(){
+		try{
+			$('.circle-loader').css('display', 'flex');
+			const res = await fetch('/BagTypeMaster/loadDataOnEdit?code='+code,{
+			  method: 'GET'
+			});
+			if(!res.ok) throw new Error("Failed to fetch data");
+
+			const data = await res.json();
+			console.log("Edit Data:", data);
+
+			if(!data.success){
+				toastr.warning(data.message || "Data not found");
+				return;
+			}
+
+			const item= data.data;
+
+			$('#CODE').val(item.code || item.CODE);
+			$('#txtName').val(item.name || item.NAME);
+			$('#txtShortName').val(item.shortname || item.SHORTNAME);
+
+			//====For Toggle======
+			const isActive = (item.active ?? item.ACTIVE) == 1;
+			$('#IsActive').val(isActive ? '1' : '0');
+			const toggle = document.getElementById('customToggle');
+			const label = document.getElementById('statusLabel');
+			if (isActive) {
+				toggle.classList.add('active');
+				label.textContent = 'Active';
+				label.classList.add('active');
+				label.classList.remove('inactive');
+			} else {
+				toggle.classList.remove('active');
+				label.textContent = 'Inactive';
+				label.classList.add('inactive');
+				label.classList.remove('active');
+			}
+
+		}catch(err){
+			toastr.error(err.message || "Error loading data");
+		}finally{
+			$('.circle-loader').css('display', 'none');
+		}
+	}
+
+	//======Readonly Mode=====
+	function readOnlyMode() {
+		$('#BagTypeMasterForm input, #BagTypeMasterForm select, #BagTypeMasterForm textarea').prop('disabled', true);
+		const toggle = document.getElementById('customToggle');
+		if (toggle) {
+			toggle.style.pointerEvents = 'none';
+			toggle.style.opacity = '0.6';
+		}
+		$('#btnSave').hide();
+	}
+
+</script>

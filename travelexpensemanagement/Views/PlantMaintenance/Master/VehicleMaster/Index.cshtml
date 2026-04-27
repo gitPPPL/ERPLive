@@ -1,0 +1,558 @@
+﻿@{
+    ViewBag.Title = "Vehicle Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+    <legend class="legend-field">Vehicle Master</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "VehicleMasterList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="VehicleMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="Code">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Name</label>
+                    <select class="form-control" id="ddlName">
+                        <option value=""> Select Item Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Short Name</label>
+                    <input type="text" class="form-control" id="TxtshortName">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Vehicle Category</label>
+                    <select class="form-control" id="ddlVehicleCategory">
+                        <option value=""> Select Category</option>
+                        <option value="Owned">Owned</option>
+                        <option value="Hired">Hired</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Registeration No</label>
+                    <input type="text" class="form-control" id="TxtRegNo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Color</label>
+                    <select class="form-control" id="ddlColor">
+                        <option value=""> Select Color</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Make</label>
+                    <select class="form-control" id="ddlMake">
+                        <option value=""> Select Make</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Model</label>
+                    <input type="text" class="form-control" id="TxtModel">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Chassis No</label>
+                    <input type="text" class="form-control" id="TxtchassisNo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Engine No</label>
+                    <input type="text" class="form-control" id="TxtEngineNo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Make</label>
+                    <select class="form-control" id="ddlFuelType">
+                        <option value="">Fuel Type</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="CNG">CNG</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Place</label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">Place</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Country</label>
+                    <select class="form-control" id="ddlCountry">
+                        <option value=""> Select Country</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="DtRoadTaxDate">Road Tax Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtRoadTaxDate" name="RoadTaxDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkRoadTaxDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="DtRoadTaxDueDate">Road Tax Due Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtRoadTaxDueDate" name="RoadTaxDueDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkRoadTaxDueDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Road Tax Rec.No</label>
+                    <input type="text" class="form-control" id="RoadTaxRecNo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="DtNextServiceDate">Next Service Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtNextServiceDate" name="NextServiceDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkNextServiceDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>FC</label>
+                    <input type="text" class="form-control" id="txtFc">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="DtfcDate">FC Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtfcDate" name="fcDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkfcDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="DtfcDueDate">FC Due Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtfcDueDate" name="fcDueDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkfcDueDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Fc Rec. No</label>
+                    <input type="text" class="form-control" id="TxtFcRecNo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Fc Remarks</label>
+                    <input type="text" class="form-control" id="TxtFCRemarks">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Pollution Certificate No</label>
+                    <input type="text" class="form-control" id="TxtPollutionCertificateNo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group position-relative">
+                    <label for="DtPollutionCertificateDate">Pollution Certificate Date</label>
+                    <div class="calender-check">
+                        <input type="date" class="form-control" id="DtPollutionCertificateDate" name="PollutionCertificateDate" style="padding-left: 30px;">
+                        <input type="checkbox" id="chkPollutionCertificateDate" class="checkbox-inside">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" style="height:50px;"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <div class="toggle-wrapper justify-content-center" id="ddlActive">
+                        <input type="hidden" id="IsActive" name="IsActive" value="1">
+                        <div id="customToggle" class="custom-toggle active"></div>
+                        <span id="statusLabel" class="status-label 0 active">Active</span>
+                    </div>
+                </div>
+            </div>
+            <div class="offset-md-2 col-md-3">
+                <div class="button-right btn-mt">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<script>
+    //==============FOR TOGGLE==================
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById('customToggle');
+        const label = document.getElementById('statusLabel');
+        const hiddenInput = document.getElementById('IsActive');
+        toggle.addEventListener('click', function () {
+            toggle.classList.toggle('active');
+            const isActive = toggle.classList.contains('active');
+
+            label.textContent = isActive ? 'Active' : 'Inactive';
+            label.classList.toggle('active', isActive);
+            label.classList.toggle('inactive', !isActive);
+
+            hiddenInput.value = isActive ? '1' : '0';
+
+            console.log("Toggle value:", hiddenInput.value);
+        });
+    });
+    
+    $(document).ready(function(){
+        const urlParams= new URLSearchParams(window.location.search);
+        const code= urlParams.get('code');
+        const mode= new URLSearchParams(window.location.search).get('mode');
+
+        if(mode==='view'){
+            $('#VehicleMasterForm input').prop('readonly', true);
+            $('#VehicleMasterForm select').prop('disabled', true);
+            $('#customToggle').css('pointer-events', 'none');
+            $('#btnSave').hide();
+        }
+
+        NameDDl();
+        ColorDDL();
+        CountryDDl();
+        PlaceDDL();
+        MakeDDL();
+
+        if(code){
+            LoadDataOnEdit(code)
+        }
+
+        //=====Save and Update =============
+        $('#btnSave').on('click', function(e){
+            e.preventDefault();
+            if (!validateRequiredField('#ddlVehicleCategory', 'VehicalCategory')) return;
+            if (!validateRequiredField('#TxtRegNo', 'Vehicle Register No')) return;
+
+            var codeVal = $('#CODE').val() || 0;
+
+            var foamData={
+                CODE: codeVal,
+                VEHICLE_NAME: $('#ddlName').val(),
+                SHORTNAME: $('#TxtshortName').val(),
+                VEHICLE_CATEGORY: $('#ddlVehicleCategory').val(),
+                VEHICLE_REGNO: $('#TxtRegNo').val(),
+                COLOR_CODE:$('#ddlColor').val(),
+                MAKE_CODE: $('#ddlMake').val(),
+                MODEL: $('#TxtModel').val(),
+                CHASSIS_NO: $('#TxtchassisNo').val(),
+                ENGINE_NO: $('#TxtEngineNo').val(),
+                FUEL_TYPE: $('#ddlFuelType').val(),
+                PLACE_CODE: $('#ddlPlace').val(),
+                COUNTRY_CODE: $('#ddlCountry').val(),
+                ACTIVE: $('#IsActive').val(),
+                ROADTAX_DATE: $('#chkRoadTaxDate').is(':checked') ? $('#DtRoadTaxDate').val() : null,
+                ROADTAX_DUEDATE: $('#chkRoadTaxDueDate').is(':checked') ? $('#DtRoadTaxDueDate').val() : null,
+                ROADTAX_RECNO: $('#RoadTaxRecNo').val(),
+
+                NEXT_SERVICE_DATE: $('#chkNextServiceDate').is(':checked') ? $('#DtNextServiceDate').val() : null,
+
+                FC: $('#txtFc').val(),
+                FC_DATE: $('#chkfcDate').is(':checked') ? $('#DtfcDate').val() : null,
+                FC_DUEDATE: $('#chkfcDueDate').is(':checked') ? $('#DtfcDueDate').val() : null,
+
+                FC_RECNO: $('#TxtFcRecNo').val(),
+                FC_REMARKS: $('#TxtFCRemarks').val(),
+
+                POLLUTION_NO: $('#TxtPollutionCertificateNo').val(),
+                POLLUTION_DATE: $('#chkPollutionCertificateDate').is(':checked') ? $('#DtPollutionCertificateDate').val() : null,
+                Action: codeVal > 0 ? "Update" :"Insert"
+
+            }
+            $.ajax({
+                url:'/VehicleMaster/SaveAndUpdateVehicleMaster',
+                type:'Post',
+                contentType: 'application/json',
+                data: JSON.stringify(foamData),
+                success: function(res){
+                    if(res.success){
+                        if(foamData.Action=="Insert") showFlashMessageByKey('insert','success');
+                        else showFlashMessageByKey('update','success');
+
+                        setTimeout(function(){
+                            window.location.href='/VehicleMasterList/Index';
+                        },500)
+                    } else{
+                         toastr.warning("Data Saved Failed !!");
+                    }
+                } ,
+                error: function(xhr){
+                    let msg = xhr.responseText || "Unexpected error occurred";
+                    toastr.error(msg); 
+                }
+            })
+
+        })
+    });
+
+    //========Load Data on Edit=======
+    function LoadDataOnEdit(code) {
+        $.ajax({
+            url: '/VehicleMaster/LoadDataOnEdit',
+            type: 'GET',
+            data: { code: code },
+            success: function (res) {
+
+                if (res.success) {
+
+                    const data = res.data;
+                    console.log("Data",data);
+                    $('#CODE').val(data.code);
+
+                    NameDDl(() => $('#ddlName').val(data.vehicleName));
+                   // CountryDDl(() => $('#ddlCountry').val(data.countryCode));
+                    CountryDDl(() => $('#ddlCountry').val(data.countryCode).trigger('change'));
+                    ColorDDL(() => $('#ddlColor').val(data.colorCode));
+                    PlaceDDL(() => $('#ddlPlace').val(data.placeCode));
+                    MakeDDL(() => $('#ddlMake').val(data.makeCode));
+
+                    $('#TxtshortName').val(data.shortName);
+                    $('#ddlVehicleCategory').val(data.vehicleCategory);
+                    $('#TxtRegNo').val(data.vehicleRegNo);
+
+                    $('#TxtModel').val(data.model);
+                    $('#TxtchassisNo').val(data.chassisNo);
+                    $('#TxtEngineNo').val(data.engineNo);
+
+                    $('#ddlFuelType').val(data.fuelType);
+
+                    $('#RoadTaxRecNo').val(data.roadTaxRecNo);
+
+                    $('#txtFc').val(data.fc);
+                    $('#TxtFcRecNo').val(data.fcRecNo);
+                    $('#TxtFCRemarks').val(data.fcRemarks);
+
+                    $('#TxtPollutionCertificateNo').val(data.pollutionNo);
+
+                    // ===== Dates =====
+                    if (data.roadTaxDate) {
+                        $('#chkRoadTaxDate').prop('checked', true);
+                        $('#DtRoadTaxDate').val(data.roadTaxDate);
+                    }
+
+                    if (data.roadTaxDueDate) {
+                        $('#chkRoadTaxDueDate').prop('checked', true);
+                        $('#DtRoadTaxDueDate').val(data.roadTaxDueDate);
+                    }
+
+                    if (data.nextServiceDate) {
+                        $('#chkNextServiceDate').prop('checked', true);
+                        $('#DtNextServiceDate').val(data.nextServiceDate);
+                    }
+
+                    if (data.fcDate) {
+                        $('#chkfcDate').prop('checked', true);
+                        $('#DtfcDate').val(data.fcDate);
+                    }
+
+                    if (data.fcDueDate) {
+                        $('#chkfcDueDate').prop('checked', true);
+                        $('#DtfcDueDate').val(data.fcDueDate);
+                    }
+
+                    if (data.pollutionDate) {
+                        $('#chkPollutionCertificateDate').prop('checked', true);
+                        $('#DtPollutionCertificateDate').val(data.pollutionDate);
+                    }
+
+                    // ===== Active Toggle =====
+                    if (data.active == 1) {
+                        $('#customToggle').addClass('active');
+                        $('#statusLabel').text('Active');
+                        $('#IsActive').val('1');
+                    } else {
+                        $('#customToggle').removeClass('active');
+                        $('#statusLabel').text('Inactive');
+                        $('#IsActive').val('0');
+                    }
+
+                } else {
+                    toastr.error("Failed to load edit data");
+                }
+            },
+            error: function (xhr) {
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+
+    }
+    //=========Bind DropDowns=====================
+    function NameDDl(callback){
+        $.ajax({
+            url:'/VehicleMaster/VehicleNameDDl',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const name= $('#ddlName');
+                    name.empty();
+                    name.append('<option value="">--Select Vehical--</option>');
+                    $.each(res.data, function(index, item){
+                        name.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                    if (typeof callback === "function") callback();
+                }else{
+                    toastr.warning("Name DDL Load Failed !!");
+                }
+            },
+            error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    }
+
+    function CountryDDl(callback){
+        $.ajax({
+            url:'/VehicleMaster/CountryDDL',
+            type: 'Get',
+            dataType: 'Json',
+            success: function(res){
+                if(res.success){
+                  const country=$('#ddlCountry');
+                  country.empty();
+                  country.append('<option value="">--Select country--</option>');
+                  $.each(res.data, function(index, item){
+                      country.append('<option value="' + item.value + '">' + item.text + '</option>');
+                  });
+                  country.select2({
+                      placeholder: "Select Country",
+                      allowClear: true,
+                      width: '100%'
+                    });
+                  if(typeof callback ==="function") callback();
+                } else{
+                    toastr.warning("country DDL Load Failed !!");
+                }
+            }, 
+            error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        })
+    }
+     
+    function ColorDDL(callback){
+        $.ajax({
+            url:'/VehicleMaster/ColorDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const color = $('#ddlColor');
+                    color.empty();
+                    color.append('<option value="">--Select Color--</option>');
+                    $.each(res.data, function(index, item){
+                      color.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                    if(typeof callback ==="function") callback();
+                }
+                else{
+                    toastr.warning("Color DDl load Failed");
+                }
+            },
+            error: function(xhr){
+                 let msg = xhr.responseText || "Unexpected error occurred";
+                 toastr.error(msg);
+            }
+        });
+    }
+
+    function PlaceDDL(callback){
+        $.ajax({
+            url:'/VehicleMaster/PlaceDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const place= $('#ddlPlace');
+                    place.empty();
+                    place.append('<option value= "">--Select Place--</option>');
+                    $.each(res.data, function(index, item){
+                        place.append('<option value="' + item.value +'">' + item.text + '</option>');
+                    });
+                    if( typeof callback==="function") callback();
+                } else{
+                    toastr.warning("Place DDL load Failed");
+                }
+            },
+            error: function(xhr){
+              let msg = xhr.responseText || "Unexpected error occurred";
+              toastr.error(msg);
+            }
+        })
+    } 
+    function MakeDDL(callback){
+        $.ajax({
+            url:'/VehicleMaster/MakeDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const make=$('#ddlMake');
+                    make.empty();
+                    make.append('<option value="">--Select Make--</option>');
+                    $.each(res.data, function(index, item){
+                       make.append('<option value="' + item.value +'">' + item.text + '</option>');
+                    });
+                    if( typeof callback==="function") callback();
+                } else{
+                    toastr.warning("Make DDl Load Failed");
+                }
+            },
+            error: function(xhr){
+              let msg = xhr.responseText || "Unexpected error occurred";
+              toastr.error(msg);
+            }
+        });
+    }
+</script>

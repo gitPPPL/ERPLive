@@ -1,0 +1,628 @@
+﻿@{
+    ViewBag.Title = "Loom Production Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<fieldset>
+    <legend class="legend-field">Loom Production Order</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "LoomProductionOrderList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="LoomProductionOrderForm">
+        <input type="hidden" id="docId" name="DOC_ID">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document Type</label>
+                    <select class="form-control" id="docType"></select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document No</label>
+                    <input type="number" class="form-control" id="NumDocNo" readonly>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Eff. Date</label>
+                    <input type="date" class="form-control" id="DtEffDate">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Completed Date</label>
+                    <input type="date" class="form-control" id="DtCompletedDate">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <select class="form-control" id="ddlItem">
+                        <option value="">--Select Item Name--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Prod.Qty</label>
+                    <input type="number" class="form-control" id="ProdQty">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Approx Meter</label>
+                    <input type="number" class="form-control" id="ApproaxMtr">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Approx Kg</label>
+                    <input type="number" class="form-control" id="ApproaxKg">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Number of looms</label>
+                    <input type="number" class="form-control" id="NoOfLoom">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea class="form-control" id="Remarks" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <fieldset>
+            <div class="card">
+                <div class="table-responsive">
+                    <table id="tblLoomProductionOrder" class="table table-bordered">
+                        <thead class="table-head">
+                            <tr>
+                                <th>Loom No</th>
+                                <th>Current Item</th>
+                                <th>Eff.Date</th>
+                                <th>Eff.Shift</th>
+                                <th>Change Item Name</th>
+                                <th>Size</th>
+                                <th>Type</th>
+                                <th>Gram</th>
+                                <th>Mesh</th>
+                                <th>Color</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-add-row-last">
+                            <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                        </div>
+                        @* <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-mt button-right">
+                    <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+@* Table Script *@
+<script>
+    let ItemList = [];
+    let LoomList = [];
+    let MeshList = [];
+
+    let $tbody;
+    $(document).ready(async function () {
+
+        $('.circle-loader').css('display', 'flex');
+        $tbody = $('#tblLoomProductionOrder tbody');
+        try {
+
+           await Promise.all([
+            loadAllDrodowns(),     // ITEM + DocType
+            loadLoomDropdown(),
+            loadItemDropdown(),    // detailed item list
+            loadMeshDropdown()
+        ]);
+           if (docId) {
+             await LoadDataOnEdit();
+           }else {
+            await GetVNo();
+            addRow();
+           }
+        }
+        catch (err) {
+            console.error("Error loading data:", err);
+        }
+        finally {
+            $('.circle-loader').hide(); 
+        }
+    });
+
+    //=====LOAD TABLES DROPDOWNS =====
+    function loadLoomDropdown() {
+        return $.get('/LoomProductionOrder/loom', res => {
+            if (res.success) LoomList = res.list;
+        });
+    }
+
+    function loadItemDropdown() {
+        return $.get('/LoomProductionOrder/itemNameDDL', res => {
+            if (res.success) {
+                console.log("item list data", res);
+                ItemList = res.list;
+            }
+        });
+    }
+
+    function loadMeshDropdown() {
+        return $.get('/LoomProductionOrder/Mesh', res => {
+            if (res.success) MeshList = res.list;
+        });
+    }
+
+    //===== TABLE ADD ROW ========
+    function addRow() {
+        $tbody.find('.btn-add').remove();
+        let loomOpt = `<option value="">--Select Loom--</option>`;
+        LoomList.forEach(l => {
+            loomOpt += `<option value="${l.value}">${l.text}</option>`;
+        });
+
+        let itemOpt = `<option value="">--Select Item--</option>`;
+
+        (ItemList || []).forEach(i => {
+            itemOpt += `
+                <option value="${i.code}"
+                    data-size="${i.size}"
+                    data-type="${i.type}"
+                    data-gram="${i.gram}"
+                    data-color="${i.color}">
+                    ${i.itemName}
+                </option>`;
+        });
+
+        let meshOpt = `<option value="">--Select Mesh--</option>`;
+        MeshList.forEach(m => {
+            meshOpt += `<option value="${m.value}">${m.text}</option>`;
+        });
+
+        let row = `
+        <tr>
+
+            <!-- Loom -->
+            <td>
+                <select class="form-control ddlLoom" style="width:100px;">${loomOpt}</select>
+            </td>
+
+            <!-- Current Item -->
+            <td>
+                <select class="form-control ddlCurrentItem" style="width:130px;">${itemOpt}</select>
+            </td>
+
+            <!-- Eff Date -->
+            <td>
+                <input type="date" class="form-control txtEffDate" style="width:100px;">
+            </td>
+
+            <!-- Shift -->
+            <td>
+                <select class="form-control ddlShift" style="width:100px;">
+                    <option value="">--Shift--</option>
+                    <option>A</option>
+                    <option>B</option>
+                    <option>C</option>
+                </select>
+            </td>
+            <td>
+                <select class="form-control ddlChangeItem" style="width:130px;">${itemOpt}</select>
+            </td>
+            <td><input type="text" class="form-control txtSize" style="width:100px;"></td>
+
+            <!-- Type -->
+            <td><input type="text" class="form-control txtType" style="width:100px;"></td>
+
+            <!-- Gram -->
+            <td><input type="text" class="form-control txtGram" style="width:100px;"></td>
+
+            <td>
+                <select class="form-control ddlMesh" style="width:100px;">
+                    ${meshOpt}
+                </select>
+            </td>
+            <td><input type="text" class="form-control txtColor" style="width:100px;"></td>
+
+            <!-- Status -->
+            <td>
+                <select class="form-control ddlStatus" style="width:100px;">
+                    <option value="">--Status--</option>
+                    <option>Running</option>
+                    <option>Stopped</option>
+                </select>
+            </td>
+
+            <!-- Action -->
+             <td>
+                <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+            </td>
+
+        </tr>`;
+
+        $tbody.append(row);
+        let $newRow = $tbody.find('tr:last');
+
+        $newRow.find('.ddlCurrentItem').select2({
+            placeholder: "Search Item",
+            width: 'resolve'
+        });
+
+        $newRow.find('.ddlChangeItem').select2({
+            placeholder: "Search Item",
+            width: 'resolve'
+        });
+        
+    }
+    
+    //====AUTO FILL ON CHANGE ITEM =======
+    $(document).on('change', '.ddlChangeItem', function () {
+
+        let row = $(this).closest('tr');
+        let opt = $(this).find(':selected');
+
+        row.find('.txtSize').val(opt.data('size') || '');
+        row.find('.txtType').val(opt.data('type') || '');
+        row.find('.txtGram').val(opt.data('gram') || '');
+        row.find('.txtColor').val(opt.data('color') || '');
+    });
+
+    //======= ADD ROW CLICK ======
+    $(document).on('click', '.btn-add-action, .btn-add-row', function () {
+         addRow();
+    });
+
+    //=====DELETE ROW ==========
+     $(document).on('click', '.btn-delete-action', function () {
+        const $row = $(this).closest('tr');
+        const $tbody = $row.closest('tbody');
+        const isLast = $row.is(':last-child');
+        $row.remove();
+        $tbody.find('.btn-add-action').remove();
+
+        if (isLast) {
+            const $last = $tbody.find('tr:last');
+            if ($last.length) {
+                $last.find('td:last').prepend(
+                    `<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>`
+                );
+            }
+        }
+    });
+</script>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('docId');
+    const mode = new URLSearchParams(window.location.search).get('mode');
+   $(document).ready(async function(){
+        setCurrentDate();
+        //await loadAllDrodowns();
+        if(mode==='view'){
+           readOnlyMode();
+        }
+
+        $('#btnSave').on('click', async function (e) {
+            e.preventDefault();
+           
+            if (!$('#DtEffDate').val()) {
+                toastr.error("Eff Date is required");
+                return;
+            }
+
+            if (!$('#DtCompletedDate').val()) {
+                toastr.error("Complete Date is required");
+                return;
+            }
+
+            if (!$('#ddlItem').val()) {
+                toastr.error("Item is required");
+                return;
+            }
+
+            if (!$('#ProdQty').val() || parseFloat($('#ProdQty').val()) <= 0) {
+                toastr.error("Production Qty must be greater than 0");
+                return;
+            }
+
+            try {
+                let itemList = [];
+                $('#tblLoomProductionOrder tbody tr').each(function () {
+                    let $row = $(this);
+                    let item = {
+                        LOOM_CODE: parseInt($row.find('.ddlLoom').val())|| null,
+                        FITEM_CODE: parseInt($row.find('.ddlCurrentItem').val())|| null,
+                        FITEM_NAME: $row.find('.ddlCurrentItem option:selected').text().trim() || null,
+                        FEFF_DATE: $row.find('.txtEffDate').val()|| null,
+                        EFF_SHIFT: $row.find('.ddlShift').val()|| null,
+                        MITEM_CODE: parseInt($row.find('.ddlChangeItem').val())|| null,
+                        MITEM_NAME: $row.find('.ddlChangeItem option:selected').text().trim() || null,
+                        SIZE_CODE: parseInt($row.find('.txtSize').val())|| null,
+                        PTYPE_CODE: parseInt($row.find('.txtType').val())|| null,
+                        GRAM_CODE: parseFloat($row.find('.txtGram').val())|| null,
+                        MESH_CODE: parseInt($row.find('.ddlMesh').val())|| null,
+                        COLOR_CODE: parseInt($row.find('.txtColor').val())|| null,
+                        STATUS: $row.find('.ddlStatus').val()|| null
+                    };
+                    itemList.push(item);              
+                });
+                
+                let model = {
+                    DOC_ID: $('#docId').val(),
+                    V_TYPE: $('#docType').val(),
+                    V_NO: parseInt($('#NumDocNo').val()),
+                    V_DATE: $('#DtDocDate').val(),
+                    EFF_DATE: $('#DtEffDate').val()|| null,
+                    COMP_DATE: $('#DtCompletedDate').val()|| null,
+                    ITEM_CODE: parseInt($('#ddlItem').val())|| null,
+                    PROD_QTY: parseFloat($('#ProdQty').val())|| null,
+                    APPROX_MTR: parseFloat($('#ApproaxMtr').val())|| null,
+                    APPROX_KG: parseFloat($('#ApproaxKg').val())|| null,
+                    NO_OF_LOOM: parseInt($('#NoOfLoom').val())|| null,
+                    REMARKS: $('#Remarks').val()|| null,
+                    ItemList: itemList
+                };
+                
+                $('.circle-loader').css('display', 'flex');
+                const res = await fetch('/LoomProductionOrder/SaveData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body:JSON.stringify(model)
+                });
+                if (!res.ok) {
+                    throw new Error("HTTP error " + res.status);
+                }
+                const data = await res.json();
+                 if (data.isUpdate) {
+                     showFlashMessageByKey('update', 'success');
+                 } else {
+                     showFlashMessageByKey('insert', 'success');
+                 }
+                 setTimeout(function () {
+                     window.location.href = '/LoomProductionOrderList/Index';
+                 }, 500);
+            } catch (err) {
+                console.error(err);
+                toastr.error("Something went wrong");
+            }
+            finally {
+               $('.circle-loader').css('display', 'none');
+            }
+        });
+   });
+
+   async function LoadDataOnEdit(){
+        try
+        {
+            $('.circle-loader').show();
+            if (!docId) return;
+            const res = await fetch(`/LoomProductionOrder/loadDataOnEdit?docId=${docId}`,{
+            method: 'GET'
+            });
+            if(!res.ok) throw new Error("Network Error");
+            const data= await res.json();
+            if(data.success){
+                console.log("Edit Data", data);
+                bindFormData(data);
+            } else{
+                toastr.error(data.message || "Failed to load data");
+            }
+        }catch(err)
+        {
+            console.error("LoadDataOnEdit Error:", err);
+            toastr.error(err.message || "Something went wrong");
+
+        }finally
+        {
+        $('.circle-loader').hide();
+        }
+
+   }
+
+   function bindFormData(data) {
+        const header = data.header;
+        const items = data.items;
+        // ==== HEADER =====
+         $('#docId').val(header.doC_ID);
+         $('#NumDocNo').val(header.v_NO);
+         $('#docType').val(header.v_TYPE);
+         $('#DtDocDate').val(header.v_DATE?.split('T')[0]);
+         $('#DtEffDate').val(header.efF_DATE?.split('T')[0]);
+         $('#DtCompletedDate').val(header.comP_DATE?.split('T')[0]);
+         $('#ddlItem').val(header.iteM_CODE);
+         $('#ProdQty').val(header.proD_QTY);
+         $('#ApproaxMtr').val(header.approX_MTR);
+         $('#ApproaxKg').val(header.approX_KG);
+         $('#NoOfLoom').val(header.nO_OF_LOOM);
+         $('#Remarks').val(header.remarks);
+        //=======TABLE =====
+        $tbody.empty();
+        if (!items || items.length === 0) {
+            addRow();
+            return;
+        }
+        items.forEach(item => {
+            addRow();
+            const $row = $tbody.find('tr:last');
+             $row.find('.ddlLoom').val(item.looM_CODE).trigger('change');
+             $row.find('.ddlCurrentItem').val(item.fiteM_CODE).trigger('change');
+             $row.find('.txtEffDate').val(item.fefF_DATE?.split('T')[0]);
+             $row.find('.ddlShift').val(item.efF_SHIFT);
+             $row.find('.ddlChangeItem').val(item.miteM_CODE).trigger('change');
+             $row.find('.ddlMesh').val(item.mesH_CODE);
+             $row.find('.txtColor').val(item.coloR_CODE);
+             $row.find('.ddlStatus').val(item.status);
+        });
+    }
+
+   function setCurrentDate(){
+        let today = new Date().toISOString().split('T')[0];
+        $("#DtDocDate").val(today);
+    }
+
+   async function loadAllDrodowns(){
+       try{
+           await Promise.all([
+                ItemDDL(),
+                DocTypeDDL()
+           ]);
+       }catch(err){
+           toastr.error(err.message||"Failed to load some drodpwon");
+       }
+   }
+
+   async function DocTypeDDL(){
+        try{
+             const res= await fetch('/LoomProductionOrder/DocType',{
+                 method:'GET'
+             });
+             if(!res.ok) throw new Error("Network Error");
+
+             const{success, list}= await res.json();
+             if(!success){
+                 toastr.warning("DocType load Failed");
+             }
+             const docType= $('#docType');
+             docType.empty();
+              
+            list.forEach(item=>{
+                docType.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+
+            if (list.length > 0) {
+                docType.val(list[0].value);
+                 GetVNo();
+            }
+
+        }catch(err){
+             toastr.error(err.message ||"Unexpected error occured");
+        }
+   }
+
+   async function ItemDDL(){
+       try
+       {
+            const res = await fetch('/LoomProductionOrder/ITEM',{
+                method: 'GET'
+            });
+            if(!res.ok) throw new Error("Network Error");
+            
+            const{success, list}= await res.json();
+            if(!success){
+                toastr.warning("Item Dropdown load failed");
+            }
+            const itemlist= $('#ddlItem');
+            itemlist.empty();
+            itemlist.append('<option value="">Select Item</option>');
+
+            list.forEach(item=>{
+                    itemlist.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+
+       }catch(err){
+             toastr.error(err.message ||"Unexpected error occured");
+       }
+   }
+
+   async function GetVNo() {
+        try {
+            const vType = $('#docType').val();
+            if (!vType) {
+                console.warn("vType is empty");
+                return;
+            }
+            const res = await fetch(`/LoomProductionOrder/GenerateVNo?vType=${encodeURIComponent(vType)}`);
+
+            if (!res.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await res.json();
+            if (data.v_NO) {
+                $('#NumDocNo').val(data.v_NO);
+                const docId = vType + data.v_NO;
+                console.log("DOC_ID:", docId);
+            } else {
+                toastr.warning("V_NO not found in response");
+            }
+
+        } catch (e) {
+             toastr.error("Error in GetVNo:", e);
+        }
+   }
+
+   function readOnlyMode() {
+       $('#LoomProductionOrderForm').find('input, select, textarea').prop('disabled', true);
+       $('#tblLoomProductionOrder').css('pointer-events', 'none');
+       $('#btnSave').hide();
+       $('.btn-add-row').hide();
+       $('.btn-add-action').hide();
+       $('.btn-delete-action').hide();
+       $('#NumDocNo').prop('disabled', false);
+       $('#LoomProductionOrderForm input, #LoomProductionOrderForm textarea').css({
+            'background-color': '#f5f5f5',
+            'cursor': 'not-allowed'
+       });
+       $('#LoomProductionOrderForm select').css({
+            'background-color': '#f5f5f5',
+            'cursor': 'not-allowed'
+       });
+   }
+
+</script>

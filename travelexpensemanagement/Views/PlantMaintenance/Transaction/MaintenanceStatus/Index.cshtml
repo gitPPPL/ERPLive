@@ -1,0 +1,1561 @@
+﻿@{
+    ViewBag.Title = "Maintenance Status ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+<fieldset>
+    <legend class="legend-field">Maintenance Status</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "MaintenanceStatusList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="MaintenanceStatusForm">
+        <input type="hidden" class="form-control" id="docId" name="DOC_ID" value="">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Document Type</label>
+                    <select class="form-control" id="ddlDocumentType">
+                        <option value="">--Select Document Type--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Document No</label>
+                    <input type="number" class="form-control" id="NumDocNo" readonly />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Document Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <fieldset>
+                    <legend class="sub-legend">Section</legend>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="radio-label" id="erp-selected-section">
+                                    <input type="radio" name="section" value="selected">
+                                    Selected
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="radio-label" id="erp-all-section">
+                                    <input type="radio" name="section" value="all" checked>
+                                    All
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="erp-dropdown-section" style="display:none;">
+                        <select class="form-control" id="RadioSection">
+                            <option value="">--Select Section--</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <fieldset>
+                    <legend class="sub-legend">Place</legend>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="radio-label" id="erp-selected-place">
+                                    <input type="radio" name="place" value="selected">
+                                    Selected
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="radio-label" id="erp-all-place">
+                                    <input type="radio" name="place" value="all" checked>
+                                    All
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="erp-dropdown-place" style="display:none;">
+                        <select class="form-control" id="RadioPlace">
+                            <option value="">---Select Place---</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="row mt-1">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Plan Name</label>
+                    <select class="form-control" id="ddlPlanName">
+                        <option value="">Select Plan Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Plan No</label>
+                    <input type="number" class="form-control" id="NumPlanNo" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" class="form-control" id="DtStartDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" class="form-control" id="DtEndDate" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Equipment</label>
+                    <input type="text" class="form-control" id="txtEquipment" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Complaint Reason/Fault</label>
+                    <select class="form-control" id="ddlComplaintReasonFault">
+                        <option value="">Select Complaint Reason/Fault</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Plan Send/Complaint by Dept.</label>
+                    <select class="form-control" id="ddlPlanSendComplaintDept">
+                        <option value="">Select Plan Send/Complaint by Dept.</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Place</label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Complaint No.</label>
+                    <input type="number" class="form-control" id="NumComplaintNo" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Prepared By</label>
+                    <select class="form-control" id="ddlPreparedBy">
+                        <option value="">Select Prepared By</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Machine Status</label>
+                    <input type="text" class="form-control" id="TxtMachineStatus" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Stop Date</label>
+                    <input type="date" class="form-control" id="NumStopDate" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Complaint Date</label>
+                    <input type="date" class="form-control" id="DtComplaintDate" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select class="form-control" id="ddlPriority">
+                        <option value="">Select Priority</option>
+                        <option value="">Urgent</option>
+                        <option value="">Non-Urgent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Machine Name</label>
+                    <select class="form-control" id="ddlMachineName">
+                        <option value="">Select Machine Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Complaint Remarks</label>
+                    <textarea typeof="text" class="form-control" id="txtcomplaintremarks" placeholder="Enter Complaint Remarks" style="height:50px;"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Resolved By Department</label>
+                    <select class="form-control" id="ddlResolvedDepartment">
+                        <option value="">Select Resolved By Department</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Department Remarks</label>
+                    <textarea typeof="text" class="form-control" id="txtDepartmentremarks" placeholder="Enter Department Remarks" style="height:50px;"></textarea>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="button-right btn-mt">
+                    <button type="button" id="btnselectcomplaint" class="btn btn-primary"><i class="fa fa-clipboard"></i>Select Complaint/Plan</button>
+                </div>
+                <div class="modal fade" id="maintananceStatus" tabindex="-1" aria-labelledby="maintenanceStatusLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content draggable-modal">
+                            <div class="popup-header">
+                                <h5 class="popup-title" id="maintenanceStatusLabel">Copy From</h5>
+                                <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                            <input type="text" id="searchBoxPR" class="form-control border-0" placeholder="Search..." />
+
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <div class="form-row">
+                                                <input type="checkbox" id="chkAppendMaintenanceStatus">
+                                                <label class="checkbox-label" for="chkAppendMaintenanceStatus">Append</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="btn-rightalign">
+                                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="getSelectedRows()"><i class="fa fa-copy"></i>Copy</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="table-responsive">
+                                        <table id="tblMaintenanceStatus" class="table-width">
+                                            <thead class="table-head">
+                                                <tr>
+                                                    <th><input type="checkbox" id="selectAllPR" /></th>
+                                                    <th>Vno</th>
+                                                    <th>Vtype</th>
+                                                    <th>Vdate</th>
+                                                    <th>Machine Name</th>
+                                                    <th>Priority</th>
+                                                    <th>Fault Code</th>
+                                                    <th>Complaint Date</th>
+                                                    <th>Mach Stop</th>
+                                                    <th>To dept</th>
+                                                    <th>To dept</th>
+                                                    <th>Mcode</th>
+                                                    <th>Plancode</th>
+                                                    <th>EDate</th>
+                                                    <th>FromDept</th>
+                                                    <th>Priority1</th>
+                                                    <th>Complaint_Remark</th>
+                                                    <th>Prepared_By</th>
+                                                    <th style="display:none;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+    @* NavTab *@
+    <div class="navtab-form">
+        <ul class="nav nav-tabs" id="maintenanceTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link-tab active" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">Activity</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="spares-tab" data-bs-toggle="tab" data-bs-target="#spares" type="button" role="tab">Spares</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="Resource-tab" data-bs-toggle="tab" data-bs-target="#Resource" type="button" role="tab">Resource</button>
+            </li>
+
+        </ul>
+        <div class="tab-content" id="MaintenanceStatusTabContent">
+            <!-- Activity Tab -->
+            <div class="tab-pane fade show active" id="activity">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblActivityList" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Activity</th>
+                                    <th>Category</th>
+                                    <th>Checklist</th>
+                                    <th>Frequency</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="activitytablePagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Spares Tab -->
+            <div class="tab-pane fade" id="spares">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblSparesDetails" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Item Name</th>
+                                    <th>Quantity</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Resource Details Tab -->
+            <div class="tab-pane fade" id="Resource">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblResourceDetails" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Employee Name</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Hours</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="offset-md-9 col-md-3">
+                    <div class="button-right btn-mt">
+                        <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<script>
+        // Section Radio Buttons and Dropdown
+    const erpSelectedSection = document.querySelector("input[name='section'][value='selected']");
+    const erpAllSection = document.querySelector("input[name='section'][value='all']");
+    const erpDropdownSection = document.getElementById("erp-dropdown-section");
+
+    // Place Radio Buttons and Dropdown
+    const erpSelectedPlace = document.querySelector("input[name='place'][value='selected']");
+    const erpAllPlace = document.querySelector("input[name='place'][value='all']");
+    const erpDropdownPlace = document.getElementById("erp-dropdown-place");
+
+    // Add event listeners for "Section" radio buttons
+    erpSelectedSection.addEventListener("change", function() {
+        if (erpSelectedSection.checked) {
+            erpDropdownSection.style.display = "block";  // Show dropdown
+        }
+    });
+
+    erpAllSection.addEventListener("change", function() {
+        if (erpAllSection.checked) {
+            erpDropdownSection.style.display = "none";  // Hide dropdown
+        }
+    });
+
+    // Add event listeners for "Place" radio buttons
+    erpSelectedPlace.addEventListener("change", function() {
+        if (erpSelectedPlace.checked) {
+            erpDropdownPlace.style.display = "block";  // Show dropdown
+        }
+    });
+
+    erpAllPlace.addEventListener("change", function() {
+        if (erpAllPlace.checked) {
+            erpDropdownPlace.style.display = "none";  // Hide dropdown
+        }
+    });
+</script>
+
+<script>
+    let activity = [];
+    let checkList = [];
+    let frequency = [];
+    let category = [];
+
+    let $activityTbody;
+    let $sparesTbody;
+    let $resourceTbody;
+
+    $(document).ready(function () {
+
+        $activityTbody = $('#tblActivityList tbody');
+        $sparesTbody = $('#tblSparesDetails tbody');
+        $resourceTbody = $('#tblResourceDetails tbody');
+
+    });
+    /* ================= ACTIVITY TABLE ================= */
+
+    function addActivityRow(data = {}) {
+
+        $activityTbody.find('.btn-add-action').remove();
+
+        let activityOptions = '<option value="">--Select Activity--</option>';
+        activity.forEach(function(item){
+            activityOptions += '<option value="'+ item.value +'">'+ item.text +'</option>';
+        });
+
+        let checklistOptions = '<option value="">--Select Checklist--</option>';
+        checkList.forEach(function(item){
+            checklistOptions += '<option value="'+ item.value +'">'+ item.text +'</option>';
+        });
+
+        let frequencyOptions = '<option value="">--Select Frequency--</option>';
+        frequency.forEach(function(item){
+            frequencyOptions += '<option value="'+ item.value +'">'+ item.text +'</option>';
+        });
+
+        let CategoryOptions = '<option value="">--Select Category--</option>';
+        category.forEach(function(item){
+            CategoryOptions += '<option value="'+ item.value +'">'+ item.text +'</option>';
+        });
+
+        const row = `
+            <tr>
+
+                <td style="display:none;">${data.code || ''}</td>
+
+                <td>
+                   <select class="form-control ddlActivity">${activityOptions} </select>
+                </td>
+
+                <td>
+                  <select class="form-control ddlCategory">${CategoryOptions} </select>
+                </td>
+
+                <td>
+                   <select class="form-control ddlChecklist">${checklistOptions}</select>
+                </td>
+
+                <td>
+                   <select class="form-control ddlFrequency">${frequencyOptions} </select>
+                </td>
+
+                <td>
+                   <input type="date" class="form-control txtStartDate">
+                </td>
+
+                <td>
+                   <input type="date" class="form-control txtEndDate">
+                </td>
+
+                <td>
+                   <input type="text" class="form-control txtStatus">
+                </td>
+
+                <td>
+                   <input type="text" class="form-control txtRemarks">
+                </td>
+
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+                </td>
+
+            </tr>`;
+
+        $activityTbody.append(row);
+
+    }
+
+    /* ================= SPARES TABLE ================= */
+
+    function addSparesRow(data = {}) {
+
+        $sparesTbody.find('.btn-add-action').remove();
+
+        const row = `
+            <tr>
+
+                <td style="display:none;">${data.code || ''}</td>
+
+                <td>
+                   <select class="form-control ddlItemName" style="width:100%"></select>
+               </td>
+
+                <td>
+                   <input type="number" class="form-control txtQty">
+                </td>
+
+                <td>
+                   <input type="text" class="form-control txtRemarks">
+                </td>
+
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+                </td>
+
+            </tr>`;
+
+        $sparesTbody.append(row);
+        initItemSearch();
+    }
+    /* ================= RESOURCE TABLE ================= */
+
+    function addResourceRow(data = {}) {
+
+        $resourceTbody.find('.btn-add-action').remove();
+
+        const row = `
+            <tr>
+
+                <td style="display:none;">${data.code || ''}</td>
+
+                    <td>
+                       <select class="form-control ddlEmployee" style="width:100%"></select>
+                    </td>
+
+                    <td>
+                       <input type="date" class="form-control txtStartDate">
+                    </td>
+
+                    <td>
+                       <input type="date" class="form-control txtEndDate">
+                    </td>
+
+                    <td>
+                       <input type="number" class="form-control txtHours">
+                    </td>
+
+                    <td>
+                       <input type="text" class="form-control txtRemarks">
+                    </td>
+
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+                </td>
+
+            </tr>`;
+
+        $resourceTbody.append(row);
+        initEmployeeSearch();
+    }
+
+    /* ================= ADD ROW EVENTS ================= */
+
+    $(document).on('click', '#activity .btn-add-row, #activity .btn-add-action', function () {
+        addActivityRow();
+    });
+
+    $(document).on('click', '#spares .btn-add-row, #spares .btn-add-action', function () {
+        addSparesRow();
+    });
+
+    $(document).on('click', '#Resource .btn-add-row, #Resource .btn-add-action', function () {
+        addResourceRow();
+    });
+
+
+    /* ================= DELETE ROW ================= */
+
+    $(document).on('click', '.btn-delete-action', function () {
+
+        const $row = $(this).closest('tr');
+        const $tbody = $row.closest('tbody');
+        const isLastRow = $row.is(':last-child');
+
+        $row.remove();
+
+        if (isLastRow) {
+
+            const $lastRow = $tbody.find('tr:last');
+
+            if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+
+                $lastRow.find('td:last').prepend(
+                    `<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>`
+                );
+
+            }
+
+        }
+
+    });
+
+</script>
+
+@* Main Script *@
+<script>
+    let isEditMode = false;
+    $(document).ready(function(){
+      const urlParams = new URLSearchParams(location.search);
+      const docId= urlParams.get('docId');
+      const mode = new URLSearchParams(window.location.search).get('mode');
+
+         setCurrentDate();
+         if(mode === "view"){
+              ReadOnlyMode();
+         }
+
+         //=====Load all dropdown========
+         loadAllDropdowns().then(function(){
+             addActivityRow();
+             addSparesRow();
+             addResourceRow();
+             if(docId){
+                 isEditMode = true;
+                 loadListData(docId);
+             } else {
+                 GetVNo();
+             }
+         });
+          
+         //=========Save and Update Data=========
+         $('#btnSave').on('click', function (e) {
+            e.preventDefault();
+
+            let activityDetails = [];
+            let sparesDetails = [];
+            let resourceDetails = [];
+
+            //================= ACTIVITY TABLE =================
+            $('#tblActivityList tbody tr').each(function () {
+                let row = {
+                    ACT_CODE: $(this).find('.ddlActivity').val(),
+                    ACT_NAME: $(this).find('.ddlActivity option:selected').text(),
+                    CAT_CODE: $(this).find('.ddlCategory').val(),
+                    CAT_NAME: $(this).find('.ddlCategory option:selected').text(),
+                    CHK_CODE: $(this).find('.ddlChecklist').val(),
+                    CHK_NAME: $(this).find('.ddlChecklist option:selected').text(),
+                    FREQUENCY: $(this).find('.ddlFrequency option:selected').text(),
+                    AS_DATE: $(this).find('.txtStartDate').val(),
+                    AE_DATE: $(this).find('.txtEndDate').val(),
+                    STATUS: $(this).find('.txtStatus').val(),
+                    AREMARKS: $(this).find('.txtRemarks').val()
+                };
+                activityDetails.push(row);
+            });
+            //================= SPARES TABLE =================
+            $('#tblSparesDetails tbody tr').each(function () {
+                let row = {
+                    SITEM_CODE: $(this).find('.ddlItemName').val(),
+                    SITEM_NAME: $(this).find('.ddlItemName option:selected').text(),
+                    QUANTITY: $(this).find('.txtQty').val(),
+                    SREMARKS: $(this).find('.txtRemarks').val()
+                };
+                sparesDetails.push(row);
+            });
+            //================= RESOURCE TABLE ================= 
+            $('#tblResourceDetails tbody tr').each(function () {
+                let row = {
+                    EMP_CODE: $(this).find('.ddlEmployee').val(),
+                    EMP_NAME: $(this).find('.ddlEmployee option:selected').text(),
+                    FS_DATE: $(this).find('.txtStartDate').val(),
+                    FE_DATE: $(this).find('.txtEndDate').val(),
+                    HOUR: $(this).find('.txtHours').val(),
+                    FREMARKS: $(this).find('.txtRemarks').val()
+                };
+                resourceDetails.push(row);
+            });
+
+            //================= MAIN MODEL =================
+            let model = {
+                DOC_ID: $('#docId').val(),
+                V_TYPE: $('#ddlDocumentType').val(),
+                V_NO: parseInt($('#NumDocNo').val()),
+                V_DATE: $('#DtDocDate').val(),
+                PLAN_CODE:$('#ddlPlanName').val(),
+                PLAN_NAME: $('#ddlPlanName option:selected').text(),
+                PLAN_NO: $('#NumPlanNo').val(),
+                PLACE_CODE: $('#ddlPlace').val(),
+                PLACE_NAME: $('#ddlPlace option:selected').text(),
+                ITEM_NAME: $('#txtEquipment').val(),
+                DEPT_CODE: $('#ddlPlanSendComplaintDept').val(),
+                DEPT_NAME: $('#ddlPlanSendComplaintDept option:selected').text(),
+                CLDEPT_CODE: $('#ddlResolvedDepartment').val(),
+                S_DATE: $('#DtStartDate').val(),
+                E_DATE: $('#DtEndDate').val(),
+                CLOSE_REMARKS: $('#txtDepartmentremarks').val(),
+                Action: isEditMode && $('#docId').val() ? "Update" : "Insert",
+
+                ActivityList: activityDetails,   
+                SparesList: sparesDetails,      
+                FollowResource: resourceDetails
+            };
+               
+            //================= SAVE AJAX =================
+       
+            $('.circle-loader').css('display', 'flex');
+            $.ajax({
+                url: '/MaintenanceStatus/SaveOrUpdateResult',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (res) {
+                    if (res.success) {
+                        if (res.isUpdate) {
+                            showFlashMessageByKey('update', 'success');
+                        } else {
+                            showFlashMessageByKey('insert', 'success');
+                        }
+                        setTimeout(function(){
+                            window.location.href = '/MaintenanceStatusList/Index';
+                        },500)
+                    }
+                    else {
+                        toastr.warning("Data Saved Failed");
+                    }
+                },
+                error: function (xhr) {
+                  let msg = xhr.responseText || "Unexpected error occurred";
+                  toastr.error(msg);
+                },
+                complete: function () {
+                    //====hide loader======
+                   $('.circle-loader').css('display', 'none');
+                }
+            });
+
+         });
+    });
+   
+    //===Current Date=======
+    function setCurrentDate() {
+        let today = new Date().toISOString().split('T')[0];
+        $("#DtDocDate").val(today);
+    }
+
+    //======Date Format========
+    function formatDateForInput(dateStr) {
+        if (!dateStr) return '';
+        return dateStr.split('T')[0];
+    }
+
+    //=====Load Data on edit=======
+    function loadListData(docId){
+        //====show loader======
+        $('.circle-loader').css('display', 'flex');
+        $.ajax({
+            url: '/MaintenanceStatus/LoadListData',
+            type: 'GET',
+            data: { docId: docId },
+            success: function(res){
+                if(res.success){
+                    console.log("Edit Data", res);
+                    const header = res.header;
+                    const activity = res.activity;
+                    const spares = res.spares;
+                    const resources = res.resources;
+                    // --- Header Fields ---
+                     $('#docId').val(header.doC_ID);
+                     console.log("Hidden DOC_ID after set:", $('#docId').val());
+                     $('#NumDocNo').val(header.v_NO);
+                     $('#DtDocDate').val(formatDateForInput(header.v_DATE));
+                     $('#ddlDocumentType').val(header.v_TYPE);
+                     $('#ddlPlanName').val(header.plaN_CODE);
+                     $('#NumPlanNo').val(header.plaN_NO);
+                     $('#ddlPlace').val(header.placE_CODE);
+                     $('#txtEquipment').val(header.iteM_NAME);
+                     $('#ddlPlanSendComplaintDept').val(header.depT_CODE);
+                     $('#ddlResolvedDepartment').val(header.cldepT_CODE);
+                     $('#DtStartDate').val(formatDateForInput(header.s_DATE));
+                     $('#DtEndDate').val(formatDateForInput(header.e_DATE));
+                     $('#txtDepartmentremarks').val(header.closE_REMARKS);
+
+                    // --- Activity Table ---
+                    $activityTbody.empty();
+                    activity.forEach(function(a, index){
+                        addActivityRow({
+                            code: a.ACT_CODE,
+                            ACT_CODE: a.ACT_CODE,
+                            ACT_NAME: a.ACT_NAME,
+                            CAT_CODE: a.CAT_CODE,
+                            CAT_NAME: a.CAT_NAME,
+                            CHK_CODE: a.CHK_CODE,
+                            CHK_NAME: a.CHK_NAME,
+                            FREQUENCY: a.FREQUENCY,
+                            AS_DATE: a.AS_DATE,
+                            AE_DATE: a.AE_DATE,
+                            STATUS: a.STATUS,
+                            AREMARKS: a.AREMARKS
+                        });
+                        const $row = $activityTbody.find('tr:last');
+                         $row.find('.ddlActivity').val(a.acT_CODE);
+                         $row.find('.ddlCategory').val(a.caT_CODE);
+                         $row.find('.ddlChecklist').val(a.chK_CODE);
+                         $row.find('.ddlFrequency').val(a.frequency.toString());
+                         $row.find('.txtStartDate').val(formatDateForInput(a.aS_DATE));
+                         $row.find('.txtEndDate').val(formatDateForInput(a.aE_DATE));
+                         $row.find('.txtStatus').val(a.status);
+                        $row.find('.txtRemarks').val(a.aremarks);
+                    });
+
+                    $sparesTbody.empty();
+                    spares.forEach(function(s, index){
+                        addSparesRow({code: s.SITEM_CODE});
+                        const $row = $sparesTbody.find('tr:last');
+                        const option = new Option(s.siteM_NAME, s.siteM_CODE, true, true);
+                        $row.find('.ddlItemName').append(option).trigger('change');
+                        $row.find('.txtQty').val(s.quantity);
+                        $row.find('.txtRemarks').val(s.sremarks);
+                    });
+
+                    // --- Resource Table ---
+                    $resourceTbody.empty();
+                    resources.forEach(function(r, index){
+                        addResourceRow({code: r.EMP_CODE});
+                        const $row = $resourceTbody.find('tr:last');
+                        const option = new Option(r.emP_NAME, r.emP_CODE, true, true);
+                        $row.find('.ddlEmployee').append(option).trigger('change');
+                        $row.find('.txtStartDate').val(formatDateForInput(r.fE_DATE));
+                        $row.find('.txtEndDate').val(formatDateForInput(r.fS_DATE));
+                        $row.find('.txtHours').val(r.hour);
+                        $row.find('.txtRemarks').val(r.fremarks);
+                    });
+                }
+                else{
+                    console.warn("Failed to load edit data:", res.message || res);
+                    toastr.error("Failed to load edit data");
+                }
+            },
+            error: function(xhr){
+                console.error("Error loading edit data:", xhr.responseText);
+                toastr.error("Error loading edit data");
+            },
+            complete: function () {
+                //====hide loader======
+               $('.circle-loader').css('display', 'none');
+            }
+        });
+    }
+
+    //=====Load All DropDown=======
+    function loadAllDropdowns(){
+      return Promise.all([
+            DocTypeDDL(),
+            RadioSectionDDL(),
+            RadioPlaceDDL(),
+            PlanNameDDL(),
+            FaultDDL(),
+            ComplaintDeptDDL(),
+            PlaceDDL(),
+            PreparedBYDDL(),
+            ResolveByDeptDDL(),
+            MachineNameDDL(),
+            ActivityDDl(),
+            CheckListDDl(),
+            frequencyDDl(),
+            CategoryDDl()
+      ])
+        .then(function(){
+            console.log("All dropdowns loaded");
+        })
+        .catch(function(){
+            toastr.error("Some dropdown failed to load");
+        });
+    }
+
+    //====Bind DropDowns=====
+    function DocTypeDDL(callback){
+        return $.ajax({
+            url:'/MaintenanceStatus/DocTypeDropdown',
+            type:'GET',
+            dataType:'json',
+            success: function(res){
+                if(res.success){
+                    const docType = $('#ddlDocumentType');
+                    docType.empty();
+
+                    //docType.append('<option value="">--Select DocType--</option>');
+
+                    $.each(res.data, function(index, item){
+                        docType.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    const docIdVal = $('#docId').val();
+
+                    if (!docIdVal) {
+                        docType.prop('selectedIndex', 0); 
+                        GetVNo();
+                    }
+
+                    $('#ddlDocumentType').off('change').on('change', function () {
+                        const vType = $(this).val();
+                        if (!vType) return;
+                        GetVNo();
+                    });
+
+                    if(typeof callback==="function") callback();
+                }
+            },
+            error:function(xhr){
+                console.error("DocType Error:", xhr.responseText);
+            }
+        });
+    }
+
+    function RadioSectionDDL(callback){
+        return $.ajax({
+            url:'/MaintenanceStatus/SectionDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const radioSection=$('#RadioSection');
+                    radioSection.empty();
+
+                    radioSection.append('<option value="">--Select Section--</option>');
+
+                    $.each(res.data, function(index, item){
+                        radioSection.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Section Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function RadioPlaceDDL(callback){
+        return $.ajax({
+            url:'/MaintenanceStatus/PlaceDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const radioPlace=$('#RadioPlace');
+                    radioPlace.empty();
+
+                    radioPlace.append('<option value="">--Select Place--</option>');
+
+                    $.each(res.data, function(index, item){
+                        radioPlace.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function PlanNameDDL(callback){
+        return  $.ajax({
+            url:'/MaintenanceStatus/PlanNameDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const planeName=$('#ddlPlanName');
+                    planeName.empty();
+
+                    planeName.append('<option value="">--Select PlanName--</option>');
+
+                    $.each(res.data, function(index, item){
+                        planeName.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function FaultDDL(callback){
+        return  $.ajax({
+            url:'/MaintenanceStatus/FaultDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const fault=$('#ddlComplaintReasonFault');
+                    fault.empty();
+
+                    fault.append('<option value="">--Select ComplaintReason/Fault--</option>');
+
+                    $.each(res.data, function(index, item){
+                        fault.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function ComplaintDeptDDL(callback){
+        return  $.ajax({
+            url:'/MaintenanceStatus/SectionDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const complainDept=$('#ddlPlanSendComplaintDept');
+                    complainDept.empty();
+
+                    complainDept.append('<option value="">--Select Complaint Department--</option>');
+
+                    $.each(res.data, function(index, item){
+                        complainDept.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function PlaceDDL(callback){
+        return  $.ajax({
+            url:'/MaintenanceStatus/PlaceDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const place=$('#ddlPlace');
+                    place.empty();
+
+                    place.append('<option value="">--Select Place--</option>');
+
+                    $.each(res.data, function(index, item){
+                        place.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function PreparedBYDDL(callback){
+        return  $.ajax({
+            url:'/MaintenanceStatus/PrepareByDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const preparedBy=$('#ddlPreparedBy');
+                    preparedBy.empty();
+
+                    preparedBy.append('<option value="">--Select PreparedBY--</option>');
+
+                    $.each(res.data, function(index, item){
+                        preparedBy.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function ResolveByDeptDDL(callback){
+        return $.ajax({
+            url:'/MaintenanceStatus/SectionDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const resolveDept=$('#ddlResolvedDepartment');
+                    resolveDept.empty();
+
+                    resolveDept.append('<option value="">--Select Department--</option>');
+
+                    $.each(res.data, function(index, item){
+                        resolveDept.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Section Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function MachineNameDDL(callback){
+        return  $.ajax({
+            url:'/MaintenanceStatus/MachineDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const machine=$('#ddlMachineName');
+                    machine.empty();
+
+                    machine.append('<option value="">--Select Machine Name--</option>');
+
+                    $.each(res.data, function(index, item){
+                        machine.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning.warning("Section Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function ActivityDDl(callback) {
+        return $.ajax({
+            url: '/MaintenanceStatus/ActivityDDl',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    activity = res.data;
+                    if (typeof callback === "function") callback();
+                }
+                else {
+                    toastr.warning("Activity dropdown load failed");
+                }
+            },
+            error: function () {
+                toastr.error("Error loading parameter");
+            }
+        });
+    };
+
+    function CheckListDDl(callback) {
+       return $.ajax({
+            url: '/MaintenanceStatus/PMCheckListDDl',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    checkList = res.data;
+                    if (typeof callback === "function") callback();
+                }
+                else {
+                    toastr.warning("Checklist dropdown load failed");
+                }
+            },
+            error: function () {
+                toastr.error("Error loading parameter");
+            }
+       });
+    };
+
+    function frequencyDDl(callback) {
+       return $.ajax({
+            url: '/MaintenanceStatus/FrequencyDDL',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    frequency = res.data;
+                    if (typeof callback === "function") callback();
+                }
+                else {
+                    toastr.warning("Frequency dropdown load failed");
+                }
+            },
+            error: function () {
+                toastr.error("Error loading parameter");
+            }
+       });
+    };
+
+    function CategoryDDl(callback) {
+       return $.ajax({
+            url: '/MaintenanceStatus/CategoryDDL',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    category = res.data;
+                    if (typeof callback === "function") callback();
+                }
+                else {
+                    toastr.warning("Frequency dropdown load failed");
+                }
+            },
+            error: function () {
+                toastr.error("Error loading parameter");
+            }
+       });
+    };
+
+    function initItemSearch(){
+
+        $('.ddlItemName').select2({
+
+            placeholder: "Search Item",
+            allowClear: true,
+
+            ajax: {
+
+                url: '/MaintenanceStatus/SearchItem',
+                dataType: 'json',
+                delay: 250,
+
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+
+                processResults: function (data) {
+                    return {
+                        results: data.map(function(item){
+                            return {
+                                id: item.value,
+                                text: item.text
+                            };
+                        })
+                    };
+
+                },
+                cache: true
+            }
+
+        });
+
+    }
+
+    function initEmployeeSearch(){
+
+        $('.ddlEmployee').select2({
+
+            width:'100%',
+            placeholder: "Search Employee",
+            allowClear: true,
+
+            ajax: {
+                url: '/MaintenanceStatus/EmployeeDDL',
+                dataType: 'json',
+                delay: 250,
+
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    let results = [];
+                    if(data.success && data.data){
+
+                        data.data.forEach(function(item){
+                            results.push({
+                                id: item.value,
+                                text: item.text
+                            });
+                        });
+
+                    }
+                    return { results: results };
+                },
+
+                cache: true
+            }
+
+        });
+
+    }
+
+    //====Generate VNo========
+    async function GetVNo()
+    {
+       try
+       {
+          console.log("GetVNo called");
+          const vType = $('#ddlDocumentType').val();
+          const res = await fetch(`/MaintenanceStatus/GenerateVNo?vType=${vType}`);
+          const data = await res.json();
+            if (data.v_NO) {
+               $('#NumDocNo').val(data.v_NO);
+               const docId = vType + data.v_NO;
+               console.log("DOC_ID:", docId);  
+            } 
+       }catch (e)
+       {
+         console.error(e);
+       }
+    }
+
+    //======Read only mode==========
+    function ReadOnlyMode() {
+        $('#MaintenanceStatusForm input, #MaintenanceStatusForm textarea')
+            .prop('readonly', true);
+
+        $('#MaintenanceStatusForm select')
+            .prop('disabled', true);
+
+        $('#MaintenanceStatusForm input[type="radio"]')
+            .prop('disabled', true);
+
+        $('#tblActivityList tbody tr, #tblSparesDetails tbody tr, #tblResourceDetails tbody tr')
+            .each(function () {
+
+                $(this).find('input, textarea').prop('readonly', true);
+                $(this).find('select').prop('disabled', true);
+                $(this).find('select').each(function () {
+                    if ($(this).hasClass('select2-hidden-accessible')) {
+                        $(this).prop('disabled', true).trigger('change.select2');
+                    }
+                });
+            });
+        $('#btnSave').hide(); 
+        $('#btnselectcomplaint').prop('disabled', true);
+        $('.btn-add-row, .btn-add-action, .btn-delete-action').hide();
+    }
+
+</script>
+
+@* Copy Data Script *@
+<script>
+    $(document).on('click', '#btnselectcomplaint', function () {
+        var vType = $('#ddlDocumentType').val();
+        console.log("Sending vType:", vType);
+        var myModal = new bootstrap.Modal(document.getElementById('maintananceStatus'));
+        myModal.show();
+        loadComplaintTable(vType);
+    });
+
+    function loadComplaintTable(vType) {
+            //====show loader======
+        $('.circle-loader').css('display', 'flex'); 
+        $.ajax({
+            url: '/MaintenanceStatus/GetCopyData',
+            type: 'GET',
+            data: { vType: vType},
+            success: function (res) {
+                if (res.success) {
+                    let tbody = $("#tblMaintenanceStatus tbody");
+                    tbody.empty();
+                    $.each(res.data, function (index, item) {
+                        let row = `<tr
+                            data-vtype="${item.vType}"
+                            data-vno="${item.vNo}"
+                            data-vdate="${item.vDate}"
+                            data-machine="${item.MachineName || ''}"
+                            data-priority="${item.priority || ''}"
+                            data-fault="${item.faultCode || ''}"
+                            data-complaintdate="${item.complaintDate || ''}"
+                            data-machstop="${item.machStop || ''}"
+                            data-todept="${item.toDept || ''}"
+                            data-todeptname="${item.to_Dept || ''}"
+                            data-mcode="${item.mcode || ''}"
+                            data-plancode="${item.plancode || ''}"
+                            data-edate="${item.eDate || ''}"
+                            data-fromdept="${item.fromDept || ''}"
+                            data-prioritytext="${item.priorityText || ''}"
+                            data-remarks="${item.complainT_REMARKS || ''}"
+                            data-preparedby="${item.prepared_By || ''}"
+                        >
+                            <td><input type="checkbox" class="row-select"/></td>
+                            <td>${item.vType}</td>
+                            <td>${item.vNo}</td>
+                            <td>${item.vDate}</td>
+                            <td>${item.MachineName || ''}</td>
+                            <td>${item.priority || ''}</td>
+                            <td>${item.faultCode || ''}</td>
+                            <td>${item.complaintDate || ''}</td>
+                            <td>${item.machStop || ''}</td>
+                            <td>${item.toDept || ''}</td>
+                            <td>${item.to_Dept || ''}</td>
+                            <td>${item.mcode || ''}</td>
+                            <td>${item.plancode || ''}</td>
+                            <td>${item.eDate || ''}</td>
+                            <td>${item.fromDept || ''}</td>
+                            <td>${item.priorityText || ''}</td>
+                            <td>${item.complainT_REMARKS || ''}</td>
+                            <td>${item.prepared_By || ''}</td>
+                        </tr>`;
+                        tbody.append(row);
+                    });
+                } else {
+                    alert("Data load failed");
+                }
+            },
+            error: function (xhr) {
+               let msg = xhr.responseText || "Unexpected error occurred";
+               toastr.error(msg);
+            },
+            complete: function () {
+                //====hide loader======
+               $('.circle-loader').css('display', 'none');
+            }
+        });
+    }
+
+    function getSelectedRows() {
+        let selectedRow = $('.row-select:checked').closest('tr');
+        if (selectedRow.length === 0) {
+            toastr.warning("Please select a row");
+            return;
+        }
+        const data = {
+            vType: selectedRow.data('vtype'),
+            vNo: selectedRow.data('vno'),
+            vDate: selectedRow.data('vdate'),
+            machine: selectedRow.data('machine'),
+            priority: selectedRow.data('priority'),
+            fault: selectedRow.data('fault'),
+            complaintDate: selectedRow.data('complaintdate'),
+            machStop: selectedRow.data('machstop'),
+            toDept: selectedRow.data('todept'),
+            toDeptName: selectedRow.data('todeptname'),
+            mcode: selectedRow.data('mcode'),
+            plancode: selectedRow.data('plancode'),
+            eDate: selectedRow.data('edate'),
+            fromDept: selectedRow.data('fromdept'),
+            priorityText: selectedRow.data('prioritytext'),
+            remarks: selectedRow.data('remarks'),
+            preparedBy: selectedRow.data('preparedby')
+        };
+
+        $('#ddlDocumentType').val(data.vType);
+        $('#NumDocNo').val(data.vNo);
+        $('#DtDocDate').val(data.vDate);
+        $('#txtEquipment').val(data.machine);
+        $('#ddlPriority').val(data.priority);
+        $('#DtComplaintDate').val(data.complaintDate);
+        $('#NumStopDate').val(data.eDate);
+        $('#txtcomplaintremarks').val(data.remarks);
+        $('#ddlPreparedBy').val(data.preparedBy);
+        $('#ddlPlanSendComplaintDept').val(data.fromDept);
+        $('#ddlResolvedDepartment').val(data.toDept);
+        $('#maintananceStatus').modal('hide');
+    }
+</script>
+

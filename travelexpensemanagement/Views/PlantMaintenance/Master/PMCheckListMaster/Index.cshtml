@@ -1,0 +1,422 @@
+﻿@{
+	ViewBag.Title = "PMCheckList Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* Loader  *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">CheckList Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "PMCheckListMasterList")'" type="button" class="btn btn-draft">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="CheckListMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Check List Type</label>
+					<select class="form-control" id="ddlType">
+						<option value="">--Select Type--</option>
+						<option value="MaintenanceType/Service">MaintenanceType/Service</option>
+						<option value="Pre-UseInspection">Pre-UseInspection</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Check List Name</label>
+					<input type="text" class="form-control" id="txtCheckListName" name="Name" placeholder="Enter Check List Name">
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Activity Master</label>
+					<select class="form-control" id="ddlActivity">
+						<option value="">--Select Activity--</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Category</label>
+					<select class="form-control" id="ddlCategory">
+						<option value="">--Select Category--</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="card">
+			<div class="table-responsive">
+				<table id="tblCheckListParameter" class="table-width">
+					<thead class="table-head">
+						<tr>
+							<th style="display:none;">Code</th>
+							<th>Parameter</th>
+							<th>Remarks</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="btn-add-row-last">
+							<i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<div class="pagination-end">
+						<div class="custom-pagination" id="tablePagination"></div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+@*======Table Script===========*@
+<script>
+	let $tbody;
+	$(document).ready(function () {
+		$tbody = $('#tblCheckListParameter tbody');
+		
+	});
+
+	//=========Add Row and Delete Row=======================
+	function addRow(data = {}) {
+
+		let options = '<option value="">--Select Parameter--</option>';
+
+		parameterList.forEach(function (item) {
+
+		let selected = data.parameterCode == item.value ? 'selected' : '';
+
+		options += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+
+		});
+
+		$tbody.find('.btn-add-action').remove();
+
+		const row = `
+			<tr>
+
+			<td style="display:none;">${data.code || ''}</td>
+
+			<td>
+			   <select class="form-control ddlParameter"> ${options} </select>
+			</td>
+
+			<td>
+			   <input type="text" class="form-control txtRemarks"value="${data.remarks || ''}">
+			</td>
+
+			<td>
+				<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+				<i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+			</td>
+
+			</tr>`;
+
+		$tbody.append(row);
+
+	}
+	$(document).on('click', '.btn-add-row, .btn-add-action', function () {
+		addRow();
+	});
+
+	//=============Delete Row====================
+	$(document).on('click', '.btn-delete-action', function () {
+
+		const $row = $(this).closest('tr');
+		const isLastRow = $row.is(':last-child');
+
+		$row.remove();
+
+		//===============If last row deleted → show plus on new last row ===================
+		if (isLastRow) {
+			const $lastRow = $tbody.find('tr:last');
+			if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+				$lastRow.find('td:last').prepend(
+					`<i class="fa fa-plus btn-add-action text-success"
+						title="Add Row"
+						style="cursor:pointer;"></i>`
+				);
+			}
+		}
+	});
+
+	$(document).on('click', '.btn-delete-action', function () {
+		$(this).closest('tr').remove();
+	});
+
+	$(document).on('change', '.ddlItemName', function () {
+		const selectedCode = $(this).val();
+		const row = $(this).closest('tr');
+		row.find('.txtItemCode').val(selectedCode);
+	});
+</script>
+
+
+<script>
+	let parameterList = [];
+
+	$(document).ready(function(){
+
+		const urlParams = new URLSearchParams(window.location.search);
+		const code = urlParams.get('code');
+		const mode = new URLSearchParams(window.location.search).get('mode');
+
+    //====Load Dropdowns=========
+		ddlActivity();
+		ddlCategory();
+		
+	//======Load table Data And ReadOnly Mode===========
+		loadParameter(function() {
+			if(code){
+				loadDataOnEdit(code, function(){	
+					if(mode==="view"){
+						setReadOnlyMode();
+					}
+				});
+			} else {
+				addRow();
+				if(mode==="view"){
+				  setReadOnlyMode(); 
+				}
+			}
+		});
+
+	//===========Save and Update Data================
+		$('#btnSave').on('click', function (e) {
+
+			e.preventDefault();
+
+			if (!validateRequiredField('#ddlType', 'CheckList Type')) return;
+			if (!validateRequiredField('#ddlCategory', 'Category')) return;
+
+			const details = [];
+
+			//====== Table rows collect ==========
+			$('#tblCheckListParameter tbody tr').each(function () {
+
+				const parameterCode = $(this).find('.ddlParameter').val();
+				const parameterName = $(this).find('.ddlParameter option:selected').text();
+				const remarks = $(this).find('.txtRemarks').val();
+				console.log("Row values:", parameterCode, parameterName, remarks);
+
+				if (parameterCode) {
+					details.push({
+						PARAMETER_CODE: parseInt(parameterCode),
+						PARAMETER_NAME: parameterName,
+						REMARKS: remarks
+					});
+				}
+
+			});
+			const codeVal= $('#CODE').val() || null;
+			const formData = {
+
+				CODE: codeVal,
+				CHECKLIST_TYPE: $('#ddlType').val(),
+				CHECKLIST_NAME: $('#txtCheckListName').val(),
+				CATEGORY_CODE: parseInt($('#ddlCategory').val()) || null,
+				ACTIVITY_CODE: parseInt($('#ddlActivity').val()) || null,
+				Details: details,
+				Action:codeVal > 0 ?  "Update" : "Insert",
+			};
+			console.log("FormData", formData);
+
+			  //===show loader===
+	        $('.circle-loader').css('display', 'flex');
+			$.ajax({
+				url: '/PMCheckListMaster/SaveAndUpdateCheckListMaster',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(formData),
+				success: function (res) {
+					if (res.success) {
+						if(formData.Action==="Insert") showFlashMessageByKey('insert','success');
+						else showFlashMessageByKey('update','success');
+				        
+						setTimeout(function(){
+							window.location.href='/PMCheckListMasterList/Index';
+						},500);
+					}
+					else {
+						toastr.error(res.message);
+					}
+				},
+				error: function (xhr) {
+					let msg = xhr.responseText || "Unexpected error occurred";
+	                toastr.error(msg);
+				},
+				complete: function(){
+					//===Hide the loader===
+	             $('.circle-loader').css('display', 'none');
+				}
+			});
+
+		});
+	});
+
+	//==========Load Data On Edit============
+	function loadDataOnEdit(code,callback){
+		//===Show Loader====
+		$('.circle-loader').css('display', 'flex');
+
+		$.ajax({
+			url:'/PMCheckListMaster/loadDataOnEdit',
+			type:'Get',
+			data:{code:code},
+			success: function(res){
+				if(res.success){
+					const data= res.data;
+
+					$('#CODE').val(data.code);
+
+					ddlActivity(() => $('#ddlActivity').val(data.activitY_CODE));
+					ddlCategory(() => $('#ddlCategory').val(data.categorY_CODE));
+
+					$('#ddlType').val(data.checklisT_TYPE);
+					$('#txtCheckListName').val(data.checklisT_NAME);
+
+					const detailsArray = res.details || [];
+					console.log("Details Array", res.details);
+					$tbody.empty();
+					if(detailsArray.length > 0){
+						detailsArray.forEach(function(d){
+							addRow({
+								parameterCode: d.parameteR_CODE,
+								remarks: d.remarks
+							});
+						});
+					} else {
+						addRow();
+					}
+					if(typeof callback === "function") callback();
+
+				}else{
+					toastr.warning("Data Load Failed");
+				}
+			},error: function(xhr){
+				let msg = xhr.responseText || "Unexpected error occurred";
+				toastr.error(msg);
+			},
+			complete: function(){
+				//====Hide Loader=====
+				$('.circle-loader').css('display', 'none');
+			}
+		});
+	};
+
+	//======Read only Mode=========
+	function setReadOnlyMode(){
+		
+		$('#CheckListMasterForm').find('input,select').prop('disabled', true);
+		$('#btnSave').hide();
+		$('#tblCheckListParameter').find('select, input').prop('disabled', true);
+		$('.btn-add-row, .btn-add-action, .btn-delete-action').prop('disabled',true);
+	}
+
+	//==============Bind Dropdown=============
+	function ddlActivity(callback){
+	    $.ajax({
+			url: '/PMCheckListMaster/ActivityDDl',
+			type:'Get',
+			dataType:'Json',
+			success: function(res){
+				if(res.success){
+				  const activity= $('#ddlActivity');
+				  activity.empty();
+				  activity.append('<option value="">--Select Activity--</option>');
+
+				  $.each(res.data, function(index, item){
+					  activity.append('<option value="' + item.value + '">' + item.text + '</option>');
+				  });
+
+				  if(typeof callback==="function") callback();
+				} 
+				else
+				{
+					taostr.warning("Activity Dropdown load failed !!");
+				}
+			}, error: function(xhr){
+				let msg = xhr.responseText || "Unexpected error occurred";
+			    toastr.error(msg);
+			}
+		});
+	};
+
+	function ddlCategory(callback){
+		$.ajax({
+			url:'/PMCheckListMaster/CategoryDDL',
+			type:'Get',
+			dataType: 'Json',
+			success: function(res){
+				if(res.success){
+					const category=$('#ddlCategory');
+					category.empty();
+
+					category.append('<option value="">--Select Category--</option>');
+					$.each(res.data, function(index, item){
+						category.append('<option value="' + item.value + '">' + item.text + '</option>');
+					});
+					if(typeof callback==="function") callback();
+				}
+				else{
+					taostr.warning("Category Dropdown load failed !!");
+				}
+			},
+			error: function(xhr){
+				let msg = xhr.responseText || "Unexpected error occurred";
+				toastr.error(msg);
+			}
+		});
+	};
+
+	function loadParameter(callback) {
+		$.ajax({
+			url: '/PMCheckListMaster/ParameterDDl',
+			type: 'GET',
+			dataType: 'json',
+			success: function (res) {
+				if (res.success) {
+					parameterList = res.data;  
+					if (typeof callback === "function") callback();
+				}
+				else {
+					toastr.warning("Parameter dropdown load failed");
+				}
+			},
+			error: function () {
+				toastr.error("Error loading parameter");
+			}
+		});
+	};
+</script>

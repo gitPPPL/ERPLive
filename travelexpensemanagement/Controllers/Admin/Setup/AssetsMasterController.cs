@@ -38,7 +38,6 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
         public IActionResult InsertAsset([FromForm] AssetModel model)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
-            //FIX (string → int conversion)
             int yearCode = Convert.ToInt32(globalVar.PubFYearCode);
             int compCode = Convert.ToInt32(globalVar.PubCompCode);
 
@@ -76,7 +75,6 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
     }
 }
 
-
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.Data.SqlClient;
 //using Microsoft.Extensions.Configuration;
@@ -95,7 +93,7 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
 //    {
 //        private readonly DataBaseConnection _dbConnection;
 //        private readonly GlobalVariableService _globalVariableService;
-//        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
+//        using travelexpensemanagement.Common.Globalvariable;
 //        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
 
 //        public AssetsMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,

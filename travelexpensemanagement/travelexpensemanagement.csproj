@@ -84,12 +84,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\FinancialAccounting\Accounting\" />
-    <Folder Include="Controllers\PlantMaintenance\Master\" />
-    <Folder Include="Controllers\Production\Master\" />
-    <Folder Include="Models\PlantMaintenance\Master\" />
-    <Folder Include="Models\Production\Master\" />
-    <Folder Include="Views\PlantMaintenance\Master\" />
-    <Folder Include="Views\Production\Master\" />
     <Folder Include="wwwroot\attachments\Purchase\" />
   
     <Folder Include="wwwroot\css\css\bootstrap\css\" />

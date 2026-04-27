@@ -1,0 +1,142 @@
+﻿@{
+	ViewBag.Title = "Lot Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+  @* Loader *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">Lot Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "LotMasterList")'" type="button" class="btn btn-draft">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="LotMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Name</label>
+					<input type="text" class="form-control" id="txtName" name="Name" placeholder="Enter Name">
+				</div>
+
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>ShortName</label>
+					<input type="text" class="form-control" id="txtShortName" name="ShortName" placeholder="Enter Short Name">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</div>
+	   </div>
+	</form>
+</fieldset>
+<script>
+	$(document).ready(function(){
+	    const urlParams= new URLSearchParams(window.location.search);
+		const code= urlParams.get('code');
+		const mode= new URLSearchParams(window.location.search).get('mode');
+		
+		//=======ReadOnly Mode========
+		if(mode==='view'){
+			$('#LotMasterForm input').prop('readonly', true);
+			$('#btnSave').hide();
+		}
+
+		//=======Load Data========
+		if (code) {
+		  loadDataOnEdit(code);
+		}
+
+		//=========Save And Update Data=============
+		$('#btnSave').on('click',function(e){
+			e.preventDefault();
+			if (!validateRequiredField('#txtName', 'Name')) return;
+			if(!validateRequiredField('#txtShortName','Short Name')) return;
+
+			var formData={
+				CODE:$('#CODE').val() || 0,
+				Name:$('#txtName').val(),
+				ShortName:$('#txtShortName').val(),
+				Action:$('#CODE').val() > 0 ? "Update" : "Insert"
+			}
+			console.log("FormData",formData);
+				//show loader
+	        $('.circle-loader').css('display', 'flex');
+
+			$.ajax({
+				url:'/LotMaster/SaveAndUpdateData',
+				type:'Post',
+				contentType:'application/json',
+				data:JSON.stringify(formData),
+				success: function(response){
+					if(response.success){
+					if(formData.Action=="Insert") showFlashMessageByKey('insert','success');
+	                else showFlashMessageByKey('update','success');
+						setTimeout(function(){
+							window.location.href='/LotMasterList/Index';
+						},500)
+					}else{
+						toastr.warning("Failed To Save Data!!")
+					}
+				},
+				error: function(){
+					let msg = xhr.responseText || "Unexpected error occurred";
+	                toastr.error(msg);
+				},
+			   complete: function () {
+				   //hide loader  
+	              $('.circle-loader').css('display', 'none');
+	           }
+			});
+		});
+	})
+    
+	//=======Load Data on Edit===========
+	function loadDataOnEdit(code){
+			//show loader
+	    $('.circle-loader').css('display', 'flex');
+
+		$.ajax({
+			url:'/LotMaster/LoadOnEdit',
+			type:'Get',
+			data:{code: code},
+			success: function(response){
+				if(response.success){
+					const data = response.data;
+					console.log("Edit Data",response.data);
+					$('#CODE').val(data.code);
+					$('#txtName').val(data.name);  
+					$('#txtShortName').val(data.shortName);
+				}else{
+					toastr.warning("Failed to load data");
+				}
+			},
+			error:function(xhr){
+				 let msg = xhr.responseText || "Unexpected error occurred";
+	             toastr.error(msg);
+			},
+		    complete: function () {
+			   $('.circle-loader').css('display', 'none');
+			}
+		})
+	}
+</script>

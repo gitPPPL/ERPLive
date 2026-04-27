@@ -1,0 +1,273 @@
+﻿@{
+    ViewBag.Title = "Tenacity Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;  // Exit loop once found current menu permission
+        }
+    }
+}
+<fieldset>
+    <legend class="legend-field">Tenacity Master List</legend>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TenacityMaster")'" type="button" class="btn btn-add">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-info">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-export" onclick="Approval()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblchemicalRecipeList" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">Code</th>
+                        <th>Name</th>
+                        <th>Tenacity Type</th>
+                        <th>MinStd</th>
+                        <th>MaxStd</th>
+                        <th>Category</th>
+                        <th>Active</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<script>
+
+    let currentPage = 1;
+    const pageSize = 10;
+        
+    const tenaGroupMap = {
+        "1": "A",
+        "2": "H",
+        "3": "M",
+        "4": "MS",
+        "5": "SH",
+        "6": "SHH"
+    };
+    $(document).ready(function () {
+
+        loadTenacityTable();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadTenacityTable();
+        });
+
+    });
+    //==========Load Data in list Table=============
+    function loadTenacityTable() {
+        $.ajax({
+            url: '/TenacityMasterList/GetTenacityList',
+            type: 'GET',
+            data: {
+                pageNumber: currentPage,
+                pageSize: pageSize,
+                searchTerm: $('#searchBox').val()
+            },
+            success: function (res) {
+
+                console.log("Response:", res);
+
+                if (!res.success) {
+                    alert("Failed to load data");
+                    return;
+                }
+
+                const lists = res.data;
+                const totalCount = res.totalCount;
+
+                let tbody = $('#tblchemicalRecipeList tbody');
+                tbody.empty();
+
+                if (!lists || lists.length === 0) {
+                    tbody.append('<tr><td colspan="8" class="text-center text-muted">No records found</td></tr>');
+                    renderPagination(0);
+                    return;
+                }
+
+                $.each(lists, function (index, item) {
+
+                    let activeText = item.active == 1 ? "Active" : "Non-Active";
+
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${item.code}</td>
+                            <td>${item.name || ''}</td>
+                            <td>${item.tenacitY_TYPE || ''}</td>
+                            <td>${item.miN_STD || ''}</td>
+                            <td>${item.maX_STD || ''}</td>
+                            <td>${tenaGroupMap[item.tenacitY_CAT] || ''}</td> <!-- Category -->
+                            <td>${item.active}</td>
+                            <td>
+                                <i class="fa fa-edit btn-edit" style="cursor:pointer" onclick="editTensityMaster(${item.code})"></i>
+                                <i class="fa fa-eye btn-view" style="cursor:pointer" onclick="viewItemGroupDetails(${item.code})"></i>
+                                <i class="fa fa-trash btn-delete" style="cursor:pointer" onclick="deleteTensityMaster(${item.code})"></i>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount);
+            },
+            error: function (xhr) {
+                alert("Error loading data: " + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(totalCount) {
+
+        const totalPages = Math.ceil(totalCount / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+      
+        if (currentPage > 1) 
+        {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+        }
+        
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+
+            html += `
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
+                    onclick="goToPage(${i})">${i}</button>
+            `;
+        }
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+        }
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadTenacityTable();
+    }
+
+      function editTensityMaster(code) {
+        window.location.href = '/TenacityMaster/Index?code=' + code;
+    }
+
+    function viewItemGroupDetails(code) {
+        window.location.href = '/TenacityMaster/Index?code=' + code + '&mode=view';
+    }
+
+    //=========== DELETE DATA =====================
+    function deleteTensityMaster(code) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to delete this record?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/TenacityMasterList/DeleteTenacityMaster',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted', 'Data has been deleted successfully', 'success');
+                            loadListData();
+                        } else {
+                            Swal.fire('Failed', 'Failed to delete data', 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'An error occurred while deleting', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>

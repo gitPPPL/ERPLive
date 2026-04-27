@@ -1,0 +1,149 @@
+﻿@{
+	ViewBag.Title = "Tenacity Group Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+      @*  Loader  *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">Tenacity Group Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "TenacityGroupMasterList")'" type="button" class="btn btn-draft">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="chemicalReciepeMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Tensity Name</label>
+					<input type="text" class="form-control" id="tensityName" name="tensityName" placeholder="Enter Tensity Name">
+				</div>
+			
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Description</label>
+					<input type="text" class="form-control" id="Description" name="Description" placeholder="Enter Description">
+				</div>
+			</div>
+			
+		</div>
+
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+<script>
+   $(document).ready(function(){
+		var mode = new URLSearchParams(window.location.search).get('mode');
+	    var code = new URLSearchParams(window.location.search).get('code');
+		
+		//=================ReadOnly Mode============
+		if (mode === 'view') {
+			$('#chemicalReciepeMasterForm input').prop('readonly', true);
+			$('#chemicalReciepeMasterForm select').prop('disabled', true);
+			$('#chemicalReciepeMasterForm textarea').prop('readonly', true);
+			$('#btnSave').hide();
+		}
+		//====Load Edit Table========
+		if (code) {
+		 loadData(code);
+	    }
+
+      //===========Save And Update==================
+	  $('#btnSave').on('click', function(e)
+	  {
+			e.preventDefault();
+
+			if (!validateRequiredField('#tensityName', 'Name')) return;
+			if (!validateRequiredField('#Description', 'Description')) return;
+			
+			var formData={
+				Code: parseInt($('#CODE').val()) || 0,
+				Name:$('#tensityName').val(),
+				Description:$('#Description').val(),
+				Action: $('#CODE').val() > 0 ? "UPDATE" : "INSERT"
+			}
+			  //show loader
+	        $('.circle-loader').css('display', 'flex');
+
+			$.ajax({
+				url:'/TenacityGroupMaster/SaveOrUpdateTenacityMaster',
+				type:'Post',
+				contentType: 'application/json',
+				data:JSON.stringify(formData),
+				success:function(response){
+					if(response.success){
+						console.log("Response", response);
+						if(formData.Action=="INSERT") showFlashMessageByKey('insert', 'success');
+						else showFlashMessageByKey('update', 'success');
+
+						setTimeout(function(){
+							window.location.href='/TenacityGroupMasterList/Index';
+						},500);
+					}
+					else{
+						toaster.warning('Data Saved Failed !!');
+					}
+				},
+				error:function(xhr){
+					let msg = xhr.responseText || "Unexpected error occurred";
+	                toastr.error(msg);
+				},
+				complete: function () {
+					$('.circle-loader').css('display', 'none');
+				}
+			})
+	  });
+   });
+
+   //=============Load Data On Edit==============
+	function loadData(code) {
+			//show loader
+	    $('.circle-loader').css('display', 'flex');
+
+		$.ajax({
+		    url: '/TenacityGroupMaster/GetById',
+			type: 'GET',
+			data:{code:code},
+			success: function (data) {
+				if(data.success)
+				{
+					console.log("Data",data);
+					$('#CODE').val(data.code); 
+					$('#tensityName').val(data.name);
+					$('#Description').val(data.description);
+				} else{
+					toastr.warning("Failed To load Data!!");
+				}
+			},
+			 error:function(xhr){
+				let msg = xhr.responseText || "Unexpected error occurred";
+				toastr.error(msg);
+			 },
+			complete: function () {
+				//hide loader 
+				$('.circle-loader').css('display', 'none');
+			}
+		});
+	}
+</script>

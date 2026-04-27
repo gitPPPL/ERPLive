@@ -1,0 +1,441 @@
+﻿
+@{
+	ViewBag.Title = "Chemical Recipe Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">Chemical Recipe Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "ChemicalRecipeMasterList")'" type="button" class="btn btn-draft">
+			  		<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="chemicalReciepeMasterForm">
+		<input type="hidden" class="form-control" id="docId" name="DOC_ID">
+        <input type="hidden" class="form-control" id="vNo" name="V_NO">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Document Type</label>
+					<select class="form-control" id="docTYPE" >
+						<option value=""> Select Document Type</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Document Date</label>
+					<input type="date" class="form-control" id="docDate">
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Place</label>
+					<select class="form-control" id="ddlPlace" name="ddlPlace">
+						<option value=""> Select Place</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="card">
+			<div class="table-responsive">
+				<table id="tblChemicalRecipe" class="table-width">
+					<thead class="table-head">
+						<tr>
+							<th style="display:none;">Code</th>
+							<th>ID</th>
+							<th>Chemical Name</th>
+							<th>%</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<div class="pagination-end">
+						<div class="custom-pagination" id="tablePagination"></div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+
+@* Table Script *@
+<script>
+
+    let itemList = [];
+    let $ItemDetailsTbody;
+
+    $(document).ready(async function () {
+
+        $ItemDetailsTbody = $('#tblChemicalRecipe tbody');
+
+        await loadItemDropdown();
+
+        if (docId) {
+            await loadDataOnEdit(docId);  
+        } else {
+            addItemDetailsRow();        
+        }
+    });
+
+    // ================= LOAD ITEM DROPDOWN =================
+    function loadItemDropdown() {
+        return $.ajax({
+            url: '/ChemicalRecipeMaster/ChemicalNameDropDown',
+            type: 'GET',
+            success: function (res) {
+                if (res.success) {
+                    itemList = res.data;
+                }
+            },
+            error: function () {
+                alert("Chemical name load failed");
+            }
+        });
+    }
+
+
+    // ================= ADD ROW =================
+    function addItemDetailsRow(data = {}) {
+
+        $ItemDetailsTbody.find('.btn-add-action').remove();
+
+        let itemOptions = '<option value="">--Select Chemical--</option>';
+
+        itemList.forEach(function (item) {
+            itemOptions += `<option value="${item.value}" data-code="${item.value}">
+                                ${item.text}
+                            </option>`;
+        });
+
+        const row = `
+            <tr>
+                
+                <td class="tdItemCode"></td>
+
+                <td>
+                    <select class="form-control ddlItem">
+                        ${itemOptions}
+                    </select>
+                </td>
+
+                <!-- % -->
+                <td>
+                    <input type="number" class="form-control txtPer" placeholder="%">
+                </td>
+
+                <!-- Action -->
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+                </td>
+            </tr>`;
+
+        const $row = $(row);
+        $ItemDetailsTbody.append($row);
+
+        $row.find('.ddlItem').select2({
+            placeholder: "Search Chemical",
+            width: '100%'
+        });
+
+        // Edit mode
+        if (data && data.ITEM_CODE) {
+            $row.find('.ddlItem').val(data.ITEM_CODE).trigger('change');
+            $row.find('.txtPer').val(data.PER);
+        }
+    }
+
+
+    // ================= AUTO FILL CODE =================
+    $(document).on('change', '.ddlItem', function () {
+
+        const selected = $(this).find(':selected');
+        const code = selected.data('code');
+
+        const $row = $(this).closest('tr');
+
+        // ID column me code fill
+        $row.find('.tdItemCode').text(code || '');
+    });
+
+
+    // ================= ADD ROW =================
+    $(document).on('click', '.btn-add-action', function () {
+        addItemDetailsRow();
+    });
+
+
+    // ================= DELETE ROW =================
+    $(document).on('click', '.btn-delete-action', function () {
+
+        const $row = $(this).closest('tr');
+        const $tbody = $row.closest('tbody');
+        const isLastRow = $row.is(':last-child');
+
+        $row.remove();
+
+        if (isLastRow) {
+            const $lastRow = $tbody.find('tr:last');
+
+            if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                $lastRow.find('td:last').prepend(
+                    `<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>`
+                );
+            }
+        }
+    });
+
+</script>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('docId');
+    const mode = new URLSearchParams(window.location.search).get('mode');
+
+    $(document).ready(function(){
+        setCurrentDate();
+        DocTypeDDL();
+        PlaceDDL();
+
+        $('#btnSave').on('click', function (e) {
+            e.preventDefault();
+
+            let details = [];
+
+            // ================= GET TABLE DATA =================
+            $('#tblChemicalRecipe tbody tr').each(function () {
+
+                let itemCode = $(this).find('.tdItemCode').text().trim();
+                let itemName = $(this).find('.ddlItem option:selected').text().trim();
+                let per = $(this).find('.txtPer').val();
+
+                if (itemCode) {
+                    details.push({
+                        ITEM_CODE: parseInt(itemCode),
+                        ITEM_NAME: itemName,
+                        PER: parseFloat(per) || 0
+                    });
+                }
+            });
+
+            // ================= VALIDATION =================
+            if (details.length === 0) {
+                toastr.warning("Please add at least one chemical");
+                return;
+            }
+
+            // ================= MODEL CREATE =================
+            const model = {
+                DOC_ID: $('#docId').val(),
+                V_TYPE: $('#docTYPE').val(),
+                V_NO: $('#vNo').val(),
+                V_DATE: $('#docDate').val(),
+                DEPT_CODE: $('#ddlPlace').val()|| null,
+                DEPT_NAME: $('#ddlPlace option:selected').text()|| null,
+                Details: details
+            };
+      
+            // ================= AJAX CALL =================
+            $.ajax({
+                url: '/ChemicalRecipeMaster/SaveAndUpdate',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (res) {
+                    if(res.success){
+                         console.log("Res", res);
+                        if (res.isUpdate) {
+                            showFlashMessageByKey('update', 'success');
+                        } else {
+                            showFlashMessageByKey('insert', 'success');
+                        }
+                        setTimeout(function(){
+                            window.location.href = '/ChemicalRecipeMasterList/Index';
+                        },500)
+                     } else{
+                        toastr.warning(res.message);
+                     }
+                },
+                error: function (err) {
+                    $('.circle-loader').hide();
+                    toastr.error("Server error");
+                    console.error(err);
+                }
+            });
+
+        });
+    });
+
+    async function loadDataOnEdit(docId) {
+        try {
+            $('.circle-loader').show();
+            const res = await $.ajax({
+                url: '/ChemicalRecipeMaster/loadDataOnEdit',
+                type: 'GET',
+                data: { docId: docId }
+            });
+            if (res.success) {
+            console.log("Edit Data", res);
+                const header = res.header;
+                const items = res.items;
+
+                // ================= HEADER SET =================
+                $('#docId').val(header.doC_ID || header.doC_ID);
+                $('#vNo').val(header.v_NO || header.v_NO);
+                $('#docTYPE').val(header.v_TYPE || header.v_TYPE);
+                $('#docDate').val(header.v_DATE?.split('T')[0]);
+                $('#ddlPlace').val(header.depT_CODE || header.depT_CODE);
+
+                // ================= TABLE CLEAR =================
+                $ItemDetailsTbody.empty();
+
+                if (items.length > 0) {
+                items.forEach(item => {
+                    addItemDetailsRow({
+                        ITEM_CODE: item.iteM_CODE,
+                        ITEM_NAME: item.iteM_NAME,
+                        PER: item.per
+                    });
+                });
+            }  else {
+                    addItemDetailsRow();
+                }
+
+            } else {
+                toastr.error("Failed to load data");
+            }
+
+        } catch (err) {
+            console.error(err);
+            toastr.error("Error loading edit data");
+        } finally {
+            $('.circle-loader').hide();
+        }
+    }
+
+    //====Current Date======
+    function setCurrentDate() {
+        let today = new Date().toISOString().split('T')[0];
+        $("#docDate").val(today);
+    }
+
+    //====Bind DropDowns=====
+    function DocTypeDDL(callback){
+        return $.ajax({
+            url:'/ChemicalRecipeMaster/DocTypeDropdown',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const docType=$('#docTYPE');
+                    docType.empty();
+
+                    $.each(res.data, function(index, item){
+                        docType.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                     if (!docId) {
+                        docType.val(res.data[0].value);
+                        GetVNo();
+                     }
+
+                    // $('#ddlDocType').off('change').on('change', function () {
+                    //    GetVNo();
+                    // });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("DocType Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function PlaceDDL(callback){
+        return $.ajax({
+            url:'/ChemicalRecipeMaster/PlaceDropDown',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const place=$('#ddlPlace');
+                    place.empty();
+
+                    place.append('<option value="">--Select Status--</option>');
+
+                    $.each(res.data, function(index, item){
+                        place.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    //====Generate VNo========
+    async function GetVNo() {
+        try {
+            const vType = $('#docTYPE').val();
+            if (!vType) {
+                console.warn("vType is empty");
+                return;
+            }
+            const res = await fetch(`/ChemicalRecipeMaster/GenerateVNo?vType=${encodeURIComponent(vType)}`);
+
+            if (!res.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await res.json();
+            if (data.v_NO) {
+                $('#vNo').val(data.v_NO);
+            } else {
+                console.warn("V_NO not found in response");
+            }
+
+        } catch (e) {
+            console.error("Error in GetVNo:", e);
+        }
+    }
+</script>
+
+

@@ -2,89 +2,134 @@
 	ViewBag.Title = "Visitor Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-	<legend class="legend-field">Visitor Entry List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="tableSearch" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Visitor Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppagelist-btn erppagelist-btn-add erppagelist-btn-add" onclick="location.href='@Url.Action("Index", "VisitorEntry")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="tableSearch" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btnPrint">
+			<i class="fa fa-print"></i>Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i>Export
+		</button>
+		@* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+			<i class="fa fa-envelope"></i>Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+			<i class="fa fa-check-circle"></i>Approved
+		</button> *@
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblVisitorEntry" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" /> <!-- FIXED -->
+				<col style="width: 80px;" />  <!-- Serial No -->
+				<col style="width: 110px;" /> <!-- Visit Date -->
+				@* <col style="width: 70px;" /> *@  <!-- Slip No -->
+				<col style="width: 150px;" /> <!-- Visitor Name -->
+				<col style="width: 180px;" /> <!-- Organization -->
+				<col style="width: 65px;" />  <!-- In Time -->
+				<col style="width: 75px;" />  <!-- Out Time -->
+				<col style="width: 150px;" /> <!-- Meet Person -->
+				<col style="width: 100px;" /> <!-- Purpose -->
+				<col style="width: 150px;" /> <!-- Address -->
+				<col style="width: 100px;" /> <!-- Mobile -->
+				<col style="width: 100px;" /> <!-- Vehicle No -->
+				
+				<col style="width: 140px;" /> <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Serial No</th>
+					<th>Visit Date</th>
+					@* <th>Slip No</th> *@
+					<th>Visitor Name</th>
+					<th>Organization</th>
+					<th>In Time</th>
+					<th>Out Time</th>
+					<th>Meet Person</th>
+					<th>Purpose</th>
+					<th>Address</th>
+					<th>Mobile</th>
+					<th>Vehicle No</th>
+					@* <th>Material</th>
+					<th>Card No</th> *@
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+
+	</div>
+
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "VisitorEntry")'" type="submit" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblVisitorEntry" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Vno</th>
-						<th>Vdate</th>
-						<th>Slipno</th>
-						<th>Visitorname</th>
-						<th>Organization</th>
-						<th>Intime</th>
-						<th>Outtime</th>
-						<th>Meetperson</th>
-						<th>Purpose</th>
-						<th>Address</th>
-						<th>Mobile</th>
-						<th>Vehicleno</th>
-						<th>Material</th>
-						<th>Cardno</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
+</div>
 
 <script>
-	// Global Variables from controller
-	var compCode = '@ViewBag.CompCode';
-	var branchCode = '@ViewBag.BranchCode';
-	var yearCode = '@ViewBag.YearCode';
 
 	let currentVisitorPage = 1;
-	const visitorPageSize = 10;
+	let visitorPageSize = 10; 
+	let totalVisitorCount = 0;
 
 	$(document).ready(function () {
 		loadAllVisitors();
+
+		//===Export====
+		$('#btnExport').on('click', function () {
+			const searchTerm = $('#tableSearch').val() || '';
+			window.location.href = `/VisitorEntryList/ExportVisitorToExcel?searchTerm=${encodeURIComponent(searchTerm)}`;
+		});
+
+		//====Print(pdf)====
+		$('#btnPrint').on('click', function () {
+			const searchTerm = $('#tableSearch').val() || '';
+			window.open(`/VisitorEntryList/ExportVisitorToPdf?searchTerm=${encodeURIComponent(searchTerm)}`, '_blank');
+		});
 	});
 
 	function loadAllVisitors() {
-		const searchTerm = $('#tableSearch').val(); 
+		const searchTerm = $('#tableSearch').val();
+		$('.circle-loader').css('display', 'flex');
 
 		$.ajax({
-			url: '/VisitorEntryList/GetAllVisitors', 
+			url: '/VisitorEntryList/GetAllVisitors',
 			type: 'GET',
 			dataType: 'json',
 			data: {
@@ -93,26 +138,27 @@
 				pageSize: visitorPageSize
 			},
 			success: function (res) {
-				console.log(res);
+
 				const visitors = res.visitors || [];
 				const totalCount = res.totalCount || 0;
+
+				totalVisitorCount = totalCount; 
 
 				let tbody = $('#tblVisitorEntry tbody');
 				tbody.empty();
 
 				if (visitors.length === 0) {
 					tbody.append('<tr><td colspan="16" class="text-center text-muted">No visitors found.</td></tr>');
-					renderVisitorPagination(0, visitorPageSize, currentVisitorPage);
+					renderNewPagination();
 					return;
 				}
 
 				$.each(visitors, function (index, item) {
 					tbody.append(`
 						<tr>
-							<td style="display:none;">${item.v_NO || ''}</td>
+							<td style="display:none;">${item.doC_ID || ''}</td>
 							<td>${item.v_NO || ''}</td>
 							<td>${item.v_DATE ? formatDate(item.v_DATE) : ''}</td>
-							<td>${item.sliP_NO || ''}</td>
 							<td>${item.name || ''}</td>
 							<td>${item.organization || ''}</td>
 							<td>${item.iN_TIME || ''}</td>
@@ -122,78 +168,129 @@
 							<td>${item.address || ''}</td>
 							<td>${item.mobilE_NO || ''}</td>
 							<td>${item.vehiclE_NO || ''}</td>
-							<td>${item.material || ''}</td>
-							<td>${item.carD_NO || ''}</td>
-							<td>
-								<i class="fas fa-edit text-primary" title="Edit" style="cursor:pointer;" onclick="editVisitor(${item.v_NO})"></i>
-								<i class="fas fa-eye text-secondary ms-2" title="View" style="cursor:pointer;" onclick="viewVisitor(${item.v_NO})"></i>
-								<i class="fas fa-trash text-danger ms-2" title="Delete" style="cursor:pointer;" onclick="deleteVisitor(${item.v_NO})"></i>
+							
+							<td class="action-col">
+								<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="editVisitor('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
+								<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewVisitor('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
+								<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteVisitor('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
+
 							</td>
 						</tr>
 					`);
 				});
 
-				renderVisitorPagination(totalCount, visitorPageSize, currentVisitorPage);
+				renderNewPagination(); 
 			},
 			error: function (xhr) {
-				toastr.error('Error loading visitors: ' + xhr.responseText);
+				showCenterToast('Error loading visitors: ' + xhr.responseText, "error");
+			},
+			complete: function () {
+				$('.circle-loader').css('display', 'none');
 			}
 		});
 	}
 
-	function renderVisitorPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const paginationContainer = $('#tablePagination');
-		paginationContainer.empty();
+	//NEW PAGINATION
+	function renderNewPagination() {
 
-		if (totalPages <= 1) return;
+		const totalPages = Math.ceil(totalVisitorCount / visitorPageSize) || 1;
 
 		let html = '';
+		let maxVisible = 5; // kitne buttons dikhane hai
+		let startPage = Math.max(1, currentVisitorPage - Math.floor(maxVisible / 2));
+		let endPage = startPage + maxVisible - 1;
 
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(${currentPage - 1})">Prev</button>`;
+		if (endPage > totalPages) {
+			endPage = totalPages;
+			startPage = Math.max(1, endPage - maxVisible + 1);
 		}
 
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, currentPage + 2);
+		// First + dots
+		if (startPage > 1) {
+			html += `<span class="page-number" onclick="goToVisitorPage(1)">1</span>`;
+			if (startPage > 2) {
+				html += `<span class="dots">...</span>`;
+			}
+		}
 
-		if (currentPage <= 3) endPage = Math.min(5, totalPages);
-		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
+		// Middle pages
 		for (let i = startPage; i <= endPage; i++) {
-			html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToVisitorPage(${i})">${i}</button>`;
+			html += `<span class="page-number ${i === currentVisitorPage ? 'active' : ''}"
+						onclick="goToVisitorPage(${i})">${i}</span>`;
 		}
 
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToVisitorPage(${totalPages})">Last</button>`;
+		// Last + dots
+		if (endPage < totalPages) {
+			if (endPage < totalPages - 1) {
+				html += `<span class="dots">...</span>`;
+			}
+			html += `<span class="page-number" onclick="goToVisitorPage(${totalPages})">${totalPages}</span>`;
 		}
 
-		paginationContainer.html(html);
+		$('#pageNumbers').html(html);
+
+		// Results Text
+		let start = (currentVisitorPage - 1) * visitorPageSize + 1;
+		let end = Math.min(currentVisitorPage * visitorPageSize, totalVisitorCount);
+
+		if (totalVisitorCount === 0) {
+			start = 0;
+			end = 0;
+		}
+
+		$('#pageInfoText').text(`Results: ${start} - ${end} of ${totalVisitorCount}`);
+
+		$('#prevBtn').prop('disabled', currentVisitorPage === 1);
+		$('#nextBtn').prop('disabled', currentVisitorPage === totalPages);
 	}
 
+	// Prev / Next
+	function prevPage() {
+		if (currentVisitorPage > 1) {
+			currentVisitorPage--;
+			loadAllVisitors();
+		}
+	}
+
+	function nextPage() {
+		const totalPages = Math.ceil(totalVisitorCount / visitorPageSize);
+		if (currentVisitorPage < totalPages) {
+			currentVisitorPage++;
+			loadAllVisitors();
+		}
+	}
+
+	// Page click
 	function goToVisitorPage(page) {
 		currentVisitorPage = page;
 		loadAllVisitors();
 	}
 
-	// Search binding
+	// Page size change
+	function changeRowsPerPage() {
+		visitorPageSize = parseInt($('#pageSizeSelect').val());
+		currentVisitorPage = 1;
+		loadAllVisitors();
+	}
+
+	// Search
 	$('#tableSearch').on('keyup', function () {
 		currentVisitorPage = 1;
 		loadAllVisitors();
 	});
 
-	// Action Functions
-	function editVisitor(id) {
-		window.location.href = '/VisitorEntry/Index?id=' + encodeURIComponent(id);
+	// Edit
+	function editVisitor(docId) {
+		window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId);
 	}
 
-	function viewVisitor(id) {
-		window.location.href = '/VisitorEntry/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	// View
+	function viewVisitor(docId) {
+		window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
 	}
 
-	function deleteVisitor(id) {
+	// Delete
+	function deleteVisitor(docId) {
 		Swal.fire({
 			title: 'Are you sure?',
 			text: "This will permanently delete the visitor entry.",
@@ -206,14 +303,9 @@
 		}).then((result) => {
 			if (result.isConfirmed) {
 				$.ajax({
-					url: '/VisitorEntry/DeleteVisitorEntryByCode',
+					url: '/VisitorEntry/DeleteVisitorEntry',
 					type: 'POST',
-					data: {
-						code: id,
-						compCode: compCode,
-						branchCode: branchCode,
-						yearCode: yearCode
-					},
+					data: { docId: docId },
 					success: function (response) {
 						if (response.success) {
 							Swal.fire('Deleted!', response.message, 'success').then(() => {
@@ -231,10 +323,11 @@
 		});
 	}
 
-	// Utility: Format date as dd-MM-yyyy
+	// Date format
 	function formatDate(dateString) {
 		if (!dateString) return '';
 		const date = new Date(dateString);
 		return date.toLocaleDateString('en-GB');
 	}
+
 </script>

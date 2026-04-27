@@ -1,0 +1,312 @@
+﻿<!-- HEADER -->
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>BOM List</span>
+    </div>
+
+    <div class="erppagelist-header-right">
+
+        <button class="erppagelist-btn erppagelist-btn-add"
+                onclick="location.href='@Url.Action("Index", "BOMMaster")'">
+            <i class="fa fa-plus"></i>
+            Add New
+        </button>
+
+    </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="txtSearch" placeholder="Search BOM, Customer, Order..." />
+    </div>
+
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action" onclick="printTable()">
+            <i class="fa fa-print"></i>
+            Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action" id="btnExport">
+            <i class="fa fa-file-excel"></i>
+            Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action">
+            <i class="fa fa-print"></i>
+            Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve">
+            <i class="fa fa-check-circle"></i>
+            Approved
+        </button>
+    </div>
+
+</div>
+
+<!-- GRID WRAPPER (NEW SAFE LAYER) -->
+<div class="erppagelist-container">
+
+    <div class="excel-wrapper">
+
+        <table id="excelTable" class="excel-table">
+
+            <thead>
+                <tr>
+                    <th>Component Code</th>
+                    <th>Component Name</th>
+                    <th>Item Name</th>
+                    <th>Unlam GSM</th>
+                    <th>Lam GSM</th>
+                    <th>Total GSM</th>
+                    <th>Color</th>
+                    <th>Type of fabric</th>
+                    <th>Fabric Size(CM)</th>
+                    <th>Cut Size(CM)</th>
+                    <th>No of pieces</th>
+                    <th>Total Qty MTRS</th>
+                    <th>Total Kg</th>
+                    <th>Remarks</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="tableBody">
+
+                <tr>
+                    <td>Sample Bag</td>
+                    <td>ABC Ltd</td>
+                    <td>Type A</td>
+                    <td>White</td>
+                    <td>1000</td>
+                    <td>ORD-001</td>
+                    <td class="action-col">
+                        <button class="act-btn edit"><i class="fa fa-edit"></i></button>
+                        <button class="act-btn delete"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Bag B</td>
+                    <td>XYZ Ltd</td>
+                    <td>Type B</td>
+                    <td>Blue</td>
+                    <td>500</td>
+                    <td>ORD-002</td>
+                    <td class="action-col">
+                        <button class="act-btn edit"><i class="fa fa-edit"></i></button>
+                        <button class="act-btn delete"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <div class="page-current" id="pageCurrentText">
+                1 / 1
+            </div>
+            <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+<script>
+        let currentPage = 1;
+    let rowsPerPage = 10;
+    let allRows = [];
+
+    /* ================= INIT ================= */
+    $(document).ready(function () {
+
+        allRows = $("#tableBody tr").clone().toArray();
+
+        renderTable();
+        $("#pageCurrentText").text(`${currentPage} / ${totalPages}`);
+        $("#txtSearch").on("keyup", function () {
+            currentPage = 1;
+            renderTable();
+        });
+
+    });
+
+
+    /* ================= MAIN RENDER ================= */
+    function renderTable() {
+
+        let filter = $("#txtSearch").val().toLowerCase();
+
+        let filtered = allRows.filter(row =>
+            row.innerText.toLowerCase().includes(filter)
+        );
+
+        let totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        let start = (currentPage - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+
+        let pageData = filtered.slice(start, end);
+
+        let tbody = $("#tableBody");
+
+        /* 🔥 SMOOTH ANIMATION */
+        tbody.addClass("fade-out");
+
+        setTimeout(() => {
+
+            tbody.empty();
+
+            if (pageData.length === 0) {
+                tbody.append(`
+                    <tr>
+                        <td colspan="100%" style="text-align:center;padding:15px;">
+                            No records found
+                        </td>
+                    </tr>
+                `);
+            } else {
+                pageData.forEach(row => {
+                    tbody.append($(row).clone());
+                });
+            }
+
+            tbody.removeClass("fade-out").addClass("fade-in");
+
+            setTimeout(() => tbody.removeClass("fade-in"), 200);
+
+        }, 150);
+
+        renderPagination(totalPages);
+
+        /* ✅ RIGHT SIDE TEXT */
+        let totalRecords = filtered.length;
+        let startRecord = totalRecords === 0 ? 0 : start + 1;
+        let endRecord = Math.min(end, totalRecords);
+
+        $("#pageInfoText").text(`Results: ${startRecord} - ${endRecord} of ${totalRecords}`);
+    }
+
+
+    /* ================= PAGINATION ================= */
+    function renderPagination(totalPages) {
+
+        let container = $("#pageNumbers");
+        container.empty();
+
+        if (totalPages <= 1) return;
+
+        let maxVisible = 5;
+
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, start + maxVisible - 1);
+
+        if (end - start < maxVisible) {
+            start = Math.max(1, end - maxVisible + 1);
+        }
+
+        if (start > 1) {
+            container.append(`<button onclick="goToPage(1)">1</button>`);
+            if (start > 2) container.append(`<span>...</span>`);
+        }
+
+        for (let i = start; i <= end; i++) {
+            container.append(`
+                <button class="${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">
+                    ${i}
+                </button>
+            `);
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) container.append(`<span>...</span>`);
+            container.append(`<button onclick="goToPage(${totalPages})">${totalPages}</button>`);
+        }
+
+        /* DISABLE NAV */
+        $("#prevBtn").prop("disabled", currentPage === 1);
+        $("#nextBtn").prop("disabled", currentPage === totalPages);
+    }
+
+
+    /* ================= NAVIGATION ================= */
+    function nextPage() {
+        let totalPages = Math.ceil(getFilteredRows().length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = parseInt(page);
+        renderTable();
+    }
+
+
+    /* ================= ROW CHANGE ================= */
+    function changeRowsPerPage() {
+        rowsPerPage = parseInt($("#pageSizeSelect").val());
+        currentPage = 1;
+        renderTable();
+    }
+
+
+    /* ================= FILTER HELPER ================= */
+    function getFilteredRows() {
+        let filter = $("#txtSearch").val().toLowerCase();
+        return allRows.filter(row =>
+            row.innerText.toLowerCase().includes(filter)
+        );
+    }
+
+
+    /* ================= PRINT ================= */
+    function printTable() {
+        var w = window.open();
+        w.document.write(document.getElementById("excelTable").outerHTML);
+        w.print();
+        w.close();
+    }
+
+
+    /* ================= EXPORT ================= */
+    $("#btnExport").click(function () {
+        var html = document.getElementById("excelTable").outerHTML;
+        var blob = new Blob([html], { type: "application/vnd.ms-excel" });
+
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "BOM_List.xls";
+        a.click();
+    });
+</script>

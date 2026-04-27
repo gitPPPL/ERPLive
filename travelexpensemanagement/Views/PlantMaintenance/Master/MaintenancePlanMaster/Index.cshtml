@@ -1,0 +1,792 @@
+﻿
+@{
+    ViewBag.Title = "Maintenance Plan Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<fieldset>
+    <legend class="legend-field">Maintenance Plan Master</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "MaintenancePlanMasterList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="MaintenancePlanMasterForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Plan Name</label>
+                    <input type="text" class="form-control" id="TxtPlanName" placeholder="Enter Plan Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Equipment</label>
+                    <select class="form-control" id="ddlEquipment">
+                        <option value="">Select Equipment</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Place</label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Section</label>
+                    <select class="form-control" id="ddlSection">
+                        <option value="">Select Section</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Frequency</label>
+                    <select class="form-control" id="ddlFrequency">
+                        <option value="">Select Frequency</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Category</label>
+                    <select class="form-control" id="ddlCategory">
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Due Days</label>
+                    <input type="number" class="form-control" id="NumDueDays" placeholder="Enter Due Days">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" class="form-control" id="NumDueDate">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-mt">
+                    <div class="toggle-wrapper justify-content-center" id="ddlActive">
+                        <input type="hidden" id="IsActive" name="IsActive" value="1">
+                        <div id="customToggle" class="custom-toggle active"></div>
+                        <span id="statusLabel" class="status-label 0 active">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    @* NavTab *@
+    <div class="navtab-form">
+        <ul class="nav nav-tabs" id="maintenanceTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link-tab active" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">Activity</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link-tab" id="spares-tab" data-bs-toggle="tab" data-bs-target="#spares" type="button" role="tab">Spares</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="MaintenanceTabContent">
+            <!-- Activity Tab -->
+            <div class="tab-pane fade show active" id="activity">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblActivityList" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Activity</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="activitytablePagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Spares Tabs -->
+            <div class="tab-pane fade" id="spares">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="tblSparesDetails" class="table-width">
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Item Name</th>
+                                    <th>Quantity</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-add-row-last">
+                                <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            </div>
+                            <div class="pagination-end">
+                                <div class="custom-pagination" id="SparestablePagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offset-md-9 col-md-3">
+                    <div class="button-right btn-mt">
+                        <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<script>
+            //==============FOR TOGGLE==================
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById('customToggle');
+        const label = document.getElementById('statusLabel');
+        const hiddenInput = document.getElementById('IsActive');
+        toggle.addEventListener('click', function () {
+            toggle.classList.toggle('active');
+            const isActive = toggle.classList.contains('active');
+
+            label.textContent = isActive ? 'Active' : 'Inactive';
+            label.classList.toggle('active', isActive);
+            label.classList.toggle('inactive', !isActive);
+
+            hiddenInput.value = isActive ? '1' : '0';
+
+            console.log("Toggle value:", hiddenInput.value);
+        });
+    });
+</script>
+
+<script>
+    let currentPage = 1;
+    let pageSize = 10;
+
+    // ===== GLOBAL addRow FUNCTION =====
+    function addRow(table, type, data = {}) {
+
+        let row = '';
+
+        if (type === 'activity') {
+            let options = '<option value="">--Select Activity--</option>';
+
+            activity.forEach(function (item) {
+
+                let selected = data.activityCode == item.value ? 'selected' : '';
+
+                options += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+
+            });
+
+            row = `
+                <tr class="no-border-input">
+                    <td style="display:none;">${data.code || ''}</td>
+                    <td>
+                        <select class="form-control ddlActivity">${options}</select>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control txtActivityRemarks" value="${data.remarks || ''}" />
+                    </td>
+                    <td>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+                </tr>
+            `;
+
+        } else if (type === 'spares') {
+
+            let options = '<option value="">Search Item</option>';
+            if (data.itemCode) {
+                options += `<option value="${data.itemCode}" selected>${data.itemName || ''}</option>`;
+            }
+            row = `
+                <tr class="no-border-input">
+                    <td style="display:none;">${data.code || ''}</td>
+
+                    <td>
+                        <select class="form-control ddlItem ">${options}</select>
+                    </td>
+
+                    <td>
+                        <input type="number" class="form-control txtQty" value="${data.quantity || ''}" />
+                    </td>
+
+                    <td>
+                        <input type="text" class="form-control txtSpareRemarks" value="${data.remarks || ''}" />
+                    </td>
+
+                    <td>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+                </tr>
+            `;
+        }
+
+        table.append(row);
+
+        setTimeout(function () {
+
+            table.find('.ddlItem').last().select2({
+                width: '100%',
+                placeholder: "Search Item",
+                dropdownParent: $('#spares'),
+
+                ajax: {
+                    url: '/MaintenancePlanMaster/SearchItem',
+                    dataType: 'json',
+                    delay: 250,
+
+                    data: function (params) {
+                        return {
+                            search: params.term
+                        };
+                    },
+
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    id: item.value,
+                                    text: item.text
+                                };
+                            })
+                        };
+                    }
+                }
+            });
+
+            table.find('.ddlActivity').last().select2({
+                width: '100%',
+                placeholder: "Search Activity"
+            });
+
+        }, 100);
+
+        const $lastRow = table.find('tr:last');
+
+        if ($lastRow.find('.btn-add-action').length === 0) {
+            $lastRow.find('td:last').prepend(
+                `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+            );
+        }
+    }
+
+    $(document).ready(function () {
+
+        const $activityTable = $('#tblActivityList tbody');
+        const $sparesTable = $('#tblSparesDetails tbody');
+
+        ActivityDDl(function () {
+            addRow($('#tblActivityList tbody'), 'activity');
+        });
+
+        addRow($('#tblSparesDetails tbody'), 'spares');
+
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+
+            const targetTable = $(this).closest('.tab-pane').find('table tbody');
+            const tableType = targetTable.closest('.tab-pane').attr('id') === 'activity' ? 'activity' : 'spares';
+
+            addRow(targetTable, tableType);
+
+            updateRowIcons(targetTable);
+        });
+
+        $(document).on('click', '.btn-delete-action', function () {
+
+            const $row = $(this).closest('tr');
+
+            $row.remove();
+
+            const $lastRow = $(this).closest('tbody').find('tr:last');
+
+            if ($lastRow.length > 0 && !$lastRow.find('.btn-add-action').length) {
+
+                $lastRow.find('td:last').prepend(
+                    `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                );
+            }
+
+            updateRowIcons($(this).closest('tbody'));
+        });
+
+        function updateRowIcons(table) {
+
+            table.find('tr').each(function () {
+
+                const $row = $(this);
+
+                const $deleteIcon = $row.find('.btn-delete-action');
+
+                const $addIcon = $row.find('.btn-add-action');
+
+                if ($row.is(':last-child')) {
+
+                    if ($addIcon.length === 0) {
+
+                        $row.find('td:last').prepend(
+                            `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                        );
+                    }
+
+                    //$deleteIcon.hide();
+
+                } else {
+
+                    $deleteIcon.show();
+
+                    $addIcon.remove();
+                }
+            });
+        }
+
+    });
+</script>
+
+<script>
+        let activity = [];
+        let itemDdl = [];
+
+    $(document).ready(function(){
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const mode = new URLSearchParams(window.location.search).get('mode');
+
+        loadAllDropdowns();
+
+        if(code){
+            loadDataOnEdit(code);
+        }
+
+        if(mode === "view"){
+            setReadOnlyMode();
+        }
+
+        //=====Save and Update Data=========
+        $('#btnSave').on('click', function (e) {
+
+        e.preventDefault();
+
+        let activityList = [];
+        let spareList = [];
+
+        // ===== Activity Table =====
+            $('#tblActivityList tbody tr').each(function () {
+
+                let activityCode = $(this).find('.ddlActivity').val();
+                let activityName=$(this).find('.ddlActivity option:selected').text();
+                let remarks = $(this).find('.txtActivityRemarks').val();
+
+                if (activityCode) {
+                    activityList.push({
+                        ACTIVITY_CODE: parseInt(activityCode),
+                        ACTIVITY_NAME: activityName,
+                        ACTIVITY_REMARKS: remarks
+                    });
+                }
+
+            });
+
+            // ===== Spares Table =====
+            $('#tblSparesDetails tbody tr').each(function () {
+
+                let itemCode = $(this).find('.ddlItem').val();
+                let itemName=$(this).find('.ddlItem option:selected').text();
+                let qty = $(this).find('.txtQty').val();
+                let remarks = $(this).find('.txtSpareRemarks').val();
+
+                if (itemCode ) {
+                    spareList.push({
+                        ITEM_CODE: parseInt(itemCode),
+                        ITEM_NAME:itemName,
+                        QUANTITY: qty,
+                        SPARE_REMARKS: remarks
+                    });
+
+                }
+
+            });
+
+        //===== Main Model =====
+        const codeVal= $('#TxtCode').val() || 0;
+        const  model = {
+
+            CODE: codeVal,
+            PLAN_NAME: $('#TxtPlanName').val(),
+
+            M_CODE: $('#ddlEquipment').val(),
+            M_NAME: $('#ddlEquipment option:selected').text(),
+
+            PLACE_CODE: $('#ddlPlace').val(),
+            PLACE_NAME: $('#ddlPlace option:selected').text(),
+
+            SECTION_CODE: $('#ddlSection').val(),
+            SECTION_NAME: $('#ddlSection option:selected').text(),
+                
+            FREQUENCY_CODE: $('#ddlFrequency').val(),
+            FREQUENCY: $('#ddlFrequency option:selected').text(),
+
+            CAT_CODE: $('#ddlCategory').val(),
+            CAT_NAME: $('#ddlCategory option:selected').text(),
+
+            DUE_DAYS: $('#NumDueDays').val(),
+            DUE_DATE: $('#NumDueDate').val(),
+            ACTIVE: $('#IsActive').val(),
+
+            Details: activityList,
+            Details1: spareList,
+
+            Action:codeVal > 0 ?  "Update" : "Insert"
+        };
+                 //===show loader===
+            $('.circle-loader').css('display', 'flex');
+            $.ajax({
+                url: '/MaintenancePlanMaster/SaveOrUpdateData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (res) {
+                    if (res.success) {
+                        console.log("Res",res);
+                        if(model.Action==="Insert") showFlashMessageByKey('insert','success');
+                        else showFlashMessageByKey('update','success');
+
+                        setTimeout(function(){
+                            window.location.href='/MaintenancePlanMasterList/Index';
+                        },500);
+                    }
+                    else {
+                        toastr.error(res.error);
+                    }
+                },
+                error: function () {
+                    toastr.error("Error saving data");
+                },
+                complete: function () {
+                 //====hide loader======
+                  $('.circle-loader').css('display', 'none');
+                }  
+            });
+
+        });
+    });
+
+     //======Load Data on Edit=========
+     function loadDataOnEdit(code){
+          //===show loader===
+         $('.circle-loader').css('display', 'flex');
+
+         $.ajax({
+             url:'/MaintenancePlanMaster/LoadDataOnEdit',
+             type:'Get',
+             data:{code:code},
+             success: function(res){
+                 if(res.success){
+                     const data=res.data;
+                     console.log("Edit Data", data);
+
+                    $('#TxtCode').val(data.code);
+                    $('#TxtPlanName').val(data.plaN_NAME);
+                    $('#NumDueDays').val(data.duE_DAYS);
+                  
+                    if (data.duE_DATE) {
+                        $('#NumDueDate').val(data.duE_DATE.split('T')[0]);
+                    }
+
+                    ddlEquipment(()=>$('#ddlEquipment').val(data.m_CODE));
+                    PlaceDDL(()=>$('#ddlPlace').val(data.placE_CODE));
+                    SectionDDL(()=>$('#ddlSection').val(data.sectioN_CODE));
+                    FrequencyDDL(()=>$('#ddlFrequency').val(data.frequencY_CODE));
+                    CategoryDDl(()=>$('#ddlCategory').val(data.caT_CODE));
+
+                    $('#IsActive').val(data.active);
+                    if(data.active==1){
+                        $('#customToggle').addClass('active');
+                        $('#statusLabel').text('Active');
+                    }else{
+                        $('#customToggle').removeClass('active');
+                        $('#statusLabel').text('Inactive');
+                    }
+
+                    //===Activity table data load====
+                    $('#tblActivityList tbody').empty();
+
+                    const details = res.details || [];
+                    console.log("Details", details);
+
+                    details.forEach(function(item){
+                        addRow($('#tblActivityList tbody'), 'activity', {
+                            activityCode: item.activitY_CODE,
+                            remarks: item.activitY_REMARKS
+                        });
+
+                    });
+
+                    //===Spares table data load====
+                    $('#tblSparesDetails tbody').empty();
+
+                    const details1 = res.details1  || [];
+                    console.log("deatils1",details1);
+
+                    details1.forEach(function(item){
+                        addRow($('#tblSparesDetails tbody'),'spares',{
+                            itemCode:item.iteM_CODE,
+                            itemName:item.iteM_NAME,
+                            quantity:item.quantity,
+                            remarks:item.sparE_REMARKS
+                        });
+                        
+                    });
+                    const mode = new URLSearchParams(window.location.search).get('mode');
+                    if(mode === "view"){
+                        setReadOnlyMode();
+                    }
+
+                 } else{
+                     toastr.warning("Failed To load Data On Edit");
+                 }
+             } ,
+             error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+             },
+             complete: function () {
+                 //====hide loader======
+                  $('.circle-loader').css('display', 'none');
+             }
+         });
+     };
+
+    function loadAllDropdowns(){
+
+        Promise.all([
+            ddlEquipment(),
+            PlaceDDL(),
+            SectionDDL(),
+            FrequencyDDL(),
+            CategoryDDl()
+        ]);
+
+    }
+    
+    //======Bind DropDowns=======
+    function ddlEquipment(callback){
+        $.ajax({
+            url:'/MaintenancePlanMaster/EquipmentDDL',
+            type:'Get',
+            dataType: 'Json',
+            success: function(res){
+                if(res.success){
+                    const equipment=$('#ddlEquipment');
+                    equipment.empty();
+
+                    equipment.append('<option value="">--Select Equipment--</option>');
+                    $.each(res.data, function(index, item){
+                        equipment.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                    if(typeof callback==="function") callback();
+                }
+                else{
+                    toastr.warning("Equipment Dropdown load failed !!");
+                }
+            },
+            error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function PlaceDDL(callback){
+        $.ajax({
+            url:'/MaintenancePlanMaster/PlaceDDL',
+            type:'Get',
+            dataType: 'Json',
+            success: function(res){
+                if(res.success){
+                    const place=$('#ddlPlace');
+                    place.empty();
+
+                    place.append('<option value="">--Select Place--</option>');
+                    $.each(res.data, function(index, item){
+                        place.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                    if(typeof callback==="function") callback();
+                }
+                else{
+                    toastr.warning("Place Dropdown load failed !!");
+                }
+            },
+            error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function SectionDDL(callback){
+        $.ajax({
+            url:'/MaintenancePlanMaster/SectionDDL',
+            type:'Get',
+            dataType: 'Json',
+            success: function(res){
+                if(res.success){
+                    const section=$('#ddlSection');
+                    section.empty();
+
+                    section.append('<option value="">--Select Place--</option>');
+
+                    $.each(res.data, function(index, item){
+                        section.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }
+                else{
+                    taostr.warning("Place Dropdown load failed !!");
+                }
+            },
+            error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function FrequencyDDL(callback){
+        $.ajax({
+            url:'/MaintenancePlanMaster/FrequencyDDL',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const frequency=$('#ddlFrequency');
+                    frequency.empty();
+
+                    frequency.append('<option value="">--Select Frequency--</option>');
+
+                    $.each(res.data, function(index, item){
+                        frequency.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    taostr.warning("Frequency Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function ActivityDDl(callback) {
+        $.ajax({
+            url: '/MaintenancePlanMaster/ActivityDDl',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    activity = res.data;
+                    if (typeof callback === "function") callback();
+                }
+                else {
+                    toastr.warning("Parameter dropdown load failed");
+                }
+            },
+            error: function () {
+                toastr.error("Error loading parameter");
+            }
+        });
+    };
+    
+    function CategoryDDl(callback){
+        $.ajax({
+            url:'/MaintenancePlanMaster/CategoryDDl',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const category=$('#ddlCategory');
+                    category.empty();
+
+                    category.append('<option value="">--Select Category--</option>');
+                    $.each(res.data, function(index, item){
+                        category.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+                    if(typeof callback==="function") callback();
+                } else{
+                    toastr.warning("Category DDl Load Failed");
+                }
+            },
+            error: function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            } 
+        });
+    };
+
+    //======ReadOnly Mode=======
+   
+    function setReadOnlyMode() {
+        
+        $('input, select, textarea').prop('disabled', true);
+
+        $('#tblActivityList tbody tr, #tblSparesDetails tbody tr').each(function () {
+            $(this).find('input, select').prop('disabled', true);
+
+            $(this).find('select').each(function () {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).prop('disabled', true).trigger('change.select2');
+                }
+            });
+        });
+           
+        $('.btn-add-row, .btn-add-action, .btn-delete-action').prop('disabled', true).css('pointer-events', 'none');
+        $('#customToggle').css('pointer-events', 'none');
+        $('#btnSave').hide();
+    }
+</script>

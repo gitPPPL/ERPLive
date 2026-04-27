@@ -1,0 +1,222 @@
+﻿@{
+	ViewBag.Title = "Maintenance Plan List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Maintenance Plan List</legend>
+	<div class="row">
+		<div class="col-lg-4">
+			<div class="input-group">
+				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
+			</div>
+		</div>
+		<div class="col-lg-8">
+			<div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "MaintenancePlanMaster")'" type="button" class="btn btn-add">
+					<i class="fa fa-plus"></i>Add
+				</button>
+				<button class="btn btn-print">
+					<i class="fa fa-print"></i> Print
+				</button>
+				<button class="btn btn-export">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+				<button class="btn btn-send">
+					<i class="fa fa-paper-plane"></i> Approval Send
+				</button>
+				<button class="btn btn-approved">
+					<i class="fa fa-check"></i> Approved
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="card">
+		<div class="table-responsive">
+			<table id="tblMaintenancePlanList" class="table-width">
+				<thead class="table-head">
+					<tr>
+						<th style="display:none;">Code</th>
+						<th>Name</th>
+						<th>Machine</th>
+						<th>Category</th>
+						<th>Place</th>
+						<th>Section</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pagination-end">
+					<div class="custom-pagination" id="tablePagination"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</fieldset>
+
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function(){
+        loadListData();
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadListData();
+        });
+    });
+
+    //==========Load Data in list table==============
+    function loadListData() {
+             //====show loader======
+         $('.circle-loader').css('display', 'flex');
+
+         $.ajax({
+             url:'/MaintenancePlanMasterList/loadListData',
+             type: 'GET',
+             data: {
+                 pageNumber: currentPage,
+                 pageSize: pageSize,
+                 searchTerm: $('#searchBox').val()
+             },
+             success: function (response) {
+                 console.log("Response",response);
+                 if (!response.success) {
+                     toastr.warning("Failed to load data");
+                     return;
+                 }
+
+                 const tbody=$("#tblMaintenancePlanList tbody");
+                 tbody.empty();
+
+                 const list = response.data;
+                 const totalCount = response.totalCount;
+
+                 if (!list || list.length === 0) {
+                     tbody.html(`<tr>
+                                    <td colspan="4" class="text-center text-muted">No records found </td>
+                                 </tr>`);
+                     renderPagination(0);
+                     return;
+                 }
+                 $.each(list, function (index, item) {
+
+                    const row=`
+                     <tr>
+                        <td style="display:none;">${item.code}</td>
+                         <td>${item.name || ''}</td>
+                         <td>${item.machine || ''}</td>
+                         <td>${item.category || ''}</td>
+                         <td>${item.place || ''}</td>
+                         <td>${item.section || ''}</td>
+                         <td>
+                             <i class="fa fa-edit btn-edit" style="cursor:pointer" onclick="editMaintenancePlanMaster(${item.code})"></i>
+                             <i class="fa fa-eye btn-view" style="cursor:pointer" onclick="viewMaintenanceMasterDetails(${item.code})"></i>
+                             <i class="fa fa-trash btn-delete" style="cursor:pointer" onclick="deleteMaintenanceMaster(${item.code})"></i>
+                         </td>
+                     </tr>`;
+                    tbody.append(row);
+                 });
+
+                 renderPagination(totalCount);
+             },
+             error: function (xhr) {
+                  let msg = xhr.responseText || "Unexpected error occurred";
+                  toastr.error(msg);
+             },
+             complete: function () {
+                 //====hide loader======
+                $('.circle-loader').css('display', 'none');
+             }
+         });
+    }
+
+     //=============Render Pagination =================
+     function renderPagination(totalCount) {
+
+         const totalPages = Math.ceil(totalCount / pageSize);
+         const paginationContainer = $('#tablePagination');
+         paginationContainer.empty();
+
+         if (totalPages <= 1) return;
+
+         let html = '';
+
+         if (currentPage > 1) {
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+         }
+         let startPage = Math.max(1, currentPage - 2);
+         let endPage = Math.min(totalPages, currentPage + 2);
+
+         for (let i = startPage; i <= endPage; i++) {
+
+             html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"onclick="goToPage(${i})">${i}</button>`;
+         }
+
+         if (currentPage < totalPages) {
+
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+             html += `<button class="btn btn-sm btn-light mx-1"  onclick="goToPage(${totalPages})">Last</button>`;
+
+         }
+         paginationContainer.html(html);
+     }
+
+     function goToPage(page) {
+         currentPage = page;
+         loadListData();
+     }
+
+	 //=========Edit============
+	function editMaintenancePlanMaster(code){
+		 window.location.href='/MaintenancePlanMaster/Index?code=' + code;
+	}
+
+	 //=========View============
+	function viewMaintenanceMasterDetails(code){
+		window.location.href='/MaintenancePlanMaster/Index?code=' + code + '&mode=view';
+	}
+
+    function deleteMaintenanceMaster(code){
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to delete this record?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/MaintenancePlanMasterList/DeleteMaintenancePlanMaster',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function(res) {
+                        if (res.success) {
+                            Swal.fire('Deleted', 'Data has been deleted successfully', 'success');
+                            loadListData();
+                        } else {
+                            Swal.fire('Failed', 'Failed to delete data', 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'An error occurred while deleting', 'error');
+                    }
+                });
+            }
+        });
+    };
+</script>
+

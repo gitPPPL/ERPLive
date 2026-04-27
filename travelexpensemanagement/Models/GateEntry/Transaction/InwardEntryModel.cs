@@ -3,26 +3,11 @@
 namespace travelexpensemanagement.Models.GateEntry
 {
 
-
-
-
-
-
-
     public class InwardEntryModel
     {
-
         public InwardEntry_Header Header { get; set; }
-
         public List<Details> Deatils { get; set; }
-
-
-
     }
-
-
-
-
     public class InwardEntry_Header
     {
         public string? action { get; set; }  
@@ -88,73 +73,36 @@ namespace travelexpensemanagement.Models.GateEntry
         public string? WAYBILL_NO { get;  set; }
         public string? VtypeCode { get;  set; }
         public string? PAN_NO { get;  set; }
-        public string? ShipAddress { get;  set; }
+         public string? ShipAddress { get;  set; }
+         public string? Remarks2 { get;  set; }
 
 
 
 
     }
-
-
-
     public class Details
-
-        {
-
-
-
-
-
-
+    {
         public string? VtypeCode { get; set; }
         public int? ITEM_CODE { get; set; }
-
         public string? ITEM_NAME { get; set; }
-
         public int? DEPT_CODE { get; set; }
         public int? NOS { get; set; }
-
         public decimal?   QTY { get; set; }
-
         public int? UOM_CODE { get; set; }
-
         public string? UOM_NAME { get; set; }
-
         public string? EMPTY { get; set; }
-
         public string? REMARKS { get; set; }
-
         public string? REF_TYPE { get; set; }
-
         public int? REF_NO { get; set; }
-
         public string? MRN_TYPE { get; set; }
-
-        public int? MRN_NO { get; set; }
-          
+        public int? MRN_NO { get; set; }          
         public string? STATUS { get; set; }
-
         public decimal? ADJ_QTY { get; set; }
-
-        public decimal? BALANCEQTY { get; set; }
-          
-        public int? SRNO { get; set; }
-         
+        public decimal? BALANCEQTY { get; set; }          
+        public int? SRNO { get; set; }         
         public decimal? SHIP_RATE { get; set; }
         public string? Department { get; set; }
         public string? Unit { get; set; }
 
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
+     }
+}

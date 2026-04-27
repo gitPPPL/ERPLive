@@ -1,0 +1,168 @@
+﻿@{
+	ViewBag.Title = "PMCategory Master";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<fieldset>
+	<legend class="legend-field">Category Master</legend>
+	<div class="row">
+		<div class="offset-md-8 col-md-4">
+			<div class="button-right">
+				<button onclick="window.location.href='@Url.Action("Index", "PMCategoryMasterList")'" type="button" class="btn btn-draft">
+					<i class="fa fa-list"></i>Back to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<form id="CategoryMasterForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Category Name</label>
+					<input type="text" class="form-control" id="txtName" name="Name" placeholder="Enter Name">
+				</div>
+
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>ShortName</label>
+					<input type="text" class="form-control" id="txtShortName" name="Name" placeholder="Enter Name">
+				</div>
+
+			</div>	
+			<div class="col-md-2">
+				<div class="form-group">
+					<label>Type</label>
+					<select class="form-control" id="ddlType">
+						<option value="">--Select Type--</option>
+						<option value="Machine">Machine</option>
+						<option value="Equipment">Equipment</option>
+						<option value="Instrument">Instrument</option>
+						<option value="Vehicle">Vehicle</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="btn-mt">
+					<div class="toggle-wrapper justify-content-center" id="ddlActive">
+						<input type="hidden" id="IsActive" name="IsActive" value="1">
+						<div id="customToggle" class="custom-toggle active"></div>
+						<span id="statusLabel" class="status-label 0 active">Active</span>
+					</div>
+				</div>
+			</div>
+       </div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+<script>
+	$(document).ready(function(){
+		const urlParams= new URLSearchParams(window.location.search);
+		const code= urlParams.get('code');
+		const mode= new URLSearchParams(window.location.search).get('mode');
+
+		//======Read only mode =============
+		 	if(mode === 'view'){
+				$('#customToggle').css('pointer-events', 'none');
+				$('#txtName, #txtShortName').prop('readonly', true);
+				$('#ddlType').prop('disabled', true);
+				$('#btnSave').hide();
+			}
+
+			if(code){
+				loadDataOnEdit(code);
+			}
+
+        //=================Save and Update Data===========
+		$('#btnSave').on('click', function(e){
+			e.preventDefault();
+
+			if (!validateRequiredField('#txtName', 'Name')) return;
+			if (!validateRequiredField('#ddlType', 'Type')) return;
+
+			var codeVal = $('#CODE').val() || 0;
+			var foamData = {
+				CODE: codeVal,
+				NAME: $('#txtName').val(),
+				SHORTNAME: $('#txtShortName').val(),
+				TYPE: $('#ddlType').val(),
+				ACTIVE: $('#IsActive').val(),
+				Action: codeVal > 0 ? "Update" : "Insert"
+			}
+			console.log("Foam Data", foamData);
+
+			$.ajax({
+				url:'/PMCategoryMaster/SaveOrUpdateData',
+				type:'Post',
+				contentType:'application/json; charset=utf-8',
+				data:JSON.stringify(foamData),
+				success: function(res){
+					if(res.success){
+						if(foamData.Action=="Insert") showFlashMessageByKey('insert','success');
+						else showFlashMessageByKey('update','success');
+
+						setTimeout(function(){
+							window.location.href='/PMCategoryMasterList/Index';
+						},500)
+
+					}else{
+						toastr.warning("Failed To Save Data");
+					}
+				},
+				error: function(xhr){
+					let msg = xhr.responseText || "Unexpected error occurred";
+					toastr.error(msg);
+				}
+			});
+
+		});
+	})
+
+	//===========Load Data on Edit============
+	 function loadDataOnEdit(code){
+		 $.ajax({
+			 url:'/PMCategoryMaster/loadOnEdit',
+			 type:'Get',
+			 data:{code:code},
+			 success:function(res){
+				 if(res.success){
+					 const data= res.data;
+					 console.log("Data", data);
+
+					$('#CODE').val(data.code);
+					$('#txtName').val(data.name);
+					$('#txtShortName').val(data.shortName);
+					$('#ddlType').val(data.type);
+					$('#IsActive').val(data.active);
+
+					const toggle = document.getElementById('customToggle');
+					const label = document.getElementById('statusLabel');
+					if(data.active == 1){
+						toggle.classList.add('active');
+						label.textContent = 'Active';
+						label.classList.add('active');
+						label.classList.remove('inactive');
+					} else {
+						toggle.classList.remove('active');
+						label.textContent = 'Inactive';
+						label.classList.remove('active');
+						label.classList.add('inactive');
+					}
+				 }else{
+					 toastr.warning("Failed to load Data !!");
+				 }
+			 },
+			 error: function(xhr){
+				let msg = xhr.responseText || "Unexpected error occurred";
+				toastr.error(msg);
+			 }
+		 });
+	 }
+</script>

@@ -1,0 +1,266 @@
+﻿@{
+    ViewBag.Title = "Loom PPM Meter Entry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+}
+<fieldset>
+    <legend class="legend-field">Loom PPM Meter Entry List</legend>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "LoomPPMMeterEntry")'" type="button" class="btn btn-add">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-info">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-export" onclick="Approval()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblLoomPPMMeterEntryList" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">docId</th>
+                        <th>VNo</th>
+                        <th>VType</th>
+                        <th>VDate</th>
+                        <th>Employee</th>
+                        <th>Place</th>
+                        <th>Shift</th>
+                        <th>Remark</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function(){
+        loadListData();
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadListData();
+        });
+    });
+
+    async function loadListData() {
+        try {
+            $('.circle-loader').show();
+
+            const response = await $.ajax({
+                url: '/LoomPPMMeterEntryList/loadListData',
+                type: 'GET',
+                data: {
+                    pageNumber: currentPage,
+                    pageSize: pageSize,
+                    searchTerm: $('#searchBox').val()
+                }
+            });
+
+            console.log("List data", response);
+
+            if (!response.success) {
+                toastr.warning("Failed to load data");
+                return;
+            }
+
+            const tbody = $("#tblLoomPPMMeterEntryList tbody");
+            tbody.empty();
+
+            const list = response.data;
+            const totalCount = response.totalCount;
+
+            if (!list || list.length === 0) {
+                tbody.html(`
+                    <tr>
+                        <td colspan="22" class="text-center text-muted">No records found</td>
+                    </tr>`);
+                renderPagination(0);
+                return;
+            }
+
+            list.forEach(item => {
+                const row = `
+                <tr>
+                   <td style="display:none;">${item.docId}</td>
+                       <td>${item.vNo || ''}</td>
+                       <td>${item.vType || ''}</td>
+                       <td>${item.vDate || ''}</td>
+                       <td>${item.empName || ''}</td>
+                       <td>${item.placeName || ''}</td>
+                       <td>${item.shift || ''}</td>
+                       <td>${item.remark || ''}</td>
+                    <td>
+                        <i class="fa fa-edit btn-edit" onclick="editLoomPPMMeterEntry('${item.docId}')"></i>
+                        <i class="fa fa-eye btn-view" onclick="viewLoomPPMMeterDetails('${item.docId}')"></i>
+                        <i class="fa fa-trash btn-delete" style="cursor:pointer" onclick="deleteLoomPPMMeterEntryData('${item.docId}')"></i>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            renderPagination(totalCount);
+
+        } catch (err) {
+            toastr.error(err.message || "Unexpected Error Occurred");
+        } finally {
+            $('.circle-loader').hide();
+        }
+    }
+
+     //=============Render Pagination =================
+     function renderPagination(totalCount) {
+
+         const totalPages = Math.ceil(totalCount / pageSize);
+         const paginationContainer = $('#tablePagination');
+         paginationContainer.empty();
+
+         if (totalPages <= 1) return;
+
+         let html = '';
+
+         if (currentPage > 1) {
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+         }
+
+         let startPage = Math.max(1, currentPage - 2);
+         let endPage = Math.min(totalPages, currentPage + 2);
+
+         for (let i = startPage; i <= endPage; i++) {
+
+             html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"onclick="goToPage(${i})">${i}</button>`;
+         }
+
+         if (currentPage < totalPages) {
+
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+             html += `<button class="btn btn-sm btn-light mx-1"  onclick="goToPage(${totalPages})">Last</button>`;
+
+         }
+         paginationContainer.html(html);
+     }
+
+     function goToPage(page) {
+         currentPage = page;
+         loadListData();
+     }
+
+    //=========Edit==========
+    function editLoomPPMMeterEntry(docId){
+        window.location.href='/LoomPPMMeterEntry/Index?docId=' + docId;
+    }
+
+    //=========View==========
+    function viewLoomPPMMeterDetails(docId){
+        window.location.href='/LoomPPMMeterEntry/Index?docId=' + docId + '&mode=view';
+    }
+
+    //======Delete==========
+    function deleteLoomPPMMeterEntryData(docId){
+        Swal.fire({
+          title: 'Are you sure?',
+          html: `
+                   <b>Are you sure?</b><br><br>
+                   You are going to delete:<br>
+                   <span style="color:red; font-weight:bold;">DOC ID: ${docId}</span>
+                   <br><br>This action cannot be undone!
+               `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel'
+        }).then((result)=>{
+            if(result.isConfirmed){
+                $.ajax({
+                    url:'/LoomPPMMeterEntryList/DeleteData',
+                    type:'Post',
+                    data:{docId:docId},
+                    success: function(res){
+                        if(res.success){
+                            Swal.fire('Deleted','Data has been deleted successfully','success');
+                            loadListData();
+                        }
+                        else{
+                            Swal.fire('Failed','Data Deleted Failed !!', 'error');
+                        }
+                    },
+                    error:function(){
+                        Swal.fire('Error','An error occured while deleting','error');
+                    }
+                });
+            }
+        });
+    }
+
+</script>

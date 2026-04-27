@@ -1,0 +1,209 @@
+﻿@{
+    ViewBag.Title = "Tenacity Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Tenacity Master</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "TenacityMasterList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="tensityMasterForm">
+        <input type="hidden" class="form-control" id="CODE" name="Code">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="Name">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Tenacity Type <span class="text-danger">*</span></label>
+                    <select class="form-control" id="ddlTenacityType" name="TenacityType">
+                        <option value=""> Select Type</option>
+                        <option value="Above5">Above 5</option>
+                        <option value="Below5">Below 5</option>
+                        <option value="NA">NA</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Tena Group <span class="text-danger">*</span></label>
+                    <select class="form-control" id="ddlTenaGroup" name="Tena Group">
+                        <option value=""> Select Group</option>
+                        <option value="1">A</option>
+                        <option value="2">H</option>
+                        <option value="3">M</option>
+                        <option value="4">MS</option>
+                        <option value="5">SH</option>
+                        <option value="6">SHH</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Min Std</label>
+                    <input type="text" class="form-control" id="MinStd">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Mix Std</label>
+                    <input type="text" class="form-control" id="MixStd">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <div class="toggle-wrapper justify-content-center" id="ddlActive">
+                        <input type="hidden" id="IsActive" name="IsActive" value="1">
+                        <div id="customToggle" class="custom-toggle active"></div>
+                        <span id="statusLabel" class="status-label 0 active">Active</span>
+                    </div>
+                </div>
+            </div>
+            <div class="offset-md-3 col-md-3">
+                <div class="button-right btn-mt">
+                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+        //==============FOR TOGGLE==================
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById('customToggle');
+        const label = document.getElementById('statusLabel');
+        const hiddenInput = document.getElementById('IsActive');
+        toggle.addEventListener('click', function () {
+            toggle.classList.toggle('active');
+            const isActive = toggle.classList.contains('active');
+
+            label.textContent = isActive ? 'Active' : 'Inactive';
+            label.classList.toggle('active', isActive);
+            label.classList.toggle('inactive', !isActive);
+
+            hiddenInput.value = isActive ? '1' : '0';
+
+            console.log("Toggle value:", hiddenInput.value);
+        });
+    });
+
+    $(document).ready(function(){
+        var mode = new URLSearchParams(window.location.search).get('mode');
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+       
+            if (code) {
+                loadTenacityMaster(code); 
+            }
+    
+    //==============VIEW MODE========================
+    if(mode === "view") 
+    {
+        $('#tensityMasterForm input, #tensityMasterForm select,#customToggle').prop('disabled', true);
+        $('#customToggle').css('pointer-events','none'); 
+        $('#btnSave').hide();
+    }
+
+      //==================SAVE AND UPDATE============================
+        $('#btnSave').on('click', function(e){
+            e.preventDefault();
+
+             //--------Validation----------------
+            if (!validateRequiredField('#Name', 'Name')) return;
+            if (!validateRequiredField('#ddlTenacityType', 'Tensity Type')) return;
+            if (!validateRequiredField('#ddlTenaGroup', 'Tensity Group')) return;
+
+               var codeValue = $('#CODE').val();
+               var actionType = codeValue && codeValue != "0" ? "Update" : "Insert";
+               var formData = {
+                    Action: actionType,
+                    Code: codeValue ? parseInt(codeValue) : 0,
+                    Name: $('#Name').val(),
+                    TENACITY_TYPE: $('#ddlTenacityType').val(),
+                    TENACITY_CAT: $('#ddlTenaGroup').val(),
+                    MIN_STD: $('#MinStd').val() ? parseFloat($('#MinStd').val()) : null,
+                    MAX_STD: $('#MixStd').val() ? parseFloat($('#MixStd').val()) : null,
+                    Active: $('#IsActive').val()
+               };
+            console.log("Form Data", formData);
+            $.ajax({
+                url:'/TenacityMaster/SaveOrUpdateTenacityMaster',
+                type:'Post',
+                contentType: 'application/json',
+                data:JSON.stringify(formData),
+                success: function(res){
+                    if(res.success){
+                        console.log("Response",res);
+                       if(actionType === "Insert"){
+                            showFlashMessageByKey('insert', 'success');
+                       } else {
+                         showFlashMessageByKey('update', 'success');
+                       }
+                     setTimeout(function(){
+                         window.location.href='/TenacityMasterList/Index';
+                     },500)   
+                    }
+                    else{
+                        alert("Failed to Save Data ");
+                    }
+                },
+                error: function(){
+                    alert("Failed to Save Data !!");
+                }
+            })
+        })
+    });
+    //==================LOAD data On Edit========================
+   function loadTenacityMaster(code) {
+        $.ajax({
+            url: '/TenacityMaster/GetTenacityByCode', 
+            type: 'GET',
+            data: { code: code },
+            dataType: 'json',
+            success: function(res) {
+                if(res.success && res.data) {
+                    const data = res.data;
+                    console.log("Load Data",data);
+                    $('#CODE').val(data.code);
+                    $('#Name').val(data.name);
+                    $('#ddlTenacityType').val(data.tenacitY_TYPE);
+                    $('#ddlTenaGroup').val(data.tenacitY_CAT);
+                    $('#MinStd').val(data.miN_STD);
+                    $('#MixStd').val(data.maX_STD);
+
+                    const toggle = $('#customToggle');
+                    const label = $('#statusLabel');
+                    const hiddenInput = $('#IsActive');
+
+                    if(data.active == 1) {
+                        toggle.addClass('active');
+                        label.text('Active').removeClass('inactive').addClass('active');
+                        hiddenInput.val('1');
+                    } else {
+                        toggle.removeClass('active');
+                        label.text('Inactive').removeClass('active').addClass('inactive');
+                        hiddenInput.val('0');
+                    }
+                } else {
+                    alert("Failed to load data for edit");
+                }
+            },
+            error: function() {
+                alert("Error fetching data for edit");
+            }
+        });
+   }
+</script>

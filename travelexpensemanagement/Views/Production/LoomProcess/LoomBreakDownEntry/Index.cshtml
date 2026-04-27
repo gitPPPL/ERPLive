@@ -1,0 +1,709 @@
+﻿@{
+    ViewBag.Title = "Loom BreakDown Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<fieldset>
+    <legend class="legend-field">Loom BreakDown Entry</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "LoomBreakDownEntryList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="LoomBreakdownEntryForm">
+        <input type="hidden" class="form-control" id="docId" name="DOC_ID" value="">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document No</label>
+                    <input type="number" class="form-control" id="NumDocNo" readonly />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Department</label>
+                    <select class="form-control" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Fault</label>
+                    <select class="form-control" id="ddlFault">
+                        <option value="">Select Fault</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Repair type</label>
+                    <select class="form-control" id="ddlRepairType">
+                        <option value="">Select RepairType</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="datetime-local" class="form-control" id="StartDate" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="datetime-local" class="form-control" id="EndDate" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Hours</label>
+                    <input type="number" class="form-control" id="hour" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Minute</label>
+                    <input type="number" class="form-control" id="minute" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea class="form-control" id="Remarks" style="height:50px;"></textarea>
+                </div>
+            </div>
+        </div>
+        <fieldset>
+            <!-- Date Range -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Date From</label>
+                        <input type="date" class="form-control" id="dtFrom">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="date" class="form-control" id="dtTo">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Employee</label>
+                        <select class="form-control" id="ddlEmployee"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dropdown Row -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Place</label>
+                        <select class="form-control" id="ddlPlace"></select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Shift</label>
+                        <select class="form-control" id="ddlShift2">
+                         <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select class="form-control" id="ddlDept2"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Block</label>
+                        <select class="form-control" id="ddlBlock"></select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Hour</label>
+                        <select class="form-control" id="ddlHour"></select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Minute</label>
+                        <select class="form-control" id="ddlMinute"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="button-right">
+                        <button type="button" class="btn btn-success">
+                            <i class="fa fa-upload"></i> Import Roll Cutting Breakdown
+                        </button>
+
+                        <button type="button" class="btn btn-primary">
+                            <i class="fa fa-bolt"></i> Auto Insert Breakdown (Elec. Fault)
+                        </button>
+
+                        <button type="button" class="btn btn-primary">
+                            <i class="fa fa-cogs"></i> Mechanical/Maintenance
+                        </button>
+
+                        <button type="button" class="btn btn-primary">
+                            <i class="fa fa-refresh"></i> Change / Retreading
+                        </button>
+                        <button class="btn btn-print">
+                            <i class="fa fa-print"></i> Print Breakdown
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Buttons -->
+            <div class="row">
+                <div class="offset-md-9 col-md-3">
+                    <div class="button-right btn-mt">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-list"></i> Daily List
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fa fa-users"></i> EmpWise
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-mt button-right">
+                    <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblLoomBreakDownEntryList" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th>VNo</th>
+                        <th>VType</th>
+                        <th>VDate</th>
+                        <th>DocId</th>
+                        <th>Shift</th>
+                        <th>St_Date</th>
+                        <th>St_Time</th>
+                        <th>Stop_Date</th>
+                        <th>Stop_Time</th>
+                        <th>Hrs</th>
+                        <th>Mint</th>
+                        <th>Loom Code</th>
+                        <th>Loom Name</th>
+                        <th>BD Code</th>
+                        <th>BD Name</th>
+                        <th>Fault_Code</th>
+                        <th>Fault_Name</th>
+                        <th>Conv_Mint</th>
+                        <th>Conv_Hrs</th>
+                        <th>Remarks</th>
+                        <th>UUser</th>
+                        <th>UDate</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</fieldset>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('docId');
+    const mode = new URLSearchParams(window.location.search).get('mode');
+
+    $(document).ready(async function(){
+        setCurrentDate();
+        loadAllDropdown();
+
+      $('#StartDate, #EndDate').on('change', function () {
+        if (validateDateRange()) {
+            calculateDuration();
+        }
+      });
+
+      $('#btnSave').on('click', async function(e){
+          e.preventDefault();
+          await SaveData();
+      });
+
+      if (docId) {
+         await loadDataonEdit(docId);
+      }else {
+          GetVNo();
+      }
+
+      if(mode==='view'){
+          readOnlyMode();
+      }
+
+    });
+
+    //====Save and Update=====
+    async function SaveData(){
+        try
+        {
+            $('.circle-loader').show();
+            const model=
+            {
+              DOC_ID:$('#docId').val(),
+              V_NO:$('#NumDocNo').val(),
+              V_DATE: $('#DtDocDate').val(),
+              SHIFT: $('#ddlShift').val()|| null,
+              ST_DATE: $('#StartDate').val()|| null,
+              STOP_DATE: $('#EndDate').val()|| null,
+              ST_TIME: $('#StartDate').val()?.split('T')[1] || null,
+              STOP_TIME: $('#EndDate').val()?.split('T')[1] || null,
+              LOOM_CODE: parseInt($('#ddlDepartment').val()) || 0,
+              BD_CODE: parseInt($('#ddlFault').val()) || 0,
+              FAULT_CODE: parseInt($('#ddlRepairType').val()) || 0,
+              HRS: parseInt($('#hour').val()) || 0,
+              MINT: parseInt($('#minute').val()) || 0,
+              REMARKS: $('#Remarks').val() || null
+            };
+
+            if (!model.SHIFT) {
+                toastr.warning("Please select Shift");
+                return;
+            }
+            if (!model.LOOM_CODE) {
+                toastr.warning("Please select Department");
+                return;
+            }
+
+            const isUpdate = !!$('#docId').val();
+            const res= await fetch('/LoomBreakDownEntry/SaveAndUpdateData',{
+                method:'POST',
+                headers: {
+                 'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(model)
+            });
+
+            if (!res.ok) throw new Error("Server error");
+
+            const data = await res.json();
+
+            if(data.success)
+            {
+                if (isUpdate)  showFlashMessageByKey('update', 'success');
+                else  showFlashMessageByKey('insert', 'success');
+
+                setTimeout(function(){
+                    window.location.href = '/LoomBreakDownEntryList/Index';
+                },500)
+            }
+            else
+            {
+                toastr.error( data.message || "Data Saved Failed!!");
+            }
+        }
+        catch(err)
+        {
+          toastr.error(err.message ||"Unexpected Error");
+
+        }finally
+        {
+          $('.circle-loader').hide();
+        }
+    }
+
+    //=====Load Data On Edit======
+    async function loadDataonEdit(){
+        try{
+            const res= await fetch(`/LoomBreakDownEntry/loadDataOnEdit?docId=${docId}`,{
+                method: 'GET'
+            });
+            if(!res.ok) throw new Error("Network Error");
+
+            const data= await res.json();
+            if(data.success){
+                console.log("Edited Data", data);
+                bindFormData(data.data);
+            }else{
+                toastr.error(data.message || "Failed to load data");
+            }
+        }
+        catch(err){
+            console.error("LoadDataOnEdit Error:", err);
+            toastr.error(err.message || "Something went wrong");
+        }
+        finally
+        {
+           $('.circle-loader').hide();
+        }
+    }
+
+    //====Bind Edit Data======
+    function bindFormData(data) {
+        $('#docId').val(data.doC_ID);
+        $('#NumDocNo').val(data.v_NO);
+        $('#DtDocDate').val(data.v_DATE?.split('T')[0]);
+        $('#ddlShift').val(data.shift);
+        $('#ddlDepartment').val(data.looM_CODE);
+        $('#ddlFault').val(data.bD_CODE);
+        $('#ddlRepairType').val(data.faulT_CODE);
+        if (data.sT_DATE) {
+           $('#StartDate').val(data.sT_DATE.substring(0,16));
+        }
+        if (data.stoP_DATE) {
+            $('#EndDate').val(data.stoP_DATE.substring(0,16));
+        }
+        $('#hour').val(data.hrs);
+        $('#minute').val(data.mint);
+        $('#Remarks').val(data.remarks);
+    }
+
+    //=====Set CurrentDate=====
+    function setCurrentDate() {
+        let today = new Date().toISOString().split('T')[0];
+        $("#DtDocDate").val(today);
+        $("#dtFrom").val(today);
+        $("#dtTo").val(today);
+    }
+
+    //====Validate Date Range=====
+    function validateDateRange() {
+        const startVal = $('#StartDate').val();
+        const endVal = $('#EndDate').val();
+
+        if (!startVal || !endVal) return true;
+
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+
+        if (endDate < startDate) {
+            toastr.error("End Date cannot be less than Start Date");
+            $('#EndDate').val('');
+            $('#hour').val('');
+            $('#minute').val('');
+            return false;
+        }
+        return true;
+    }
+
+    //====Calculate Duration=====
+    function calculateDuration() {
+        const startVal = $('#StartDate').val();
+        const endVal = $('#EndDate').val();
+
+        if (!startVal || !endVal) return;
+
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+
+        let diffMs = endDate - startDate;
+
+        if (diffMs < 0) return; // safety check
+
+        let totalMinutes = Math.floor(diffMs / (1000 * 60));
+
+        let hours = Math.floor(totalMinutes / 60);
+        let minutes = totalMinutes % 60;
+
+        $('#hour').val(hours);
+        $('#minute').val(minutes);
+    }
+
+    //====Load All Dropdown=====
+    async function loadAllDropdown(){
+        try{
+            await Promise.all([
+                DepartmentDDL(),
+                FaultDDL(),
+                RepairType(),
+                PlaceDDL(),
+                BlockDDL(),
+                EmployeeDDL(),
+                loadTimeDropdown()
+               
+            ]);
+        }catch(err){
+            toastr.error("Some Dropdown failed to load !!");
+        }
+    }
+
+    //====Bind Dropdowns======
+    async function DepartmentDDL(){
+        try{
+            const res = await fetch('/LoomBreakDownEntry/DepartmentDDL',{
+                method: 'GET'
+            });
+
+            if(!res.ok) throw new Error("Network Error");
+
+            const {success, list} = await res.json();
+
+            if(!success){
+                toastr.warning("Department Dropdown Load Failed !!");
+                return;
+            }
+
+            const department1 = $('#ddlDepartment');
+            const department2 = $('#ddlDept2');
+
+            department1.empty();
+            department2.empty();
+
+            department1.append('<option value="">Select Department</option>');
+            department2.append('<option value="">Select Department</option>');
+
+            list.forEach(item => {
+                const option = `<option value="${item.value}">${item.text}</option>`;
+                department1.append(option);
+                department2.append(option);
+            });
+
+        }catch(err){
+            toastr.error(err.message || "Unexpected error");
+        }
+    }
+
+    async function FaultDDL(){
+       try
+       {
+           const res=  await fetch('/LoomBreakDownEntry/FaultDDL',{
+               method: 'GET'
+           });
+
+           if(!res.ok){
+               throw new Error("Network Error");
+           }
+           const {success, list}= await res.json();
+
+           if(!success){
+               toastr.warning("Fault Dropdown load Failed !!");
+           }
+
+           const fault= $('#ddlFault');
+           fault.empty();
+           fault.append('<option value="">--Select Fault--</option>');
+
+           list.forEach(item =>{
+               fault.append(`<option value= "${item.value}">${item.text}</option>`);
+           });
+
+       }catch(err)
+       {
+           toastr.error(err.message ||"Unexpected error occured");
+       }
+    }
+
+    async function RepairType(){
+        try
+        {
+            const res= await fetch('/LoomBreakDownEntry/RepairTypeDDL',{
+                method: 'GET'
+            });
+
+            if(!res.ok){
+                throw new Error("Network error");
+            };
+
+            const {success,list}= await res.json();
+
+            if(!success){
+                toastr.warning("Repair type Dropdown  load Failed !!");
+            }
+
+            const repairType= $('#ddlRepairType');
+            repairType.empty();
+            repairType.append('<option value="">--Select Repair type--</option>');
+
+            list.forEach(item =>{
+                repairType.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+
+        }catch(err)
+        {
+            toastr.error(err.message ||"Unexpected error occured");
+        }
+    }
+
+    async function PlaceDDL(){
+        try
+        {
+            const res= await fetch('/LoomBreakDownEntry/PlaceDDL',{
+                method: 'GET'
+            });
+
+            if(!res.ok){
+                throw new Error("Network error");
+            };
+
+            const {success,list}= await res.json();
+
+            if(!success){
+                toastr.warning("Place Dropdown  load Failed !!");
+            }
+
+            const place= $('#ddlPlace');
+            place.empty();
+            place.append('<option value="">Select Place</option>');
+
+            list.forEach(item =>{
+                place.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+
+        }catch(err)
+        {
+            toastr.error(err.message ||"Unexpected error occured");
+        }
+    }
+
+    async function BlockDDL(){
+       try
+       {
+           const res=  await fetch('/LoomBreakDownEntry/block',{
+               method: 'GET'
+           });
+
+           if(!res.ok){
+               throw new Error("Network Error");
+           }
+           const {success, list}= await res.json();
+
+           if(!success){
+               toastr.warning("Block Dropdown load Failed !!");
+           }
+
+           const block= $('#ddlBlock');
+           block.empty();
+           block.append('<option value="">Select Block</option>');
+
+           list.forEach(item =>{
+               block.append(`<option value= "${item.value}">${item.text}</option>`);
+           });
+
+       }catch(err)
+       {
+           toastr.error(err.message ||"Unexpected error occured");
+       }
+    }
+
+    async function EmployeeDDL(){
+       try
+       {
+           const res=  await fetch('/LoomBreakDownEntry/EmployeeDDL',{
+               method: 'GET'
+           });
+
+           if(!res.ok){
+               throw new Error("Network Error");
+           }
+           const {success, list}= await res.json();
+
+           if(!success){
+               toastr.warning("Employee Dropdown load Failed !!");
+           }
+           const employee= $('#ddlEmployee');
+           employee.empty();
+           employee.append('<option value="">Select Employee</option>');
+
+           list.forEach(item =>{
+               employee.append(`<option value= "${item.value}">${item.text}</option>`);
+           });
+
+       }catch(err)
+       {
+           toastr.error(err.message ||"Unexpected error occured");
+       }
+    }
+
+    async function loadTimeDropdown() {
+        let ddlHour = $('#ddlHour');
+        ddlHour.empty(); 
+
+        for (let i = 1; i <= 12; i++) {
+            ddlHour.append(`<option value="${i}">${i}</option>`);
+        }
+
+        ddlHour.prop('selectedIndex', -1);
+        let ddlMinute = $('#ddlMinute');
+        ddlMinute.empty();
+
+        for (let i = 1; i <= 59; i++) {
+            ddlMinute.append(`<option value="${i}">${i}</option>`);
+        }
+    }
+
+    //====Generate VNo======
+    async function GetVNo() {
+        try {
+            const res = await fetch('/LoomBreakDownEntry/GenerateVNo');
+            if (!res.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await res.json();
+            if (data.v_NO) {
+                $('#NumDocNo').val(data.v_NO);
+            } else {
+                console.warn("v_NO not found in response");
+            }
+
+        } catch (e) {
+            console.error("Error in GetVNo:", e);
+        }
+    }
+
+    //=====Read only mode====
+    function readOnlyMode(){
+       $('#LoomBreakdownEntryForm').find('input, select, textarea').prop('disabled', true);
+       $('#btnSave').hide();
+    }
+
+</script>

@@ -1,11 +1,16 @@
-﻿using iTextSharp.text;
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office.Word;
+using DocumentFormat.OpenXml.Spreadsheet;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
-using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
-using travelexpensemanagement.Common.Globalvariable;
+using System.Data.Common;
+using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
 
 
@@ -17,24 +22,18 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+         travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,  ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-
         }
-
-
 
         public IActionResult Index()
         {
             return View("~/Views/GateEntry/Transaction/InwardEntryList/Index.cshtml");
         }
 
-
         [HttpGet]
-
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             var getvariabledata = _globalVariableService.GetGlobalVariables();
@@ -60,7 +59,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@PageSize", pageSize);
                     cmd.Parameters.AddWithValue("@COMP_CODE", getvariabledata.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", getvariabledata.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getvariabledata.PubBranchCode);
 
                     conn.Open();
 
@@ -72,20 +71,19 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             {
                                 V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
                                 V_TYPE = reader["Vouchertype"] != DBNull.Value ? reader["Vouchertype"].ToString() : string.Empty,
+                                DOC_ID = reader["DOC_ID"] != DBNull.Value ? reader["DOC_ID"].ToString() : string.Empty,
                                 VtypeCode = reader["V_TYPE"] != DBNull.Value ? reader["V_TYPE"].ToString() : string.Empty,
-
-                                V_DATE = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]) : DateTime.MinValue,
+                                V_DATE = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]) : null,
                                 TRUCK_NO = reader["Truck_no"] != DBNull.Value ? reader["Truck_no"].ToString() : string.Empty,
                                 BILL_NO = reader["BILL_NO"] != DBNull.Value ? reader["BILL_NO"].ToString() : string.Empty,
-                                BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
+                                BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : null,
                                 PARTY_NAME = reader["PartyName"] != DBNull.Value ? reader["PartyName"].ToString() : string.Empty,
                                 TRANSIT_NO = reader["TRANSIT_NO"] != DBNull.Value ? Convert.ToInt32(reader["TRANSIT_NO"]) : 0,
                                 WAYBILL_NO = reader["WAYBILL_NO"] != DBNull.Value ? reader["WAYBILL_NO"].ToString() : string.Empty,
-                                R_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
+                                R_DATE = reader["R_Date"] != DBNull.Value ? Convert.ToDateTime(reader["R_Date"]) : null,
                                 R_TIME = !string.IsNullOrEmpty(reader["R_Time"] as string)
                                 ? DateTime.TryParse(reader["R_Time"].ToString(), out DateTime dateValue) ? dateValue.ToString("HH:mm:ss") : "00:00:00"
                                 : "00:00:00"
-
 
                             });
                         }
@@ -105,15 +103,13 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(new { success = true, lists = headerList, totalCount });
         }
-        [HttpGet]
 
-        public IActionResult GetDataByPendingorder(int PartyCode)
+
+        [HttpGet]
+        public IActionResult GetDataByPendingorder(int PartyCode , string V_TYPE, DateTime V_DATE)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
-
-
             var Datalist = new List<object>();
-
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -125,11 +121,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         cmd3.CommandType = CommandType.StoredProcedure;
                         cmd3.Parameters.AddWithValue("@Action", "PartyBillNo");
                         cmd3.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd3.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
-                        cmd3.Parameters.AddWithValue("@SUPPLIER", PartyCode);
-
-                        cmd3.Parameters.AddWithValue("@V_TYPE", "PAUD");
+                        cmd3.Parameters.AddWithValue("@PARTY_CODE", PartyCode);
+                        cmd3.Parameters.AddWithValue("@V_TYPE", V_TYPE);
+                        cmd3.Parameters.Add("@V_DATE", SqlDbType.Date).Value = V_DATE;
 
                         using (SqlDataReader rdr = cmd3.ExecuteReader())
                         {
@@ -138,19 +134,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                 while (rdr.Read())
                                 {
                                     var ITEM_CODE = rdr["ITEM_CODE"]?.ToString();
-                                    var ItemName = rdr["ItemName"]?.ToString();
+                                    var ItemName = rdr["ITEM_NAME"]?.ToString();
                                     var UNIT_NAME = rdr["UNIT_NAME"]?.ToString();
-                                    var PACKING_NOS = rdr["PACKING_NOS"]?.ToString();
+                                    var PACKING_NOS = rdr["NOS"]?.ToString();
                                     var QTY = rdr["QTY"]?.ToString();
-                                    var balqty = rdr["balqty"]?.ToString();
-                                    var DocType = rdr["DocType"]?.ToString();
-                                    var DocNo = rdr["DocNo"]?.ToString();
-                                    var DocDate = rdr["DocDate"]?.ToString();
-                                    var RATE = rdr["RATE"]?.ToString();
-                                    var REMARK = rdr["REMARK"]?.ToString();
-                                    var DEPARTMENT = rdr["DEPARTMENT"]?.ToString();
-                                    var DeptCode = rdr["DeptCode"]?.ToString();
-                                
+                                    var balqty = rdr["P_QTY"]?.ToString();
+                                    var DocType = rdr["V_type"]?.ToString();
+                                    var DocNo = rdr["V_NO"]?.ToString();
+                                    var DocDate = rdr["Date"]?.ToString();
+                                    var RATE = rdr["Rate"]?.ToString();
+                                    var REMARK = rdr["Remark"]?.ToString();
+                                    var DEPARTMENT = rdr["Department"]?.ToString();
+                                    var DeptCode = rdr["DEPT_CODE"]?.ToString();
+                                    var EMPTY_YN = "";
+                                    var UOM_CODE = rdr["UNIT_CODE"]?.ToString();
+
 
                                     if (!string.IsNullOrEmpty(ITEM_CODE) && !string.IsNullOrEmpty(ITEM_CODE))
                                     {
@@ -169,7 +167,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                             RATE = RATE,
                                             REMARK = REMARK,
                                             DEPARTMENT = DEPARTMENT,
-                                            DeptCode = DeptCode
+                                            DeptCode = DeptCode,
+                                            EMPTY_YN = EMPTY_YN,
+                                            UOM_CODE = UOM_CODE
                                         });
                                     }
                                 }
@@ -190,30 +190,75 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         public JsonResult Delete(int code, string VType)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
+            string Message = "";
+            string Message1 = "";
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
+                    con.Open();
+
+                    string sql = "SELECT  v_no, v_date FROM WB1  WHERE  GATE_TYPE = @VType    AND GATE_NO =@code    AND COMP_CODE = @pubCompCode" +
+                    "  AND BRANCH_CODE = @pubBranchCode  AND YEAR_CODE = @pubFYearCode;";
+
+                    using (var cmdCheck = new SqlCommand(sql, con))
+                    {
+                      
+                        cmdCheck.Parameters.AddWithValue("@code", code);
+                        cmdCheck.Parameters.AddWithValue("@VType", VType);
+                        cmdCheck.Parameters.AddWithValue("@pubCompCode", getGlobalCode.PubCompCode);
+                        cmdCheck.Parameters.AddWithValue("@pubBranchCode", getGlobalCode.PubBranchCode);
+                        cmdCheck.Parameters.AddWithValue("@pubFYearCode", getGlobalCode.PubFYearCode);
+                        using var reader = cmdCheck.ExecuteReader();
+
+                        if (reader.Read())
+                        {
+                            var v_no = reader["v_no"];
+                            var v_date = reader["v_date"];
+                            Message = $"This document exists in Weighbridge Serial No :{v_no} dated :{v_date}";
+                            return Json(new { success = false, message = Message });
+                        }
+                    }
+
+                    string sql1 = @"SELECT  v_no,v_date FROM   PURCHASE2 WHERE   REF_TYPE = @RefType  AND REF_NO = @RefNo  AND COMP_CODE = @CompCode
+                    AND BRANCH_CODE = @BranchCode AND YEAR_CODE = @YearCode;";
+
+                    using (var cmdCheck1 = new SqlCommand(sql1, con))
+                    {
+
+                        cmdCheck1.Parameters.AddWithValue("@RefNo", code);
+                        cmdCheck1.Parameters.AddWithValue("@RefType", VType);
+                        cmdCheck1.Parameters.AddWithValue("@CompCode", getGlobalCode.PubCompCode);
+                        cmdCheck1.Parameters.AddWithValue("@BranchCode", getGlobalCode.PubBranchCode);
+                        cmdCheck1.Parameters.AddWithValue("@YearCode", getGlobalCode.PubFYearCode);
+                        using var reader = cmdCheck1.ExecuteReader();
+
+                        if (reader.Read())
+                        {
+                            var v_no = reader["v_no"];
+                            var v_date = reader["v_date"];
+                            Message1 = $"This document exists in Weighbridge Serial No :{v_no} dated :{v_date}";
+                            return Json(new { success = false, message = Message1 });
+                        }
+                    }
+
                     using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
                         cmd.Parameters.AddWithValue("@V_NO", code);
                         cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        con.Open();
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);                 
                         cmd.ExecuteNonQuery();
                     }
                 }
-
-                return Json(new { success = true, message = "Purchase Sauda deleted successfully." });
+                return Json(new { success = true, message = "Successfully Delete" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error deleting Purchase Sauda .", error = ex.Message });
+                return Json(new { success = false, message = "Error Deleting Inward Entry .", error = ex.Message });
             }
         }
 
@@ -235,7 +280,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             try
             {
-                // Connect to the database
+       
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     con.Open();
@@ -248,11 +293,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         cmd.Parameters.AddWithValue("@ShowActionOption", "Header");
                         cmd.Parameters.AddWithValue("@V_NO", code);
                         cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", vtype);
-
-
 
                         using (SqlDataReader rdr = cmd.ExecuteReader())
                         {
@@ -288,6 +331,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     Add2 = rdr["Add2"]?.ToString(),
                                     Add3 = rdr["Add2"]?.ToString(),
                                     PAN_NO = rdr["PAN_NO"]?.ToString(),
+                                    Remarks2 = rdr["Remarks2"]?.ToString(),
 
                                     PARTY_CITY = rdr["PARTY_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_CITY"]) : 0,
                                     City = rdr["City"]?.ToString(),
@@ -323,7 +367,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     GR_NO = rdr["GR_NO"]?.ToString(),
                                     GR_DATE = rdr["GR_Date"] != DBNull.Value ? Convert.ToDateTime(rdr["GR_Date"]) : DateTime.MinValue,
                                     STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0
-                                   
+
 
 
                                 };
@@ -342,7 +386,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         cmd4.Parameters.AddWithValue("@V_NO", code);
                         cmd4.Parameters.AddWithValue("@V_TYPE", vtype);
                         cmd4.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd4.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd4.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd4.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
 
 
@@ -391,9 +435,244 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
+        public JsonResult DocDetailsCode(string docCode)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            List<InwardEntryDetailDto> docDetails = new List<InwardEntryDetailDto>();
 
+            using (SqlConnection conn = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "DocDetailID");
+                    cmd.Parameters.AddWithValue("@DOC_ID", docCode);
 
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var InwardEntryDetailDto = new InwardEntryDetailDto
+                            {
+                                Code = reader["Code"]?.ToString(),
+                                UUser = reader["UUser"]?.ToString(),
+                                UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : (DateTime?)null,
+                                EUSER = reader["EUSER"]?.ToString(),
+                                EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : (DateTime?)null,
+                                WSID = reader["WSID"]?.ToString(),
+                                LIP = reader["LIP"]?.ToString(),
+                                LID = reader["LID"]?.ToString()
+                            };
+                            docDetails.Add(InwardEntryDetailDto);
+                        }
+                    }
+                }
+            }
 
+            return Json(new { success = true, data = docDetails });
+        }
+
+        public class InwardEntryDetailDto
+        {
+            public string? Code { get; set; }
+            public string? UUser { get; set; }
+            public DateTime? UDATE { get; set; }
+            public string? EUSER { get; set; }
+            public DateTime? EDATE { get; set; }
+            public string? WSID { get; set; }
+            public string? LIP { get; set; }
+            public string? LID { get; set; }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string searchTerm = null)
+        {   
+
+            var global = _globalVariableService.GetGlobalVariables();
+
+            using (var conn = _dbConnection.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var ws = workbook.Worksheets.Add("GateInward");
+
+                        // Header
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            var cell = ws.Cell(1, i + 1);
+                            cell.Value = reader.GetName(i);
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                        }
+
+                        int row = 2;
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < reader.FieldCount; col++)
+                            {
+                                var cell = ws.Cell(row, col + 1);
+
+                                if (reader[col] == DBNull.Value)
+                                {
+                                    cell.Value = "";
+                                }
+                                else if (reader.GetFieldType(col) == typeof(DateTime))
+                                {
+                                    cell.Value = Convert.ToDateTime(reader[col]);
+                                    cell.Style.DateFormat.Format = "dd-MM-yyyy";
+                                }
+                                else
+                                {
+                                    cell.Value = reader[col].ToString();
+                                }
+                            }
+                            row++;
+                        }
+
+                        ws.Columns().AdjustToContents();
+
+                        foreach (var col in ws.Columns())
+                        {
+                            if (col.Width > 40) col.Width = 40;
+                            if (col.Width < 10) col.Width = 10;
+                        }
+
+                        ws.Style.Alignment.WrapText = true;
+                        ws.SheetView.FreezeRows(1);
+
+                        var range = ws.RangeUsed();
+                        if (range != null)
+                        {
+                            range.CreateTable();
+                        }
+
+                        using (var stream = new MemoryStream())
+                        {
+                            workbook.SaveAs(stream);
+                            stream.Position = 0;
+
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "GateInward.xlsx"
+                            );
+                        }
+                    }
+                }
+
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToPdf(string searchTerm = null)
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+
+            using (var conn = _dbConnection.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;     
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Action", "ExportToPdf");
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var stream = new MemoryStream())
+                    {
+                        // ✅ PDF Setup (Landscape A4)
+                        var document = new iTextSharp.text.Document(
+                            iTextSharp.text.PageSize.A4.Rotate(), 10, 10, 10, 10);
+
+                        iTextSharp.text.pdf.PdfWriter.GetInstance(document, stream);
+                        document.Open();
+
+                        // ✅ Fonts (FIXED - no ambiguity)
+                        var titleFont = iTextSharp.text.FontFactory.GetFont(
+                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 14);
+
+                        var headerFont = iTextSharp.text.FontFactory.GetFont(
+                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 9);
+
+                        var dataFont = iTextSharp.text.FontFactory.GetFont(
+                            iTextSharp.text.FontFactory.HELVETICA, 8);
+
+                        // ✅ Title
+                        var title = new iTextSharp.text.Paragraph("Gate Inward Report", titleFont);
+                        title.Alignment = iTextSharp.text.Element.ALIGN_CENTER;
+                        document.Add(title);
+
+                        document.Add(new iTextSharp.text.Paragraph(" ")); // spacing
+
+                        // ✅ Table
+                        int columnCount = reader.FieldCount;
+                        var table = new iTextSharp.text.pdf.PdfPTable(columnCount);
+                        table.WidthPercentage = 100;
+
+                        // Header
+                        for (int i = 0; i < columnCount; i++)
+                        {
+                            var cell = new iTextSharp.text.pdf.PdfPCell(
+                                new iTextSharp.text.Phrase(reader.GetName(i), headerFont));
+
+                            cell.HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER;
+                            cell.BackgroundColor = iTextSharp.text.BaseColor.LIGHT_GRAY;
+
+                            table.AddCell(cell);
+                        }
+
+                        // Data
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < columnCount; col++)
+                            {
+                                string value = "";
+
+                                if (reader[col] != DBNull.Value)
+                                {
+                                    if (reader.GetFieldType(col) == typeof(DateTime))
+                                    {
+                                        value = Convert.ToDateTime(reader[col])
+                                                        .ToString("dd-MM-yyyy");
+                                    }
+                                    else
+                                    {
+                                        value = reader[col].ToString();
+                                    }
+                                }
+
+                                var cell = new iTextSharp.text.pdf.PdfPCell(
+                                    new iTextSharp.text.Phrase(value, dataFont));
+
+                                table.AddCell(cell);
+                            }
+                        }
+
+                        document.Add(table);
+                        document.Close();
+
+                        return File( stream.ToArray(), "application/pdf", "GateInward.pdf" );
+                    }
+                }
+            }
+        }
 
     }
 }

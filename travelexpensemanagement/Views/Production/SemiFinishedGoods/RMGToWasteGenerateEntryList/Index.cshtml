@@ -1,0 +1,264 @@
+﻿@{
+    ViewBag.Title = "RMG To Wast Generate Entry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+}
+<fieldset>
+    <legend class="legend-field">RMGTo Waste GenerateEntry List</legend>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <div class="btn-rightalign">
+                @if (canAdd)
+                {
+                    <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "RMGToWasteGenerateEntry")'" type="button" class="btn btn-add">
+                        <i class="fa fa-plus"></i>Add
+                    </button>
+                }
+                @if (canPrint)
+                {
+                    <button class="btn btn-print" onclick="callGetReportAsPdf()">
+                        <i class="fa fa-print"></i> Print
+                    </button>
+                }
+                @if (canExport)
+                {
+                    <button class="btn btn-export" onclick="exportToExcel()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+                @if (canMail)
+                {
+                    <button class="btn btn-info">
+                        <i class="fa fa-envelope"></i> Mail
+                    </button>
+                }
+                @if (canApproval)
+                {
+                    <button class="btn btn-export" onclick="Approval()">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblRMGToWasteGenerateEntryList" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">docId</th>
+                        <th>VNo</th>
+                        <th>VType</th>
+                        <th>VDate</th>
+                        <th>Shift</th>
+                        <th>Slip_No</th>
+                        <th>Pord_Type</th>
+                        <th>Pord_No</th>
+                        <th>Remark</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+
+    $(document).ready(function(){
+         loadListData();
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadListData();
+        });
+    });
+
+    //==========Load Data in list table==============
+    function loadListData() {
+             //====show loader======
+         $('.circle-loader').css('display', 'flex');
+         $.ajax({
+             url:'/RMGToWasteGenerateEntryList/loadListData',
+             type: 'GET',
+             data: {
+                 pageNumber: currentPage,
+                 pageSize: pageSize,
+                 searchTerm: $('#searchBox').val()
+             },
+             success: function (response) {
+                 console.log("Response",response);
+                 if (!response.success) {
+                     toastr.warning("Failed to load data");
+                     return;
+                 }
+                 const tbody=$("#tblRMGToWasteGenerateEntryList tbody");
+                 tbody.empty();
+
+                 const list = response.data;
+                 const totalCount = response.totalCount;
+
+                 if (!list || list.length === 0) {
+                     tbody.html(`<tr>
+                                    <td colspan="4" class="text-center text-muted">No records found </td>
+                                 </tr>`);
+                     renderPagination(0);
+                     return;
+                 }
+                 $.each(list, function (index, item) {
+
+                     const row=`
+                     <tr>
+                        <td style="display:none;">${item.docId}</td>
+                         <td>${item.vNo || ''}</td>
+                         <td>${item.vType || ''}</td>
+                         <td>${item.vDate || ''}</td>
+                         <td>${item.shift || ''}</td>
+                         <td>${item.slip_No || ''}</td>
+                         <td>${item.pord_Type || ''}</td>
+                         <td>${item.pord_No || ''}</td>
+                         <td>${item.remark || ''}</td>
+                         <td>${item.status || ''}</td>
+                         <td>
+                             <i class="fa fa-edit btn-edit" style="cursor:pointer" onclick="editRMGToWasteGenerateEntry('${item.docId}')"></i>
+                             <i class="fa fa-eye btn-view" style="cursor:pointer" onclick="viewRMGToWasteGenerateEntryDetails('${item.docId}')"></i>
+                             <i class="fa fa-trash btn-delete" style="cursor:pointer" onclick="deleteRMGToWasteGenerateEntryData('${item.docId}')"></i>
+                         </td>
+                     </tr>`;
+                    tbody.append(row);
+                 });
+
+                 renderPagination(totalCount);
+             },
+             error: function (xhr) {
+                  let msg = xhr.responseText || "Unexpected error occurred";
+                  toastr.error(msg);
+             },
+             complete: function () {
+                 //====hide loader======
+                $('.circle-loader').css('display', 'none');
+             }
+         });
+    }
+
+     //=============Render Pagination =================
+     function renderPagination(totalCount) {
+
+         const totalPages = Math.ceil(totalCount / pageSize);
+         const paginationContainer = $('#tablePagination');
+         paginationContainer.empty();
+
+         if (totalPages <= 1) return;
+
+         let html = '';
+
+         if (currentPage > 1) {
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+         }
+         let startPage = Math.max(1, currentPage - 2);
+         let endPage = Math.min(totalPages, currentPage + 2);
+
+         for (let i = startPage; i <= endPage; i++) {
+
+             html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"onclick="goToPage(${i})">${i}</button>`;
+         }
+
+         if (currentPage < totalPages) {
+
+             html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+             html += `<button class="btn btn-sm btn-light mx-1"  onclick="goToPage(${totalPages})">Last</button>`;
+
+         }
+         paginationContainer.html(html);
+     }
+
+     function goToPage(page) {
+         currentPage = page;
+         loadListData();
+     }
+
+    //=========Edit============
+    function editRMGToWasteGenerateEntry(docId){
+        window.location.href='/RMGToWasteGenerateEntry/Index?docId=' + docId;
+    }
+
+    //=========View============
+    function viewRMGToWasteGenerateEntryDetails(docId){
+        window.location.href='/RMGToWasteGenerateEntry/Index?docId=' + docId + '&mode=view';
+    }
+
+    //=========Delete Data============
+    function deleteRMGToWasteGenerateEntryData(docId){
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "Do you want to delete this record ?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel'
+        }).then((result)=>{
+            if(result.isConfirmed){
+                $.ajax({
+                    url:'/RMGToWasteGenerateEntryList/DeleteData',
+                    type:'Post',
+                    data:{docId:docId},
+                    success: function(res){
+                        if(res.success){
+                            Swal.fire('Deleted','Data has been deleted successfully','success');
+                            loadListData();
+                        }
+                        else{
+                            Swal.fire('Failed','Data Deleted Failed !!', 'error');
+                        }
+                    },
+                    error:function(){
+                        Swal.fire('Error','An error occured while deleting','error');
+                    }
+
+                });
+            }
+        });
+    }
+</script>

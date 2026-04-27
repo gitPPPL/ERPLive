@@ -1,0 +1,842 @@
+﻿@{
+    ViewBag.Title = "Loom Production Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<fieldset>
+    <legend class="legend-field">Loom Production Entry</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "LoomProductionEntryList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="LoomProductionEntryForm">
+        <input type="hidden" class="form-control" id="docId" name="DOC_ID" value="">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document No</label>
+                    <input type="number" class="form-control" id="NumDocNo" readonly />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Document Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Place</label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">--Select Place--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Superwiser</label>
+                    <select class="form-control" id="ddlSuperwisor">
+                        <option value="">--Select Superwiser--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Block</label>
+                    <select class="form-control" id="ddlBlock">
+                        <option value="">--Select Block--</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea class="form-control" id="Remarks" style="height:50px;"></textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-success" id="btn_fill"><i class="fa fa-download"></i> Fill</button>
+                    <button type="button" class="btn btn-primary" id="btn_ConnectGetReading"><i class="fa fa-refresh"></i> Connect and Get Reading</button>
+                </div>
+            </div>
+        </div>
+
+        <fieldset>
+            <div class="card">
+                <div class="table-responsive">
+                    <table id="tblLoomProductionEntry" class="table-width">
+                        <thead class="table-head">
+                            <tr>
+                                <th>LID</th>
+                                <th>Loom</th>
+                                <th>Employee Code</th>
+                                <th>Employee Name</th>
+                                <th>Item Name</th>
+                                <th>Type</th>
+                                <th>Width</th>
+                                <th>Gram</th>
+                                <th>Mesh</th>
+                                <th>Color</th>
+                                <th>DNR</th>
+                                <th>OP.RD</th>
+                                <th>CL.RD</th>
+                                <th>PRDN</th>
+                                <th>PPM</th>
+                                <th>Waste</th>
+                                <th>C.Prod</th>
+                                <th>Kgs</th>
+                                <th>PROD</th>
+                                <th>PROD No</th>
+                                <th>Reference Type</th>
+                                <th>Reference No</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-add-row-last">
+                            <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                        </div> 
+                        @* <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Total Rec</label>
+                        <input type="number" class="form-control" id="NumTotalrec" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Total Production</label>
+                        <input type="number" class="form-control" id="NumTotalProduction" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Total Waste</label>
+                        <input type="number" class="form-control" id="NumTotalWaste" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Average Production</label>
+                        <input type="number" class="form-control" id="NumAverageProduction" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-mt button-right">
+                    <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+@* Table Script *@
+<script>
+
+    let itemList = [];
+    let EmployeeList = [];
+    let LoomList = [];
+    let MeshList = [];
+    let ColorList = [];
+
+    let $ItemDetailsTbody;
+
+    $(document).ready(async function () {
+
+        $ItemDetailsTbody = $('#tblLoomProductionEntry tbody');
+
+        await loadLoomDropdown();
+        await loadEmployeeDropdown();
+        await loadItemDropdown();
+        await loadMeshDropdown();
+        await loadColorDropdown();
+
+        if (docId) {
+            await LoadDataOnEdit();
+        } else {
+            await GetVNo();
+            addItemDetailsRow(); 
+        }
+
+    });
+
+    //======LOAD Table DROPDOWNS =====
+    function loadLoomDropdown() {
+        return $.ajax({
+            url: '/LoomProductionEntry/loomDDL',
+            type: 'GET',
+            success: res => { if (res.success) LoomList = res.data; }
+        });
+    }
+
+    function loadEmployeeDropdown() {
+        return $.ajax({
+            url: '/LoomProductionEntry/Supervisor',
+            type: 'GET',
+            success: res => { if (res.success) EmployeeList = res.data; }
+        });
+    }
+
+    function loadItemDropdown() {
+        return $.ajax({
+            url: '/LoomProductionEntry/itemNameDDL',
+            type: 'GET',
+            success: res => { if (res.success) itemList = res.data; }
+        });
+    }
+
+    function loadMeshDropdown() {
+        return $.ajax({
+            url: '/LoomProductionEntry/MeshDDL',
+            type: 'GET',
+            success: res => { if (res.success) MeshList = res.data; }
+        });
+    }
+
+    function loadColorDropdown() {
+        return $.ajax({
+            url: '/LoomProductionEntry/ColorDDL',
+            type: 'GET',
+            success: res => { if (res.success) ColorList = res.data; }
+        });
+    }
+
+    //====== Add Details In Table =========
+    function addItemDetailsRow() {
+
+        $ItemDetailsTbody.find('.btn-add-action').remove();
+
+        let loomOptions = '<option value="">--Select Loom--</option>';
+        LoomList.forEach(l => {
+            loomOptions += `<option value="${l.value}" data-code="${l.value}">${l.text}</option>`;
+        });
+
+        let empOptions = '<option value="">--Select Employee--</option>';
+        EmployeeList.forEach(e => {
+            empOptions += `<option value="${e.value}" data-code="${e.value}">${e.text}</option>`;
+        });
+
+        let itemOptions = '<option value="">--Select Item--</option>';
+        itemList.forEach(i => {
+            itemOptions += `
+                <option value="${i.code}"
+                    data-ptype="${i.pType}"
+                    data-width="${i.width}"
+                    data-gram="${i.gram}">
+                    ${i.itemName}
+                </option>`;
+        });
+
+        let meshOptions = '<option value="">--Select Mesh--</option>';
+        MeshList.forEach(m => {
+            meshOptions += `<option value="${m.value}">${m.text}</option>`;
+        });
+
+        let colorOptions = '<option value="">--Select Color--</option>';
+        ColorList.forEach(c => {
+            colorOptions += `<option value="${c.value}">${c.text}</option>`;
+        });
+
+        const row = `
+        <tr>
+
+            <td class="tdLID"></td>
+
+            <td>
+                <select class="form-control ddlLoom" style="width:100px;">${loomOptions}</select>
+            </td>
+
+            <td class="tdEmpCode" style="width:50px;"></td>
+
+            <td>
+                <select class="form-control ddlEmployee" style="width:120px;">${empOptions}</select>
+            </td>
+
+            <td>
+                <select class="form-control ddlItem" style="width:100px;">${itemOptions}</select>
+            </td>
+
+            <td><input type="text" class="form-control tdType" style="width:100px;"></td>
+            <td><input type="number" class="form-control tdWidth" style="width:100px;"></td>
+            <td><input type="number" class="form-control tdGram" style="width:100px;"></td>
+
+            <td>
+                <select class="form-control ddlMesh" style="width:100px;">${meshOptions}</select>
+            </td>
+
+            <td>
+                <select class="form-control ddlColor" style="width:100px;">${colorOptions}</select>
+            </td>
+
+            <td><input type="text" class="form-control txtDNR" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtOPRD" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtCLRD" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtPRDN" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtPPM" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtWaste" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtCProd" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtKgs" style="width:80px;"></td>
+            <td><input type="text" class="form-control txtProd" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtProdNo" style="width:80px;"></td>
+            <td><input type="text" class="form-control txtRefType" style="width:80px;"></td>
+            <td><input type="number" class="form-control txtRefNo" style="width:80px;"></td>
+
+            <td>
+                <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+            </td>
+
+        </tr>`;
+
+        $ItemDetailsTbody.append(row);
+         calculateTotals();
+    }
+
+    //========LOOM AUTO FILL ========
+    $(document).on('change', '.ddlLoom', function () {
+        const code = $(this).find(':selected').data('code');
+        $(this).closest('tr').find('.tdLID').text(code || '');
+    });
+
+    //========= EMPLOYEE AUTO FILL =====
+    $(document).on('change', '.ddlEmployee', function () {
+        const code = $(this).find(':selected').data('code');
+        $(this).closest('tr').find('.tdEmpCode').text(code || '');
+    });
+
+    //======ITEM AUTO FILL ==========
+    $(document).on('change', '.ddlItem', function () {
+
+        const opt = $(this).find(':selected');
+        const row = $(this).closest('tr');
+
+        row.find('.tdType').val(opt.data('ptype') || '');
+        row.find('.tdWidth').val(opt.data('width') || '');
+        row.find('.tdGram').val(opt.data('gram') || '');
+         calculateKgs(row);
+        const color = opt.data('color');
+        if (color) {
+            row.find('.ddlColor').val(color);
+        }
+    });
+
+    //=========ADD ROW BUTTON ========
+    $(document).on('click', '.btn-add-action, .btn-add-row', function () {
+        addItemDetailsRow();
+    });
+
+    //========== DELETE ROW ========
+    $(document).on('click', '.btn-delete-action', function () {
+        const $row = $(this).closest('tr');
+        const $tbody = $row.closest('tbody');
+        const isLast = $row.is(':last-child');
+        $row.remove();
+        if (isLast) {
+            const $last = $tbody.find('tr:last');
+            if ($last.length) {
+                $last.find('td:last').prepend(
+                    `<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>`
+                );
+            }
+        }
+         calculateTotals();
+    });
+
+    //=====Calculate PRDN======
+    function calculatePRDN(row) {
+
+        const oprdVal = row.find('.txtOPRD').val();
+        const clrdVal = row.find('.txtCLRD').val();
+
+        if (oprdVal === "" || clrdVal === "") {
+            row.find('.txtPRDN').val('');
+            return 0;
+        }
+
+        const oprd = parseFloat(oprdVal);
+        const clrd = parseFloat(clrdVal);
+        let prdn = 0;
+
+        if (clrd < oprd) {
+            prdn = clrd + 10000 - oprd;
+        } else {
+            prdn = clrd - oprd;
+        }
+
+        row.find('.txtPRDN').val(prdn.toFixed(2));
+
+        return prdn;
+    }
+
+    //==== Calculate KG=========
+    function calculateKgs(row) {
+
+        const widthVal = row.find('.tdWidth').val();
+        const gramVal = row.find('.tdGram').val();
+        const prdnVal = row.find('.txtPRDN').val();
+
+        if (!widthVal || !gramVal || !prdnVal) {
+            row.find('.txtKgs').val("0.00");
+            return;
+        }
+
+        const width = parseFloat(widthVal);
+        const gram = parseFloat(gramVal);
+        const prdn = parseFloat(prdnVal);
+
+        const kgs = (width * gram * 0.001) * prdn;
+
+        row.find('.txtKgs').val(kgs.toFixed(2));
+    }
+
+    //========Calculate Totals ========
+    function calculateTotals() {
+
+        let totalProduction = 0;
+        let totalWaste = 0;
+
+        $('#tblLoomProductionEntry tbody tr').each(function () {
+
+            const prdn = parseFloat($(this).find('.txtPRDN').val()) || 0;
+            const waste = parseFloat($(this).find('.txtWaste').val()) || 0;
+
+            totalProduction += prdn;
+            totalWaste += waste;
+        });
+
+       const totalRec = $('#tblLoomProductionEntry tbody tr').length;
+
+       $('#NumTotalrec').val(totalRec);
+       $('#NumTotalProduction').val(totalProduction.toFixed(2));
+       $('#NumTotalWaste').val(totalWaste.toFixed(2));
+
+       const avg = totalRec > 0 ? (totalProduction / totalRec) : 0;
+       $('#NumAverageProduction').val(avg.toFixed(2));
+    }
+
+    //======On change bind=========
+    $(document).on('input', '.txtOPRD, .txtCLRD ,.txtWaste', function () {
+        const row = $(this).closest('tr');
+        calculatePRDN(row);
+        calculateKgs(row);
+        calculateTotals();
+    });
+
+    $(document).on('input', '.tdWidth, .tdGram', function () {
+        const row = $(this).closest('tr');
+        calculateKgs(row);
+    });
+
+    //=====Fill Data On Btn_fill=======
+    $('#btn_fill').on('click', async function () {
+        const block = $('#ddlBlock').val();
+        const shift = $('#ddlShift').val();
+        const vDate = $('#DtDocDate').val();
+
+        if (!block) {
+            toastr.error("Please select Block");
+            return;
+        }
+
+        try {
+            $('.circle-loader').show();
+
+            const res = await fetch(`/LoomProductionEntry/FillLoomData?block=${block}&shift=${shift}&vDate=${vDate}`);
+            const data = await res.json();
+
+            console.log("Full API Response", data);
+
+            if (!data.success) {
+                toastr.error(data.message);
+                return;
+            }
+
+            $ItemDetailsTbody.empty();
+
+            data.data.forEach(item => {
+                addItemDetailsRow();
+
+                const $row = $ItemDetailsTbody.find('tr:last');
+
+                $row.find('.ddlLoom').val(item.loomCode).trigger('change');
+                $row.find('.txtPRDN').val(item.clrdr);
+
+                calculateKgs($row);
+            });
+
+            calculateTotals();
+
+        } catch (err) {
+            toastr.error("Error loading fill data");
+            console.error(err);
+        } finally {
+            $('.circle-loader').hide();
+        }
+    });
+
+</script>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('docId');
+    const mode = new URLSearchParams(window.location.search).get('mode');
+
+    $(document).ready(function(){
+        setCurrentDate();
+        loadAllDropdowns();
+
+        if(mode==='view'){
+            readOnlyMode();
+        }
+
+        //======Save and Update========
+        $('#btnSave').on('click', function (e) {
+            e.preventDefault();
+
+            if (!validateRequiredField('#ddlPlace', 'Place')) return;
+            if (!validateRequiredField('#ddlSuperwisor', 'SuperWiser Name ')) return;
+            let itemList = [];
+
+            $('#tblLoomProductionEntry tbody tr').each(function () {
+
+                let $row = $(this);
+                let item = {
+                    LOOM_CODE: $row.find('.ddlLoom').val()|| null,
+                    LOOM_TYPE: $row.find('.ddlLoom option:selected').text()|| null,
+                    FEMP_CODE: $row.find('.ddlEmployee').val()|| null,
+                    ITEM_CODE: $row.find('.ddlItem').val()|| null,
+                    PTYPE_NAME: $row.find('.tdType').val() || null, 
+                    WIDTH: $row.find('.tdWidth').val() || null,
+                    GRAM: $row.find('.tdGram').val() || null,
+                    MESH_CODE: $row.find('.ddlMesh').val()|| null,
+                    MESH: $row.find('.ddlMesh option:selected').text()|| null,
+                    COLOR_CODE: $row.find('.ddlColor').val()|| null,
+                    COLOR_NAME: $row.find('.ddlColor option:selected').text()|| null,
+                    DNR: $row.find('.txtDNR').val()|| null,
+                    OPRD: $row.find('.txtOPRD').val()|| null,
+                    CLRD: $row.find('.txtCLRD').val()|| null,
+                    PRDN: $row.find('.txtPRDN').val()|| null,
+                    PPM: $row.find('.txtPPM').val()|| null,
+                    WASTE: $row.find('.txtWaste').val()|| null,
+                    CPRDN: $row.find('.txtCProd').val()|| null,
+                    PORD_TYPE: $row.find('.txtRefType').val() || null,
+                    PORD_NO: $row.find('.txtRefNo').val()|| 0
+                };
+                if (item.ITEM_CODE) {
+                    itemList.push(item);
+                }
+            });
+            let model = {
+                DOC_ID: $('#docId').val(),
+                V_NO: $('#NumDocNo').val(),
+                V_DATE: $('#DtDocDate').val(),
+                SHIFT: $('#ddlShift').val()|| null,
+                PLACE_CODE: $('#ddlPlace').val()|| null,
+                EMP_CODE: $('#ddlSuperwisor').val()|| null,
+                REMARKS: $('#Remarks').val()|| null,
+                ItemList: itemList
+            };
+            $('.circle-loader').show();
+            $.ajax({
+                url: '/LoomProductionEntry/SaveAndUpdateData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (res) {
+                    if (res.isUpdate) {
+                        showFlashMessageByKey('update', 'success');
+                    } else {
+                        showFlashMessageByKey('insert', 'success');
+                    }
+                    setTimeout(function(){
+                        window.location.href = '/LoomProductionEntryList/Index';
+                    },500)
+                },
+                error: function (err) 
+                {
+                   toastr.error("Error saving data");
+                },complete: function()
+                {
+                   $('.circle-loader').hide();
+                }
+            });
+        });
+    });
+
+    //==== Set Current Date=======
+    function setCurrentDate() {
+        let today = new Date().toISOString().split('T')[0];
+        $("#DtDocDate").val(today);
+    }
+
+    //=====Load Data On Edit========
+    async function LoadDataOnEdit(){
+        try
+        {
+            $('.circle-loader').show();
+            if (!docId) return;
+            const res = await fetch(`/LoomProductionEntry/loadDataOnEdit?docId=${docId}`,{
+                method: 'GET'
+            });
+            if(!res.ok) throw new Error("Network Error");
+            const data= await res.json();
+            if(data.success){
+                console.log("Edit Data", data);
+                bindFormData(data);
+            } else{
+                toastr.error(data.message || "Failed to load data");
+            }
+        }catch(err)
+        {
+            console.error("LoadDataOnEdit Error:", err);
+            toastr.error(err.message || "Something went wrong");
+
+        }finally 
+        {
+           $('.circle-loader').hide();
+        }
+
+    }
+
+    function toDecimal(val) {
+        let num = parseFloat(val);
+        return isNaN(num) ? "" : num.toFixed(2);
+    }
+
+    //=====Bind Form On Edit========
+    function bindFormData(data) {
+
+        const header = data.header;
+        const items = data.items;
+       
+        $('#docId').val(header.doC_ID);
+        $('#NumDocNo').val(header.v_NO);
+        $('#DtDocDate').val(header.v_DATE?.split('T')[0]);
+        $('#ddlShift').val(header.shift);
+        $('#ddlPlace').val(header.placE_CODE);
+        $('#ddlSuperwisor').val(header.emP_CODE);
+        $('#Remarks').val(header.remarks);
+
+        $ItemDetailsTbody.empty();
+
+        if (!items || items.length === 0) {
+            addItemDetailsRow();
+            return;
+        }
+
+        items.forEach(item => {
+
+            addItemDetailsRow();
+            const $row = $ItemDetailsTbody.find('tr:last');
+
+            $row.find('.ddlLoom').val(item.looM_CODE).trigger('change');
+            $row.find('.ddlEmployee').val(item.femP_CODE).trigger('change');
+            $row.find('.ddlItem').val(item.iteM_CODE).trigger('change');
+            $row.find('.ddlMesh').val(item.mesH_CODE);
+            $row.find('.ddlColor').val(item.coloR_CODE);
+            $row.find('.txtDNR').val(item.dnr);
+            $row.find('.txtOPRD').val(toDecimal(item.oprd));
+            $row.find('.txtCLRD').val(toDecimal(item.clrd));
+            $row.find('.txtPRDN').val(toDecimal(item.prdn));
+            $row.find('.txtPPM').val(toDecimal(item.ppm));
+            $row.find('.txtWaste').val(toDecimal(item.waste));
+            $row.find('.txtCProd').val(toDecimal(item.cprdn));
+            $row.find('.tdGram').val(toDecimal(item.gram));
+            $row.find('.txtKgs').val(toDecimal(item.prkg));
+            $row.find('.txtProd').val(item.porD_TYPE);
+            $row.find('.txtProdNo').val(item.porD_NO);
+        });
+
+        calculateTotals();
+    }
+
+    //======Load DropDown=======
+    function loadAllDropdowns(){
+      return Promise.all([
+            PlaceDDL(),
+            SupervisorDDL(),
+            blockDDL(),
+      ])
+        .then(function(){
+            console.log("All dropdowns loaded");
+        })
+        .catch(function(){
+            toastr.error("Some dropdown failed to load");
+        });
+    }
+
+    //======Bind Dropdowns========
+    function PlaceDDL(callback){
+        return $.ajax({
+            url:'/LoomProductionEntry/Place',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const place=$('#ddlPlace');
+                    place.empty();
+
+                    place.append('<option value="">--Select Place--</option>');
+
+                    $.each(res.data, function(index, item){
+                        place.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("Place Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function SupervisorDDL(callback){
+        return $.ajax({
+            url:'/LoomProductionEntry/Supervisor',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const superwisor=$('#ddlSuperwisor');
+                    superwisor.empty();
+
+                    superwisor.append('<option value="">--Select Superwisor--</option>');
+
+                    $.each(res.data, function(index, item){
+                        superwisor.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("Superwisor Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function blockDDL(callback){
+        return $.ajax({
+            url:'/LoomProductionEntry/block',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const block=$('#ddlBlock');
+                    block.empty();
+
+                    block.append('<option value="">--Select Block--</option>');
+
+                    $.each(res.data, function(index, item){
+                        block.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("Block Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    //=====Generate VNo==========
+    async function GetVNo() {
+        try {
+
+            const res = await fetch('/LoomProductionEntry/GenerateVNo');
+            if (!res.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await res.json();
+            if (data.v_NO) {
+                $('#NumDocNo').val(data.v_NO);
+               
+                const docId = data.v_TYPE + data.v_NO ;
+                console.log("DOC_ID:", docId);
+            } else {
+                console.warn("v_NO not found in response");
+            }
+
+        } catch (e) {
+            console.error("Error in GetVNo:", e);
+        }
+    }
+
+    //====Read only Mode=======
+    function readOnlyMode() {
+        $('#LoomProductionEntryForm').find('input, select, textarea').prop('disabled', true);
+        $('#tblLoomProductionEntry').css('pointer-events', 'none');
+        $('#btnSave').hide();
+        $('#btn_fill').prop('disabled',true);
+        $('#btn_ConnectGetReading').prop('disabled',true);
+        $('.btn-add-row').hide();
+        $('.btn-add-action').hide();
+        $('.btn-delete-action').hide();
+        $('#NumDocNo').prop('disabled', false);
+        $('input, textarea').css({
+            'background-color': '#f5f5f5',
+            'cursor': 'not-allowed'
+        });
+        $('select').css({
+            'background-color': '#f5f5f5',
+            'cursor': 'not-allowed'
+        });
+    }
+
+</script>

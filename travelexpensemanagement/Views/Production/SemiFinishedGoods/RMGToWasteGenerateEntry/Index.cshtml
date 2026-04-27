@@ -1,0 +1,771 @@
+﻿@{
+    ViewBag.Title = "RMG To Waste Generate Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+<fieldset>
+    <legend class="legend-field">RMGTo Waste GenerateEntry</legend>
+    <div class="row">
+        <div class="offset-md-8 col-md-4">
+            <div class="button-right">
+                <button onclick="window.location.href='@Url.Action("Index", "RMGToWasteGenerateEntryList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="RMGToWasteGenerateEntryForm">
+        <input type="hidden" class="form-control" id="docId" name="DOC_ID" value="">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Document Type</label>
+                    <select class="form-control" id="ddlDocType">
+                        <option value="">--Select Document Type--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Document No</label>
+                    <input type="number" class="form-control" id="NumDocNo" readonly />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Document Date</label>
+                    <input type="date" class="form-control" id="DtDocDate" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Slip No</label>
+                    <input type="text" class="form-control" id="SlipNo" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="btn-mt button-right">
+                        <button type="button" id="btnStoreNilStock" class="btn btn-primary">Store Nil Stock (Amt.) Adjustment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Production Code No</label>
+                    <select class="form-control" id="ProductionCodeNo">
+                        <option value="">--Select ProductionCodeNo--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>DO No.</label>
+                    <select class="form-control" id="ddlDoNo">
+                        <option value="">--Select DoNo--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea class="form-control" id="Remarks" style="height:50px;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-md-6 col-md-6">
+                <div class="button-right">
+                    <button type="button" id="LinkFlakes" class="btn btn-primary">Link Flakes</button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-copy"></i> <span id="dropdownText">Copy From</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="copyFromDropdown">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#productionreceivedModal">Production Received</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        @* Modal Popup *@
+        <div class="modal fade" id="productionreceivedModal" tabindex="-1" aria-labelledby="productionreceivedLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="productionreceivedLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                    <input type="text" id="searchBoxQM" class="form-control" placeholder="Search Module..." aria-label="Search term" />
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <input type="checkbox" id="chkAppendRMP">
+                                        <label class="checkbox-label" for="chkAppendRMP">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="btn-rightalign">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblRMPurchaseModal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllQM" /></th>
+                                            <th>Pono</th>
+                                            <th>Potype</th>
+                                            <th>Vdate</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+
+                                            <th style="display:none;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <fieldset>
+            <legend class="sub-legend">Item Details</legend>
+            <div class="card">
+                <div class="table-responsive">
+                    <table id="RMGToWasteGenerateEntry" class="table-width">
+                        <thead class="table-head">
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Unit</th>
+                                <th>Lot No</th>
+                                <th>Nos</th>
+                                <th>Weight</th>
+                                <th>From Place</th>
+                                <th>To Place</th>
+                                <th>Remarks</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>LD Rate</th>
+                                <th>LD Amt</th>
+                                <th>Production Type</th>
+                                <th>Production No</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-add-row-last">
+                            <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                        </div>
+                        @* <div class="pagination-end">
+                            <div class="custom-pagination" id="tablePagination"></div>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="btn-mt button-right">
+                    <button type="submit" id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+@* Table Script *@
+<script>
+
+    let itemList = [];
+    let $ItemDetailsTbody;
+
+    /* ================= LOAD ITEM DROPDOWN ================= */
+
+    function loadItemDropdown(vType) {
+        let url = '';
+        if (vType === 'RAIT') {
+            url = '/RMGToWasteGenerateEntry/ItemMasterRAIT';
+        } else if (vType === 'RAIV') {
+            url = '/RMGToWasteGenerateEntry/ItemMasterRAIV';
+        } else {
+            console.warn("Invalid DocType");
+            return;
+        }
+        return $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (res) {
+                if (res.success) {
+                    itemList = res.data;
+                }
+            },
+            error: function () {
+                alert("Item load failed");
+            }
+        });
+    }
+
+    /* ================= ADD ROW ================= */
+    function addItemDetailsRow(data = {}) {
+
+        $ItemDetailsTbody.find('.btn-add-action').remove();
+
+        let itemOptions = '<option value="">--Select Item--</option>';
+        let deptOptions = '<option value="">--Select--</option>';
+
+        itemList.forEach(function(item) {
+
+            const parts = item.text.split('|');
+            const itemName = parts[0];
+            const unit = parts[1];
+
+            itemOptions += `<option value="${item.value}"
+                data-code="${item.value}"
+                data-unit="${unit}">
+                ${itemName}
+            </option>`;
+        });
+
+         departmentList.forEach(function (dept) {
+             deptOptions += `<option value="${dept.value}">
+                            ${dept.text}
+                        </option>`;
+         });
+
+        const row = `
+            <tr>
+                <td class="tdItemCode"></td>
+                <td>
+                    <select class="form-control ddlItem">
+                        ${itemOptions}
+                    </select>
+                </td>
+                <td class="tdUnit"></td>
+                <td><input type="text" class="form-control txtLotNo"></td>
+                <td><input type="number" class="form-control txtNos" style="width:100px;"></td>
+                <td><input type="number" class="form-control txtWeight" style="width:100px;"></td>
+                <td>
+                    <select class="form-control ddlFromPlace" style="width:140px;">
+                        ${deptOptions}
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control ddlToPlace" style="width:140px;">
+                        ${deptOptions}
+                    </select>
+                </td>
+                <td><input type="text" class="form-control txtRemarks"></td>
+                <td><input type="number" class="form-control txtRate" style="width:100px;"></td>
+                <td><input type="number" class="form-control txtAmount" style="width:100px;"></td>
+                <td><input type="number" class="form-control txtLDRate" style="width:100px;"></td>
+                <td><input type="number" class="form-control txtLDAmt" style="width:100px;"></td>
+                <td><input type="text" class="form-control txtProdType"></td>
+                <td><input type="number" class="form-control txtProdNo"></td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;margin-left:8px;"></i>
+                </td>
+            </tr>`;
+        const $row = $(row);
+        $ItemDetailsTbody.append($row);
+
+        if (!$row.find('.ddlItem').hasClass("select2-hidden-accessible")) {
+            $row.find('.ddlItem').select2({
+                placeholder: "Search Item",
+                width: '100%'
+            });
+        }
+    }
+
+    /* ================= ITEM CHANGE (AUTO FILL) ================= */
+    $(document).on('change', '.ddlItem', function () {
+        const selected = $(this).find(':selected');
+        const code = selected.data('code');
+        const unit = selected.data('unit');
+        const $row = $(this).closest('tr');
+
+        $row.find('.tdItemCode').text(code || '');
+        $row.find('.tdUnit').text(unit || '');
+
+    });
+
+    /* ================= ADD ROW EVENT ================= */
+    $(document).on('click', '.btn-add-action', function () {
+        addItemDetailsRow();
+    });
+
+    // For the bottom "Add New Row" button outside table
+    $(document).on('click', '.btn-add-row', function () {
+        addItemDetailsRow();
+    });
+
+    /* ================= DELETE ROW ================= */
+    $(document).on('click', '.btn-delete-action', function () {
+
+        const $row = $(this).closest('tr');
+        const $tbody = $row.closest('tbody');
+        const isLastRow = $row.is(':last-child');
+
+        $row.remove();
+        if (isLastRow) {
+            const $lastRow = $tbody.find('tr:last');
+
+            if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+                $lastRow.find('td:last').prepend(
+                    `<i class="fa fa-plus btn-add-action text-success" style="cursor:pointer;"></i>`
+                );
+            }
+        }
+
+    });
+
+     /* ================= CALCULATE AMOUNT ================= */
+    $(document).on('input', '.txtWeight, .txtRate', function () {
+
+        const $row = $(this).closest('tr');
+
+        let weight = parseFloat($row.find('.txtWeight').val()) || 0;
+        let rate = parseFloat($row.find('.txtRate').val()) || 0;
+
+        let amount = weight * rate;
+
+        // Set Amount
+        $row.find('.txtAmount').val(amount.toFixed(2));
+        $row.find('.txtLDRate').val(rate.toFixed(2));
+        $row.find('.txtLDAmt').val(amount.toFixed(2));
+    });
+</script>
+
+<script>
+    let departmentList = [];
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('docId');
+    const mode = new URLSearchParams(window.location.search).get('mode');
+
+    $(document).ready(function(){
+        $ItemDetailsTbody = $('#RMGToWasteGenerateEntry tbody');
+         setCurrentDate();
+
+        if(mode === "view"){
+            readOnlyMode();
+        }
+
+        loadAllDropdowns().then(function () {
+            if (docId) {
+                loadDataOnEdit(docId);   
+            }
+        });
+        
+        //======Save and Update Data===========
+        $('#btnSave').on('click', function(e){
+             e.preventDefault();
+
+            if (!validateRequiredField('#ddlDocType', 'DocumentType')) return;
+            if (!validateRequiredField('#ProductionCodeNo', 'productionCodeNo')) return;
+            if (!validateRequiredField('#ddlDoNo', 'ddlDoNoType')) return;
+
+            let itemListData = [];
+            $('#RMGToWasteGenerateEntry tbody tr').each(function () {
+
+                const $row = $(this);
+                const item = {
+                    ITEM_CODE: $row.find('.ddlItem').val(),
+                    ITEM_NAME: $row.find('.ddlItem option:selected').text().trim(),
+                    UOM_NAME: $row.find('.tdUnit').text(),
+                    LOT_NO: $row.find('.txtLotNo').val() || null,
+                    NOS: $row.find('.txtNos').val()|| null,
+                    QTY: $row.find('.txtWeight').val()|| null,
+                    FROM_DEPT: $row.find('.ddlFromPlace').val() || null,
+                    To_DEPT: $row.find('.ddlToPlace').val() || null,
+                    IREMARKS: $row.find('.txtRemarks').val()|| null,
+                    RATE: $row.find('.txtRate').val()|| null,
+                    IAMOUNT: $row.find('.txtAmount').val()|| null,
+                    LAND_RATE: $row.find('.txtLDRate').val()|| null,
+                    LAND_AMT: $row.find('.txtLDAmt').val()|| null,
+                    IPORD_TYPE: $row.find('.txtProdType').val()|| null,
+                    IPORD_NO: $row.find('.txtProdNo').val() || null
+                };
+                if (item.ITEM_CODE) {
+                    itemListData.push(item);
+                }
+            });
+             const model={
+                 DOC_ID: $('#docId').val(),
+                 V_TYPE: $('#ddlDocType').val(),
+                 V_NO: $('#NumDocNo').val()|| 0,
+                 V_DATE: $('#DtDocDate').val(),
+                 SHIFT:$('#ddlShift').val() || null,
+                 SLIP_NO: $('#SlipNo').val() || null,
+                 PORD_NO: $('#ProductionCodeNo').val() || null,
+                 PORD_TYPE: $('#ProductionCodeNo option:selected').text() || null,
+                 REMARKS:$('#Remarks').val()|| null,
+                 STATUS:$('#ddlStatus option:selected').val()|| null,
+                 PLAN_NO:$('#ddlDoNo').val()|| null,
+                 PLAN_TYPE:$('#ddlDoNo option:selected').text()|| null,
+                 ItemList: itemListData
+             }
+
+             //====show loader======
+             $('.circle-loader').css('display', 'flex');
+             $.ajax({
+                 url:'/RMGToWasteGenerateEntry/SaveAndUpdateData',
+                 type:'Post',
+                 contentType: 'application/json',
+                 data: JSON.stringify(model),
+                 success: function(res){
+                     if(res.success){
+                         console.log("Res", res);
+                        if (res.isUpdate) {
+                            showFlashMessageByKey('update', 'success');
+                        } else {
+                            showFlashMessageByKey('insert', 'success');
+                        }
+                        setTimeout(function(){
+                            window.location.href = '/RMGToWasteGenerateEntryList/Index';
+                        },500)
+                     } else{
+                        toastr.warning("Data Saved Failed");
+                     }
+                 },
+                error: function (xhr) {
+                      let msg = xhr.responseText || "Unexpected error occurred";
+                      toastr.error(msg);
+                },
+                complete: function () {
+                    //====hide loader======
+                   $('.circle-loader').css('display', 'none');
+                }
+             })
+        });
+    });
+
+    //====Current Date======
+    function setCurrentDate() {
+        let today = new Date().toISOString().split('T')[0];
+        $("#DtDocDate").val(today);
+    }
+
+    //=====Load Data On Edit ========
+    function loadDataOnEdit(docId) {
+        $('.circle-loader').css('display', 'flex');
+        $.ajax({
+            url: '/RMGToWasteGenerateEntry/loadDataOnEdit',
+            type: 'GET',
+            data: { docId: docId },
+            success: function (res) {
+                $('.circle-loader').hide();
+                if (res.success) {
+                    console.log("Item Table", res);
+                    const header = res.header;
+                    const items = res.items;
+
+                    $('#ddlDocType').val(header.v_TYPE);
+
+                    loadItemDropdown(header.v_TYPE).then(function () {
+
+                        /* HEADER FILL */
+                        $('#docId').val(header.doC_ID);
+                        $('#NumDocNo').val(header.v_NO);
+                        $('#DtDocDate').val(header.v_DATE?.split('T')[0]);
+                        $('#ddlStatus').val(header.status);
+                        $('#ddlShift').val(header.shift);
+                        $('#SlipNo').val(header.sliP_NO);
+                        $('#ProductionCodeNo').val(header.porD_NO);
+                        $('#ddlDoNo').val(header.plaN_NO);
+                        $('#Remarks').val(header.remarks);
+
+                        /* TABLE BIND */
+                        $ItemDetailsTbody.empty();
+
+                        items.forEach(function (item) {
+                            addItemDetailsRow();
+                            const $row = $ItemDetailsTbody.find('tr:last');
+
+                            $row.find('.tdItemCode').text(item.iteM_CODE);
+                            $row.find('.tdUnit').text(item.uoM_NAME);
+                            $row.find('.ddlItem').val(String(item.iteM_CODE).trim()).trigger('change');
+                            $row.find('.txtLotNo').val(item.loT_NO);
+                            $row.find('.txtNos').val(item.nos);
+                            $row.find('.txtWeight').val(parseFloat(item.qty || 0).toFixed(3));
+                            $row.find('.txtRemarks').val(item.iremarks);
+                            $row.find('.txtRate').val(parseFloat(item.rate || 0).toFixed(3));
+                            $row.find('.txtAmount').val(parseFloat(item.iamount || 0).toFixed(3));
+                            $row.find('.txtLDRate').val(parseFloat(item.lanD_RATE || 0).toFixed(3));
+                            $row.find('.txtLDAmt').val(parseFloat(item.lanD_AMT || 0).toFixed(3));
+                            $row.find('.txtProdType').val(item.iporD_TYPE);
+                            $row.find('.txtProdNo').val(item.iporD_NO);
+
+                             $row.find('.ddlFromPlace').val(String(item.froM_DEPT).trim()).trigger('change');
+                             $row.find('.ddlToPlace').val(String(item.froM_DEPT).trim()).trigger('change');
+                        });
+
+                    });
+                }
+            },error: function () {
+                toastr.warning("Error loading data");
+            },
+            complete: function () {
+                //====hide loader======
+                $('.circle-loader').css('display', 'none');
+            }
+        });
+    }
+
+    //=======Load All Dropdown=====
+    function loadAllDropdowns(){
+      return Promise.all([
+            DocTypeDDL(),
+            StatusDDL(),
+            DoNoDDL(),
+            ProdOrderNoDDL(),
+            loadDepartmentDropdown()
+      ])
+        .then(function(){
+            console.log("All dropdowns loaded");
+        })
+        .catch(function(){
+            toastr.error("Some dropdown failed to load");
+        });
+    }
+
+    //====Bind DropDowns=====
+    function DocTypeDDL(callback){
+        return $.ajax({
+            url:'/RMGToWasteGenerateEntry/DOCTYPE',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const docType=$('#ddlDocType');
+                    docType.empty();
+
+                   // docType.append('<option value="">--Select DocType--</option>');
+                    $.each(res.data, function(index, item){
+                        docType.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if (!docId) {
+                        docType.prop('selectedIndex', 0);
+                        GetVNo();
+                    }
+
+                    const vType = docType.val();
+                    loadItemDropdown(vType).then(function (res) {
+                        if (res && res.success !== false) {
+                            $ItemDetailsTbody.empty();
+                            addItemDetailsRow();
+                        }
+                    });
+
+                    $('#ddlDocType').off('change').on('change', function () {
+                       const vType = $(this).val();
+                        if (!vType) return;
+                        GetVNo();
+                        loadItemDropdown(vType).then(function () {
+                            $ItemDetailsTbody.empty();
+                            addItemDetailsRow();
+                        });
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("DocType Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function StatusDDL(callback){
+        return $.ajax({
+            url:'/RMGToWasteGenerateEntry/Status',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const status=$('#ddlStatus');
+                    status.empty();
+
+                    status.append('<option value="">--Select Status--</option>');
+
+                    $.each(res.data, function(index, item){
+                        status.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("Status Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function DoNoDDL(callback){
+        return  $.ajax({
+            url:'/RMGToWasteGenerateEntry/DONO',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const doNo=$('#ddlDoNo');
+                    doNo.empty();
+
+                    doNo.append('<option value="">--Select Do.No.--</option>');
+
+                    $.each(res.data, function(index, item){
+                        doNo.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("DoNo Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function ProdOrderNoDDL(callback){
+        return  $.ajax({
+            url:'/RMGToWasteGenerateEntry/ProdOrderNo',
+            type:'Get',
+            dataType:'Json',
+            success: function(res){
+                if(res.success){
+                    const productionCodeNo=$('#ProductionCodeNo');
+                    productionCodeNo.empty();
+
+                    productionCodeNo.append('<option value="">--Select ProductionCodeNo--</option>');
+
+                    $.each(res.data, function(index, item){
+                        productionCodeNo.append('<option value="' + item.value + '">' + item.text + '</option>');
+                    });
+
+                    if(typeof callback==="function") callback();
+                }else{
+                    toastr.warning("ProdOrderNo Dropdown load failed !!");
+                }
+            },
+            error:function(xhr){
+                let msg = xhr.responseText || "Unexpected error occurred";
+                toastr.error(msg);
+            }
+        });
+    };
+
+    function loadDepartmentDropdown() {
+        return $.ajax({
+            url: '/RMGToWasteGenerateEntry/DepartmentDDl',
+            type: 'GET',
+            success: function (res) {
+                if (res.success) {
+                    departmentList = res.data;
+                }
+            },
+            error: function () {
+                toastr.error("Department load failed");
+            }
+        });
+    }
+
+    //====Generate VNo========
+    async function GetVNo() {
+        try {
+            const vType = $('#ddlDocType').val();
+            if (!vType) {
+                console.warn("vType is empty");
+                return;
+            }
+            const res = await fetch(`/RMGToWasteGenerateEntry/GenerateVNo?vType=${encodeURIComponent(vType)}`);
+
+            if (!res.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await res.json();
+            if (data.v_NO) {
+                $('#NumDocNo').val(data.v_NO);
+            } else {
+                console.warn("V_NO not found in response");
+            }
+
+        } catch (e) {
+            console.error("Error in GetVNo:", e);
+        }
+    }
+
+    //======Read only Mode========
+    function readOnlyMode() {
+        $('#RMGToWasteGenerateEntryForm').find('input, select, textarea, button').prop('disabled', true);
+        $('#RMGToWasteGenerateEntry').find('input, select').prop('disabled', true).prop('readonly', true);
+        $('.ddlItem').prop('disabled', true).trigger('change.select2');
+        $('#btnSave').hide();
+        $('.btn-add-row').hide();
+        $('.btn-add-action, .btn-delete-action').hide();
+    }
+
+</script>
