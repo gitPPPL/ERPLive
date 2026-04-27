@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Production.Master.LotMaster;
@@ -8,11 +8,11 @@ namespace travelexpensemanagement.Controllers.Production.Master
 {
     public class LotMasterListController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariable;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public LotMasterListController(DataBaseConnection dbConnection, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
+        public LotMasterListController(DataBaseConnection dbConnection, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbConnection = dbConnection;

@@ -41,36 +41,36 @@ namespace travelexpensemanagement.Controllers.Dashboard
             return View("Index");
         }
 
-        public JsonResult GetAllDashboardCount()
-        {
-            var userId = HttpContext.Session.GetString("CODE");
-            var compCode = HttpContext.Session.GetString("COMP_CODE");
+        //public JsonResult GetAllDashboardCount()
+        //{
+        //    var userId = HttpContext.Session.GetString("CODE");
+        //    var compCode = HttpContext.Session.GetString("COMP_CODE");
 
-            int requestCount = 0;
-            int sendRequestCount = 0;
+        //    int requestCount = 0;
+        //    int sendRequestCount = 0;
 
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                SqlCommand cmd = new SqlCommand("GetDashboardRequestCount", con);
-                cmd.CommandType = CommandType.StoredProcedure;
+        //    using (SqlConnection con = _dbConnection.GetErpConnection())
+        //    {
+        //        SqlCommand cmd = new SqlCommand("GetDashboardRequestCount", con);
+        //        cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@GetCODE", userId);
-                cmd.Parameters.AddWithValue("@comp_code", compCode);
+        //        cmd.Parameters.AddWithValue("@GetCODE", userId);
+        //        cmd.Parameters.AddWithValue("@comp_code", compCode);
 
-                con.Open();
+        //        con.Open();
 
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                        requestCount = Convert.ToInt32(reader["TotalCount"]);
+        //        using (SqlDataReader reader = cmd.ExecuteReader())
+        //        {
+        //            if (reader.Read())
+        //                requestCount = Convert.ToInt32(reader["TotalCount"]);
 
-                    if (reader.NextResult() && reader.Read())
-                        sendRequestCount = Convert.ToInt32(reader["SendTotalCount"]);
-                }
-            }
+        //            if (reader.NextResult() && reader.Read())
+        //                sendRequestCount = Convert.ToInt32(reader["SendTotalCount"]);
+        //        }
+        //    }
 
-            return Json(new { success = true, requestCount, sendRequestCount });
-        }
+        //    return Json(new { success = true, requestCount, sendRequestCount });
+        //}
 
 
     }
