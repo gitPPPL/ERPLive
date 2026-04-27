@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
-
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.EmployeePortal;
 
@@ -17,12 +18,12 @@ namespace travelexpensemanagement.Controllers.EmployeePortal
         }
 
         private readonly DataBaseConnection _dbConnection;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         public TimesheetDashboardController(DataBaseConnection dbConnection,
-           travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+           DropdownService dropdownService, DbHelper dbHelper,
     ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;  

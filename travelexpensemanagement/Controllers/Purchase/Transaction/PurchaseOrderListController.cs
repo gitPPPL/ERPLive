@@ -1,23 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
 using travelexpensemanagement.Models.FincialAccounting.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.ModuleService;
 using Microsoft.Data.SqlClient;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseOrderListController : Controller
     {
 
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public PurchaseOrderListController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public PurchaseOrderListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

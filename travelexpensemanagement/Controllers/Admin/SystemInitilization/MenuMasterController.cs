@@ -3,7 +3,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
@@ -17,12 +19,12 @@ namespace travelexpensemanagement.Controllers.Admin.Master
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         public MenuMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-     travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
+     DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

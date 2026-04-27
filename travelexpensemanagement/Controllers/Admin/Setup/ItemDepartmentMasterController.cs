@@ -2,8 +2,9 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.DropdownService;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 
@@ -14,10 +15,10 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         public ItemDepartmentMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-     travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper)
+     DropdownService dropdownService, DbHelper dbHelper)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -75,7 +76,7 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
         public JsonResult GetddlCost()
         {
             var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-            var nameCondition = DbHelper.DbHelper.NotNullOrEmptyCondition("Name");
+            var nameCondition = DbHelper.NotNullOrEmptyCondition("Name");
             //string query = $"SELECT Code, Name FROM COSTCENTER_MAST WHERE COMP_CODE = '{compCode}' AND ISNULL(Name, '') <> ''";
             string query = $"SELECT Code, Name FROM COSTCENTER_MAST WHERE COMP_CODE = '{compCode}' AND {nameCondition}";
             var result = _dropdownService.GetDropdownList(query);

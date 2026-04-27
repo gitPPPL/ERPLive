@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace travelexpensemanagement.GlobalErrorHandlingMiddleware
+namespace travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware
 {
     public class GlobalErrorHandlingMiddleware
     {

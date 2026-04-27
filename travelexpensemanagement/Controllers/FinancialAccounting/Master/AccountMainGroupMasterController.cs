@@ -2,9 +2,9 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
+using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.FincialAccounting.Master;
 

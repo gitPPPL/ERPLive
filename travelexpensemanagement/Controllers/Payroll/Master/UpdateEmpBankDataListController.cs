@@ -2,8 +2,9 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
-using travelexpensemanagement.Controllers.DropdownService;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -14,11 +15,11 @@ namespace travelexpensemanagement.Controllers.Payroll.Master
     public class UpdateEmpBankDataListController : Controller
     {
 
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public UpdateEmpBankDataListController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public UpdateEmpBankDataListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbConnection = dbcontext;

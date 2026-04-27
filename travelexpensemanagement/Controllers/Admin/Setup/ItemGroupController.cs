@@ -3,10 +3,12 @@ using System.Net.Sockets;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Admin.Setup
 {
@@ -15,11 +17,11 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
 
         public ItemGroupController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-     travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper)
+     DropdownService dropdownService, DbHelper dbHelper)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

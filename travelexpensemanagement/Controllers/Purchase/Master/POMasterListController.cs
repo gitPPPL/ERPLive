@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.Purchase.Master
 {
     public class POMasterListController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         string yearPrefix, VNO;
-        public POMasterListController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue)
+        public POMasterListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

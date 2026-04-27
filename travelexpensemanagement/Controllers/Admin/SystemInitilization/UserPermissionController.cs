@@ -5,10 +5,10 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Reflection.Metadata;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.DropdownService;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
 using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Admin.Setup;
 
@@ -19,11 +19,11 @@ namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService.DropdownService _dropdownService;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
 
         public UserPermissionController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        DropdownService.DropdownService dropdownService, DbHelper.DbHelper dbHelper)
+        DropdownService dropdownService, DbHelper dbHelper)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

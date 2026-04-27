@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using travelexpensemanagement.Models;
 using System;
 
-namespace travelexpensemanagement.Controllers.Globalvariable
+namespace travelexpensemanagement.Common.Globalvariable
 {
     public class GlobalVariableService
     {

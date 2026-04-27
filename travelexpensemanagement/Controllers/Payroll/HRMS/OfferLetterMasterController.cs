@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using System.Collections.Generic;
 using System;
+using travelexpensemanagement.Common.Globalvariable;
 
 namespace travelexpensemanagement.Controllers.Payroll.HRMS
 {

@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.Payroll.Transaction
 {
     public class DiwaliListCreationController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly GlobalVariableService _globalValue;
-        public DiwaliListCreationController(travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue)
+        public DiwaliListCreationController(DbHelper dbHelper, GlobalVariableService globalValue)
         {
             _dbHelper = dbHelper;
             _globalValue = globalValue;

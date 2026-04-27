@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.ApprovalProcedures;
 namespace travelexpensemanagement.Controllers.Admin.ApprovalProcedures
@@ -16,7 +18,7 @@ namespace travelexpensemanagement.Controllers.Admin.ApprovalProcedures
         private readonly GlobalVariableService _globalVariableService;
         private int? userLevel;
         public ApprovalStagesListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+    DropdownService dropdownService, DbHelper dbHelper,
     ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

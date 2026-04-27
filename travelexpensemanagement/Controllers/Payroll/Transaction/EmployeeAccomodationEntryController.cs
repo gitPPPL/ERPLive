@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
 using travelexpensemanagement.Models.Payroll.Transaction;
 using travelexpensemanagement.Models.QualityControl.Transaction;
 
@@ -13,12 +13,12 @@ namespace travelexpensemanagement.Controllers.Payroll.Transaction
 {
     public class EmployeeAccomodationEntryController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly travelexpensemanagement.Services.IMasterDataService _masterDataService;
-        public EmployeeAccomodationEntryController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, Services.IMasterDataService masterDataService)
+        public EmployeeAccomodationEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, Services.IMasterDataService masterDataService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

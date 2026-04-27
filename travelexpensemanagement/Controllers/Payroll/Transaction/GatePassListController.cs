@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.Payroll.Transaction
 {
     public class GatePassListController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly GlobalVariableService _globalValue;
-        public GatePassListController(travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue)
+        public GatePassListController(DbHelper dbHelper, GlobalVariableService globalValue)
         {
             _dbHelper = dbHelper;
             _globalValue = globalValue;

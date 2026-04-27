@@ -9,7 +9,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Reflection.Emit;
 using System.Runtime.ConstrainedExecution;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Payroll.Transaction;
 

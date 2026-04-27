@@ -5,25 +5,26 @@ using System.Data;
 using System.Data.Common;
 using System.Dynamic;
 using System.Threading.Tasks;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.Admin.SystemInitilization;
 using travelexpensemanagement.ModuleService;
 using Dapper;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Payroll.Master
 {
     public class EmployeeMasterListController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         int x;
-        public EmployeeMasterListController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public EmployeeMasterListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

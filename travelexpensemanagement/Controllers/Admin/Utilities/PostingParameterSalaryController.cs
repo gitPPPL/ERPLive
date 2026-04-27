@@ -1,20 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Utilities;
 using Microsoft.Data.SqlClient;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Admin.Utilities
 {
     public class PostingParameterSalaryController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly travelexpensemanagement.Services.IMasterDataService _masterDataService;
-        public PostingParameterSalaryController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, Services.IMasterDataService masterDataService)
+        public PostingParameterSalaryController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, Services.IMasterDataService masterDataService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

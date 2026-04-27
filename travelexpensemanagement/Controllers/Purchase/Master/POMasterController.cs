@@ -1,21 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Purchase.Master
 {
     public class POMasterController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         string yearPrefix, VNO;
-        public POMasterController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue)
+        public POMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
@@ -115,9 +116,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Master
                         //cmd.Parameters.AddWithValue("@DocDate", _dbHelper.Xnull(model.DocDate));
                         //cmd.Parameters.AddWithValue("@FromDt", _dbHelper.Xnull(model.FromDate));
                         //cmd.Parameters.AddWithValue("@ToDate", _dbHelper.Xnull(model.ToDate));
-                        cmd.Parameters.AddWithValue("@DocDate", DbHelper.DbHelper.ConvertToDate(model.DocDate) ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@FromDt", DbHelper.DbHelper.ConvertToDate(model.FromDate) ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@ToDate", DbHelper.DbHelper.ConvertToDate(model.ToDate) ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DocDate", DbHelper.ConvertToDate(model.DocDate) ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@FromDt", DbHelper.ConvertToDate(model.FromDate) ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ToDate", DbHelper.ConvertToDate(model.ToDate) ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@storeAmt", _dbHelper.Xnull(model.StoreAmt));
                         cmd.Parameters.AddWithValue("@CapitalAmt", _dbHelper.Xnull(model.CapitalAmt));
                         cmd.Parameters.AddWithValue("@Remark", _dbHelper.Xnull(model.Remarks));
@@ -186,9 +187,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Master
                         //cmd.Parameters.AddWithValue("@DocDate", _dbHelper.Xnull(model.DocDate));
                         //cmd.Parameters.AddWithValue("@FromDt", _dbHelper.Xnull(model.FromDate));
                         //cmd.Parameters.AddWithValue("@ToDate", _dbHelper.Xnull(model.ToDate));
-                        cmd.Parameters.AddWithValue("@DocDate", DbHelper.DbHelper.ConvertToDate(model.DocDate) ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@FromDt", DbHelper.DbHelper.ConvertToDate(model.FromDate) ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@ToDate", DbHelper.DbHelper.ConvertToDate(model.ToDate) ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DocDate", DbHelper.ConvertToDate(model.DocDate) ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@FromDt", DbHelper.ConvertToDate(model.FromDate) ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ToDate", DbHelper.ConvertToDate(model.ToDate) ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@storeAmt", _dbHelper.Xnull(model.StoreAmt));
                         cmd.Parameters.AddWithValue("@CapitalAmt", _dbHelper.Xnull(model.CapitalAmt));
                         cmd.Parameters.AddWithValue("@Remark", _dbHelper.Xnull(model.Remarks));

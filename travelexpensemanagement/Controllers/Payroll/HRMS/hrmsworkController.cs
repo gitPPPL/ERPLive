@@ -10,7 +10,9 @@ using System.Data;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 
@@ -20,12 +22,12 @@ namespace travelexpensemanagement.Controllers.Payroll.HRMS
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         public hrmsworkController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+    DropdownService dropdownService, DbHelper dbHelper,
     ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

@@ -1,19 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using Newtonsoft.Json;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Inventory.Master
 {
     public class ColorMasterController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         int x;
-        public ColorMasterController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue)
+        public ColorMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace travelexpensemanagement.Helpers
+namespace travelexpensemanagement.Common.EncryptionHelper
 {
     public class EncryptionHelper
     {

@@ -8,7 +8,7 @@ using System.Data;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.EmployeePortal

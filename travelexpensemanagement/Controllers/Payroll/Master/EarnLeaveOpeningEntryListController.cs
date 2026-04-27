@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
-using travelexpensemanagement.Controllers.DropdownService;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Payroll.Master
 {
@@ -17,7 +18,7 @@ namespace travelexpensemanagement.Controllers.Payroll.Master
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
                 public EarnLeaveOpeningEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-            travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+            DropdownService dropdownService, DbHelper dbHelper,
             ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
-using travelexpensemanagement.Helpers;
+using travelexpensemanagement.Common.DbHelper;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace travelexpensemanagement.Controllers.WhatsupAPISetting

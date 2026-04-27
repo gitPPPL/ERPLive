@@ -4,18 +4,19 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
- 
+
 namespace travelexpensemanagement.Controllers
 {
     public class DocumentMasterController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalVal;
-        public DocumentMasterController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalVal)
+        public DocumentMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalVal)
         {
             _dbcontext = dbcontext;
             _dbHelper = dbHelper;

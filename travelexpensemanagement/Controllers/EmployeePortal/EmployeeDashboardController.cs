@@ -8,7 +8,7 @@ using Microsoft.Data.SqlClient;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
 using System.Reflection.Emit;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.EmployeePortal

@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.RateLimiting;
-using travelexpensemanagement.Controllers.DropdownService;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
-using travelexpensemanagement.GlobalErrorHandlingMiddleware;
-using travelexpensemanagement.Helpers;
 using travelexpensemanagement.LogService;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Services;
@@ -12,6 +7,11 @@ using travelexpensemanagement.Services;
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Implementations;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.EncryptionHelper;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

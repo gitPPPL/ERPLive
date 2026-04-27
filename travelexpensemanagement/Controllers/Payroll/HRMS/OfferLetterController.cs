@@ -4,8 +4,9 @@ using System.Data;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Mail;
-using travelexpensemanagement.Controllers.DropdownService;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Payroll.HRMS;
 using static travelexpensemanagement.Controllers.Payroll.HRMS.OfferLetterMasterController;
@@ -16,11 +17,11 @@ namespace travelexpensemanagement.Controllers.Payroll.HRMS
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         private readonly ModuleService.ModuleService _moduleService;
 
-        public OfferLetterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService)
+        public OfferLetterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

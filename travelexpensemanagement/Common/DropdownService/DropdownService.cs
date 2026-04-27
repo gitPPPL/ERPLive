@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using travelexpensemanagement.Dbconnection;
 
-namespace travelexpensemanagement.Controllers.DropdownService
+namespace travelexpensemanagement.Common.DropdownService
 {
     public class DropdownService
     {

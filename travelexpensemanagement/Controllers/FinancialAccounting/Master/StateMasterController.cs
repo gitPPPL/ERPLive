@@ -5,23 +5,24 @@ using System.Data;
 using System.Data.Common;
 using System.Dynamic;
 using System.Security.Cryptography.X509Certificates;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using static travelexpensemanagement.Controllers.Master.CountryMasterController;
- 
+
 
 namespace travelexpensemanagement.Controllers.Master
 {
     public class StateMasterController : Controller
     {
         private readonly DataBaseConnection _dbcontext;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly GlobalVariableService _globalVariableService;
         int x;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public StateMasterController(DataBaseConnection dbcontext, DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService)
+        public StateMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService)
         {
             _dbcontext = dbcontext;
             _dbHelper = dbHelper;

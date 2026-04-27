@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.ModuleService

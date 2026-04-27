@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Dynamic;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
 using travelexpensemanagement.Models.Admin.Setup;
 
 
@@ -15,11 +15,11 @@ namespace travelexpensemanagement.Controllers.Master
     public class CityMasterController : Controller
     {
         private readonly DataBaseConnection _dbcontext;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalVariableService _globalVariableService;
         int x;
-        public CityMasterController(DataBaseConnection dbcontext, DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService)
+        public CityMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService)
         {
             _dbcontext = dbcontext;
             _dbHelper = dbHelper;

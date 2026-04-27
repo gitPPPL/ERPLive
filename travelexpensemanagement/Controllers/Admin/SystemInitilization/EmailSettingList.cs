@@ -6,11 +6,10 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
-using travelexpensemanagement.Helpers;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.ModuleService;
@@ -21,12 +20,12 @@ namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
     public class EmailSettingList : Controller
     {
         private readonly DataBaseConnection _dbConnection;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         private readonly GlobalVariableService _globalVariableService;
 
-        public EmailSettingList(DataBaseConnection dbConnection, DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService)
+        public EmailSettingList(DataBaseConnection dbConnection, DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService)
         {
             _dbConnection = dbConnection;
             _dbHelper = dbHelper;

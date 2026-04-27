@@ -2,8 +2,9 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Admin.SystemInitilization;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Utilities;
 using travelexpensemanagement.Models.Payroll.Transaction;
@@ -13,12 +14,12 @@ namespace travelexpensemanagement.Controllers.Admin.Utilities
     [SessionAuthorize]
     public class ACOpeningBalanceEntryController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly travelexpensemanagement.Services.IMasterDataService _masterDataService;
-        public ACOpeningBalanceEntryController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, Services.IMasterDataService masterDataService)
+        public ACOpeningBalanceEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, Services.IMasterDataService masterDataService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

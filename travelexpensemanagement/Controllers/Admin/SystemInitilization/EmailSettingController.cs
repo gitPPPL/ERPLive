@@ -5,9 +5,9 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.EncryptionHelper;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
-using travelexpensemanagement.Helpers;
 using travelexpensemanagement.Models.Admin.Setup;
 using static iTextSharp.text.pdf.AcroFields;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -18,10 +18,10 @@ namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
     public class EmailSettingController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly EncryptionHelper _encryptionHelper;
 
-        public EmailSettingController(DataBaseConnection dbConnection, DbHelper.DbHelper dbHelper, EncryptionHelper encryptionHelper)
+        public EmailSettingController(DataBaseConnection dbConnection, DbHelper dbHelper, EncryptionHelper encryptionHelper)
         {
             _dbConnection = dbConnection;
             _dbHelper = dbHelper;

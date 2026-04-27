@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using System;
+using travelexpensemanagement.Common.Globalvariable;
 
 namespace travelexpensemanagement.LogService
 {

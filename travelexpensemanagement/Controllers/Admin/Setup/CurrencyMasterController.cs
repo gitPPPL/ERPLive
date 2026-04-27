@@ -3,7 +3,8 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -17,12 +18,12 @@ namespace travelexpensemanagement.Controllers
     {
         private readonly GlobalVariableService _globalValue;
         private readonly DataBaseConnection _dbcontext;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         string StrSystemName = "", StrSystemIP = "";
    
-        public CurrencyMasterController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService) 
+        public CurrencyMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService) 
         {
             _dbcontext = dbcontext;
             _dbHelper = dbHelper;

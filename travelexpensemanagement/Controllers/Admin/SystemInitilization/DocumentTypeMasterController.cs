@@ -1,20 +1,21 @@
 ﻿using System.Data;
 using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
 {
     public class DocumentTypeMasterController : Controller
     {
         
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalVal;
 
-        public DocumentTypeMasterController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalVal)
+        public DocumentTypeMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalVal)
         {
             _dbcontext = dbcontext;
             _dbHelper = dbHelper;

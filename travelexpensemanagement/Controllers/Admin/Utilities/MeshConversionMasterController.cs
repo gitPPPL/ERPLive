@@ -2,9 +2,11 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Collections.Generic;
-using travelexpensemanagement.Controllers.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Utilities;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Admin.Utilities
 {
@@ -12,15 +14,15 @@ namespace travelexpensemanagement.Controllers.Admin.Utilities
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         public MeshConversionMasterController(
             DataBaseConnection dbConnection,
             GlobalVariableService globalVariableService,
-            travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService,
-            travelexpensemanagement.DbHelper.DbHelper dbHelper,
+            DropdownService dropdownService,
+            DbHelper dbHelper,
             travelexpensemanagement.ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

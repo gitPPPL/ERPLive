@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
 using travelexpensemanagement.ModuleService;
 
 namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
@@ -15,11 +15,11 @@ namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
     public class DocumentNumberingListController : Controller
     {
         private readonly GlobalVariableService _globalValue;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
-        public DocumentNumberingListController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public DocumentNumberingListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using travelexpensemanagement.Dbconnection;
 
-namespace travelexpensemanagement.GlobalErrorHandlingMiddleware
+namespace travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware
 {
     public class ErrorLoggerService
     {

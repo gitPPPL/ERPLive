@@ -3,15 +3,15 @@ using System.Data;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 
-namespace travelexpensemanagement.Controllers.Globalvariable
+namespace travelexpensemanagement.Common.Globalvariable
 {
     public class GlobalValidationdate
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly ModuleService.ModuleService _moduleService;
 
-        public GlobalValidationdate(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, travelexpensemanagement.ModuleService.ModuleService moduleService)
+        public GlobalValidationdate(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

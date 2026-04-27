@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Controllers.DropdownService;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.EmployeePortal
@@ -9,8 +9,8 @@ namespace travelexpensemanagement.Controllers.EmployeePortal
     public class EmpAttendanceController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        public EmpAttendanceController(DataBaseConnection dbConnection, DropdownService.DropdownService dropdownService)
+        private readonly DropdownService _dropdownService;
+        public EmpAttendanceController(DataBaseConnection dbConnection, DropdownService dropdownService)
         {
             _dbConnection = dbConnection;
             _dropdownService = dropdownService;

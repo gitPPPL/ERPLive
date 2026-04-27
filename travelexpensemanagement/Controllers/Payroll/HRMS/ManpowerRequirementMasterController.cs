@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 
@@ -11,12 +12,12 @@ namespace travelexpensemanagement.Controllers.Payroll.HRMS
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly Controllers.DropdownService.DropdownService _dropdownService;
+        private readonly DropdownService _dropdownService;
 
         public ManpowerRequirementMasterController(
             DataBaseConnection dbConnection,
             GlobalVariableService globalVariableService,
-            Controllers.DropdownService.DropdownService dropdownService)
+            DropdownService dropdownService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

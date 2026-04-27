@@ -7,9 +7,9 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Text.RegularExpressions;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.EncryptionHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Helpers;
 using travelexpensemanagement.Models.Admin.Setup;
 using static iTextSharp.text.pdf.AcroFields;
 

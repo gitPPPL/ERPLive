@@ -4,9 +4,9 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Numerics;
 using System.Security.AccessControl;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.DbHelper;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.FincialAccounting.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
@@ -15,11 +15,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class ImportExportExpensesEntryController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public ImportExportExpensesEntryController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public ImportExportExpensesEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

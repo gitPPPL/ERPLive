@@ -7,7 +7,8 @@ using System.Data;
 using System.Data.Common;
 using System.Security.Cryptography;
 using System.Text;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -22,14 +23,14 @@ namespace travelexpensemanagement.Controllers.Master
     public class CountryMasterController : Controller
     {
         private readonly DataBaseConnection _dbcontext;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
 
         private readonly GlobalVariableService _globalVarservice;
         int x, Vno;
         string tablename, Vtype, description, Lip, Lid;
-        public CountryMasterController(DataBaseConnection dbcontext, DbHelper.DbHelper dbHelper, GlobalVariableService globalVarservice, ModuleService.ModuleService moduleService)
+        public CountryMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalVarservice, ModuleService.ModuleService moduleService)
         {
             _dbcontext = dbcontext;
             _dbHelper = dbHelper;

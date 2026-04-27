@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 
@@ -17,7 +19,7 @@ namespace travelexpensemanagement.Controllers.Payroll.Master
 
         private int? userLevel;
         public DiwaliBonusMasterListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-          travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+          DropdownService dropdownService, DbHelper dbHelper,
           ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

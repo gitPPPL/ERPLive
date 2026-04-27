@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Repositories.Interfaces;
@@ -12,9 +13,9 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
         private readonly IAssetRepository _assetRepository;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DataBaseConnection _dbConnection;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
+        private readonly DropdownService _dropdownService;
 
-        public AssetsMasterController(IAssetRepository assetRepository, GlobalVariableService globalVariableService, DropdownService.DropdownService dropdownService, DataBaseConnection dbConnection)
+        public AssetsMasterController(IAssetRepository assetRepository, GlobalVariableService globalVariableService, DropdownService dropdownService, DataBaseConnection dbConnection)
         {
             _assetRepository = assetRepository;
             _globalVariableService = globalVariableService;

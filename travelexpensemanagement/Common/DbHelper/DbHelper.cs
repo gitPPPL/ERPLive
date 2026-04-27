@@ -7,12 +7,13 @@ using System.Dynamic;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using travelexpensemanagement.Controllers.DropdownService;
-using travelexpensemanagement.Controllers.Globalvariable;
+//using travelexpensemanagement.Controllers.DropdownService;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace travelexpensemanagement.DbHelper
+namespace travelexpensemanagement.Common.DbHelper
 {
     public class DbHelper
     {
@@ -443,7 +444,7 @@ namespace travelexpensemanagement.DbHelper
             }
             return result;
         }
-        internal void ExecuteNonQuery(string insertQuery, List<Microsoft.Data.SqlClient.SqlParameter> insertParams)
+        internal void ExecuteNonQuery(string insertQuery, List<SqlParameter> insertParams)
         {
             throw new NotImplementedException();
         }

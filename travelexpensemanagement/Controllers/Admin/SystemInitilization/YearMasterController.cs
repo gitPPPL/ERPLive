@@ -5,7 +5,8 @@ using System.Data;
 using System.Data.Common;
 using System.Security.Cryptography;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -18,13 +19,13 @@ namespace travelexpensemanagement.Controllers.Admin.SystemInitilization
     public class YearMasterController : Controller
     {
         private readonly GlobalVariableService _globalValue;
-        private readonly DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         string StrSystemName = "", StrSystemIP = "";
         int StrUUser, StrEUser, x;
-        public YearMasterController(DataBaseConnection dbcontext, DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public YearMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

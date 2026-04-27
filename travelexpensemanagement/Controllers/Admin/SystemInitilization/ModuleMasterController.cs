@@ -8,7 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Serialization;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -22,14 +23,14 @@ namespace travelexpensemanagement.Controllers.Master
     [SessionAuthorize]
     public class ModuleMasterController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         string StrSystemIP = "", Strwsid = "", tablename, Vtype, description, Lip, Lid;
         int x, companyCd, Vno, StrUser;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
-        public ModuleMasterController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public ModuleMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

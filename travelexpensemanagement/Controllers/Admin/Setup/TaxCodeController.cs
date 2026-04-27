@@ -2,7 +2,8 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 
@@ -13,8 +14,8 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
-        public TaxCodeController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, travelexpensemanagement.DbHelper.DbHelper dbHelper)
+        private readonly DbHelper _dbHelper;
+        public TaxCodeController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

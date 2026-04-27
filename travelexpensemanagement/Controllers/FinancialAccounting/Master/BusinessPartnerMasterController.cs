@@ -2,7 +2,9 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Reflection.Emit;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.FincialAccounting.Master;
 
@@ -12,12 +14,12 @@ namespace travelexpensemanagement.Controllers.Financial_Accounting.Master
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly travelexpensemanagement.Controllers.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         public BusinessPartnerMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+        DropdownService dropdownService, DbHelper dbHelper,
         ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
