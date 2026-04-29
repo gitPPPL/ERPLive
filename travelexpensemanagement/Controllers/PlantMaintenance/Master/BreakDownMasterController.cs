@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.PlantMaintenance.Master.BreakDownMaster;
@@ -11,11 +12,11 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        using travelexpensemanagement.Common.Globalvariable;
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly DropdownService _dropdownService;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         public BreakDownMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-     travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+     travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
      ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

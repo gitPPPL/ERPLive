@@ -8,7 +8,7 @@ using Microsoft.Data.SqlClient;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
 using System.Data.Common;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
@@ -22,7 +22,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-         travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,  ModuleService.ModuleService moduleService)
+         travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,  ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

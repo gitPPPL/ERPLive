@@ -14,10 +14,6 @@
         public string Weight { get; set; }
         public string Remarks { get; set; }
         public string V_No { get; set; }
-        //public int? ID { get; set; }
-
-        // ✅ New fields
-
         public string? ACTION { get; set; }
     }
 

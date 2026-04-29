@@ -28,7 +28,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
-
         }
         public IActionResult Index()
         {
@@ -50,9 +49,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 var parameters = new[]
                 {
                     new SqlParameter("@CompCode", globalVar.PubCompCode),
-                    new SqlParameter("@BranchCode", 1),
+                    new SqlParameter("@BranchCode", globalVar.PubBranchCode),
                     new SqlParameter("@YearCode", globalVar.PubFYearCode),
-                    //new SqlParameter("@YearCode", 5),
                     new SqlParameter("@V_TYPE", docType)
                 };
                 int nextVNo = 1;
