@@ -27,81 +27,114 @@
 			break;
 		}
 	}
- 
 }
-<fieldset>
-	<legend class="legend-field">Transport Inward Entry List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				@if(canAdd)
-				{
-					<button onclick="window.location.href='@Url.Action("Index", "TransportInwardEntry")'" type="submit" class="btn btn-add">
-						<i class="fa fa-plus"></i>Add
-					</button>
-				}
-				@if(canPrint)
-				{
-					<button class="btn btn-print" onclick="printCityMasterReport()">
-						<i class="fa fa-print"></i> Print
-					</button>
-				}
-				@if(canExport)
-				{
-					<button class="btn btn-export" onclick="exportToExcel()">
-						<i class="fas fa-file-export"></i> Export
-					</button>
-				}
-				@if(canMail)
-				{
-					<button class="btn btn-mail">
-						<i class="fa fa-envelope"></i> Mail
-					</button>
-				}
-				@if(canApproval)
-				{
-					<button class="btn btn-approved">
-						<i class="fa fa-check"></i> Approved
-					</button>
-				}
-			</div>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseBillPassEntry" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Vno</th>
-						<th>Vdate</th>
-						<th>Vtime</th>
-						<th>Do No</th>
-						<th>Party Name</th>
-						<th>Truck No</th>
-						<th>Transport</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
 
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Transport Inward Entry List</span>
+	</div>
+
+	<div class="erppagelist-header-right">
+		@if (canAdd){
+			<button class="erppagelist-btn erppagelist-btn-add erppagelist-btn-add" onclick="location.href='@Url.Action("Index", "TransportInwardEntry")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
+	</div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+
+	<div class="erppagelist-actions">
+
+		@if (canPrint)
+		{
+			<button class="btn btn-print" onclick="printCityMasterReport()">
+				<i class="fa fa-print"></i> Print
+			</button>
+		}
+
+		@if (canExport)
+		{
+			<button class="btn btn-export" onclick="exportToExcel()">
+				<i class="fas fa-file-export"></i> Export
+			</button>
+		}
+
+		@if (canMail)
+		{
+			<button class="btn btn-mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+		}
+
+		@if (canApproval)
+		{
+			<button class="btn btn-approved">
+				<i class="fa fa-check"></i> Approved
+			</button>
+		}
+
+	</div>
+</div>
+
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" /> <!-- FIXED -->
+				<col style="width: 80px;" />  <!-- VN No -->
+				<col style="width: 110px;" /> <!-- V Date -->
+				<col style="width: 150px;" /> <!-- Do No -->
+				<col style="width: 180px;" /> <!-- Party Name -->
+				<col style="width: 65px;" />  <!-- Truck No -->
+				<col style="width: 75px;" />  <!-- Transport -->
+				<col style="width: 140px;" /> <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Vno</th>
+					<th>Vdate</th>
+					<th>Vtime</th>
+					<th>Do No</th>
+					<th>Party Name</th>
+					<th>Truck No</th>
+					<th>Transport</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
@@ -239,9 +272,16 @@
 					data: { docid: CodeforDel },
 					success: function (res) {
 						if (res.status) {
-							showFlashMessageByKey('delete', 'success');
+							// showFlashMessageByKey('delete', 'success');
+							// $row.remove();
+							// GetMasterDataList();
+							//===================Correction=====================
 							$row.remove();
-							GetMasterDataList();
+							setTimeout(() => {
+								window.location.href = '/TransportInwardEntryList/Index';
+							}, 1500);
+							showFlashMessageByKey('delete', 'success');
+							//========================================
 						} else {
 							Swal.fire('Error!', 'Error deleting item group: ' + res.message, 'error');
 						}
@@ -308,8 +348,6 @@
 			});
 		}
 
-
-
 		function callGetReportAsPdf() {
 				var reportName = "rpt_emp_mast";
 			var now = new Date();
@@ -344,8 +382,7 @@
 					console.error('Error generating report:', error);
 				}
 			});
-		 }
-
+		}
 
 		 function showImpExpExpensePopup(docCode) {
 			 $.ajax({
