@@ -87,7 +87,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
                 }
             }
-
             return Json(new { items = results, totalCount });
         }
 

@@ -151,7 +151,129 @@
         </div>
     </form>
 </fieldset>
+<script src="~/common/dropdown.js"></script>
+
 <script>
+    $(document).ready(function () {
+
+        const params = new URLSearchParams(window.location.search);
+        const docNo = params.get('id');
+        const docType = params.get('type');
+        const mode = params.get('mode');
+
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#CourierTrackingEntryForm')
+                .after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
+
+        // Bind all dropdowns (ONE LINE EACH)
+        bindDropdown('CourierTrackingEntry','DocType', '#ddlDocType', '-- Select Doc Type --');
+        bindDropdown('CourierTrackingEntry','City', '#ddlCity', '-- Select City --');
+        bindDropdown('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --');
+        bindDropdown('CourierTrackingEntry','Courier', '#ddlCourierName', '-- Select Courier --');
+        bindDropdown('CourierTrackingEntry','Employee', '#ddlReceivedBy', '-- Select Received By --');
+        bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --');
+
+        // DocType change → get DocNo
+        $('#ddlDocType').on('change', function () {
+            const selectedValue = $(this).val();
+            const selectedText = $(this).find("option:selected").text();
+
+            if (selectedValue) {
+                $.post('/CourierTrackingEntry/GetDocNo', {
+                    docType: selectedValue,
+                    docName: selectedText
+                }, function (response) {
+                    if (response.success) {
+                        $('#NumDocNo').val(response.nextVNo);
+                    }
+                });
+            }
+        });
+
+        // EDIT MODE
+        if (docNo) {
+            $.ajax({
+                url: '/CourierTrackingEntry/GetCourierDataList',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ docNo: docNo, docType: docType }),
+                success: function (data) {
+                    bindCourierTracking(data);
+                }
+            });
+        }
+
+        // SAVE
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+
+            const formData = {
+                DocType: $('#ddlDocType').val(),
+                DocDate: $('#DtDocDate').val(),
+                DocNo: $('#NumDocNo').val(),
+                PartyName: $('#ddlPartyName').val(),
+                City: $('#ddlCity').val(),
+                CourierName: $('#ddlCourierName').val(),
+                DocketNo: $('#TxtDocketNo').val(),
+                ReceivedBy: $('#ddlReceivedBy').val(),
+                Purpose: $('#ddlPurpose').val(),
+                Weight: $('#txtWeight').val(),
+                Remarks: $('#txtRemarks').val(),
+                V_No: docNo,
+                ACTION: docNo ? "UPDATE" : "INSERT"
+            };
+
+            $.ajax({
+                url: '/CourierTrackingEntry/SaveCourierData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    res.success ? toastr.success(res.message)
+                                : toastr.error(res.message);
+                },
+                error: function () {
+                    toastr.error('Error saving data');
+                }
+            });
+        });
+
+    });
+
+    // 🔥 Bind data in edit mode
+    function bindCourierTracking(data) {
+        bindDropdown('CourierTrackingEntry','DocType', '#ddlDocType', '-- Select Doc Type --', data.vType);
+        bindDropdown('CourierTrackingEntry','City', '#ddlCity', '-- Select City --', data.city);
+        bindDropdown('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --', data.partyName);
+        bindDropdown('CourierTrackingEntry','Courier', '#ddlCourierName', '-- Select Courier --', data.courierName);
+        bindDropdown('CourierTrackingEntry','Employee', '#ddlReceivedBy', '-- Select Received By --', data.receivedBy);
+        bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --', data.purpose);
+
+        $('#DtDocDate').val(data.docDate ? formatDate(data.docDate) : '');
+        $('#NumDocNo').val(data.docNo || '');
+        $('#TxtDocketNo').val(data.docketNo || '');
+        $('#txtWeight').val(data.weight || '');
+        $('#txtRemarks').val(data.remarks || '');
+    }
+    // Format Date
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [day, month, year] = dateStr.split('/');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Readonly Mode
+    function setFormReadOnly() {
+        $('#CourierTrackingEntryForm input').prop('readonly', true);
+        $('#CourierTrackingEntryForm select').prop('disabled', true);
+        $('#btn-save').hide();
+    }
+      
+</script>
+
+@* <script>
     $(document).ready(function () {
 
     const params = new URLSearchParams(window.location.search);
@@ -310,7 +432,7 @@
             dataType: 'json',
             success: function (data) {
                 const ddl = $('#ddlCourierName');
-                ddl.empty().append('<option value="">-- Select Courier Name --</option>');
+                ddl.empty().append('<option value="">-- Select Name --</option>');
                 $.each(data, function (index, item) {
                     ddl.append(`<option value="${item.value}">${item.text}</option>`);
                 });
@@ -448,4 +570,4 @@
         $('#btn-save').hide();
     }
 
-</script>
+</script> *@
