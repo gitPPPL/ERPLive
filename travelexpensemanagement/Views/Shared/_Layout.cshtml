@@ -2,6 +2,15 @@
 @inject travelexpensemanagement.ModuleService.ModuleService ModuleService
 
 @{
+	// string userName = "Guest";
+	// var userName = HttpContextAccessor.HttpContext.Session.GetString("USER_NAME") ?? "Guest";
+	// if (HttpContextAccessor.HttpContext?.Session?.IsAvailable == true)
+	// {
+	// 	userName = HttpContextAccessor.HttpContext.Session.GetString("USER_NAME") ?? "Guest";
+	// }
+	// var userName = HttpContextAccessor.HttpContext.Session.GetString("USER_NAME") ?? "Guest";
+
+	// =====================================================================
 	var userName = "Guest";
 	var modules = new List<travelexpensemanagement.ModuleService.ModuleService.Module>();
 	var menumodules = new List<travelexpensemanagement.ModuleService.ModuleService.MenuModule>();
@@ -32,7 +41,27 @@
 		userLevel = ModuleService.GetUserLevel() ?? userLevel;
 		Company = ModuleService.GetCompanyName() ?? Company;
 	}
+	// =====================================================================
+
+
+
+
+	// var modules = ModuleService.GetAllModules();
+	// var menumodules = ModuleService.GetMenuMaster();
+	// var menuPermissions = ModuleService.GetUserMenuPermissions();
+	// var userLevel = ModuleService.GetUserLevel();
+	// var Company = ModuleService.GetCompanyName();	
+
+	// // Current controller and action from the request
+	// var currentCtrl = ViewContext.RouteData.Values["controller"]?.ToString();
+	// var currentAction = ViewContext.RouteData.Values["action"]?.ToString()?.ToLower();
+
+	// // Modified helper to check multiple actions
+	// bool IsHere(string ctrl, params string[] actions) =>
+	// 	string.Equals(currentCtrl, ctrl, StringComparison.OrdinalIgnoreCase) &&
+	// 	(actions == null || actions.Length == 0 || actions.Contains(currentAction, StringComparer.OrdinalIgnoreCase));
 }
+
 <style>
 	.search-results {
 		position: absolute;
@@ -76,6 +105,8 @@
 	<link rel="stylesheet" type="text/css" href="~/icon/icofont/css/icofont.css">
 	<link rel="stylesheet" type="text/css" href="~/css/style.css">
 	<link rel="stylesheet" type="text/css" href="~/css/masterstyle.css">
+	<link rel="stylesheet" type="text/css" href="~/css/ERPPagesMasterstyle.css">
+	<link rel="stylesheet" type="text/css" href="~/css/ERPPagesListMasterstyle.css">
 	<link rel="stylesheet" type="text/css" href="~/css/jquery.mCustomScrollbar.css">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
@@ -88,7 +119,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+	
 </head>
 
 <body>
@@ -255,6 +286,7 @@
 		});
 		</script>
 	<!-- Your existing local scripts, no duplicate jQuery here -->
+	<script src="~/js/GlobalToaster.js"></script>
 	<script src="~/js/GlobalValidation.js"></script>
 	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>

@@ -1,0 +1,1505 @@
+﻿@{
+    ViewBag.Title = "Vehicle Inward Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-truck-loading"></i>
+        </div>
+        <div class="erppage-header-title">Vehicle Inward Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button id="btnbacklist" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "VehicleInwardEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="TransportInwardPassEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Type</label>
+                    <Select class="erppage-redinput" id="ddlDocType" disabled>
+                        <option>Select Document Type</option>
+                    </Select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="text" class="erppage-redinput" id="NumDocNo" readonly/>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate" autofocus />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Report Date</label>
+                    <input type="date" class="erppage-input" id="DtReportDate" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">In Time</label>
+                    <input type="time" class="erppage-redinput" id="TmInTime" readonly />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Report Time</label>
+                    <input type="time" class="erppage-redinput" id="TmRTime" />
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="erppage-subfieldset">
+            <legend>Vehicle Details</legend>
+            <div class="erppage-subheader">Vehicle Details</div>
+            <div class="erppage-grid2">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vehicle No</label>
+                    <input type="text" class="erppage-input" maxlength="15" id="TxtVehicleNo" placeholder="Enter Vehicle No" />
+                    <button type="button" class="erppage-btn erppage-btn-common" id="btnGetVAHANData"><i class="fa fa-cloud-download"></i> Get Data (VAHAN Portal)</button>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Transport Name</label>
+                    <select class="erppage-redinput" id="ddlTransportName">
+                        <option value="">Select Transport Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Driver Name</label>
+                    <input type="text" class="erppage-redinput" maxlength="50" id="TxtDrivername" placeholder="Enter Driver Name" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Driver Mobile</label>
+                    <input type="text" class="erppage-redinput" id="NumDriverMobile" maxlength="10" placeholder="Enter Driver Mobile" data-validate="phone" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">DL No</label>
+                    <input type="text" class="erppage-input" maxlength="20" id="txtDLNo" placeholder="Enter DL No" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vehicle RC No</label>
+                    <input type="text" class="erppage-input" maxlength="20" id="TxtVehicleRCNo" placeholder="Enter Vehicle RC No" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Insurance No</label>
+                    <input type="text" class="erppage-input" id="TxtInsuranceNo" maxlength="20" placeholder="Enter Insurance No" />
+                </div>
+                <div class="erppage-divfield erppage-datefield">
+                    <label class="erppage-label">Validity</label>
+                    <div class="erppage-datebox">
+                        <input type="date" class="erppage-input erppage-dateinput" id="DtValidity">
+                        <label class="erppage-checkbox-inside">
+                            <input type="checkbox" id="chkValidity">
+                        </label>
+                    </div>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Purpose</label>
+                    <input type="text" class="erppage-input" maxlength="50" id="txtPurpose" placeholder="Enter Purpose" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">PAN No</label>
+                    <input type="text" class="erppage-input" maxlength="10" id="txtPANNO" placeholder="Enter PAN No" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-datefield">
+                    <label class="erppage-label">Fitment Validity</label>
+                    <div class="erppage-datebox">
+                        <input type="date" class="erppage-input erppage-dateinput" id="DtFitmentValidity">
+                        <label class="erppage-checkbox-inside">
+                            <input type="checkbox" id="chkFitmentValidity">
+                        </label>
+                    </div>
+                </div>
+                <div class="erppage-divfield erppage-datefield">
+                    <label class="erppage-label">Tax Validity</label>
+                    <div class="erppage-datebox">
+                        <input type="date" class="erppage-input erppage-dateinput" id="DtTaxValidity">
+                        <label class="erppage-checkbox-inside">
+                            <input type="checkbox" id="chkTaxValidity">
+                        </label>
+                    </div>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vehicle Body</label>
+                    <input type="text" class="erppage-input" maxlength="50" id="txtVehicleBody" placeholder="Enter Vehicle Body" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Pass Weight</label>
+                    <input type="number" class="erppage-input" maxlength="50" id="txtPassWeight" placeholder="Enter Pass Weight" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Container Size</label>
+                    <select class="erppage-input" id="ddlContainerSize">
+                        <option value="">Select Container Size</option>
+                        <option value="40 HQ">40 HQ</option>
+                        <option value="20 SD">20 SD</option>
+                        <option value="LCL">LCL</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Container No</label>
+                    <input type="text" class="erppage-input" maxlength="15" id="NumContainerNo" placeholder="Enter Container No" />
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Attachment</label>
+                    <div class="erppage-upload-wrap">
+                        <input type="file" class="erppage-input" id="TxtAttachment" accept="image" />
+                        <div id="previewContainer" class="erppage-preview-box" style="display:none;">
+                            <img id="imgPreview" src="" alt="Preview" />
+                            <button type="button" id="btnRemoveImage" class="erppage-btn erppage-btn-remove">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="erppage-subfieldset">
+            <legend>Customer Details</legend>
+            <div class="erppage-subheader">Customer Details</div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">DO No</label>
+                    <select class="erppage-input" id="ddlDONo">
+                        <option value="">Select DO No</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Customer Name</label>
+                    <select class="erppage-redinput" id="ddlCustomerName">
+                        <option value="">Select Customer Name</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Add Line1</label>
+                    <input type="text" class="erppage-input" id="TxtAdd1TIR" placeholder="Enter Address Line 1" readonly />
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Add Line2</label>
+                    <input type="text" class="erppage-input" id="TxtAdd2TIR" placeholder="Enter Address Line 2" readonly />
+                </div>
+
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Add Line3</label>
+                    <input type="text" class="erppage-input" id="TxtAdd3PD" placeholder="Enter Address Line 3" readonly />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">City</label>
+                    <select class="erppage-input" id="ddlCity" disabled>
+                        <option value="">Select City</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <input type="text" class="erppage-input" maxlength="500" id="TxtRemarks" placeholder="Enter Remarks" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Vehicle Remarks</label>
+                    <textarea type="text" class="erppage-textarea" maxlength="500" id="TxtVehicleRemarks" placeholder="Enter Vehicle Remarks" ></textarea>
+                </div>
+            </div>
+            <div class="erppage-internalaction">
+                <button class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-barcode"></i>
+                    <span>Barcode</span>
+                </button>
+                <button class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-sticky-note"></i>
+                    <span>Sticker</span>
+                </button>
+            </div>
+        </fieldset>
+    </div>
+    <div class="erppage-actions">
+        <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+        @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+            <i class="fa fa-print"></i>Print
+        </button> *@
+    </div>
+</div>
+
+
+@* <script src="~/js/GlobalFunction.js" asp-append-version="true"></script> *@
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.api.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.ui.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.validation.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.init.js"></script>
+@* <script>
+
+    // var allFieldIds = [
+    //   "TxtDocId", "ddlDocType", "NumDocNo", "DtDocDate", "DtReportDate", "TmInTime", "TmRTime", "ddlTransportName", "TxtDrivername",
+    //   "TxtVehicleNo", "TxtVehicleRCNo", "NumContainerNo", "txtDLNo", "NumDriverMobile", "TxtInsuranceNo", "txtPANNO", "txtPurpose",
+    //   "ddlContainerSize", "ddlDONo", "ddlCustomerName", "TxtAdd1TIR", "TxtAdd2TIR", "TxtAdd3PD", "ddlCity", "TxtRemarks"
+    // ];
+    //=========================Correction========================
+    var allFieldIds = [
+      "TxtDocId", "ddlDocType", "NumDocNo", "DtDocDate", "DtReportDate", "TmInTime", "TmRTime", "ddlTransportName", "TxtDrivername",
+      "TxtVehicleNo", "TxtVehicleRCNo", "NumContainerNo", "txtDLNo", "NumDriverMobile", "TxtInsuranceNo", "txtPANNO", "txtPurpose",
+      "ddlContainerSize", "ddlDONo", "ddlCustomerName", "TxtAdd1TIR", "TxtAdd2TIR", "TxtAdd3PD", "ddlCity", "TxtRemarks",
+      "DtValidity", "DtFitmentValidity", "DtTaxValidity", "chkValidity", "chkFitmentValidity", "chkTaxValidity", "txtVehicleBody", "txtPassWeight",
+      "TxtVehicleRemarks", "TxtAttachment"
+    ];
+    //===========================================================
+
+    // const itemRecords = [
+    //   "TxtCode",
+    //   "TxtVno",
+    //   "TxtVdate",
+    //   "TxtDoNo",
+    //   "ddlPartyNm",
+    //   "TxtTruckNo",
+    //   "ddlTransport",
+    //   "TxtDriverNm",
+    //   "TxtMobileNo",
+    //   "TxtRemarks"
+    // ];
+
+
+    let docId = "";
+    let readOnly;
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    $(async function () {
+        try {
+            await GetDocTypeAsync();
+            $('#ddlDocType').prop('selectedIndex', 0);
+            handleDocLoad();
+        } catch (error) {
+            // toastr.error('Failed to load document types: ' + error);
+            showToast('Failed to load document types: ' + error, { type: "error" });
+        }
+    });
+
+    $(document).ready(function () {
+        GetCustomerList();
+        GetTransportList();
+        GetDONo();
+
+        // addItemRecordRow();
+
+        setEnterKeyFocus(allFieldIds);
+
+        $(".draggable-modal").draggable({
+        handle: ".popup-header"
+        });
+
+        $('#ddlDocType').on('change', function () {
+            const VType = $(this).val();
+            if (VType) {
+                GetDocid(VType);
+            }
+        });
+
+        // $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        //     var tbody = $(this).closest('tbody');
+        //     var rowCount = tbody.find('tr').length;
+        //     if (rowCount > 1) {
+        //         $(this).closest('tr').remove();
+        //     } else {
+        //         alert('Cannot delete the first row.');
+        //     }
+        // });
+
+        // $(document).on('click', '#tab1 .btn-Itemadd-action', function () {
+        // addItemRecordRow();
+        // });
+
+
+        $('#ddlCustomerName').on('change', function () {
+            var partyCode = $(this).val();
+            var selectedOption = $(this).find('option:selected');
+            if (partyCode) {
+                $('#TxtAdd1TIR').val(selectedOption.data('add1') || '');
+                $('#TxtAdd2TIR').val(selectedOption.data('add2') || '');
+                $('#TxtAdd3PD').val(selectedOption.data('add3') || '');
+                var cityCode = selectedOption.data('citycd');
+                var cityName = selectedOption.data('cityname');
+                ensureOption($('#ddlCity'), cityCode, cityName);
+                $('#ddlCity').val(cityCode).trigger('change');
+            } else {
+                $('#TxtAdd1TIR, #TxtAdd2TIR, #TxtAdd3PD').val('');
+                $('#ddlCity').val('');
+            }
+        });
+        //======================Correction==========================
+        $('#ddlDONo').on('change', function(){
+            var doNo = $(this).val();
+            var selectedOption = $(this).find('option:selected');
+            if (doNo) {
+                $('#TxtAdd1TIR').val(selectedOption.data('add1') || '');
+                $('#TxtAdd2TIR').val(selectedOption.data('add2') || '');
+                $('#TxtAdd3PD').val(selectedOption.data('add3') || '');
+                var cityCode = selectedOption.data('citycd');
+                var cityName = selectedOption.data('cityname');
+                ensureOption($('#ddlCity'), cityCode, cityName);
+                $('#ddlCity').val(cityCode).trigger('change');
+                var partyCode = selectedOption.data('billcd');
+                var partyName = selectedOption.data('partyname');
+                ensureOption($('#ddlCustomerName'), partyCode, partyName);
+                $('#ddlCustomerName').val(partyCode).trigger('change');
+                var transportCode = selectedOption.data('transportcode');
+                var transportName = selectedOption.data('transportname');
+                ensureOption($('#ddlTransportName'), transportCode, transportName);
+                $('#ddlTransportName').val(transportCode).trigger('change');
+                $('#TxtVehicleNo').val(selectedOption.data('truckno') || '');
+
+                $('#ddlTransportName').prop('disabled', true);
+                $('#ddlCustomerName').prop('disabled', true);
+                setTimeout(function () {
+                    $('#TxtDrivername').focus();
+                }, 100);
+            } else {
+                $('#TxtAdd1TIR, #TxtAdd2TIR, #TxtAdd3PD, #TxtVehicleNo').val('');
+                $('#ddlCity').val('');
+                $('#ddlTransportName').val(null).trigger('change');
+                $('#ddlCustomerName').val(null).trigger('change');
+                $('#ddlTransportName').prop('disabled', false);
+                $('#ddlCustomerName').prop('disabled', false);
+            }
+        })
+        chkDtdisable();
+        toggleDate('#chkValidity', '#DtValidity');
+        toggleDate('#chkFitmentValidity', '#DtFitmentValidity');
+        toggleDate('#chkTaxValidity', '#DtTaxValidity');
+
+
+        //Sumesh Code below
+        $('#TxtAttachment').on('change', function () {
+        const file = this.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid File',
+                text: 'Please select a valid image file.'
+            });
+
+            $(this).val('');
+            $('#previewContainer').hide();
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#imgPreview').attr('src', e.target.result);
+            $('#previewContainer').fadeIn();
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+            $('#btnRemoveImage').on('click', async function (e) {
+        e.preventDefault();
+
+        const result = await Swal.fire({
+            title: 'Remove Image?',
+            text: 'Do you want to remove this image?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        });
+
+        if (!result.isConfirmed) return;
+
+        $('#TxtAttachment').val('');
+        $('#imgPreview').attr('src', '');
+        $('#previewContainer').fadeOut();
+    });
+        //===================================================
+
+        function ensureOption($dropdown, code, name) {
+            if (code && $dropdown.find(`option[value="${code}"]`).length === 0) {
+                $dropdown.append(`<option value="${code}">${name}</option>`);
+            }
+        }
+
+
+        $('#btn-save').on('click', async function (e) {
+            e.preventDefault();
+
+              if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+              if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
+              if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
+              if (!validateRequiredField('#TmInTime', 'In Time')) return;
+              if (!validateRequiredField('#TmRTime', 'R Time')) return;
+              if (!validateRequiredField('#ddlTransportName', 'Transport Name')) return;
+              if (!validateRequiredField('#TxtDrivername', 'Driver Name')) return;
+              if (!validateRequiredField('#ddlCustomerName', 'Customer Name')) return;
+              if (!validateRequiredField('#NumDriverMobile', 'Mobile Number')) return;
+              //====================================Correction============================
+              if (!validateForm('#TransportInwardPassEntryForm')) return;
+              // if (!validateDate()) return;
+              const checkValidation = await checkValidDate();
+              if(checkValidation == false){
+                  return;
+              }
+              //=======================================================================
+            try {
+                const tableData = await collectFormData();
+                if (docId) {
+                    UpdateData(tableData);
+                } else {
+                    SaveData(tableData);
+                }
+            } catch (error) {
+                // toastr.error('An error occurred while saving the data.');
+                showToast("An error occurred while saving the data.", { type: "error" });
+            }
+
+        });
+
+    });
+
+</script>
+
+<script>
+
+    function setCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}`;
+        document.getElementById('TmInTime').value = currentTime;
+    }
+    //============Correction=============
+    function chkDtdisable(){
+        const currentDate = setCurrentDate();
+        $('#chkValidity, #chkFitmentValidity, #chkTaxValidity').prop('checked', false);
+        $('#DtValidity, #DtFitmentValidity, #DtTaxValidity').prop('disabled', true);
+        $('#DtValidity, #DtFitmentValidity, #DtTaxValidity').val(currentDate);
+    }
+    function toggleDate(chk, input) {
+        $(chk).change(function () {
+            $(input).prop('disabled', !$(this).is(':checked'));
+        });
+    }
+    function setCurrentDate(){
+        const today = new Date();
+        const todayDate = today.getFullYear() + '-' +
+        (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+        today.getDate().toString().padStart(2, '0');
+        return todayDate;
+    }
+    const formatDateToBind = val => val ? val.substring(0, 10) : '';
+    //======================================================
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "VehicleInwardEntry")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          // $dropdown.append('<option value="">-select doc Type-</option>');
+
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      // toastr.error("Document Type Load failed: " + error);
+                      showToast("Document Type Load failed: " + error, { type: "error" });
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    async function handleDocLoad() {
+             docId = getQueryParam('id');
+             readOnly = getQueryParam('readOnly');
+
+            if (docId) {
+                $('#ddlDocType').prop('readonly', true);
+                await GetDocData(docId, readOnly);
+            } else {
+                const Vtype = $('#ddlDocType').val();
+                let selectedText = $('#ddlDocType option:selected').text();
+                if(Vtype)
+                {
+                  GetDocid(Vtype);
+                }
+                setCurrentTime();
+                let todayDate = setCurrentDate();
+                $('#DtDocDate').val(todayDate);
+                $('#DtReportDate').val(todayDate);
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                     url: '@Url.Action("SaveOrUpdateTransportInward", "VehicleInwardEntry")',
+                    type: 'POST',
+                    //======Correction
+                    // contentType: 'application/json',
+                    contentType: false,
+                    processData: false,
+                    // data: JSON.stringify(saveDt),
+                    data: saveDt,
+                    //==========
+                    success: function (response) {
+                        if (response?.status) {
+                            // showFlashMessageByKey('insert', 'success');
+                            // resetFields();
+                            setTimeout(() => {
+                                window.location.href = '/VehicleInwardEntryList/Index';
+                            }, 1500);
+                            showToast("Inserted successfully!", { type: "success" });
+                        } else {
+                            // toastr.error(response?.message || "Save failed. Please try again.");
+                            showToast(response?.message || "Save failed. Please try again.", { type: "error" });
+                        }
+                    },
+                    error: function () {
+                        // toastr.error("Error occurred while saving. Please contact admin.");
+                        showToast("Error occurred while saving. Please contact admin.", { type: "error" });
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateTransportInward", "VehicleInwardEntry")',
+            type: 'POST',
+            //====Correction
+            // contentType: 'application/json',
+            // data: JSON.stringify(UpdateDt),
+            // dataType: 'json',
+            contentType: false,
+            processData: false,
+            data: UpdateDt,
+            //========
+            success: function (response) {
+                if (response?.status) {
+                    // showFlashMessageByKey('update', 'success');
+                    // resetFields();
+                    showToast("Updated successfully!", { type: "success" });
+                    setTimeout(() => {
+                        window.location.href = '/VehicleInwardEntryList/Index';
+                    }, 1500);
+                } else {
+                    // toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                    showToast("Update failed: " + (response?.message || "Unknown error."), { type: "error" });
+                }
+            },
+            error: function (xhr, status, error) {
+                // toastr.error("Data not updated: " + error);
+                showToast("Data not updated: " + error, { type: "error" });
+            }
+        });
+    }
+
+    async function collectFormData() {
+        const id = toNullableString(docId);
+        //=================Correction===========
+        const formData = new FormData();
+
+        const InsuranceExpDate    = $('#chkValidity').is(':checked') ? toNullableDate($('#DtValidity').val()) : null;
+        const FitmentValidityDate = $('#chkFitmentValidity').is(':checked') ? toNullableDate($('#DtFitmentValidity').val()) : null;
+        const TaxValidityDate     = $('#chkTaxValidity').is(':checked') ? toNullableDate($('#DtTaxValidity').val()) : null;
+
+        const file = document.getElementById("TxtAttachment")?.files[0];
+        if (file) {
+            formData.append("Attachment", file); // key name for backend
+        }
+
+        formData.append("V_TYPE",toNullableString(document.getElementById("ddlDocType")?.value));
+        formData.append("V_NO",parseIntSafe(document.getElementById("NumDocNo")?.value));
+        formData.append("DOC_ID",toNullableString(document.getElementById("TxtDocId")?.value));
+        formData.append("TRF_TYPE","");
+        formData.append("TRF_NO","");
+        formData.append("V_DATE",toNullableDate(document.getElementById("DtDocDate")?.value));
+        formData.append("V_TIME",toNullableString(document.getElementById("TmInTime")?.value));
+        formData.append("ITEM_TYPE","");
+        formData.append("PARTY_CODE",toNullableInt(document.getElementById("ddlCustomerName")?.value));
+        formData.append("ADD1",toNullableString(document.getElementById("TxtAdd1TIR")?.value));
+        formData.append("ADD2",toNullableString(document.getElementById("TxtAdd2TIR")?.value));
+        formData.append("ADD3",toNullableString(document.getElementById("TxtAdd3PD")?.value));
+        formData.append("PARTY_CITY",toNullableInt(document.getElementById("ddlCity")?.value));
+        formData.append("PARTY_GST","");
+        formData.append("PARTY_PINCODE","");
+        formData.append("PARTY_ADDRESSID","");
+        formData.append("BILL_NO","");
+        formData.append("BILL_DATE","");
+        formData.append("CHALL_NO","");
+        formData.append("TRUCK_NO",toNullableString(document.getElementById("TxtVehicleNo")?.value));
+        formData.append("TRANSPORT_CODE",toNullableInt(document.getElementById("ddlTransportName")?.value));
+        formData.append("DRIVER_NAME",toNullableString(document.getElementById("TxtDrivername")?.value));
+        formData.append("DRIVER_NO",toNullableString(document.getElementById("NumDriverMobile")?.value));
+        formData.append("TRANSIT_NO","");
+        formData.append("WAYBILL_NO","");
+        formData.append("BILL_AMT","");
+        formData.append("REMARKS",toNullableString(document.getElementById("TxtRemarks")?.value));
+        formData.append("DISP_PLAN_NO",toNullableInt(document.getElementById("ddlDONo")?.value));
+        formData.append("DISP_PLAN_TYPE","");
+        formData.append("WB_TYPE","");
+        formData.append("WB_NO","");
+        formData.append("MRN_TYPE","");
+        formData.append("MRN_NO","");
+        formData.append("REF_TYPE","");
+        formData.append("REF_NO","");
+        formData.append("FAPROV_STATUS","");
+        formData.append("FAPROV_REMARKS","");
+        formData.append("STATUS","");
+        formData.append("ACTIVE","");
+        formData.append("PARTY_NAME","");
+        formData.append("RC_NO",toNullableString(document.getElementById("TxtVehicleRCNo")?.value));
+        formData.append("DL_NO",toNullableString(document.getElementById("txtDLNo")?.value));
+        formData.append("INSU_NO",toNullableString(document.getElementById("TxtInsuranceNo")?.value));
+        formData.append("PAN_NO",toNullableString(document.getElementById("txtPANNO")?.value));
+        formData.append("PURPOSE",toNullableString(document.getElementById("txtPurpose")?.value));
+        formData.append("IMAGEPATH","");
+        formData.append("R_TIME",toNullableString(document.getElementById("TmRTime")?.value));
+        formData.append("OUT_TIME","");
+        formData.append("R_DATE",toNullableDate(document.getElementById("DtReportDate")?.value));
+        formData.append("OUT_DATE","");
+        formData.append("RETURN_TYPE","");
+        formData.append("QRCODE_NO","");
+        formData.append("INOUT_ACTIVE","");
+        formData.append("OUT_ALLOWED","");
+        formData.append("OUT_ALLOWEDBY","");
+        formData.append("RETURN_DATE","");
+        formData.append("RESPONSIBLE_PERSON","");
+        formData.append("INSU_EXPDT",InsuranceExpDate);
+        formData.append("EWB_DATE",FitmentValidityDate);
+        formData.append("CHALL_DATE",TaxValidityDate);
+        formData.append("PARTY_WBSLIPNO",toNullableString($('#txtVehicleBody').val()));
+        formData.append("PARTY_WBGRWT",toNullableString($('#txtPassWeight').val()));
+        formData.append("Remarks2",toNullableString($('#TxtVehicleRemarks').val()));
+        formData.append("DL_EXPDT","");
+        formData.append("CONTAINER_NO",toNullableString(document.getElementById("NumContainerNo")?.value));
+        formData.append("CONTAINER_SIZE",toNullableString(document.getElementById("ddlContainerSize")?.value));
+        formData.append("SHIP_PARTY","");
+        formData.append("SHIP_BILLNO","");
+        formData.append("SHIP_BILLDATE","");
+        formData.append("EWB_EXPDATE","");
+        formData.append("PARTY_WBTIME","");
+        formData.append("EWB_INVNO","");
+        formData.append("EWB_INVAMT","");
+        formData.append("PARTY_WBTRWT","");
+        formData.append("PARTY_EWBCITY","");
+        formData.append("GR_NO","");
+        formData.append("GR_DATE","");
+        formData.append("SaveOrUpdate",(!id || id == "") ? 'Save' : 'Update');
+        return formData;
+        //==========================
+        // return {
+        // V_TYPE: toNullableString(document.getElementById("ddlDocType")?.value),
+        // V_NO: parseIntSafe(document.getElementById("NumDocNo")?.value),
+        // DOC_ID: toNullableString(document.getElementById("TxtDocId")?.value),
+        // TRF_TYPE: null,
+        // TRF_NO: null,
+        // V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
+        // V_TIME: toNullableString(document.getElementById("TmInTime")?.value),
+        // ITEM_TYPE: null,
+        // PARTY_CODE: toNullableInt(document.getElementById("ddlCustomerName")?.value),
+        // ADD1: toNullableString(document.getElementById("TxtAdd1TIR")?.value),
+        // ADD2: toNullableString(document.getElementById("TxtAdd2TIR")?.value),
+        // ADD3: toNullableString(document.getElementById("TxtAdd3PD")?.value),
+        // PARTY_CITY: toNullableInt(document.getElementById("ddlCity")?.value),
+        // PARTY_GST: null,
+        // PARTY_PINCODE: null,
+        // PARTY_ADDRESSID: null,
+        // BILL_NO: null,
+        // BILL_DATE: null,
+        // CHALL_NO: null,
+        // // CHALL_DATE: null,
+        // TRUCK_NO: toNullableString(document.getElementById("TxtVehicleNo")?.value),
+        // TRANSPORT_CODE: toNullableInt(document.getElementById("ddlTransportName")?.value),
+        // DRIVER_NAME: toNullableString(document.getElementById("TxtDrivername")?.value),
+        // DRIVER_NO: toNullableString(document.getElementById("NumDriverMobile")?.value),
+        // TRANSIT_NO: null,
+        // WAYBILL_NO: null,
+        // BILL_AMT: null,
+        // REMARKS: toNullableString(document.getElementById("TxtRemarks")?.value),
+        // DISP_PLAN_NO: toNullableInt(document.getElementById("ddlDONo")?.value),
+        // DISP_PLAN_TYPE: null,
+        // WB_TYPE: null,
+        // WB_NO: null,
+        // MRN_TYPE: null,
+        // MRN_NO: null,
+        // REF_TYPE: null,
+        // REF_NO: null,
+        // FAPROV_STATUS: null,
+        // FAPROV_REMARKS: null,
+        // STATUS: null,
+        // ACTIVE: null,
+        // // Remarks2: null,
+        // PARTY_NAME: null,
+        // RC_NO: toNullableString(document.getElementById("TxtVehicleRCNo")?.value),
+        // DL_NO: toNullableString(document.getElementById("txtDLNo")?.value),
+        // INSU_NO: toNullableString(document.getElementById("TxtInsuranceNo")?.value),
+        // PAN_NO: toNullableString(document.getElementById("txtPANNO")?.value),
+        // PURPOSE: toNullableString(document.getElementById("txtPurpose")?.value),
+        // IMAGEPATH: null,
+        // R_TIME: toNullableString(document.getElementById("TmRTime")?.value),
+        // OUT_TIME: null,
+        // R_DATE: toNullableDate(document.getElementById("DtReportDate")?.value),
+        // OUT_DATE: null,
+        // RETURN_TYPE: null,
+        // QRCODE_NO: null,
+        // INOUT_ACTIVE: null,
+        // OUT_ALLOWED: null,
+        // OUT_ALLOWEDBY: null,
+        // RETURN_DATE: null,
+        // RESPONSIBLE_PERSON: null,
+        // //====================Correction===============
+        // // INSU_EXPDT: null,
+        // INSU_EXPDT: InsuranceExpDate,
+        // EWB_DATE: FitmentValidityDate,
+        // CHALL_DATE: TaxValidityDate,
+        // PARTY_WBSLIPNO: toNullableString($('#txtVehicleBody').val()),
+        // PARTY_WBGRWT: toNullableString($('#txtPassWeight').val()),
+        // Remarks2: toNullableString($('#TxtVehicleRemarks').val()),
+        // //====================================
+        // DL_EXPDT: null,
+        // CONTAINER_NO: toNullableString(document.getElementById("NumContainerNo")?.value),
+        // CONTAINER_SIZE: toNullableString(document.getElementById("ddlContainerSize")?.value),
+        // SHIP_PARTY: null,
+        // SHIP_BILLNO: null,
+        // SHIP_BILLDATE: null,
+        // // EWB_DATE: null,
+        // EWB_EXPDATE: null,
+        // PARTY_WBTIME: null,
+        // EWB_INVNO: null,
+        // EWB_INVAMT: null,
+        // // PARTY_WBSLIPNO: null,
+        // // PARTY_WBGRWT: null,
+        // PARTY_WBTRWT: null,
+        // PARTY_EWBCITY: null,
+        // GR_NO: null,
+        // GR_DATE: null,
+        // SaveOrUpdate: (!id || id == "") ? 'Save' : 'Update'
+
+        // };
+    }
+
+    function GetDocid(VType) {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "VehicleInwardEntry")',
+            type: 'GET',
+            data:{V_type:VType},
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                // toastr.error('Error fetching Doc ID:', error);
+                showToast('Error fetching Doc ID:', error, { type: "error" });
+            }
+        });
+    }
+
+    function GetCustomerList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetPartyList", "VehicleInwardEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlCustomerName');
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select -</option>');
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                            data-add1="${item.ADD1}"
+                            data-add2="${item.ADD2}"
+                            data-add3="${item.ADD3}"
+                            data-cityName="${item.CityName}"
+                            data-cityCd="${item.CITY_CODE}"
+                            value="${item.CODE}">
+                            ${item.NAME}
+                        </option>`);
+                    });
+
+                    // Initialize or refresh Select2
+                    $dropdown.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    // toastr.error("Party Load failed");
+                    showToast("Party Load failed", { type: "error" });
+                }
+            },
+            error: function (xhr, status, error) {
+                // toastr.error("Party Load failed: " + error);
+                showToast("Party Load failed: " + error, { type: "error" });
+            }
+        });
+    }
+
+    function GetTransportList(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetTransportationList", "VehicleInwardEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+
+                    var $DropdownId = $('#ddlTransportName');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Transport Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(
+                            `<option
+                            data-partyCode="${item.PARTY_CODE}"
+                            value="${item.CODE}">${item.NAME}</option>`
+                        );
+                    });
+
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+                }
+                else
+                {
+                    // toastr.error("Transport Name Load failed");
+                    showToast("Transport Name Load failed", { type: "error" });
+                }
+            },
+            error: function (xhr, status, error) {
+                // toastr.error("Transport Name Load failed", xhr.error);
+                showToast("Transport Name Load failed", { type: "error" });
+            }
+        });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? /* ==correction== null */ "" : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || /* ==correction== null */ "";
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/VehicleInwardEntry/GetTransportInwardRecordsById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                await fillFormFields(response.data);
+
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                    //======================Correction============
+                    var $previewContainer = $('#previewContainer');
+                    if($previewContainer.is(':visible')){
+                         $('#btnRemoveImage').hide();
+                    }
+                    $('#btnGetVAHANData').prop('disabled', true).css('pointer-events', 'none');
+                    //=====================================
+                } // else {
+                //     $('#btn-save, #cancelBtn').show();
+                //     enableAllFields();
+                // }
+            } else {
+                // toastr.error('No data returned.');
+                showToast('No data returned.', { type: "error" });
+            }
+        } catch (error) {
+            // toastr.error('Failed to load data.');
+            showToast('Failed to load data.', { type: "error" });
+            console.error(error);
+        }
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+        async function fillFormFields(data) {
+        console.log("/GetTransportInwardRecordsById", data);
+        if (!Array.isArray(data) || data.length === 0) {
+            console.error("Invalid or empty data array");
+            return;
+        }
+
+        const d = data[0];
+        const formatTime = val => val ? val.substring(0, 5) : '';
+
+        document.getElementById("TxtDocId").value = d.doC_ID || '';
+        document.getElementById("ddlDocType").value = d.v_TYPE || '';
+        document.getElementById("NumDocNo").value = d.v_NO || '';
+        document.getElementById("DtDocDate").value = formatDateToBind(d.v_DATE);
+        document.getElementById("DtReportDate").value = formatDateToBind(d.r_DATE);
+        document.getElementById("TmInTime").value = formatTime(d.v_TIME);
+        document.getElementById("TmRTime").value = formatTime(d.r_TIME);
+        document.getElementById("TxtDrivername").value = d.driveR_NAME || '';
+        document.getElementById("TxtVehicleNo").value = d.trucK_NO || '';
+        document.getElementById("TxtVehicleRCNo").value = d.rC_NO || '';
+        document.getElementById("NumContainerNo").value = d.containeR_NO || '';
+        document.getElementById("txtDLNo").value = d.dL_NO || '';
+        document.getElementById("NumDriverMobile").value = d.driveR_NO || '';
+        document.getElementById("TxtInsuranceNo").value = d.insU_NO || '';
+        document.getElementById("txtPANNO").value = d.paN_NO || '';
+        document.getElementById("txtPurpose").value = d.purpose || '';
+        document.getElementById("ddlContainerSize").value = d.containeR_SIZE || '';
+        document.getElementById("ddlDONo").value = d.disP_PLAN_NO || '';
+        document.getElementById("TxtAdd1TIR").value = d.adD1 || '';
+        document.getElementById("TxtAdd2TIR").value = d.adD2 || '';
+        document.getElementById("TxtAdd3PD").value = d.adD3 || '';
+        document.getElementById("ddlCity").value = d.partY_CITY || '';
+        document.getElementById("TxtRemarks").value = d.remarks || '';
+        GetCustomerList(d.partY_CODE);
+        GetTransportList(d.transporT_CODE);
+
+        //================================Correction======================
+        document.getElementById("txtVehicleBody").value = d.partY_WBSLIPNO || '';
+        document.getElementById("TxtVehicleRemarks").value = d.remarks2 || '';
+        document.getElementById("txtPassWeight").value = d.partY_WBGRWT || '';
+
+        let currentDate = setCurrentDate();
+        const syncValidity = (value, chkId, dtId) => {
+            const hasValue = value !== null && value !== "";
+            $(`#${chkId}`).prop('checked', hasValue);
+            $(`#${dtId}`).val(hasValue ? formatDateToBind(value) : currentDate)
+                         .prop('disabled', !hasValue);
+        };
+        syncValidity(d.insU_EXPDT, 'chkValidity', 'DtValidity');
+        syncValidity(d.ewB_DATE, 'chkFitmentValidity', 'DtFitmentValidity');
+        syncValidity(d.chalL_DATE, 'chkTaxValidity', 'DtTaxValidity');
+
+        if (d.imagepath !== null && d.imagepath !== '') {
+            const imgUrl = `/Attachments/TransportInward/${d.imagepath}`;
+            $('#imgPreview').attr('src', imgUrl);
+            $('#previewContainer').show();
+        } else {
+            $('#imgPreview').attr('src', '');
+            $('#previewContainer').hide();
+        }
+        //========================================
+    }
+    // async function fillFormFields(data) {
+    //      console.log("/GetTransportInwardRecordsById", data);
+    //     if (!Array.isArray(data) || data.length === 0) {
+    //         console.error("Invalid or empty data array");
+    //         return;
+    //     }
+
+    //     const d = data[0];
+    //     // const formatDate = val => val ? val.substring(0, 10) : '';
+    //     const formatTime = val => val ? val.substring(0, 5) : '';
+
+    //     document.getElementById("TxtDocId").value = d.doC_ID || '';
+    //     document.getElementById("ddlDocType").value = d.v_TYPE || '';
+    //     document.getElementById("NumDocNo").value = d.v_NO || '';
+    //     // document.getElementById("DtDocDate").value = formatDate(d.V_DATE);
+    //     document.getElementById("DtDocDate").value = formatDateToBind(d.v_DATE);
+    //     // document.getElementById("DtReportDate").value = formatDate(d.R_DATE);
+    //     document.getElementById("DtReportDate").value = formatDateToBind(d.r_DATE);
+    //     document.getElementById("TmInTime").value = formatTime(d.v_TIME);
+    //     document.getElementById("TmRTime").value = formatTime(d.r_TIME);
+    //     document.getElementById("TxtDrivername").value = d.DRIVER_NAME || '';
+    //     document.getElementById("TxtVehicleNo").value = d.TRUCK_NO || '';
+    //     document.getElementById("TxtVehicleRCNo").value = d.RC_NO || '';
+    //     document.getElementById("NumContainerNo").value = d.CONTAINER_NO || '';
+    //     document.getElementById("txtDLNo").value = d.DL_NO || '';
+    //     document.getElementById("NumDriverMobile").value = d.DRIVER_NO || '';
+    //     document.getElementById("TxtInsuranceNo").value = d.INSU_NO || '';
+    //     document.getElementById("txtPANNO").value = d.PAN_NO || '';
+    //     document.getElementById("txtPurpose").value = d.PURPOSE || '';
+    //     document.getElementById("ddlContainerSize").value = d.CONTAINER_SIZE || '';
+    //     document.getElementById("ddlDONo").value = d.DISP_PLAN_NO || '';
+    //     document.getElementById("TxtAdd1TIR").value = d.ADD1 || '';
+    //     document.getElementById("TxtAdd2TIR").value = d.ADD2 || '';
+    //     document.getElementById("TxtAdd3PD").value = d.ADD3 || '';
+    //     document.getElementById("ddlCity").value = d.PARTY_CITY || '';
+    //     document.getElementById("TxtRemarks").value = d.REMARKS || '';
+    //     GetCustomerList(d.PARTY_CODE);
+    //     GetTransportList(d.TRANSPORT_CODE);
+
+    //     //================================Correction======================
+    //     document.getElementById("txtVehicleBody").value = d.PARTY_WBSLIPNO || '';
+    //     document.getElementById("TxtVehicleRemarks").value = d.Remarks2 || '';
+    //     document.getElementById("txtPassWeight").value = d.PARTY_WBGRWT || '';
+
+    //     let currentDate = setCurrentDate();
+    //     const syncValidity = (value, chkId, dtId) => {
+    //         const hasValue = value !== null && value !== "";
+
+    //         $(`#${chkId}`).prop('checked', hasValue);
+    //         $(`#${dtId}`).val(hasValue ? formatDateToBind(value) : currentDate)
+    //                      .prop('disabled', !hasValue);
+    //     };
+    //     syncValidity(d.INSU_EXPDT, 'chkValidity', 'DtValidity');
+    //     syncValidity(d.EWB_DATE, 'chkFitmentValidity', 'DtFitmentValidity');
+    //     syncValidity(d.CHALL_DATE, 'chkTaxValidity', 'DtTaxValidity');
+
+    //     if (d.IMAGEPATH !== null && d.IMAGEPATH !== '') {
+    //         const imgUrl = `/Attachments/TransportInward/${d.IMAGEPATH}`;
+
+    //         $('#imgPreview').attr('src', imgUrl);
+    //         $('#previewContainer').show();
+    //     } else {
+    //         $('#imgPreview').attr('src', '');
+    //         $('#previewContainer').hide();
+    //     }
+    //     //========================================
+    // }
+    //====================================Correction============================
+    // $('#btnbacklist').on('click', async function (e) {
+    //     e.preventDefault();
+    //     readOnly = getQueryParam('readOnly');
+    //     if(readOnly !== "true"){
+    //         const result = await Swal.fire({
+    //             title: 'Discard Changes?',
+    //             text: 'Are you sure to cancel without saving record?',
+    //             icon: 'question',
+    //             showCancelButton: true,
+    //             confirmButtonText: 'Yes',
+    //             cancelButtonText: 'No'
+    //         });
+
+    //         if (!result.isConfirmed) return;
+    //     }
+
+    //     window.location.href = '@Url.Action("Index", "VehicleInwardEntryList")';
+    // })
+    function formatOption(option) {
+        if (!option.id) return option.text;
+
+        let el = $(option.element);
+
+        let vno = option.id;
+        let transport = el.data('transportname');
+        let truckname = el.data('truckno');
+        let partyname = el.data('partyname');
+        let cityname = el.data('cityname');
+
+        return $(`
+            <div style="display:flex; gap:0px; font-size:12px;  border-bottom:1px solid;">
+                <span style="flex:0 0 30%; font-weight:bold;">${vno}</span>
+                <span style="flex:1; padding-left:8px; white-space:normal;">${transport}</span>
+                <span style="flex:1; padding-left:8px; white-space:nowrap;">${truckname}</span>
+                <span style="flex:1; padding-left:8px; white-space:normal;">${partyname}</span>
+                <span style="flex:1; padding-left:8px; white-space:normal;">${cityname}</span>
+            </div>
+        `);
+    }
+    function GetDONo(selectedValue = null) {
+        $.ajax({
+            url: '@Url.Action("GetDONo", "VehicleInwardEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $dropdown = $('#ddlDONo');
+                    $dropdown.empty();
+                    $dropdown.append('<option selected disabled value="">- Select -</option>');
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option
+                             data-truckno="${item.TruckNo}"
+                             data-transportname="${item.TransportName}"
+                             data-transportcode="${item.TransportCode}"
+                             data-add1="${item.Add1}"
+                             data-add2="${item.Add2}"
+                             data-add3="${item.Add3}"
+                             data-partyname="${item.PartyName}"
+                             data-citycd="${item.CityCode}"
+                             data-cityname="${item.CityName}"
+                             data-billcd="${item.BillCode}"
+                             value="${item.Code}">
+                            ${item.Name}
+                        </option>`);
+                    });
+
+                    // Initialize or refresh Select2
+                    $dropdown.select2({
+                        placeholder: "- Select -",
+                        allowClear: true,
+                        // width: 100,
+                        width: '600px',
+                        templateResult: formatOption,
+                        templateSelection: function (option) {
+                            if (!option.id) return option.text;
+
+                            return option.id;
+                        }
+                    });
+
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    // toastr.error("Do No Load failed");
+                    showToast("Do No Load failed", { type: "error" });
+                }
+            },
+            error: function (xhr, status, error) {
+                // toastr.error("Do No Load failed: " + error);
+                showToast("Do No Load failed: " + error, { type: "error" });
+            }
+        });
+    }
+
+    async function checkValidDate() {
+        const data = {
+            vdate: $("#DtDocDate").val(),
+            vtype: $("#ddlDocType").val(),
+            vno: $("#NumDocNo").val()
+        };
+        try {
+                const response = await fetch('/VehicleInwardEntry/CheckValidDate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.status === false) {
+                toastr.warning(result.message);
+                // showToast(result.message, { type: "warning" });
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error("Error:", error);
+            return false;
+        }
+    }
+    function getDriverDetails(mobileNo){
+        $.ajax({
+            url: '@Url.Action("GetDriverDetails", "VehicleInwardEntry")',
+            type: 'GET',
+            dataType: 'json',
+            data: {mobileNo: mobileNo},
+            success: function (response) {
+                if (response.status) {
+                    const data = response.driverDetails;
+                    $('#TxtDrivername').val(data.driverName);
+                    $('#NumDriverMobile').val(data.driverNo);
+                    $('#txtDLNo').val(data.dLNo);
+                    $('#txtPANNO').val(data.pANNo);
+                }
+            },
+            error: function (xhr, status, error) {
+                // toastr.error("Driver Details Load failed", xhr.error);
+                showToast("Driver Details Load failed" + xhr.error, { type: "error" });
+            }
+        });
+    }
+    $('#NumDriverMobile').on('blur', function(){
+        const mobileNo = $(this).val();
+        if (!validateForm('#TransportInwardPassEntryForm')) return;
+        if(mobileNo){
+            getDriverDetails(mobileNo);
+        }
+    })
+
+    function getVehicleDetailsFromDB(vehicleNo) {
+        return $.ajax({
+            url: '@Url.Action("GetVehicleInfoFromDB", "VehicleInwardEntry")',
+            type: 'GET',
+            dataType: 'json',
+            data: { vehicleNo: vehicleNo }
+        }).then(function (response) {
+            if (response.success && response.vehicleInfo) {
+                const data = response.vehicleInfo;
+                if (data.bodyType) $('#txtVehicleBody').val(data.bodyType);
+                if (data.grossWt) $('#txtPassWeight').val(data.grossWt);
+                if (data.insuranceNumber) $('#TxtInsuranceNo').val(data.insuranceNumber);
+                if (data.purpose) $('#txtPurpose').val(data.purpose);
+                if (data.rcNumber) $('#TxtVehicleRCNo').val(data.rcNumber);
+                if (data.vehicleRemarks) $('#TxtVehicleRemarks').val(data.vehicleRemarks);
+
+                if(data.transportCode) {
+                    GetTransportList(data.transportCode);
+                }
+
+                const validityData = [
+                    { value: data.insuExp, checkboxId: '#chkValidity', datepickerId: '#DtValidity' },
+                    { value: data.fitmentupto, checkboxId: '#chkFitmentValidity', datepickerId: '#DtFitmentValidity' },
+                    { value: data.taxupto, checkboxId: '#chkTaxValidity', datepickerId: '#DtTaxValidity' }
+                ];
+
+                validityData.forEach(item => {
+                    if (item.value) {
+                        $(item.checkboxId).prop('checked', true);
+                        $(item.datepickerId).val(formatDateToBind(item.value)).prop('disabled', false);
+                    }
+                });
+                return true;
+            }
+            return false;
+        }).catch(function () {
+            return false;
+        });
+    }
+    function clearVehicleData(){
+        $('#txtVehicleBody').val('');
+        $('#txtPassWeight').val('');
+        $('#TxtInsuranceNo').val('');
+        $('#txtPurpose').val('');
+        $('#TxtVehicleRCNo').val('');
+        $('#TxtVehicleRemarks').val('');
+        $('#ddlTransportName').val('');
+        chkDtdisable();
+    }
+    async function GetVehicledetailFromApi() {
+        try {
+                const rcNumber = $('#TxtVehicleNo').val();
+
+                if(!rcNumber)
+                {
+                    // toastr.info("Vehicle No Not Found");
+                    showToast("Vehicle No Not Found", { type: "info" });
+                    return;
+                }
+
+            const response = await $.ajax({
+                url: `/VehicleInwardEntry/GetVehcleinfo`,
+                data : {rc_number : rcNumber},
+                type: 'GET',
+                dataType: 'json',
+            });
+            if (response && response.status) {
+                const res = response.vehicleInfo;
+                let grossWt = 0;
+                if (res.vehicleGrossWeight != null && res.unladenWeight != null) {
+                    grossWt = res.vehicleGrossWeight - res.unladenWeight;
+                }
+
+                const vehicleRemarks = `Vehicle category : ${res.vehicleCategory}, Insurance validity : ${formatDateToBind(res.insuranceUpto)}, Pucc validity : ${formatDateToBind(res.puccUpto)}, Permit valid upto : ${formatDateToBind(res.permitValidUpto)}, Blacklist status : ${res.blacklistStatus}, Rc Status : ${res.rcStatus}",`;
+
+                // toastr.success("Vehicle Info found Successfully");
+                showToast("Vehicle Info found Successfully!", { type: "success" });
+                $('#TxtVehicleRCNo').val(res.vehicleChasiNumber || '');
+                $('#TxtInsuranceNo').val(res.insurancePolicyNumber || '');
+                $('#txtPassWeight').val(grossWt);
+                $('#txtVehicleBody').val(res.bodyType || '');
+                $('#TxtVehicleRemarks').val(vehicleRemarks || '');
+               const validityData = [
+                   { value: res.insuranceUpto, checkboxId: '#chkValidity', datepickerId: '#DtValidity' },
+                   { value: res.taxUpto, checkboxId: '#chkTaxValidity', datepickerId: '#DtTaxValidity' },
+                   { value: res.fitUpTo, checkboxId: '#chkFitmentValidity', datepickerId: '#DtFitmentValidity' }
+               ];
+
+               validityData.forEach(item => {
+                   if (item.value !== null && item.value !== "") {
+                       $(item.checkboxId).prop('checked', true);
+                       $(item.datepickerId).val(formatDateToBind(item.value));
+                       $(item.datepickerId).prop('disabled', false);
+                   }
+               });
+
+                var strValid = "";
+
+                // Check blacklist_status
+                if (res.blacklistStatus !== "" && res.blacklistStatus !== null) {
+                    strValid += "BlackListed Vehicle\n";
+                }
+
+                // Check RC status
+                if(res.rcStatus !== "" && res.rcStatus !== null){
+                    if ((res.rcStatus) !== "ACTIVE") {
+                        strValid += "Vehicle RC is not active.\n";
+                    }
+                }
+
+                // Check permit validity
+                if (res.permitValidUpto !== "" && res.permitValidUpto !== null) {
+                    var permitValidUpto = new Date(res.permitValidUpto);
+                    var currentDate = new Date();
+                    if (permitValidUpto < currentDate) {
+                        strValid += "Vehicle permit has expired.\n";
+                    }
+                }
+                if(strValid !== ""){
+                    // toastr.warning(strValid);
+                    showToast(strValid, { type: "warning" });
+                }
+            } else {
+                // toastr.error("Vehicle not found or invalid.");
+                showToast("Vehicle not found or invalid.", { type: "error" });
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            // toastr.error("Error fetching vehicle details.");
+            showToast("Error fetching vehicle details.", { type: "error" });
+        }
+    }
+
+    $('#TxtVehicleNo').on('blur', async function() {
+        setTimeout(async () => {
+        // check if focus moved to the button
+            if (document.activeElement.id === 'btnGetVAHANData') {
+                return;
+            }
+
+            const vehicleNo = $(this).val();
+
+            if (vehicleNo !== "") {
+                await getVehicleDetailsFromDB(vehicleNo);
+            } else {
+                clearVehicleData();
+            }
+    }, 0);
+    });
+
+    $('#btnGetVAHANData').on('click', async function() {
+        const vehicleNo = $('#TxtVehicleNo').val();
+        if (!vehicleNo) {
+            // toastr.info("Please enter a Vehicle No");
+            showToast("Please enter Vehicle No", { type: "info" });
+            return;
+        }
+        clearVehicleData();
+        GetVehicledetailFromApi();
+    });
+    const mobileInput = document.getElementById("NumDriverMobile");
+
+    mobileInput.addEventListener("beforeinput", function (e) {
+        if (e.data && !/^\d+$/.test(e.data)) {
+            e.preventDefault();
+        }
+    });
+
+    //=============================================================================
+</script>
+ *@

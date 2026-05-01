@@ -166,7 +166,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveOrUpdateTransportInward([FromBody] TransportInward POmodel)
+        public async Task<IActionResult> SaveOrUpdateTransportInward([FromBody] TransportInwardModel POmodel)
         {
             if (POmodel == null)
                 return Json(new { status = false, message = " data save failed." });

@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Production.Master.TenacityMaster;
@@ -11,11 +11,11 @@ namespace travelexpensemanagement.Controllers.Production.Master
 {
     public class TenacityMasterListController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public TenacityMasterListController(DataBaseConnection dbcontext, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public TenacityMasterListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;

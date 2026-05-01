@@ -1,17 +1,18 @@
 ﻿using Microsoft.AspNetCore.RateLimiting;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.EncryptionHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.LogService;
+using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
-using travelexpensemanagement.Services;
-
+using travelexpensemanagement.Repositories.Implementations;
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
-using travelexpensemanagement.Repositories.Implementations;
-using travelexpensemanagement.Common.DropdownService;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Common.EncryptionHelper;
-using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
+using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,10 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
+builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
+builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
+builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
 
 builder.Services.Configure<EncryptionSettings>(
     builder.Configuration.GetSection("EncryptionSettings"));

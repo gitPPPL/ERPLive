@@ -1,0 +1,427 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+@inject travelexpensemanagement.ModuleService.ModuleService ModuleService
+
+@{
+	var userName = "Guest";
+	var modules = new List<travelexpensemanagement.ModuleService.ModuleService.Module>();
+	var menumodules = new List<travelexpensemanagement.ModuleService.ModuleService.MenuModule>();
+	var menuPermissions = new List<travelexpensemanagement.ModuleService.ModuleService.UserMenuPermission>();
+	int? userLevel = 1;
+	var Company = string.Empty;
+
+	// Current controller and action
+	var currentCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+	var currentAction = ViewContext.RouteData.Values["action"]?.ToString()?.ToLower() ?? string.Empty;
+
+	// Helper to match controller + optional actions
+	bool IsHere(string ctrl, params string[] actions) =>
+		!string.IsNullOrEmpty(ctrl) &&
+		string.Equals(currentCtrl, ctrl, StringComparison.OrdinalIgnoreCase) &&
+		(actions == null || actions.Length == 0 ||
+		 actions.Any(a => string.Equals(a, currentAction, StringComparison.OrdinalIgnoreCase)));
+
+	// Load session-based data safely
+	if (HttpContextAccessor?.HttpContext?.Session != null &&
+		HttpContextAccessor.HttpContext.Session.Keys.Any())
+	{
+		userName = HttpContextAccessor.HttpContext.Session.GetString("USER_NAME") ?? "Guest";
+
+		modules = ModuleService.GetAllModules() ?? modules;
+		menumodules = ModuleService.GetMenuMaster() ?? menumodules;
+		menuPermissions = ModuleService.GetUserMenuPermissions() ?? menuPermissions;
+		userLevel = ModuleService.GetUserLevel() ?? userLevel;
+		Company = ModuleService.GetCompanyName() ?? Company;
+	}
+}
+<style>
+	.search-results {
+		position: absolute;
+		background: #fff;
+		width: 305px;
+		max-height: 300px;
+		overflow-y: auto;
+		box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+		z-index: 1000;
+		display: block;
+		margin-top: 332px;
+		margin-left: 25px;
+	}
+	.search-results a
+	{
+		display: block;
+		padding: 8px 12px;
+		text-decoration: none;
+		color: #333;
+		border-bottom: 1px solid #ddd;
+	}
+	 .search-results a:hover {
+	 	background-color: #f0f0f0;
+	 }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Pashupati ERP</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="keywords" content="Admin, Responsive, Landing, Bootstrap, App, Template, Mobile, iOS, Android, Creative App">
+
+	<link rel="icon" href="~/images/favicon.ico" type="image/x-icon">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="~/css/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="~/icon/themify-icons/themify-icons.css">
+	<link rel="stylesheet" type="text/css" href="~/icon/icofont/css/icofont.css">
+	<link rel="stylesheet" type="text/css" href="~/css/style.css">
+	<link rel="stylesheet" type="text/css" href="~/css/masterstyle.css">
+	<link rel="stylesheet" type="text/css" href="~/css/jquery.mCustomScrollbar.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+</head>
+
+<body>
+	<div class="container-fluid">
+
+		<!-- Sidebar -->
+
+		<nav class="sidebar">
+			<div class="sidebar-fixed-top">
+			<div class="sidebar-logo">
+				<img src="~/images/logo.webp">
+			</div>
+			<div class="dropdown-divider"></div>
+			<div class="sidebar-heading"><i class="fa fa-building"></i><span>@Company</span></div>
+			</div>
+			<ul class="sidebar-nav">
+				@foreach (var module in modules)
+				{
+					var submenus = menumodules.Where(m => m.MODULE_CODE == module.Code).ToList();
+					bool hasModuleAccess = userLevel == 1 ||
+					menuPermissions.Any(p => p.MODULE_CODE == module.Code && p._ACCESS == 1);
+					if (!hasModuleAccess)
+					{
+						continue;
+					}
+					// Unique submenu ID for toggling
+					@* var submenuId = "submenu-" + module.Code.ToLower(); *@
+					var submenuId = "submenu-" + module.Code;
+					// Determine if any subitem is active
+					bool isParentOpen = submenus.Any(sm => IsHere(sm.WebFORM_NAME));
+					string toggleClass = isParentOpen ? "expanded" : "";
+					string submenuStyle = isParentOpen ? "display:block;" : "display:none;";
+					<li class="nav-item @(isParentOpen ? "active-parent" : "")">
+						<a class="nav-link navbar-adjust toggle @toggleClass"
+						   href="javascript:void(0)"
+						   onclick="toggleSubmenu(event, '@submenuId')">
+							<span><i class="fa fa-home"></i>@module.DisplayName</span>
+							<i class="fa fa-angle-down"></i>
+						</a>
+
+						@if (submenus.Any())
+						{
+							<ul id="@submenuId" class="submenu" style="@submenuStyle">
+								@foreach (var submenu in submenus)
+								{
+									bool hasSubAccess = userLevel == 1 || 
+									@* menuPermissions.Any(p => p.MENU_NAME == submenu.DISPLAY_NAME && p._ACCESS == 1); *@
+									menuPermissions.Any(p => p.MENU_CODE == submenu.CODE && p._ACCESS == 1);
+									@* menuPermissions.Any(p => p._ACCESS == 1); *@
+									if (!hasSubAccess)
+									{
+										continue;
+									}
+									bool isActive = IsHere(submenu.WebFORM_NAME);
+									<li class="sub-nav navbar-adjust @(isActive ? "active-submenu" : "")">
+										<a href="/@submenu.WebFORM_NAME/Index">@submenu.DISPLAY_NAME</a>
+									</li>
+								}
+							</ul>
+						}
+					</li>
+				}
+			</ul>
+
+		</nav>
+		<div class="main-content">
+			<nav class="top-navbar">
+				<button id="hamburger">
+					<span class="hamburger-icon">&#9776;</span> <!-- ☰ hamburger -->
+					<span class="close-icon" style="display:none;">&#10005;</span> <!-- ✕ close -->
+				</button>
+				<div class="search-section">
+					<div class="search-wrapper">
+					<i class="fa fa-search search-icon"></i>
+					@* <input type="text" class="search-input" placeholder="Search..."> *@
+					<input type="text" class="search-input" id="menuSearch" placeholder="Search Menu...">
+					<div id="searchResults" class="search-results"></div>
+				</div>
+				</div>
+
+				<div class="action-section">
+					<a class="fullscreen" href="#!" onclick="javascript:toggleFullScreen()">
+						<i class="ti-fullscreen"></i>
+					</a>
+					<div class="divider mx-2"></div>
+					<!-- Right: Actions -->
+
+					<div class="user-info dropdown">
+						<a href="#" class="user-image dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="~/images/user.png" class="user-avatar" alt="User" width="32" height="32">
+							<span class="user-name ms-2">@userName</span>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li><a class="user-dropdown" href="#settings"><i class="fa fa-cog me-2"></i>Settings</a></li>
+							<li><a class="user-dropdown" href="#profile"><i class="fa fa-user me-2"></i>Profile</a></li>
+							<li><a class="user-dropdown" href="#messages"><i class="fa fa-envelope me-2"></i>My Messages</a></li>
+							<li><a class="user-dropdown" href="#notifications"><i class="fa fa-bell me-2"></i>Notifications</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a class="user-dropdown text-danger" href="@Url.Action("Logout", "Login")"><i class="fa fa-sign-out me-2"></i>Logout</a></li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+			<div class="content-body">
+				@RenderBody()
+			</div>
+
+		</div>
+	</div>
+	<script>
+		    document.addEventListener('DOMContentLoaded', () => {
+			const sidebar = document.querySelector('.sidebar');
+			const mainContent = document.querySelector('.main-content');
+			const topNavbar = document.querySelector('.top-navbar');
+			const hamburger = document.getElementById('hamburger');
+			const hamburgerIcon = hamburger.querySelector('.hamburger-icon');
+			const closeIcon = hamburger.querySelector('.close-icon');
+
+			hamburger.addEventListener('click', () => {
+				const isSmallScreen = window.innerWidth <= 992;
+
+				if (isSmallScreen) {
+					// Toggle sidebar for small screens
+					sidebar.classList.toggle('open');
+					mainContent.classList.toggle('shifted'); // <-- Move main content & top-navbar
+
+					if (sidebar.classList.contains('open')) {
+						hamburgerIcon.style.display = 'none';
+						closeIcon.style.display = 'inline-block';
+					} else {
+						hamburgerIcon.style.display = 'inline-block';
+						closeIcon.style.display = 'none';
+					}
+				} else {
+					// Toggle sidebar for large screens
+					sidebar.classList.toggle('closed');
+					mainContent.classList.toggle('full-width');
+					topNavbar.classList.toggle('full-width');
+
+					if (sidebar.classList.contains('closed')) {
+						hamburgerIcon.style.display = 'inline-block';
+						closeIcon.style.display = 'none';
+					} else {
+						hamburgerIcon.style.display = 'none';
+						closeIcon.style.display = 'inline-block';
+					}
+				}
+			});
+
+			// Reset sidebar when resizing window
+			window.addEventListener('resize', () => {
+				if (window.innerWidth > 992) {
+					sidebar.classList.remove('open');
+					sidebar.classList.remove('closed');
+					mainContent.classList.remove('shifted');
+					mainContent.classList.remove('full-width');
+					topNavbar.classList.remove('full-width');
+					hamburgerIcon.style.display = 'inline-block';
+					closeIcon.style.display = 'none';
+				} else {
+					sidebar.classList.remove('closed');
+				}
+			});
+		});
+		</script>
+	<!-- Your existing local scripts, no duplicate jQuery here -->
+	<script src="~/js/GlobalValidation.js"></script>
+	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
+	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="~/js/jquery-slimscroll/jquery.slimscroll.js"></script>
+	<script type="text/javascript" src="~/js/modernizr/modernizr.js"></script>
+	<script src="~/pages/widget/amchart/amcharts.min.js"></script>
+	<script src="~/pages/widget/amchart/serial.min.js"></script>
+	<script type="text/javascript" src="pages/todo/todo.js"></script>
+	<script type="text/javascript" src="~/pages/dashboard/custom-dashboard.js"></script>
+	<script type="text/javascript" src="~/js/script.js"></script>
+	<script type="text/javascript" src="~/js/SmoothScroll.js"></script>
+	<script src="~/js/pcoded.min.js"></script>
+	<script src="~/js/demo-12.js"></script>
+	<script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
+	<script>
+		var $window = $(window);
+		var nav = $('.fixed-button');
+			$window.scroll(function(){
+				if ($window.scrollTop() >= 200) {
+				 nav.addClass('active');
+			 }
+			 else {
+				 nav.removeClass('active');
+			 }
+		 });
+	</script>
+	<script>
+		function toggleSubmenu(event, id) {
+			event.preventDefault();
+			const link = event.currentTarget;
+			const submenu = document.getElementById(id);
+			const isCollapsed = submenu.style.display === 'block';
+			submenu.style.display = isCollapsed ? 'none' : 'block';
+			link.classList.toggle('collapsed', isCollapsed);
+		}
+	</script>
+	<script>
+		function toggleSubmenu(event, submenuId) {
+			event.preventDefault();
+
+			// Remove 'active' class from all main links
+			const allToggles = document.querySelectorAll('.navbar-adjust');
+			allToggles.forEach(function (toggle) {
+				toggle.classList.remove('active');
+			});
+
+			// Toggle submenu visibility
+			const submenu = document.getElementById(submenuId);
+			const allSubmenus = document.querySelectorAll('.submenu');
+			allSubmenus.forEach(function (menu) {
+				if (menu !== submenu) {
+					menu.style.display = 'none';
+				}
+			});
+
+			// Toggle current submenu and activate current link
+			if (submenu.style.display === 'block') {
+				submenu.style.display = 'none';
+			} else {
+				submenu.style.display = 'block';
+				event.currentTarget.classList.add('active');
+			}
+		}
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const searchInput = document.getElementById('menuSearch');
+			const searchResults = document.getElementById('searchResults');
+
+			searchInput.addEventListener('keyup', function () {
+				const query = searchInput.value.toLowerCase().trim();
+				searchResults.innerHTML = '';
+				searchResults.style.display = 'none';
+
+				if (query === '') return;
+
+				// Get all submenu items
+				const allSubmenuLinks = document.querySelectorAll('.submenu li');
+				allSubmenuLinks.forEach(function (li) {
+					const link = li.querySelector('a');
+					const text = link.textContent.toLowerCase();
+
+					if (text.includes(query)) {
+						const clonedLink = link.cloneNode(true);
+						searchResults.appendChild(clonedLink);
+					}
+				});
+
+				if (searchResults.children.length > 0) {
+					searchResults.style.display = 'block';
+				}
+			});
+
+			// Hide results if clicked outside
+			document.addEventListener('click', function (e) {
+				if (!searchResults.contains(e.target) && e.target !== searchInput) {
+					searchResults.style.display = 'none';
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const searchInput = document.getElementById('menuSearch');
+			searchInput.addEventListener('keyup', function () {
+				const query = searchInput.value.toLowerCase().trim();
+				// Loop through all submenu <li> items
+				const allSubmenuLinks = document.querySelectorAll('.submenu li');
+				allSubmenuLinks.forEach(function (li) {
+					const linkText = li.textContent.toLowerCase();
+					const matches = linkText.includes(query);
+					li.style.display = matches ? 'block' : 'none';
+				});
+				// Show/hide parent modules based on visible children
+				const allModules = document.querySelectorAll('.nav-item');
+				allModules.forEach(function (module) {
+					const visibleSubmenus = module.querySelectorAll('.submenu li:not([style*="display: none"])');
+					const submenu = module.querySelector('.submenu');
+					if (visibleSubmenus.length > 0) {
+						module.style.display = 'block';
+						if (submenu) submenu.style.display = 'block';
+					} else {
+						module.style.display = 'none';
+					}
+				});
+				// Reset all if input is empty
+				if (query === '') {
+					document.querySelectorAll('.nav-item').forEach(function (module) {
+						module.style.display = 'block';
+						const submenu = module.querySelector('.submenu');
+						if (submenu) submenu.style.display = 'none'; // or 'block' if you want all open
+					});
+					document.querySelectorAll('.submenu li').forEach(function (li) {
+						li.style.display = 'block';
+					});
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			// Restore sidebar scroll position
+			const savedScroll = sessionStorage.getItem("sidebar-scroll");
+			const sidebar = document.querySelector(".sidebar");
+			if (sidebar && savedScroll) {
+				sidebar.scrollTop = parseInt(savedScroll);
+			}
+
+			// Save scroll position before page unload
+			window.addEventListener("beforeunload", function () {
+				if (sidebar) {
+					sessionStorage.setItem("sidebar-scroll", sidebar.scrollTop);
+				}
+			});
+		});
+	</script>
+
+	<script>
+		$(document).ajaxComplete(function (event, xhr) {
+			if (xhr.status === 401 && xhr.responseText === "SessionExpired") {
+				window.location.href = "/AccessedError/Index";
+			}
+		});
+	</script>
+
+
+</body>
+
+</html>
