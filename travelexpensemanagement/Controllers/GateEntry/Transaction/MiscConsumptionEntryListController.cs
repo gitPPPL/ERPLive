@@ -9,12 +9,10 @@ using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 
-
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
     public class MiscConsumptionEntryListController : Controller
     {
-
 
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
@@ -91,12 +89,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = true, headers = headerList, details = detailsList, totalCount });
         }
 
-
-
-
         [HttpPost]
         public IActionResult GetDataByCode([FromForm] int rowId, [FromForm] string vtype)
-
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             MiscConsumptionEntryModel wrapper = new MiscConsumptionEntryModel
@@ -139,8 +133,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     Add1 = rdr["ADD1"]?.ToString(),
                                     Add2 = rdr["ADD2"]?.ToString(),
                                     Add3 = rdr["ADD3"]?.ToString(),
-                                     TRUCK_NO = rdr["TRUCK_NO"]?.ToString(),
-                             
+                                    TRUCK_NO = rdr["TRUCK_NO"]?.ToString(),
+                                    ITEM_TYPE = rdr["item_type"]?.ToString(),
                                     REMARKS = rdr["REMARKS"]?.ToString(),
                                     DOC_ID = rdr["doc_id"]?.ToString()
                                 };
@@ -198,9 +192,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
-
-
         [HttpPost]
         public JsonResult Delete(int code  , string vtype)
         {
@@ -233,7 +224,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
         public JsonResult GetPendingDocumnents(int PartyId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -242,20 +232,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
-                    string query = @" SELECT  top 10  gate2.V_type ,  gate2.V_NO , FORMAT(gate1.v_date, 'yyyy-MM-dd') as v_date,  gate2.ITEM_CODE , gate2.item_name ,
-                    gate2.remarks ,  gate2.QTY, (gate2.qty - ISNULL(gate2.ADJ_QTY, 0)) AS P_Qty, gate2.UOM_CODE, gate2.UOM_NAME,
-                    gate2.NOS, gate2.srno FROM   GATE2
-                    LEFT JOIN  GATE1   ON gate2.V_TYPE = gate1.V_TYPE  AND gate2.V_NO = gate1.V_NO AND gate2.COMP_CODE = gate1.COMP_CODE 
-                    AND gate2.BRANCH_CODE = gate1.BRANCH_CODE  AND gate2.YEAR_CODE = gate1.YEAR_CODE
-                    LEFT JOIN   DOCTYPE_MAST   ON DOCTYPE_MAST.CODE = gate2.V_TYPE ;";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                //string query = @" SELECT  top 10  gate2.V_type ,  gate2.V_NO , FORMAT(gate1.v_date, 'yyyy-MM-dd') as v_date,  gate2.ITEM_CODE , gate2.item_name ,
+                //gate2.remarks ,  gate2.QTY, (gate2.qty - ISNULL(gate2.ADJ_QTY, 0)) AS P_Qty, gate2.UOM_CODE, gate2.UOM_NAME,
+                //gate2.NOS, gate2.srno FROM   GATE2
+                //LEFT JOIN  GATE1   ON gate2.V_TYPE = gate1.V_TYPE  AND gate2.V_NO = gate1.V_NO AND gate2.COMP_CODE = gate1.COMP_CODE 
+                //AND gate2.BRANCH_CODE = gate1.BRANCH_CODE  AND gate2.YEAR_CODE = gate1.YEAR_CODE
+                //LEFT JOIN   DOCTYPE_MAST   ON DOCTYPE_MAST.CODE = gate2.V_TYPE ;";
+                
+                using (SqlCommand cmd = new SqlCommand("sp_MiscConsumptionEntry", con))
                 {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "LoadPendingData");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@PARTY_CODE", PartyId);
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -282,5 +273,5 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(dataList);
         }
-            }
+    }
 }

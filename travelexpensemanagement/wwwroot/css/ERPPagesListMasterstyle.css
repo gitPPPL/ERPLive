@@ -84,6 +84,16 @@
     background: #fff;
     border-radius: 8px;
 }
+.erppagelist-toolbar-end {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+}
 
 /* SEARCH WRAPPER */
 .erppagelist-search-wrapper {
@@ -319,8 +329,8 @@
     }
 
     .act-btn.document {
-        background: #fff2cc; /* soft yellow */
-        color: #b38600; /* dark gold/brown */
+        background: #ffe7c9;
+        color: #ff8100;
         border-radius: 4px;
         padding: 4px 6px;
     }
@@ -462,7 +472,7 @@ th {
     right: 0;
     width: 140px;
     min-width: 140px;
-    max-width: 140px;
+    max-width: 165px;
     background: #fff;
     z-index: 10;
     border-left: 1px solid #ddd;
