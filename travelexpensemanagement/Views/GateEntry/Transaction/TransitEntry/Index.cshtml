@@ -511,7 +511,7 @@
         }
     }
 
-    async function LoadDropDown(data) {
+    async function LoadDropDown(VTypeId) {
         try {
             await bindDropdown('TransitEntry','DocType', '#ddlDocType', '-- Select VType --', null, null, false, null);
             await bindDropdown('TransitEntry','DocStatus', '#ddlStatus', '-- Select Status --', null, null, true, null);

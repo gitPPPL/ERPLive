@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Spire.Doc.Documents;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,11 +11,6 @@ namespace travelexpensemanagement.Common.DropdownService
 {
     public class DropdownService
     {
-        //private readonly string _connectionString;
-        // public DropdownService(IConfiguration configuration)
-        //{
-        //    _connectionString = configuration.GetConnectionString("ERPDB"); 
-        //}
         private readonly DataBaseConnection _dbConnection;
         public DropdownService(DataBaseConnection dbConnection)
         {
@@ -173,6 +169,109 @@ namespace travelexpensemanagement.Common.DropdownService
             public string Value { get; set; }
             public string Text { get; set; }
         }
+
+        private List<DropdownModel> ExecuteDropdown(string query, SqlParameter[] parameters = null)
+        {
+            var list = new List<DropdownModel>();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    if (parameters != null)
+                        cmd.Parameters.AddRange(parameters);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new DropdownModel
+                            {
+                                Value = rdr["Value"].ToString(),
+                                Text = rdr["Text"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+        public List<DropdownModel> GetDocType()
+        {
+            string query = @"SELECT Code AS Value, Name AS Text FROM DOCTYPE_MAST WHERE CODE IN ('CTIN','CTOT') ORDER BY Name";
+            return ExecuteDropdown(query);
+        }
+
+        // City
+        public List<DropdownModel> GetCity(string compCode)
+        {
+            string query = @"SELECT DISTINCT Code AS Value, Name AS Text FROM (SELECT Code, Name FROM City_MAST
+                        UNION ALL
+                        SELECT City_Code, City_Name FROM COURIER_TRACKING WHERE Comp_code = @CompCode 
+                        AND City_Name <> ''  AND City_Code <> '0' ) x ORDER BY Name";
+
+            return ExecuteDropdown(query, new[]
+            {
+        new SqlParameter("@CompCode", compCode)
+    });
+        }
+        //  Party
+        public List<DropdownModel> GetParty(string compCode)
+        {
+            string query = @"SELECT DISTINCT Code AS Value, Name AS Text 
+                 FROM (
+                    SELECT Code, Name FROM SUBGROUP_MAST WHERE Comp_code = @CompCode
+                    AND Nature NOT IN ('CASH','BANK','OTHERS')
+                    AND Name IS NOT NULL AND Name <> '' AND Code IS NOT NULL AND Code <> '0'
+
+                    UNION ALL
+
+                    SELECT Party_Code, Party_Name FROM COURIER_TRACKING  WHERE Comp_code = @CompCode
+                    AND Party_Name IS NOT NULL AND Party_Name <> ''
+                    AND Party_Code IS NOT NULL AND Party_Code <> '0'
+                 ) x
+                 ORDER BY Name";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+
+        //  Courier
+        public List<DropdownModel> GetCourier()
+        {
+            string query = @"SELECT DISTINCT COURIER_NAME AS Value, COURIER_NAME AS Text 
+                             FROM COURIER_TRACKING 
+                             WHERE COURIER_NAME IS NOT NULL AND COURIER_NAME <> '' 
+                             ORDER BY COURIER_NAME";
+
+            return ExecuteDropdown(query);
+        }
+
+        //  Purpose
+        public List<DropdownModel> GetPurpose()
+        {
+            string query = @"SELECT DISTINCT Purpose AS Value, Purpose AS Text 
+                             FROM COURIER_TRACKING WHERE Purpose <> '' ORDER BY Purpose";
+
+            return ExecuteDropdown(query);
+        }
+
+        // ✅ Employee
+        public List<DropdownModel> GetEmployee(string compCode)
+        {
+            string query = @"SELECT Code AS Value, Name AS Text FROM EMP_MAST WHERE RESIGN_DATE IS NULL 
+                             AND Comp_code = @CompCode ORDER BY Name";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+
+      
 
         private List<DropdownModel> ExecuteDropdown(string query, SqlParameter[] parameters = null)
         {

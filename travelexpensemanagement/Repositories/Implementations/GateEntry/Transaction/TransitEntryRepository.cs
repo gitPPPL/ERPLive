@@ -26,7 +26,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalValidationdate = globalValidationdate;
             _logService = logService;
         }
-        public RepositoryResponseList<object> GetDDl(string type, string data = "")
+        public RepositoryResponseList<object> GetDDl(string type, string VTypeId = "")
         {
             var gv = _globalVariableService.GetGlobalVariables();
             var response = new RepositoryResponseList<object>();
@@ -40,12 +40,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     query = "Select Code as Value, Name as Text from DOCSTATUS_MAST where V_TYPE='Document' Order by CODE";
                     break;
                 case "PartyName":
-                    if (data == "TRIN")
+                    if (VTypeId == "TRIN")
                     {
                         query = "Select code as Value, name as Text from SUBGROUP_MAST  where Nature='Supplier' and COMP_CODE=" + gv.PubCompCode + "  order by name";
                     }
 
-                    else if (data == "TROT")
+                    else if (VTypeId == "TROT")
                     {
                         query = "Select code as Value, name as Text from SUBGROUP_MAST  where Nature='Customer' and COMP_CODE=" + gv.PubCompCode + "   order by name ";
                     }
@@ -55,8 +55,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                     break;
             }
-            var result = _dropdownService.GetDropdownList(query);
-            response.data = result;
+            var data = _dropdownService.GetDropdownList(query);
+            response.data = data;
             return response;
             //return Json(data);
         }

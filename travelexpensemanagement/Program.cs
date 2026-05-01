@@ -8,10 +8,10 @@ using travelexpensemanagement.LogService;
 using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
+using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
-using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
 using travelexpensemanagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,10 +29,16 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
 builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
 builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
 builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
 builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
+builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
+builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
+builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
+
+
 
 builder.Services.Configure<EncryptionSettings>(
     builder.Configuration.GetSection("EncryptionSettings"));
