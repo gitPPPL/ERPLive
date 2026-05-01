@@ -1,50 +1,54 @@
 ﻿
-using AngleSharp.Dom;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Office.Word;
-using DocumentFormat.OpenXml.Spreadsheet;
-using iText.StyledXmlParser.Jsoup.Select;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using StackExchange.Redis;
 using System.Data;
+using System.Data.Common;
 using System.Globalization;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Reflection.Emit;
 using System.Text.Json;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.GateEntry;
-using travelexpensemanagement.Models.Purchase.Transiction;
-using static System.Net.WebRequestMethods;
+using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces;
+using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
+
+
+    //private readonly IAssetRepository _assetRepository;
+    //private readonly GlobalVariableService _globalVariableService;
+    //private readonly DataBaseConnection _dbConnection;
+    //private readonly DropdownService _dropdownService;
+
+    //public AssetsMasterController(IAssetRepository assetRepository, GlobalVariableService globalVariableService, DropdownService dropdownService, DataBaseConnection dbConnection)
+    //{
+    //    _assetRepository = assetRepository;
+    //    _globalVariableService = globalVariableService;
+    //    _dropdownService = dropdownService;
+    //    _dbConnection = dbConnection;
+    //}
+
+
     public class InwardEntryController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly GlobalValidationdate _globalValidationdate;
-
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-
+        //private readonly  IInwardEntryRepository _inwardEntryRepository;
+        private readonly IInwardEntryRepository _inwardEntryRepository;
         private readonly HttpClient _httpClient;
         public int pubBPPurchTolQty = 2000;
 
         public InwardEntryController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
             travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-            ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
+            ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate , IInwardEntryRepository inwardEntryRepository)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -52,6 +56,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _inwardEntryRepository = inwardEntryRepository;
         }
 
         public IActionResult Index()
@@ -61,46 +66,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return View("~/Views/GateEntry/Transaction/InwardEntry/Index.cshtml");
         }
 
-        public JsonResult GetVNo(string Vtype , string Tablename = "GATE1")
+        public JsonResult GetVNo(string Vtype, string Tablename = "GATE1")
         {
             string newV_NO = "00000";
             try
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
-
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    con.Open();
-                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
-                    using (SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con))
-                    {
-                        prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-
-                        string prefixYR = prefixCmd.ExecuteScalar().ToString();
-
-                        string lastV_NO_Query = @" SELECT MAX(CAST(V_NO AS INT))  FROM " + Tablename + "   WHERE COMP_CODE = @CompCode   AND YEAR_CODE = @YearCode   AND BRANCH_CODE = @BranchCode   AND V_TYPE = @Vtype";
-
-                        using (SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con))
-                        {
-                            lastVnoCmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                            lastVnoCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                            lastVnoCmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
-                            lastVnoCmd.Parameters.AddWithValue("@Vtype", Vtype);
-
-                            object result = lastVnoCmd.ExecuteScalar();
-
-                            if (result != DBNull.Value && result != null)
-                            {
-                                int lastV_NO = Convert.ToInt32(result);
-                                newV_NO = (lastV_NO + 1).ToString("D5");
-                            }
-                            else
-                            {
-                                newV_NO = prefixYR + "00001";
-                            }
-                        }
-                    }
-                }
+                newV_NO = _inwardEntryRepository.GetVNoAsync(Vtype,Tablename).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
@@ -108,15 +79,25 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { error = "An error occurred while generating the V_NO." });
             }
 
-            return Json(new { V_NO = newV_NO });
+            return Json(new { V_NO = newV_NO }); // ✅ FIXED
         }
+
+
+
         public JsonResult DDlVType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateInward') order by Name ";
 
+                var parameters = new Dictionary<string, object> { { "@Type", "v_type" } };
+                var data = _dropdownService.GetMultipleDropdownList("sp_GetDropdownData", CommandType.StoredProcedure, parameters);
+
+
+
+
+
+                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateInward') order by Name ";
                 var VtypeList = _dropdownService.GetDropdownList(query);
 
                 return Json(VtypeList);
@@ -1850,7 +1831,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
         [HttpGet]
         public async Task<JsonResult> GetEWayBillData(DateTime edate, string inoutdata)
         {
@@ -2174,7 +2154,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return ex.Message; // better for debugging
             }
         }
-
         public class EwayBillData
         {
             public string FORM_NO { get; set; }

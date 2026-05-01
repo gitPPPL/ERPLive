@@ -4,15 +4,8 @@
     var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
     var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
 }
-<div class="circle-loader" style="display: none;">
-    <div class="container">
-        Loading...
-        <div class="spinner-part"></div>
-        <div class="spinner-part"></div>
-        <div class="spinner-part"></div>
-    </div>
-</div>
 
+<div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
@@ -841,7 +834,7 @@
             $('#ddlDocType').prop('disabled', true);
             $('#InDate').prop('disabled', true);
             $('#InTime').prop('disabled', true);
-            $('.erppagelist-toolbar-end').show();   //Added By Sumesh
+            $('.erppagelist-toolbar-end').show();  
             $('#btn_approval').show();
             if (mode === "view")
             {
@@ -1001,13 +994,16 @@
 
             if(!V_TYPE)
             {
-            toastr.info("Please Select Voucher Type!");
-            return;
+                showToast("Please Select Voucher Type!", { type: "info" });
+                    $('#ddlDocType').addClass('is-invalid').focus();
+                return;
             }
             if(!V_DATE)
             {
-                toastr.info("Please Select Voucher Date!");
+                showToast("Please Select Voucher Date!", { type: "info" });
+                    $('#TxtRptDate').addClass('is-invalid').focus();
                 return;
+                        
             }
            FetchPendindorderno(selectedValue,V_TYPE,V_DATE);
         });
@@ -1035,7 +1031,7 @@
             });
 
             if (isDuplicate || isItemInMainTable(currentItemCode)) {
-                toastr.error("Duplicate Item Code not allowed: " + currentItemCode);
+                showToast("Duplicate Item Code not allowed: " + currentItemCode, { type: "error" });          
                 $(this).prop('checked', false);
                 return;
             }
@@ -1061,7 +1057,7 @@
         $('#Btn_selectedData').on('click', function () {
             const selectedData = getSelectedPendingOrderRows();           
             if (selectedData.length === 0) {
-            toastr.warning("Please select at least one row.");
+                showToast("Please select at least one row.", { type: "warning" });   
             return;
             }
             populateInwardEntryTable(selectedData);
@@ -1100,13 +1096,16 @@
 
         if(Container_No)
         {
-          getcontainerdata(Container_No);
+            $('#TxtContainerNo').removeClass('is-invalid');
+            getcontainerdata(Container_No);
         }
         else
         {
-         toastr.info("Please Fill Container_No");
-        }               
-           
+          showToast("Please Fill Container_No", { type: "info" });
+            $('#TxtContainerNo').addClass('is-invalid').focus();
+            return false;        
+        }     
+
         });
 
         $('#btn_backtolist').on('click' , function(){     
@@ -1119,7 +1118,7 @@
             if (V_date) {
                     GetEwaybillno(V_date, "IN");
             } else {
-                toastr.warning("Date is empty");
+             showToast("Date is empty", { type: "warning" });
             }
         });
 
@@ -1140,15 +1139,15 @@
                 populateTable(data);
 
             } catch (error) {
-                toastr.error("Error", error);
+                       showToast(error, { type: "error" });
             }
         });
 
-      $('#btn_partybillnoselect').on('click', function () {
+        $('#btn_partybillnoselect').on('click', function () {
         const selectedrows = getSelectedRows();
 
         if (selectedrows.length === 0) {
-            toastr.warning("No rows selected");
+          showToast("No rows selected", { type: "warning" });
             return;
         }
 
@@ -1174,8 +1173,6 @@
     }
 
     function saveInwardEntry() {
-        debugger;
-
         const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
         const PARTY_NAME    = $('#ddlPartyName option:selected').text();
         const V_TYPE        = $('#ddlDocType').val();
@@ -1205,204 +1202,185 @@
         const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
 
         if (!V_TYPE) {
-            toastr.warning("Please select a Voucher Type");
-            $("#ddlDocType").focus();
+            showToast("Please select a Voucher Type", { type: "info" });
+            $('#ddlDocType').addClass('is-invalid').focus();
+            return ;       
+        }
+          else{
+            $('#ddlDocType').removeClass('is-invalid');
+          }
+       
+        if (!V_NO) {
+            showToast("Please select a Voucher No", { type: "info" });
+            $('#TxtDocNo').addClass('is-invalid').focus();
             return;
         }
-
-        if (!V_NO) {
-            toastr.warning("Please select a Voucher No");
-            $("#TxtDocNo").focus();
-            return;
+        else
+        {
+          $('#TxtDocNo').removeClass('is-invalid');
         }
 
         if (!STATUS) {
-            toastr.warning("Please select a Status.");
-            $("#ddlDocStatus").focus();
+            showToast("Please select a Status.", { type: "info" });
+            $('#ddlDocStatus').addClass('is-invalid').focus();     
             return;
         }
+        else
+        {
+            $('#ddlDocStatus').removeClass('is-invalid');
+        }
 
+       
         if (!PARTY_CODE) {
-            toastr.warning("Please select a Party.");
-            $("#ddlPartyName").focus();
+            showToast("Please select a Party.", { type: "warning" });
+            $("#ddlPartyName").addClass("is-invalid").focus();
             return;
+        } else {
+            $("#ddlPartyName").removeClass("is-invalid");
         }
 
-        if (!R_DATE   &&  !R_TIME) {
-            toastr.warning("Please select a Reporting Date. and Time");
-            $("#TxtRptDate").focus();
+        if (!R_DATE && !R_TIME) {
+            showToast("Please select Reporting Date and Time.", { type: "warning" });
+            $("#TxtRptDate").addClass("is-invalid").focus();
             return;
+        } else {
+            $("#TxtRptDate").removeClass("is-invalid");
         }
+
 
         if (BILL_NO && !BILL_DATE) {
-            toastr.warning("Please select Party Bill Date.");
-            $("#DtPartyBillDate").focus();
+            showToast("Please select Party Bill Date.", { type: "warning" });
+            $("#DtPartyBillDate").addClass("is-invalid").focus();
             return;
+        } else {
+            $("#DtPartyBillDate").removeClass("is-invalid");
         }
+
 
         if (CHALL_NO && !CHALL_DATE) {
-            toastr.warning("Please select Challan Date.");
-            $("#TxtChallanDate").focus();
+            showToast("Please select Challan Date.", { type: "warning" });
+            $("#TxtChallanDate").addClass("is-invalid").focus();
             return;
+        } else {
+            $("#TxtChallanDate").removeClass("is-invalid");
         }
 
+
         if (!BILL_AMT) {
-            toastr.warning("Please Fill a Bill Amount.");
-            $("#TxtBillAmt").focus();
+            showToast("Please fill Bill Amount.", { type: "warning" });
+            $("#TxtBillAmt").addClass("is-invalid").focus();
             return;
+        } else {
+            $("#TxtBillAmt").removeClass("is-invalid");
         }
 
         if (!TRUCK_NO) {
-            toastr.warning("Please Fill a Vehicle No.");
-            $("#TxtVehicleNo").focus();
+            showToast("Please fill Vehicle No.", { type: "warning" });
+            $("#TxtVehicleNo").addClass("is-invalid").focus();
             return;
+        } else {
+            $("#TxtVehicleNo").removeClass("is-invalid");
         }
 
-        if(TRUCK_NO)
-        {
-                var numericPart = TRUCK_NO.replace(/\D/g, '');
-                var lastFour = numericPart.slice(-4);
 
-            if (lastFour) {
+        if (TRUCK_NO) {
+        var numericPart = TRUCK_NO.replace(/\D/g, '');
+        var lastFour = numericPart.slice(-4);
 
+        if (lastFour) {
 
-                if (!DRIVER_NAME) {
-                    toastr.warning("Please enter Driver Name.");
-                    $("#TxtDriverName").focus();
-                    return;
-                }
+            if (!DRIVER_NAME) {
+                showToast("Please enter Driver Name.", { type: "warning" });
+                $("#TxtDriverName").addClass("is-invalid").focus();
+                return;
+            } else {
+                $("#TxtDriverName").removeClass("is-invalid");
+            }
 
-                if (!DRIVER_NO) {
-                    toastr.warning("Please enter Driver Mobile.");
-                    $("#TxtDriverMobile").focus();
-                    return;
-                }
-
-                if (!DRIVER_NO || DRIVER_NO.toString().length !== 10)
-                {
-                    toastr.warning("Please enter a 10-digit mobile number.");
-                    $("#TxtDriverMobile").focus();
-                    return;
-                }
+            if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) {
+                showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
+                $("#TxtDriverMobile").addClass("is-invalid").focus();
+                return;
+            } else {
+                $("#TxtDriverMobile").removeClass("is-invalid");
             }
         }
-                         
+    }
+
         if (WAYBILL_NO) {
-            if (!EWB_DATE) {
-                toastr.warning("Please select EWayBill Date.");
-                $("#DtEWayDate").focus();
-                return;
-            }
 
-            if (!EWB_EXPDATE) {
-                toastr.warning("Please select EWayBill Expiry Date.");
-                $("#TxtEWayDate").focus();
-                return;
-            }
-
-            if (!EWB_INVNO) {
-                toastr.warning("Please fill EWB Party Inv No.");
-                $("#TxtEWBInvNo").focus();
-                return;
-            }
-
-            if (!EWB_INVAMT) {
-                toastr.warning("Please fill EWB Party Inv Amount.");
-                $("#TxtEWBInvAmt").focus();
-                return;
-            }
-        }
-
-        if(R_DATE > V_DATE)
-        {
-            toastr.info("Reporting Date Can Not Be Greater Then In Date ");
+        if (!EWB_DATE) {
+            showToast("Please select EWayBill Date.", { type: "warning" });
+            $("#DtEWayDate").addClass("is-invalid").focus();
             return;
         }
 
-        if(R_TIME > OUT_DATE)
-        {
-            toastr.info("Reporting Time Can Not Be Greater Then In Time ");
+        if (!EWB_EXPDATE) {
+            showToast("Please select EWayBill Expiry Date.", { type: "warning" });
+            $("#TxtEWayDate").addClass("is-invalid").focus();
             return;
         }
 
-        if(BILL_DATE > V_DATE)
-        {
-            toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
+        if (!EWB_INVNO) {
+            showToast("Please fill EWB Party Inv No.", { type: "warning" });
+            $("#TxtEWBInvNo").addClass("is-invalid").focus();
             return;
         }
 
-        if(CHALL_DATE > V_DATE)
-        {
-            toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
+        if (!EWB_INVAMT) {
+            showToast("Please fill EWB Party Inv Amount.", { type: "warning" });
+            $("#TxtEWBInvAmt").addClass("is-invalid").focus();
             return;
         }
+    }
 
-        if(SHIP_BILLDATE > V_DATE)
-        {
-            toastr.info("Ship. Bill Date Can Not Be Greater Then In Date  ");
+        if (R_DATE > V_DATE) {
+        showToast("Reporting Date cannot be greater than In Date.", { type: "info" });
+        return;
+    }
+
+        if (BILL_DATE > V_DATE) {
+        showToast("Bill Date cannot be greater than In Date.", { type: "info" });
+        return;
+    }
+
+        if (SHIP_PARTY && !SHIP_BILLNO) {
+        showToast("Shipping Bill No. is required.", { type: "info" });
+        return;
+    }
+
+        if (SHIP_BILLNO && !SHIP_PARTY) {
+        showToast("Shipping Party is required.", { type: "info" });
+        return;
+    }
+
+        if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
+        if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
+            showToast("Bill Amount compulsory for " + PARTY_NAME, { type: "info" });
             return;
         }
-
-        if(OUT_DATE > V_DATE)
-        {
-            toastr.info("Vehicle Out Date Can Not Be Greater Then In Date  ");
-            return;
-        }
-
-        if(SHIP_PARTY)
-        {
-            if(!SHIP_BILLNO)
-            {
-                toastr.info("Shipping Bill No.is required if shipping party mentioned.");
-                return;
-            }
-        }
-
-        if(SHIP_BILLNO)
-        {
-            if(!SHIP_PARTY)
-            {
-                toastr.info("Shipping Party required if you entered shipping bill no.");
-                return;
-            }
-
-            if(!BILL_NO && !CHALL_NO)
-            {
-                toastr.info("Bill No./Challan No. is compulsary.");
-                return;
-            }
-
-        }
-
-        if (V_TYPE == "INST" && V_TYPE == "INFU"  && V_TYPE == "INRM")
-        {
-            if(BILL_AMT == 0 && TRANSIT_NO == null && WAYBILL_NO  == null)
-            {
-                toastr.info("Bill Amount compulsory for " + PARTY_NAME);
-                return;
-            }
-        }
+    }
 
         if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-         toastr.info("Transit No. and E-Way Bill are compulsory if Bill Amount > " + PubDefEWaybillAmt);
-            if (!TRANSIT_NO) {
-             $("#ddlTransit").focus();
-            } else {
-             $("#TxtEWayNo").focus();
-            }
-           return; 
+        showToast("Transit No. and E-Way Bill required.", { type: "info" });
+        if (!TRANSIT_NO) {
+            $("#ddlTransit").addClass("is-invalid").focus();
+        } else {
+            $("#TxtEWayNo").addClass("is-invalid").focus();
         }
+        return;
+    }
 
         if (TRANSIT_NO && EWB_EXPDATE) {
             const expDate = new Date(EWB_EXPDATE);
             const inDate = new Date(V_DATE);
 
-            if (!isNaN(expDate) && !isNaN(inDate) && expDate < inDate) {
-                toastr.info("Waybill expired on " + EWB_EXPDATE + ". Record cannot be saved.");
-                return; 
+            if (expDate < inDate) {
+                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });
+                return;
             }
         }
-       
+      
         const Header = {
                         V_TYPE: $('#ddlDocType').val(),
                         V_NO: V_NO,
@@ -1458,12 +1436,11 @@
                         PAN_NO: $.trim($('#TxtPAN').val()) || null,
                         PARTY_NAME : PARTY_NAME
                     };
-
         const Deatils = collectTableRowData();            
 
         if (!Deatils || Deatils.length === 0) {
-            toastr.warning("Please fill at least one row in Detail");
-            return;
+         showToast("Please fill at least one row in Detail", { type: "info" });
+          return;
         }
 
        const itemCodeSet = new Set();
@@ -1473,49 +1450,49 @@
 
         if (row.ITEM_CODE !== null) {
             if (itemCodeSet.has(row.ITEM_CODE)) {
-                toastr.warning(`Duplicate ITEM_CODE: ${row.ITEM_CODE} (Row ${i + 1})`);
+                showToast(`Duplicate ITEM_CODE: ${row.ITEM_CODE} (Row ${i + 1})`, { type: "warning" });
                 focusCell(i, 0); 
                 return;
             }
             itemCodeSet.add(row.ITEM_CODE);
                      
             if (row.DEPT_CODE === null) {
-                toastr.warning(`Department required (Row ${i + 1})`);
+                   showToast(`Department required (Row ${i + 1})`, { type: "warning" });
                 focusCell(i, 11);
                 return;
             }
                  
             if (row.UOM_NAME === null) {
-                toastr.warning(`Unit required (Row ${i + 1})`);
+                showToast(`Unit required (Row ${i + 1})`, { type: "warning" });
                 focusCell(i, 3);
                 return;
             }
 
             if (row.NOS === null) {
-                toastr.warning(`NOS required (Row ${i + 1})`);
+                showToast(`NOS required (Row ${i + 1})`, { type: "warning" });
                 focusCell(i, 4);
                 return;
             }
 
             if (row.QTY === null) {
-                toastr.warning(`Quantity required (Row ${i + 1})`);
+                showToast(`Quantity required (Row ${i + 1})`, { type: "warning" });
                 focusCell(i, 5);
                 return;
             }
 
             if (!row.EMPTY) {
-                toastr.warning(`EMPTY field required (Row ${i + 1})`);
+                showToast(`EMPTY field required (Row ${i + 1})`, { type: "warning" });
                 focusCell(i, 7);
                 return;
             }
 
             if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
                 if (!row.REF_TYPE) {
-                    toastr.warning(`Reference Type required (Row ${i + 1})`);
+                    showToast(`Reference Type required (Row ${i + 1})`, { type: "warning" });
                     focusCell(i, 9);
                     return;
                 }
-            }
+            }     
         }
       } 
 
@@ -1535,13 +1512,12 @@
             success: function (response) {
                 if (response.status === "Success") {
                     if (response.message) {
-                        toastr.warning(response.message);
-                    }
-                    toastr.success("Saved successfully!");
+                       showToast("Saved successfully!", { type: "success" });
+                    }                                    
                     setTimeout(function () {  window.location.href =  '/InwardEntry/Index?id=' + V_NO +  '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);
                 }
                 else {
-                    toastr.error(response.message || "Save failed.");
+                 showToast(response.message, { type: "error" });
                 }
             },
 
@@ -1554,9 +1530,8 @@
                     errorMessage = "Server error: " + xhr.responseText;
                 } else {
                     errorMessage = "Unexpected error: " + xhr.statusText;
-                }
-
-                toastr.error(errorMessage);
+                }         
+                 showToast(errorMessage, { type: "error" });          
             },
 
             complete: function () {
@@ -1580,50 +1555,50 @@
         }
     }
 
-    // async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
-    //     try {
-    //         const response = await $.ajax({
-    //             url: '/InwardEntry/BillNoValidation',
-    //             type: 'POST',
-    //             data: {
-    //                 PARTY_CODE: PARTY_CODE,
-    //                 BILL_NO: BILL_NO,
-    //                 V_NO: V_NO
-    //             }
-    //         });  
+    async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
+        try {
+            const response = await $.ajax({
+                url: '/InwardEntry/BillNoValidation',
+                type: 'POST',
+                data: {
+                    PARTY_CODE: PARTY_CODE,
+                    BILL_NO: BILL_NO,
+                    V_NO: V_NO
+                }
+            });  
 
-    //         if (!response.success) {
-    //             toastr.error(response.message || "Invalid Bill No");
-    //             return response;
-    //         }
+            if (!response.success) {
+               showToast("Invalid Bill No", { type: "error" });             
+                return response;
+            }
 
-    //         return response;
+            return response;
 
-    //     } catch (error) {
-    //         toastr.error("Validation Error",error);
-    //         return { success: false };
-    //     }
-    // }
+        } catch (error) {
+            showToast("Validation Error", { type: "error" });         
+            return { success: false };
+        }
+    }
 
-    // async function GatenoValidation(V_TYPE, V_NO) {
-    //     try {
-    //         const response = await $.ajax({
-    //             url: '/InwardEntry/GatenoValidation',
-    //             type: 'POST',
-    //             data: {  V_TYPE: V_TYPE, V_NO: V_NO }
-    //         });        
+    async function GatenoValidation(V_TYPE, V_NO) {
+        try {
+            const response = await $.ajax({
+                url: '/InwardEntry/GatenoValidation',
+                type: 'POST',
+                data: {  V_TYPE: V_TYPE, V_NO: V_NO }
+            });        
 
-    //         if (!response.success) {
-    //             toastr.error(response.message || "Invalid Gate No");
-    //             return response;
-    //         }
-    //         return response;
+            if (!response.success) {
+               showToast(response.message, { type: "error" });     
+                return response;
+            }
+            return response;
 
-    //     } catch (error) {
-    //         toastr.error("Validation Error",error);     
-    //         return { success: false };
-    //     }
-    // }
+        } catch (error) {
+           showToast("Validation Error", { type: "error" });             
+            return { success: false };
+        }
+    }
 
     function setFormReadOnly() {
                 const form = document.getElementById("InwardEntryForm");
@@ -1799,7 +1774,8 @@
             ]);
 
         } catch (error) {
-            toastr.error("Error loading dropdowns",error);
+          showToast("Error loading dropdowns", { type: "error" });
+       
         }
     }
 
@@ -1839,7 +1815,8 @@
               ddl.append(`<option value="${item.value}">${item.text}</option>`);
             });
           } catch (error) {
-            toastr.error("Error loading VType:", error);
+           showToast("rror loading VType:", { type: "error" });
+   
           }
     }
 
@@ -1862,7 +1839,7 @@
         });
 
       } catch (error) {
-        toastr.error("Error loading Party:", error);
+        showToast("Error loading Party:", { type: "error" });  
       }
     }
 
@@ -1889,7 +1866,8 @@
             });
 
           } catch (error) {
-            toastr.error("Error loading Ship From:", error);
+                      showToast(error, { type: "error" });
+      
           }
      }
 
@@ -1903,7 +1881,8 @@
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
         } catch (error) {
-            toastr.error("Error loading Doc Status:", error);
+          showToast("Error loading Doc Status:", { type: "error" });
+    
         }
     }
 
@@ -1917,7 +1896,8 @@
                   ddl.append(`<option value="${item.value}">${item.text}</option>`);
                 });
               } catch (error) {
-                      toastr.error("Error loading Transporter", error);
+                  showToast("Error loading Transporter", { type: "error" });
+              
               }
             }
 
@@ -1931,7 +1911,8 @@
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
         } catch (error) {
-            toastr.error("Error loading Party City:", error);
+           showToast("Error loading Party City:", { type: "error" });
+    
         }
     }
 
@@ -1945,7 +1926,8 @@
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
         } catch (error) {
-            toastr.error("Error loading Party City:", error);
+                showToast("Error loading  City:", { type: "error" });
+         
         }
     }
 
@@ -1959,7 +1941,8 @@
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
         } catch (error) {
-            toastr.error("Error loading State:", error);
+                     showToast("Error loading  State:", { type: "error" });
+
     }
 }
 
@@ -1976,7 +1959,8 @@
           });
         },
         error: function (xhr, status, error) {
-          toastr.error('Error loading Party Address:', error);
+                      showToast("Error loading  Party Address:", { type: "error" });
+      
         }
       });
     }
@@ -1999,7 +1983,8 @@
             $('#TxtPAN').val(d.pan ?? "");
 
         } catch (error) {
-                toastr.error('Failed to fetch party data',error);        
+                    showToast("Error fetch party data:", { type: "error" });
+         
         }
     }
 
@@ -2021,7 +2006,7 @@
             $('#TxtPAN').val(d.pan ?? "");
 
         } catch (error) {
-                toastr.error('Failed to fetch party data',error);
+           showToast("Failed to fetch party data:", { type: "error" });       
         
         }
     }
@@ -2037,7 +2022,8 @@
               $('#txtShipAddress').val('');
             }
           } catch (error) {
-              toastr.error('Failed to fetch ship from address:', error);
+            showToast(" Failed to fetch ship from address:", { type: "error" });
+              
           }
         }
 
@@ -2055,7 +2041,8 @@
               ddl.append(`<option value="${item.value}">${item.text}</option>`);
             });
           } catch (error) {
-              toastr.error("Error loading Transit Numbers:", error);
+             showToast("Error loading Transit Numbers:", { type: "error" });
+                
           }
         }
 
@@ -2071,8 +2058,8 @@
 
             $('#TxtDocNo').val(data.v_NO);
         } catch (e) {
-
-            toastr.warning('Error loading Document Number: ' + e.message);
+           showToast("Error loading Document Number: ", { type: "error" });
+ 
         }
       }
 
@@ -2091,7 +2078,7 @@
                 myModal.show();
             } else {
                 var PartyName = $('#ddlPartyName option:selected').text();
-                toastr.info("Data Not Found For this party: " + PartyName);
+               showToast(`Data Not Found For this party: ${PartyName}`, { type: "error" });  
                 return;
             }
                   
@@ -2121,15 +2108,10 @@
             `;
             tableBody.insertAdjacentHTML('beforeend', row);
           });
-
-        } else {
-
-          toastr.error("Failed to load pending orders: " + result.message);
-        }
+        } 
 
       } catch (error) {
-    
-            toastr.error("Error loading Pending Orders.",error);
+         showToast(`Failed to load pending orders`, { type: "error" });
       }
     }
 
@@ -2267,11 +2249,10 @@
 
 
 
-              } else {
-                   toastr.error(res.message || "Failed to load data.");
-              }
+              } 
           } catch (err) {
-              toastr.error("Something went wrong while loading the form.");
+            showToast("Something went wrong while loading the form.", { type: "error" });
+
           }
       }
 
@@ -2282,9 +2263,14 @@
             const VNo = $('#TxtDocNo').val();
 
             if(!rcNumber)
-            {
-             toastr.info("Vehicle No Not Found");
+            {     
+             showToast("Vehicle No Not Found", { type: "info" });
+             $('#TxtVehicleNo').addClass('is-invalid').focus();
              return;
+            }
+            else
+            {
+              $('#TxtVehicleNo').removeClass('is-invalid');
             }
 
             const res = await $.ajax({
@@ -2295,14 +2281,16 @@
             });                  
 
             if (res && res.success) {
-             
-                toastr.success("FastTag Info Saved Successfully");
+              showToast("FastTag Info Saved Successfully", { type: "success" });
+     
 
             } else {
-                toastr.error("Data Not Found For This Vehicle No.");
+                showToast("Data Not Found For This Vehicle No", { type: "error" });
+           
             }
-        } catch (err) {       
-                toastr.error("Error fetching vehicle details.",err);
+        } catch (err) {
+            showToast("Error fetching vehicle details.", { type: "error" });
+               
         }
     }
 
@@ -2312,9 +2300,14 @@
                     const VType = $('#ddlDocType').val();  
                     const VNo = $('#TxtDocNo').val();  
                     if(!rcNumber)
-                    {
-                        toastr.info("Vehicle No Not Found");
+                    {                    
+                        showToast("Vehicle No Not Found", { type: "info" });
+                        $('#TxtVehicleNo').addClass('is-invalid').focus();
                         return;
+                        }
+                    else
+                    {
+                      $('#TxtVehicleNo').removeClass('is-invalid');
                     }
 
                 const res = await $.ajax({
@@ -2325,13 +2318,14 @@
                 });
 
                 if (res && res.success) {
-                       toastr.success("Vehicle Info Saved Successfully");
+                  showToast("Vehicle Info Saved Successfully", { type: "success" });
+
                 } else {
-                    toastr.error("Vehicle not found or invalid.");
+                   showToast("Vehicle not found or invalid", { type: "error" });
                 }
             } catch (err) {
-          
-                    toastr.error("Error fetching vehicle details.",err);
+                       showToast("Error fetching vehicle details.", { type: "error" });
+                
             }
         }
 
@@ -2414,8 +2408,8 @@
             $('#tblRCDetaillist tbody').append(row);
 
         } catch (err) {
- 
-                toastr.error("Error fetching vehicle details.",err);
+               showToast("Error fetching vehicle details.", { type: "error" });
+             
         }
     }
 
@@ -2478,15 +2472,15 @@
 
         const result = await response.json();
 
-        if (result.status === false) {
-            toastr.warning(result.message);
+        if (result.status === false) {    
+            showToast("result.message", { type: "warning" });
             return false;
         }
 
         return true;
 
     } catch (error) {
-        toastr.error("Error:", error);
+       showToast("result.message", { type: "warning" });
         return false;
     }
 }
@@ -2632,8 +2626,9 @@
 
             itemList = await res.json();
         } catch (err) {
-      
-                toastr.error("Error loading ITEM master",err);
+
+
+             showToast(err, { type: "warning" });
         }
     }
 
@@ -2643,8 +2638,8 @@
             if (!res.ok) throw new Error("Unit load failed");
             unitList = await res.json();  
         } catch (err) {
-       
-                toastr.error("Error loading UNIT master",err);
+             
+         showToast("Error loading UNIT master", { type: "warning" });
         }
     }
 
@@ -2654,8 +2649,7 @@
             if (!res.ok) throw new Error("Department load failed");
             deptList = await res.json();  
         } catch (err) {
-          
-                toastr.error("Error loading DEPARTMENT master",err);
+         showToast(err, { type: "warning" });
         }
     }
 
@@ -2677,11 +2671,12 @@
             fetchTransitno(v_type, Vno, res.supplier, indate);
             
         } else {
-          toastr.error("Invalid response or supplier missing");
+                    showToast("Invalid response or supplier missing", { type: "error" });
+      
         }
       }
       catch (error) {
-        toastr.error("Error", error);
+        showToast(err, { type: "warning" });
       }
     }
     
@@ -2693,15 +2688,14 @@
                 data: { edate: $('#InDate').val(),inoutdata :"OUT"  },
                 dataType: 'json'
             });           
-          console.log("E-Way Bill Response:", res); 
+       
           if(res.success)
           {
-                  toastr(res.message);
+           showToast("Successfully", { type: "success" });
           }
 
         } catch (error) {
-            console.error(error);
-            toastr.error("Something went wrong");
+            showToast(error, { type: "error" });
         }
     }
 
