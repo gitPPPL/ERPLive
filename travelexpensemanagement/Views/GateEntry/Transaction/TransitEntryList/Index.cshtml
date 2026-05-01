@@ -92,6 +92,10 @@
 
     $(document).ready(function () {
 		loadAllMenus();
+		$('#searchBox').on('keyup', function () {
+				currentPage = 1;
+				loadAllMenus();
+		});
 	});
 
 	//Load main grid...............
@@ -182,12 +186,17 @@
 		});
 	}
 
-     function formatDate(dateStr) {
-				if (!dateStr) return '';
-				const d = new Date(dateStr);
-				if (isNaN(d)) return '';
-				return d.toISOString().slice(0, 10);
-			}
+ //    function formatDate(dateStr) {
+	// 	if (!dateStr) return '';
+	// 	const d = new Date(dateStr);
+	// 	if (isNaN(d)) return '';
+	// 	return d.toISOString().slice(0, 10);
+	// }
+	function formatDate(date){
+		let parts = date.split('T');
+		let newDate = parts[0];
+		return newDate;
+	};
 
 	function renderPagination(total, pageSize, currentPage) {
 		const totalPages = Math.ceil(total / pageSize);
@@ -221,7 +230,7 @@
 
 	function goToPage(page) {
 		currentPage = page;
-		loadDocumentStages();
+		loadAllMenus();
 	}
 
 	function AddOrEditFunction(code, vtype) {

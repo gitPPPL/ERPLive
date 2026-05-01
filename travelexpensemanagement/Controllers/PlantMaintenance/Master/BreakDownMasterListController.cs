@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Purchase.Transaction;
 using travelexpensemanagement.Controllers.Travelexpense;
@@ -12,13 +13,14 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
     {
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbConnection;
-        private readonly GlobalVariableService _globalVariable;
+        private readonly GlobalVariableService _globalVariableService;
+        private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         public BreakDownMasterListController(DataBaseConnection dbConnection, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbConnection = dbConnection;
-            _globalVariable = globalVariableService;
+            _globalVariableService = globalVariableService;
             _moduleService = moduleService;
 
         }
@@ -40,7 +42,7 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
         [HttpGet]
         public IActionResult loadListData(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
         {
-            var globalVariable= _globalVariable.GetGlobalVariables();
+            var globalVariable= _globalVariableService.GetGlobalVariables();
             List<object> list = new List<object>();
             int totalCount = 0;
 
@@ -82,7 +84,7 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
         [HttpPost]
         public IActionResult DeleteBreakdownMaster(int code)
         {
-            var globalVariable = _globalVariable.GetGlobalVariables();
+            var globalVariable = _globalVariableService.GetGlobalVariables();
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())

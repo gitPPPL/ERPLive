@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Common.DropdownService;
+using System.Data.Common;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
@@ -18,7 +18,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly GlobalVariableService _globalVariableService;
 
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        ModuleService.ModuleService moduleService)
+         travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,  ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

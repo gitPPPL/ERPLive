@@ -22,7 +22,6 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
             _dropdownService = dropdownService;
             _dbConnection = dbConnection;
         }
-
         public IActionResult Index()
         {
             return View("~/Views/Admin/Setup/AssetsMaster/Index.cshtml");

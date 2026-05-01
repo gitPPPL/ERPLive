@@ -959,10 +959,7 @@
                     </div>
 
                     <div class="modal-body">
-
                         <input type="hidden" id="hdnTableName" />
-
-                        <!-- Dynamic fields will append here -->
                         <div id="dynamicFields" class="row"></div>
 
                         <div class="button-right btn-mt mt-3">
@@ -1040,89 +1037,7 @@
          document.getElementById("txtDATEOFMARRIAGEC").value = `${yyyy}-${mm}-${dd}`;
          document.getElementById("txtDECLDATEAdd").value = `${yyyy}-${mm}-${dd}`;
          document.getElementById("txtATTACHMENTDATE").value = `${yyyy}-${mm}-${dd}`;
-         // $('#btnGetdata').click(function (e) {
-         //     e.preventDefault();
-         //     var gstno = $('#txtGstNo').val();
-         //     if (gstno === "") {
-         //         alert("Please enter GST No");
-         //         return;
-         //     }
-         //     $.ajax({
-         //     url: '/BusinessPartnerMaster/GetLegalNameByGSTIN',
-         //     type: 'GET',
-         //     data: { gstno: gstno },
-         //     success: function (response) {
-         //         let res = JSON.parse(response);
-         //         console.log('Get gst No', response)
-         //         if (res.status_cd == "1") {
-         //             $('#txtLEGALNAME').val(res.data.lgnm);
-         //             bindGSTDataToAddressRow(res.data);
-         //         } else {
-         //             alert("Invalid GST Number!");
-         //         }
-         //     },
-         //     error: function (err) {
-         //         console.log(err);
-         //     }
-         // });
-         //  });
-         // function bindGSTDataToAddressRow(data) {
-         //     let addr = data.pradr.addr;
-         //     let address = {
-         //         isChecked: true,
-         //         address1: addr.bno || "",
-         //         address2: addr.st || "",
-         //         address3: addr.loc || "",
-         //         city: addr.dst || "",
-         //         cityValue: addr.dst || "",
-         //         state: addr.stcd || "",
-         //         stateValue: addr.stcd || "",
-         //         country: "India",
-         //         countryValue: "India",
-         //         pincode: addr.pncd || "",
-         //         gstNo: data.gstin || "",
-         //         panNo: "",
-         //         tanNo: "",
-         //         gstCertDt: "",
-         //         declNo: "",
-         //         declDate: "",
-         //         distance: "",
-         //         billType: "",
-         //         leadDays: "",
-         //         legalName: data.lgnm || ""
-         //     };
-         //     bindToTable([address]);
-         // }
-         // function bindToTable(list) {
-         //     const tableBody = $('#addressTable tbody');
-         //     tableBody.empty();
-         //     list.forEach(function (address) {
-         //         const row = `
-         //         <tr>
-         //             <td><input type="checkbox" class="rowCheckbox" checked /></td>
-         //             <td>${address.address1}</td>
-         //             <td>${address.address2}</td>
-         //             <td>${address.address3}</td>
-
-         //             <td data-value="0">${address.city}</td>
-         //             <td data-value="0">${address.state}</td>
-         //             <td data-value="0">${address.country}</td>
-         //             <td>${address.pincode}</td>
-         //             <td>${address.gstNo}</td>
-         //             <td>${address.panNo}</td>
-         //             <td>${address.tanNo}</td>
-         //             <td>${address.gstCertDt}</td>
-         //             <td>${address.declNo}</td>
-         //             <td>${address.declDate}</td>
-         //             <td>${address.distance}</td>
-         //             <td>${address.billType}</td>
-         //             <td>${address.leadDays}</td>
-         //             <td>${address.legalName}</td>
-         //             <td><button class="btn btn-danger btnDelete btn-sm">Delete</button></td>
-         //         </tr>`;
-         //         tableBody.append(row);
-         //     });
-         //  }
+        
         $('#btnGetdata').click(function (e) {
          e.preventDefault();
          var gstno = $('#txtGstNo').val();

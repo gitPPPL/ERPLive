@@ -29,6 +29,11 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
+builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
+builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
+builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
+builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
 builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
 builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
 builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();

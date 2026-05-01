@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Dbconnection;
 using System;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.LogService
 {
@@ -15,7 +15,6 @@ namespace travelexpensemanagement.LogService
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
         }
-
         public void InsertLog(string tableName, string formName, string tableType, string mode, string vType, string vNo, DateTime? vDate)
         {
             var sessionData = _globalVariableService.GetGlobalVariables();
@@ -24,7 +23,6 @@ namespace travelexpensemanagement.LogService
                 // Optionally log or handle null session
                 return;
             }
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 //SqlCommand cmd = new SqlCommand(@" INSERT INTO LOG_TABLE
@@ -44,8 +42,6 @@ namespace travelexpensemanagement.LogService
                 cmd.Parameters.AddWithValue("@FORM_NAME", formName);
                 cmd.Parameters.AddWithValue("@TABLE_TYPE", tableType);
                 cmd.Parameters.AddWithValue("@MODE", mode);
-                //cmd.Parameters.AddWithValue("@DESCRIPTION", description);
-                //==================================================
 
                 cmd.Parameters.AddWithValue("@USERID", sessionData.PubUserId ?? "");
                 cmd.Parameters.AddWithValue("@LOG_DATE", DateTime.Now);
@@ -57,7 +53,6 @@ namespace travelexpensemanagement.LogService
                 cmd.ExecuteNonQuery();
             }
         }
-
         //string description = $"FieldName: Mobile, Old Value: 9876543210, New Value: 1234567890";
         //_logService.InsertLog("Employee", "UPDATE", "EMP123", description);
 
