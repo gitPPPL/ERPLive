@@ -3,14 +3,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="circle-loader" style="display: none;">
-    <div class="container">
-        Loading...
-        <div class="spinner-part"></div>
-        <div class="spinner-part"></div>
-        <div class="spinner-part"></div>
-    </div>
-</div>
 <div id="erp-center-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
@@ -654,7 +646,7 @@
             }
         };
 
-        $('.circle-loader').css('display', 'flex');
+        
         console.log("Final model",payload );
         $.ajax({
             url: '/VisitorEntry/SaveVisitorEntry',
@@ -723,7 +715,7 @@
     }
 
     function loadVisitorEntry(docId) {
-        $('.circle-loader').css('display', 'flex');
+        
         $.ajax({
             url: '/VisitorEntryList/GetVisitorByVno',
             type: 'GET',
