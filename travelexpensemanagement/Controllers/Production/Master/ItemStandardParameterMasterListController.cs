@@ -2,18 +2,18 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 namespace travelexpensemanagement.Controllers.Production.Master
 {
     public class ItemStandardParameterMasterListController : Controller
     {
-        private readonly travelexpensemanagement.DbHelper.DbHelper _dbHelper;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariable;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public ItemStandardParameterMasterListController(DataBaseConnection dbConnection, travelexpensemanagement.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
+        public ItemStandardParameterMasterListController(DataBaseConnection dbConnection, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbConnection = dbConnection;

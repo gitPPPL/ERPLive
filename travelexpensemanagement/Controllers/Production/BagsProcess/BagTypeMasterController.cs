@@ -12,11 +12,11 @@ namespace travelexpensemanagement.Controllers.Production.BagsProcess
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly travelexpensemanagement.Common.DropdownService.DropdownService _dropdownService;
-        private readonly travelexpensemanagement.Common.DbHelper _dbHelper;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         public BagTypeMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-     travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,
+     travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
      ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;

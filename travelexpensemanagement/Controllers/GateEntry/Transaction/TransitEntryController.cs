@@ -14,7 +14,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
     public class TransitEntryController : Controller
     {
 
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;

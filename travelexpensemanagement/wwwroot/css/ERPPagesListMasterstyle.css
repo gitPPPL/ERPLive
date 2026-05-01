@@ -1,0 +1,676 @@
+﻿
+/* HEADER */
+.erppagelist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    flex-wrap: wrap; /* important */
+}
+/* Right section default behavior */
+.erppagelist-header-right {
+    display: flex;
+    align-items: center;
+}
+/* TITLE WITH ICON */
+.erppagelist-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+    .erppagelist-title i {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 6px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+/* BUTTON */
+.erppagelist-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+}
+}
+/* PRIMARY */
+.erppagelist-btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+    .erppagelist-btn-add:hover {
+        background-color: rgb(255 255 255 / 84%);
+        color: #216826;
+    }
+    
+    /* ACTION */
+    .erppagelist-btn-action {
+        background: #007bff;
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.25);
+    }
+        .erppagelist-btn-action:hover {
+            background: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+/* TOOLBAR */
+.erppagelist-toolbar {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+/* SEARCH WRAPPER */
+.erppagelist-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 6px 10px;
+    border-radius: 8px;
+    width: 320px;
+}
+
+    .erppagelist-search-wrapper i {
+        color: #6b7280;
+    }
+
+    .erppagelist-search-wrapper input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 13px;
+    }
+
+/* ACTIONS RIGHT */
+.erppagelist-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ACTION BUTTONS */
+.erppagelist-action {
+    border: none;
+    background: none;
+    cursor: pointer;
+    margin-right: 6px;
+}
+
+    .erppagelist-action.edit {
+        color: #2563eb;
+    }
+
+    .erppagelist-action.delete {
+        color: #dc2626;
+    }
+
+/* PAGINATION (PREMIUM UI) */
+/* MAIN LAYOUT */
+.erppagelist-pagination {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* LEFT */
+.pagination-left select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+}
+
+/* CENTER */
+.pagination-center {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* PAGE NUMBERS */
+.page-numbers {
+    display: flex;
+    gap: 6px;
+}
+
+    .page-numbers button {
+        border: none;
+        background: transparent;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #6b7280;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .page-numbers button:hover {
+            background: #e5e7eb;
+        }
+
+        .page-numbers button.active {
+            background: #5b6ee1;
+            color: #fff;
+        }
+
+/* NAV BUTTON */
+.page-nav {
+    border: none;
+    background: #256d29;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+}
+
+    .page-nav:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+/* RIGHT TEXT */
+.pagination-right {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* 🔥 SMOOTH TABLE ANIMATION */
+.fade-out {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.15s ease;
+}
+
+.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.2s ease;
+}
+.erppagelist-pages {
+    font-size: 13px;
+    font-weight: 500;
+}
+.page-current {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    padding: 4px 8px;
+    background: #f3f4f6;
+    border-radius: 6px;
+}
+
+/* WRAPPER */
+.excel-wrapper {
+    width: 100%;
+    overflow: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+/* TABLE */
+.excel-table {
+    position: relative;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    /* IMPORTANT FIX */
+    overflow: visible; /* 🔥 change this */
+    width: max-content;
+    min-width: 100%;
+}
+/* ACTION BAR */
+.erppage-actions {
+    position: sticky;
+    bottom: 0;
+    display: flex; /* 🔥 MISSING */
+    justify-content: flex-end; /* now works */
+    gap: 10px;
+    background: #fff;
+    padding: 6px 12px; /* better spacing */
+    border-top: 1px solid #eee;
+    z-index: 10;
+}
+    /* HEADER */
+    .excel-table th {
+        position: sticky;
+        top: 0;
+        background: linear-gradient(135deg, #232323, #0f0f0f);
+        padding: 10px;
+        font-size: 13px;
+        text-align: left;
+        user-select: none;
+        color: #ffffff;
+        border-bottom: 2px solid #d1d5db;
+    }
+    
+    /* CELLS */
+    .excel-table td {
+        padding: 5px;
+        font-size: 12px;
+        border-bottom: 1px solid #eee;
+        border-right: 1px solid #eee;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .excel-table th,
+    .excel-table td {
+        background-clip: padding-box; /* prevents overlap glitches */
+    }
+    .excel-table input,
+    .excel-table select {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+/* ACTION COLUMN */
+.action-col {
+    width: 120px;
+    text-align: center;
+}
+
+
+
+/* ACTION BUTTONS */
+.act-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    margin: 0 3px;
+    font-size: 14px;
+}
+
+    .act-btn.edit {
+        background: #d4e9ff;
+        color: #007bff;
+        border-radius: 4px;
+        padding: 4px 6px;
+    }
+
+
+    .act-btn.add {
+        background: #bed2ff;
+        color: #2563eb;
+        border-radius: 4px;
+        padding: 4px 6px;
+    }
+    .act-btn.view {
+        background: #d9faff;
+        color: #0492a9;
+        border-radius: 4px;
+        padding: 4px 6px;
+    }
+    .act-btn.delete {
+        background: #ffdcdc;
+        color: #ff4949;
+        border-radius: 4px;
+        padding: 4px 6px;
+    }
+
+    .act-btn:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+    }
+.action-col {
+    width: 120px; /* fits buttons nicely */
+    text-align: center;
+}
+
+/* TOASTER CONTAINER */
+#erp-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+/* ================= FIXED GRID TABLE ================= */
+.fixed-grid-table {
+    table-layout: fixed !important;
+    /* REMOVE HARD WIDTH */
+    width: auto !important; /* 🔥 change this */
+
+    border-collapse: collapse !important;
+    border-spacing: 0;
+}
+
+
+
+    /* Fixed cells */
+    .fixed-grid-table th,
+    .fixed-grid-table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Header */
+    .fixed-grid-table th {
+        padding: 8px !important;
+    }
+
+    /* Body */
+    .fixed-grid-table td {
+        padding: 4px 6px !important;
+    }
+
+    /* Prevent form controls from stretching columns */
+    .fixed-grid-table input,
+    .fixed-grid-table select,
+    .fixed-grid-table textarea {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+/* Wrapper scroll */
+.fixed-grid-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    position: relative;
+}
+/* TOASTER ITEM */
+.erp-toast {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    min-width: 220px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+    /* SHOW TOASTER */
+    .erp-toast.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* ICON STYLING */
+    .erp-toast i {
+        font-weight: bold;
+        font-size: 14px;
+    }
+/* RESIZER */
+.resizer {
+    width: 5px;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: col-resize;
+}
+
+th {
+    position: relative;
+}
+
+/* ACTION COLUMN FREEZE (FINAL) */
+.fixed-grid-table th.action-col,
+.fixed-grid-table td.action-col {
+    position: sticky;
+    right: 0;
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+    background: #fff;
+    z-index: 10;
+    border-left: 1px solid #ddd;
+}
+
+/* HEADER ABOVE EVERYTHING */
+.fixed-grid-table th.action-col {
+    z-index: 11;
+    background: linear-gradient(135deg, #232323, #0f0f0f);
+}
+
+/* Shadow for UX */
+.fixed-grid-table td.action-col {
+    box-shadow: -4px 0 8px rgba(0,0,0,0.08);
+}
+/* Prevent layout breaking for unlimited columns */
+.erppagelist-container {
+    -webkit-overflow-scrolling: touch;
+    margin-top: 12px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+/* Excel wrapper safety */
+.excel-wrapper {
+    width: 100%;
+    min-width: 100%;
+    overflow-x: auto;
+}
+/*Tooltip*/
+.tooltip-btn {
+    position: relative;
+}
+
+    .tooltip-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: -34px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #111;
+        color: #fff;
+        font-size: 11px;
+        padding: 5px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.25s ease;
+        z-index: 999;
+    }
+
+    .tooltip-btn:hover::after {
+        opacity: 1;
+    }
+
+/* Improve scroll behavior */
+.erppagelist-container::-webkit-scrollbar,
+.excel-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.erppagelist-container::-webkit-scrollbar-thumb,
+.excel-wrapper::-webkit-scrollbar-thumb {
+    background: #bdbdbd;
+    border-radius: 10px;
+}
+/* MOBILE CARD VIEW */
+.erp-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    font-size: 13px;
+}
+
+    .erp-card div {
+        margin-bottom: 4px;
+    }
+
+.erppagelist-btn-approve {
+    background: #28a745;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+    .erppagelist-btn-approve:hover {
+        background: #fff;
+        color: #218838;
+        border: 1px solid #218838;
+    }
+/*Excel table end*/
+
+/* ============================= */
+/* ENTERPRISE HEADER RESPONSIVE  */
+/* ============================= */
+
+@media (max-width: 1024px) {
+
+    .erppagelist-header {
+        
+        padding: 10px 12px;
+    }
+
+    .erppagelist-header-right {
+        width: auto;
+        justify-content: flex-end;
+    }
+
+    .erppagelist-title {
+        font-size: 15px;
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .erppagelist-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .erppagelist-search-wrapper {
+        width: 100%;
+    }
+
+    .erppagelist-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .erppagelist-header {
+        flex-direction: row; /* KEEP SAME ROW */
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .excel-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .excel-table {
+        min-width: 900px; /* keeps scroll alive */
+    }
+
+    .erppagelist-container {
+        overflow-x: auto;
+    }
+    .erppagelist-header-right {
+        margin-left: auto;
+        justify-content: flex-end;
+        width: auto;
+    }
+
+    .erp-card {
+        display: block;
+    }
+    .erppagelist-title {
+        flex: 1;
+        font-size: 14px;
+    }
+    /* Smooth scrolling feel */
+    .erppagelist-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .erppagelist-btn {
+        width: auto;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    .erppagelist-btn span {
+        display: none;
+    }
+}
+
+/* VERY SMALL DEVICES */
+@media (max-width: 480px) {
+
+    .erppagelist-header {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+    }
+
+    .erppagelist-title {
+        font-size: 13px;
+        flex: 1;
+        min-width: 0; /* prevents overflow issues */
+    }
+
+    .erppagelist-header-right {
+        display: flex;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
+    .erppagelist-btn {
+        font-size: 11px;
+        padding: 5px 8px;
+        white-space: nowrap;
+    }
+
+    .erppagelist-title span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

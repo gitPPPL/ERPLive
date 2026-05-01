@@ -117,6 +117,29 @@ function confirmAction(message = "Are you sure you want to delete this item grou
     }).then(result => result.isConfirmed);
 }
 
+function handleBack(redirectUrl, isReadOnly = false) {
+
+    if (isReadOnly) {
+        window.location.href = redirectUrl;
+        return;
+    }
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Unsaved data will be lost.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, exit',
+        cancelButtonText: 'Stay',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = redirectUrl;
+        }
+    });
+}
+
 $('.nav-link').on('click dblclick', function (e) {
     e.stopPropagation();
 });

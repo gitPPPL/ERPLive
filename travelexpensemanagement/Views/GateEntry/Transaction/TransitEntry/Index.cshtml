@@ -336,10 +336,7 @@
 </fieldset>
 
 <script>
-
-
-
-        $(document).ready(async function () {
+    $(document).ready(async function () {
         const $tbody = $('#tblItemRecordTEList tbody');
         const urlParams = new URLSearchParams(window.location.search);
         const rowId = urlParams.get('id');
@@ -371,12 +368,6 @@
             '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
             );
             }
-
-
-
-   
-
-
 
         // Event handlers
         $("#ddlDocType").on('change', function () {
@@ -484,13 +475,10 @@
                 }
             });
         });
-    });
-
-
-
+    })
     ///////// Funtion
 
-        function formatDate(dateStr) {
+    function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
         if (isNaN(d)) return '';
@@ -538,10 +526,7 @@
         }
     }
 
-
-
-
-        async function DDlstatus(rowId) {
+    async function DDlstatus(rowId) {
         try {
             const res = await fetch('/TransitEntry/DDlstatus');
             const data = await res.json();
@@ -557,23 +542,12 @@
                 const selected = item.value == defaultId ? 'selected' : '';
                 ddl.append(`<option value="${item.value}" ${selected}>${item.text}</option>`);
             });
-
-            // Disable the dropdown if rowId is null
-
-
-
            
 
         } catch (error) {
             console.error("Error loading Status:", error);
         }
     }
-
-
-
-
-
-
 
     async function DDLPartyName(VTypeId) {
         try {
@@ -667,13 +641,9 @@
         $("#TxtTransport").val($.trim(data.transport));
         const DtSBLCDue = $("#DtGRDate").val();
         $("#chkGRDate").prop("checked", !!DtSBLCDue);
-
     }
 
-
-
-
-        function setFormReadOnly() {
+    function setFormReadOnly() {
         const form = $('#TransitEntryForm');
         form.find(':input').prop('disabled', true);
         form.find('textarea').css('background-color', '#f0f0f0');
@@ -689,13 +659,6 @@
             'background-color': '#e9ecef' 
         });
     }
-
-
-
-
-
-
-
 </script>
 
 

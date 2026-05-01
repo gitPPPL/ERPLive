@@ -115,7 +115,7 @@ body {
     }
 
     .emp-tabs .active {
-        background: #1e3c72;
+        background: #4c7dff;
         color: white;
     }
 
@@ -186,7 +186,7 @@ body {
     padding: 14px;
     border: none;
     border-radius: 30px;
-    background: #1e3c72;
+    background: #4c7dff;
     color: white;
     font-weight: 600;
     cursor: pointer;
@@ -194,7 +194,7 @@ body {
 }
 
     .emp-login-btn:hover {
-        background: #2f6fed;
+        background: #198754;
     }
 
 .emp-otp-btn {
@@ -387,7 +387,12 @@ body {
         display: block;
     }
 
-
+/* Mobile */
+@media(max-width:768px) {
+    .emp-content {
+        margin-left: 0;
+    }
+}
 
 .content-box {
     padding: 25px;
@@ -419,10 +424,8 @@ body {
     background-color: #318346;
 }
 .emp-header-left,
-.emp-header-center,
 .emp-header-right {
-    display: flex;
-    align-items: center;
+    flex-shrink: 0;
 }
 
 .emp-header-left i {
@@ -457,19 +460,6 @@ body {
     margin-left: 10px;
     margin-right: 8px;
 }
-/*.no-border-input input {
-    border: none !important;
-    box-shadow: none;
-    outline: none;
-    background-color: transparent;
-}
-
-.no-border-input select {
-    border: none !important;
-    box-shadow: none;
-    outline: none;
-    background-color: transparent;
-}*/
 
 /* Input */
 .emp-search-box input {
@@ -545,10 +535,9 @@ body {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    /*background: linear-gradient(135deg, #2f7d3f, #1f4e79);*/
+    background: linear-gradient(135deg, #2f7d3f, #1f4e79);
     color: white;
     font-size: 14px;
-    background: #318346;
 }
 /* Breadcrumb */
 .emp-breadcrumb {
@@ -666,13 +655,13 @@ body {
 
 /* Graph Card */
 .emp-graph-card {
-    background: #ffffff;
+    background: var(--emp-card-bg);
     border-radius: 18px;
     padding: 28px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.05);
     transition: 0.3s ease;
     height: 100%;
-    border: 1px solid #dbdbdb;
+    border:1px solid #dbdbdb;
 }
 
     .emp-graph-card:hover {
@@ -701,14 +690,9 @@ body {
 }
 
 .emp-graph-body {
-    position: relative;
-    width: 100%;
-    height: 320px;
+    height: 300px;
 }
-    .emp-graph-body canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
+
 
 /* Leave Bar */
 .emp-leave-bar {
@@ -740,12 +724,11 @@ body {
 }
 
     .emp-leave-title i {
-        /*background: linear-gradient(135deg, #2f7d3f, #1f4e79);*/
+        background: linear-gradient(135deg, #2f7d3f, #1f4e79);
         color: #fff;
         padding: 8px;
         border-radius: 8px;
         font-size: 14px;
-        background: #318346;
     }
 
 /* Dropdown */
@@ -755,7 +738,7 @@ body {
 
 /* Button */
 .emp-leave-btn {
-    /*background: linear-gradient(135deg, #2f7d3f, #1f4e79);*/
+    background: linear-gradient(135deg, #2f7d3f, #1f4e79);
     color: #fff;
     border: none;
     padding: 6px 14px;
@@ -766,12 +749,12 @@ body {
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    transition: 0.3s ease;
     position: relative;
-    background-color: #0e253c;
 }
 
     .emp-leave-btn:hover {
-        background-color: #318346;
+        transform: translateY(-2px);
         box-shadow: 0 8px 18px rgba(0,0,0,0.15);
     }
 
@@ -827,6 +810,8 @@ body {
             color: #1f4e79;
         }
 
+
+
 /* ===== EMP MODAL DESIGN ===== */
 .emp-leave-modal .modal-content {
     border-radius: 15px;
@@ -835,22 +820,11 @@ body {
     animation: empFadeIn 0.3s ease-in-out;
 }
 
-.emp-modal-dialog {
-    max-width: 500px;
-    width: 95%;
-    margin: 1rem auto;
-}
-.emp-balance-wrapper {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
 /* Header */
 .emp-modal-header {
     background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: #fff;
-    padding: 14px;
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: start;
@@ -860,20 +834,13 @@ body {
     font-weight: 600;
     margin: 0;
 }
-/* Centered input field */
-#Fltr_date {
-    width: 100%; /* Ensure the input takes full width of the container */
-    max-width: 200px; /* You can set the max width for the input */
-    margin: 0 auto;
-    height: 35px;
-    font-size: 14px;
-}
+
 /* Close Button */
 .emp-close-btn {
     background: rgba(255,255,255,0.2);
     border: none;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     color: #fff;
     transition: 0.3s;
@@ -886,14 +853,13 @@ body {
 
 /* Body */
 .emp-modal-body {
-    padding: 20px 25px;
+    padding: 25px;
     background: #f8f9fa;
 }
 
 /* Form Group */
 .emp-form-group {
     margin-bottom: 15px;
-    flex: 1;
 }
 
     .emp-form-group label {
@@ -906,11 +872,11 @@ body {
 /* Input Design */
 .emp-form-control {
     width: 100%;
-    padding: 4px 12px;
+    padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #ced4da;
     transition: 0.3s;
-    font-size: 13px;
+    font-size: 14px;
 }
 
     .emp-form-control:focus {
@@ -922,14 +888,13 @@ body {
 /* Submit Button */
 .emp-submit-btn {
     width: 100%;
-    padding: 8px 14px;
+    padding: 10px;
     border-radius: 8px;
     border: none;
     background: linear-gradient(135deg, #2a5298, #1e3c72);
     color: white;
     font-weight: 600;
     transition: 0.3s;
-    font-size: 13px;
 }
 
     .emp-submit-btn:hover {
@@ -940,7 +905,7 @@ body {
 
 
 .emp-cl-badge {
-    background: #318346;
+    background: #17a2b8;
     color: white;
 }
 
@@ -1031,29 +996,6 @@ body {
     justify-content: center;
 }
 
-.emp-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-.main {
-    width: 100%;
-    min-width: 650px; /* IMPORTANT */
-    border-collapse: collapse;
-}
-
-    /* Prevent text breaking */
-    .main th,
-    .main td {
-        white-space: nowrap;
-        padding: 10px;
-    }
-
-/* Right align */
-.col-right {
-    text-align: right;
-}
-
 /* ===============================
    BODY
 ================================= */
@@ -1116,6 +1058,7 @@ body {
     }
 
 /*Employee Attendance*/
+/* ================= HEADER ================= */
 
 .emp-att-header {
     display: flex;
@@ -1147,6 +1090,7 @@ body {
     font-size: 13px;
     border: 1px solid #d1d5db !important;
     background-color: #ffffff;
+    /*transition: all 0.3s ease;*/
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
@@ -1268,7 +1212,7 @@ body {
     border-radius: 4px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
-    width: 50%;
+    width: 48%;
     border: 1px solid #b1b1b1;
 }
 
@@ -1291,7 +1235,7 @@ body {
     border: none;
     background: #003771;
     color: #fff;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: 0.3s ease;
@@ -1310,12 +1254,12 @@ body {
 
 /* Label */
 .emp-filter-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: #1c1c1c;
+    color: #0d2237;
     margin-bottom: 6px;
     letter-spacing: .3px;
-    margin: 0;
+    margin: 0; /* important */
 }
 
 /* Select */
@@ -1325,7 +1269,7 @@ body {
     border-radius: 30px;
     padding: 0 18px;
     font-size: 13px;
-    border: 1px solid #d1d5db !important;
+    border: 1px solid #d1d5db;
     background-color: #ffffff;
     transition: all 0.3s ease;
 }
@@ -1359,7 +1303,10 @@ body {
             margin: 0;
             position: relative;
         }
- 
+
+       
+
+       
 .emp-tablehead {
     background-color: #0d2237;
     color: #fff;
@@ -1410,6 +1357,7 @@ body {
     flex: 1;
     min-width: 280px;
     background: #ffffff;
+/*    border-radius: 14px;*/
     padding: 18px 20px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.05);
     border: 0.5px solid #373737;
@@ -1476,78 +1424,36 @@ body {
     color: #6b7280;
 }
 
-/* ===== LEAVE HISTORY TABLE ===== */
 
-.emp-history-body {
-    padding: 0;
-}
-
-.emp-history-table-wrapper {
-    max-height: 350px;
-    overflow-y: auto;
-}
-
-.emp-history-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-    .emp-history-table thead {
-        background: #f1f5f9;
-        position: sticky;
-        top: 0;
-        z-index: 5;
-    }
-
-    .emp-history-table th {
-        padding: 6px 12px;
-        font-size: 13px;
-        text-align: left;
-        font-weight: 600;
-        color: #1e293b;
-        background-color: #e5e5e5;
-    }
-
-    .emp-history-table td {
-        padding: 8px 12px;
-        font-size: 13px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .emp-history-table tbody tr:hover {
-        background: #f8fafc;
-    }
-
-/* Status Badges */
-.emp-history-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-/* Approved */
-.emp-approved {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-/* Pending */
-.emp-pending {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-/* Rejected */
-.emp-rejected {
-    background: #fee2e2;
-    color: #991b1b;
-}
 
 /*New code end*/
 
+/* ================= RESPONSIVE BREAKPOINTS ================= */
 /* Responsive */
+/* ================= TABLET (iPad) ================= */
 
+
+/*@media(min-width:1600px) {
+    .emp-wrapper {
+        gap: 70px;
+        padding: 80px;
+    }
+
+    .emp-right {
+        padding: 80px;
+    }
+}
+
+@media(max-width:1400px) {
+    .emp-wrapper {
+        gap: 50px;
+        width: 100%;
+    }
+
+    .emp-right {
+        padding: 45px 30px 45px 30px;
+    }
+}*/
 /* Large Desktop */
 @media(max-width:1200px) {
 
@@ -1565,17 +1471,9 @@ body {
     .emp-search-box {
         width: 380px;
     }
-    .emp-graph-body {
-        height: 360px;
-    }
 }
 /* Laptop */
 @media(max-width:992px) {
-    .timesheettasklist-table th,
-    .timesheettasklist-table td {
-        padding: 10px;
-        font-size: 13px;
-    }
     .emp-leave-btn {
         padding: 7px 16px;
         font-size: 13px;
@@ -1610,216 +1508,9 @@ body {
     .emp-header {
         padding: 0 20px;
     }
-    .emp-modal-dialog {
-        max-width: 520px;
-    }
-    .emp-filter-group {
-        flex-direction: row;
-    }
-
-    .emp-filter-select {
-        width: 200px;
-    }
-
-    .emp-filter-action {
-        width: auto;
-    }
-    .timesheet-buttons {
-        flex-wrap: wrap;
-    }
-
-    .timesheetsearch-container {
-        width: 100%;
-        margin-left: 0;
-        justify-content: flex-end;
-    }
-
-        .timesheetsearch-container input {
-            width: 200px;
-        }
-   
-
-    .timesheetlist-title {
-        flex: 1 1 100%;
-        text-align: center;
-    }
-
-    .timesheetlist-search {
-        
-        min-width: 200px;
-    }
-
-    .back-btn {
-        white-space: nowrap;
-    }
-}
-@media (min-width: 768px) and (max-width: 1024px) {
-
-    .emp-profile-image {
-        width: 90px;
-        height: 90px;
-    }
-
-    .emp-graph-body {
-        height: 280px;
-    }
-    .emp-modal-dialog {
-        max-width: 480px;
-    }
-    .emp-filter-row {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .emp-filter-group {
-        width: 60%;
-    }
-
-    
-
-    .emp-filter-action {
-        width: 35%;
-        justify-content: flex-end;
-    }
 }
 /* Tablet */
 @media(max-width:768px) {
-    .empattendancecheck-container {
-        padding: 10px;
-    }
-
-    .empattendancecheck-viewtype {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .empattendancecheck-users {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .empattendancecheck-dropdown {
-        width: 100%;
-    }
-
-    .load-btn {
-        width: 100%;
-        text-align: center;
-    }
-
-    .emp-filter-group {
-        width: 100%;
-    }
-    .timesheetlist-title {
-        text-align: center;
-        font-size: 20px;
-    }
-
-    .timesheetlist-search {
-        width: 100%;
-    }
-
-    .timesheetlist-search input {
-            width: 100%;
-        }
-
-    .back-btn {
-        width: 50%;
-        text-align: center;
-        padding: 10px;
-    }
-
-    .timesheet-buttons {
-        flex-wrap: wrap; /* Allow buttons to wrap */
-        gap: 10px;
-        justify-content: flex-start; /* Adjusts layout on smaller screens */
-    }
-
-    .timesheetbtn-icon {
-        padding: 12px;
-    }
-
-    .timesheetsearch-container input {
-        width: 200px;
-    }
-
-    .timesheet-cards {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .timesheet-cards .card {
-            padding: 15px;
-        }
-
-    .task-overview, .recent-activities {
-        margin-bottom: 20px;
-    }
-
-    .timesheet-cards {
-        grid-template-columns: 1fr 1fr; /* 2 columns on smaller screens */
-    }
-
-    .timesheet-cards .tcard {
-            padding: 15px;
-        }
-    .emp-content {
-        margin-left: 0;
-    }
-    
-        .timesheettasklist-table tr {
-            margin-bottom: 15px;
-            background: #fff;
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-
-        .timesheettasklist-table td {
-            border: none;
-            padding-left: 45%;
-            position: relative;
-            margin-bottom: 10px;
-            font-size: 13px;
-        }
-
-            .timesheettasklist-table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 12px;
-                top: 0;
-                font-weight: 600;
-                font-size: 12px;
-                color: #3b4b6b;
-            }
-    .recent-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .recent-filters {
-        width: 70%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-
-    .filter-btn {
-        flex: 1;
-        text-align: center;
-    }
-    .emp-filter-row {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-   
-    .emp-filter-select {
-        width: auto;
-    }
-
-    .emp-filter-action {
-        width: 35%;
-        justify-content: flex-end;
-    }
     .emp-search-box {
         width: 260px;
     }
@@ -1931,90 +1622,66 @@ body {
         right: auto;
         left: 0;
     }
-    .emp-profile-top {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .emp-profile-image {
-        width: 85px;
-        height: 85px;
-    }
-
-    .emp-status-badge {
-        right: 50%;
-        transform: translateX(50%);
-        bottom: -10px;
-    }
-
-    .emp-detail-item {
-        font-size: 13px;
-        padding: 8px 14px;
-    }
-
-    .emp-graph-body {
-        height: 250px;
-    }
-    .emp-modal-dialog {
-        max-width: 420px;
-    }
-
-    .emp-modal-body {
-        padding: 22px;
-    }
 }
-/* ================= MOBILE ================= */
 
-@media (max-width: 576px) {
-
-    .theading {
-        font-size: 16px;
+/* Large Mobile */
+@media(max-width:480px) {
+    .emp-search-box {
+        width: 200px;
+        padding: 2px 8px;
     }
 
-    .tp1, .tp2, .tp3, .tp4 {
+    .emp-search-icon {
+        font-size: 12px;
+        margin-left: 6px;
+    }
+
+    .emp-mic-btn {
+        width: 22px;
+        height: 22px;
+    }
+
+    .emp-header {
+        height: 52px;
+    }
+    .emp-badge {
+        font-size: 10px;
+        min-width: 13px;
+        height: 16px;
+    }
+    
+    .emp-logo img {
+        width: 28px;
+        height: 28px;
+    }
+
+    .emp-logo {
         font-size: 20px;
     }
 
-    .timesheetcard-icon1,
-    .timesheetcard-icon2,
-    .timesheetcard-icon3,
-    .timesheetcard-icon4 {
-        width: 34px;
-        height: 34px;
-        top: -15px;
+    .emp-tabs button {
+        font-size: 11px;
+        padding: 6px;
     }
-    .timesheet-buttons {
-        flex-direction: column;
-        align-items: stretch;
-        flex-wrap: nowrap;
+    .emp-leave-wrapper {
+        flex-direction: row; /* keep horizontal */
+        flex-wrap: nowrap; /* prevent next line */
+        align-items: center;
+        gap: 8px; /* reduce gap */
     }
 
-    /* Buttons full width */
-    .timesheetbtn-icon {
-        width: 100%;
-        justify-content: center;
-        padding: 10px;
-        font-size: 13px;
+    .emp-leave-btn {
+        padding: 5px 10px;
+        font-size: 11px;
+        white-space: nowrap; /* prevent text break */
     }
 
-    /* Search below buttons */
-    .timesheetsearch-container {
-        width: 100%;
-        margin-top: 5px;
+    .emp-badge {
+        font-size: 9px;
+        min-width: 14px;
+        height: 14px;
     }
-
-        .timesheetsearch-container input {
-            width: 100%;
-        }
-
-        .timesheetsearch-container button {
-            border-radius: 25px;
-            padding: 8px 12px;
-        }
 }
-
-   
-
 /* Small Mobile */
 @media (max-width:360px) {
     .emp-header {
@@ -2046,9 +1713,10 @@ body {
         }
 
         .emp-leave-wrapper {
+            flex-direction: row;
+            flex-wrap: nowrap;
             align-items: center;
             gap: 6px;
-            display: grid;
         }
 
         .emp-leave-btn {
@@ -2058,832 +1726,14 @@ body {
         }
 
         .emp-badge {
-            font-size: 9px;
+            font-size: 8px;
             min-width: 12px;
             height: 12px;
         }
 
         .emp-leave-title {
-            font-size: 14px;
-            gap: 8px;
+            font-size: 11px;
+            gap: 5px;
             white-space: nowrap;
-        }
-    }
-
-
-@keyframes slideUp {
-    from {
-        transform: translateY(60px);
-        opacity: 0
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1
-    }
-}
-/*Timesheet Task datalist Page */
-
-/* ================= WRAPPER ================= */
-.timesheetlist-wrapper {
-    /*padding: 30px;*/
-    background: #f4f6fb;
-    min-height: 80vh;
-    display: flex;
-    justify-content: center;
-}
-
-.timesheetlist-card {
-    width: 100%;
-    max-width: 1100px;
-    background: #fff;
-    border-radius: 7px;
-    padding: 22px 24px;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
-    border: 1px solid #318346;
-}
-
-/* ================= HEADER ================= */
-.timesheetlist-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-}
-
-.timesheetlist-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #122f4d;
-    text-decoration: underline;
-}
-
-/* ================= SEARCH ================= */
-.timesheetlist-search {
-    position: relative;
-    width: 250px;
-}
-
-    .timesheetlist-search i {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #7a8aa0;
-        font-size: 13px;
-    }
-
-    .timesheetlist-search input {
-        width: 80%;
-        padding: 5px 10px 5px 30px;
-        border-radius: 8px;
-        border: 1px solid #d6dbe6;
-        font-size: 13px;
-        background: #f9fbff;
-        outline: none;
-    }
-
-        .timesheetlist-search input:focus {
-            border-color: #2f6fed;
-            box-shadow: 0 0 0 2px rgba(47,111,237,0.15);
-        }
-
-/* ================= TABLE ================= */
-.timesheettasklist-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-    .timesheettasklist-table thead tr {
-        color: #1c1c1c;
-    }
-    .timesheettasklist-table thead {
-        background: #d2e5ff;
-    }
-
-    .timesheettasklist-table th {
-        padding: 6px 12px;
-        text-align: left;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-        .timesheettasklist-table th i {
-            margin-left: 6px;
-            font-size: 11px;
-            color: #9aa7bd;
-        }
-
-    .timesheettasklist-table td {
-        padding: 12px;
-        font-size: 13px;
-        border-top: 1px solid #eef1f6;
-    }
-
-    .timesheettasklist-table tbody tr:hover {
-        background: #f8faff;
-    }
-
-/* ================= BADGES ================= */
-.timesheetlist-badge {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.timesheetlist-low {
-    background: #e6f7ec;
-    color: #2e9f59;
-}
-
-.timesheetlist-medium {
-    background: #fff3e0;
-    color: #f39c12;
-}
-
-.timesheetlist-high {
-    background: #efdada;
-    color: #e74c3c;
-}
-
-.timesheetlist-status {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.timesheetlist-pending {
-    background: #e6f0ff;
-    color: #dc3545;
-    
-}
-
-.timesheetlist-close {
-    background: #d1e8ff;
-    color: #0e243b;
-}
-
-.timesheetlist-complete {
-    background: #ceffdb;
-    color: #198754;
-}
-
-/* ================= ACTION DROPDOWN ================= */
-.timesheetlist-action {
-    position: relative;
-}
-
-.timesheetlist-action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.timesheetlist-dropdown {
-    position: absolute;
-    right: 0;
-    top: 25px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    border: 1px solid #e6e9f0;
-    display: none;
-    min-width: 120px;
-    z-index: 10;
-}
-
-    .timesheetlist-dropdown div {
-        padding: 8px 12px;
-        cursor: pointer;
-        font-size: 13px;
-    }
-
-        .timesheetlist-dropdown div:hover {
-            background: #f4f6fb;
-        }
-
-.timesheetlist-delete {
-    color: #e74c3c;
-}
-
-/* ================= PAGINATION ================= */
-.timesheetlist-pagination {
-    display: flex;
-    justify-content: flex-end;
-    gap: 6px;
-    margin-top: 18px;
-    flex-wrap: wrap;
-}
-
-    .timesheetlist-pagination button {
-        border: 1px solid #d6dbe6;
-        background: #fff;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        cursor: pointer;
-    }
-
-        .timesheetlist-pagination button.active {
-            background: #2f6fed;
-            color: white;
-        }
-
-/* ================= MOBILE STACK ================= */
-@media(max-width:768px) {
-   
-    .timesheetlist-title {
-        text-align: center;
-        font-size: 20px;
-        margin-bottom: 10px; /* Ensure some space below title */
-    }
-
-    .timesheetlist-search {
-        width: 100%;
-        margin-bottom: 10px; /* Ensure space after the search box */
-    }
-
-    
-    .btn_task_View,
-    .btn_task_Delete {
-        padding: 6px 10px;
-        font-size: 12px;
-    }
-
-    .timesheettasklist-btn {
-        width: 100%;
-        margin-top: 5px;
-    }
-    
-
-        .timesheettasklist-table tr {
-            margin-bottom: 14px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-        }
-
-        .timesheettasklist-table td {
-            border: none;
-            padding-left: 50%;
-            position: relative;
-            margin-bottom: 6px;
-        }
-
-            .timesheettasklist-table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 12px;
-                font-weight: 600;
-                font-size: 12px;
-                color: #3b4b6b;
-            }
-
-    .timesheetlist-pagination {
-        justify-content: center;
-    }
-}
-
-
-/*Reply Popup Form*/
-/* =============================
-   REPLY MODAL EXACT UI
-============================= */
-
-.reply-overlay {
-    position: fixed;
-    inset: 0;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    /* Background Blur */
-    background: rgba(0,0,0,0.40);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-    .reply-overlay * {
-        box-sizing: border-box;
-    }
-
-/* Card */
-.reply-card {
-    width: 450px;
-    background: rgba(255, 255, 255, 0.75);
-    border-radius: 18px;
-    padding: 22px 20px 18px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
-    animation: slideUp 0.35s ease;
-    backdrop-filter: blur(18px);
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-/* Fade Animation */
-@keyframes replyFade {
-    from {
-        opacity: 0;
-        transform: scale(0.96);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* Header */
-.reply-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 18px;
-}
-    .reply-header i {
-        color: #2f6fed;
-        font-size: 16px;
-        cursor: pointer;
-    }
-.reply-title {
-    flex: 1;
-    text-align: center;
-    margin: 0;
-    font-size: 18px;
-    font-weight: 500;
-    color: #033e7d;
-}
-
-.reply-back {
-    font-size: 18px;
-    color: #213a63;
-    cursor: pointer;
-}
-
-
-
-.reply-group {
-    margin-bottom: 20px;
-}
-
-.reply-label {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: #3e4b6d;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.reply-task-name {
-    font-weight: 600;
-    margin-left: 4px;
-    color: #0d6efd;
-    font-size: 17px;
-}
-
-/* all */
-.reply-textarea, .reply-select {
-    width: 100%;
-    padding: 6px 12px;
-    border-radius: 10px;
-    border: 1px solid #dce3ef;
-    background: #f8fafd;
-    font-size: 13px;
-    margin-bottom: 0px;
-    outline: none;
-    transition: 0.2s;
-}
-
-    .reply-textarea:focus,
-    .reply-select:focus {
-        border-color: #2f6fed;
-        box-shadow: 0 0 0 2px rgba(47,111,237,0.15);
-    }
-
-/* Attachment Box */
-.reply-attach-box {
-    width: 100%;
-    height: 48px;
-    border: 1px solid #dde2e7;
-    border-radius: 8px;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    padding: 6px;
-}
-
-.reply-attach-inner {
-    margin-left: auto;
-    display: flex;
-    gap: 10px;
-}
-
-.reply-plus {
-    width: 24px;
-    height: 26px;
-    border: 1px solid #a8a8a8;
-    background: #eef1f4;
-    border-radius: 4px;
-    font-size: 18px;
-    color: #198754;
-}
-
-.reply-upload {
-    height: 36px;
-    padding: 0 18px;
-    border: none;
-    border-radius: 8px;
-    background: #2f6fb3;
-    color: white;
-    font-size: 14px;
-}
-
-/* Divider */
-.reply-dash {
-    border-top: 1px dashed #d9dee4;
-    margin: 24px 0;
-}
-
-/* Footer */
-.reply-footer {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-
-.reply-submit {
-    flex: 1;
-    background: #2f6fed;
-    color: white;
-    border: none;
-    padding: 10px 0;
-    border-radius: 12px;
-    font-size: 14px;
-    box-shadow: 0 10px 25px rgba(47, 111, 237, 0.35);
-    cursor: pointer;
-    margin-top: 14px;
-}
-    .reply-submit:hover {
-        background: #1f5ae0;
-        transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(47, 111, 237, 0.45);
-    }
-.reply-cancel {
-    flex: 1;
-    background: #F1F3F7;
-    border: 1px solid #dce3ef;
-    border-radius: 12px;
-    font-size: 14px;
-    cursor: pointer;
-    color: #ff2b2b;
-}
-.reply-cancel:hover {
-    background: #ffecec;
-    border-color: #ff2b2b;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(255, 43, 43, 0.15);
-}
-/* Upload Box Layout */
-.reply-upload-box {
-    border: 1px solid #dde2e7;
-    border-radius: 8px;
-    background: #ffffff;
-    padding: 10px;
-}
-
-/* Controls Row */
-.reply-upload-controls {
-    display: flex;
-    gap: 10px;
-    /*margin-bottom: 10px;*/
-}
-
-/* File List */
-.reply-file-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Individual File Item */
-.reply-file-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f1f3f6;
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 10px;
-}
-
-/* Remove Button */
-.reply-file-remove {
-    background: none;
-    border: none;
-    color: #d11a2a;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* =============================
-   MOBILE RESPONSIVE
-============================= */
-
-@media (max-width:768px) {
-
-    .reply-overlay {
-        align-items: flex-end;
-    }
-
-    .reply-card {
-        width: 100%;
-        border-radius: 18px 18px 0 0;
-        animation: replySlideUp .35s ease;
-    }
-
-    @keyframes replySlideUp {
-        from {
-            transform: translateY(100%);
-        }
-
-        to {
-            transform: translateY(0);
-        }
-    }
-
-    .reply-footer {
-        flex-direction: column;
-    }
-
-    .reply-submit,
-    .reply-cancel {
-        width: 100%;
-        padding: 12px;
-    }
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .calendar-cell, .empty-cell {
-        height: 70px;
-        font-size: 11px;
-    }
-
-    .calendar-table thead th {
-        font-size: 11px;
-        padding: 4px 0;
-    }
-}
-
-    @media (max-width: 480px) {
-        
-        
-        .timesheetlist-title {
-            font-size: 18px;
-        }
-
-        .timesheetlist-search input {
-            font-size: 12px;
-            padding: 10px 10px 10px 32px;
-            width: 100%;
-        }
-
-        .back-btn {
-            font-size: 13px;
-            padding: 12px;
-            width:100%;
-        }
-        .task-modal {
-            align-items: flex-end;
-        }
-
-        .task-card {
-            width: 100%;
-            border-radius: 25px 25px 0 0;
-        }
-
-        .timesheet-cards {
-            grid-template-columns: 1fr; /* 1 column on very small screens */
-        }
-
-        .timesheetsearch-container input {
-            width: 120px;
-        }
-
-        .calendar-cell, .empty-cell {
-            height: auto;
-            font-size: 10px;
-            padding: 3px;
-        }
-
-        .calendar-cell {
-            min-height: 60px;
-        }
-
-        .time-text {
-            font-size: 9px;
-        }
-
-        .date-number {
-            font-size: 12px;
-        }
-
-        .timesheettasklist-table td {
-            padding-left: 50%;
-            font-size: 12px;
-        }
-
-            .timesheettasklist-table td::before {
-                font-size: 11px;
-            }
-
-        .recent-header h3 {
-            font-size: 18px;
-        }
-
-        .recent-filters {
-            width: 100%;
-            overflow-x: auto; /* 🔥 horizontal scroll */
-            flex-wrap: nowrap; /* keep in one row */
-            gap: 8px;
-            padding: 5px;
-        }
-
-        .filter-btn {
-            flex: 0 0 auto; /* prevent shrinking */
-            font-size: 11px;
-            padding: 6px 10px;
-            white-space: nowrap;
-        }
-
-        /* optional scrollbar styling */
-        .recent-filters::-webkit-scrollbar {
-            height: 4px;
-        }
-
-        .recent-filters::-webkit-scrollbar-thumb {
-            background: #aaa;
-            border-radius: 10px;
-        }
-
-        .emp-search-box {
-            width: 200px;
-            padding: 2px 8px;
-        }
-
-        .emp-search-icon {
-            font-size: 12px;
-            margin-left: 6px;
-        }
-
-        .emp-mic-btn {
-            width: 22px;
-            height: 22px;
-        }
-
-        .emp-header {
-            height: 52px;
-        }
-
-        .emp-badge {
-            font-size: 10px;
-            min-width: 13px;
-            height: 16px;
-        }
-
-        .emp-logo img {
-            width: 28px;
-            height: 28px;
-        }
-
-        .emp-logo {
-            font-size: 20px;
-        }
-
-        .emp-tabs button {
-            font-size: 11px;
-            padding: 6px;
-        }
-
-        .emp-leave-wrapper {
-            flex-direction: row; /* keep horizontal */
-            flex-wrap: nowrap; /* prevent next line */
-            align-items: center;
-            gap: 8px; /* reduce gap */
-        }
-
-        .emp-leave-btn {
-            padding: 5px 10px;
-            font-size: 11px;
-            white-space: nowrap; /* prevent text break */
-        }
-
-        .emp-badge {
-            font-size: 9px;
-            min-width: 14px;
-            height: 14px;
-        }
-
-        .emp-modal-dialog {
-            max-width: 100%;
-            width: 95%;
-            margin: 0.5rem auto;
-        }
-
-        .emp-modal-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .emp-close-btn {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-        }
-
-        .emp-modal-body {
-            padding: 18px;
-        }
-
-        .emp-modal-title {
-            font-size: 16px;
-        }
-
-        .emp-balance-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .emp-filter-row {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .emp-filter-group {
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-        }
-
-        .emp-filter-label {
-            font-size: 12px;
-        }
-
-        .emp-filter-select {
-            width: 100%;
-            height: 38px;
-        }
-
-        .emp-filter-action {
-            width: 100%;
-        }
-
-        .emp-download-btn {
-            width: 100%;
-            justify-content: center;
-            padding: 10px;
-        }
-
-
-        .timesheetbtn-icon {
-            padding: 10px;
-            border-radius: 50%;
-        }
-        .timesheetlist-card {
-            padding: 15px;
-        }
-
-        .timesheetlist-title {
-            font-size: 18px;
-        }
-
-        .timesheettasklist-table td {
-            padding-left: 45%;
-            font-size: 12px;
-        }
-        .emp-main-title {
-            font-size: 13px;
-        }
-
-        .empattendancecheck-label {
-            font-size: 12px;
-        }
-
-        .empattendancecheck-dropdown-toggle {
-            font-size: 12px;
-            padding: 6px;
-        }
-
-        .load-btn {
-            padding: 6px;
-            font-size: 12px;
-            width:50%;
         }
     }

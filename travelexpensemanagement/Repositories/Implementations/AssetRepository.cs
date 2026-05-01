@@ -37,6 +37,7 @@ namespace travelexpensemanagement.Repositories.Implementations
                 }
             }
         }
+
         //  Insert
         public bool InsertAsset(AssetModel model)
         {

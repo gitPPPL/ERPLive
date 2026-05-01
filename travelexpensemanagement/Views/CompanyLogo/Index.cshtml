@@ -1,0 +1,150 @@
+﻿@{
+	ViewBag.Title = "Company Logo";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Loader *@
+<div class="circle-loader" style="display: none;">
+	<div class="container">
+		Loading...
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+		<div class="spinner-part"></div>
+	</div>
+</div>
+
+<fieldset>
+	<legend class="legend-field">Company Logo </legend>
+	<form id="CompanyLogoForm">
+		<input type="hidden" class="form-control" id="CODE" name="Code">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Select Company</label>
+					<select class="erppage-redinput" id="ddlCompany">
+						<option value="">Select Company</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- FILE UPLOAD -->
+			<div class="col-md-3">
+				<div class="form-group">
+					<label>Upload Logo</label>
+					<input type="file" id="logoFile" class="form-control" accept="image/*" />
+				</div>
+			</div>
+			<div class="col-md-3">
+				<label>Company Logo Preview</label>
+				<br />
+				<img id="companyLogoPreview" style="height:80px; display:none;" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="offset-md-9 col-md-3">
+				<div class="button-right btn-mt">
+					<button id="btnSave" type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</fieldset>
+<script>
+	$(document).ready(function(){
+		CompanyDDL();
+
+		//===Retrieve Company logo on Dropdon Change====
+        $('#ddlCompany').change(function () {
+
+			let compCode = $(this).val();
+
+			if (!compCode) {
+				$('#companyLogoPreview').hide();
+				return;
+			}
+
+			$('#companyLogoPreview')
+				.attr('src', '/CompanyLogo/GetCompanyLogo?compCode=' + compCode)
+				.show();
+		});
+
+		//===Upload Logo====
+		$('#CompanyLogoForm').on('submit', function (e) {
+			e.preventDefault();
+
+			const compCode = $('#ddlCompany').val();
+			const fileInput = $('#logoFile')[0];
+
+			// ❌ validation
+			if (!compCode) {
+				toastr.warning("Please select company");
+				return;
+			}
+
+			if (fileInput.files.length === 0) {
+				toastr.warning("Please select logo file");
+				return;
+			}
+
+			let formData = new FormData();
+			formData.append("compCode", compCode);
+			formData.append("file", fileInput.files[0]);
+
+			$.ajax({
+				url: '/CompanyLogo/UploadLogo',
+				type: 'POST',
+				data: formData,
+				contentType: false,
+				processData: false,
+				success: function (res) {
+					if (res.success) {
+						toastr.success(res.message);
+
+						// reset
+						$('#logoFile').val('');
+						$('#ddlCompany').val('');
+					} else {
+						toastr.error(res.message);
+					}
+				},
+				error: function () {
+					toastr.error("Error uploading logo");
+				},
+			});
+		});
+	});
+
+	//===Bind Company Dropdown====
+	async function CompanyDDL(){
+	   try
+	   {
+		   const res=  await fetch('/CompanyLogo/CompanyDDL',{
+			   method: 'GET'
+		   });
+
+		   if(!res.ok){
+			   throw new Error("Network Error");
+		   }
+		   const {success, list}= await res.json();
+
+		   if(!success){
+			   toastr.warning("Company Dropdown load Failed !!");
+		   }
+
+		   console.log("Company List", list);
+
+		   const fault= $('#ddlCompany');
+		   fault.empty();
+		   fault.append('<option value="">Select Company</option>');
+
+		   list.forEach(item =>{
+			   fault.append(`<option value= "${item.value}">${item.text}</option>`);
+		   });
+
+	   }catch(err)
+	   {
+		   toastr.error(err.message ||"Unexpected error occured");
+	   }
+	}
+
+</script>

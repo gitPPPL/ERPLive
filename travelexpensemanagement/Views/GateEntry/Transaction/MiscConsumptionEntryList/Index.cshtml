@@ -60,17 +60,14 @@
 </fieldset>
 
 <script>
-
-
 	let currentPage = 1;
 	let pageSize = 10;
 
-
 	$(document).ready(function () {
 			loadAllMenus();
-		});
+    });
 
-		function loadAllMenus(page = 1) {
+    function loadAllMenus(page = 1) {
 	  currentPage = page;
 	  const searchTerm = $('#searchBox').val();
 
@@ -187,7 +184,7 @@
 
 
 
-		}
+    }
 
 		function viewMenuDetails(code, vtype) {
 				console.log('Selected Vtype:', vtype);

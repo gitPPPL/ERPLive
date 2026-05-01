@@ -1,18 +1,11 @@
-﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Office.Word;
-using DocumentFormat.OpenXml.Spreadsheet;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
-using System.Data.Common;
-using travelexpensemanagement.Controllers.Globalvariable;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
-
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
@@ -20,9 +13,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
     {
 
         private readonly DataBaseConnection _dbConnection;
+        private readonly DropdownService _dropdownService;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly GlobalVariableService _globalVariableService;
+
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-         travelexpensemanagement.Controllers.DropdownService.DropdownService dropdownService, travelexpensemanagement.DbHelper.DbHelper dbHelper,  ModuleService.ModuleService moduleService)
+        ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -104,7 +100,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = true, lists = headerList, totalCount });
         }
 
-
         [HttpGet]
         public IActionResult GetDataByPendingorder(int PartyCode , string V_TYPE, DateTime V_DATE)
         {
@@ -148,7 +143,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     var DeptCode = rdr["DEPT_CODE"]?.ToString();
                                     var EMPTY_YN = "";
                                     var UOM_CODE = rdr["UNIT_CODE"]?.ToString();
-
 
                                     if (!string.IsNullOrEmpty(ITEM_CODE) && !string.IsNullOrEmpty(ITEM_CODE))
                                     {
