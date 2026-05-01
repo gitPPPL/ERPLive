@@ -37,8 +37,6 @@
 <div class="modal fade" id="approvedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg erppagesmodal">
         <div class="modal-content erppagesmodal-content">
-
-            <!-- Header -->
             <div class="erppagesmodal-header">
                 <div class="erppagesmodal-header-left">
                     <div class="erppagesmodal-header-icon">
@@ -48,20 +46,15 @@
                         Document Approval Window
                     </h5>
                 </div>
-
                 <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fa fa-times"></i>
                 </button>
             </div>
-
-            <!-- Body -->
             <div class="erppagesmodal-body">
                 <fieldset class="erppagesmodal-fieldset">
                     <legend>
                         <i class="fa fa-user-check"></i> Approval User
                     </legend>
-
-                    <!-- First Row -->
                     <div class="erppagesrow">
                         <div class="erppagescol-4">
                             <div class="erppagesmodal-group">
@@ -73,7 +66,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="erppagescol-4">
                             <div class="erppagesmodal-group">
                                 <label for="ddlForwardTo" class="erppagesmodal-label">
@@ -84,7 +76,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="erppagescol-4">
                             <div class="erppagesmodal-group">
                                 <label for="ddlRemarks" class="erppagesmodal-label">
@@ -96,8 +87,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Button Row -->
                     <div class="erppagesrow">
                         <div class="erppagescol-12">
                             <div class="erppagesmodal-action">
@@ -117,53 +106,37 @@
     <input type="hidden" class="form-control" id="TxtCode" name="CODE">
     <div class="erppage-container">
         <fieldset class="erppage-fieldset">
-            <div class="erppagesrow">
-
-                <!-- Doc Type -->
-                <div class="erppagescol-25">
-                    <div class="erppage-field">
-                        <label for="ddlDocType" class="erppage-label">Doc Type</label>
-                        <select class="erppage-input erppage-select" id="ddlDocType">
-                            <option>Select Doc Type</option>
-                        </select>
-                    </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label for="ddlDocType" class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option>Select Doc Type</option>
+                    </select>
                 </div>
-
-                <!-- Document No -->
-                <div class="erppagescol-25">
-                    <div class="erppage-field">
-                        <label for="TxtDocNo" class="erppage-label">Document No</label>
-                        <input type="text" class="erppage-input" id="TxtDocNo" placeholder="Enter Document No" readonly>
-                    </div>
+                <div class="erppage-divfield">
+                    <label for="TxtDocNo" class="erppage-label">Document No</label>
+                    <input type="text" class="erppage-input" id="TxtDocNo" placeholder="Enter Document No" readonly>
                 </div>
-
-                <!-- In Date -->
-                <div class="erppagescol-25">
+                <div class="erppage-divfield">
                     <div class="erppage-field">
                         <label for="InDate" class="erppage-label">In Date</label>
                         <input type="date" class="erppage-input" id="InDate" value="@logindate">
                     </div>
                 </div>
-
-                <!-- In Time -->
-                <div class="erppagescol-25">
-                    <div class="erppage-field">
-                        <label for="InTime" class="erppage-label">In Time</label>
-                        <input type="time" class="erppage-input" id="InTime">
-                    </div>
+                <div class="erppage-divfield">
+                    <label for="InTime" class="erppage-label">In Time</label>
+                    <input type="time" class="erppage-input" id="InTime">
                 </div>
             </div>
-            <div class="erppagesrow">
-                <div class="erppagescol-4">
-                    <div class="erppage-field">
-                        <label for="TxtRptDate" class="erppage-label">
-                            Reporting Date
-                        </label>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label for="TxtRptDate" class="erppage-label">
+                        Reporting Date
+                    </label>
 
-                        <div class="erppage-inline-group" style="width:100%;">
-                            <input type="date" class="erppage-redinput" id="TxtRptDate">
-                            <input type="time" class="erppage-redinput" id="TiRptDate">
-                        </div>
+                    <div class="erppage-inline-group" style="width:100%;">
+                        <input type="date" class="erppage-redinput" id="TxtRptDate">
+                        <input type="time" class="erppage-redinput" id="TiRptDate">
                     </div>
                 </div>
             </div>
@@ -431,57 +404,48 @@
                 </div>
             </div>
         </div>
-        
         <!-- Transport Details -->
         <fieldset class="erppage-subfieldset">
             <legend>Transport Details</legend>
             <div class="erppage-subheader">Transport Details</div>
-
-            <!-- Row 1 -->
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label for="TxtVehicleNo" class="erppage-label">Vehicle No</label>
-                    <input type="text" class="erppage-redinput" id="TxtVehicleNo" placeholder="Enter Vehicle No" maxlength="10" />
+            <div class="erppage-body">
+                <!-- Row 1 -->
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtVehicleNo" class="erppage-label">Vehicle No</label>
+                        <input type="text" class="erppage-redinput" id="TxtVehicleNo" placeholder="Enter Vehicle No" maxlength="10" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="TxtTransporter" class="erppage-label">Transport Name</label>
+                        <select class="erppage-input" id="TxtTransporter">
+                            <option>Select Transport Name</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="TxtGRNo" class="erppage-label">GR No.</label>
+                        <input type="text" class="erppage-input" id="TxtGRNo" maxlength="20" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="DtGRDate" class="erppage-label">GR Date</label>
+                        <input type="date" class="erppage-input" id="DtGRDate" />
+                    </div>
                 </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtTransporter" class="erppage-label">Transport Name</label>
-                    <select class="erppage-input" id="TxtTransporter">
-                        <option>Select Transport Name</option>
-                    </select>
+                <!-- Row 2 -->
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtDriverName" class="erppage-label">Driver Name</label>
+                        <input type="text" class="erppage-input" id="TxtDriverName" maxlength="50" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="TxtDriverMobile" class="erppage-label">Driver Mobile No</label>
+                        <input type="number" class="erppage-input" id="TxtDriverMobile" maxlength="10" oninput="validateMobile(this)" />
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label for="txt_VehicleRemarks" class="erppage-label">Vehicle Remarks</label>
+                        <textarea class="erppage-textarea" id="txt_VehicleRemarks"></textarea>
+                    </div>
                 </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtGRNo" class="erppage-label">GR No.</label>
-                    <input type="text" class="erppage-input" id="TxtGRNo" maxlength="20" />
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="DtGRDate" class="erppage-label">GR Date</label>
-                    <input type="date" class="erppage-input" id="DtGRDate" />
-                </div>
-            </div>
-
-            <!-- Row 2 -->
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label for="TxtDriverName" class="erppage-label">Driver Name</label>
-                    <input type="text" class="erppage-input" id="TxtDriverName" maxlength="50" />
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtDriverMobile" class="erppage-label">Driver Mobile No</label>
-                    <input type="number" class="erppage-input" id="TxtDriverMobile" maxlength="10" oninput="validateMobile(this)" />
-                </div>
-
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label for="txt_VehicleRemarks" class="erppage-label">Vehicle Remarks</label>
-                    <textarea class="erppage-textarea" id="txt_VehicleRemarks"></textarea>
-                </div>
-            </div>
-
-            <!-- Row 3 Buttons -->
-            
+                <!-- Row 3 Buttons -->
                 <div class="erppage-internalaction">
                     <button type="button" class="erppage-btn erppage-btn-save" id="btn_setting">
                         <i class="fa fa-cog"></i>
@@ -489,7 +453,7 @@
                     <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" id="btn_RCDetail" data-bs-target="#RCDetail">
                         RC Detail
                     </button>
-                
+
                     <button type="button" class="erppage-btn erppage-btn-save" id="btn_database">
                         <i class="fa fa-database"></i>
                     </button>
@@ -497,12 +461,12 @@
                         Fastag Detail
                     </button>
                 </div>
-           
+            </div>
+
             <!-- RC Detail Modal -->
             <div class="modal fade" id="RCDetail" tabindex="-1" aria-labelledby="RCDetailLabel" aria-hidden="true">
                 <div class="modal-dialog modal-xl erppagesmodal">
                     <div class="modal-content erppagesmodal-content draggable-modal">
-
                         <!-- Header -->
                         <div class="erppagesmodal-header">
                             <div class="erppagesmodal-header-left">
@@ -513,85 +477,80 @@
                                     RC Data of Vehicle No.<span id="RCDetailLabel"></span>
                                 </h5>
                             </div>
-
                             <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
                                 <i class="fa fa-times"></i>
                             </button>
                         </div>
-
                         <!-- Body -->
-                        
-                            <div class="erppagelist-container">
-                                <div class="excel-wrapper">
-                                    <table id="tblRCDetaillist" class="excel-table fixed-grid-table table-width">
-                                        <thead class="table-head">
-                                            <tr>
-                                                <th>Client ID</th>
-                                                <th>RC Number</th>
-                                                <th>Registration Date</th>
-                                                <th>Owner Name</th>
-                                                <th>Father Name</th>
-                                                <th>Present Address</th>
-                                                <th>Permanent Address</th>
-                                                <th>Mobile Number</th>
-                                                <th>Vehicle Category</th>
-                                                <th>Chassis Number</th>
-                                                <th>Engine Number</th>
-                                                <th>Manufacturer</th>
-                                                <th>Model Name</th>
-                                                <th>Body Type</th>
-                                                <th>Fuel Type</th>
-                                                <th>Vehicle Color</th>
-                                                <th>Emission Norms</th>
-                                                <th>Fitness Valid Upto</th>
-                                                <th>Financer Name</th>
-                                                <th>Is Financed</th>
-                                                <th>Insurance Company</th>
-                                                <th>Insurance Policy No</th>
-                                                <th>Insurance Valid Upto</th>
-                                                <th>Manufacturing Date</th>
-                                                <th>Manufacturing Date (Formatted)</th>
-                                                <th>Registered RTO</th>
-                                                <th>Data Updated By</th>
-                                                <th>Less Information Flag</th>
-                                                <th>Tax Valid Upto</th>
-                                                <th>Tax Paid Upto</th>
-                                                <th>Cubic Capacity (CC)</th>
-                                                <th>Gross Vehicle Weight</th>
-                                                <th>No Of Cylinders</th>
-                                                <th>Seat Capacity</th>
-                                                <th>Sleeper Capacity</th>
-                                                <th>Standing Capacity</th>
-                                                <th>Wheel Base</th>
-                                                <th>Unladen Weight</th>
-                                                <th>Vehicle Category Description</th>
-                                                <th>PUCC Number</th>
-                                                <th>PUCC Valid Upto</th>
-                                                <th>Permit Number</th>
-                                                <th>Permit Issue Date</th>
-                                                <th>Permit Valid From</th>
-                                                <th>Permit Valid Upto</th>
-                                                <th>Permit Type</th>
-                                                <th>National Permit Number</th>
-                                                <th>National Permit Valid Upto</th>
-                                                <th>National Permit Issued By</th>
-                                                <th>Non Use Status</th>
-                                                <th>Non Use From Date</th>
-                                                <th>Non Use To Date</th>
-                                                <th>Blacklist Status</th>
-                                                <th>NOC Details</th>
-                                                <th>Owner Number</th>
-                                                <th>RC Status</th>
-                                                <th>Masked Owner Name</th>
-                                                <th>Challan Details</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper">
+                                <table id="tblRCDetaillist" class="excel-table fixed-grid-table table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Client ID</th>
+                                            <th>RC Number</th>
+                                            <th>Registration Date</th>
+                                            <th>Owner Name</th>
+                                            <th>Father Name</th>
+                                            <th>Present Address</th>
+                                            <th>Permanent Address</th>
+                                            <th>Mobile Number</th>
+                                            <th>Vehicle Category</th>
+                                            <th>Chassis Number</th>
+                                            <th>Engine Number</th>
+                                            <th>Manufacturer</th>
+                                            <th>Model Name</th>
+                                            <th>Body Type</th>
+                                            <th>Fuel Type</th>
+                                            <th>Vehicle Color</th>
+                                            <th>Emission Norms</th>
+                                            <th>Fitness Valid Upto</th>
+                                            <th>Financer Name</th>
+                                            <th>Is Financed</th>
+                                            <th>Insurance Company</th>
+                                            <th>Insurance Policy No</th>
+                                            <th>Insurance Valid Upto</th>
+                                            <th>Manufacturing Date</th>
+                                            <th>Manufacturing Date (Formatted)</th>
+                                            <th>Registered RTO</th>
+                                            <th>Data Updated By</th>
+                                            <th>Less Information Flag</th>
+                                            <th>Tax Valid Upto</th>
+                                            <th>Tax Paid Upto</th>
+                                            <th>Cubic Capacity (CC)</th>
+                                            <th>Gross Vehicle Weight</th>
+                                            <th>No Of Cylinders</th>
+                                            <th>Seat Capacity</th>
+                                            <th>Sleeper Capacity</th>
+                                            <th>Standing Capacity</th>
+                                            <th>Wheel Base</th>
+                                            <th>Unladen Weight</th>
+                                            <th>Vehicle Category Description</th>
+                                            <th>PUCC Number</th>
+                                            <th>PUCC Valid Upto</th>
+                                            <th>Permit Number</th>
+                                            <th>Permit Issue Date</th>
+                                            <th>Permit Valid From</th>
+                                            <th>Permit Valid Upto</th>
+                                            <th>Permit Type</th>
+                                            <th>National Permit Number</th>
+                                            <th>National Permit Valid Upto</th>
+                                            <th>National Permit Issued By</th>
+                                            <th>Non Use Status</th>
+                                            <th>Non Use From Date</th>
+                                            <th>Non Use To Date</th>
+                                            <th>Blacklist Status</th>
+                                            <th>NOC Details</th>
+                                            <th>Owner Number</th>
+                                            <th>RC Status</th>
+                                            <th>Masked Owner Name</th>
+                                            <th>Challan Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                       
-
+                        </div>
                     </div>
                 </div>
             </div>
@@ -615,33 +574,29 @@
                                 <i class="fa fa-times"></i>
                             </button>
                         </div>
-
                         <!-- Body -->
-                      
-                            <div class="erppagelist-container">
-                                <div class="excel-wrapper">
-                                    <table id="tblFastagDetaillist" class="excel-table fixed-grid-table table-width">
-                                        <thead class="table-head">
-                                            <tr>
-                                                <th>Client ID</th>
-                                                <th>RC Number</th>
-                                                <th>Bank Name</th>
-                                                <th>Tag ID</th>
-                                                <th>Transaction Status</th>
-                                                <th>Lane Direction</th>
-                                                <th>Transaction DateTime</th>
-                                                <th>Sequence No</th>
-                                                <th>Toll Plaza Geo Code</th>
-                                                <th>Toll Plaza Name</th>
-                                                <th>Vehicle Type</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper">
+                                <table id="tblFastagDetaillist" class="excel-table fixed-grid-table table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Client ID</th>
+                                            <th>RC Number</th>
+                                            <th>Bank Name</th>
+                                            <th>Tag ID</th>
+                                            <th>Transaction Status</th>
+                                            <th>Lane Direction</th>
+                                            <th>Transaction DateTime</th>
+                                            <th>Sequence No</th>
+                                            <th>Toll Plaza Geo Code</th>
+                                            <th>Toll Plaza Name</th>
+                                            <th>Vehicle Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                       
-
+                        </div>
                     </div>
                 </div>
             </div>
@@ -650,149 +605,159 @@
         <fieldset class="erppage-subfieldset">
             <legend>EWay Bill Details</legend>
             <div class="erppage-subheader">EWay Bill Details</div>
+            <div class="erppage-body">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="ddlTransit" class="erppage-label">Transit No</label>
+                        <div class="erppageinputicon-wrapper">
+                            <select class="erppage-input" id="ddlTransit">
+                                <option>Select Transit No</option>
+                            </select>
+                            <span class="erppageinputicon">
+                                <i class="fa fa-cog" id="EwayBillbtn"></i>
+                            </span>
+                        </div>
+                    </div>
 
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label for="ddlTransit" class="erppage-label">Transit No</label>
-                    <div class="erppageinputicon-wrapper">
-                        <select class="erppage-input" id="ddlTransit">
-                            <option>Select Transit No</option>
+                    <div class="erppage-divfield">
+                        <label for="TxtEWayNo" class="erppage-label">EWayBill No</label>
+                        <input type="text" class="erppage-input" id="TxtEWayNo" placeholder="Enter EWayBill No" maxlength="30">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="DtEWayDate" class="erppage-label">
+                            EWayBill Date
+                            <span id="span_EWayBillDate" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="date" class="erppage-input" id="DtEWayDate">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtEWayDate" class="erppage-label">
+                            EWayBill Expiry Date
+                            <span id="span_EWayBillExpiryDate" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="date" class="erppage-input" id="TxtEWayDate">
+                    </div>
+                </div>
+
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtEWBInvNo" class="erppage-label">
+                            EWB Party Inv No
+                            <span id="span_EWBPartyInvNo" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="text" class="erppage-input" id="TxtEWBInvNo" placeholder="Enter EWB Party Inv No">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtEWBInvAmt" class="erppage-label">
+                            EWB Party Inv Amt
+                            <span id="span_EWBPartyInvAm" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="number" class="erppage-input" id="TxtEWBInvAmt">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtWbSlipNo" class="erppage-label">Party WB Slip No</label>
+                        <input type="text" class="erppage-input" id="TxtWbSlipNo">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtGrWt" class="erppage-label">
+                            Party WB GrWt
+                            <span id="span_PartyWBGrWt" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="text" class="erppage-input" id="TxtGrWt">
+                    </div>
+                </div>
+
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtTrWt" class="erppage-label">
+                            Party WB TrWt
+                            <span id="span_PartyWBTrWt" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="text" class="erppage-input" id="TxtTrWt">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtWbTime" class="erppage-label">
+                            Party WB Time
+                            <span id="span_PartyWBTime" style="color:red; display:none;">*</span>
+                        </label>
+                        <div class="erppage-inline-group">
+                            <input type="date" class="erppage-input" id="DtWBTime">
+                            <input type="time" class="erppage-input" id="TxtWbTime" style="display:none;">
+                        </div>
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="ddlPartyCity" class="erppage-label">Party City</label>
+                        <select class="erppage-input" id="ddlPartyCity">
+                            <option>Select Party City</option>
                         </select>
-                        <span class="erppageinputicon">
-                            <i class="fa fa-cog" id="EwayBillbtn"></i>
-                        </span>
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtContainerNo" class="erppage-label">Container No</label>
+                        <div class="erppageinputicon-wrapper">
+                            <input type="text" class="erppage-input" id="TxtContainerNo">
+                            <span class="erppageinputicon" id="SEARCHCONTAINER">
+                                <i class="fa fa-search"></i>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="erppage-divfield">
-                    <label for="TxtEWayNo" class="erppage-label">EWayBill No</label>
-                    <input type="text" class="erppage-input" id="TxtEWayNo" placeholder="Enter EWayBill No" maxlength="30">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="DtEWayDate" class="erppage-label">
-                        EWayBill Date
-                        <span id="span_EWayBillDate" style="color:red; display:none;">*</span>
-                    </label>
-                    <input type="date" class="erppage-input" id="DtEWayDate">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtEWayDate" class="erppage-label">
-                        EWayBill Expiry Date
-                        <span id="span_EWayBillExpiryDate" style="color:red; display:none;">*</span>
-                    </label>
-                    <input type="date" class="erppage-input" id="TxtEWayDate">
-                </div>
-            </div>
-
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label for="TxtEWBInvNo" class="erppage-label">
-                        EWB Party Inv No
-                        <span id="span_EWBPartyInvNo" style="color:red; display:none;">*</span>
-                    </label>
-                    <input type="text" class="erppage-input" id="TxtEWBInvNo" placeholder="Enter EWB Party Inv No">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtEWBInvAmt" class="erppage-label">
-                        EWB Party Inv Amt
-                        <span id="span_EWBPartyInvAm" style="color:red; display:none;">*</span>
-                    </label>
-                    <input type="number" class="erppage-input" id="TxtEWBInvAmt">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtWbSlipNo" class="erppage-label">Party WB Slip No</label>
-                    <input type="text" class="erppage-input" id="TxtWbSlipNo">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtGrWt" class="erppage-label">
-                        Party WB GrWt
-                        <span id="span_PartyWBGrWt" style="color:red; display:none;">*</span>
-                    </label>
-                    <input type="text" class="erppage-input" id="TxtGrWt">
-                </div>
-            </div>
-
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label for="TxtTrWt" class="erppage-label">
-                        Party WB TrWt
-                        <span id="span_PartyWBTrWt" style="color:red; display:none;">*</span>
-                    </label>
-                    <input type="text" class="erppage-input" id="TxtTrWt">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtWbTime" class="erppage-label">
-                        Party WB Time
-                        <span id="span_PartyWBTime" style="color:red; display:none;">*</span>
-                    </label>
-                    <div class="erppage-inline-group">
-                        <input type="date" class="erppage-input" id="DtWBTime">
-                        <input type="time" class="erppage-input" id="TxtWbTime" style="display:none;">
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <label for="TxtRemarks" class="erppage-label">Remarks</label>
+                        <input class="erppage-input" id="TxtRemarks" rows="1" />
                     </div>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="ddlPartyCity" class="erppage-label">Party City</label>
-                    <select class="erppage-input" id="ddlPartyCity">
-                        <option>Select Party City</option>
-                    </select>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label for="TxtContainerNo" class="erppage-label">Container No</label>
-                    <div class="erppageinputicon-wrapper">
-                        <input type="text" class="erppage-input" id="TxtContainerNo">
-                        <span class="erppageinputicon" id="SEARCHCONTAINER">
-                            <i class="fa fa-search"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label for="TxtRemarks" class="erppage-label">Remarks</label>
-                    <input class="erppage-input" id="TxtRemarks" rows="1"/>
                 </div>
             </div>
         </fieldset>
-
-        
-        <div class="row">
-            <div class="offset-md-6 col-md-6">
-                <div class="btn-mt button-right">
-                    <button type="button" class="btn btn-primary"><i class="fa fa-list"></i>List of Documents to be send</button>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" id="btnpendingorderno"><i class="fa fa-clock"></i>Pending Orders/Bill</button>
-                </div>
+        <div class="erppagelist-toolbar-end">
+            <div class="erppage-internalaction" style="margin: 0;">
+                <button type="button" class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-list"></i>
+                    <span>List of Documents to be send</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" id="btnpendingorderno">
+                    <i class="fa fa-clock"></i>
+                    <span>Pending Orders/Bill</span>
+                </button>
             </div>
         </div>
         <!--Modal Popup-->
         <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="pendingordersLabel">Pending Order</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+            <div class="modal-dialog modal-xl erppagesmodal">
+                <div class="modal-content erppagesmodal-content draggable-modal">
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-clock"></i>
+                            </div>
+                            <h5 class="erppagesmodal-title" id="pendingordersLabel">Pending Orders</h5>
+                        </div>
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-times"></i>
+                        </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="button-right">
-                            <button type="button" class="btn btn-primary" id="Btn_selectedData">
+                    <div class="erppagesmodal-body">
+                        <div class="erppagesmodal-action">
+                            <button type="button" class="erppagesmodal-btn" id="Btn_selectedData">
                                 <i class="fa fa-check"></i> Selected Data
                             </button>
                         </div>
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblpendingordermodal" class="table-width">
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper">
+                                <table id="tblpendingordermodal" class="excel-table fixed-grid-table table-width">
                                     <thead class="table-head">
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" class="rowCheckbox" /></th>
-                                            <th>ItemCode</th>
+                                            <th>Item Code</th>
                                             <th>Item Name</th>
                                             <th>Unit</th>
                                             <th>Nos</th>
@@ -807,27 +772,24 @@
                                             <th style="display:none;">Department Code </th>
                                             <th style="display:none;">Unit code</th>
                                             <th>Empty</th>
-
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
-
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
-
-
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblInwardEntry" class="table-width">
+        <div class="erppagelist-container">
+            <div class="excel-wrapper">
+                <table id="tblInwardEntry" class="excel-table fixed-grid-table table-width">
                     <thead class="table-head">
                         <tr>
                             <th>Code</th>
-                            <th style="width:350px;">Item Name</th>
+                            <th>Item Name</th>
                             <th>Department</th>
                             <th>Unit</th>
                             <th>Nos</th>
@@ -838,22 +800,23 @@
                             <th>Reference Type</th>
                             <th>Reference No</th>
                             <th>Action</th>
-
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
-        <div class="row mt-2">
-            <div class="offset-md-9 col-md-3">
-                <div class="button-right">
-                    <button id="btn-save" type="button" class="btn btn-primary">
-                        <i class="fa fa-save"></i> Save
-                    </button>
-                </div>
-            </div>
+
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+            @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+            <i class="fa fa-print"></i>Print
+        </button> *@
         </div>
+
 
     </div>
 </div>
@@ -985,6 +948,7 @@
 
             $("#btn-save").click(async function (e) {
                     e.preventDefault();
+                    
                     const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
                     const V_NO = parseInt($('#TxtDocNo').val()) || null;
                     const BILL_NO = $.trim($('#TxtBillNo').val()) || null;
@@ -1721,7 +1685,9 @@
                 el.style.pointerEvents = "none";
                 el.style.opacity = "0.5";
             });
-
+            $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
+            $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
+            $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
             // Add readonly class for CSS styling
             form.classList.add("readonly-mode");
         }
@@ -2709,3 +2675,5 @@
         }
 
 </script>
+
+

@@ -148,17 +148,42 @@ function showDocumentPopupjQuery(data, docCode) {
 
     const modalHTML = `
         <div class="modal fade" id="dynamicDocModal" tabindex="-1" aria-labelledby="docModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="docModalLabel">Document Details for ${data[0]?.uUser || 'Unknown User'}</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+    <div class="modal-dialog modal-lg erppagesmodal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-file-signature"></i>
                     </div>
-                    <div class="popup-card">
-                        <div class="table-responsive">
-                            <table id="tblApprovalStageMaster" class="table table-bordered">
-                                <thead class="table-head">
+                    <h5 class="erppagesmodal-title" id="docModalLabel">
+                        Document Details for ${data[0]?.uUser || 'Unknown User'}
+                    </h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+                    <div class="erppagelist-container">
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="tblApprovalStageMaster" class="excel-table fixed-grid-table">
+                                <colgroup>
+                                    <col style="display:none;" /> <!-- FIXED -->
+                                    <col style="width: 120px;" />  <!-- Doc ID -->
+                                    <col style="width: 120px;" />  <!-- Created By -->
+                                    <col style="width: 120px;" />  <!-- Created On -->
+                                    <col style="width: 140px;" />  <!-- Last Modified By -->
+                                    <col style="width: 140px;" />  <!-- Last Modified On -->
+                                    <col style="width: 100px;" />  <!-- Status -->
+                                    <col style="width: 120px;" />  <!-- Approved By -->
+                                    <col style="width: 120px;" />  <!-- Approved On -->
+                                    <col style="width: 140px;" />  <!-- Last PC Name -->
+                                    <col style="width: 140px;" />  <!-- Last N-Compid -->
+                                    <col style="width: 140px;" />  <!-- Last Login By -->
+                                </colgroup>
+                                <thead>
                                     <tr>
+                                        <th style="display:none;">Code</th>
                                         <th>Doc id</th>
                                         <th>Created By</th>
                                         <th>Created On</th>
@@ -176,9 +201,10 @@ function showDocumentPopupjQuery(data, docCode) {
                             </table>
                         </div>
                     </div>
-                </div>
             </div>
-        </div>`;
+        </div>
+    </div>
+</div>`;
 
     // Inject modal into the DOM
     document.body.insertAdjacentHTML('beforeend', modalHTML);
