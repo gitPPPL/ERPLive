@@ -1,7 +1,6 @@
 function deleteRecord(controller, docId, options = {}) {
 
     const {
-        action = "Delete", // default action name
         title = "Are you sure?",
         text = "This action cannot be undone.",
         successCallback = null
@@ -47,3 +46,10 @@ function deleteRecord(controller, docId, options = {}) {
     });
 }
 
+//function deleteVisitor(docId) {
+//    deleteRecord("VisitorEntry", docId, {
+//        action: "DeleteVisitorEntry",
+//        text: "This will permanently delete the visitor entry.",
+//        successCallback: loadAllVisitors
+//    });
+//}

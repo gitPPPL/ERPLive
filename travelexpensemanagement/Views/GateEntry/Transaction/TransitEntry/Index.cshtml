@@ -8,7 +8,7 @@
         <div class="offset-md-10 col-md-2">
             <div class="btn-right">
                 <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "TransitEntryList")'" type="button" class="btn btn-primary">
+                        onclick="handleBack('@Url.Action("Index", "TransitEntryList")', readOnly)" type="button" class="btn btn-primary">
                     <i class="fa fa-list"></i>Back to list
                 </button>
             </div>
@@ -283,7 +283,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="DtEWaybillDate">EWaybill Date</label>
-                                <input type="date" class="form-control" id="DtEWaybillDate">
+                                <input type="date" class="form-control" id="DtEWaybillDate" disabled>
                             </div>
                         </div>
                     </div>
@@ -334,57 +334,50 @@
         </div>
     </form>
 </fieldset>
-
+<script src="~/js/common/dropdown.js"></script>
 <script>
-
-
-
-        $(document).ready(async function () {
-        const $tbody = $('#tblItemRecordTEList tbody');
+    let readOnly = false;
+    $(document).ready(async function () {
         const urlParams = new URLSearchParams(window.location.search);
         const rowId = urlParams.get('id');
         const mode = urlParams.get('mode');
         const vtype = urlParams.get('vtype');
-
+        readOnly = (mode === 'view');
+        //=======Set focus========
+        $('#ddlDocType').focus();
+        if (mode !== "view" && rowId !== null) {
+            $('#DtFormDate').focus();
+        }
+        //=====Set Current Date==========
+        const currentDate = getCurrentDateDMY();
+        $('#DtBillDate, #DtGRDate, #DtFormDate, #DtExpiryDate, #DtArrivalDate, #DtEWaybillDate, #DtFromDate, #DtToDate').val(currentDate);
+        
         // Load dropdowns and form data if editing
-        LoadDropDown()
-            .then(() => {
+        LoadDropDown().then(() => {
                 if (rowId) {
                     return LoadFormByID(rowId, vtype).then(() => {
-                 
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("An error occurred:", error);
-            });
-
-
-
-            if (rowId == null) {
-            document.getElementById("ddlStatus").disabled = true;
+                });
             }
-
-            if (mode === "view") {
+        }).catch(error => {
+                console.error("An error occurred:", error);
+        });
+        //======View Mode====
+        if (mode === "view") {
             setFormReadOnly();
             $('#TransitEntryForm').after(
-            '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+                '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
             );
-            }
-
-
-
-   
-
-
-
+        }
+        
         // Event handlers
         $("#ddlDocType").on('change', function () {
             if (rowId == null) {
                 GetVNo(this.value);
-                document.getElementById("ddlStatus").disabled = true;
+                document.getElementById("ddlDocType").disabled = true;
+                $('#NumWaybillNo').focus();
             }
-            DDLPartyName(this.value);
+            // DDLPartyName(this.value);
+            bindDropdown('TransitEntry','PartyName', '#ddlPartyName', '-- Select Party Name --', null, null, false, this.value, true);
         });
 
         $("#ddlPartyName").on('change', function () {
@@ -398,6 +391,9 @@
             if ($("#chkGRDate").is(":checked")) {
                 const dateVal = formatDate($("#DtGRDate").val());
                 GR_DATE = dateVal ? dateVal : null;
+            }
+            else{
+                GR_DATE = getCurrentDateDMY();
             }
 
             const Header = {
@@ -438,13 +434,15 @@
 
             // Validations
             if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+            
             if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
+            if (!validateRequiredField('#NumWaybillNo', 'WayBill No')) return;
             if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
+            if (!validateRequiredField('#DtBillDate', 'Bill Date')) return;
+            
             if (!validateRequiredField('#TxtPartyGSTIN', 'Party Gstin')) return;
             if (!validateRequiredField('#TxtBillNo', 'Bill No')) return;
-            if (!validateRequiredField('#DtBillDate', 'Bill Date')) return;
             if (!validateRequiredField('#NumBillAmount', 'Bill Amount')) return;
-            if (!validateRequiredField('#NumWaybillNo', 'WayBill No')) return;
             if (!validateRequiredField('#DtFormDate', 'Form Date')) return;
             if (!validateRequiredField('#DtExpiryDate', 'Expiry Date')) return;
 
@@ -484,13 +482,12 @@
                 }
             });
         });
+
     });
-
-
 
     ///////// Funtion
 
-        function formatDate(dateStr) {
+    function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
         if (isNaN(d)) return '';
@@ -514,93 +511,17 @@
         }
     }
 
-    async function LoadDropDown() {
+    async function LoadDropDown(VTypeId) {
         try {
-            await DDLVtype();
-            await DDLPartyName("");
-            await DDlstatus();
+            await bindDropdown('TransitEntry','DocType', '#ddlDocType', '-- Select VType --', null, null, false, null);
+            await bindDropdown('TransitEntry','DocStatus', '#ddlStatus', '-- Select Status --', null, null, true, null);
+            await bindDropdown('TransitEntry','PartyName', '#ddlPartyName', '-- Select Party Name --', null, null, false, "", true);
         } catch (error) {
             console.error("Error loading dropdowns:", error);
         }
     }
 
-    async function DDLVtype() {
-        try {
-            const res = await fetch('/TransitEntry/DDlVType');
-            const data = await res.json();
-            const ddl = $('#ddlDocType');
-            ddl.empty().append('<option value="">-- Select VType --</option>');
-            data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-        } catch (error) {
-            console.error("Error loading VType:", error);
-        }
-    }
-
-
-
-
-        async function DDlstatus(rowId) {
-        try {
-            const res = await fetch('/TransitEntry/DDlstatus');
-            const data = await res.json();
-            const ddl = $('#ddlStatus');
-
-            // Clear existing options and add default
-            ddl.empty().append('<option value="">-- Select Status --</option>');
-
-            const defaultId = 1; // 👈 ID to be selected by default
-
-            // Append all options
-            data.forEach(item => {
-                const selected = item.value == defaultId ? 'selected' : '';
-                ddl.append(`<option value="${item.value}" ${selected}>${item.text}</option>`);
-            });
-
-            // Disable the dropdown if rowId is null
-
-
-
-           
-
-        } catch (error) {
-            console.error("Error loading Status:", error);
-        }
-    }
-
-
-
-
-
-
-
-    async function DDLPartyName(VTypeId) {
-        try {
-            const params = new URLSearchParams({ vtypeId: VTypeId });
-            const res = await fetch(`/TransitEntry/DDlParty?${params}`);
-
-            if (!res.ok) {
-                throw new Error(`Server responded with ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            const ddl = $('#ddlPartyName');
-            ddl.empty().append('<option value="">-- Select PartyName --</option>');
-
-            if (data && data.length) {
-                data.forEach(item => {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                ddl.prop('disabled', false);
-            } else {
-                ddl.append('<option value="">— No parties found —</option>').prop('disabled', true);
-            }
-        } catch (error) {
-            console.error("Error loading PartyName:", error);
-        }
-    }
-
+    
     async function fetchPartyGstin(Partycode) {
         try {
             const response = await fetch(`/TransitEntry/fetchPartyGstinNo?Partycode=${Partycode}`);
@@ -638,7 +559,7 @@
 
     function populateForm(data) {
         $("#TxtCode").val($.trim(data.v_NO));
-        $("#ddlDocType").val($.trim(data.v_TYPE));
+        $("#ddlDocType").val($.trim(data.v_TYPE)).prop('disabled', true);
         $("#NumDocNo").val($.trim(data.v_NO));
         $("#ddlPartyName").val($.trim(data.partY_CODE));
         $("#TxtPartyGSTIN").val($.trim(data.partY_GSTIN));
@@ -670,10 +591,7 @@
 
     }
 
-
-
-
-        function setFormReadOnly() {
+    function setFormReadOnly() {
         const form = $('#TransitEntryForm');
         form.find(':input').prop('disabled', true);
         form.find('textarea').css('background-color', '#f0f0f0');
@@ -689,13 +607,13 @@
             'background-color': '#e9ecef' 
         });
     }
-
-
-
-
-
-
-
+    function getCurrentDateDMY(){
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
+    };
 </script>
 
 

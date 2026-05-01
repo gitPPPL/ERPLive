@@ -3,7 +3,15 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div id="erp-center-toast-container"></div>
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+<div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
@@ -12,11 +20,12 @@
         <div class="erppage-header-title">Visitor Entry</div>
     </div>
     <div class="erppage-header-right">
-       @*  <button id="btnbacklist" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "VisitorEntryList")', isReadOnly)"> *@
-        <button id="btnbacklist" class="erppage-header-back"
-                onclick="returnBack()">
+        <button type="button" id="btnbacklist" class="erppage-header-back" onclick="returnBack('@Url.Action("Index", "VisitorEntryList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list 
+        </button> 
+        @*  <button id="btnbacklist" class="erppage-header-back" onclick="returnBack('@Url.Action("Index", "VisitorEntryList")')">
             <i class="fa-solid fa-arrow-left"></i>Back to list
-        </button>
+        </button>  *@
     </div>
 </div>
 <form id="VisitorEntryForm" enctype="multipart/form-data">
@@ -38,7 +47,7 @@
                         </div>
                         <div class="erppage-divfield">
                             <label class="erppage-label">In Time</label>
-                            <input type="time" class="erppage-redinput" id="TMInTime" />
+                            <input type="time" class="erppage-redinput" id="TMInTime" readonly />
                         </div>
                     </div>
                     <fieldset class="erppage-subfieldset">
@@ -163,7 +172,13 @@
     </div>
 </form>
 
-<script>
+<script src="~/erpjs/gateentry/transaction/visitorentryjs/visitorapi.js"></script>
+<script src="~/erpjs/gateentry/transaction/visitorentryjs/visitor.js"></script>
+<script src="~/erpjs/gateentry/transaction/visitorentryjs/visitorinit.js"></script> 
+ 
+@* <script src="~/erpjs/gateentry/transaction/visitorentry.js"></script> *@
+
+@* <script>
     const urlParams = new URLSearchParams(location.search);
     const rowId = (urlParams.get('docId'));
     const isReadOnly = urlParams.get('readOnly') === 'true';
@@ -224,7 +239,7 @@
             const vType = 'VISI';
             const vNo = $('#NumDocNo').val()?.trim();
             const docId = $('#DOCID').val()?.trim();
-            // ❌ Invalid VNO
+            // Invalid VNO
             if (!vNo || vNo === "0") {
                 showToast("Invalid document number", { type: "warning" });
                 return;
@@ -242,11 +257,6 @@
                 return;
             }
 
-            // if (docId && docId !== "" && vNo && vType) {
-            //     openPrint(vNo, vType, docId);
-            //     return;
-            // }
-
             showToast("Please save data first", { type: "warning" });
         });
 
@@ -257,7 +267,7 @@
                 data: { vNo: vNo, vType: vType },
 
                 success: function (res) {
-                    // ❌ No Data Found case
+                    // No Data Found case
                     if (res.success === false) {
                         showToast(res.message, { type: "warning" });
                         return;
@@ -286,7 +296,6 @@
             window.location.href = url;
             return;
         }
-
          handleBack(url, false);
 
     }
@@ -363,7 +372,7 @@
 
             $('#TxtMeetOther').val(nameOnly);
 
-            // ✅ REMOVE INVALID STATE
+            // REMOVE INVALID STATE
             clearInvalid($('#ddlMeetEmployee'));
             clearInvalid($('#TxtMeetOther'));
 
@@ -377,7 +386,7 @@
     //===Get data by Mobile No===
     $('#NumMobileNo').on('blur', function () {
         isMobileDataLoaded = false;
-        isMobileLoading = true; // 👈 START
+        isMobileLoading = true; // START
 
         if (rowId) return;
         const mobile = $(this).val().trim();
@@ -725,7 +734,7 @@
                     showToast("Visitor record not found.", { type: "warning" });
                     return;
                 }
-                console.log("Edit data",res);
+                
                 const visitor = res.data;
                 $('#DOCID').val(visitor.doc_id || '');
                 $('#NumDocNo').val(visitor.v_NO || '');
@@ -800,7 +809,7 @@
         form.find('input, select, textarea, button[type="submit"]').prop('disabled', true);
         form.find('button').not('#btnbacklist , #btn_Print').prop('disabled', true);
 
-        // add readonly class (🔥 MAIN FIX)
+        // add readonly class
         form.addClass('erppage-readonly');
 
         $('#VisitorImage').prop('disabled', true);
@@ -862,10 +871,10 @@
         }
     }
 
-</script>
+</script> *@
 
 @* For Camera  *@
-<script>
+@* <script>
     let stream = null;
     let opened = false;
     let capturedBase64 = "";
@@ -942,13 +951,13 @@
         const previewSrc = $('#previewImage').attr('src');
         const webcamImage = $('#WebcamImage').val();
 
-        // ✅ Check if image exists
+        // Check if image exists
         if (!previewSrc && !capturedBase64 && !webcamImage) {
             showToast("No image found to remove", { type: "warning" });
             return;
         }
 
-        // ✅ Remove image
+        // Remove image
         $('#previewImage').attr('src', '').hide();
         $('#VisitorImage').val('');
         $('#WebcamImage').val('');
@@ -964,10 +973,10 @@
         showToast("Image removed successfully", { type: "success" });
     }
 
-</script>
+</script> *@
 
 @* FOR IMAGE PRIVIEW  *@
-<script>
+@* <script>
     document.getElementById('VisitorImage').addEventListener('change', function (event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -995,4 +1004,4 @@
 });
 
 </script>
-
+ *@

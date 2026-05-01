@@ -226,118 +226,6 @@
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.10/lottie.min.js"></script>
 	<script>
-		// ================= LOADER =================
-		$(document).ajaxStart(function () {
-			showLoader();
-		});
-
-		$(document).ajaxStop(function () {
-			hideLoader();
-		});
-
-		let loaderTimeout;
-		let loaderStartTime;
-
-		function showLoader() {
-			loaderStartTime = Date.now();
-			document.getElementById('lottie-overlay').style.display = 'flex';
-		}
-
-		function hideLoader() {
-			const elapsed = Date.now() - loaderStartTime;
-			const minTime = 400;
-
-			if (elapsed < minTime) {
-				clearTimeout(loaderTimeout);
-				loaderTimeout = setTimeout(() => {
-					document.getElementById('lottie-overlay').style.display = 'none';
-				}, minTime - elapsed);
-			} else {
-				document.getElementById('lottie-overlay').style.display = 'none';
-			}
-		}
-
-		// ================= FETCH WRAPPER =================
-		const originalFetch = window.fetch;
-
-		window.fetch = async function (...args) {
-			showLoader();
-			try {
-				const response = await originalFetch(...args);
-				return response;
-			} finally {
-				hideLoader();
-			}
-		};
-
-		// ================= DOM READY =================
-		document.addEventListener("DOMContentLoaded", function () {
-
-			// ===== LOTTIE ANIMATION =====
-			var animation = lottie.loadAnimation({
-				container: document.getElementById('lottie-animation'),
-				renderer: 'svg',
-				loop: true,
-				autoplay: true,
-				path: 'https://lottie.host/30e1c7d5-22ca-41c7-b0a2-f2b0a7ce94e2/ysJGEsOTl6.json'
-			});
-
-			// ===== SIDEBAR TOGGLE =====
-			const sidebar = document.querySelector('.sidebar');
-			const mainContent = document.querySelector('.main-content');
-			const topNavbar = document.querySelector('.top-navbar');
-			const hamburger = document.getElementById('hamburger');
-			const hamburgerIcon = hamburger.querySelector('.hamburger-icon');
-			const closeIcon = hamburger.querySelector('.close-icon');
-
-			hamburger.addEventListener('click', () => {
-				const isSmallScreen = window.innerWidth <= 992;
-
-				if (isSmallScreen) {
-					sidebar.classList.toggle('open');
-					mainContent.classList.toggle('shifted');
-
-					if (sidebar.classList.contains('open')) {
-						hamburgerIcon.style.display = 'none';
-						closeIcon.style.display = 'inline-block';
-					} else {
-						hamburgerIcon.style.display = 'inline-block';
-						closeIcon.style.display = 'none';
-					}
-				} else {
-					sidebar.classList.toggle('closed');
-					mainContent.classList.toggle('full-width');
-					topNavbar.classList.toggle('full-width');
-
-					if (sidebar.classList.contains('closed')) {
-						hamburgerIcon.style.display = 'inline-block';
-						closeIcon.style.display = 'none';
-					} else {
-						hamburgerIcon.style.display = 'none';
-						closeIcon.style.display = 'inline-block';
-					}
-				}
-			});
-
-			// ===== RESIZE HANDLER =====
-			window.addEventListener('resize', () => {
-				if (window.innerWidth > 992) {
-					sidebar.classList.remove('open');
-					sidebar.classList.remove('closed');
-					mainContent.classList.remove('shifted');
-					mainContent.classList.remove('full-width');
-					topNavbar.classList.remove('full-width');
-					hamburgerIcon.style.display = 'inline-block';
-					closeIcon.style.display = 'none';
-				} else {
-					sidebar.classList.remove('closed');
-				}
-			});
-		});
-	</script>
-
-
-	@* <script>
 		$(document).ajaxStart(function () {
 			showLoader();
 		});
@@ -453,11 +341,7 @@
 		});
 		</script> *@
 	<!-- Your existing local scripts, no duplicate jQuery here -->
-    <script src="~/common/globalfunction.js"></script>
-    <script src="~/common/globaltoaster.js"></script>
-    <script src="~/common/globalvalidation.js"></script>
-    <script src="~/common/delete.js"></script>
-    <script src="~/common/pagination.js"></script>
+	<script src="~/js/GlobalValidation.js"></script>
 	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
 	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>

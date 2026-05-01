@@ -64,8 +64,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                 DocType = reader["V_TYPE"] ?? "",
                                 DocNo = reader["DOC_ID"] ?? "",
                                 VDate = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]).ToString("yyyy-MM-dd") : "",
-                                //PartyName = reader["PARTY_NAME"] ?? "",
-                                //CityName = reader["CITY_NAME"] ?? "",
                                 PartyName = reader["PARTY_NAME"] == DBNull.Value ? "" : reader["PARTY_NAME"].ToString(),
                                 CityName = reader["CITY_NAME"] == DBNull.Value ? "" : reader["CITY_NAME"].ToString(),
                                 CourierName = reader["COURIER_NAME"] ?? "",
@@ -76,7 +74,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             });
                         }
 
-                        // ✅ Second result set: total count
+                        //  Second result set: total count
                         if (reader.NextResult())
                         {
                             if (reader.Read())
@@ -87,7 +85,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
                 }
             }
-
             return Json(new { items = results, totalCount });
         }
 

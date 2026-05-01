@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<div id="erp-center-toast-container"></div>
+<div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
@@ -20,7 +20,7 @@
         <div class="erppage-header-title">Vehicle Inward Entry</div>
     </div>
     <div class="erppage-header-right">
-        <button id="btnbacklist" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "TransportInwardEntryList")', isReadOnly)">
+        <button id="btnbacklist" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "VehicleInwardEntryList")', readOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
     </div>
@@ -38,11 +38,11 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Document No</label>
-                    <input type="text" class="erppage-redinput" id="NumDocNo" readonly />
+                    <input type="text" class="erppage-redinput" id="NumDocNo" readonly/>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Document Date</label>
-                    <input type="date" class="erppage-redinput" id="DtDocDate" />
+                    <input type="date" class="erppage-redinput" id="DtDocDate" autofocus />
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Report Date</label>
@@ -162,7 +162,7 @@
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Attachment</label>
                     <div class="erppage-upload-wrap">
-                        <input type="file" class="erppage-input" id="TxtAttachment" accept="image/*" />
+                        <input type="file" class="erppage-input" id="TxtAttachment" accept="image" />
                         <div id="previewContainer" class="erppage-preview-box" style="display:none;">
                             <img id="imgPreview" src="" alt="Preview" />
                             <button type="button" id="btnRemoveImage" class="erppage-btn erppage-btn-remove">
@@ -220,7 +220,7 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Vehicle Remarks</label>
-                    <input type="text" class="erppage-textarea" maxlength="500" id="TxtVehicleRemarks" placeholder="Enter Vehicle Remarks" />
+                    <textarea type="text" class="erppage-textarea" maxlength="500" id="TxtVehicleRemarks" placeholder="Enter Vehicle Remarks" ></textarea>
                 </div>
             </div>
             <div class="erppage-internalaction">
@@ -247,8 +247,12 @@
 </div>
 
 
-<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
-<script>
+@* <script src="~/js/GlobalFunction.js" asp-append-version="true"></script> *@
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.api.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.ui.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.validation.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/vehicleinwardentry/vehicleinwardentry.init.js"></script>
+@* <script>
 
     // var allFieldIds = [
     //   "TxtDocId", "ddlDocType", "NumDocNo", "DtDocDate", "DtReportDate", "TmInTime", "TmRTime", "ddlTransportName", "TxtDrivername",
@@ -293,14 +297,16 @@
             $('#ddlDocType').prop('selectedIndex', 0);
             handleDocLoad();
         } catch (error) {
-            toastr.error('Failed to load document types: ' + error);
+            // toastr.error('Failed to load document types: ' + error);
+            showToast('Failed to load document types: ' + error, { type: "error" });
         }
     });
 
     $(document).ready(function () {
-        GetDONo();
         GetCustomerList();
         GetTransportList();
+        GetDONo();
+
         // addItemRecordRow();
 
         setEnterKeyFocus(allFieldIds);
@@ -316,19 +322,19 @@
             }
         });
 
-        $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
-            var tbody = $(this).closest('tbody');
-            var rowCount = tbody.find('tr').length;
-            if (rowCount > 1) {
-                $(this).closest('tr').remove();
-            } else {
-                alert('Cannot delete the first row.');
-            }
-        });
+        // $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        //     var tbody = $(this).closest('tbody');
+        //     var rowCount = tbody.find('tr').length;
+        //     if (rowCount > 1) {
+        //         $(this).closest('tr').remove();
+        //     } else {
+        //         alert('Cannot delete the first row.');
+        //     }
+        // });
 
-        $(document).on('click', '#tab1 .btn-Itemadd-action', function () {
-        addItemRecordRow();
-        });
+        // $(document).on('click', '#tab1 .btn-Itemadd-action', function () {
+        // addItemRecordRow();
+        // });
 
 
         $('#ddlCustomerName').on('change', function () {
@@ -383,20 +389,14 @@
                 $('#ddlCustomerName').prop('disabled', false);
             }
         })
-        $('#chkValidity, #chkFitmentValidity, #chkTaxValidity').prop('checked', false);
-        $('#DtValidity, #DtFitmentValidity, #DtTaxValidity').prop('disabled', true);
-
-        function toggleDate(chk, input) {
-            $(chk).change(function () {
-                $(input).prop('disabled', !$(this).is(':checked'));
-            });
-        }
+        chkDtdisable();
         toggleDate('#chkValidity', '#DtValidity');
         toggleDate('#chkFitmentValidity', '#DtFitmentValidity');
         toggleDate('#chkTaxValidity', '#DtTaxValidity');
-        
+
+
         //Sumesh Code below
-            $('#TxtAttachment').on('change', function () {
+        $('#TxtAttachment').on('change', function () {
         const file = this.files[0];
 
         if (!file) return;
@@ -441,52 +441,7 @@
         $('#imgPreview').attr('src', '');
         $('#previewContainer').fadeOut();
     });
-
-
-
-        // $('#TxtAttachment').change(function () {
-        //     const file = this.files[0];
-
-        //     if (file) {
-                
-        //         if (!file.type.startsWith('image/')) {
-        //             alert('Please select a valid image file.');
-        //             $(this).val('');
-        //             $('#previewContainer').hide();
-        //             return;
-        //         }
-
-        //         const reader = new FileReader();
-
-        //         reader.onload = function (e) {
-        //             $('#imgPreview').attr('src', e.target.result);
-        //             $('#previewContainer').show();
-        //         };
-
-        //         reader.readAsDataURL(file);
-        //     }
-        // });
-
-        
-        // $('#btnRemoveImage').on('click', async function (e) {
-        //     e.preventDefault();
-
-        //     const result = await Swal.fire({
-        //         title: 'Discard Picture?',
-        //         text: 'Do you want to remove Picture?',
-        //         icon: 'question',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Yes',
-        //         cancelButtonText: 'No'
-        //     });
-
-        //     if (!result.isConfirmed) return;
-
-        //     $('#TxtAttachment').val('');
-        //     $('#imgPreview').attr('src', '');
-        //     $('#previewContainer').hide();
-        // });
-       
+        //===================================================
 
         function ensureOption($dropdown, code, name) {
             if (code && $dropdown.find(`option[value="${code}"]`).length === 0) {
@@ -517,14 +472,14 @@
               //=======================================================================
             try {
                 const tableData = await collectFormData();
-                console.log("tableData", tableData);
                 if (docId) {
                     UpdateData(tableData);
                 } else {
                     SaveData(tableData);
                 }
             } catch (error) {
-                toastr.error('An error occurred while saving the data.');
+                // toastr.error('An error occurred while saving the data.');
+                showToast("An error occurred while saving the data.", { type: "error" });
             }
 
         });
@@ -543,6 +498,17 @@
         document.getElementById('TmInTime').value = currentTime;
     }
     //============Correction=============
+    function chkDtdisable(){
+        const currentDate = setCurrentDate();
+        $('#chkValidity, #chkFitmentValidity, #chkTaxValidity').prop('checked', false);
+        $('#DtValidity, #DtFitmentValidity, #DtTaxValidity').prop('disabled', true);
+        $('#DtValidity, #DtFitmentValidity, #DtTaxValidity').val(currentDate);
+    }
+    function toggleDate(chk, input) {
+        $(chk).change(function () {
+            $(input).prop('disabled', !$(this).is(':checked'));
+        });
+    }
     function setCurrentDate(){
         const today = new Date();
         const todayDate = today.getFullYear() + '-' +
@@ -555,7 +521,7 @@
     function GetDocTypeAsync(selectedValue) {
           return new Promise((resolve, reject) => {
               $.ajax({
-                  url: '@Url.Action("GetDocType", "TransportInwardEntry")',
+                  url: '@Url.Action("GetDocType", "VehicleInwardEntry")',
                   type: 'GET',
                   dataType: 'json',
                   success: function (response) {
@@ -580,7 +546,8 @@
                       }
                   },
                   error: function (xhr, status, error) {
-                      toastr.error("Document Type Load failed: " + error);
+                      // toastr.error("Document Type Load failed: " + error);
+                      showToast("Document Type Load failed: " + error, { type: "error" });
                       reject(error);
                   }
               });
@@ -597,33 +564,23 @@
             } else {
                 const Vtype = $('#ddlDocType').val();
                 let selectedText = $('#ddlDocType option:selected').text();
-                console.log(Vtype, selectedText);
                 if(Vtype)
                 {
                   GetDocid(Vtype);
                 }
                 setCurrentTime();
-                // const today = new Date();
-                // const todayDate = today.getFullYear() + '-' +
-                //     (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                //     today.getDate().toString().padStart(2, '0');
                 let todayDate = setCurrentDate();
                 $('#DtDocDate').val(todayDate);
                 $('#DtReportDate').val(todayDate);
-                //=====================Correction====================
-                $('#DtValidity').val(todayDate);
-                $('#DtFitmentValidity').val(todayDate);
-                $('#DtTaxValidity').val(todayDate);
-                //===============================================
             }
     }
 
     function SaveData(saveDt) {
                 $.ajax({
-                     url: '@Url.Action("SaveOrUpdateTransportInward", "TransportInwardEntry")',
+                     url: '@Url.Action("SaveOrUpdateTransportInward", "VehicleInwardEntry")',
                     type: 'POST',
                     //======Correction
-
+                    // contentType: 'application/json',
                     contentType: false,
                     processData: false,
                     // data: JSON.stringify(saveDt),
@@ -631,44 +588,52 @@
                     //==========
                     success: function (response) {
                         if (response?.status) {
-                            showFlashMessageByKey('insert', 'success');
+                            // showFlashMessageByKey('insert', 'success');
                             // resetFields();
                             setTimeout(() => {
-                                window.location.href = '/TransportInwardEntryList/Index';
+                                window.location.href = '/VehicleInwardEntryList/Index';
                             }, 1500);
+                            showToast("Inserted successfully!", { type: "success" });
                         } else {
-                            toastr.error(response?.message || "Save failed. Please try again.");
+                            // toastr.error(response?.message || "Save failed. Please try again.");
+                            showToast(response?.message || "Save failed. Please try again.", { type: "error" });
                         }
                     },
                     error: function () {
-                        toastr.error("Error occurred while saving. Please contact admin.");
+                        // toastr.error("Error occurred while saving. Please contact admin.");
+                        showToast("Error occurred while saving. Please contact admin.", { type: "error" });
                     }
                 });
     }
 
     function UpdateData(UpdateDt) {
         $.ajax({
-            url: '@Url.Action("SaveOrUpdateTransportInward", "TransportInwardEntry")',
+            url: '@Url.Action("SaveOrUpdateTransportInward", "VehicleInwardEntry")',
             type: 'POST',
             //====Correction
-
+            // contentType: 'application/json',
+            // data: JSON.stringify(UpdateDt),
+            // dataType: 'json',
             contentType: false,
             processData: false,
             data: UpdateDt,
             //========
             success: function (response) {
                 if (response?.status) {
-                    showFlashMessageByKey('update', 'success');
+                    // showFlashMessageByKey('update', 'success');
                     // resetFields();
+                    showToast("Updated successfully!", { type: "success" });
                     setTimeout(() => {
-                        window.location.href = '/TransportInwardEntryList/Index';
+                        window.location.href = '/VehicleInwardEntryList/Index';
                     }, 1500);
                 } else {
-                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                    // toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                    showToast("Update failed: " + (response?.message || "Unknown error."), { type: "error" });
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error("Data not updated: " + error);
+                // toastr.error("Data not updated: " + error);
+                showToast("Data not updated: " + error, { type: "error" });
             }
         });
     }
@@ -767,17 +732,104 @@
         formData.append("SaveOrUpdate",(!id || id == "") ? 'Save' : 'Update');
         return formData;
         //==========================
+        // return {
+        // V_TYPE: toNullableString(document.getElementById("ddlDocType")?.value),
+        // V_NO: parseIntSafe(document.getElementById("NumDocNo")?.value),
+        // DOC_ID: toNullableString(document.getElementById("TxtDocId")?.value),
+        // TRF_TYPE: null,
+        // TRF_NO: null,
+        // V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
+        // V_TIME: toNullableString(document.getElementById("TmInTime")?.value),
+        // ITEM_TYPE: null,
+        // PARTY_CODE: toNullableInt(document.getElementById("ddlCustomerName")?.value),
+        // ADD1: toNullableString(document.getElementById("TxtAdd1TIR")?.value),
+        // ADD2: toNullableString(document.getElementById("TxtAdd2TIR")?.value),
+        // ADD3: toNullableString(document.getElementById("TxtAdd3PD")?.value),
+        // PARTY_CITY: toNullableInt(document.getElementById("ddlCity")?.value),
+        // PARTY_GST: null,
+        // PARTY_PINCODE: null,
+        // PARTY_ADDRESSID: null,
+        // BILL_NO: null,
+        // BILL_DATE: null,
+        // CHALL_NO: null,
+        // // CHALL_DATE: null,
+        // TRUCK_NO: toNullableString(document.getElementById("TxtVehicleNo")?.value),
+        // TRANSPORT_CODE: toNullableInt(document.getElementById("ddlTransportName")?.value),
+        // DRIVER_NAME: toNullableString(document.getElementById("TxtDrivername")?.value),
+        // DRIVER_NO: toNullableString(document.getElementById("NumDriverMobile")?.value),
+        // TRANSIT_NO: null,
+        // WAYBILL_NO: null,
+        // BILL_AMT: null,
+        // REMARKS: toNullableString(document.getElementById("TxtRemarks")?.value),
+        // DISP_PLAN_NO: toNullableInt(document.getElementById("ddlDONo")?.value),
+        // DISP_PLAN_TYPE: null,
+        // WB_TYPE: null,
+        // WB_NO: null,
+        // MRN_TYPE: null,
+        // MRN_NO: null,
+        // REF_TYPE: null,
+        // REF_NO: null,
+        // FAPROV_STATUS: null,
+        // FAPROV_REMARKS: null,
+        // STATUS: null,
+        // ACTIVE: null,
+        // // Remarks2: null,
+        // PARTY_NAME: null,
+        // RC_NO: toNullableString(document.getElementById("TxtVehicleRCNo")?.value),
+        // DL_NO: toNullableString(document.getElementById("txtDLNo")?.value),
+        // INSU_NO: toNullableString(document.getElementById("TxtInsuranceNo")?.value),
+        // PAN_NO: toNullableString(document.getElementById("txtPANNO")?.value),
+        // PURPOSE: toNullableString(document.getElementById("txtPurpose")?.value),
+        // IMAGEPATH: null,
+        // R_TIME: toNullableString(document.getElementById("TmRTime")?.value),
+        // OUT_TIME: null,
+        // R_DATE: toNullableDate(document.getElementById("DtReportDate")?.value),
+        // OUT_DATE: null,
+        // RETURN_TYPE: null,
+        // QRCODE_NO: null,
+        // INOUT_ACTIVE: null,
+        // OUT_ALLOWED: null,
+        // OUT_ALLOWEDBY: null,
+        // RETURN_DATE: null,
+        // RESPONSIBLE_PERSON: null,
+        // //====================Correction===============
+        // // INSU_EXPDT: null,
+        // INSU_EXPDT: InsuranceExpDate,
+        // EWB_DATE: FitmentValidityDate,
+        // CHALL_DATE: TaxValidityDate,
+        // PARTY_WBSLIPNO: toNullableString($('#txtVehicleBody').val()),
+        // PARTY_WBGRWT: toNullableString($('#txtPassWeight').val()),
+        // Remarks2: toNullableString($('#TxtVehicleRemarks').val()),
+        // //====================================
+        // DL_EXPDT: null,
+        // CONTAINER_NO: toNullableString(document.getElementById("NumContainerNo")?.value),
+        // CONTAINER_SIZE: toNullableString(document.getElementById("ddlContainerSize")?.value),
+        // SHIP_PARTY: null,
+        // SHIP_BILLNO: null,
+        // SHIP_BILLDATE: null,
+        // // EWB_DATE: null,
+        // EWB_EXPDATE: null,
+        // PARTY_WBTIME: null,
+        // EWB_INVNO: null,
+        // EWB_INVAMT: null,
+        // // PARTY_WBSLIPNO: null,
+        // // PARTY_WBGRWT: null,
+        // PARTY_WBTRWT: null,
+        // PARTY_EWBCITY: null,
+        // GR_NO: null,
+        // GR_DATE: null,
+        // SaveOrUpdate: (!id || id == "") ? 'Save' : 'Update'
 
+        // };
     }
 
     function GetDocid(VType) {
         $.ajax({
-            url: '@Url.Action("GetMaxVNo", "TransportInwardEntry")',
+            url: '@Url.Action("GetMaxVNo", "VehicleInwardEntry")',
             type: 'GET',
             data:{V_type:VType},
             success: function (response) {
                 if (response.status === true && response.data) {
-                    console.log(response.data);
                     $('#NumDocNo').val(response.data.vNo || '');
                     $('#TxtDocId').val(response.data.docId || '');
                 } else {
@@ -786,14 +838,15 @@
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error('Error fetching Doc ID:', error);
+                // toastr.error('Error fetching Doc ID:', error);
+                showToast('Error fetching Doc ID:', error, { type: "error" });
             }
         });
     }
 
     function GetCustomerList(selectedValue = null) {
         $.ajax({
-            url: '@Url.Action("GetPartyList", "TransportInwardEntry")',
+            url: '@Url.Action("GetPartyList", "VehicleInwardEntry")',
             type: 'GET',
             dataType: 'json',
             success: function (response) {
@@ -825,18 +878,20 @@
                         $dropdown.val('').trigger('change');
                     }
                 } else {
-                    toastr.error("Party Load failed");
+                    // toastr.error("Party Load failed");
+                    showToast("Party Load failed", { type: "error" });
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error("Party Load failed: " + error);
+                // toastr.error("Party Load failed: " + error);
+                showToast("Party Load failed: " + error, { type: "error" });
             }
         });
     }
 
     function GetTransportList(selectedValue = null) {
         $.ajax({
-            url: '@Url.Action("GetTransportationList", "TransportInwardEntry")',
+            url: '@Url.Action("GetTransportationList", "VehicleInwardEntry")',
             type: 'GET',
             dataType: 'json',
             success: function (response) {
@@ -867,11 +922,13 @@
                 }
                 else
                 {
-                    toastr.error("Transport Name Load failed");
+                    // toastr.error("Transport Name Load failed");
+                    showToast("Transport Name Load failed", { type: "error" });
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error("Transport Name Load failed", xhr.error);
+                // toastr.error("Transport Name Load failed", xhr.error);
+                showToast("Transport Name Load failed", { type: "error" });
             }
         });
     }
@@ -948,12 +1005,11 @@
     async function GetDocData(MasterTblId, readOnly) {
         try {
             const response = await $.ajax({
-                url: '/TransportInwardEntry/GetTransportInwardRecordsById',
+                url: '/VehicleInwardEntry/GetTransportInwardRecordsById',
                 type: 'GET',
                 data: { id: MasterTblId }
             });
             if (response.status) {
-                console.log(response.data);
                 await fillFormFields(response.data);
 
                 if (readOnly === 'true') {
@@ -963,23 +1019,25 @@
                     var $previewContainer = $('#previewContainer');
                     if($previewContainer.is(':visible')){
                          $('#btnRemoveImage').hide();
-                         $('#btnGetVAHANData').prop('disabled', true).css('pointer-events', 'none');
                     }
+                    $('#btnGetVAHANData').prop('disabled', true).css('pointer-events', 'none');
                     //=====================================
-                } else {
-                    $('#btn-save, #cancelBtn').show();
-                    enableAllFields();
-                }
+                } // else {
+                //     $('#btn-save, #cancelBtn').show();
+                //     enableAllFields();
+                // }
             } else {
-                toastr.error('No data returned.');
+                // toastr.error('No data returned.');
+                showToast('No data returned.', { type: "error" });
             }
         } catch (error) {
-            toastr.error('Failed to load data.');
+            // toastr.error('Failed to load data.');
+            showToast('Failed to load data.', { type: "error" });
             console.error(error);
         }
     }
 
-      function enableAllFields() {
+    function enableAllFields() {
       allFieldIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.disabled = false;
@@ -992,83 +1050,60 @@
         if (el) el.disabled = true;
       });
     }
-
-    async function fillFormFields(data) {
+        async function fillFormFields(data) {
+        console.log("/GetTransportInwardRecordsById", data);
         if (!Array.isArray(data) || data.length === 0) {
             console.error("Invalid or empty data array");
             return;
         }
 
         const d = data[0];
-        // const formatDate = val => val ? val.substring(0, 10) : '';
         const formatTime = val => val ? val.substring(0, 5) : '';
 
-        document.getElementById("TxtDocId").value = d.DOC_ID || '';
-        document.getElementById("ddlDocType").value = d.V_TYPE || '';
-        document.getElementById("NumDocNo").value = d.V_NO || '';
-        // document.getElementById("DtDocDate").value = formatDate(d.V_DATE);
-        document.getElementById("DtDocDate").value = formatDateToBind(d.V_DATE);
-        // document.getElementById("DtReportDate").value = formatDate(d.R_DATE);
-        document.getElementById("DtReportDate").value = formatDateToBind(d.R_DATE);
-        document.getElementById("TmInTime").value = formatTime(d.V_TIME);
-        document.getElementById("TmRTime").value = formatTime(d.R_TIME);
-        document.getElementById("TxtDrivername").value = d.DRIVER_NAME || '';
-        document.getElementById("TxtVehicleNo").value = d.TRUCK_NO || '';
-        document.getElementById("TxtVehicleRCNo").value = d.RC_NO || '';
-        document.getElementById("NumContainerNo").value = d.CONTAINER_NO || '';
-        document.getElementById("txtDLNo").value = d.DL_NO || '';
-        document.getElementById("NumDriverMobile").value = d.DRIVER_NO || '';
-        document.getElementById("TxtInsuranceNo").value = d.INSU_NO || '';
-        document.getElementById("txtPANNO").value = d.PAN_NO || '';
-        document.getElementById("txtPurpose").value = d.PURPOSE || '';
-        document.getElementById("ddlContainerSize").value = d.CONTAINER_SIZE || '';
-        document.getElementById("ddlDONo").value = d.DISP_PLAN_NO || '';
-        document.getElementById("TxtAdd1TIR").value = d.ADD1 || '';
-        document.getElementById("TxtAdd2TIR").value = d.ADD2 || '';
-        document.getElementById("TxtAdd3PD").value = d.ADD3 || '';
-        document.getElementById("ddlCity").value = d.PARTY_CITY || '';
-        document.getElementById("TxtRemarks").value = d.REMARKS || '';
-        GetCustomerList(d.PARTY_CODE);
-        GetTransportList(d.TRANSPORT_CODE);
+        document.getElementById("TxtDocId").value = d.doC_ID || '';
+        document.getElementById("ddlDocType").value = d.v_TYPE || '';
+        document.getElementById("NumDocNo").value = d.v_NO || '';
+        document.getElementById("DtDocDate").value = formatDateToBind(d.v_DATE);
+        document.getElementById("DtReportDate").value = formatDateToBind(d.r_DATE);
+        document.getElementById("TmInTime").value = formatTime(d.v_TIME);
+        document.getElementById("TmRTime").value = formatTime(d.r_TIME);
+        document.getElementById("TxtDrivername").value = d.driveR_NAME || '';
+        document.getElementById("TxtVehicleNo").value = d.trucK_NO || '';
+        document.getElementById("TxtVehicleRCNo").value = d.rC_NO || '';
+        document.getElementById("NumContainerNo").value = d.containeR_NO || '';
+        document.getElementById("txtDLNo").value = d.dL_NO || '';
+        document.getElementById("NumDriverMobile").value = d.driveR_NO || '';
+        document.getElementById("TxtInsuranceNo").value = d.insU_NO || '';
+        document.getElementById("txtPANNO").value = d.paN_NO || '';
+        document.getElementById("txtPurpose").value = d.purpose || '';
+        document.getElementById("ddlContainerSize").value = d.containeR_SIZE || '';
+        document.getElementById("ddlDONo").value = d.disP_PLAN_NO || '';
+        document.getElementById("TxtAdd1TIR").value = d.adD1 || '';
+        document.getElementById("TxtAdd2TIR").value = d.adD2 || '';
+        document.getElementById("TxtAdd3PD").value = d.adD3 || '';
+        document.getElementById("ddlCity").value = d.partY_CITY || '';
+        document.getElementById("TxtRemarks").value = d.remarks || '';
+        GetCustomerList(d.partY_CODE);
+        GetTransportList(d.transporT_CODE);
 
         //================================Correction======================
-        document.getElementById("txtVehicleBody").value = d.PARTY_WBSLIPNO || '';
-        document.getElementById("TxtVehicleRemarks").value = d.Remarks2 || '';
-        document.getElementById("txtPassWeight").value = d.PARTY_WBGRWT || '';
+        document.getElementById("txtVehicleBody").value = d.partY_WBSLIPNO || '';
+        document.getElementById("TxtVehicleRemarks").value = d.remarks2 || '';
+        document.getElementById("txtPassWeight").value = d.partY_WBGRWT || '';
 
         let currentDate = setCurrentDate();
+        const syncValidity = (value, chkId, dtId) => {
+            const hasValue = value !== null && value !== "";
+            $(`#${chkId}`).prop('checked', hasValue);
+            $(`#${dtId}`).val(hasValue ? formatDateToBind(value) : currentDate)
+                         .prop('disabled', !hasValue);
+        };
+        syncValidity(d.insU_EXPDT, 'chkValidity', 'DtValidity');
+        syncValidity(d.ewB_DATE, 'chkFitmentValidity', 'DtFitmentValidity');
+        syncValidity(d.chalL_DATE, 'chkTaxValidity', 'DtTaxValidity');
 
-        if(d.INSU_EXPDT){
-            $('#chkValidity').prop('checked', true);
-            $('#DtValidity').val(formatDateToBind(d.INSU_EXPDT));
-            $('#DtValidity').prop('disabled', false);
-        }
-        else{
-            $('#chkValidity').prop('checked', false);
-            $('#DtValidity').val(formatDateToBind(currentDate));
-        }
-        if(d.EWB_DATE){
-            $('#chkFitmentValidity').prop('checked', true);
-            $('#DtFitmentValidity').val(formatDateToBind(d.EWB_DATE));
-            $('#DtFitmentValidity').prop('disabled', false);
-        }
-        else{
-            $('#chkFitmentValidity').prop('checked', false);
-            $('#DtFitmentValidity').val(formatDateToBind(currentDate));
-        }
-        if(d.CHALL_DATE){
-            $('#chkTaxValidity').prop('checked', true);
-            $('#DtTaxValidity').val(formatDateToBind(d.CHALL_DATE));
-            $('#DtTaxValidity').prop('disabled', false);
-        }
-        else{
-            $('#chkTaxValidity').prop('checked', false);
-            $('#DtTaxValidity').val(formatDateToBind(currentDate));
-        }
-
-        if (d.IMAGEPATH !== null && d.IMAGEPATH !== '') {
-            const imgUrl = `/Attachments/TransportInward/${d.IMAGEPATH}`;
-
+        if (d.imagepath !== null && d.imagepath !== '') {
+            const imgUrl = `/Attachments/TransportInward/${d.imagepath}`;
             $('#imgPreview').attr('src', imgUrl);
             $('#previewContainer').show();
         } else {
@@ -1077,25 +1112,92 @@
         }
         //========================================
     }
+    // async function fillFormFields(data) {
+    //      console.log("/GetTransportInwardRecordsById", data);
+    //     if (!Array.isArray(data) || data.length === 0) {
+    //         console.error("Invalid or empty data array");
+    //         return;
+    //     }
+
+    //     const d = data[0];
+    //     // const formatDate = val => val ? val.substring(0, 10) : '';
+    //     const formatTime = val => val ? val.substring(0, 5) : '';
+
+    //     document.getElementById("TxtDocId").value = d.doC_ID || '';
+    //     document.getElementById("ddlDocType").value = d.v_TYPE || '';
+    //     document.getElementById("NumDocNo").value = d.v_NO || '';
+    //     // document.getElementById("DtDocDate").value = formatDate(d.V_DATE);
+    //     document.getElementById("DtDocDate").value = formatDateToBind(d.v_DATE);
+    //     // document.getElementById("DtReportDate").value = formatDate(d.R_DATE);
+    //     document.getElementById("DtReportDate").value = formatDateToBind(d.r_DATE);
+    //     document.getElementById("TmInTime").value = formatTime(d.v_TIME);
+    //     document.getElementById("TmRTime").value = formatTime(d.r_TIME);
+    //     document.getElementById("TxtDrivername").value = d.DRIVER_NAME || '';
+    //     document.getElementById("TxtVehicleNo").value = d.TRUCK_NO || '';
+    //     document.getElementById("TxtVehicleRCNo").value = d.RC_NO || '';
+    //     document.getElementById("NumContainerNo").value = d.CONTAINER_NO || '';
+    //     document.getElementById("txtDLNo").value = d.DL_NO || '';
+    //     document.getElementById("NumDriverMobile").value = d.DRIVER_NO || '';
+    //     document.getElementById("TxtInsuranceNo").value = d.INSU_NO || '';
+    //     document.getElementById("txtPANNO").value = d.PAN_NO || '';
+    //     document.getElementById("txtPurpose").value = d.PURPOSE || '';
+    //     document.getElementById("ddlContainerSize").value = d.CONTAINER_SIZE || '';
+    //     document.getElementById("ddlDONo").value = d.DISP_PLAN_NO || '';
+    //     document.getElementById("TxtAdd1TIR").value = d.ADD1 || '';
+    //     document.getElementById("TxtAdd2TIR").value = d.ADD2 || '';
+    //     document.getElementById("TxtAdd3PD").value = d.ADD3 || '';
+    //     document.getElementById("ddlCity").value = d.PARTY_CITY || '';
+    //     document.getElementById("TxtRemarks").value = d.REMARKS || '';
+    //     GetCustomerList(d.PARTY_CODE);
+    //     GetTransportList(d.TRANSPORT_CODE);
+
+    //     //================================Correction======================
+    //     document.getElementById("txtVehicleBody").value = d.PARTY_WBSLIPNO || '';
+    //     document.getElementById("TxtVehicleRemarks").value = d.Remarks2 || '';
+    //     document.getElementById("txtPassWeight").value = d.PARTY_WBGRWT || '';
+
+    //     let currentDate = setCurrentDate();
+    //     const syncValidity = (value, chkId, dtId) => {
+    //         const hasValue = value !== null && value !== "";
+
+    //         $(`#${chkId}`).prop('checked', hasValue);
+    //         $(`#${dtId}`).val(hasValue ? formatDateToBind(value) : currentDate)
+    //                      .prop('disabled', !hasValue);
+    //     };
+    //     syncValidity(d.INSU_EXPDT, 'chkValidity', 'DtValidity');
+    //     syncValidity(d.EWB_DATE, 'chkFitmentValidity', 'DtFitmentValidity');
+    //     syncValidity(d.CHALL_DATE, 'chkTaxValidity', 'DtTaxValidity');
+
+    //     if (d.IMAGEPATH !== null && d.IMAGEPATH !== '') {
+    //         const imgUrl = `/Attachments/TransportInward/${d.IMAGEPATH}`;
+
+    //         $('#imgPreview').attr('src', imgUrl);
+    //         $('#previewContainer').show();
+    //     } else {
+    //         $('#imgPreview').attr('src', '');
+    //         $('#previewContainer').hide();
+    //     }
+    //     //========================================
+    // }
     //====================================Correction============================
-    $('#btnbacklist').on('click', async function (e) {
-        e.preventDefault();
-        readOnly = getQueryParam('readOnly');
-        if(readOnly !== "true"){
-            const result = await Swal.fire({
-                title: 'Discard Changes?',
-                text: 'Are you sure to cancel without saving record?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No'
-            });
+    // $('#btnbacklist').on('click', async function (e) {
+    //     e.preventDefault();
+    //     readOnly = getQueryParam('readOnly');
+    //     if(readOnly !== "true"){
+    //         const result = await Swal.fire({
+    //             title: 'Discard Changes?',
+    //             text: 'Are you sure to cancel without saving record?',
+    //             icon: 'question',
+    //             showCancelButton: true,
+    //             confirmButtonText: 'Yes',
+    //             cancelButtonText: 'No'
+    //         });
 
-            if (!result.isConfirmed) return;
-        }
+    //         if (!result.isConfirmed) return;
+    //     }
 
-        window.location.href = '@Url.Action("Index", "TransportInwardEntryList")';
-    })
+    //     window.location.href = '@Url.Action("Index", "VehicleInwardEntryList")';
+    // })
     function formatOption(option) {
         if (!option.id) return option.text;
 
@@ -1119,7 +1221,7 @@
     }
     function GetDONo(selectedValue = null) {
         $.ajax({
-            url: '@Url.Action("GetDONo", "TransportInwardEntry")',
+            url: '@Url.Action("GetDONo", "VehicleInwardEntry")',
             type: 'GET',
             dataType: 'json',
             success: function (response) {
@@ -1164,55 +1266,51 @@
                         $dropdown.val('').trigger('change');
                     }
                 } else {
-                    toastr.error("Do No Load failed");
+                    // toastr.error("Do No Load failed");
+                    showToast("Do No Load failed", { type: "error" });
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error("Do No Load failed: " + error);
+                // toastr.error("Do No Load failed: " + error);
+                showToast("Do No Load failed: " + error, { type: "error" });
             }
         });
     }
 
     async function checkValidDate() {
-
         const data = {
             vdate: $("#DtDocDate").val(),
             vtype: $("#ddlDocType").val(),
             vno: $("#NumDocNo").val()
         };
-
         try {
-                const response = await fetch('/TransportInwardEntry/CheckValidDate', {
+                const response = await fetch('/VehicleInwardEntry/CheckValidDate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             });
-
             const result = await response.json();
-
             if (result.status === false) {
                 toastr.warning(result.message);
+                // showToast(result.message, { type: "warning" });
                 return false;
             }
-
             return true;
-
         } catch (error) {
             console.error("Error:", error);
             return false;
         }
     }
-
     function getDriverDetails(mobileNo){
         $.ajax({
-            url: '@Url.Action("GetDriverDetails", "TransportInwardEntry")',
+            url: '@Url.Action("GetDriverDetails", "VehicleInwardEntry")',
             type: 'GET',
             dataType: 'json',
             data: {mobileNo: mobileNo},
             success: function (response) {
-                if (response.success) {
+                if (response.status) {
                     const data = response.driverDetails;
                     $('#TxtDrivername').val(data.driverName);
                     $('#NumDriverMobile').val(data.driverNo);
@@ -1221,7 +1319,8 @@
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error("Driver Details Load failed", xhr.error);
+                // toastr.error("Driver Details Load failed", xhr.error);
+                showToast("Driver Details Load failed" + xhr.error, { type: "error" });
             }
         });
     }
@@ -1232,95 +1331,93 @@
             getDriverDetails(mobileNo);
         }
     })
-    function getVehicleDetailsFromDB(vehicleNo){
-        $.ajax({
-            url: '@Url.Action("GetVehicleInfoFromDB", "TransportInwardEntry")',
+
+    function getVehicleDetailsFromDB(vehicleNo) {
+        return $.ajax({
+            url: '@Url.Action("GetVehicleInfoFromDB", "VehicleInwardEntry")',
             type: 'GET',
             dataType: 'json',
-            data: {vehicleNo: vehicleNo},
-            success: function (response) {
-                if (response.success) {
-                    const data = response.vehicleInfo;
-                    console.log("Vehicle data:", data);
-                    $('#txtVehicleBody').val(data.bodyType);
-                    $('#txtPassWeight').val(data.grossWt);
-                    $('#TxtInsuranceNo').val(data.insuranceNumber);
-                    $('#txtPurpose').val(data.purpose);
-                    $('#TxtVehicleRCNo').val(data.rcNumber);
-                    $('#TxtVehicleRemarks').val(data.vehicleRemarks);
+            data: { vehicleNo: vehicleNo }
+        }).then(function (response) {
+            if (response.success && response.vehicleInfo) {
+                const data = response.vehicleInfo;
+                if (data.bodyType) $('#txtVehicleBody').val(data.bodyType);
+                if (data.grossWt) $('#txtPassWeight').val(data.grossWt);
+                if (data.insuranceNumber) $('#TxtInsuranceNo').val(data.insuranceNumber);
+                if (data.purpose) $('#txtPurpose').val(data.purpose);
+                if (data.rcNumber) $('#TxtVehicleRCNo').val(data.rcNumber);
+                if (data.vehicleRemarks) $('#TxtVehicleRemarks').val(data.vehicleRemarks);
+
+                if(data.transportCode) {
                     GetTransportList(data.transportCode);
-
-                    const validityData = [
-                       { value: data.insuExp, checkboxId: '#chkValidity', datepickerId: '#DtValidity' },
-                       { value: data.fitmentupto, checkboxId: '#chkFitmentValidity', datepickerId: '#DtFitmentValidity' },
-                       { value: data.taxupto, checkboxId: '#chkTaxValidity', datepickerId: '#DtTaxValidity' }
-                   ];
-
-                   validityData.forEach(item => {
-                       if (item.value !== null && item.value !== "") {
-                           $(item.checkboxId).prop('checked', true);
-                           $(item.datepickerId).val(formatDateToBind(item.value));
-                           $(item.datepickerId).prop('disabled', false);
-                       }
-                   });
                 }
-            },
-            error: function (xhr, status, error) {
-                toastr.error("Driver Details Load failed", xhr.error);
+
+                const validityData = [
+                    { value: data.insuExp, checkboxId: '#chkValidity', datepickerId: '#DtValidity' },
+                    { value: data.fitmentupto, checkboxId: '#chkFitmentValidity', datepickerId: '#DtFitmentValidity' },
+                    { value: data.taxupto, checkboxId: '#chkTaxValidity', datepickerId: '#DtTaxValidity' }
+                ];
+
+                validityData.forEach(item => {
+                    if (item.value) {
+                        $(item.checkboxId).prop('checked', true);
+                        $(item.datepickerId).val(formatDateToBind(item.value)).prop('disabled', false);
+                    }
+                });
+                return true;
             }
+            return false;
+        }).catch(function () {
+            return false;
         });
     }
-    $('#TxtVehicleNo').on('blur', function(){
-        const vehicleNo = $(this).val();
-        if(vehicleNo){
-            getVehicleDetailsFromDB(vehicleNo);
-        }
-    })
-
-    async function GetVehicledetail() {
+    function clearVehicleData(){
+        $('#txtVehicleBody').val('');
+        $('#txtPassWeight').val('');
+        $('#TxtInsuranceNo').val('');
+        $('#txtPurpose').val('');
+        $('#TxtVehicleRCNo').val('');
+        $('#TxtVehicleRemarks').val('');
+        $('#ddlTransportName').val('');
+        chkDtdisable();
+    }
+    async function GetVehicledetailFromApi() {
         try {
                 const rcNumber = $('#TxtVehicleNo').val();
-                // const VType = $('#ddlDocType').val();
-                // const VNo = $('#TxtDocNo').val();
 
                 if(!rcNumber)
                 {
-                    toastr.info("Vehicle No Not Found");
+                    // toastr.info("Vehicle No Not Found");
+                    showToast("Vehicle No Not Found", { type: "info" });
                     return;
                 }
 
             const response = await $.ajax({
-                url: `/TransportInwardEntry/GetVehcleinfo`,
-                data : {rc_number : rcNumber/*  , VType : VType ,VNo : VNo  */},
+                url: `/VehicleInwardEntry/GetVehcleinfo`,
+                data : {rc_number : rcNumber},
                 type: 'GET',
                 dataType: 'json',
             });
-            if (response && response.success) {
+            if (response && response.status) {
                 const res = response.vehicleInfo;
                 let grossWt = 0;
                 if (res.vehicleGrossWeight != null && res.unladenWeight != null) {
                     grossWt = res.vehicleGrossWeight - res.unladenWeight;
-                    console.log("Gross Weight: " + grossWt);  // Output: Gross Weight: 500
-                } else {
-                    console.log("Invalid data: VehicleGrossWeight or UnladenWeight is undefined or not a number.");
                 }
-
 
                 const vehicleRemarks = `Vehicle category : ${res.vehicleCategory}, Insurance validity : ${formatDateToBind(res.insuranceUpto)}, Pucc validity : ${formatDateToBind(res.puccUpto)}, Permit valid upto : ${formatDateToBind(res.permitValidUpto)}, Blacklist status : ${res.blacklistStatus}, Rc Status : ${res.rcStatus}",`;
 
-                toastr.success("Vehicle Info found Successfully");
-                // console.log("vehicleInfo: ", res.vehicleInfo);
-                $('#TxtVehicleRCNo').val(res.vehicleChasiNumber);
-                $('#TxtInsuranceNo').val(res.insurancePolicyNumber);
+                // toastr.success("Vehicle Info found Successfully");
+                showToast("Vehicle Info found Successfully!", { type: "success" });
+                $('#TxtVehicleRCNo').val(res.vehicleChasiNumber || '');
+                $('#TxtInsuranceNo').val(res.insurancePolicyNumber || '');
                 $('#txtPassWeight').val(grossWt);
-                $('#txtVehicleBody').val(res.bodyType);
-                $('#TxtVehicleRemarks').val(vehicleRemarks);
-
-
+                $('#txtVehicleBody').val(res.bodyType || '');
+                $('#TxtVehicleRemarks').val(vehicleRemarks || '');
                const validityData = [
                    { value: res.insuranceUpto, checkboxId: '#chkValidity', datepickerId: '#DtValidity' },
-                   { value: res.taxUpto, checkboxId: '#chkFitmentValidity', datepickerId: '#DtFitmentValidity' },
-                   { value: res.fitUpTo, checkboxId: '#chkTaxValidity', datepickerId: '#DtTaxValidity' }
+                   { value: res.taxUpto, checkboxId: '#chkTaxValidity', datepickerId: '#DtTaxValidity' },
+                   { value: res.fitUpTo, checkboxId: '#chkFitmentValidity', datepickerId: '#DtFitmentValidity' }
                ];
 
                validityData.forEach(item => {
@@ -1354,19 +1451,55 @@
                     }
                 }
                 if(strValid !== ""){
-                    toastr.warning(strValid);
+                    // toastr.warning(strValid);
+                    showToast(strValid, { type: "warning" });
                 }
             } else {
-                toastr.error("Vehicle not found or invalid.");
+                // toastr.error("Vehicle not found or invalid.");
+                showToast("Vehicle not found or invalid.", { type: "error" });
             }
         } catch (err) {
             console.error("Error:", err);
-            toastr.error("Error fetching vehicle details.");
+            // toastr.error("Error fetching vehicle details.");
+            showToast("Error fetching vehicle details.", { type: "error" });
         }
     }
-    $('#btnGetVAHANData').on('click', function(){
-        GetVehicledetail();
-    })
+
+    $('#TxtVehicleNo').on('blur', async function() {
+        setTimeout(async () => {
+        // check if focus moved to the button
+            if (document.activeElement.id === 'btnGetVAHANData') {
+                return;
+            }
+
+            const vehicleNo = $(this).val();
+
+            if (vehicleNo !== "") {
+                await getVehicleDetailsFromDB(vehicleNo);
+            } else {
+                clearVehicleData();
+            }
+    }, 0);
+    });
+
+    $('#btnGetVAHANData').on('click', async function() {
+        const vehicleNo = $('#TxtVehicleNo').val();
+        if (!vehicleNo) {
+            // toastr.info("Please enter a Vehicle No");
+            showToast("Please enter Vehicle No", { type: "info" });
+            return;
+        }
+        clearVehicleData();
+        GetVehicledetailFromApi();
+    });
+    const mobileInput = document.getElementById("NumDriverMobile");
+
+    mobileInput.addEventListener("beforeinput", function (e) {
+        if (e.data && !/^\d+$/.test(e.data)) {
+            e.preventDefault();
+        }
+    });
+
     //=============================================================================
 </script>
-
+ *@

@@ -2,13 +2,28 @@
     ViewBag.Title = "Misc Consumption Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+         Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<div id="erp-toast-container"></div>
 <fieldset>
     <legend class="legend-field">Misc Consumption Entry</legend>
     <div class="row">
         <div class="offset-md-10 col-md-2">
             <div class="btn-right">
+               @*  <button id="btnbacklist"
+                       onclick="window.location.href='@Url.Action("Index", "MiscConsumptionEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button> *@
                 <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "MiscConsumptionEntryList")'" type="button" class="btn btn-primary">
+                        onclick="handleBack('@Url.Action("Index", "MiscConsumptionEntryList")', isReadOnly)" type="button" class="btn btn-primary">
                     <i class="fa fa-list"></i>Back to list
                 </button>
             </div>
@@ -28,7 +43,7 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="NumDocNo">Doc No<span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
                 </div>
             </div>
             <div class="col-md-3">
@@ -86,7 +101,7 @@
                         <label for="ddlType">Type</label>
                         <select class="form-control" id="ddlType">
                             <option value="">Select Type</option>
-                            <option>Misc </option>
+                            <option value="Misc">Misc</option>
                         </select>
                     </div>
                 </div>
@@ -98,7 +113,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="btn-mt button-right">
-                        <button id="btn-pending" type="button" class="btn btn-danger" data-toggle="modal" data-target="#pendingModal">
+                        <button id="btn-pending" type="button" class="btn btn-danger">
                             <i class="fa fa-clock"></i> Pending Documents
                         </button>
                     </div>
@@ -111,13 +126,12 @@
                     <div class="modal-content">
                         <div class="popup-header">
                             <h5 class="popup-title" id="pendingModalLabel">Pending Documents</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span>&times;</span>
                             </button>
 
                         </div>
                         
-
                         <div class="modal-body">
                             <div class="card">
                                 <div class="table-responsive">
@@ -182,8 +196,6 @@
             </div>
         </div>
 
-
-
         <div class="row">
             <div class="offset-md-10 col-md-2">
                 <div class="btn-last">
@@ -194,67 +206,79 @@
     </form>
 </fieldset>
 
+<script src="~/common/dropdown.js"></script>
+
 <script>
     const refTypeOptions = ["PO", "Indent", "Manual"];
     let itemMap = {};
     let UnitMap = {};
     let DeptMap = {};
 
-    $(document).ready(function () {
-      const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const vtype = urlParams.get('vtype');
+    const $tbody = $("#tblConsumptionEntry tbody");
+    // const mode = urlParams.get('mode');
+    // const isReadOnly = urlParams.get('readOnly') === 'true';
+    const mode = urlParams.get('mode');
+    const isReadOnly = (mode === 'view');
 
-        const rowId = urlParams.get('id');
-        const vtype = urlParams.get('vtype');
-        const $tbody = $("#tblConsumptionEntry tbody");
-        const mode = urlParams.get('mode');
-        const isReadOnly = urlParams.get('readOnly') === 'true';
+    $(document).ready(function () {
+
       (async () => {
         try {
+          setCurrentDateTime();
           await LoadDropDowns();
-          addRow($tbody);
+          $('#ddlDocType').focus();
+          
+            const defaultVal = $('#ddlDocType').val();
+            if (defaultVal && !rowId) {
+                GetVNo(defaultVal);
+            }
+
+            addRow($tbody);
 
             if (rowId) {
                 await LoadFormByID(rowId);
-                    if (mode == 'view') {
-                        console.log('Mode', mode);
-                          setFormReadOnly();
-                    }
+                if (mode == 'view') {
+                    console.log('Mode', mode);
+                    setFormReadOnly();
+                }
 
             }
 
-
-             if (rowId && rowId !== 0) {
-            await LoadFormByID(rowId, vtype);
-            if (typeof isReadOnly !== 'undefined' && isReadOnly) {
-              setFormReadOnly();
+            if (rowId && rowId !== 0) {
+                await LoadFormByID(rowId, vtype);
+                if (typeof isReadOnly !== 'undefined' && isReadOnly) {
+                    setFormReadOnly();
+                }
             }
-          }
 
             $("#ddlPartyName").on("change", async function () {
-                const partyId = $(this).val();
+                 const partyId = $(this).val();
                 if (!partyId) {
                 $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").val("").prop("disabled", true);
-                return;
+                 return;
                 }
 
                 await fetchPartyAddressDetails(partyId);
             });
 
-            $("#ddlDocType").change(function () {
-                if (!rowId) GetVNo(this.value);
-            });
+            // $("#ddlDocType").change(function () {
+            //     if (!rowId) GetVNo(this.value);
+            // });
 
 
           $("#btn-pending").on("click", async function () {
-                const partyId = $("#ddlPartyName").val(); 
+            const partyId = $("#ddlPartyName").val(); 
 
-                if (!partyId) {
-                    toastr.warning("Please select a Party.");
-                    return; 
-                }
+            if (!partyId) {
+                toastr.warning("Please select a Party.");
+                return; 
+            }
            
-                await loadPendingDocuments(partyId);
-            });
+            await loadPendingDocuments(partyId);
+          });
 
           $(document).on("click", ".btn-add-action", () => addRow($tbody));
 
@@ -275,55 +299,41 @@
           });
 
           // Save Button Click
-          $("#btn-save").click(function (e) {
+          $("#btn-save").click( async function (e) {
             e.preventDefault();
 
-            const V_DATE = formatDate($("#DtDocDate").val());
-            const DocType = $.trim($('#ddlDocType').val());
-            const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
-
-            if (!DocType) {
-                toastr.warning("Please select a Doc Type.");
-                $("#ddlDocType").focus();
-                return;
+            if (!validateConsumptionForm()) {
+                return; 
             }
 
-            if (!V_DATE) {
-                toastr.warning("Please select a Voucher Date.");
-                $("#ddlDocType").focus();
-                return;
-            }
-
-            if (!PartyCode) {
-                toastr.warning("Please select a Party.");
-                $("#ddlPartyName").focus();
-                return;
-            }
+            const validateDate=  await checkValidDate();
+            
+            if(validateDate == false) {
+                return ;
+            } 
 
             const header = {
               DOC_ID: $.trim($('#TxtCode').val()) ?? null,
               V_TYPE: $('#ddlDocType').val() ?? null,
               V_NO: parseInt($('#NumDocNo').val()) || null,
-                V_DATE: (() => {
+              V_DATE: (() => {
                 const d = new Date($("#DtDocDate").val());
                 return !isNaN(d) ? d.toISOString() : null;
-                })(),
-
-
-                V_TIME: (() => {
+              })(),
+              V_TIME: (() => {
                 const val = $('#TmDocTime').val();
                 if (!val) return null;
                 return val.length === 5 ? val + ':00' : val;
-                })(),
+              })(),
 
-                PARTY_CODE: parseInt($('#ddlPartyName').val()) || null,
-                TRUCK_NO: $.trim($('#TxtVehicleNo').val()) ?? null,
-                REMARKS: $.trim($('#TxtRemarks').val()) ?? null,
-                Add1: $.trim($('#TxtAdd1PD').val()) ?? null,
-                Add2: $.trim($('#TxtAdd2PD').val()) ?? null,
-                Add3: $.trim($('#TxtAdd3PD').val()) ?? null,
-                ITEM_TYPE: $.trim($('#ddlType').val()) ?? null,
-                action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT'
+               PARTY_CODE: parseInt($('#ddlPartyName').val()) || null,
+               TRUCK_NO: $.trim($('#TxtVehicleNo').val()) ?? null,
+               REMARKS: $.trim($('#TxtRemarks').val()) ?? null,
+               Add1: $.trim($('#TxtAdd1PD').val()) ?? null,
+               Add2: $.trim($('#TxtAdd2PD').val()) ?? null,
+               Add3: $.trim($('#TxtAdd3PD').val()) ?? null,
+               ITEM_TYPE: $.trim($('#ddlType').val()) ?? null,
+               action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT'
             };
 
           const payload = {
@@ -331,25 +341,25 @@
               Deatils: collectTableRowData()
             };
 
-
-            console.log('Data' , payload);
-
-
-
             $("#btn-save").prop("disabled", true);
 
             $.ajax({
-              url: '/MiscConsumptionEntry/SavedData',
+              url: '/MiscConsumptionEntry/SaveData',
               type: 'POST',
               contentType: 'application/json',
               data: JSON.stringify(payload),
               success: function (response) {
                 if (response.success) {
-                  toastr.success("Saved successfully!");
-                      setTimeout(() => window.location.href = '/MiscConsumptionEntryList/Index', 1000);
+                    if (header.action === 'UPDATE') {
+                        showToast("Data Updated Successfully", { type: "success" });
+                    } else {
+                        showToast("Data Saved Successfully", { type: "success" });
+                    }
+
+                  setTimeout(() => window.location.href = '/MiscConsumptionEntryList/Index', 1000);
 
                 } else {
-                  toastr.error(response.message || "Save failed.");
+                   showToast("Error while saving", { type: "error" });
                 }
               },
               error: function (xhr) {
@@ -361,7 +371,7 @@
                 } else {
                   errorMessage = "Unexpected error: " + xhr.statusText;
                 }
-                toastr.error(errorMessage);
+                showToast(response.message || "Error while saving", { type: "error" });
               },
               complete: function () {
                 $("#btn-save").prop("disabled", false);
@@ -369,8 +379,8 @@
             });
           });
 
-         // Add/Delete row buttons
-          $(document).on("click", ".btn-add-action", () => addRow($tbody));
+          // Add/Delete row buttons
+          // $(document).on("click", ".btn-add-action", () => addRow($tbody));
 
           $(document).on("click", ".btn-delete-action", function () {
             const $row = $(this).closest("tr");
@@ -386,46 +396,201 @@
             }
           });
 
-          $("#ddlDocType").change(function () {
-            if (!rowId) GetVNo(this.value);
-          });
+          // $("#ddlDocType").change(function () {
+          //   if (!rowId) GetVNo(this.value);
+          // });
 
-              $('#PendngAddRow').on('click', function (e) {
-        e.preventDefault();
+         $('#PendngAddRow').on('click', function (e) {
+         e.preventDefault();
 
         // 1. Get selected rows
         let selectedRows = getSelectedPendingDocuments();
 
         // 2. If nothing is selected, alert and return
         if (selectedRows.length === 0) {
-              toastr.warning("Please select at least one row.");
+            //toastr.warning("Please select at least one row.");
+            showToast("Please select at least one row.", { type: "warning" });
             return;
         }
 
         // 3. Add to consumption table
         addSelectedToConsumptionTable(selectedRows);
+         $('#pendingModal').modal('hide');
+         // $('body').removeClass('modal-open');
+         // $('.modal-backdrop').remove();
 
-        // 4. (Optional) Log the data
-        console.log('Selected row data:', selectedRows);
-
-        // 5. (Optional) Close the modal
       
     });
-
-            
-            
             $('#tblPendingDocument thead input[type="checkbox"]').on('change', function () {
                 const checked = $(this).is(':checked');
                 $('#tblPendingDocument tbody input.select-row').prop('checked', checked);
             });
 
         } catch (err) {
+          showToast("Error initializing page: " + err.message, { type: "error" });
           console.error("Error initializing page:", err);
         }
       })();
     });
 
+    //===Validation form========
+    function validateConsumptionForm() {
+ 
+        // ========= DOC TYPE =========
+        const docType = $('#ddlDocType').val();
+        if (!docType) {
+            showToast("Doc Type is required.", { type: "warning" });
+            $('#ddlDocType').addClass('is-invalid').focus();
+            return false;
+        } else {
+            $('#ddlDocType').removeClass('is-invalid');
+        }
 
+        // ========= DOC NO =========
+        const docNo = $('#NumDocNo').val();
+        if (!docNo || parseInt(docNo) === 0) {
+            showToast("Invalid Doc No.", { type: "warning" });
+            $('#NumDocNo').addClass('is-invalid').focus();
+            return false;
+        } else {
+            $('#NumDocNo').removeClass('is-invalid');
+        }
+
+        // ========= DOC DATE =========
+        const docDate = $('#DtDocDate').val();
+        if (!docDate) {
+            showToast("Doc Date is required.", { type: "warning" });
+            $('#DtDocDate').addClass('is-invalid').focus();
+            return false;
+        } else {
+            $('#DtDocDate').removeClass('is-invalid');
+        }
+
+        // ========= PARTY =========
+        const party = $('#ddlPartyName').val();
+        if (!party) {
+            showToast("Party Name is required.", { type: "warning" });
+            // toastr.warning("Party Name Required !!");
+            $('#ddlPartyName').addClass('is-invalid').focus();
+            return false;
+        } else {
+            $('#ddlPartyName').removeClass('is-invalid');
+        }
+
+        // ========= VEHICLE =========
+        const vehicle = $('#TxtVehicleNo').val().trim();
+        if (!vehicle) {
+            showToast("Vehicle No is required.", { type: "warning" });
+            $('#TxtVehicleNo').addClass('is-invalid').focus();
+            return false;
+        } else {
+            $('#TxtVehicleNo').removeClass('is-invalid');
+        }
+
+        // ========= GRID VALIDATION =========
+        const rows = $("#tblConsumptionEntry tbody tr");
+
+        if (rows.length === 0) {
+            showToast("Please add at least one item.", { type: "warning" });
+            return false;
+        }
+
+        let isValid = true;
+
+        rows.each(function () {
+
+            const item = $(this).find(".itemName").val();
+            const dept = $(this).find(".department").val();
+            const unit = $(this).find(".unit").val();
+            const nos = parseFloat($(this).find(".no").val() || 0);
+            const qty = parseFloat($(this).find(".quantity").val() || 0);
+
+            // Item
+            if (!item) {
+                showToast("Item Name is required.", { type: "warning" });
+                $(this).find(".itemName").addClass("is-invalid").focus();
+                isValid = false;
+                return false;
+            } else {
+                $(this).find(".itemName").removeClass("is-invalid");
+            }
+
+            // Department
+            if (!dept) {
+                showToast("Department is required.", { type: "warning" });
+                $(this).find(".department").addClass("is-invalid").focus();
+                isValid = false;
+                return false;
+            } else {
+                $(this).find(".department").removeClass("is-invalid");
+            }
+
+            // Unit
+            if (!unit) {
+                showToast("Unit is required.", { type: "warning" });
+                $(this).find(".unit").addClass("is-invalid").focus();
+                isValid = false;
+                return false;
+            } else {
+                $(this).find(".unit").removeClass("is-invalid");
+            }
+
+            // Nos
+            if (!nos) {
+                showToast("Nos is required.", { type: "warning" });
+                $(this).find(".no").addClass("is-invalid").focus();
+                isValid = false;
+                return false;
+            } else {
+                $(this).find(".no").removeClass("is-invalid");
+            }
+
+            // Quantity
+            if (qty <= 0) {
+                showToast("Quantity must be greater than 0.", { type: "warning" });
+                $(this).find(".quantity").addClass("is-invalid").focus();                                     
+                isValid = false;
+                return false;
+            } else {
+                $(this).find(".quantity").removeClass("is-invalid");
+            }
+        });
+
+        return isValid;
+    }
+       
+    //==Validate Doc date from global Variable
+    async function checkValidDate() {
+
+        const data = {
+            vdate: $("#DtDocDate").val(),
+            vtype: "MICO",
+            vno: $("#NumDocNo").val()
+        };
+
+        try{
+                const response = await fetch('/MiscConsumptionEntry/CheckValidDate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.status === false) {
+                showToast(result.message, { type: "warning" });
+                return false;
+            }
+
+            return true;
+
+        } catch (error) {
+            console.error("Error:", error);
+            return false;
+        }
+    }
 
     async function fetchPartyAddressDetails(partyId) {
       try {
@@ -434,6 +599,7 @@
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
         const details = await res.json();
+        console.log("FULL RESPONSE:", details);
         if (details.length) {
           const d = details[0];
           $("#TxtAdd1PD").val(d.add1);
@@ -443,46 +609,94 @@
 
           $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").val("");
         }
-      } catch (e) {
-        console.error("Error fetching party address:", e);
+      } catch (err) {
+        showToast("Error fetching party address:" + err.message, { type: "error" });
+       // console.error("Error fetching party address:", e);
 
       }
     }
 
-
-      function setFormReadOnly() {
+    function setFormReadOnly() {
         const formSelector = '#MiscConsumptionEntryForm';
+
+        // Normal fields
         $(`${formSelector} input:not([type="hidden"]):not([type="time"])`).prop('readonly', true);
         $(`${formSelector} input[type="time"]`).prop('disabled', true);
         $(`${formSelector} select`).prop('disabled', true);
         $(`${formSelector} textarea`).prop('readonly', true);
         $(`${formSelector} button`).prop('disabled', true);
-        $('#tblConsumptionEntry tbody tr, #tblPendingDocument tbody tr').each(function () {
+
+        $(formSelector).addClass('erppage-readonly');
+        $('#btn-save').hide();
+        // ===== TABLE FIELDS FIX =====
+        $('#tblConsumptionEntry tbody tr').each(function () {
+
+            $(this).find('input').prop('readonly', true).prop('disabled', true);
+            $(this).find('select').prop('disabled', true);
+
+            $(this).find('select').each(function () {
+                if ($(this).hasClass("select2-hidden-accessible")) {
+                    $(this).select2('destroy');
+                }
+            });
+
+            $(this).find('.btn-add-action, .btn-delete-action')
+                .css({
+                    'pointer-events': 'none',
+                    'opacity': '0.5'
+                });
+        });
+
+        //ADD THIS (TABLE CSS LOCK - SIMPLE & CLEAN)
+        $('#tblConsumptionEntry').css({
+            'pointer-events': 'none',
+            'opacity': '0.85'
+        });
+
+        // Pending table also disable
+        $('#tblPendingDocument tbody tr').each(function () {
             $(this).find('input, select, textarea').prop('disabled', true);
         });
+
+        $('#tblPendingDocument').css({
+            'pointer-events': 'none',
+            'opacity': '0.85'
+        });
+
+        // global row buttons
         $('.btn-add-row, .btn-delete-row, #PendngAddRow').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
+
         $('#tablePagination').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
-        $(`${formSelector} input, ${formSelector} select, ${formSelector} textarea`).attr('tabindex', '-1');
-    }
 
+        $(`${formSelector} input, ${formSelector} select, ${formSelector} textarea`)
+            .attr('tabindex', '-1');
+    }
 
     async function LoadDropDowns() {
       await Promise.all([
-            DDLVtype(),
-        DDLParty(),
+        bindDropdown('MiscConsumptionEntry','DocType', '#ddlDocType','',  null, null, true ),
+        bindDropdown('MiscConsumptionEntry','Party', '#ddlPartyName', '-- Select Party --'),
         loadItemMaster(),
         loadDeptMaster(),
         loadUnit()
-
       ]);
+       initSelect2();
     }
 
+    function initSelect2() {
+        $('#ddlPartyName').select2({
+            placeholder: "-- Select Party --",
+            allowClear: true,
+            width: '100%'
+        });
+    }
+      
     async function loadItemMaster() {
       const res = await fetch("/MiscConsumptionEntry/DDLItemMaster");
       const data = await res.json();
@@ -504,21 +718,29 @@
       data.forEach(i => UnitMap[i.value] = i.text);
     }
 
-    async function DDLVtype() {
-      const res = await fetch("/MiscConsumptionEntry/DDlVType");
-      const list = await res.json();
-      const ddl = $("#ddlDocType");
-      ddl.empty().append('<option value="">-- Select Voucher Type --</option>');
-      list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
-    }
+    // async function DDLVtype() {
+    //   const res = await fetch("/MiscConsumptionEntry/DDlVType");
+    //   const list = await res.json();
+    //   const ddl = $("#ddlDocType");
+    //   ddl.empty();
+    //  // ddl.empty().append('<option value="">-- Select Voucher Type --</option>');
+    //   list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+    //   if (list.length > 0) {
+    //         const defaultVal = list[0].value;
 
-    async function DDLParty() {
-      const res = await fetch("/MiscConsumptionEntry/DDlParty");
-      const list = await res.json();
-      const ddl = $("#ddlPartyName");
-      ddl.empty().append('<option value="">-- Select Party --</option>');
-      list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
-    }
+    //         ddl.val(defaultVal);      // set selected
+    //         GetVNo(defaultVal);       // generate doc no once
+    //   }
+       
+    // }
+
+    // async function DDLParty() {
+    //   const res = await fetch("/MiscConsumptionEntry/DDlParty");
+    //   const list = await res.json();
+    //   const ddl = $("#ddlPartyName");
+    //   ddl.empty().append('<option value="">-- Select Party --</option>');
+    //   list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+    // }
 
     async function GetVNo(Vtype) {
       const res = await fetch(`/MiscConsumptionEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
@@ -526,10 +748,10 @@
       if (data.v_NO) {
         $('#NumDocNo').val(data.v_NO);
       } else {
+        showToast("No Document Number Received", { type: "warning" });
         console.warn('No document number received');
       }
     }
-
 
     function formatDate(dateStr) {
       if (!dateStr) return null;
@@ -543,7 +765,7 @@
         .join("");
     }
 
-     function collectTableRowData() {
+    function collectTableRowData() {
       const rows = document.querySelectorAll('#tblConsumptionEntry tbody tr');
 
       return Array.from(rows, row => ({
@@ -555,6 +777,26 @@
         QTY: parseFloat(row.querySelector('input.quantity')?.value) || null,
         REMARKS: row.querySelector('input.remarks')?.value || ''
       }));
+    }
+
+    function initRowSelect2($row) {
+        $row.find('.itemName').select2({
+            placeholder: "-- Select Item --",
+            allowClear: true,
+            width: '100%'
+        });
+
+        $row.find('.department').select2({
+            placeholder: "-- Select Department --",
+            allowClear: true,
+            width: '100%'
+        });
+
+        $row.find('.unit').select2({
+            placeholder: "-- Select Unit --",
+            allowClear: true,
+            width: '100%'
+        });
     }
 
     function addRow($tbody, data = {}) {
@@ -578,10 +820,15 @@
             <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
           </td>
         </tr>`;
-      $tbody.append(row);
+      // $tbody.append(row);
+         const $newRow = $(row);
+         $tbody.append($newRow);
+
+        initRowSelect2($newRow);
     }
 
     function LoadFormByID(rowId, vtype) {
+      $('.circle-loader').css('display', 'flex');
       $.ajax({
         url: '/MiscConsumptionEntryList/GetDataByCode',
         method: 'POST',
@@ -590,15 +837,11 @@
           vtype: vtype
         },
         success: function (result) {
-          console.log("selected data:", result);
-          console.log('vType', vtype);
           if (!result.success || !result.data || !result.data.header) {
-            toastr.error("Invalid or missing response data.");
+            //toastr.error("Invalid or missing response data.");
+            showToast("Invalid or missing response data.", { type: "error" });
             return;
           }
-
-          console.log('data', result);
-
 
           const header = result.data.header;
           const details = result.data.details;
@@ -607,10 +850,10 @@
           $('#TxtCode').val(header.doC_ID || '');
           $('#ddlDocType').val(header.v_TYPE || '');
           $('#NumDocNo').val(header.v_NO || '');
-            $('#TmDocTime').val(header.v_TIME);
-
+          $('#TmDocTime').val(header.v_TIME);
           $('#DtDocDate').val(formatDate(header.v_DATE));
-          $('#ddlPartyName').val(header.partY_CODE || '');
+         // $('#ddlPartyName').val(header.partY_CODE || '');
+          $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
           $('#TxtVehicleNo').val(header.trucK_NO || '');
           $('#TxtRemarks').val(header.remarks || '');
           $('#TxtAdd1PD').val(header.add1 || '');
@@ -636,17 +879,21 @@
 
             };
 
-            addRow($tbody, rowData);  // Assuming addRow is your custom row-adding function
+            addRow($tbody, rowData);  
           });
         },
         error: function (xhr, status, error) {
-          console.error("AJAX error:", error);
-          toastr.error("Error loading form data: " + error);
+          //console.error("AJAX error:", error);
+         // toastr.error("Error loading form data: " + error);
+         showToast("Error loading Form Data:" + error.message, { type: "error" });
+        },
+        complete:function(){
+            $('.circle-loader').css('display', 'none');
         }
       });
     }
 
-     function loadPendingDocuments(partyId) {
+    function loadPendingDocuments(partyId) {
         $.ajax({
             url: '/MiscConsumptionEntryList/GetPendingDocumnents',
             type: 'GET',
@@ -654,13 +901,13 @@
             success: function (data) {
                 let tbody = $('#tblPendingDocument tbody');
                 tbody.empty();
-                         if (data.length === 0) {
+                if (data.length === 0) {
                     tbody.append('<tr><td colspan="8" class="text-center">No pending documents found.</td></tr>');
                 } else {
                     $.each(data, function (i, item) {
                         let row = `<tr>
                         <td style="display:none;">${item.v_NO}</td>
-                        <td><input type="checkbox" class="select-row" /></td> <!-- ✅ Add class -->
+                        <td><input type="checkbox" class="select-row" /></td> 
                         <td>${item.v_type}</td>
                         <td>${item.v_NO}</td>
                         <td>${item.v_date}</td>
@@ -676,16 +923,15 @@
                         tbody.append(row);
                     });
                 }
-
                 $('#pendingModal').modal('show');
             },
             error: function (xhr) {
-                  toastr.warning("Error loading pending documents.");
+                //toastr.warning("Error loading pending documents.");
+                showToast("Error loading pending documents.", { type: "error" });
                 console.log(xhr.responseText);
             }
         });
     }
-
 
     function getSelectedPendingDocuments() {
         let selectedRows = [];
@@ -708,11 +954,10 @@
                 selectedRows.push(rowData);
             }
         });
-        console.log('selected' , selectedRows);
         return selectedRows;
     }
 
-        function addSelectedToConsumptionTable(selectedRows) {
+    function addSelectedToConsumptionTable(selectedRows) {
         const $tbody = $("#tblConsumptionEntry tbody");
 
         selectedRows.forEach(row => {
@@ -753,6 +998,12 @@
         });
     }
 
+    //===Set Current Date & Time=====
+    function setCurrentDateTime() {
+        const now = new Date();
 
+        $('#DtDocDate').val(now.toISOString().split('T')[0]);
+        $('#TmDocTime').val(now.toTimeString().slice(0, 5));
+    }
 
 </script>

@@ -244,3 +244,27 @@ $(document).ready(function () {
 //How to call
 //<input type="number" class="form-control" id="FLAG_A" name="FLAG_A" data-maxlength="5">
 
+
+function handleBack(redirectUrl, isReadOnly = false) {
+
+    if (isReadOnly) {
+        window.location.href = redirectUrl;
+        return;
+    }
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Unsaved data will be lost.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, exit',
+        cancelButtonText: 'Stay',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = redirectUrl;
+        }
+    });
+}
+
