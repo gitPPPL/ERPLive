@@ -1,0 +1,1214 @@
+﻿
+/* ===== HEADER UPGRADE ===== */
+.erppage-header {
+    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    color: #fff;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+}
+
+/* LEFT */
+.erppage-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+/* RIGHT SIDE PUSH */
+.erppage-header-right {
+    margin-left: auto; /* 🔥 pushes to right */
+}
+
+/* BACK BUTTON */
+.erppage-header-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+    /* HOVER EFFECT */
+    .erppage-header-back:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-1px);
+    }
+
+    /* ICON SIZE */
+    .erppage-header-back i {
+        font-size: 12px;
+    }
+/* ICON */
+.erppage-header-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+    .erppage-header-icon i {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 6px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+/* BASE COPY BUTTON */
+.erppage-btn-copy {
+    background: #2563eb; /* nice blue for copy */
+    color: #fff;
+    border: 1px solid #1e40af; /* slightly darker border */
+}
+
+    /* Hover effect */
+    .erppage-btn-copy:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+    }
+
+    /* Click effect */
+    .erppage-btn-copy:active {
+        transform: scale(0.97);
+    }
+
+    /* Icon inside button */
+    .erppage-btn-copy i {
+        font-size: 14px;
+        color: #fff;
+    }
+
+.erppage-btn-danger {
+    background: #ef4444; /* nice red for danger */
+    color: #fff;
+    border: 1px solid #dc2626; /* slightly darker red border */
+}
+
+    /* Hover effect */
+    .erppage-btn-danger:hover {
+        background: #dc2626; /* darker red for hover */
+        transform: translateY(-1px);
+    }
+
+    /* Click effect */
+    .erppage-btn-danger:active {
+        transform: scale(0.97);
+    }
+
+    /* Icon inside button */
+    .erppage-btn-danger i {
+        font-size: 14px;
+        color: #fff;
+    }
+/* Container aligns buttons to the right */
+.erppage-internalaction {
+    display: flex;
+    justify-content: flex-end; /* pushes content to the right */
+    gap: 6px; /* optional spacing if multiple buttons */
+    margin-top: 10px; /* optional spacing from fields above */
+}
+
+
+/* TITLE */
+.erppage-header-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+.erppage-readonly input,
+.erppage-readonly textarea,
+.erppage-readonly select {
+    pointer-events: none; /* 🚫 no click */
+    user-select: none; /* 🚫 no text select */
+    background-color: #f5f5f5; /* optional grey */
+    cursor: not-allowed; /* 🚫 no text cursor */
+}
+
+/* Select2 fix */
+.erppage-readonly .select2-container {
+    pointer-events: none;
+    user-select: none;
+    cursor: not-allowed;
+}
+#erp-center-toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+}
+
+.erppage_centertoast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #333;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    margin-top: 10px;
+    min-width: 250px;
+    justify-content: center;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: 0.3s ease;
+}
+
+    /* show animation */
+    .erppage_centertoast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* types */
+    .erppage_centertoast.success {
+        background: #28a745;
+    }
+
+    .erppage_centertoast.error {
+        background: #dc2626;
+    }
+
+    .erppage_centertoast.warning {
+        background: #f59e0b;
+    }
+
+    .erppage_centertoast.info {
+        background: #2563eb;
+    }
+
+.toast-icon {
+    font-size: 16px;
+}
+/* ===== CONTAINER ===== */
+.erppage-container {
+    margin: 16px auto;
+   /* padding: 0 10px;*/
+}
+
+/* ===== SECTION (FIELDSET) ===== */
+.erppage-fieldset {
+    border: 1px solid #c1d6ff;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+    margin-bottom: 18px;
+    padding: 10px 10px 10px 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s ease;
+}
+
+    /* Keep semantic but hide default legend */
+.erppage-fieldset legend {
+    position: absolute;
+    opacity: 0;
+}
+   
+    /* ===== SECTION HEADER ===== */
+.erppage-section-header {
+    padding: 6px 16px;
+    background: #d7d7d7;
+    border-left: 4px solid #2f7d32;
+    color: #27712b;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 16px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+}
+    .erppage-section-header:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.10);
+    }
+    /* ===== BODY ===== */
+.erppage-body {
+    padding: 10px 12px;
+}
+
+/* ===== GRID ===== */
+.erppage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 35px;
+    row-gap: 18px;
+    padding: 6px;
+}
+.erppage-grid1 {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    column-gap: 35px;
+    row-gap: 18px;
+    padding: 6px;
+}
+.erppage-grid2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 35px;
+    row-gap: 18px;
+    padding: 6px;
+}
+.erppage-grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 35px;
+    row-gap: 18px;
+    padding: 6px;
+}
+.erppage-grid4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 10px;
+    row-gap: 18px;
+    padding: 6px;
+}
+
+/* SUB FIELDSET */
+.erppage-subfieldset {
+    border: 1px solid #bed0fb;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+    .erppage-subfieldset:hover {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+    /* HIDE DEFAULT LEGEND */
+    .erppage-subfieldset legend {
+        position: absolute;
+        opacity: 0;
+    }
+
+/*Row columns behavior start*/
+.erppagesmodal-action-bottom {
+    height: 100%;
+    align-items: flex-end;
+}
+.erppagesmodal-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 30px;
+    flex-wrap: nowrap;
+}
+
+    .erppagesmodal-checkbox-wrap input[type="checkbox"] {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .erppagesmodal-checkbox-wrap label {
+        margin: 0;
+        display: inline-block;
+        white-space: nowrap;
+        line-height: 1;
+    }
+.erppagesrow {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -6px;
+    margin-right: -6px;
+}
+
+    .erppagesrow > [class*="erppagescol-"] {
+        padding-left: 6px;
+        padding-right: 6px;
+        box-sizing: border-box;
+    }
+.erppagescolumn {
+    flex: 1;
+    min-width: 0; /* prevents overflow issues */
+}
+.erppagescol-1 {
+    flex: 0 0 8.333%;
+    max-width: 8.333%;
+}
+
+.erppagescol-2 {
+    flex: 0 0 16.666%;
+    max-width: 16.666%;
+}
+
+.erppagescol-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+.erppagescol-4 {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+}
+
+.erppagescol-5 {
+    flex: 0 0 41.666%;
+    max-width: 41.666%;
+}
+
+.erppagescol-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.erppagescol-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+@media (max-width: 768px) {
+    .erppagescolumn,
+    [class*="erppagescol-"] {
+        flex: 0 0 100%; /* 🔥 stack on mobile */
+    }
+}
+
+.erppage-col-span-1 {
+    grid-column: span 1;
+}
+
+.erppage-col-span-2 {
+    grid-column: span 2; /* 🔥 takes double width */
+}
+
+.erppage-col-span-3 {
+    grid-column: span 3;
+}
+/*Row columns behavior end*/
+
+
+/* CUSTOM HEADER */
+.erppage-subheader {
+    padding: 6px 16px;
+    background: #d7d7d7;
+    border-left: 4px solid #2f7d32;
+    color: #27712b;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 16px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+}
+.erppage-subfieldset.collapsed .erppage-grid {
+    display: none;
+}
+/* BODY */
+.erppage-subfieldset .erppage-grid {
+    padding: 6px;
+}
+.erppage-subfieldset.collapsed .erppage-grid1 {
+    display: none;
+}
+/* BODY */
+.erppage-subfieldset .erppage-grid1 {
+    padding: 6px;
+}
+.erppage-subfieldset.collapsed .erppage-grid3 {
+    display: none;
+}
+/* BODY */
+.erppage-subfieldset .erppage-grid3 {
+    padding: 6px;
+}
+.erppage-subfieldset.collapsed .erppage-grid2 {
+    display: none;
+}
+/* BODY */
+.erppage-subfieldset .erppage-grid2 {
+    padding: 6px;
+}
+.erppage-subfieldset.collapsed .erppage-grid4 {
+    display: none;
+}
+/* BODY */
+.erppage-subfieldset .erppage-grid4 {
+    padding: 6px;
+}
+/* ===== FIELD ===== */
+.erppage-field {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    flex-direction: column; /* 🔥 stack label + input always */
+}
+
+/* ===== FIELD ===== */
+.erppage-divfield {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    flex-direction: column; /* 🔥 stack label + input always */
+}
+
+/* ===== Select2 Container ===== */
+.erppage-select + .select2-container {
+    width: 100% !important;
+    font-size: 13px;
+}
+
+/* ===== Selected Box ===== */
+.select2-container--default .select2-selection--single {
+    height: 30px !important;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+}
+
+    /* ===== Text inside select ===== */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #495057;
+        line-height: normal !important;
+       
+        padding: 4px 8px;
+    }
+
+/* ===== Arrow ===== */
+.select2-container--default .select2-selection__arrow {
+    height: 100%;
+    right: 8px;
+}
+
+/* ===== Focus Effect ===== */
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+}
+
+/* ===== Dropdown Panel ===== */
+.select2-dropdown {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+/* ===== Search Box ===== */
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+    outline: none;
+}
+
+    .select2-search--dropdown .select2-search__field:focus {
+        border-color: #0d6efd;
+    }
+
+/* ===== Options ===== */
+.select2-results__option {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+/* Hover */
+.select2-results__option--highlighted {
+    background-color: #08306b !important;
+    color: #d7d7d7;
+}
+
+/* Selected */
+.select2-results__option--selected {
+    background-color: #d7d7d7 !important;
+    font-weight: 500;
+}
+
+/* ===== Clear Button ===== */
+.select2-selection__clear {
+    color: red !important;
+    font-size: 16px;
+}
+
+/* ===== Error State ===== */
+.is-invalid + .select2-container .select2-selection--single {
+    border: 1px solid red !important;
+}
+.erppage-required {
+    border-left: 3px solid #ff2626 !important;
+    padding-left: 6px; /* adjust spacing after border */
+}
+
+    .erppage-required + .select2-container .select2-selection--single {
+        border-left: 3px solid #ff2626 !important;
+        padding-left: 6px;
+    }
+
+.is-invalid {
+    border: 1px solid red !important;
+}
+
+.erppage-redinput {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 4px 10px;
+    transition: 0.2s;
+    box-sizing: border-box;
+    font-size: 13px;
+    color: #2c2c2c;
+    border-left: 3px solid #ff2626;
+}
+.erppage-datebox {
+    position: relative;
+    width: 100%;
+}
+/* ===== LABEL ===== */
+.erppage-label {
+    font-size: 13px;
+    color: #374151;
+    display: inline-block;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* ===== INPUT ===== */
+.erppage-input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 4px 10px;
+    transition: 0.2s;
+    box-sizing: border-box; /* 🔥 IMPORTANT */
+    font-size: 13px;
+    color: #2c2c2c;
+}
+/* ===== TEXTAREA ===== */
+.erppage-textarea {
+    width: 100%;
+    height: 60px; /* fixed height */
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    font-size: 13px;
+    color: #2c2c2c;
+    resize: none; /* user cannot resize */
+    font-family: inherit;
+    overflow-y: auto; /* vertical scrollbar if content overflows */
+
+    white-space: pre-wrap; /* preserves line breaks from Enter */
+    word-break: break-word; /* wraps long words */
+    overflow-wrap: break-word;
+}
+
+    /* Focus effect like input */
+    .erppage-textarea:focus {
+        outline: none;
+        border-color: #2f7d32;
+        box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
+    }
+/* ===== SELECT FIX (ONLY ADDITION) ===== */
+select.erppage-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 5 4.5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 30px;
+    font-size: 13px;
+    color: #2c2c2c;
+}
+
+/* Focus */
+.erppage-input:focus {
+    outline: none;
+    border-color: #2f7d32;
+    box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
+}
+/* wrapper for date + checkbox */
+
+
+/* date input takes full space */
+.erppage-dateinput {
+    width: 100%;
+    height: 30px;
+    padding-right: 35px; /* 🔥 space for checkbox */
+}
+.erppage-checkbox-inside {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+    .erppage-checkbox-inside input {
+        cursor: pointer;
+        transform: scale(1.1);
+    }
+
+/* checkbox inside input area */
+/*Image Attachment Start*/
+.erppage-upload-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.erppage-preview-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 8px;
+    background: #f9fafb;
+    min-height: 90px;
+    flex-wrap: wrap;
+}
+
+    .erppage-preview-box img {
+        width: 100px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        max-width: 100%;
+    }
+
+.erppage-btn-remove {
+    background: #fff;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+    .erppage-btn-remove:hover {
+        background: #ef4444;
+        color: #fff;
+    }
+
+/* Tablet */
+@media (max-width: 768px) {
+    .erppage-preview-box img {
+        width: 80px;
+        height: 60px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .erppage-preview-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .erppage-preview-box img {
+            width: 100%;
+            height: auto;
+            max-height: 180px;
+        }
+
+    .erppage-btn-remove {
+        width: 100%;
+        justify-content: center;
+        display: flex;
+    }
+}
+/*image Attachment End*/
+/* ===== RADIO GROUP ===== */
+.erppage-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap; /* ✅ allows wrapping on small screens */
+}
+
+.erppage-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #262525;
+}
+
+/* ===== INLINE INPUT GROUP (H x W cm) ===== */
+.erppage-inline-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    /*flex-wrap: wrap;*/ /* ✅ important for mobile */
+}
+
+.small-input {
+    width: 100px;
+    min-width: 60px;
+}
+.medium-input {
+    width: 150px;
+    min-width: 90px;
+}
+.required{
+    color:red;
+}
+/* Wrapper */
+.erppageinputicon-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+    /* Input with right spacing */
+    .erppageinputicon-wrapper .erppage-input {
+        width: 100%;
+        padding-right: 38px;
+    }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide the spinner arrows in Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Icon */
+.erppageinputicon {
+    position: absolute;
+    right: 0px;
+    border-radius: 5px;
+    top: 50%;
+    background-color: #2f7d32;
+    padding: 7px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s ease;
+}
+
+    /* Hover */
+    .erppageinputicon:hover {
+        color: #fff;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+    .erppageinputicon {
+        right: 8px;
+        font-size: 13px;
+    }
+
+    .erppageinputicon-wrapper .erppage-input {
+        padding-right: 34px;
+    }
+}
+/* ===== MULTI SELECT (COLORS) ===== */
+.erppage-multi-select {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* desktop */
+    gap: 6px;
+}
+
+/* Make complex fields take full row */
+.full-width {
+    grid-column: 1 / -1; /* 🔥 always full width */
+}
+
+.erppage-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 4px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.erppage-tab {
+    padding: 8px 14px;
+    border: none;
+    background: #f3f4f6;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+    .erppage-tab.active {
+        background: #2f7d32;
+        color: #fff;
+    }
+
+.erppage-tab-content {
+    display: none;
+}
+
+    .erppage-tab-content.active {
+        display: block;
+    }
+.erppage-accordion-header {
+    display: none;
+    padding: 10px;
+    background: #f9fafb;
+    border-left: 4px solid #2f7d32;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.erppage-accordion-body {
+    display: block;
+}
+
+@media (max-width: 768px) {
+
+    .erppage-tabs {
+        display: none; /* hide tabs */
+    }
+
+    .erppage-tab-content {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .erppage-accordion-header {
+        display: block;
+    }
+
+    .erppage-accordion-body {
+        display: none;
+        padding: 10px;
+    }
+
+    .erppage-tab-content.active .erppage-accordion-body {
+        display: block;
+    }
+}
+/* Tablet */
+@media (max-width: 1024px) {
+    .full-width {
+        grid-column: span 2;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .full-width {
+        grid-column: span 1;
+    }
+    .erppage-subheader {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+/* ===== TABLET FIX ===== */
+@media (max-width: 1024px) {
+    .erppage-multi-select {
+        grid-template-columns: repeat(2, 1fr); /* 2 per row */
+    }
+}
+
+/* ===== MOBILE FIX ===== */
+@media (max-width: 600px) {
+
+    /* Stack radio buttons nicely */
+    .erppage-radio-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .erppage-inline-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .small-input {
+        flex: 1; /* 🔥 equal width */
+        min-width: 50px;
+    }
+
+    .inline-text {
+        flex-shrink: 0;
+    }
+
+    /* Colors full width */
+    .erppage-multi-select {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== BUTTON ===== */
+.erppage-btn-common {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: #fff;
+}
+
+    .erppage-btn-common:hover {
+        background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        transform: translateY(-1px);
+    }
+
+    .erppage-btn-common:active {
+        transform: scale(0.97);
+    }
+
+/* ACTION BAR */
+.erppage-actions {
+    position: sticky;
+    bottom: 0;
+    display: flex; /* 🔥 MISSING */
+    justify-content: flex-end; /* now works */
+    gap:10px;
+    background: #fff;
+    padding: 6px 12px; /* better spacing */
+    border-top: 1px solid #eee;
+    z-index: 999;
+}
+
+/* BASE BUTTON */
+.erppage-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+/* SAVE */
+.erppage-btn-primary {
+    background-color: #08306b;
+    color: white;
+}
+/* SAVE */
+.erppage-btn-save {
+    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    color: #fff;
+}
+
+/* CANCEL */
+.erppage-btn-cancel {
+    background: #f3f4f6;
+    color: #374151;
+}
+.erppage-btn-remove {
+    color: #ff3838;
+    border: 1px solid #ff3838;
+}
+/* HOVER */
+.erppage-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* CLICK FEEL */
+.erppage-btn:active {
+    transform: scale(0.97);
+}
+
+/* 🔥 ROTATION ANIMATION */
+.erppage-btn-save.loading i {
+    animation: erppage-spin 1s linear infinite;
+}
+
+/* KEYFRAME */
+@keyframes erppage-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ICON */
+.erppage-btn i {
+    font-size: 14px;
+}
+.erppagescol-25 {
+    flex: 0 0 calc(25% - 9px);
+    max-width: calc(25% - 9px);
+}
+.erppagesrow + .erppagesrow {
+    margin-top: 18px;
+}
+/*Split pages into 9:3 start*/
+.erppage-split {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* 🔥 9:3 ratio */
+    gap: 20px;
+    align-items: start;
+}
+.erppage9 {
+    width: 100%;
+}
+.erppage3 {
+    width: 100%;
+}
+
+/* CARD */
+.erppage-image-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    position: sticky;
+    top: 20px; /* 🔥 stays visible */
+}
+.erppage-image-preview {
+    width: 100%;
+    height: 220px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .erppage-image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .erppage-image-preview::after {
+        content: "📷";
+        position: absolute;
+        font-size: 24px;
+        opacity: 0.4;
+    }
+.erppage-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.erppage-image-preview:hover {
+    cursor: pointer;
+    transform: scale(1.02);
+}
+.erppage-image-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+    .erppage-image-actions .erppage-btn {
+        justify-content: center;
+        width: 100%;
+    }
+@media (max-width: 1024px) {
+    .erppage-split {
+        grid-template-columns: 2fr 1fr;
+    }
+
+    .erppage-image-preview {
+        height: 180px;
+    }
+}
+@media (max-width: 768px) {
+
+    .erppage-split {
+        grid-template-columns: 1fr; /* 🔥 STACK */
+    }
+
+    .erppage3 {
+        order: -1; /* 🔥 image comes on top */
+    }
+
+    .erppage-image-card {
+        position: static; /* remove sticky */
+    }
+
+    .erppage-image-preview {
+        height: 200px;
+    }
+
+    .erppage-image-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+        .erppage-image-actions .erppage-btn {
+            flex: 1;
+            min-width: 30%;
+        }
+}
+/*Split pages into 9:3 end*/
+/* ===== RESPONSIVE ===== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .erppage-grid1 {
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 25px;
+    }
+    .erppage-grid1 {
+        grid-template-columns: repeat(1, 1fr);
+        column-gap: 25px;
+    }
+    .erppage-grid3 {
+        grid-template-columns: repeat(2, 1fr);
+        column-gap: 25px;
+    }
+    .erppage-grid2 {
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 25px;
+    }
+    .erppage-grid4 {
+        grid-template-columns: repeat(4, 1fr);
+        column-gap: 25px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .erppage-grid {
+        grid-template-columns: 1fr;
+    }
+    .erppage-grid1 {
+        grid-template-columns: 1fr;
+    }
+    .erppage-grid3 {
+        grid-template-columns: 1fr;
+    }
+    .erppage-grid2 {
+        grid-template-columns: 1fr;
+    }
+    .erppage-grid4 {
+        grid-template-columns: 1fr;
+    }
+    .erppage-field {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    .erppage-divfield {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    .erppage-label {
+        margin-bottom: 4px;
+    }
+}

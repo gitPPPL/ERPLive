@@ -2,229 +2,199 @@
     ViewBag.Title = " Material Inward Entry List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<style>
-    .erp-search {
-        display: flex;
-        align-items: center;
-        width: 360px;
-        height: 30px;
-        background: linear-gradient(#f2f2f2, #e7e7e7);
-        border: 1px solid #b5b5b5;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    /* Input */
-    .erp-search-input {
-        flex: 1;
-        height: 100%;
-        border: none;
-        outline: none;
-        padding: 0 10px;
-        font-size: 12px;
-        background: #00000000;
-        color: #3c3c3c;
-    }
-
-        .erp-search-input::placeholder {
-            color: #8f8f8f;
-        }
-
-    /* Button */
-    .erp-search-button {
-        width: 30px;
-        height: 100%;
-        border: none;
-        cursor: pointer;
-        background: linear-gradient(#93be52, #34733a);
-        border-left: 1px solid #b5b5b5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-        .erp-search-button:hover {
-            background: linear-gradient(#555, #333);
-        }
-
-        .erp-search-button:active {
-            background: linear-gradient(#2f2f2f, #1f1f1f);
-        }
-
-    /* Magnifier icon (pure CSS) */
-    .erp-search-icon {
-        position: relative;
-        width: 12px;
-        height: 12px;
-        border: 2px solid #fff;
-        border-radius: 50%;
-    }
-
-        .erp-search-icon::after {
-            content: "";
-            position: absolute;
-            width: 7px;
-            height: 2px;
-            background: #fff;
-            bottom: -4px;
-            right: -5px;
-            transform: rotate(45deg);
-        }
-</style>
-
-<fieldset>
-    <legend class="legend-field">Inward Entry List</legend>
-    <div class="row">
-        <div class="col-lg-6">
-  
-            <div class="erp-search">
-                <input type="text" id="searchBox" class="erp-search-input" placeholder="Search by All Columns Name..." />
-                <button class="erp-search-button">
-                    <span class="erp-search-icon"></span>
-                </button>
-            </div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Material Inward Entry List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "InwardEntry")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Report">
+            <i class="fa fa-print"></i>Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_exportPdf" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i>Export
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblInwardEntryList" class="excel-table fixed-grid-table">
+            <colgroup>
+                <col style="display:none;" /> <!-- FIXED -->
+                <col style="width: 120px;" />  <!-- Voucher No -->
+                <col style="width: 130px;" />  <!-- Voucher Type -->
+                <col style="width: 120px;" />  <!-- Voucher Date -->
+                <col style="width: 100px;" />  <!-- Truck No -->
+                <col style="width: 120px;" />  <!-- Bill No -->
+                <col style="width: 120px;" />  <!-- Bill Date -->
+                <col style="width: 150px;" />  <!-- Party Name -->
+                <col style="width: 130px;" />  <!-- Transit No -->
+                <col style="width: 140px;" />  <!-- Waybill No -->
+                <col style="width: 100px;" />  <!-- RDate -->
+                <col style="width: 100px;" />  <!-- RTime -->
+                <col style="width: 100px;" />  <!-- Status -->
+                <col style="width: 120px;" />  <!-- Action -->
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="display:none;">Code</th>
+                    <th>Voucher No</th>
+                    <th>Voucher Type</th>
+                    <th>Voucher Date</th>
+                    <th>Truck No</th>
+                    <th>Bill No</th>
+                    <th>Bill Date</th>
+                    <th>Party Name</th>
+                    <th>Transit No</th>
+                    <th>Waybill No</th>
+                    <th>RDate</th>
+                    <th>RTime</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <!-- Pagination Section -->
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
         </div>
-        <div class="col-lg-6">
-            <div class="btn-rightalign">
-                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "InwardEntry")'" type="submit" class="btn btn-add">
-                    <i class="fa fa-plus"></i>Add
-                </button>
-                <button class="btn btn-print" id="btn_Report">
-                    <i class="fa fa-print"></i> Print
-                </button>
-                <button class="btn btn-export" id="btn_exportPdf">
-                    <i class="fas fa-file-export"></i> Export
-                </button>      
-            </div>
+        <div class="pagination-center">
+            <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
         </div>
     </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table id="tblInwardEntryList" class="table-width">
-                <thead class="table-head">
-                    <tr>
-                        <th style="display:none;">Code</th>
-                        <th>Voucher No</th>
-                        <th>Voucher Type</th>
-                        <th>Voucher Date</th>
-                        <th>Truck No</th>
-                        <th>Bill No</th>
-                        <th>Bill Date</th>
-                        <th>Party Name</th>
-                        <th>Transit No</th>
-                        <th>Waybill No</th>
-                        <th>RDate</th>
-                        <th>RTime</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <!-- Pagination container -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="pagination-end">
-                    <div class="custom-pagination" id="tablePagination"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</fieldset>
-
+</div>
+<script src="~/common/pagination.js"></script>
 <script>
-
-    let currentPage = 1;
-    let pageSize = 10;
-
+    let pager;
     $(document).ready(function () {
-        loadAllMenus();
+
+        initPagination();
 
         $('#searchBox').on('keyup', function () {
-            currentPage = 1;
-            loadAllMenus();
+            pager.goToPage(1);
         });
 
+        $('#pageSizeSelect').on('change', function () {
+            pager.setPageSize(parseInt($(this).val()));
+        });
 
         $('#btn_exportPdf').on('click', function () {
             var text = $('#searchBox').val();
-            var url = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
-            window.location.href = url;
+            window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
         $('#btn_Report').on('click', function () {
             var text = $('#searchBox').val();
-            var url = '/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text);
-
-            window.open(url, '_blank');
+            window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
         });
 
     });
+    function initPagination() {
 
+        pager = Pagination.create({
 
-    function loadAllMenus() {
-        const searchTerm = $('#searchBox').val();
+            pageSize: parseInt($('#pageSizeSelect').val()) || 10,
 
-        $.ajax({
-            url: '/InwardEntryList/GetList',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm: searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
+            paginationContainer: '#pageNumbers',
+            infoContainer: '#pageInfoText',
+
+            loader: function (params) {
+
+                $.ajax({
+                    url: '/InwardEntryList/GetList',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        searchTerm: $('#searchBox').val(),
+                        pageNumber: params.pageNumber,
+                        pageSize: params.pageSize
+                    },
+                    success: function (res) {
+
+                        if (!res.success) {
+                            toastr.error("Failed to load data.");
+                            return;
+                        }
+
+                        renderTable(res.lists || []);
+
+                        params.callback({
+                            data: res.lists || [],
+                            totalCount: res.totalCount || 0
+                        });
+                    },
+                    error: function (xhr) {
+                        toastr.error('Error loading list: ' + xhr.responseText);
+                    }
+                });
             },
-            success: function (res) {
-                if (!res.success) {
-                    toastr.error("Failed to load data.");
-                    return;
-                }
-                const list = res.lists;
-                const totalCount = res.totalCount;
-                const tbody = $('#tblInwardEntryList tbody'); 
 
-                tbody.empty();
-
-                if (list.length === 0) {
-                    tbody.append('<tr><td colspan="12" class="text-center text-muted">No list found.</td></tr>');
-                } else {
-                    $.each(list, function (index, item) {
-                        tbody.append(`
-                            <tr>
-                                <td>${item.v_NO}</td>
-                                <td>${item.v_TYPE}</td>
-                                <td>${formatDate(item.v_DATE)}</td>
-                                <td>${item.trucK_NO}</td>
-                                <td>${item.bilL_NO}</td>
-                                <td>${formatDate(item.bilL_DATE)}</td>
-                                <td>${item.partY_NAME}</td>
-                                <td>${item.transiT_NO}</td>
-                                <td>${item.waybilL_NO}</td>
-                                <td>${formatDate(item.r_DATE)}</td>
-                                <td>${item.r_TIME}</td>
-                                <td>${item.status}</td>
-                                <td>
-                                    <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"></i>
-                                    <i class="fa fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.v_NO}', '${item.vtypeCode}')"></i>
-                                    <i class="fa fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteTemp('${item.v_NO}', '${item.vtypeCode}')"></i>
-                                    <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" data-doc="${item.doC_ID}" onclick="showDocumentPopup('${item.doC_ID}')"></i>
-                                </td>
-                            </tr>
-                        `);
-                    });
-                    renderPagination(totalCount, pageSize, currentPage);
-                }
-            },
-            error: function (xhr) {
-                toastr.error('Error loading menu list: ' + xhr.responseText);
-
+            render: function (data) {
+                renderTable(data);
             }
         });
+
+        pager.load();
     }
+    function renderTable(list) {
+        const tbody = $('#tblInwardEntryList tbody');
+        tbody.empty();
 
-
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
+        $.each(list, function (index, item) {
+            tbody.append(`
+                <tr>
+                    <td>${item.v_NO}</td>
+                    <td>${item.v_TYPE}</td>
+                    <td>${formatDate(item.v_DATE)}</td>
+                    <td>${item.trucK_NO}</td>
+                    <td>${item.bilL_NO}</td>
+                    <td>${formatDate(item.bilL_DATE)}</td>
+                    <td>${item.partY_NAME}</td>
+                    <td>${item.transiT_NO}</td>
+                    <td>${item.waybilL_NO}</td>
+                    <td>${formatDate(item.r_DATE)}</td>
+                    <td>${item.r_TIME}</td>
+                    <td>${item.status}</td>
+                    <td class="action-col">
+                    <button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-edit"></i></button>
+                    <button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+                    <button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTemp('${item.v_NO}', '${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                    <button class="act-btn document" title="Document" style="cursor:pointer;" data-doc="${item.doC_ID}" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
     function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
@@ -236,51 +206,14 @@
 
         return `${day}-${month}-${year}`;
     }
-  
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const pagination = $('#tablePagination');
-        pagination.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-        }
-
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `
-                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-        }
-
-        pagination.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadAllMenus();
-    }
-
     function AddOrEditFunction(code, vtype) {
         window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}`;
     }
-
     function viewMenuDetails(code, vtype) {
-        window.location.href = '/InwardEntry/Index?id=' + encodeURIComponent(code) + '&vtype=' + encodeURIComponent(vtype) + '&mode=view';
+        window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
     }
+    function deleteTemp(code, VType) {
 
-       function deleteTemp(code, VType) {
         Swal.fire({
             title: "Are you sure?",
             text: "You want to delete this Inward Entry?",
@@ -291,6 +224,7 @@
             confirmButtonText: "Yes, delete it!",
             cancelButtonText: "Cancel"
         }).then((result) => {
+
             if (result.isConfirmed) {
 
                 $.ajax({
@@ -300,50 +234,44 @@
                     success: function (res) {
 
                         if (res.success) {
-
-                            if (res.message === "Successfully Delete") {
-                                toastr.success(res.message);
-                            } else {
-                                toastr.warning(res.message);
-                            }
-                            loadAllMenus();
-
+                            toastr.success(res.message || "Deleted successfully");
+                            pager.goToPage(1); // refresh
                         } else {
                             toastr.error(res.message || 'Failed to delete.');
                         }
                     },
-                    error: function (xhr, status, error) {
-                        toastr.error(`Error deleting: ${xhr.responseText || error}`);
+                    error: function (xhr) {
+                        toastr.error(xhr.responseText || 'Error deleting record.');
                     }
                 });
-
             }
         });
     }
-
     function showDocumentPopup(docCode) {
+
         $.ajax({
             url: '/InwardEntryList/DocDetailsCode',
             type: 'POST',
             dataType: 'json',
             data: { docCode: docCode },
-            success: function(response) {
-                if(response.success) {
+            success: function (response) {
+                if (response.success) {
                     showDocumentPopupjQuery(response.data, docCode);
                 } else {
                     toastr.error("Failed to get document details.");
                 }
             },
-            error: function() {
-                toastr.error("An error occurred while fetching document details.");
+            error: function () {
+                toastr.error("Error fetching document details.");
             }
         });
     }
-
-
+    function changeRowsPerPage() {
+        visitorPageSize = parseInt($('#pageSizeSelect').val());
+        currentVisitorPage = 1;
+          renderTable();
+    }
 </script>
-
-
 
 
 

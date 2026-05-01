@@ -4,364 +4,379 @@
     var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
     var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
 }
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
 
-
-<fieldset>
-    <legend class="legend-field">Material Inward Entry</legend>
-    <div class="row">
-        <div class="offset-md-6 col-md-6">
-            <div class="button-right">
-                <button type="button" class="btn btn-approved" data-bs-toggle="modal" data-bs-target="#approvedModal" id="btn_approval" style="display:none;">
-                    <i class="fa fa-check"></i> Approved
-                </button>
-                <button type="button" class="btn btn-draft"  id="btn_backtolist">
-                    <i class="fa fa-list"></i> Back to list
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-truck-loading"></i>
+        </div>
+        <div class="erppage-header-title">Material Inward Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button id="btn_backtolist" class="erppage-header-back">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar-end" style="display:none;">
+    <div class="erppagelist-actions">
+        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve" data-bs-toggle="modal" data-bs-target="#approvedModal" id="btn_approval" style="display:none;">
+            <i class="fa fa-check-circle"></i>Approved
+        </button>
+    </div>
+</div>
+@* Modal Popup *@
+<div class="modal fade" id="approvedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg erppagesmodal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-file-signature"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="ApprovedLabel">
+                        Document Approval Window
+                    </h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
                 </button>
             </div>
-        </div>
-    </div>
-    @* ModalPopup *@
-    <div class="modal fade" id="approvedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content draggable-modal">
-                <div class="popup-header">
-                    <h5 class="popup-title" id="ApprovedLabel">Document Approval Window</h5>
-                    <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                </div>
-                <div class="modal-body">
-                    <fieldset>
-                        <legend class="sub-legend">Approval User</legend>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ddlApprovalStatus">Approval Status</label>
-                                    <select class="form-control" id="ddlApprovalStatus">
-                                        <option value="">Select Approval Status</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ddlForwardTo">Forward to</label>
-                                    <select class="form-control" id="ddlForwardTo">
-                                        <option value="">Select Forward to</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="TxtRemarks">Remarks</label>
-                                    <select class="form-control" id="ddlRemarks">
-                                        <option value="">Select Forward to</option>
-                                    </select>
-                                </div>
+            <div class="erppagesmodal-body">
+                <fieldset class="erppagesmodal-fieldset">
+                    <legend>
+                        <i class="fa fa-user-check"></i> Approval User
+                    </legend>
+                    <div class="erppagesrow">
+                        <div class="erppagescol-4">
+                            <div class="erppagesmodal-group">
+                                <label for="ddlApprovalStatus" class="erppagesmodal-label">
+                                    Approval Status
+                                </label>
+                                <select class="erppagesmodal-input" id="ddlApprovalStatus">
+                                    <option value="">Select Approval Status</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="offset-md-4 col-md-8">
-                                <div class="button-right">
-                                    <button type="button" class="btn btn-success" id="btn_sendapproval"><i class="fa fa-paper-plane"></i> Send Approval</button>
+                        <div class="erppagescol-4">
+                            <div class="erppagesmodal-group">
+                                <label for="ddlForwardTo" class="erppagesmodal-label">
+                                    Forward To
+                                </label>
+                                <select class="erppagesmodal-input" id="ddlForwardTo">
+                                    <option value="">Select Forward to</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppagescol-4">
+                            <div class="erppagesmodal-group">
+                                <label for="ddlRemarks" class="erppagesmodal-label">
+                                    Remarks
+                                </label>
+                                <select class="erppagesmodal-input" id="ddlRemarks">
+                                    <option value="">Select Remarks</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="erppagesrow">
+                        <div class="erppagescol-12">
+                            <div class="erppagesmodal-action">
+                                <button type="button" class="erppagesmodal-btn" id="btn_sendapproval">
+                                    <i class="fa fa-paper-plane"></i> Send Approval
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="InwardEntryForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label for="ddlDocType" class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option>Select Doc Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label for="TxtDocNo" class="erppage-label">Document No</label>
+                    <input type="text" class="erppage-input" id="TxtDocNo" placeholder="Enter Document No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <div class="erppage-field">
+                        <label for="InDate" class="erppage-label">In Date</label>
+                        <input type="date" class="erppage-input" id="InDate" value="@logindate">
+                    </div>
+                </div>
+                <div class="erppage-divfield">
+                    <label for="InTime" class="erppage-label">In Time</label>
+                    <input type="time" class="erppage-input" id="InTime">
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label for="TxtRptDate" class="erppage-label">
+                        Reporting Date
+                    </label>
+
+                    <div class="erppage-inline-group" style="width:100%;">
+                        <input type="date" class="erppage-redinput" id="TxtRptDate">
+                        <input type="time" class="erppage-redinput" id="TiRptDate">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-container">
+            <div class="erppage-tabs">
+                <button class="erppage-tab active" data-tab="partydetails">Party Details</button>
+                <button class="erppage-tab" data-tab="shippinginfo">Shipping Info</button>
+                <button class="erppage-tab" data-tab="billchallan">Bill & Challan</button>
+            </div>
+            <div class="erppage-tab-content active" id="partydetails">
+                <div class="erppage-accordion-header">Party Details</div>
+                <div class="erppage-accordion-body">
+                    <fieldset class="erppage-fieldset">
+                        <div class="erppage-section-header">Party Details</div>
+                        <div class="erppage-body">
+                            <div class="erppage-grid2">
+                                <div class="erppage-field">
+                                    <label for="ddlPartyName" class="erppage-label">Party Name</label>
+                                    <select class="erppage-input erppage-required" id="ddlPartyName">
+                                        <option value="">Select Party Name</option>
+                                    </select>
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="TxtAddLine1" class="erppage-label">Address Line 1</label>
+                                    <div class="erppage-inline-group" style="width:100%;">
+                                        <input type="text" class="erppage-input" id="TxtAddLine1" placeholder="Enter Address" readonly>
+                                        <select id="ddladdressline1" style="width:50%" class="erppage-input">
+                                            <option value="" id="SelectAddress">Select address</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="TxtAddLine2" class="erppage-label">Address Line 2</label>
+                                    <input type="text" class="erppage-input" id="TxtAddLine2" readonly>
+                                </div>
+
+                                <div class="erppage-field">
+                                    <label for="TxtAddLine3" class="erppage-label">Address Line 3</label>
+                                    <input type="text" class="erppage-input" id="TxtAddLine3" readonly>
+                                </div>
+
+                                <div class="erppage-field">
+                                    <label for="ddlcity" class="erppage-label">City</label>
+                                    <select class="erppage-input" id="ddlcity" disabled>
+                                        <option>Select City</option>
+                                    </select>
+                                </div>
+
+                                <div class="erppage-field">
+                                    <label for="TxtPincode" class="erppage-label">Pincode</label>
+                                    <input type="text" class="erppage-input" id="TxtPincode" readonly>
+                                </div>
+                            </div>
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="TxtState" class="erppage-label">State</label>
+                                    <select class="erppage-input" id="TxtState" disabled>
+                                        <option>Select State</option>
+                                    </select>
+                                </div>
+
+                                <div class="erppage-field">
+                                    <label for="TxtGSTNo" class="erppage-label">GST No</label>
+                                    <input type="text" class="erppage-input" id="TxtGSTNo" readonly>
+                                </div>
+
+                                <div class="erppage-field">
+                                    <label for="TxtPAN" class="erppage-label">PAN</label>
+                                    <input type="text" class="erppage-input" id="TxtPAN" readonly>
+                                </div>
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="erppage-tab-content" id="shippinginfo">
+                <div class="erppage-accordion-header">Shipping Info</div>
+                <div class="erppage-accordion-body">
+                    <fieldset class="erppage-fieldset">
+                        <div class="erppage-section-header">Shipping Info</div>
+                        <div class="erppage-body">
+                            <div class="erppage-grid2">
+                                <div class="erppage-field">
+                                    <label for="ddlShipFrom" class="erppage-label">Ship From</label>
+                                    <select class="erppage-input" id="ddlShipFrom">
+                                        <option>Select Ship From</option>
+                                    </select>
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="txtShipAddress" class="erppage-label">Ship Address</label>
+                                    <input type="text" class="erppage-input" id="txtShipAddress" readonly>
+                                </div>
+                            </div>
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="ShipBillNo" class="erppage-label">Ship. Bill No</label>
+                                    <input type="text" class="erppage-input" id="ShipBillNo">
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="ShipBillDate" class="erppage-label">Ship. Bill Date</label>
+                                    <input type="date" class="erppage-input" id="ShipBillDate">
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="VehicleOutTime" class="erppage-label">Vehicle Out Time</label>
+                                    <div class="erppage-inline-group" style="width:100%;">
+                                        <input type="date" class="erppage-input" id="DtVehicleOutTime">
+                                        <input type="time" class="erppage-input" id="TiVehicleOutTime">
+                                    </div>
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="VehicleReturn" class="erppage-label">Vehicle Return</label>
+                                    <select class="erppage-input" id="VehicleReturn">
+                                        <option>NA</option>
+                                        <option>Returnable</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="ddlDocStatus" class="erppage-label">Doc Status</label>
+                                    <select class="erppage-input" id="ddlDocStatus">
+                                        <option>Select Doc Status</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </fieldset>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <form id="InwardEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>Select Doc Type</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="TxtDocNo">Document No</label>
-                    <input type="text" class="form-control" id="TxtDocNo" placeholder="Enter Document No" readonly>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="InDate">In Date</label>
-                    <input type="date" class="form-control" id="InDate" value="@logindate">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="InTime">In Time</label>
-                    <input type="time" class="form-control" id="InTime">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtRptDate">Reporting Date<span style="color:red;">*</span></label>
-                    <div class="input-divide">
-                        <input type="date" class="form-control" id="TxtRptDate">
-                        <input type="time" class="form-control" id="TiRptDate">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <!-- Party Details -->
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Party Details</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlPartyName">Party Name<span style="color:red;">*</span></label>
-                                <select class="form-control" id="ddlPartyName">
-                                    <option value="">Select Party Name</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAddLine1">Address Line 1</label>
-                                <div class="input-divide">
-                                    <input type="text" class="form-control" id="TxtAddLine1" placeholder="Enter Address" readonly>
-                                    <div class="select-wrapper">
-                                        <select id="ddladdressline1">  <option value="" id="SelectAddress">Select address</option>  </select>
+            <div class="erppage-tab-content" id="billchallan">
+                <div class="erppage-accordion-header">Bill & Challan</div>
+                <div class="erppage-accordion-body">
+                    <fieldset class="erppage-fieldset">
+                        <div class="erppage-section-header">Bill & Challan</div>
+                        <div class="erppage-body">
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="TxtPONo" class="erppage-label">PO No</label>
+                                    <input type="text" class="erppage-input" id="TxtPONo">
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="TxtBillNo" class="erppage-label">Party Bill No</label>
+                                    <div class="erppageinputicon-wrapper">
+                                        <input type="text" class="erppage-input" id="TxtBillNo">
+                                        <span class="erppageinputicon" id="BtnPartyBillno" data-bs-toggle="modal" data-bs-target="#ellipsisIcon">
+                                            <i class="fa fa-ellipsis-h"></i>
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtAddLine2">Address Line 2</label>
-                                <input type="text" class="form-control" id="TxtAddLine2" placeholder="Enter Address" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtAddLine3">Address Line 3</label>
-                                <input type="text" class="form-control" id="TxtAddLine3" placeholder="Enter Address" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlcity">City</label>
-                                <select class="form-control" id="ddlcity" disabled>
-                                    <option>Select City</option>
-                                </select>
-                                
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtPincode">Pincode</label>
-                                <input type="text" class="form-control" id="TxtPincode" placeholder="Enter Pincode" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtState">State</label>
-                                <select class="form-control" id="TxtState" disabled>
-                                    <option>Select State</option>
-                                </select>
-
-                            </div>
-                        </div>
-
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtGSTNo">GST No</label>
-                                <input type="text" class="form-control" id="TxtGSTNo" placeholder="Enter GST No" readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtPAN">PAN</label>
-                                <input type="text" class="form-control" id="TxtPAN" placeholder="Enter PAN" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <!-- Shipping Info -->
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Shipping Info</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlShipFrom">Ship From</label>
-                                <select class="form-control" id="ddlShipFrom">
-                                    <option>Select Ship From</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-
-
-                            <div class="form-group">
-                                <label for="ShipBillNo">Ship Address</label>
-                                <input type="text" class="form-control" id="txtShipAddress" placeholder="" readonly>
-                            </div>
-
-
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ShipBillNo">Ship. Bill No</label>
-                                <input type="text" class="form-control" id="ShipBillNo" placeholder="Enter Ship Bill No" maxlength="30">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ShipBillDate">Ship. Bill Date</label>
-                                <input type="date" class="form-control" id="ShipBillDate">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="VehicleOutTime">Vehicle Out Time</label>
-                                <div class="input-divide">
-                                    <input type="date" class="form-control" id="DtVehicleOutTime">
-                                    <input type="time" class="form-control" id="TiVehicleOutTime">
+                                <div class="erppage-field">
+                                    <label for="DtPartyBillDate" class="erppage-label">Party Bill Date</label>
+                                    <input type="date" class="erppage-input" id="DtPartyBillDate">
+                                </div>
+                                <div class="erppage-field">
+                                    <label for="TxtChallanNo" class="erppage-label">Challan No</label>
+                                    <input type="text" class="erppage-input" id="TxtChallanNo">
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="VehicleReturn">Vehicle Return</label>
-                                <select class="form-control" id="VehicleReturn">
-                                    <option> NA  </option>
-                                    <option> Returnable  </option>                            
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlDocStatus">Doc Status</label>
-                                <select class="form-control" id="ddlDocStatus">
-                                    <option>Select Doc Status</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <!-- Challan & Billing Info -->
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Bill & Challan</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtPONo">PO No</label>
-                                <input type="text" class="form-control" id="TxtPONo" placeholder="Enter PO No" maxlength="30">
-                            </div>
-                        </div>
-                    </div>
-                   
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtBillNo">Party Bill No</label>
-                                <div class="input-icon-wrapper">
-                                    <input type="text" class="form-control" id="TxtBillNo" maxlength="30">
-                                    <span class="input-icon" id="BtnPartyBillno" data-bs-toggle="modal" data-bs-target="#ellipsisIcon"><i class="fa fa-ellipsis-h"></i></span>
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="TxtChallanDate" class="erppage-label">Challan Date</label>
+                                    <input type="date" class="erppage-input" id="TxtChallanDate">
                                 </div>
+                                <div class="erppage-field">
+                                    <label for="TxtBillAmt" class="erppage-label">Bill Amount</label>
+                                    <input type="text" class="erppage-redinput numeric-only" id="TxtBillAmt">
+                                </div>
+
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtPartyBillDate">Party Bill Date <span id="span_partybilldate" style="color:red; display:none;">*</span></label>
-                                <input type="date" class="form-control" id="DtPartyBillDate">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtChallanNo">Challan No</label>
-                                <input type="text" class="form-control" id="TxtChallanNo" placeholder="Enter Challan No" maxlength="30"> 
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtChallanDate">Challan Date<span id="span_ChallanDatedate" style="color:red; display:none;">*</span></label>
-                                <input type="date" class="form-control" id="TxtChallanDate">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtBillAmt">Bill Amount<span style="color:red;">*</span></label>
-                                <input type="text"  class="form-control numeric-only" id="TxtBillAmt"  placeholder="Enter Bill Amount" maxlength="18">
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                </div>
             </div>
         </div>
-        <!--Modal Popup-->
+        @* Modal Popup  *@
         <div class="modal fade" id="ellipsisIcon" tabindex="-1" aria-labelledby="ellipsisIconLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="ellipsisIconLabel">Copy From</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                    <input type="text" id="searchBoxEI" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
-                                </div>
+            <div class="modal-dialog modal-xl erppagesmodal">
+                <div class="modal-content erppagesmodal-content draggable-modal">
+
+                    <!-- Header -->
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-copy"></i>
                             </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <div class="form-row">
-                                        <input type="checkbox" id="chkAppendEIModal">
-                                        <label class="checkbox-label" for="chkAppendEIModal">Append</label>
+                            <h5 class="erppagesmodal-title" id="ellipsisIconLabel">Copy From</h5>
+                        </div>
+
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="erppagesmodal-body">
+
+                        <!-- Search + Actions -->
+                        <fieldset class="erppagesmodal-fieldset">
+                            <legend><i class="fa fa-filter"></i> Search & Filter</legend>
+
+                            <div class="erppagesrow">
+                                <!-- Search -->
+                                <div class="erppagescol-4">
+                                    <div class="erppagesmodal-group">
+                                        <label for="searchBoxEI" class="erppagesmodal-label">Search Module</label>
+                                        <input type="text" id="searchBoxEI" class="erppagesmodal-input"
+                                               placeholder="Search Module..." aria-label="Search term" />
+                                    </div>
+                                </div>
+
+                                <!-- Append -->
+                                <div class="erppagescol-2">
+                                    <div class="erppagesmodal-group">
+                                        <label class="erppagesmodal-label">Option</label>
+                                        <div class="erppagesmodal-checkbox-wrap">
+                                            <input type="checkbox" id="chkAppendEIModal">
+                                            <label class="checkbox-label" for="chkAppendEIModal">Append</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Button -->
+                                <div class="erppagescol-6">
+                                    <div class="erppagesmodal-action erppagesmodal-action-bottom">
+                                        <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                                            <i class="fa fa-copy"></i> Select
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="btn-rightalign">
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Select</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblellipsisIconmodal" class="table-width">
+                        </fieldset>
+
+                        <!-- Table -->
+                        <div class="erppagelist-container mt-3">
+                            <div class="excel-wrapper">
+                                <table id="tblellipsisIconmodal" class="excel-table fixed-grid-table table-width">
                                     <thead class="table-head">
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" /></th>
@@ -384,194 +399,202 @@
                                 </table>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
-        <!--Transport Details-->
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">Transport Details</legend>
-            <div class="row">
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label for="TxtVehicleNo">Vehicle No<span style="color:red;">*</span></label>
-                        <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No"  maxlength="10" />
+        <!-- Transport Details -->
+        <fieldset class="erppage-subfieldset">
+            <legend>Transport Details</legend>
+            <div class="erppage-subheader">Transport Details</div>
+            <div class="erppage-body">
+                <!-- Row 1 -->
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtVehicleNo" class="erppage-label">Vehicle No</label>
+                        <input type="text" class="erppage-redinput" id="TxtVehicleNo" placeholder="Enter Vehicle No" maxlength="10" />
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtTransporter">Transport Name</label>         
-
-                        <select class="form-control" id="TxtTransporter">
+                    <div class="erppage-divfield">
+                        <label for="TxtTransporter" class="erppage-label">Transport Name</label>
+                        <select class="erppage-input" id="TxtTransporter">
                             <option>Select Transport Name</option>
                         </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="TxtGRNo" class="erppage-label">GR No.</label>
+                        <input type="text" class="erppage-input" id="TxtGRNo" maxlength="20" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="DtGRDate" class="erppage-label">GR Date</label>
+                        <input type="date" class="erppage-input" id="DtGRDate" />
+                    </div>
+                </div>
+                <!-- Row 2 -->
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtDriverName" class="erppage-label">Driver Name</label>
+                        <input type="text" class="erppage-input" id="TxtDriverName" maxlength="50" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label for="TxtDriverMobile" class="erppage-label">Driver Mobile No</label>
+                        <input type="number" class="erppage-input" id="TxtDriverMobile" maxlength="10" oninput="validateMobile(this)" />
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label for="txt_VehicleRemarks" class="erppage-label">Vehicle Remarks</label>
+                        <textarea class="erppage-textarea" id="txt_VehicleRemarks"></textarea>
+                    </div>
+                </div>
+                <!-- Row 3 Buttons -->
+                <div class="erppage-internalaction">
+                    <button type="button" class="erppage-btn erppage-btn-save" id="btn_setting">
+                        <i class="fa fa-cog"></i>
+                    </button>
+                    <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" id="btn_RCDetail" data-bs-target="#RCDetail">
+                        RC Detail
+                    </button>
 
-
-                    </div>
-                </div>
-                <div class="col-md-2">       
-                    <div class="form-group">
-                        <label for="TxtGRNo">GR No.</label>
-                        <input type="text" class="form-control" id="TxtGRNo"  maxlength="20" />
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label for="DtGRDate">GR Date</label>
-                        <input type="date" class="form-control" id="DtGRDate" />
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtDriverName">Driver Name </label>
-                        <input type="text" class="form-control" id="TxtDriverName" maxlength="50"/>
-                    </div>
+                    <button type="button" class="erppage-btn erppage-btn-save" id="btn_database">
+                        <i class="fa fa-database"></i>
+                    </button>
+                    <button type="button" class="erppage-btn erppage-btn-common" id="btn_FastagDetail" data-bs-toggle="modal" data-bs-target="#FastDetail">
+                        Fastag Detail
+                    </button>
                 </div>
             </div>
-            
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtDriverMobile">Driver Mobile No</label>
-                        <input type="number" class="form-control" id="TxtDriverMobile" maxlength="10" oninput="validateMobile(this)" />
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="txt_VehicleRemarks">Vehicle Remarks</label>
-                        <textarea typeof="text" class="form-control" id="txt_VehicleRemarks" ></textarea>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="btn-mt">
-                        <button type="button" class="btn btn-success" id="btn_setting"><i class="fa fa-cog"></i></button>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" id="btn_RCDetail" data-bs-target="#RCDetail">RC Detail</button>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="btn-mt">
-                        <button type="button" class="btn btn-success" id="btn_database"><i class="fa fa-database"></i></button>
-                        <button type="button" class="btn btn-primary" id="btn_FastagDetail" data-bs-toggle="modal" >Fastag Detail</button>
-                    </div>
-                </div>
-            </div>
-            @* Modal Popup *@
+
+            <!-- RC Detail Modal -->
             <div class="modal fade" id="RCDetail" tabindex="-1" aria-labelledby="RCDetailLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content draggable-modal">
-                        <div class="popup-header">
-                            <h5 class="popup-title">RC Data of Vehicle No.<span id="RCDetailLabel"></span></h5>
-                            <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                        </div>
-                        <div class="modal-body">
-                            @* <div class="button-right">
-                                <button type="button" class="btn btn-primary" id="Btn_selectedData">
-                                    <i class="fa fa-check"></i> Selected Data
-                                </button>
-                            </div> *@
-                            <div class="card">
-                                <div class="table-responsive">
-                                    <table id="tblRCDetaillist" class="table-width">
-                                        <thead class="table-head">
-                                            <tr>
-                                                <th>Client ID</th>
-                                                <th>RC Number</th>
-                                                <th>Registration Date</th>
-                                                <th>Owner Name</th>
-                                                <th>Father Name</th>
-                                                <th>Present Address</th>
-                                                <th>Permanent Address</th>
-                                                <th>Mobile Number</th>
-                                                <th>Vehicle Category</th>
-                                                <th>Chassis Number</th>
-                                                <th>Engine Number</th>
-                                                <th>Manufacturer</th>
-                                                <th>Model Name</th>
-                                                <th>Body Type</th>
-                                                <th>Fuel Type</th>
-                                                <th>Vehicle Color</th>
-                                                <th>Emission Norms</th>
-                                                <th>Fitness Valid Upto</th>
-                                                <th>Financer Name</th>
-                                                <th>Is Financed</th>
-                                                <th>Insurance Company</th>
-                                                <th>Insurance Policy No</th>
-                                                <th>Insurance Valid Upto</th>
-                                                <th>Manufacturing Date</th>
-                                                <th>Manufacturing Date (Formatted)</th>
-                                                <th>Registered RTO</th>
-                                                <th>Data Updated By</th>
-                                                <th>Less Information Flag</th>
-                                                <th>Tax Valid Upto</th>
-                                                <th>Tax Paid Upto</th>
-                                                <th>Cubic Capacity (CC)</th>
-                                                <th>Gross Vehicle Weight</th>
-                                                <th>No Of Cylinders</th>
-                                                <th>Seat Capacity</th>
-                                                <th>Sleeper Capacity</th>
-                                                <th>Standing Capacity</th>
-                                                <th>Wheel Base</th>
-                                                <th>Unladen Weight</th>
-                                                <th>Vehicle Category Description</th>
-                                                <th>PUCC Number</th>
-                                                <th>PUCC Valid Upto</th>
-                                                <th>Permit Number</th>
-                                                <th>Permit Issue Date</th>
-                                                <th>Permit Valid From</th>
-                                                <th>Permit Valid Upto</th>
-                                                <th>Permit Type</th>
-                                                <th>National Permit Number</th>
-                                                <th>National Permit Valid Upto</th>
-                                                <th>National Permit Issued By</th>
-                                                <th>Non Use Status</th>
-                                                <th>Non Use From Date</th>
-                                                <th>Non Use To Date</th>
-                                                <th>Blacklist Status</th>
-                                                <th>NOC Details</th>
-                                                <th>Owner Number</th>
-                                                <th>RC Status</th>
-                                                <th>Masked Owner Name</th>
-                                                <th>Challan Details</th>
-                                              
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                <div class="modal-dialog modal-xl erppagesmodal">
+                    <div class="modal-content erppagesmodal-content draggable-modal">
+                        <!-- Header -->
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-id-card"></i>
                                 </div>
+                                <h5 class="erppagesmodal-title">
+                                    RC Data of Vehicle No.<span id="RCDetailLabel"></span>
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <!-- Body -->
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper">
+                                <table id="tblRCDetaillist" class="excel-table fixed-grid-table table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Client ID</th>
+                                            <th>RC Number</th>
+                                            <th>Registration Date</th>
+                                            <th>Owner Name</th>
+                                            <th>Father Name</th>
+                                            <th>Present Address</th>
+                                            <th>Permanent Address</th>
+                                            <th>Mobile Number</th>
+                                            <th>Vehicle Category</th>
+                                            <th>Chassis Number</th>
+                                            <th>Engine Number</th>
+                                            <th>Manufacturer</th>
+                                            <th>Model Name</th>
+                                            <th>Body Type</th>
+                                            <th>Fuel Type</th>
+                                            <th>Vehicle Color</th>
+                                            <th>Emission Norms</th>
+                                            <th>Fitness Valid Upto</th>
+                                            <th>Financer Name</th>
+                                            <th>Is Financed</th>
+                                            <th>Insurance Company</th>
+                                            <th>Insurance Policy No</th>
+                                            <th>Insurance Valid Upto</th>
+                                            <th>Manufacturing Date</th>
+                                            <th>Manufacturing Date (Formatted)</th>
+                                            <th>Registered RTO</th>
+                                            <th>Data Updated By</th>
+                                            <th>Less Information Flag</th>
+                                            <th>Tax Valid Upto</th>
+                                            <th>Tax Paid Upto</th>
+                                            <th>Cubic Capacity (CC)</th>
+                                            <th>Gross Vehicle Weight</th>
+                                            <th>No Of Cylinders</th>
+                                            <th>Seat Capacity</th>
+                                            <th>Sleeper Capacity</th>
+                                            <th>Standing Capacity</th>
+                                            <th>Wheel Base</th>
+                                            <th>Unladen Weight</th>
+                                            <th>Vehicle Category Description</th>
+                                            <th>PUCC Number</th>
+                                            <th>PUCC Valid Upto</th>
+                                            <th>Permit Number</th>
+                                            <th>Permit Issue Date</th>
+                                            <th>Permit Valid From</th>
+                                            <th>Permit Valid Upto</th>
+                                            <th>Permit Type</th>
+                                            <th>National Permit Number</th>
+                                            <th>National Permit Valid Upto</th>
+                                            <th>National Permit Issued By</th>
+                                            <th>Non Use Status</th>
+                                            <th>Non Use From Date</th>
+                                            <th>Non Use To Date</th>
+                                            <th>Blacklist Status</th>
+                                            <th>NOC Details</th>
+                                            <th>Owner Number</th>
+                                            <th>RC Status</th>
+                                            <th>Masked Owner Name</th>
+                                            <th>Challan Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- Fastag Detail Modal -->
             <div class="modal fade" id="FastDetail" tabindex="-1" aria-labelledby="FastDetailLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content draggable-modal">
-                        <div class="popup-header">
-                            <h5 class="popup-title">RC Data of Vehicle No.<span id="FastDetailLabel"></span></h5>
-                            <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                        </div>
-                        <div class="modal-body">                           
-                            <div class="card">
-                                <div class="table-responsive">
-                                    <table id="tblFastagDetaillist" class="table-width">
-                                        <thead class="table-head">
-                                            <tr>
-                                                <th>Client ID</th>
-                                                <th>RC Number</th>
-                                                <th>Bank Name</th>
-                                                <th>Tag ID</th>
-                                                <th>Transaction Status</th>
-                                                <th>Lane Direction</th>
-                                                <th>Transaction DateTime</th>
-                                                <th>Sequence No</th>
-                                                <th>Toll Plaza Geo Code</th>
-                                                <th>Toll Plaza Name</th>
-                                                <th>Vehicle Type</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                <div class="modal-dialog modal-xl erppagesmodal">
+                    <div class="modal-content erppagesmodal-content draggable-modal">
+
+                        <!-- Header -->
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-credit-card"></i>
                                 </div>
+                                <h5 class="erppagesmodal-title">
+                                    Fastag Data of Vehicle No.<span id="FastDetailLabel"></span>
+                                </h5>
+                            </div>
+
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <!-- Body -->
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper">
+                                <table id="tblFastagDetaillist" class="excel-table fixed-grid-table table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Client ID</th>
+                                            <th>RC Number</th>
+                                            <th>Bank Name</th>
+                                            <th>Tag ID</th>
+                                            <th>Transaction Status</th>
+                                            <th>Lane Direction</th>
+                                            <th>Transaction DateTime</th>
+                                            <th>Sequence No</th>
+                                            <th>Toll Plaza Geo Code</th>
+                                            <th>Toll Plaza Name</th>
+                                            <th>Vehicle Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -579,137 +602,162 @@
             </div>
         </fieldset>
         <!-- EWay Bill -->
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">EWay Bill Details</legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlTransit">Transit No</label>
-                        <div class="input-icon-wrapper">
-                            <select class="form-control" id="ddlTransit">
+        <fieldset class="erppage-subfieldset">
+            <legend>EWay Bill Details</legend>
+            <div class="erppage-subheader">EWay Bill Details</div>
+            <div class="erppage-body">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="ddlTransit" class="erppage-label">Transit No</label>
+                        <div class="erppageinputicon-wrapper">
+                            <select class="erppage-input" id="ddlTransit">
                                 <option>Select Transit No</option>
                             </select>
-                            <span class="input-icon"><i class="fa fa-cog" id="EwayBillbtn"></i></span>
+                            <span class="erppageinputicon">
+                                <i class="fa fa-cog" id="EwayBillbtn"></i>
+                            </span>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtEWayNo">EWayBill No</label>
-                        <input type="text" class="form-control" id="TxtEWayNo" placeholder="Enter EWayBill No" maxlength="30">
+
+                    <div class="erppage-divfield">
+                        <label for="TxtEWayNo" class="erppage-label">EWayBill No</label>
+                        <input type="text" class="erppage-input" id="TxtEWayNo" placeholder="Enter EWayBill No" maxlength="30">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="DtEWayDate" class="erppage-label">
+                            EWayBill Date
+                            <span id="span_EWayBillDate" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="date" class="erppage-input" id="DtEWayDate">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtEWayDate" class="erppage-label">
+                            EWayBill Expiry Date
+                            <span id="span_EWayBillExpiryDate" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="date" class="erppage-input" id="TxtEWayDate">
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtEWayDate">EWayBill Date<span id="span_EWayBillDate" style="color:red; display:none;">*</span></label>
-                        <input type="date" class="form-control" id="DtEWayDate">
+
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtEWBInvNo" class="erppage-label">
+                            EWB Party Inv No
+                            <span id="span_EWBPartyInvNo" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="text" class="erppage-input" id="TxtEWBInvNo" placeholder="Enter EWB Party Inv No">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtEWBInvAmt" class="erppage-label">
+                            EWB Party Inv Amt
+                            <span id="span_EWBPartyInvAm" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="number" class="erppage-input" id="TxtEWBInvAmt">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtWbSlipNo" class="erppage-label">Party WB Slip No</label>
+                        <input type="text" class="erppage-input" id="TxtWbSlipNo">
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtGrWt" class="erppage-label">
+                            Party WB GrWt
+                            <span id="span_PartyWBGrWt" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="text" class="erppage-input" id="TxtGrWt">
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtEWayDate">EWayBill Expiry Date<span id="span_EWayBillExpiryDate" style="color:red; display:none;">*</span></label>
-                        <input type="date" class="form-control" id="TxtEWayDate">
+
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label for="TxtTrWt" class="erppage-label">
+                            Party WB TrWt
+                            <span id="span_PartyWBTrWt" style="color:red; display:none;">*</span>
+                        </label>
+                        <input type="text" class="erppage-input" id="TxtTrWt">
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtEWBInvNo">EWB Party Inv No<span id="span_EWBPartyInvNo" style="color:red; display:none;">*</span></label>
-                        <input type="text" class="form-control" id="TxtEWBInvNo" placeholder="Enter EWB Party Inv No">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtEWBInvAmt">EWB Party Inv Amt<span id="span_EWBPartyInvAm" style="color:red; display:none;">*</span></label>
-                        <input type="number" class="form-control" id="TxtEWBInvAmt">
-                    </div>    
-                </div> 
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtWbSlipNo">Party WB Slip No</label>
-                        <input type="text" class="form-control" id="TxtWbSlipNo">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtGrWt">Party WB GrWt <span id="span_PartyWBGrWt" style="color:red; display:none;">*</span></label>
-                        <input type="text" class="form-control" id="TxtGrWt">
-                    </div>
-                </div>                                      
-            </div> 
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtTrWt">Party WB TrWt <span id="span_PartyWBTrWt" style="color:red; display:none;">*</span></label>
-                        <input type="text" class="form-control" id="TxtTrWt">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtWbTime">Party WB Time <span id="span_PartyWBTime" style="color:red; display:none;">*</span></label>
-                        <div class="input-divide">
-                            <input type="date" class="form-control" id="DtWBTime">
-                            <input type="time" class="form-control" id="TxtWbTime" style="display:none;">
+
+                    <div class="erppage-divfield">
+                        <label for="TxtWbTime" class="erppage-label">
+                            Party WB Time
+                            <span id="span_PartyWBTime" style="color:red; display:none;">*</span>
+                        </label>
+                        <div class="erppage-inline-group">
+                            <input type="date" class="erppage-input" id="DtWBTime">
+                            <input type="time" class="erppage-input" id="TxtWbTime" style="display:none;">
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlPartyCity">Party City</label>
-                        <select class="form-control" id="ddlPartyCity">
+
+                    <div class="erppage-divfield">
+                        <label for="ddlPartyCity" class="erppage-label">Party City</label>
+                        <select class="erppage-input" id="ddlPartyCity">
                             <option>Select Party City</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtContainerNo">Container No</label>
-                        <div class="input-icon-wrapper">
-                            <input type="text" class="form-control" id="TxtContainerNo">
-                            <span class="input-icon" id="SEARCHCONTAINER"><i class="fa fa-search"></i></span>
+
+                    <div class="erppage-divfield">
+                        <label for="TxtContainerNo" class="erppage-label">Container No</label>
+                        <div class="erppageinputicon-wrapper">
+                            <input type="text" class="erppage-input" id="TxtContainerNo">
+                            <span class="erppageinputicon" id="SEARCHCONTAINER">
+                                <i class="fa fa-search"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtRemarks">Remarks</label>
-                        <textarea class="form-control" id="TxtRemarks" rows="1"></textarea>
+
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <label for="TxtRemarks" class="erppage-label">Remarks</label>
+                        <input class="erppage-input" id="TxtRemarks" rows="1" />
                     </div>
                 </div>
             </div>
         </fieldset>
-        <div class="row">
-            <div class="offset-md-6 col-md-6">
-                <div class="btn-mt button-right">
-                    <button type="button" class="btn btn-primary"><i class="fa fa-list"></i>List of Documents to be send</button>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" id="btnpendingorderno" ><i class="fa fa-clock"></i>Pending Orders/Bill</button>
-                </div>
+        <div class="erppagelist-toolbar-end">
+            <div class="erppage-internalaction" style="margin: 0;">
+                <button type="button" class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-list"></i>
+                    <span>List of Documents to be send</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" id="btnpendingorderno">
+                    <i class="fa fa-clock"></i>
+                    <span>Pending Orders/Bill</span>
+                </button>
             </div>
         </div>
         <!--Modal Popup-->
         <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="pendingordersLabel">Pending Order</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+            <div class="modal-dialog modal-xl erppagesmodal">
+                <div class="modal-content erppagesmodal-content draggable-modal">
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-clock"></i>
+                            </div>
+                            <h5 class="erppagesmodal-title" id="pendingordersLabel">Pending Orders</h5>
+                        </div>
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-times"></i>
+                        </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="button-right">
-                            <button type="button" class="btn btn-primary" id="Btn_selectedData">
+                    <div class="erppagesmodal-body">
+                        <div class="erppagesmodal-action">
+                            <button type="button" class="erppagesmodal-btn" id="Btn_selectedData">
                                 <i class="fa fa-check"></i> Selected Data
                             </button>
                         </div>
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblpendingordermodal" class="table-width">
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper">
+                                <table id="tblpendingordermodal" class="excel-table fixed-grid-table table-width">
                                     <thead class="table-head">
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" class="rowCheckbox" /></th>
-                                            <th>ItemCode</th>
+                                            <th>Item Code</th>
                                             <th>Item Name</th>
                                             <th>Unit</th>
                                             <th>Nos</th>
@@ -721,30 +769,27 @@
                                             <th>Rate</th>
                                             <th>Remarks</th>
                                             <th>Department</th>
-                                            <th style ="display:none;">Department Code </th>
-                                            <th style ="display:none;">Unit code</th>
+                                            <th style="display:none;">Department Code </th>
+                                            <th style="display:none;">Unit code</th>
                                             <th>Empty</th>
-
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
-            
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
-
-
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblInwardEntry" class="table-width">
+        <div class="erppagelist-container">
+            <div class="excel-wrapper">
+                <table id="tblInwardEntry" class="excel-table fixed-grid-table table-width">
                     <thead class="table-head">
                         <tr>
                             <th>Code</th>
-                            <th style="width:350px;">Item Name</th>
+                            <th>Item Name</th>
                             <th>Department</th>
                             <th>Unit</th>
                             <th>Nos</th>
@@ -753,28 +798,29 @@
                             <th>Empty</th>
                             <th>Remarks</th>
                             <th>Reference Type</th>
-                            <th>Reference No</th>                    
+                            <th>Reference No</th>
                             <th>Action</th>
-
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
-        <div class="row mt-2">
-            <div class="offset-md-9 col-md-3">
-                <div class="button-right">
-                    <button id="btn-save" type="button" class="btn btn-primary">
-                        <i class="fa fa-save"></i> Save
-                    </button>
-                </div>
-            </div>
-        </div>       
 
-    </form>
-</fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+            @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+            <i class="fa fa-print"></i>Print
+        </button> *@
+        </div>
 
+
+    </div>
+</div>
+<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry_validation.js"></script>
 <script>     
     const urlParams = new URLSearchParams(window.location.search);
     const rowId = urlParams.get('id');
@@ -795,19 +841,20 @@
             $('#ddlDocType').prop('disabled', true);
             $('#InDate').prop('disabled', true);
             $('#InTime').prop('disabled', true);
+            $('.erppagelist-toolbar-end').show();   //Added By Sumesh
             $('#btn_approval').show();
-              if (mode === "view")
-              {
-                setFormReadOnly();
-              }
+            if (mode === "view")
+            {
+             setFormReadOnly();
+            }
           }
          else
           {
-             if(PubUserLevel == 1)
-              {
+            if(PubUserLevel == 1)
+            {
                 $('#InDate').prop('disabled', false);
                 $('#InTime').prop('disabled', false);
-              }
+            }
             else{
                 $('#InDate').prop('disabled', true);
                 $('#InTime').prop('disabled', true);
@@ -943,8 +990,13 @@
 
             if(!selectedValue)
             {
-                toastr.info("Please Select Party Name!");
-                return;
+               showToast("Please Select Party Name!", { type: "info" });
+                    $('#ddlPartyName').addClass('is-invalid').focus();
+                return ;           
+            }
+            else
+            {
+              $('#ddlPartyName').removeClass('is-invalid');
             }
 
             if(!V_TYPE)
@@ -1069,12 +1121,48 @@
             } else {
                 toastr.warning("Date is empty");
             }
-        });               
+        });
+
+        $('#BtnPartyBillno').on('click', async function () {
+            try {
+                var SUPPLIER = $('#ddlPartyName').val();
+
+                const res = await $.ajax({
+                    url: '/InwardEntryList/GetDataByPARTTYBILLNO',
+                    type: 'GET',
+                    data: { SUPPLIER: SUPPLIER }
+                });
+
+                const data = res.data;
+
+                console.log("data",data);
+
+                populateTable(data);
+
+            } catch (error) {
+                toastr.error("Error", error);
+            }
+        });
+
+      $('#btn_partybillnoselect').on('click', function () {
+        const selectedrows = getSelectedRows();
+
+        if (selectedrows.length === 0) {
+            toastr.warning("No rows selected");
+            return;
+        }
+
+        const  row = selectedrows[0];
+        $('#TxtBillNo').val(row.supplieR_INVNO);
+        $('#DtPartyBillDate').val(row.supplieR_INVDATE);
+        $('#TxtBillAmt').val(row.supplieR_INVAMT);
+        $('#TxtContainerNo').val(row.containeR_NO);
+      });
+
     });
 
     function isItemInMainTable(itemCode) {
         let exists = false;
-
         $('#tblInwardEntry tbody tr').each(function () {
             const code = $(this).find('td:eq(0)').text().trim();
             if (code === itemCode) {
@@ -1082,11 +1170,12 @@
                 return false;
             }
         });
-
         return exists;
     }
 
     function saveInwardEntry() {
+        debugger;
+
         const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
         const PARTY_NAME    = $('#ddlPartyName option:selected').text();
         const V_TYPE        = $('#ddlDocType').val();
@@ -1116,206 +1205,203 @@
         const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
 
         if (!V_TYPE) {
-                        toastr.warning("Please select a Voucher Type");
-                        $("#ddlDocType").focus();
-                        return;
-                    }
+            toastr.warning("Please select a Voucher Type");
+            $("#ddlDocType").focus();
+            return;
+        }
 
         if (!V_NO) {
-                        toastr.warning("Please select a Voucher No");
-                        $("#TxtDocNo").focus();
-                        return;
-                    }
+            toastr.warning("Please select a Voucher No");
+            $("#TxtDocNo").focus();
+            return;
+        }
 
         if (!STATUS) {
-                        toastr.warning("Please select a Status.");
-                        $("#ddlDocStatus").focus();
-                        return;
-                    }
+            toastr.warning("Please select a Status.");
+            $("#ddlDocStatus").focus();
+            return;
+        }
 
         if (!PARTY_CODE) {
-                        toastr.warning("Please select a Party.");
-                        $("#ddlPartyName").focus();
-                        return;
-                    }
+            toastr.warning("Please select a Party.");
+            $("#ddlPartyName").focus();
+            return;
+        }
 
         if (!R_DATE   &&  !R_TIME) {
-                        toastr.warning("Please select a Reporting Date. and Time");
-                        $("#TxtRptDate").focus();
-                        return;
-                    }
+            toastr.warning("Please select a Reporting Date. and Time");
+            $("#TxtRptDate").focus();
+            return;
+        }
 
         if (BILL_NO && !BILL_DATE) {
-                        toastr.warning("Please select Party Bill Date.");
-                        $("#DtPartyBillDate").focus();
-                        return;
-                    }
+            toastr.warning("Please select Party Bill Date.");
+            $("#DtPartyBillDate").focus();
+            return;
+        }
 
         if (CHALL_NO && !CHALL_DATE) {
-                        toastr.warning("Please select Challan Date.");
-                        $("#TxtChallanDate").focus();
-                        return;
-                    }
+            toastr.warning("Please select Challan Date.");
+            $("#TxtChallanDate").focus();
+            return;
+        }
 
         if (!BILL_AMT) {
-                        toastr.warning("Please Fill a Bill Amount.");
-                        $("#TxtBillAmt").focus();
-                        return;
-                    }
+            toastr.warning("Please Fill a Bill Amount.");
+            $("#TxtBillAmt").focus();
+            return;
+        }
 
         if (!TRUCK_NO) {
-                        toastr.warning("Please Fill a Vehicle No.");
-                        $("#TxtVehicleNo").focus();
-                        return;
-                    }
+            toastr.warning("Please Fill a Vehicle No.");
+            $("#TxtVehicleNo").focus();
+            return;
+        }
 
         if(TRUCK_NO)
-                       {
-                        var numericPart = TRUCK_NO.replace(/\D/g, '');
-                        var lastFour = numericPart.slice(-4);
+        {
+                var numericPart = TRUCK_NO.replace(/\D/g, '');
+                var lastFour = numericPart.slice(-4);
 
-                         if (lastFour) {
+            if (lastFour) {
 
 
-                            if (!DRIVER_NAME) {
-                                toastr.warning("Please enter Driver Name.");
-                                $("#TxtDriverName").focus();
-                                return;
-                            }
+                if (!DRIVER_NAME) {
+                    toastr.warning("Please enter Driver Name.");
+                    $("#TxtDriverName").focus();
+                    return;
+                }
 
-                            if (!DRIVER_NO) {
-                                toastr.warning("Please enter Driver Mobile.");
-                                $("#TxtDriverMobile").focus();
-                                return;
-                            }
+                if (!DRIVER_NO) {
+                    toastr.warning("Please enter Driver Mobile.");
+                    $("#TxtDriverMobile").focus();
+                    return;
+                }
 
-                            if (!DRIVER_NO || DRIVER_NO.toString().length !== 10)
-                            {
-                                toastr.warning("Please enter a 10-digit mobile number.");
-                                $("#TxtDriverMobile").focus();
-                                return;
-                            }
-                        }
-                       }
+                if (!DRIVER_NO || DRIVER_NO.toString().length !== 10)
+                {
+                    toastr.warning("Please enter a 10-digit mobile number.");
+                    $("#TxtDriverMobile").focus();
+                    return;
+                }
+            }
+        }
                          
         if (WAYBILL_NO) {
-                        if (!EWB_DATE) {
-                            toastr.warning("Please select EWayBill Date.");
-                            $("#DtEWayDate").focus();
-                            return;
-                        }
+            if (!EWB_DATE) {
+                toastr.warning("Please select EWayBill Date.");
+                $("#DtEWayDate").focus();
+                return;
+            }
 
-                        if (!EWB_EXPDATE) {
-                            toastr.warning("Please select EWayBill Expiry Date.");
-                            $("#TxtEWayDate").focus();
-                            return;
-                        }
+            if (!EWB_EXPDATE) {
+                toastr.warning("Please select EWayBill Expiry Date.");
+                $("#TxtEWayDate").focus();
+                return;
+            }
 
-                        if (!EWB_INVNO) {
-                            toastr.warning("Please fill EWB Party Inv No.");
-                            $("#TxtEWBInvNo").focus();
-                            return;
-                        }
+            if (!EWB_INVNO) {
+                toastr.warning("Please fill EWB Party Inv No.");
+                $("#TxtEWBInvNo").focus();
+                return;
+            }
 
-                        if (!EWB_INVAMT) {
-                            toastr.warning("Please fill EWB Party Inv Amount.");
-                            $("#TxtEWBInvAmt").focus();
-                            return;
-                        }
-                    }
+            if (!EWB_INVAMT) {
+                toastr.warning("Please fill EWB Party Inv Amount.");
+                $("#TxtEWBInvAmt").focus();
+                return;
+            }
+        }
 
         if(R_DATE > V_DATE)
-                    {
-                        toastr.info("Reporting Date Can Not Be Greater Then In Date ");
-                        return;
-                    }
+        {
+            toastr.info("Reporting Date Can Not Be Greater Then In Date ");
+            return;
+        }
 
         if(R_TIME > OUT_DATE)
-                    {
-                        toastr.info("Reporting Time Can Not Be Greater Then In Time ");
-                        return;
-                    }
+        {
+            toastr.info("Reporting Time Can Not Be Greater Then In Time ");
+            return;
+        }
 
         if(BILL_DATE > V_DATE)
-                    {
-                        toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
-                        return;
-                    }
+        {
+            toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
+            return;
+        }
 
         if(CHALL_DATE > V_DATE)
-                    {
-                        toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
-                        return;
-                    }
+        {
+            toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
+            return;
+        }
 
         if(SHIP_BILLDATE > V_DATE)
-                    {
-                        toastr.info("Ship. Bill Date Can Not Be Greater Then In Date  ");
-                        return;
-                    }
+        {
+            toastr.info("Ship. Bill Date Can Not Be Greater Then In Date  ");
+            return;
+        }
 
         if(OUT_DATE > V_DATE)
-                    {
-                        toastr.info("Vehicle Out Date Can Not Be Greater Then In Date  ");
-                        return;
-                    }
+        {
+            toastr.info("Vehicle Out Date Can Not Be Greater Then In Date  ");
+            return;
+        }
 
         if(SHIP_PARTY)
-                    {
-                        if(!SHIP_BILLNO)
-                        {
-                            toastr.info("Shipping Bill No.is required if shipping party mentioned.");
-                            return;
-                        }
-                    }
+        {
+            if(!SHIP_BILLNO)
+            {
+                toastr.info("Shipping Bill No.is required if shipping party mentioned.");
+                return;
+            }
+        }
 
         if(SHIP_BILLNO)
-                    {
-                        if(!SHIP_PARTY)
-                        {
-                            toastr.info("Shipping Party required if you entered shipping bill no.");
-                            return;
-                        }
+        {
+            if(!SHIP_PARTY)
+            {
+                toastr.info("Shipping Party required if you entered shipping bill no.");
+                return;
+            }
 
-                        if(!BILL_NO && !CHALL_NO)
-                        {
-                            toastr.info("Bill No./Challan No. is compulsary.");
-                            return;
-                        }
+            if(!BILL_NO && !CHALL_NO)
+            {
+                toastr.info("Bill No./Challan No. is compulsary.");
+                return;
+            }
 
-                    }
+        }
 
         if (V_TYPE == "INST" && V_TYPE == "INFU"  && V_TYPE == "INRM")
-                    {
-                        if(BILL_AMT == 0 && TRANSIT_NO == null && WAYBILL_NO  == null)
-                        {
-                           toastr.info("Bill Amount compulsory for " + PARTY_NAME);
-
-                           return;
-                        }
-                    }
+        {
+            if(BILL_AMT == 0 && TRANSIT_NO == null && WAYBILL_NO  == null)
+            {
+                toastr.info("Bill Amount compulsory for " + PARTY_NAME);
+                return;
+            }
+        }
 
         if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-                        toastr.info("Transit No. and E-Way Bill are compulsory if Bill Amount > " + PubDefEWaybillAmt);
-
-                        if (!TRANSIT_NO) {
-                            $("#ddlTransit").focus();
-                        } else {
-                            $("#TxtEWayNo").focus();
-                        }
-
-                        return; 
-                    }
+         toastr.info("Transit No. and E-Way Bill are compulsory if Bill Amount > " + PubDefEWaybillAmt);
+            if (!TRANSIT_NO) {
+             $("#ddlTransit").focus();
+            } else {
+             $("#TxtEWayNo").focus();
+            }
+           return; 
+        }
 
         if (TRANSIT_NO && EWB_EXPDATE) {
-                        const expDate = new Date(EWB_EXPDATE);
-                        const inDate = new Date(V_DATE);
+            const expDate = new Date(EWB_EXPDATE);
+            const inDate = new Date(V_DATE);
 
-                        if (!isNaN(expDate) && !isNaN(inDate) && expDate < inDate) {
-                            toastr.info("Waybill expired on " + EWB_EXPDATE + ". Record cannot be saved.");
-                            return; 
-                        }
-                    }
+            if (!isNaN(expDate) && !isNaN(inDate) && expDate < inDate) {
+                toastr.info("Waybill expired on " + EWB_EXPDATE + ". Record cannot be saved.");
+                return; 
+            }
+        }
        
         const Header = {
                         V_TYPE: $('#ddlDocType').val(),
@@ -1494,99 +1580,153 @@
         }
     }
 
-    async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
-        try {
-            const response = await $.ajax({
-                url: '/InwardEntry/BillNoValidation',
-                type: 'POST',
-                data: {
-                    PARTY_CODE: PARTY_CODE,
-                    BILL_NO: BILL_NO,
-                    V_NO: V_NO
-                }
-            });  
+    // async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
+    //     try {
+    //         const response = await $.ajax({
+    //             url: '/InwardEntry/BillNoValidation',
+    //             type: 'POST',
+    //             data: {
+    //                 PARTY_CODE: PARTY_CODE,
+    //                 BILL_NO: BILL_NO,
+    //                 V_NO: V_NO
+    //             }
+    //         });  
 
-            if (!response.success) {
-                toastr.error(response.message || "Invalid Bill No");
-                return response;
-            }
+    //         if (!response.success) {
+    //             toastr.error(response.message || "Invalid Bill No");
+    //             return response;
+    //         }
 
-            return response;
+    //         return response;
 
-        } catch (error) {
-            toastr.error("Validation Error",error);
-            return { success: false };
-        }
-    }
+    //     } catch (error) {
+    //         toastr.error("Validation Error",error);
+    //         return { success: false };
+    //     }
+    // }
 
-    async function GatenoValidation(V_TYPE, V_NO) {
-        try {
-            const response = await $.ajax({
-                url: '/InwardEntry/GatenoValidation',
-                type: 'POST',
-                data: {  V_TYPE: V_TYPE, V_NO: V_NO }
-            });        
+    // async function GatenoValidation(V_TYPE, V_NO) {
+    //     try {
+    //         const response = await $.ajax({
+    //             url: '/InwardEntry/GatenoValidation',
+    //             type: 'POST',
+    //             data: {  V_TYPE: V_TYPE, V_NO: V_NO }
+    //         });        
 
-            if (!response.success) {
-                toastr.error(response.message || "Invalid Gate No");
-                return response;
-            }
-            return response;
+    //         if (!response.success) {
+    //             toastr.error(response.message || "Invalid Gate No");
+    //             return response;
+    //         }
+    //         return response;
 
-        } catch (error) {
-            toastr.error("Validation Error",error);     
-            return { success: false };
-        }
-    }
+    //     } catch (error) {
+    //         toastr.error("Validation Error",error);     
+    //         return { success: false };
+    //     }
+    // }
 
     function setFormReadOnly() {
+                const form = document.getElementById("InwardEntryForm");
+                if (!form) return;
+                // add readonly class
+                    form.classList.add('erppage-readonly');
+                // Hide approval button
+                $('.erppagelist-toolbar-end').hide();
+                $('#btn_approval').hide();
 
-        const form = document.getElementById("InwardEntryForm");
+                // Disable all inputs except hidden
+                const inputs = form.querySelectorAll("input");
+                inputs.forEach(el => {
+                    if (el.type !== "hidden") {
+                        if (
+                            el.type === "text" ||
+                            el.type === "date" ||
+                            el.type === "time" ||
+                            el.type === "number"
+                        ) {
+                            el.setAttribute("readonly", true);
+                        } else {
+                            el.setAttribute("disabled", true);
+                        }
+                    }
+                });
 
-        if (!form) return;
-        const inputs = form.querySelectorAll("input, textarea");
-        inputs.forEach(el => {
+                // Disable all textareas
+                const textareas = form.querySelectorAll("textarea");
+                textareas.forEach(el => {
+                    el.setAttribute("readonly", true);
+                });
 
-            if (el.type !== "hidden") {
-                el.setAttribute("readonly", true);
+                // Disable all selects
+                const selects = form.querySelectorAll("select");
+                selects.forEach(el => {
+                    el.setAttribute("disabled", true);
+                });
+
+                // Disable all buttons except Back/List buttons if needed
+                const buttons = form.querySelectorAll("button");
+                buttons.forEach(btn => {
+                    const txt = btn.innerText.trim().toLowerCase();
+
+                    if (
+                        !txt.includes("back") &&
+                        !txt.includes("close")
+                    ) {
+                        btn.setAttribute("disabled", true);
+                    }
+                });
+
+                // Disable clickable icons/spans
+                const clickableIcons = form.querySelectorAll(`
+                    .input-icon,
+                    .fa-search,
+                    .fa-cog,
+                    .fa-database,
+                    .fa-ellipsis-h
+                `);
+
+                clickableIcons.forEach(icon => {
+                    icon.style.pointerEvents = "none";
+                    icon.style.opacity = "0.5";
+                    icon.style.cursor = "not-allowed";
+                });
+
+                // Disable modal triggers
+                const modalTriggers = form.querySelectorAll("[data-bs-toggle='modal']");
+                modalTriggers.forEach(el => {
+                    el.removeAttribute("data-bs-toggle");
+                    el.removeAttribute("data-bs-target");
+                    el.style.pointerEvents = "none";
+                    el.style.opacity = "0.5";
+                    el.style.cursor = "not-allowed";
+                });
+
+                // Disable table controls
+                const tableControls = form.querySelectorAll(`
+                    table input,
+                    table select,
+                    table textarea,
+                    table button,
+                    table .fa,
+                    table span
+                `);
+
+                tableControls.forEach(el => {
+                    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+                        el.setAttribute("readonly", true);
+                    } else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
+                        el.setAttribute("disabled", true);
+                    }
+
+                    el.style.pointerEvents = "none";
+                    el.style.opacity = "0.5";
+                });
+                $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
+                $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
+                $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
+                // Add readonly class for CSS styling
+                form.classList.add("readonly-mode");
             }
-        });
-
-         $('#btn_approval').hide();
-        const selects = form.querySelectorAll("select");
-        selects.forEach(el => {
-            el.setAttribute("disabled", true);
-        });
-
-        const buttons = form.querySelectorAll("button");
-        buttons.forEach(btn => {
-
-            if (!btn.innerText.toLowerCase().includes("back")) {
-                btn.setAttribute("disabled", true);
-            }
-        });
-
-        const clickableIcons = form.querySelectorAll(".input-icon, .fa-ellipsis-h");
-        clickableIcons.forEach(icon => {
-            icon.style.pointerEvents = "none";
-            icon.style.opacity = "0.5";
-        });
-
-        const modalTriggers = form.querySelectorAll("[data-bs-toggle='modal']");
-        modalTriggers.forEach(el => {
-            el.removeAttribute("data-bs-toggle");
-            el.removeAttribute("data-bs-target");
-            el.style.pointerEvents = "none";
-            el.style.opacity = "0.5";
-        });
-
-        const tableInputs = form.querySelectorAll("table input, table select");
-        tableInputs.forEach(el => {
-            el.setAttribute("disabled", true);
-        });
-
-        form.classList.add("readonly-mode");
-    }
      
     function collectTableRowData() {
         const table = document.getElementById('tblInwardEntry');
@@ -1670,18 +1810,19 @@
           data.forEach(function (row) {
             let tr = `<tr>
                       <td><input type="checkbox" class="rowCheckbox" /></td>
-                      <td>${row.saudA_NO}</td>
-                      <td>${row.saudaDate}</td>
-                      <td>${row.itemName}</td>
-                      <td>${row.saudaQty}</td>
-                      <td>${row.saudaRate}</td>
-                      <td>${row.partyInvNo}</td>
-                      <td>${row.supplieR_INVDATE}</td>
-                      <td>${row.invAmtUSD}</td>
-                      <td>${row.containeR_NO}</td>
-                      <td>${row.contWt}</td>
-                      <td>${row.conT_SIZE}</td>
-                      <td>${row.trackingEntryNo}</td>
+                        <td>${row.saudA_NO}</td>
+                        <td>${row.saudaDate}</td>
+                        <td>${row.itemName}</td>
+                        <td>${row.iteM_CODE}</td>
+                        <td>${row.qty}</td>
+                        <td>${row.rate}</td>
+                        <td>${row.supplieR_INVNO}</td>
+                        <td>${row.supplieR_INVDATE}</td>
+                        <td>${row.supplieR_INVAMT}</td>
+                        <td>${row.containeR_NO}</td>
+                        <td>${row.grS_WEIGHT}</td>
+                        <td>${row.conT_SIZE}</td>
+                        <td>${row.v_no}</td>
                       <td style="display:none;"></td>
                   </tr>`;
             tbody.append(tr);
@@ -2352,7 +2493,7 @@
 
    function backToList() {
         var partycode = $('#ddlPartyName').val();
-        if (rowId && partycode && mode != "view")  {
+        if (partycode && mode != "view" )  {
             Swal.fire({
                 title: "Are you sure?",
                 text: "You want to go back to the list?",
@@ -2379,9 +2520,7 @@
         let itemOptions = `<option value="">Select</option>`;
         $.each(itemList, function (i, item) {
             const selected = item.value == data.itemId ? "selected" : "";
-            itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}>
-                                ${item.text}
-                            </option>`;
+            itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
         });
 
         // DEPARTMENT
@@ -2449,7 +2588,6 @@
                     <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
                     <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
                 </td>
-
             </tr>
         `;
 
@@ -2521,7 +2659,7 @@
         }
     }
 
-   async function getcontainerdata(Container_No) {
+  async function getcontainerdata(Container_No) {
       try {
         const res = await $.ajax({
           url: '/InwardEntry/GetSEARCHCONTAINER',
@@ -2546,28 +2684,62 @@
         toastr.error("Error", error);
       }
     }
+    
+  async function GetEwaybillno() {
+        try {
+            const res = await $.ajax({
+                url: '/InwardEntry/GetEWayBillData',
+                type: 'GET',
+                data: { edate: $('#InDate').val(),inoutdata :"OUT"  },
+                dataType: 'json'
+            });           
+          console.log("E-Way Bill Response:", res); 
+          if(res.success)
+          {
+                  toastr(res.message);
+          }
 
-   async function GetEwaybillno(edate,inoutdata)
-    {
-        try{
-           const  res = await $.ajax({
-            url : '/InwardEntry/GetEWayBillData',
-            type : 'get',
-            data : {edate :edate , inoutdata : inoutdata}     
-
-           });
-        }
-        catch(error)
-        {
-          toastr.error("error", error);
+        } catch (error) {
+            console.error(error);
+            toastr.error("Something went wrong");
         }
     }
 
-   function validateMobile(input) {
+  function validateMobile(input) {
       input.value = input.value.replace(/\D/g, '');
       if (input.value.length > 10) {
         input.value = input.value.slice(0, 10);
       }
+    }
+
+  function getSelectedRows() {
+        const selectedData = [];
+
+        $("#tblellipsisIconmodal tbody tr").each(function () {
+            const checkbox = $(this).find(".rowCheckbox");
+
+            if (checkbox.is(":checked")) {
+                const rowData = {
+                    saudA_NO: $(this).find("td:eq(1)").text(),
+                    saudaDate: $(this).find("td:eq(2)").text(),
+                    itemName: $(this).find("td:eq(3)").text(),
+                    iteM_CODE: $(this).find("td:eq(4)").text(),
+                    qty: $(this).find("td:eq(5)").text(),
+                    rate: $(this).find("td:eq(6)").text(),
+                    supplieR_INVNO: $(this).find("td:eq(7)").text(),
+                    supplieR_INVDATE: $(this).find("td:eq(8)").text(),
+                    supplieR_INVAMT: $(this).find("td:eq(9)").text(),
+                    containeR_NO: $(this).find("td:eq(10)").text(),
+                    grS_WEIGHT: $(this).find("td:eq(11)").text(),
+                    conT_SIZE: $(this).find("td:eq(12)").text(),
+                    v_no: $(this).find("td:eq(13)").text()
+                };
+
+                selectedData.push(rowData);
+            }
+        });
+
+        return selectedData;
     }
 
 </script>

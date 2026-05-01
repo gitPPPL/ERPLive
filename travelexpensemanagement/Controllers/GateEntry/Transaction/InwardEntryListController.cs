@@ -25,7 +25,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DropdownService _dropdownService;
 
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-         travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,  ModuleService.ModuleService moduleService)
+         travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -109,7 +109,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
 
         [HttpGet]
-        public IActionResult GetDataByPendingorder(int PartyCode , string V_TYPE, DateTime V_DATE)
+        public IActionResult GetDataByPendingorder(int PartyCode, string V_TYPE, DateTime V_DATE)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             var Datalist = new List<object>();
@@ -206,7 +206,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     using (var cmdCheck = new SqlCommand(sql, con))
                     {
-                      
+
                         cmdCheck.Parameters.AddWithValue("@code", code);
                         cmdCheck.Parameters.AddWithValue("@VType", VType);
                         cmdCheck.Parameters.AddWithValue("@pubCompCode", getGlobalCode.PubCompCode);
@@ -253,7 +253,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);                 
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -283,7 +283,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             try
             {
-       
+
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     con.Open();
@@ -490,7 +490,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
-        {   
+        {
 
             var global = _globalVariableService.GetGlobalVariables();
 
@@ -590,7 +590,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;     
+                    cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
@@ -671,9 +671,87 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         document.Add(table);
                         document.Close();
 
-                        return File( stream.ToArray(), "application/pdf", "GateInward.pdf" );
+                        return File(stream.ToArray(), "application/pdf", "GateInward.pdf");
                     }
                 }
+            }
+        }
+
+
+
+        [HttpGet]
+        public IActionResult GetDataByPARTTYBILLNO(int SUPPLIER)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+            var Datalist = new List<object>();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd3 = new SqlCommand("sp_InwardEntry", con))
+                    {
+                        cmd3.CommandType = CommandType.StoredProcedure;
+                        cmd3.Parameters.AddWithValue("@Action", "PARTTYBILLNOBYSUPPLIER");
+                        cmd3.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd3.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
+                        cmd3.Parameters.AddWithValue("@SUPPLIER", SUPPLIER);
+
+                        using (SqlDataReader rdr = cmd3.ExecuteReader())
+                        {
+                            if (rdr.HasRows)
+                            {
+                                while (rdr.Read())
+                                {
+                                    var SAUDA_NO = rdr["SaudaNo"]?.ToString();
+                                    var SaudaDate = rdr["SaudaDate"]?.ToString();
+                                    var ItemName = rdr["ItemName"]?.ToString();
+                                    var QTY = rdr["QTY"]?.ToString();
+                                    var RATE = rdr["RATE"]?.ToString();
+                                    var SUPPLIER_INVNO = rdr["SUPPLIER_INVNO"]?.ToString();
+                                    var SUPPLIER_INVDATE = rdr["SUPPLIER_INVDATE"]?.ToString();
+                                    var SUPPLIER_INVAMT = rdr["SUPPLIER_INVAMT"]?.ToString();
+                                    var CONTAINER_NO = rdr["CONTAINER_NO"]?.ToString();
+                                    var GRS_WEIGHT = rdr["GRS_WEIGHT"]?.ToString();
+                                    var CONT_SIZE = rdr["CONT_SIZE"]?.ToString();
+                                    var v_no = rdr["v_no"]?.ToString();
+                                    var ITEM_CODE = rdr["ITEM_CODE"]?.ToString();           
+                          
+
+                                    if (!string.IsNullOrEmpty(SAUDA_NO) && !string.IsNullOrEmpty(SAUDA_NO))
+                                    {
+                 
+                                        Datalist.Add(new
+                                        {
+                                            SAUDA_NO = SAUDA_NO,
+                                            SaudaDate = SaudaDate,
+                                            ItemName = ItemName,
+                                            QTY = QTY,
+                                            RATE = RATE,
+                                            SUPPLIER_INVNO = SUPPLIER_INVNO,
+                                            SUPPLIER_INVDATE = SUPPLIER_INVDATE,
+                                            SUPPLIER_INVAMT = SUPPLIER_INVAMT,
+                                            CONTAINER_NO = CONTAINER_NO,
+                                            GRS_WEIGHT = GRS_WEIGHT,
+                                            CONT_SIZE = CONT_SIZE,
+                                            v_no = v_no,
+                                            ITEM_CODE = ITEM_CODE 
+
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return Json(new { success = true, data = Datalist });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error fetching attachment data", error = ex.Message });
             }
         }
 
