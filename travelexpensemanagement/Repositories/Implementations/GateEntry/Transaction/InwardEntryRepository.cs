@@ -18,12 +18,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly HttpClient _client;
-        public InwardEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, HttpClient client)
+        public InwardEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
         {
             _dbConnection = dbConnection;
-            _globalVariableService = globalVariableService;
-            _client = client;
+            _globalVariableService = globalVariableService; 
         }
         public async Task<string> GetVNoAsync(string vType, string tableName = "GATE1")
         {
@@ -329,157 +327,102 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
         }
 
-        public async Task<RcRequest> GetVehicleInfoAsync(string rcNumber)
+
+        public async Task<RepositoryResponseData<int>> GetSEARCHCONTAINERAsync(string Container_No)
         {
-            string url = "https://kyc-api.surepass.io/api/v1/rc/rc-full";
-            string token = "YOUR_TOKEN_HERE";
+            var response = new RepositoryResponseData<int>();
 
-            _client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            var payload = new JObject
+            using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                ["id_number"] = rcNumber
-            };
+                await con.OpenAsync();
 
-            var content = new StringContent(payload.ToString(), System.Text.Encoding.UTF8, "application/json");
+                string SQL = @"SELECT TOP 1 SUPPLIER  
+                       FROM EXIM1 a  
+                       LEFT JOIN EXIM2 b ON a.V_TYPE = b.V_TYPE  
+                       AND a.V_NO = b.V_NO  
+                       AND a.COMP_CODE = b.COMP_CODE 
+                       AND a.BRANCH_CODE = b.BRANCH_CODE  
+                       AND a.YEAR_CODE = b.YEAR_CODE  
+                       WHERE b.Container_No = @Container_No";
 
-            var response = await _client.PostAsync(url, content);
-            var responseData = await response.Content.ReadAsStringAsync();
+                using (SqlCommand cmd = new SqlCommand(SQL, con))
+                {
+                    cmd.Parameters.Add("@Container_No", SqlDbType.VarChar).Value = Container_No;
 
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(responseData);
-
-            var json = JObject.Parse(responseData);
-            var data = json["data"];
-
-            if (data == null)
-                return null;
-
-            return new RcRequest
-            {
-                RcNumber = data["rc_number"]?.ToString(),
-                ClientId = data["client_id"]?.ToString(),
-                OwnerName = data["owner_name"]?.ToString(),
-                FatherName = data["father_name"]?.ToString(),
-                PresentAddress = data["present_address"]?.ToString(),
-                PermanentAddress = data["permanent_address"]?.ToString(),
-                VehicleChasiNumber = data["vehicle_chasi_number"]?.ToString(),
-                VehicleEngineNumber = data["vehicle_engine_number"]?.ToString(),
-                RegistrationDate = data["registration_date"]?.ToObject<DateTime?>(),
-                FuelType = data["fuel_type"]?.ToString(),
-                Color = data["color"]?.ToString(),
-                InsurancePolicyNumber = data["insurance_policy_number"]?.ToString(),
-                InsuranceUpto = data["insurance_upto"]?.ToObject<DateTime?>(),
-                RcStatus = data["rc_status"]?.ToString()
-            };
-        }
-
-        // ===========================
-        // 2. SAVE VEHICLE INFO
-        // ===========================
-        public async Task<ApiResponse> SaveVehicleInfoAsync(RcRequest vehicleInfo, string VType, int VNo)
-        {
-            var g = _globalVariableService.GetGlobalVariables();
-
-            using var conn = _dbConnection.GetErpConnection();
-            conn.Open();
-
-            // DELETE OLD
-            string deleteSql = @"DELETE FROM GATE_VAHAN
-                             WHERE V_TYPE=@VType AND V_NO=@VNo
-                             AND COMP_CODE=@Comp AND BRANCH_CODE=@Branch AND YEAR_CODE=@Year";
-
-            using (var cmd = new SqlCommand(deleteSql, conn))
-            {
-                cmd.Parameters.AddWithValue("@VType", VType);
-                cmd.Parameters.AddWithValue("@VNo", VNo);
-                cmd.Parameters.AddWithValue("@Comp", g.PubCompCode);
-                cmd.Parameters.AddWithValue("@Branch", g.PubBranchCode);
-                cmd.Parameters.AddWithValue("@Year", g.PubFYearCode);
-                cmd.ExecuteNonQuery();
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            response.status = true;
+                            response.message = "Successfully fetched";
+                            response.data = Convert.ToInt32(reader["SUPPLIER"]);
+                        }
+                        else
+                        {
+                            response.status = false;
+                            response.message = "Container Detail not found in Import Tracking.";
+                        }
+                    }
+                }
             }
 
-            // INSERT
-                string sql = @"INSERT INTO GATE_VAHAN
-                (COMP_CODE, BRANCH_CODE, YEAR_CODE, V_TYPE, V_NO, rc_number, owner_name, father_name,
-                present_address, permanent_address, vehicle_chasi_number, vehicle_engine_number,
-                registration_date, fuel_type, color, insurance_policy_number, insurance_upto,
-                rc_status, UUSER, UDATE)
-                VALUES
-                (@COMP, @BRANCH, @YEAR, @VTYPE, @VNO, @rc, @owner, @father,
-                @paddr, @peraddr, @chasi, @engine,
-                @regdate, @fuel, @color, @policy, @insup,
-                @status, @user, GETDATE())";
-
-            using (var cmd = new SqlCommand(sql, conn))
-            {
-                cmd.Parameters.AddWithValue("@COMP", g.PubCompCode);
-                cmd.Parameters.AddWithValue("@BRANCH", g.PubBranchCode);
-                cmd.Parameters.AddWithValue("@YEAR", g.PubFYearCode);
-                cmd.Parameters.AddWithValue("@VTYPE", VType);
-                cmd.Parameters.AddWithValue("@VNO", VNo);
-
-                cmd.Parameters.AddWithValue("@rc", vehicleInfo.RcNumber ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@owner", vehicleInfo.OwnerName ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@father", vehicleInfo.FatherName ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@paddr", vehicleInfo.PresentAddress ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@peraddr", vehicleInfo.PermanentAddress ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@chasi", vehicleInfo.VehicleChasiNumber ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@engine", vehicleInfo.VehicleEngineNumber ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@regdate", vehicleInfo.RegistrationDate ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@fuel", vehicleInfo.FuelType ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@color", vehicleInfo.Color ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@policy", vehicleInfo.InsurancePolicyNumber ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@insup", vehicleInfo.InsuranceUpto ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@status", vehicleInfo.RcStatus ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@user", g.PubUserId);
-
-                cmd.ExecuteNonQuery();
-            }
-
-            return new ApiResponse
-            {
-                Status = "Success",
-                Message = "Vehicle saved successfully"
-            };
+            return response;
         }
 
-        // ===========================
-        // 3. GET SAVED VEHICLE
-        // ===========================
-        public async Task<RcRequest?> GetVehicleDetailAsync(int vNo, string vType)
+
+        public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(
+        string v_type, int v_no, int partycode, DateTime ExpiryDate)
         {
-            var g = _globalVariableService.GetGlobalVariables();
+            var getdata = _globalVariableService.GetGlobalVariables();
+            var dataList = new List<int>();
 
-            using var conn = _dbConnection.GetErpConnection();
-            conn.Open();
-
-            string sql = @"SELECT * FROM GATE_VAHAN
-                       WHERE COMP_CODE=@Comp AND YEAR_CODE=@Year
-                       AND V_NO=@VNo AND V_TYPE=@VType";
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@Comp", g.PubCompCode);
-            cmd.Parameters.AddWithValue("@Year", g.PubFYearCode);
-            cmd.Parameters.AddWithValue("@VNo", vNo);
-            cmd.Parameters.AddWithValue("@VType", vType);
-
-            using var reader = cmd.ExecuteReader();
-
-            if (!reader.Read())
-                return null;
-
-            return new RcRequest
+            using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                RcNumber = reader["rc_number"]?.ToString(),
-                OwnerName = reader["owner_name"]?.ToString(),
-                FatherName = reader["father_name"]?.ToString(),
-                VehicleChasiNumber = reader["vehicle_chasi_number"]?.ToString(),
-                VehicleEngineNumber = reader["vehicle_engine_number"]?.ToString(),
-                FuelType = reader["fuel_type"]?.ToString(),
-                Color = reader["color"]?.ToString(),
-                RcStatus = reader["rc_status"]?.ToString()
+                await con.OpenAsync();
+
+                string query = @"SELECT V_No FROM WAYBILL1 WHERE V_TYPE = 'TRIN'
+                                AND V_No NOT IN (
+                                SELECT TRANSIT_NO FROM GATE1 
+                                WHERE V_TYPE = @V_Type AND V_No = @V_No 
+                                AND TRANSIT_NO <> 0 
+                                AND COMP_CODE = @CompCode 
+                                AND BRANCH_CODE = @BRANCH_CODE
+                                )
+                                AND PARTY_CODE = @PartyCode 
+                                AND Status = 1 
+                                AND COMP_CODE = @CompCode 
+                                AND BRANCH_CODE = @BRANCH_CODE 
+                                AND EXPIRY_DATE IS NOT NULL  
+                                AND EXPIRY_DATE >= @ExpiryDate  
+                                ORDER BY V_No;";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.Add("@CompCode", SqlDbType.Int).Value = getdata.PubCompCode;
+                    cmd.Parameters.Add("@V_Type", SqlDbType.VarChar).Value = (object)v_type ?? DBNull.Value;
+                    cmd.Parameters.Add("@V_No", SqlDbType.Int).Value = v_no;
+                    cmd.Parameters.Add("@PartyCode", SqlDbType.Int).Value = partycode;
+                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
+
+                    DateTime expiryDate = ExpiryDate.AddMonths(-1);
+                    cmd.Parameters.Add("@ExpiryDate", SqlDbType.DateTime).Value = expiryDate;
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            dataList.Add(Convert.ToInt32(reader["V_No"]));
+                        }
+                    }
+                }
+            }
+
+            return new RepositoryResponseList<int>
+            {
+                status = true,
+                message = "Success",
+                totalCount = dataList.Count,
+                data = dataList
             };
         }
     }

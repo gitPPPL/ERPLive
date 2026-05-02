@@ -2041,25 +2041,31 @@
           }
         }
 
-   async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
-          try {
-            const queryParams = new URLSearchParams({v_type,v_no,partycode,ExpiryDate});
+     async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
+      try {
+        const queryParams = new URLSearchParams({ v_type, v_no, partycode, ExpiryDate });
 
-            const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            const data = await response.json();
+        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-            const ddl = $('#ddlTransit');
-            ddl.empty().append('<option value="">-- Select Transit No --</option>');
-            data.forEach(item => {
-              ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-          } catch (error) {
-             showToast("Error loading Transit Numbers:", { type: "error" });
-                
-          }
+        const result = await response.json();
+
+        console.log("Transit No. Response:", result);
+
+        const ddl = $('#ddlTransit');
+        ddl.empty().append('<option value="">-- Select Transit No --</option>');
+
+        if (result.status && Array.isArray(result.data)) {
+          result.data.forEach(item => {
+            ddl.append(`<option value="${item}">${item}</option>`);
+          });
         }
 
+      } catch (error) {
+        console.error(error);
+        showToast("Error loading Transit Numbers", { type: "error" });
+      }
+    }
    async function GetVNo(Vtype) {
         try {
           const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);

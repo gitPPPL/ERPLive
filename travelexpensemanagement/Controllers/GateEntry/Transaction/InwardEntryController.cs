@@ -103,7 +103,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
         }
-
+        
         private ApiResponse SubmitRequest(InwardEntry_Header header, List<Details> details, string action)
         {
             try
@@ -743,7 +743,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 message = result.message
             });
         }
-        
 
         [HttpGet]
         public async Task<JsonResult> GetVehcleinfo([FromQuery] string rc_number, string VType, int VNo)
@@ -1283,7 +1282,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = "Unexpected error", details = ex.Message });
             }
         }
-
         public JsonResult GetFasttagdetail(int v_no, string v_type)
         {
             try
@@ -1347,7 +1345,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = er.Message });
             }
         }
-
         public class FasttagList
         {
             public string? V_TYPE { get; set; }
@@ -1378,79 +1375,23 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Ok(result);
         }
 
-        public JsonResult GetSEARCHCONTAINER(String Container_No)
+        public async Task<JsonResult> GetSEARCHCONTAINER(string Container_No)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-            int supplier = 0;
-            using (SqlConnection con = _dbConnection.GetErpConnection())
+            var res = await _inwardEntryRepository.GetSEARCHCONTAINERAsync(Container_No);
+
+            return Json(new
             {
-                con.Open();
-
-                string SQL = @"SELECT TOP 1  SUPPLIER  FROM EXIM1 a  LEFT JOIN EXIM2 b  ON a.V_TYPE = b.V_TYPE   AND a.V_NO = b.V_NO  AND a.COMP_CODE = b.COMP_CODE 
-                    AND a.BRANCH_CODE = b.BRANCH_CODE   AND a.YEAR_CODE = b.YEAR_CODE   WHERE b.Container_No = @Container_No";
-
-                using (SqlCommand CMD1 = new SqlCommand(SQL, con))
-                {
-                    CMD1.Parameters.Add("@Container_No", SqlDbType.VarChar).Value = Container_No;
-
-                    using (SqlDataReader reader = CMD1.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            supplier = Convert.ToInt32(reader["SUPPLIER"]);
-                        }
-                        else
-                        {
-                            return Json(new { StatusCode = false, meessage = "Container Detail not found in Import Tracking." });
-                        }
-                    }
-                }
-            }
-            return Json(new { StatusCode = false, meessage = "SuccessFully", supplier = supplier });
+                StatusCode = res.status,
+                message = res.message,
+                supplier = res.data
+            });
         }
 
         [HttpGet]
-        public JsonResult DDlTransitNo(string v_type, int v_no, int partycode, DateTime ExpiryDate)
+        public async Task<JsonResult> DDlTransitNo(string v_type, int v_no, int partycode, DateTime ExpiryDate)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-            var date = ExpiryDate.Date;
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @"
-                    SELECT V_No  FROM WAYBILL1  WHERE V_TYPE = 'TRIN'  AND V_No NOT IN (SELECT TRANSIT_NO  FROM GATE1 WHERE V_TYPE = @V_Type
-                    AND V_No = @V_No  AND TRANSIT_NO <> 0 AND COMP_CODE = @CompCode  AND BRANCH_CODE = @BRANCH_CODE )
-                    AND PARTY_CODE = @PartyCode   AND Status = 1  AND COMP_CODE = @CompCode AND BRANCH_CODE = @BRANCH_CODE
-                    AND EXPIRY_DATE IS NOT NULL  AND EXPIRY_DATE >= @ExpiryDate  ORDER BY V_No;";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@V_Type", (object)v_type ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@V_No", v_no);
-                    cmd.Parameters.AddWithValue("@PartyCode", partycode);
-                    DateTime expiryDate = ExpiryDate.AddMonths(-1);
-                    cmd.Parameters.AddWithValue("@ExpiryDate", expiryDate);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                value = reader["V_No"].ToString(),
-                                text = reader["V_No"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
+            var res = await _inwardEntryRepository.DDlTransitNoAsync(v_type, v_no, partycode, ExpiryDate);
+            return Json(res);
         }
 
         private async Task<string> AuthenticateEWayBillAsync()
@@ -1879,11 +1820,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         }
 
-
-
-
         // Drp down
-
 
         public JsonResult fetchSelectedAddress(int PartyId)
         {
@@ -1898,7 +1835,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
 
         }
-
         public JsonResult DDlVType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -2017,7 +1953,5 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(UnitList);
             }
         }
-
-
     }
 }
