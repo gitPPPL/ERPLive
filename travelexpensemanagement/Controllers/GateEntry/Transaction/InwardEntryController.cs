@@ -65,126 +65,24 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { V_NO = newV_NO }); // ✅ FIXED
         }
 
-       public JsonResult GetDataByPartyCode(int PartyId, int addressid)
+        public async Task<JsonResult> GetDataByPartyCode(int PartyId, int addressid)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @"SELECT  a.Add1, a.Add2, a.Add3, a.GSTIN, a.City_Code, b.Name AS State, a.Pincode , c.NAME as cityName ,a.PAN,a.STATE_CODE
-                                FROM  Subgroup_Address a
-                                LEFT JOIN STATE_MAST b ON a.STATE_CODE = b.code
-                                LEFT JOIN CITY_MAST c ON a.CITY_CODE = c.code
-                                WHERE   a.comp_code = @CompCode AND a.Code =@PartyId and   a.Address_Id = @Address_Id ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-                    cmd.Parameters.AddWithValue("@Address_Id", addressid);
-
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                Add1 = reader["Add1"].ToString(),
-                                Add2 = reader["Add2"].ToString(),
-                                Add3 = reader["Add3"].ToString(),
-                                GSTIN = reader["GSTIN"].ToString(),
-                                City_Code = reader["City_Code"].ToString(),
-                                STATE_CODE = reader["STATE_CODE"].ToString(),
-                                State = reader["State"].ToString(),
-                                Pincode = reader["Pincode"].ToString(),
-                                cityName = reader["cityName"].ToString(),
-                                PAN = reader["PAN"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
+            var data = await _inwardEntryRepository.GetDataByPartyCodeAsync(PartyId, addressid);
+            return Json(data);
         }
-        public JsonResult GetPartyAddressbyCode(int PartyId)
+
+        public async Task<JsonResult> GetPartyAddressbyCode(int PartyId)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @"SELECT  a.Add1, a.Add2, a.Add3, a.GSTIN, a.City_Code, b.Name AS State, a.Pincode , c.NAME as cityName ,a.PAN,a.STATE_CODE
-                                FROM  Subgroup_Address a
-                                LEFT JOIN STATE_MAST b ON a.STATE_CODE = b.code
-                                LEFT JOIN CITY_MAST c ON a.CITY_CODE = c.code
-                                WHERE   a.comp_code = @CompCode AND a.Code =@PartyId  order by  a.ADDRESS_ID asc  ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                Add1 = reader["Add1"].ToString(),
-                                Add2 = reader["Add2"].ToString(),
-                                Add3 = reader["Add3"].ToString(),
-                                GSTIN = reader["GSTIN"].ToString(),
-                                City_Code = reader["City_Code"].ToString(),
-                                STATE_CODE = reader["STATE_CODE"].ToString(),
-                                State = reader["State"].ToString(),
-                                Pincode = reader["Pincode"].ToString(),
-                                cityName = reader["cityName"].ToString(),
-                                PAN = reader["PAN"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
+            var data = await _inwardEntryRepository.GetPartyAddressByCodeAsync(PartyId);
+            return Json(data);
         }
-        public JsonResult fetchShipFromAdd(int ShipFromID)
+
+        public async Task<JsonResult> fetchShipFromAdd(int ShipFromID)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @" SELECT CONCAT(A.ADD1, ' ', A.ADD2, ' ', A.ADD3) AS FullAddress  FROM SUBGROUP_MAST A
-                WHERE Nature IN ('Customer','Supplier','Broker','Staff')   AND COMP_CODE = @CompCode 
-                AND A.ACTIVE = 1   AND A.code = @ShipFromID";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@ShipFromID", ShipFromID);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                Address = reader["FullAddress"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
+            var data = await _inwardEntryRepository.FetchShipFromAddressAsync(ShipFromID);
+            return Json(data);
         }
+
         public class ApiResponse
         {
             public string Status { get; set; }
@@ -826,109 +724,26 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-        public JsonResult BillNoValidation(int PARTY_CODE, string BILL_NO, int V_NO)
+        [HttpGet]
+        public async Task<IActionResult> BillNoValidation(int PARTY_CODE, string BILL_NO, int V_NO)
         {
-            try
-            {
-                if (PARTY_CODE <= 0 || string.IsNullOrWhiteSpace(BILL_NO))
-                {
-                    return Json(new { success = false });
-                }
+            var result = await _inwardEntryRepository.ValidateBillNoAsync(PARTY_CODE, BILL_NO, V_NO);
 
-                var g = _globalVariableService.GetGlobalVariables();
-
-                using var conn = _dbConnection.GetErpConnection();
-                conn.Open();
-
-                string sql = @"SELECT TOP 1 doc_id, V_date  FROM GATE1
-                WHERE PARTY_CODE = @PartyCode  AND BILL_NO = @BillNo
-                AND V_TYPE IN('INST', 'INRM', 'INFU', 'INJB', 'INMS', 'INSR', 'INRT') AND V_NO<> @VNo AND COMP_CODE = @CompCode
-                AND Branch_Code = @BranchCode  AND Year_Code = @YearCode; ";
-
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@PartyCode", PARTY_CODE);
-                    cmd.Parameters.AddWithValue("@BillNo", BILL_NO);
-                    cmd.Parameters.AddWithValue("@VNo", V_NO);
-                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-
-                    using var reader = cmd.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        var docId = reader["doc_id"]?.ToString();
-                        var vDate = reader["V_date"] != DBNull.Value ? Convert.ToDateTime(reader["V_date"]).ToString("dd-MMM-yyyy") : "";
-                        return Json(new { success = false, message = $"Bill No '{BILL_NO}' already exists at Serial No: {docId} dated: {vDate}" });
-                    }
-                }
-                return Json(new { success = true, message = "Valid" });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error in BillNoValidation: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while validating the Bill No." });
-            }
+            return Json(new
+            {  success = result.status == true,  message = result.message });
         }
-
-        public JsonResult GatenoValidation(string V_TYPE, int V_NO)
+        [HttpGet]
+        public async Task<IActionResult> GatenoValidation(string V_TYPE, int V_NO)
         {
-            try
+            var result = await _inwardEntryRepository.ValidateGateNoAsync(V_TYPE, V_NO);
+
+            return Json(new
             {
-                if (V_NO <= 0)
-                {
-                    return Json(new { success = false, message = "Invalid Party or Bill No." });
-                }
-
-                var g = _globalVariableService.GetGlobalVariables();
-
-                using var conn = _dbConnection.GetErpConnection();
-                conn.Open();
-
-                string sql = @"SELECT TOP 1 CONCAT(V_TYPE, V_NO)  AS  V_NO FROM Purchase1  WHERE V_TYPE IN ( SELECT code  FROM doctype_mast  
-                WHERE doctype = 'MaterialReceipt') AND GATE_TYPE = @GATE_TYPE  AND GATE_No = @GATE_NO AND Comp_Code = @Comp_Code AND 
-                Branch_Code = @Branch_Code;";
-
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@GATE_TYPE", V_TYPE);
-                    cmd.Parameters.AddWithValue("@GATE_NO", V_NO);
-                    cmd.Parameters.AddWithValue("@Comp_Code", g.PubCompCode);
-                    cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
-
-                    using var reader = cmd.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        var VNO = reader["V_NO"]?.ToString();
-                        return Json(new { success = false, message = $"Gate no. {VNO} exist in MRN No.{V_NO}  Modification not allowed." });
-                    }
-                }
-                return Json(new { success = true, message = "Valid" });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error in BillNoValidation: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while validating the Bill No." });
-            }
+                success = result.status == true,
+                message = result.message
+            });
         }
-
-        public JsonResult fetchSelectedAddress(int PartyId)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @"
-                SELECT DISTINCT  address_id AS code, add1 AS name  FROM  SUBGROUP_ADDRESS 
-                WHERE  code = " + PartyId + " AND COMP_CODE = " + getdata.PubCompCode + "    and ADD1 <> ''  ORDER BY  ADDRESS_ID;";
-
-                var selectAddList = _dropdownService.GetDropdownList(query);
-
-                return Json(selectAddList);
-            }
-
-        }
+        
 
         [HttpGet]
         public async Task<JsonResult> GetVehcleinfo([FromQuery] string rc_number, string VType, int VNo)
@@ -2068,6 +1883,22 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
 
         // Drp down
+
+
+        public JsonResult fetchSelectedAddress(int PartyId)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = @"
+                SELECT DISTINCT  address_id AS code, add1 AS name  FROM  SUBGROUP_ADDRESS 
+                WHERE  code = " + PartyId + " AND COMP_CODE = " + getdata.PubCompCode + "    and ADD1 <> ''  ORDER BY  ADDRESS_ID;";
+                var selectAddList = _dropdownService.GetDropdownList(query);
+                return Json(selectAddList);
+            }
+
+        }
+
         public JsonResult DDlVType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();

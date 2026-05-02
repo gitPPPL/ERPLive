@@ -814,6 +814,10 @@
     </div>
 </div>
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry_validation.js"></script>
+
+
+
+
 <script>     
     const urlParams = new URLSearchParams(window.location.search);
     const rowId = urlParams.get('id');
@@ -936,25 +940,37 @@
                 }
         });
 
-        $("#btn-save").click(async function (e) {
-                e.preventDefault();
-                const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
-                const V_NO = parseInt($('#TxtDocNo').val()) || null;
-                const BILL_NO = $.trim($('#TxtBillNo').val()) || null;
-                const V_TYPE  = $('#ddlDocType').val();                
-                if(BILL_NO)
-                {
-                 const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
-                }
-                const isValid = await checkValidDate();
-                if(isValid === false)
-                {
-                return;
-                }
-                const GateNoValidation = await GatenoValidation(V_TYPE ,V_NO);
-         
-                saveInwardEntry();
-        });
+     $("#btn-save").click(async function (e) {
+        e.preventDefault();
+        debugger
+            const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
+            const V_NO = parseInt($('#TxtDocNo').val()) || null;
+            const BILL_NO = $('#TxtBillNo').val().trim();
+            const V_TYPE = $('#ddlDocType').val();
+   
+        if (BILL_NO) {
+            const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
+
+            if (!validation.success) {
+                return; // ❗ STOP if invalid
+            }
+        }
+
+        // ✅ DATE VALIDATION
+        const isValid = await checkValidDate();
+        if (isValid === false) {
+            return;
+        }
+
+        // ✅ GATE VALIDATION
+        const gateValidation = await GatenoValidation(V_TYPE, V_NO);
+        if (!gateValidation.success) {
+            return; // ❗ STOP if invalid
+        }
+
+        // ✅ FINAL SAVE
+        saveInwardEntry();
+    });
 
         $('#ddlShipFrom').on('change', function() {
             fetchShipFromAdd(this.value);                      
@@ -1559,21 +1575,19 @@
         try {
             const response = await $.ajax({
                 url: '/InwardEntry/BillNoValidation',
-                type: 'POST',
+                type: 'Get',
                 data: {
                     PARTY_CODE: PARTY_CODE,
                     BILL_NO: BILL_NO,
                     V_NO: V_NO
                 }
-            });  
+            });
 
-            if (!response.success) {
-               showToast("Invalid Bill No", { type: "error" });             
+            if (!response.success == false) {
+                showToast("Invalid Bill No", { type: "error" });             
                 return response;
             }
-
             return response;
-
         } catch (error) {
             showToast("Validation Error", { type: "error" });         
             return { success: false };
@@ -1584,12 +1598,12 @@
         try {
             const response = await $.ajax({
                 url: '/InwardEntry/GatenoValidation',
-                type: 'POST',
+                type: 'Get',
                 data: {  V_TYPE: V_TYPE, V_NO: V_NO }
-            });        
+            });
 
-            if (!response.success) {
-               showToast(response.message, { type: "error" });     
+            if (!response.success == false) {
+                showToast(response.message, { type: "error" });     
                 return response;
             }
             return response;
