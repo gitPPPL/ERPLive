@@ -17,22 +17,6 @@ using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
-
-
-    //private readonly IAssetRepository _assetRepository;
-    //private readonly GlobalVariableService _globalVariableService;
-    //private readonly DataBaseConnection _dbConnection;
-    //private readonly DropdownService _dropdownService;
-
-    //public AssetsMasterController(IAssetRepository assetRepository, GlobalVariableService globalVariableService, DropdownService dropdownService, DataBaseConnection dbConnection)
-    //{
-    //    _assetRepository = assetRepository;
-    //    _globalVariableService = globalVariableService;
-    //    _dropdownService = dropdownService;
-    //    _dbConnection = dbConnection;
-    //}
-
-
     public class InwardEntryController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -41,7 +25,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        //private readonly  IInwardEntryRepository _inwardEntryRepository;
         private readonly IInwardEntryRepository _inwardEntryRepository;
         private readonly HttpClient _httpClient;
         public int pubBPPurchTolQty = 2000;
@@ -82,135 +65,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { V_NO = newV_NO }); // ✅ FIXED
         }
 
-
-
-        public JsonResult DDlVType()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-
-                var parameters = new Dictionary<string, object> { { "@Type", "v_type" } };
-                var data = _dropdownService.GetMultipleDropdownList("sp_GetDropdownData", CommandType.StoredProcedure, parameters);
-
-
-
-
-
-                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateInward') order by Name ";
-                var VtypeList = _dropdownService.GetDropdownList(query);
-
-                return Json(VtypeList);
-            }
-        }
-        public JsonResult DDlParty()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE = " + getdata.PubCompCode + "    AND ACTIVE=1  and name <> '' order by name ";
-
-                var Partylist = _dropdownService.GetDropdownList(query);
-
-                return Json(Partylist);
-            }
-
-        }
-        public JsonResult DDlShipFrom()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE =" + getdata.PubCompCode + " AND ACTIVE=1 and name <> ''    order by name ";
-
-                var ShipFromList = _dropdownService.GetDropdownList(query);
-
-                return Json(ShipFromList);
-            }
-
-        }
-        public JsonResult DDDocStatus()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document'   and Name <> ''  Order by CODE";
-
-                var DocStatusList = _dropdownService.GetDropdownList(query);
-
-                return Json(DocStatusList);
-            }
-
-        }
-        public JsonResult DDlPartycity()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select Code,Name from City_mast  Where Name <> ''  Order by name";
-
-                var PartyCitylist = _dropdownService.GetDropdownList(query);
-
-                return Json(PartyCitylist);
-            }
-
-        }
-        public JsonResult DDlstate()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE , name from STATE_MAST  where active = 1  AND name <> '' order by NAME ";
-
-                var DDlstate = _dropdownService.GetDropdownList(query);
-
-                return Json(DDlstate);
-            }
-
-        }
-        public JsonResult DDlTransportName()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "SELECT CODE , NAME  FROM TRANSPORT_MAST  WHERE COMP_CODE =" + getdata.PubCompCode + "  AND ACTIVE = 1  and NAME <> ''   order by NAME asc";
-
-                var TransportNamelist = _dropdownService.GetDropdownList(query);
-
-                return Json(TransportNamelist);
-            }
-
-        }
-        public JsonResult DDlItemMast()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select b.CODE , b.name from item_mast b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
-                var ItemList = _dropdownService.GetDropdownList(query);
-                return Json(ItemList);
-            }
-        }
-        public JsonResult DDlDeptMast()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select b.CODE , b.name  from ITEMDEPT_MAST b where B.ACTIVE=1 and b.Tran_type='Store' AND b.comp_code=" + getdata.PubCompCode + "  group by b.name ,b.CODE  order by b.name ";
-                var DeptList = _dropdownService.GetDropdownList(query);
-                return Json(DeptList);
-            }
-        }
-        public JsonResult DDlUnitMast()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select  b.CODE , b.name  from ITEMUNIT_MAST b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
-                var UnitList = _dropdownService.GetDropdownList(query);
-                return Json(UnitList);
-            }
-        }
        public JsonResult GetDataByPartyCode(int PartyId, int addressid)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -2209,6 +2063,130 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
 
         }
+
+
+
+
+        // Drp down
+        public JsonResult DDlVType()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                var parameters = new Dictionary<string, object> { { "@Type", "v_type" } };
+                var data = _dropdownService.GetMultipleDropdownList("sp_GetDropdownData", CommandType.StoredProcedure, parameters);
+                return Json(data);
+            }
+        }
+        public JsonResult DDlParty()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE = " + getdata.PubCompCode + "    AND ACTIVE=1  and name <> '' order by name ";
+
+                var Partylist = _dropdownService.GetDropdownList(query);
+
+                return Json(Partylist);
+            }
+
+        }
+        public JsonResult DDlShipFrom()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE =" + getdata.PubCompCode + " AND ACTIVE=1 and name <> ''    order by name ";
+
+                var ShipFromList = _dropdownService.GetDropdownList(query);
+
+                return Json(ShipFromList);
+            }
+
+        }
+        public JsonResult DDDocStatus()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document'   and Name <> ''  Order by CODE";
+
+                var DocStatusList = _dropdownService.GetDropdownList(query);
+
+                return Json(DocStatusList);
+            }
+
+        }
+        public JsonResult DDlPartycity()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from City_mast  Where Name <> ''  Order by name";
+
+                var PartyCitylist = _dropdownService.GetDropdownList(query);
+
+                return Json(PartyCitylist);
+            }
+
+        }
+        public JsonResult DDlstate()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE , name from STATE_MAST  where active = 1  AND name <> '' order by NAME ";
+
+                var DDlstate = _dropdownService.GetDropdownList(query);
+
+                return Json(DDlstate);
+            }
+
+        }
+        public JsonResult DDlTransportName()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "SELECT CODE , NAME  FROM TRANSPORT_MAST  WHERE COMP_CODE =" + getdata.PubCompCode + "  AND ACTIVE = 1  and NAME <> ''   order by NAME asc";
+
+                var TransportNamelist = _dropdownService.GetDropdownList(query);
+
+                return Json(TransportNamelist);
+            }
+
+        }
+        public JsonResult DDlItemMast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select b.CODE , b.name from item_mast b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
+                var ItemList = _dropdownService.GetDropdownList(query);
+                return Json(ItemList);
+            }
+        }
+        public JsonResult DDlDeptMast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select b.CODE , b.name  from ITEMDEPT_MAST b where B.ACTIVE=1 and b.Tran_type='Store' AND b.comp_code=" + getdata.PubCompCode + "  group by b.name ,b.CODE  order by b.name ";
+                var DeptList = _dropdownService.GetDropdownList(query);
+                return Json(DeptList);
+            }
+        }
+        public JsonResult DDlUnitMast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select  b.CODE , b.name  from ITEMUNIT_MAST b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
+                var UnitList = _dropdownService.GetDropdownList(query);
+                return Json(UnitList);
+            }
+        }
+
 
     }
 }

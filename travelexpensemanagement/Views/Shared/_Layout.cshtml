@@ -57,6 +57,24 @@
 	 .search-results a:hover {
 	 	background-color: #f0f0f0;
 	 }
+
+	#lottie-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(255,255,255,0.6);
+		display: none;
+		justify-content: center;
+		align-items: center;
+		z-index: 9999;
+	}
+
+	#lottie-animation {
+		width: 120px;
+		height: 120px;
+	}
 </style>
 
 <!DOCTYPE html>
@@ -196,12 +214,76 @@
 					</div>
 				</div>
 			</nav>
+			
 			<div class="content-body">
+				<div id="lottie-overlay">
+					<div id="lottie-animation"></div>
+				</div>
 				@RenderBody()
 			</div>
 
 		</div>
 	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.10/lottie.min.js"></script>
+	<script>
+		$(document).ajaxStart(function () {
+			showLoader();
+		});
+
+		$(document).ajaxStop(function () {
+			hideLoader();
+		});
+
+		let loaderTimeout;
+		let loaderStartTime;
+
+		function showLoader() {
+			loaderStartTime = Date.now();
+			document.getElementById('lottie-overlay').style.display = 'flex';
+		}
+
+		function hideLoader() {
+			const elapsed = Date.now() - loaderStartTime;
+			const minTime = 400; // 👈 smooth delay (300–500ms best)
+
+			if (elapsed < minTime) {
+				clearTimeout(loaderTimeout);
+				loaderTimeout = setTimeout(() => {
+					document.getElementById('lottie-overlay').style.display = 'none';
+				}, minTime - elapsed);
+			} else {
+				document.getElementById('lottie-overlay').style.display = 'none';
+			}
+		}
+
+		// ✅ ADD HERE 👇 (GLOBAL FETCH WRAPPER)
+		const originalFetch = window.fetch;
+
+		window.fetch = async function (...args) {
+			showLoader();
+			try {
+				const response = await originalFetch(...args);
+				return response;
+			} finally {
+				hideLoader();
+			}
+		};
+
+	</script>
+	<script>
+		// Initialize Lottie animation
+					document.addEventListener("DOMContentLoaded", function () {
+
+			var animation = lottie.loadAnimation({
+				container: document.getElementById('lottie-animation'),
+				renderer: 'svg',
+				loop: true,
+				autoplay: true,
+				path: 'https://lottie.host/30e1c7d5-22ca-41c7-b0a2-f2b0a7ce94e2/ysJGEsOTl6.json'
+			});
+
+		});
+	</script>
 	<script>
 		    document.addEventListener('DOMContentLoaded', () => {
 			const sidebar = document.querySelector('.sidebar');
@@ -259,7 +341,7 @@
 		});
 		</script>
 	<!-- Your existing local scripts, no duplicate jQuery here -->
-
+	
 	<script src="~/js/GlobalFunction.js"></script>
 	<script src="~/js/GlobalToaster.js"></script>
 	<script src="~/js/GlobalValidation.js"></script>
