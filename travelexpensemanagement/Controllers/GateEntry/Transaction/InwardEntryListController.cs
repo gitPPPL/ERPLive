@@ -5,6 +5,7 @@ using System.Data.Common;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Models.GateEntry;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction

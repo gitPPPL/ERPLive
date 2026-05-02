@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -11,12 +12,98 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        public MiscConsumptionEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
+        private readonly DropdownService _dropdownService;
+        public MiscConsumptionEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _dropdownService = dropdownService;
+        }
+      
+        public List<object> GetItemList()
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+
+            string query = $"SELECT code, name FROM item_mast WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);
         }
 
+        public List<object> GetDeptList()
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+
+            string query = $"SELECT code, name FROM ITEMDEPT_MAST WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);
+        }
+
+        public List<object> GetUnitList()
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+
+            string query = $"SELECT code, name FROM ITEMUNIT_MAST WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);
+        }
+
+        public List<object> GetDropdown(string type)
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+            string query = "";
+
+            switch (type)
+            {
+                case "DocType":
+                    query = "SELECT Code, Name FROM DOCTYPE_MAST WHERE DOCTYPE IN ('MiscConsumption') ORDER BY Name";
+                    break;
+
+                case "Party":
+                    query = $"SELECT CODE, name FROM SUBGROUP_MAST WHERE ACTIVE = 1 AND COMP_CODE = {g.PubCompCode} ORDER BY name";
+                    break;
+            }
+
+            return _dropdownService.GetDropdownList(query);
+        }
+
+        public List<object> GetAddressByPartyCode(int partyId)
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+            var dataList = new List<object>();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                string query = @"
+                    SELECT b.ADD1, b.ADD2, b.ADD3
+                    FROM SUBGROUP_MAST a
+                    LEFT JOIN SUBGROUP_ADDRESS b 
+                        ON b.CODE = a.CODE AND b.COMP_CODE = a.COMP_CODE
+                    WHERE a.CODE = @PartyId 
+                        AND a.COMP_CODE = @CompCode 
+                        AND a.ACTIVE = 1";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", partyId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            dataList.Add(new
+                            {
+                                Add1 = reader["ADD1"]?.ToString(),
+                                Add2 = reader["ADD2"]?.ToString(),
+                                Add3 = reader["ADD3"]?.ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return dataList;
+        }
+    
         public string GenerateVNo(string vType)
         {
             string newV_NO = "00000";

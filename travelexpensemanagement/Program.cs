@@ -37,6 +37,7 @@ builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListReposito
 builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
 builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
 builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
+builder.Services.AddScoped<IMiscConsumptionListRepository, MiscConsumptionListRepository>();
 
 
 
