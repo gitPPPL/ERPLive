@@ -2,155 +2,125 @@
     ViewBag.Title = "Courier Tracking Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Courier Tracking Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "CourierTrackingEntryList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-truck"></i>
         </div>
+        <div class="erppage-header-title">Courier Tracking Entry</div>
     </div>
-    <form id="CourierTrackingEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
-                    </select>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "CourierTrackingEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="CourierTrackingEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input" id="ddlDocType"></select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo">
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-redinput" id="ddlPartyName"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">City</label>
+                    <select class="erppage-input" id="ddlCity"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Courier Name</label>
+                    <select class="erppage-redinput" id="ddlCourierName"></select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Docket No</label>
+                    <input type="text" class="erppage-redinput" id="TxtDocketNo">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Received By</label>
+                    <select class="erppage-input" id="ddlReceivedBy"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Purpose</label>
+                    <select class="erppage-input" id="ddlPurpose"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Weight (gm)</label>
+                    <input type="text" class="erppage-input" id="txtWeight">
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPartyName">Party Name<span class="required">*</span></label>
-                    <select class="form-control" id="ddlPartyName">
-                        <option value="">Select Party Name</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlCity">City</label>
-                    <select class="form-control" id="ddlCity">
-                        <option value="">Select City</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlCourierName">Courier Name<span class="required">*</span></label>
-                    <select class="form-control" id="ddlCourierName">
-                        <option value="">Select Courier Name</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtDocketNo">Docket No<span class="required">*</span></label>
-                    <input type="text" class="form-control" id="TxtDocketNo" placeholder="Enter Docket No">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlReceivedBy">Received By</label>
-                    <select class="form-control" id="ddlReceivedBy">
-                        <option value="">Select Received By</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPurpose">Purpose</label>
-                    <select class="form-control" id="ddlPurpose">
-                        <option value="">Select Purpose</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="txtWeight">Weight (in gm)</label>
-                    <input type="text" class="form-control" id="txtWeight" placeholder="Enter Weight (in gm)">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="txtRemarks">Remarks</label>
-                    <textarea type="text" class="form-control" id="txtRemarks" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-        </div>
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">Print Option</legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtFrom">From</label>
-                        <input type="date" class="form-control" id="Dtfrom">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtTo">To</label>
-                        <input type="date" class="form-control" id="DtTo">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlVType">VType</label>
-                        <select class="form-control" id="ddlVtype">
-                            <option value="">Select Vtype</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlParty">Party</label>
-                        <select class="form-control" id="ddlParty">
-                            <option value="">Select Party</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="button-right">
-                        <button id="btn-print" type="submit" class="btn btn-primary"><i class="fa fa-print"></i>Print</button>
-                    </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea class="erppage-textarea" id="txtRemarks"></textarea>
                 </div>
             </div>
         </fieldset>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+        <fieldset class="erppage-subfieldset">
+            <div class="erppage-subheader">Print Option</div>
+            <div class="erppage-body">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From</label>
+                        <input type="date" class="erppage-input" id="Dtfrom">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To</label>
+                        <input type="date" class="erppage-input" id="DtTo">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">VType</label>
+                        <select class="erppage-input" id="ddlVtype"></select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Party</label>
+                        <select class="erppage-input" id="ddlParty"></select>
+                    </div>
                 </div>
             </div>
-        </div>
-    </form>
-</fieldset>
+            <div class="erppage-internalaction">
+                <button type="button" id="btn-print" class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-print"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+        </fieldset>
+
+    </div>
+    <div class="erppage-actions">
+        <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+        @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+            <i class="fa fa-print"></i>Print
+        </button> *@
+    </div>
+</div>
 <script src="~/common/dropdown.js"></script>
 
 <script>
@@ -270,7 +240,7 @@
         $('#CourierTrackingEntryForm select').prop('disabled', true);
         $('#btn-save').hide();
     }
-      
+
 </script>
 
 @* <script>
