@@ -21,7 +21,7 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
         {
             _dbHelper = dbHelper;
             _dbConnection = dbConnection;
-            _globalVariableService = globalVariableService;
+            _globalVariable = globalVariableService;
             _moduleService = moduleService;
 
         }
@@ -43,7 +43,7 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
         [HttpGet]
         public IActionResult loadListData(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
         {
-            var globalVariable= _globalVariableService.GetGlobalVariables();
+            var globalVariable= _globalVariable.GetGlobalVariables();
             List<object> list = new List<object>();
             int totalCount = 0;
 
@@ -85,7 +85,7 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
         [HttpPost]
         public IActionResult DeleteBreakdownMaster(int code)
         {
-            var globalVariable = _globalVariableService.GetGlobalVariables();
+            var globalVariable = _globalVariable.GetGlobalVariables();
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
