@@ -379,7 +379,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
                     #endregion
 
-
                     #region Fetch Dispatch Data
                     using (SqlCommand cmd4 = new SqlCommand("sp_InwardEntry", con))
                     {
@@ -676,8 +675,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 }
             }
         }
-
-
 
         [HttpGet]
         public IActionResult GetDataByPARTTYBILLNO(int SUPPLIER)

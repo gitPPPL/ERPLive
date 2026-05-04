@@ -717,7 +717,7 @@
                     <i class="fa fa-list"></i>
                     <span>List of Documents to be send</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" id="btnpendingorderno">
+                <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" data-bs-target="#pendingorders" id="btnpendingorderno">
                     <i class="fa fa-clock"></i>
                     <span>Pending Orders/Bill</span>
                 </button>
@@ -804,20 +804,13 @@
             <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
-            </button>
-            @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
-            <i class="fa fa-print"></i>Print
-        </button> *@
+            </button>   
         </div>
 
 
     </div>
 </div>
-<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry_validation.js"></script>
-
-
-
-
+<script src="~/common/GlobalFunction.js"></script>
 <script>     
     const urlParams = new URLSearchParams(window.location.search);
     const rowId = urlParams.get('id');
@@ -831,7 +824,7 @@
     var   unitList = [];
 
     $(document).ready(async function () {       
-          await LoadDropDown();
+       await LoadDropDown();
          if (rowId) 
           {
             await LoadFormByID(rowId, vtype);
@@ -942,7 +935,6 @@
 
      $("#btn-save").click(async function (e) {
         e.preventDefault();
-        debugger
             const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
             const V_NO = parseInt($('#TxtDocNo').val()) || null;
             const BILL_NO = $('#TxtBillNo').val().trim();
@@ -950,25 +942,21 @@
    
         if (BILL_NO) {
             const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
-
             if (!validation.success) {
-                return; // ❗ STOP if invalid
+                return; 
             }
         }
-
-        // ✅ DATE VALIDATION
+  
         const isValid = await checkValidDate();
         if (isValid === false) {
             return;
         }
 
-        // ✅ GATE VALIDATION
         const gateValidation = await GatenoValidation(V_TYPE, V_NO);
         if (!gateValidation.success) {
-            return; // ❗ STOP if invalid
+            return; 
         }
-
-        // ✅ FINAL SAVE
+           
         saveInwardEntry();
     });
 
@@ -991,37 +979,35 @@
                 addRow($("#tblInwardEntry tbody"), {});
             }
         });
- 
-        $("#btnpendingorderno").click(function () {
+
+
+         $("#btnpendingorderno").click(function () {
             const selectedValue = $('#ddlPartyName').val();
             const V_TYPE = $('#ddlDocType').val();
             const V_DATE = $('#TxtRptDate').val();
 
-            if(!selectedValue)
-            {
-               showToast("Please Select Party Name!", { type: "info" });
-                    $('#ddlPartyName').addClass('is-invalid').focus();
-                return ;           
-            }
-            else
-            {
-              $('#ddlPartyName').removeClass('is-invalid');
+                if (!selectedValue) {
+                    invalidateField('ddlPartyName', 'Please Select Party Name!', 'info');
+                return;
+                }
+
+            if (!V_TYPE) {
+                showToast("Please Select Voucher Type!", { type: "info" });
+                $('#ddlDocType').addClass('is-invalid').focus();
+                return;
+            } else {
+                $('#ddlDocType').removeClass('is-invalid');
             }
 
-            if(!V_TYPE)
-            {
-                showToast("Please Select Voucher Type!", { type: "info" });
-                    $('#ddlDocType').addClass('is-invalid').focus();
-                return;
-            }
-            if(!V_DATE)
-            {
+            if (!V_DATE) {
                 showToast("Please Select Voucher Date!", { type: "info" });
-                    $('#TxtRptDate').addClass('is-invalid').focus();
+                $('#TxtRptDate').addClass('is-invalid').focus();
                 return;
-                        
+            } else {
+                $('#TxtRptDate').removeClass('is-invalid');
             }
-           FetchPendindorderno(selectedValue,V_TYPE,V_DATE);
+
+            FetchPendingOrderNo(selectedValue, V_TYPE, V_DATE);
         });
 
         $(document).on('change', '#selectAllPR', function () {
@@ -1132,7 +1118,7 @@
             var V_date = $('#InDate').val();
 
             if (V_date) {
-                    GetEwaybillno(V_date, "IN");
+              GetEwaybillno(V_date, "IN");
             } else {
              showToast("Date is empty", { type: "warning" });
             }
@@ -1175,6 +1161,8 @@
       });
 
     });
+
+
 
     function isItemInMainTable(itemCode) {
         let exists = false;
@@ -1282,13 +1270,10 @@
         }
 
 
-        if (!BILL_AMT) {
-            showToast("Please fill Bill Amount.", { type: "warning" });
-            $("#TxtBillAmt").addClass("is-invalid").focus();
-            return;
-        } else {
-            $("#TxtBillAmt").removeClass("is-invalid");
-        }
+            if (!BILL_AMT) {
+        invalidateField('TxtBillAmt', 'Please fill Bill Amount.', 'warning');
+        return;
+    }
 
         if (!TRUCK_NO) {
             showToast("Please fill Vehicle No.", { type: "warning" });
@@ -1571,11 +1556,11 @@
         }
     }
 
-    async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
+      async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
         try {
             const response = await $.ajax({
                 url: '/InwardEntry/BillNoValidation',
-                type: 'Get',
+                type: 'GET',
                 data: {
                     PARTY_CODE: PARTY_CODE,
                     BILL_NO: BILL_NO,
@@ -1583,33 +1568,41 @@
                 }
             });
 
-            if (!response.success == false) {
-                showToast("Invalid Bill No", { type: "error" });             
+            // Proper condition check
+            if (response.success === false) {
+                showToast("Invalid Bill No", { type: "error" });
                 return response;
             }
+
             return response;
+
         } catch (error) {
-            showToast("Validation Error", { type: "error" });         
+            showToast("Validation Error", { type: "error" });
             return { success: false };
         }
     }
 
-    async function GatenoValidation(V_TYPE, V_NO) {
+       async function GatenoValidation(V_TYPE, V_NO) {
         try {
             const response = await $.ajax({
                 url: '/InwardEntry/GatenoValidation',
-                type: 'Get',
-                data: {  V_TYPE: V_TYPE, V_NO: V_NO }
+                type: 'GET',
+                data: {
+                    V_TYPE: V_TYPE,
+                    V_NO: V_NO
+                }
             });
 
-            if (!response.success == false) {
-                showToast(response.message, { type: "error" });     
+            // Correct condition
+            if (response.success === false) {
+                showToast(response.message, { type: "error" });
                 return response;
             }
+
             return response;
 
         } catch (error) {
-           showToast("Validation Error", { type: "error" });             
+            showToast("Validation Error", { type: "error" });
             return { success: false };
         }
     }
@@ -2083,57 +2076,70 @@
         }
       }
 
-   async function FetchPendindorderno(PartyCode, V_TYPE, V_DATE) {
-      try {
-        const result = await $.ajax({
-          url: '/InwardEntryList/GetDataByPendingorder',
-          type: 'GET',
-          data: { PartyCode, V_TYPE, V_DATE }
-        });
-
-        if (result.success) {
-
-            if (result.data && result.data.length !== 0) {
-                var myModal = new bootstrap.Modal(document.getElementById('pendingorders'));
-                myModal.show();
-            } else {
-                var PartyName = $('#ddlPartyName option:selected').text();
-               showToast(`Data Not Found For this party: ${PartyName}`, { type: "error" });  
-                return;
+     async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
+          try {
+            if (!PartyCode || !V_TYPE || !V_DATE) {
+              showToast("Invalid parameters passed", { type: "error" });
+              return;
             }
-                  
+
+            const result = await $.ajax({
+              url: '/InwardEntryList/GetDataByPendingorder',
+              type: 'GET',
+              data: { PartyCode, V_TYPE, V_DATE }
+            });
+
+            console.log("result", result);
+
+            if (!result || !result.success) {
+              showToast("Failed to fetch data", { type: "error" });
+              return;
+            }
+
+            if (!result.data || result.data.length === 0) {
+              const PartyName = $('#ddlPartyName option:selected').text();
+              showToast(`Data Not Found For this party: ${PartyName}`, { type: "error" });
+              return;
+            }
+
+            // Show modal
+            const modalElement = document.getElementById('pendingorders');
+            const myModal = new bootstrap.Modal(modalElement);
+            myModal.show();
+
+            // Table rendering
             const tableBody = document.querySelector('#tblpendingordermodal tbody');
             tableBody.innerHTML = '';
 
-          result.data.forEach(item => {
-            const row = `
-              <tr>
-                <td><input type="checkbox" class="rowCheckbox" /></td>
-                <td>${item.iteM_CODE || ''}</td>
-                <td>${item.itemName || ''}</td>
-                <td>${item.uniT_NAME || ''}</td>
-                <td>${item.packinG_NOS || ''}</td>
-                <td>${item.qty || ''}</td>
-                <td>${item.balqty || ''}</td>
-                <td>${item.docType || ''}</td>
-                <td>${item.docNo || ''}</td>
-                <td>${item.docDate || ''}</td>
-                <td>${item.rate || ''}</td>
-                <td>${item.remark || ''}</td>
-                <td>${item.department || ''}</td>
-                <td style="display:none;">${item.deptCode || ''}</td>
-                <td>${item.emptY_YN || ''}</td>
-                <td style="display:none;">${item.uoM_CODE || ''}</td>
-              </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', row);
-          });
-        } 
+            result.data.forEach(item => {
+              const row = `
+                <tr>
+                  <td><input type="checkbox" class="rowCheckbox" /></td>
+                  <td>${item.iteM_CODE ?? ''}</td>
+                  <td>${item.itemName ?? ''}</td>
+                  <td>${item.uniT_NAME ?? ''}</td>
+                  <td>${item.packinG_NOS ?? ''}</td>
+                  <td>${item.qty ?? ''}</td>
+                  <td>${item.balqty ?? ''}</td>
+                  <td>${item.docType ?? ''}</td>
+                  <td>${item.docNo ?? ''}</td>
+                  <td>${item.docDate ?? ''}</td>
+                  <td>${item.rate ?? ''}</td>
+                  <td>${item.remark ?? ''}</td>
+                  <td>${item.department ?? ''}</td>
+                  <td style="display:none;">${item.deptCode ?? ''}</td>
+                  <td>${item.emptY_YN ?? ''}</td>
+                  <td style="display:none;">${item.uoM_CODE ?? ''}</td>
+                </tr>
+              `;
+              tableBody.insertAdjacentHTML('beforeend', row);
+            });
 
-      } catch (error) {
-         showToast(`Failed to load pending orders`, { type: "error" });
-      }
-    }
+          } catch (error) {
+            console.error("Error fetching pending orders:", error);
+            showToast("Failed to load pending orders", { type: "error" });
+          }
+        }
 
    function getSelectedPendingOrderRows() {
           const selectedRows = [];

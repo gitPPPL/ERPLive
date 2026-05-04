@@ -270,7 +270,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     };
                 }
 
-                return new RepositoryResponse { status = true, message = "Valid" };
+                return new RepositoryResponse { status = true, message = "" };
             }
             catch (Exception ex)
             {
@@ -319,7 +319,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     };
                 }
 
-                return new RepositoryResponse { status = true, message = "Valid" };
+                return new RepositoryResponse { status = true, message = "" };
             }
             catch (Exception ex)
             {

@@ -1396,6 +1396,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         private async Task<string> AuthenticateEWayBillAsync()
         {
+            var getdata = _globalVariableService.GetGlobalVariables();
             try
             {
                 string unm = "API_pashupati";
@@ -1410,11 +1411,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-                request.Headers.Add("ip_address", "103.74.69.13");
-                request.Headers.Add("client_id", "8a2017bb-6f67-4bf9-bc62-46bd802ed390");
-                request.Headers.Add("client_secret", "5e3dd92c-64ba-440f-a964-1a396397da66");
-                request.Headers.Add("gstin", "05AAFCP0864M1Z7");
-                request.Headers.Add("auth_access_type", "read");
+                request.Headers.Add("ip_address", getdata.ip_address);
+                request.Headers.Add("client_id", getdata.client_id);
+                request.Headers.Add("client_secret", getdata.client_secret);
+                request.Headers.Add("gstin", getdata.gstin);
+                request.Headers.Add("auth_access_type", getdata.auth_access_type);
 
                 var response = await client.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
@@ -1464,11 +1465,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
-                request.Headers.Add("ip_address", "103.74.69.13");
-                request.Headers.Add("client_id", "8a2017bb-6f67-4bf9-bc62-46bd802ed390");
-                request.Headers.Add("client_secret", "5e3dd92c-64ba-440f-a964-1a396397da66");
-                request.Headers.Add("gstin", "05AAFCP0864M1Z7");
-                request.Headers.Add("auth_access_type", "read");
+                request.Headers.Add("ip_address", getdata.ip_address);
+                request.Headers.Add("client_id", getdata.client_id);
+                request.Headers.Add("client_secret", getdata.client_secret);
+                request.Headers.Add("gstin", getdata.gstin);
+                request.Headers.Add("auth_access_type", getdata.auth_access_type);
                 request.Headers.Add("authtoken", token);
 
                 var response = await client.SendAsync(request);
