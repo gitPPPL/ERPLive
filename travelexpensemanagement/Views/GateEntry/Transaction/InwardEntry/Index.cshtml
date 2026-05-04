@@ -13,6 +13,7 @@
     </div>
 </div>
 
+<div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
@@ -724,7 +725,7 @@
                     <i class="fa fa-list"></i>
                     <span>List of Documents to be send</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" id="btnpendingorderno">
+                <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" data-bs-target="#pendingorders" id="btnpendingorderno">
                     <i class="fa fa-clock"></i>
                     <span>Pending Orders/Bill</span>
                 </button>
@@ -811,73 +812,67 @@
             <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
-            </button>
-            @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
-            <i class="fa fa-print"></i>Print
-        </button> *@
+            </button>   
         </div>
 
 
     </div>
 </div>
+<script src="~/common/GlobalFunction.js"></script>
+<script>     
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    const vtype = urlParams.get('vtype');
+    const PubDefEWaybillAmt = 50000;
+    var   PubUserLevel=@PubUserLevel;
+    var   LoginDate = '@logindate';
+    var   itemList = [];
+    var   deptList = [];
+    var   unitList = [];
 
-
-<script>
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const rowId = urlParams.get('id');
-        const mode = urlParams.get('mode');
-        const vtype = urlParams.get('vtype');
-        const PubDefEWaybillAmt = 50000;
-        var   PubUserLevel=@PubUserLevel;
-        var   LoginDate = '@logindate';
-        var   itemList = [];
-        var   deptList = [];
-        var   unitList = [];
-
-        $(document).ready(async function () {
-
-              await LoadDropDown();
-             if (rowId)
-              {
-                await LoadFormByID(rowId, vtype);
-                $('#ddlDocType').prop('disabled', true);
+    $(document).ready(async function () {       
+       await LoadDropDown();
+         if (rowId) 
+          {
+            await LoadFormByID(rowId, vtype);
+            $('#ddlDocType').prop('disabled', true);
+            $('#InDate').prop('disabled', true);
+            $('#InTime').prop('disabled', true);
+            $('.erppagelist-toolbar-end').show();  
+            $('#btn_approval').show();
+            if (mode === "view")
+            {
+             setFormReadOnly();
+            }
+          }
+         else
+          {
+            if(PubUserLevel == 1)
+            {
+                $('#InDate').prop('disabled', false);
+                $('#InTime').prop('disabled', false);
+            }
+            else{
                 $('#InDate').prop('disabled', true);
                 $('#InTime').prop('disabled', true);
-                $('.erppagelist-toolbar-end').show();
-                $('#btn_approval').show();
-                  if (mode === "view")
-                  {
-                    setFormReadOnly();
-                  }
-              }
-             else
-              {
-                 if(PubUserLevel == 1)
-                  {
-                    $('#InDate').prop('disabled', false);
-                    $('#InTime').prop('disabled', false);
-                  }
-                else{
-                    $('#InDate').prop('disabled', true);
-                    $('#InTime').prop('disabled', true);
-                }
-
-               $('#ddlDocStatus').prop('disabled', true);
-                let today = new Date().toISOString().split('T')[0];
-                $('#InDate').attr('min', LoginDate);
-                $('#TxtRptDate').val(today);
-                let now = new Date();
-                $('#InTime').val(now.toTimeString().slice(0,8));
-                $('#TiRptDate').val(now.toTimeString().slice(0,8));
-                GetVNo($('#ddlDocType').val());
-              }
-
-            $('#ddladdressline1').on('change' , function() {
-                let selectedPartyValue = $('#ddlPartyName').val();
-                let selectedAddressValue = $('#ddladdressline1').val();
-                fetchDDlParty(selectedPartyValue, selectedAddressValue);
-            });
+            }
+                
+           $('#ddlDocStatus').prop('disabled', true);
+            let today = new Date().toISOString().split('T')[0];
+            $('#InDate').attr('min', LoginDate);  
+            $('#TxtRptDate').val(today);
+            let now = new Date();
+            $('#InTime').val(now.toTimeString().slice(0,8));
+            $('#TiRptDate').val(now.toTimeString().slice(0,8));
+            GetVNo($('#ddlDocType').val());
+          }
+             
+        $('#ddladdressline1').on('change' , function() {
+            let selectedPartyValue = $('#ddlPartyName').val();
+            let selectedAddressValue = $('#ddladdressline1').val();           
+            fetchDDlParty(selectedPartyValue, selectedAddressValue);        
+        });
 
             $(document).on('input', '.numeric-only', function () {
              this.value = this.value.replace(/[^0-9.]/g, '');
@@ -946,70 +941,82 @@
                     }
             });
 
-            $("#btn-save").click(async function (e) {
-                    e.preventDefault();
-                    
-                    const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
-                    const V_NO = parseInt($('#TxtDocNo').val()) || null;
-                    const BILL_NO = $.trim($('#TxtBillNo').val()) || null;
-                    const V_TYPE  = $('#ddlDocType').val();
-                    if(BILL_NO)
-                    {
-                     const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
-                    }
-                    const isValid = await checkValidDate();
-                    if(isValid === false)
-                    {
-                    return;
-                    }
-                    const GateNoValidation = await GatenoValidation(V_TYPE ,V_NO);
+     $("#btn-save").click(async function (e) {
+        e.preventDefault();
+            const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
+            const V_NO = parseInt($('#TxtDocNo').val()) || null;
+            const BILL_NO = $('#TxtBillNo').val().trim();
+            const V_TYPE = $('#ddlDocType').val();
+   
+        if (BILL_NO) {
+            const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
+            if (!validation.success) {
+                return; 
+            }
+        }
+  
+        const isValid = await checkValidDate();
+        if (isValid === false) {
+            return;
+        }
 
-                    saveInwardEntry();
-            });
+        const gateValidation = await GatenoValidation(V_TYPE, V_NO);
+        if (!gateValidation.success) {
+            return; 
+        }
+           
+        saveInwardEntry();
+    });
 
             $('#ddlShipFrom').on('change', function() {
                 fetchShipFromAdd(this.value);
             });
 
-            $("#ddlDocType").change(function () {
-               $(this).prop('disabled', true);
-                const docType = this.value;
-                if (rowId == null) {
-                    GetVNo(docType);
-                }
+        $("#ddlDocType").change(function () {
+           $(this).prop('disabled', true);
+            const docType = this.value;
+            if (rowId == null) {
+                GetVNo(docType);
+            }
+            
+            if (docType === "INMS") {
+                $("#tblInwardEntry tbody").empty();
+                addRow($("#tblInwardEntry tbody"), {});
+            } else {
+                $("#tblInwardEntry tbody").empty();
+                addRow($("#tblInwardEntry tbody"), {});
+            }
+        });
 
-                if (docType === "INMS") {
-                    $("#tblInwardEntry tbody").empty();
-                    addRow($("#tblInwardEntry tbody"), {});
-                } else {
-                    $("#tblInwardEntry tbody").empty();
-                    addRow($("#tblInwardEntry tbody"), {});
-                }
-            });
 
-            $("#btnpendingorderno").click(function () {
-                const selectedValue = $('#ddlPartyName').val();
-                const V_TYPE = $('#ddlDocType').val();
-                const V_DATE = $('#TxtRptDate').val();
+         $("#btnpendingorderno").click(function () {
+            const selectedValue = $('#ddlPartyName').val();
+            const V_TYPE = $('#ddlDocType').val();
+            const V_DATE = $('#TxtRptDate').val();
 
-                if(!selectedValue)
-                {
-                    toastr.info("Please Select Party Name!");
-                    return;
-                }
-
-                if(!V_TYPE)
-                {
-                toastr.info("Please Select Voucher Type!");
+                if (!selectedValue) {
+                    invalidateField('ddlPartyName', 'Please Select Party Name!', 'info');
                 return;
                 }
-                if(!V_DATE)
-                {
-                    toastr.info("Please Select Voucher Date!");
-                    return;
-                }
-               FetchPendindorderno(selectedValue,V_TYPE,V_DATE);
-            });
+
+            if (!V_TYPE) {
+                showToast("Please Select Voucher Type!", { type: "info" });
+                $('#ddlDocType').addClass('is-invalid').focus();
+                return;
+            } else {
+                $('#ddlDocType').removeClass('is-invalid');
+            }
+
+            if (!V_DATE) {
+                showToast("Please Select Voucher Date!", { type: "info" });
+                $('#TxtRptDate').addClass('is-invalid').focus();
+                return;
+            } else {
+                $('#TxtRptDate').removeClass('is-invalid');
+            }
+
+            FetchPendingOrderNo(selectedValue, V_TYPE, V_DATE);
+        });
 
             $(document).on('change', '#selectAllPR', function () {
                   $('#tblpendingordermodal tbody .rowCheckbox').prop('checked', $(this).is(':checked'));
@@ -1033,12 +1040,12 @@
                     }
                 });
 
-                if (isDuplicate || isItemInMainTable(currentItemCode)) {
-                    toastr.error("Duplicate Item Code not allowed: " + currentItemCode);
-                    $(this).prop('checked', false);
-                    return;
-                }
+            if (isDuplicate || isItemInMainTable(currentItemCode)) {
+                showToast("Duplicate Item Code not allowed: " + currentItemCode, { type: "error" });          
+                $(this).prop('checked', false);
+                return;
             }
+        }
 
             const total = $('#tblpendingordermodal tbody .rowCheckbox').length;
             const checked = $('#tblpendingordermodal tbody .rowCheckbox:checked').length;
@@ -1057,15 +1064,15 @@
                 $('#ddlDocStatus').prop('disabled', true);
             });
 
-            $('#Btn_selectedData').on('click', function () {
-                const selectedData = getSelectedPendingOrderRows();
-                if (selectedData.length === 0) {
-                toastr.warning("Please select at least one row.");
-                return;
-                }
-                populateInwardEntryTable(selectedData);
-                $('#pendingorders').modal('hide');
-            });
+        $('#Btn_selectedData').on('click', function () {
+            const selectedData = getSelectedPendingOrderRows();           
+            if (selectedData.length === 0) {
+                showToast("Please select at least one row.", { type: "warning" });   
+            return;
+            }
+            populateInwardEntryTable(selectedData);
+            $('#pendingorders').modal('hide');
+        });
 
             $('#btn_setting').on('click', function () {
              GetVehicledetail();
@@ -1097,16 +1104,19 @@
             $('#SEARCHCONTAINER').on('click' , function() {
             var Container_No  = $('#TxtContainerNo').val();
 
-            if(Container_No)
-            {
-              getcontainerdata(Container_No);
-            }
-            else
-            {
-             toastr.info("Please Fill Container_No");
-            }
+        if(Container_No)
+        {
+            $('#TxtContainerNo').removeClass('is-invalid');
+            getcontainerdata(Container_No);
+        }
+        else
+        {
+          showToast("Please Fill Container_No", { type: "info" });
+            $('#TxtContainerNo').addClass('is-invalid').focus();
+            return false;        
+        }     
 
-            });
+        });
 
             $('#btn_backtolist').on('click' , function(){
                   backToList();
@@ -1115,27 +1125,64 @@
             $('#EwayBillbtn').on('click', function () {
                 var V_date = $('#InDate').val();
 
-                if (V_date) {
-                        GetEwaybillno(V_date, "IN");
-                } else {
-                    toastr.warning("Date is empty");
-                }
-            });
+            if (V_date) {
+              GetEwaybillno(V_date, "IN");
+            } else {
+             showToast("Date is empty", { type: "warning" });
+            }
         });
 
-        function isItemInMainTable(itemCode) {
-            let exists = false;
+        $('#BtnPartyBillno').on('click', async function () {
+            try {
+                var SUPPLIER = $('#ddlPartyName').val();
 
-            $('#tblInwardEntry tbody tr').each(function () {
-                const code = $(this).find('td:eq(0)').text().trim();
-                if (code === itemCode) {
-                    exists = true;
-                    return false;
-                }
-            });
+                const res = await $.ajax({
+                    url: '/InwardEntryList/GetDataByPARTTYBILLNO',
+                    type: 'GET',
+                    data: { SUPPLIER: SUPPLIER }
+                });
 
-            return exists;
+                const data = res.data;
+
+                console.log("data",data);
+
+                populateTable(data);
+
+            } catch (error) {
+                       showToast(error, { type: "error" });
+            }
+        });
+
+        $('#btn_partybillnoselect').on('click', function () {
+        const selectedrows = getSelectedRows();
+
+        if (selectedrows.length === 0) {
+          showToast("No rows selected", { type: "warning" });
+            return;
         }
+
+        const  row = selectedrows[0];
+        $('#TxtBillNo').val(row.supplieR_INVNO);
+        $('#DtPartyBillDate').val(row.supplieR_INVDATE);
+        $('#TxtBillAmt').val(row.supplieR_INVAMT);
+        $('#TxtContainerNo').val(row.containeR_NO);
+      });
+
+    });
+
+
+
+    function isItemInMainTable(itemCode) {
+        let exists = false;
+        $('#tblInwardEntry tbody tr').each(function () {
+            const code = $(this).find('td:eq(0)').text().trim();
+            if (code === itemCode) {
+                exists = true;
+                return false;
+            }
+        });
+        return exists;
+    }
 
         function saveInwardEntry() {
             const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
@@ -1166,323 +1213,297 @@
             const SHIP_BILLNO   = $.trim($('#ShipBillNo').val()) || null;
             const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
 
-            if (!V_TYPE) {
-                            toastr.warning("Please select a Voucher Type");
-                            $("#ddlDocType").focus();
-                            return;
-                        }
+        if (!V_TYPE) {
+            showToast("Please select a Voucher Type", { type: "info" });
+            $('#ddlDocType').addClass('is-invalid').focus();
+            return ;       
+        }
+          else{
+            $('#ddlDocType').removeClass('is-invalid');
+          }
+       
+        if (!V_NO) {
+            showToast("Please select a Voucher No", { type: "info" });
+            $('#TxtDocNo').addClass('is-invalid').focus();
+            return;
+        }
+        else
+        {
+          $('#TxtDocNo').removeClass('is-invalid');
+        }
 
-            if (!V_NO) {
-                            toastr.warning("Please select a Voucher No");
-                            $("#TxtDocNo").focus();
-                            return;
-                        }
+        if (!STATUS) {
+            showToast("Please select a Status.", { type: "info" });
+            $('#ddlDocStatus').addClass('is-invalid').focus();     
+            return;
+        }
+        else
+        {
+            $('#ddlDocStatus').removeClass('is-invalid');
+        }
 
-            if (!STATUS) {
-                            toastr.warning("Please select a Status.");
-                            $("#ddlDocStatus").focus();
-                            return;
-                        }
+       
+        if (!PARTY_CODE) {
+            showToast("Please select a Party.", { type: "warning" });
+            $("#ddlPartyName").addClass("is-invalid").focus();
+            return;
+        } else {
+            $("#ddlPartyName").removeClass("is-invalid");
+        }
 
-            if (!PARTY_CODE) {
-                            toastr.warning("Please select a Party.");
-                            $("#ddlPartyName").focus();
-                            return;
-                        }
+        if (!R_DATE && !R_TIME) {
+            showToast("Please select Reporting Date and Time.", { type: "warning" });
+            $("#TxtRptDate").addClass("is-invalid").focus();
+            return;
+        } else {
+            $("#TxtRptDate").removeClass("is-invalid");
+        }
 
-            if (!R_DATE   &&  !R_TIME) {
-                            toastr.warning("Please select a Reporting Date. and Time");
-                            $("#TxtRptDate").focus();
-                            return;
-                        }
 
-            if (BILL_NO && !BILL_DATE) {
-                            toastr.warning("Please select Party Bill Date.");
-                            $("#DtPartyBillDate").focus();
-                            return;
-                        }
+        if (BILL_NO && !BILL_DATE) {
+            showToast("Please select Party Bill Date.", { type: "warning" });
+            $("#DtPartyBillDate").addClass("is-invalid").focus();
+            return;
+        } else {
+            $("#DtPartyBillDate").removeClass("is-invalid");
+        }
 
-            if (CHALL_NO && !CHALL_DATE) {
-                            toastr.warning("Please select Challan Date.");
-                            $("#TxtChallanDate").focus();
-                            return;
-                        }
+
+        if (CHALL_NO && !CHALL_DATE) {
+            showToast("Please select Challan Date.", { type: "warning" });
+            $("#TxtChallanDate").addClass("is-invalid").focus();
+            return;
+        } else {
+            $("#TxtChallanDate").removeClass("is-invalid");
+        }
+
 
             if (!BILL_AMT) {
-                            toastr.warning("Please Fill a Bill Amount.");
-                            $("#TxtBillAmt").focus();
-                            return;
-                        }
+        invalidateField('TxtBillAmt', 'Please fill Bill Amount.', 'warning');
+        return;
+    }
 
-            if (!TRUCK_NO) {
-                            toastr.warning("Please Fill a Vehicle No.");
-                            $("#TxtVehicleNo").focus();
-                            return;
-                        }
-
-            if(TRUCK_NO)
-                           {
-                            var numericPart = TRUCK_NO.replace(/\D/g, '');
-                            var lastFour = numericPart.slice(-4);
-
-                             if (lastFour) {
+        if (!TRUCK_NO) {
+            showToast("Please fill Vehicle No.", { type: "warning" });
+            $("#TxtVehicleNo").addClass("is-invalid").focus();
+            return;
+        } else {
+            $("#TxtVehicleNo").removeClass("is-invalid");
+        }
 
 
-                                if (!DRIVER_NAME) {
-                                    toastr.warning("Please enter Driver Name.");
-                                    $("#TxtDriverName").focus();
-                                    return;
-                                }
+        if (TRUCK_NO) {
+        var numericPart = TRUCK_NO.replace(/\D/g, '');
+        var lastFour = numericPart.slice(-4);
 
-                                if (!DRIVER_NO) {
-                                    toastr.warning("Please enter Driver Mobile.");
-                                    $("#TxtDriverMobile").focus();
-                                    return;
-                                }
+        if (lastFour) {
 
-                                if (!DRIVER_NO || DRIVER_NO.toString().length !== 10)
-                                {
-                                    toastr.warning("Please enter a 10-digit mobile number.");
-                                    $("#TxtDriverMobile").focus();
-                                    return;
-                                }
-                            }
-                           }
+            if (!DRIVER_NAME) {
+                showToast("Please enter Driver Name.", { type: "warning" });
+                $("#TxtDriverName").addClass("is-invalid").focus();
+                return;
+            } else {
+                $("#TxtDriverName").removeClass("is-invalid");
+            }
 
-            if (WAYBILL_NO) {
-                            if (!EWB_DATE) {
-                                toastr.warning("Please select EWayBill Date.");
-                                $("#DtEWayDate").focus();
-                                return;
-                            }
+            if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) {
+                showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
+                $("#TxtDriverMobile").addClass("is-invalid").focus();
+                return;
+            } else {
+                $("#TxtDriverMobile").removeClass("is-invalid");
+            }
+        }
+    }
 
-                            if (!EWB_EXPDATE) {
-                                toastr.warning("Please select EWayBill Expiry Date.");
-                                $("#TxtEWayDate").focus();
-                                return;
-                            }
+        if (WAYBILL_NO) {
 
-                            if (!EWB_INVNO) {
-                                toastr.warning("Please fill EWB Party Inv No.");
-                                $("#TxtEWBInvNo").focus();
-                                return;
-                            }
+        if (!EWB_DATE) {
+            showToast("Please select EWayBill Date.", { type: "warning" });
+            $("#DtEWayDate").addClass("is-invalid").focus();
+            return;
+        }
 
-                            if (!EWB_INVAMT) {
-                                toastr.warning("Please fill EWB Party Inv Amount.");
-                                $("#TxtEWBInvAmt").focus();
-                                return;
-                            }
-                        }
+        if (!EWB_EXPDATE) {
+            showToast("Please select EWayBill Expiry Date.", { type: "warning" });
+            $("#TxtEWayDate").addClass("is-invalid").focus();
+            return;
+        }
 
-            if(R_DATE > V_DATE)
-                        {
-                            toastr.info("Reporting Date Can Not Be Greater Then In Date ");
-                            return;
-                        }
+        if (!EWB_INVNO) {
+            showToast("Please fill EWB Party Inv No.", { type: "warning" });
+            $("#TxtEWBInvNo").addClass("is-invalid").focus();
+            return;
+        }
 
-            if(R_TIME > OUT_DATE)
-                        {
-                            toastr.info("Reporting Time Can Not Be Greater Then In Time ");
-                            return;
-                        }
+        if (!EWB_INVAMT) {
+            showToast("Please fill EWB Party Inv Amount.", { type: "warning" });
+            $("#TxtEWBInvAmt").addClass("is-invalid").focus();
+            return;
+        }
+    }
 
-            if(BILL_DATE > V_DATE)
-                        {
-                            toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
-                            return;
-                        }
+        if (R_DATE > V_DATE) {
+        showToast("Reporting Date cannot be greater than In Date.", { type: "info" });
+        return;
+    }
 
-            if(CHALL_DATE > V_DATE)
-                        {
-                            toastr.info("Party Bill Date Can Not Be Greater Then In Date  ");
-                            return;
-                        }
+        if (BILL_DATE > V_DATE) {
+        showToast("Bill Date cannot be greater than In Date.", { type: "info" });
+        return;
+    }
 
-            if(SHIP_BILLDATE > V_DATE)
-                        {
-                            toastr.info("Ship. Bill Date Can Not Be Greater Then In Date  ");
-                            return;
-                        }
+        if (SHIP_PARTY && !SHIP_BILLNO) {
+        showToast("Shipping Bill No. is required.", { type: "info" });
+        return;
+    }
 
-            if(OUT_DATE > V_DATE)
-                        {
-                            toastr.info("Vehicle Out Date Can Not Be Greater Then In Date  ");
-                            return;
-                        }
+        if (SHIP_BILLNO && !SHIP_PARTY) {
+        showToast("Shipping Party is required.", { type: "info" });
+        return;
+    }
 
-            if(SHIP_PARTY)
-                        {
-                            if(!SHIP_BILLNO)
-                            {
-                                toastr.info("Shipping Bill No.is required if shipping party mentioned.");
-                                return;
-                            }
-                        }
+        if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
+        if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
+            showToast("Bill Amount compulsory for " + PARTY_NAME, { type: "info" });
+            return;
+        }
+    }
 
-            if(SHIP_BILLNO)
-                        {
-                            if(!SHIP_PARTY)
-                            {
-                                toastr.info("Shipping Party required if you entered shipping bill no.");
-                                return;
-                            }
+        if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
+        showToast("Transit No. and E-Way Bill required.", { type: "info" });
+        if (!TRANSIT_NO) {
+            $("#ddlTransit").addClass("is-invalid").focus();
+        } else {
+            $("#TxtEWayNo").addClass("is-invalid").focus();
+        }
+        return;
+    }
 
-                            if(!BILL_NO && !CHALL_NO)
-                            {
-                                toastr.info("Bill No./Challan No. is compulsary.");
-                                return;
-                            }
+        if (TRANSIT_NO && EWB_EXPDATE) {
+            const expDate = new Date(EWB_EXPDATE);
+            const inDate = new Date(V_DATE);
 
-                        }
-
-            if (V_TYPE == "INST" && V_TYPE == "INFU"  && V_TYPE == "INRM")
-                        {
-                            if(BILL_AMT == 0 && TRANSIT_NO == null && WAYBILL_NO  == null)
-                            {
-                               toastr.info("Bill Amount compulsory for " + PARTY_NAME);
-
-                               return;
-                            }
-                        }
-
-            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-                            toastr.info("Transit No. and E-Way Bill are compulsory if Bill Amount > " + PubDefEWaybillAmt);
-
-                            if (!TRANSIT_NO) {
-                                $("#ddlTransit").focus();
-                            } else {
-                                $("#TxtEWayNo").focus();
-                            }
-
-                            return;
-                        }
-
-            if (TRANSIT_NO && EWB_EXPDATE) {
-                            const expDate = new Date(EWB_EXPDATE);
-                            const inDate = new Date(V_DATE);
-
-                            if (!isNaN(expDate) && !isNaN(inDate) && expDate < inDate) {
-                                toastr.info("Waybill expired on " + EWB_EXPDATE + ". Record cannot be saved.");
-                                return;
-                            }
-                        }
-
-            const Header = {
-                            V_TYPE: $('#ddlDocType').val(),
-                            V_NO: V_NO,
-                            DOC_ID: $.trim($('#TxtCode').val()) || null,
-                            V_DATE: V_DATE,
-                            OUT_DATE: OUT_DATE,
-                            V_TIME: $.trim($('#InTime').val()) || null,
-                            R_DATE: R_DATE,
-                            R_TIME: R_TIME,
-                            OUT_TIME:  $.trim($('#TiVehicleOutTime').val()) || null,
-                            DISP_PLAN_NO: parseInt($('#TxtPONo').val()) || null,
-                            DISP_PLAN_TYPE: $('#TxtPONo').val(),
-                            PARTY_CODE: PARTY_CODE,
-                            PARTY_ADDRESSID: parseInt($('#ddladdressline1').val()) || null,
-                            BILL_NO: BILL_NO,
-                            BILL_DATE: BILL_DATE,
-                            BILL_AMT: BILL_AMT,
-                            CHALL_NO: CHALL_NO,
-                            CHALL_DATE: CHALL_DATE,
-                            TRUCK_NO: TRUCK_NO,
-                            TRANSPORT_CODE: TRANSPORT_CODE,
-                            DRIVER_NAME: DRIVER_NAME,
-                            DRIVER_NO: DRIVER_NO,
-                            EWB_DATE: EWB_DATE,
-                            EWB_EXPDATE: EWB_EXPDATE,
-                            EWB_INVNO: EWB_INVNO,
-                            EWB_INVAMT: EWB_INVAMT,
-                            PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
-                            TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
-                            PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
-                            PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
-                            PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
-                            PARTY_EWBCITY: parseInt($('#ddlPartyCity').val()) || null,
-                            TRANSIT_NO: parseInt($('#ddlTransit').val()) || null,
-                            WAYBILL_NO: WAYBILL_NO,
-                            REMARKS: $.trim($('#TxtRemarks').val()) || null,
-                            Remarks2: $.trim($('#txt_VehicleRemarks').val()) || null,
-                            ADD1: $.trim($('#TxtAddLine1').val()) || null,
-                            ADD2: $.trim($('#TxtAddLine2').val()) || null,
-                            ADD3: $.trim($('#TxtAddLine3').val()) || null,
-                                PARTY_CITY: parseInt($('#ddlcity').val()) || null,
-                            PARTY_GST: $.trim($('#TxtGSTNo').val()) || null,
-                            PARTY_PINCODE: $.trim($('#TxtPAN').val()) || null,
-                            SHIP_PARTY: parseInt($('#ddlShipFrom').val()) || null,
-                            SHIP_BILLNO: $.trim($('#ShipBillNo').val()) || null,
-                            SHIP_BILLDATE: formatDate($("#ShipBillDate").val()) || null,
-                            RETURN_TYPE: $.trim($('#VehicleReturn').val()) || null,
-                            CONTAINER_NO: $.trim($('#TxtContainerNo').val()) || null,
-                            GR_NO: $.trim($('#TxtGRNo').val()) || null,
-                            GR_DATE: formatDate($("#DtGRDate").val()) || null,
-                            STATUS: STATUS,
-                            action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
-                            PAN_NO: $.trim($('#TxtPAN').val()) || null,
-                            PARTY_NAME : PARTY_NAME
-                        };
-
-            const Deatils = collectTableRowData();
-
-            if (!Deatils || Deatils.length === 0) {
-                toastr.warning("Please fill at least one row in Detail");
+            if (expDate < inDate) {
+                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });
                 return;
             }
+        }
+      
+        const Header = {
+                        V_TYPE: $('#ddlDocType').val(),
+                        V_NO: V_NO,
+                        DOC_ID: $.trim($('#TxtCode').val()) || null,
+                        V_DATE: V_DATE,
+                        OUT_DATE: OUT_DATE,
+                        V_TIME: $.trim($('#InTime').val()) || null,
+                        R_DATE: R_DATE,
+                        R_TIME: R_TIME,
+                        OUT_TIME:  $.trim($('#TiVehicleOutTime').val()) || null,
+                        DISP_PLAN_NO: parseInt($('#TxtPONo').val()) || null,
+                        DISP_PLAN_TYPE: $('#TxtPONo').val(),
+                        PARTY_CODE: PARTY_CODE,
+                        PARTY_ADDRESSID: parseInt($('#ddladdressline1').val()) || null,
+                        BILL_NO: BILL_NO,
+                        BILL_DATE: BILL_DATE,
+                        BILL_AMT: BILL_AMT,
+                        CHALL_NO: CHALL_NO,
+                        CHALL_DATE: CHALL_DATE,
+                        TRUCK_NO: TRUCK_NO,
+                        TRANSPORT_CODE: TRANSPORT_CODE,
+                        DRIVER_NAME: DRIVER_NAME,
+                        DRIVER_NO: DRIVER_NO,
+                        EWB_DATE: EWB_DATE,
+                        EWB_EXPDATE: EWB_EXPDATE,
+                        EWB_INVNO: EWB_INVNO,
+                        EWB_INVAMT: EWB_INVAMT,
+                        PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
+                        TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
+                        PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
+                        PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
+                        PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
+                        PARTY_EWBCITY: parseInt($('#ddlPartyCity').val()) || null,
+                        TRANSIT_NO: parseInt($('#ddlTransit').val()) || null,
+                        WAYBILL_NO: WAYBILL_NO,
+                        REMARKS: $.trim($('#TxtRemarks').val()) || null,
+                        Remarks2: $.trim($('#txt_VehicleRemarks').val()) || null,
+                        ADD1: $.trim($('#TxtAddLine1').val()) || null,
+                        ADD2: $.trim($('#TxtAddLine2').val()) || null,
+                        ADD3: $.trim($('#TxtAddLine3').val()) || null,
+                            PARTY_CITY: parseInt($('#ddlcity').val()) || null,
+                        PARTY_GST: $.trim($('#TxtGSTNo').val()) || null,
+                        PARTY_PINCODE: $.trim($('#TxtPAN').val()) || null,
+                        SHIP_PARTY: parseInt($('#ddlShipFrom').val()) || null,
+                        SHIP_BILLNO: $.trim($('#ShipBillNo').val()) || null,
+                        SHIP_BILLDATE: formatDate($("#ShipBillDate").val()) || null,
+                        RETURN_TYPE: $.trim($('#VehicleReturn').val()) || null,
+                        CONTAINER_NO: $.trim($('#TxtContainerNo').val()) || null,
+                        GR_NO: $.trim($('#TxtGRNo').val()) || null,
+                        GR_DATE: formatDate($("#DtGRDate").val()) || null,
+                        STATUS: STATUS,
+                        action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
+                        PAN_NO: $.trim($('#TxtPAN').val()) || null,
+                        PARTY_NAME : PARTY_NAME
+                    };
+        const Deatils = collectTableRowData();            
+
+        if (!Deatils || Deatils.length === 0) {
+         showToast("Please fill at least one row in Detail", { type: "info" });
+          return;
+        }
 
            const itemCodeSet = new Set();
 
            for (let i = 0; i < Deatils.length; i++) {
            const row = Deatils[i];
 
-            if (row.ITEM_CODE !== null) {
-                if (itemCodeSet.has(row.ITEM_CODE)) {
-                    toastr.warning(`Duplicate ITEM_CODE: ${row.ITEM_CODE} (Row ${i + 1})`);
-                    focusCell(i, 0);
-                    return;
-                }
-                itemCodeSet.add(row.ITEM_CODE);
-
-                if (row.DEPT_CODE === null) {
-                    toastr.warning(`Department required (Row ${i + 1})`);
-                    focusCell(i, 11);
-                    return;
-                }
-
-                if (row.UOM_NAME === null) {
-                    toastr.warning(`Unit required (Row ${i + 1})`);
-                    focusCell(i, 3);
-                    return;
-                }
-
-                if (row.NOS === null) {
-                    toastr.warning(`NOS required (Row ${i + 1})`);
-                    focusCell(i, 4);
-                    return;
-                }
-
-                if (row.QTY === null) {
-                    toastr.warning(`Quantity required (Row ${i + 1})`);
-                    focusCell(i, 5);
-                    return;
-                }
-
-                if (!row.EMPTY) {
-                    toastr.warning(`EMPTY field required (Row ${i + 1})`);
-                    focusCell(i, 7);
-                    return;
-                }
-
-                if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
-                    if (!row.REF_TYPE) {
-                        toastr.warning(`Reference Type required (Row ${i + 1})`);
-                        focusCell(i, 9);
-                        return;
-                    }
-                }
+        if (row.ITEM_CODE !== null) {
+            if (itemCodeSet.has(row.ITEM_CODE)) {
+                showToast(`Duplicate ITEM_CODE: ${row.ITEM_CODE} (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 0); 
+                return;
             }
-          }
+            itemCodeSet.add(row.ITEM_CODE);
+                     
+            if (row.DEPT_CODE === null) {
+                   showToast(`Department required (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 11);
+                return;
+            }
+                 
+            if (row.UOM_NAME === null) {
+                showToast(`Unit required (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 3);
+                return;
+            }
+
+            if (row.NOS === null) {
+                showToast(`NOS required (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 4);
+                return;
+            }
+
+            if (row.QTY === null) {
+                showToast(`Quantity required (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 5);
+                return;
+            }
+
+            if (!row.EMPTY) {
+                showToast(`EMPTY field required (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 7);
+                return;
+            }
+
+            if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
+                if (!row.REF_TYPE) {
+                    showToast(`Reference Type required (Row ${i + 1})`, { type: "warning" });
+                    focusCell(i, 9);
+                    return;
+                }
+            }     
+        }
+      } 
 
             const payload = {
                     Header: Header,
@@ -1497,32 +1518,30 @@
                 contentType: 'application/json',
                 data: JSON.stringify(payload),
 
-                success: function (response) {
-                    if (response.status === "Success") {
-                        if (response.message) {
-                            toastr.warning(response.message);
-                        }
-                        toastr.success("Saved successfully!");
-                        setTimeout(function () {  window.location.href =  '/InwardEntry/Index?id=' + V_NO +  '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);
-                    }
-                    else {
-                        toastr.error(response.message || "Save failed.");
-                    }
-                },
+            success: function (response) {
+                if (response.status === "Success") {
+                    if (response.message) {
+                       showToast("Saved successfully!", { type: "success" });
+                    }                                    
+                    setTimeout(function () {  window.location.href =  '/InwardEntry/Index?id=' + V_NO +  '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);
+                }
+                else {
+                 showToast(response.message, { type: "error" });
+                }
+            },
 
                 error: function (xhr) {
                     let errorMessage = "Something went wrong.";
 
-                    if (xhr.status === 400) {
-                        errorMessage = "Bad Request: " + xhr.responseText;
-                    } else if (xhr.status === 500) {
-                        errorMessage = "Server error: " + xhr.responseText;
-                    } else {
-                        errorMessage = "Unexpected error: " + xhr.statusText;
-                    }
-
-                    toastr.error(errorMessage);
-                },
+                if (xhr.status === 400) {
+                    errorMessage = "Bad Request: " + xhr.responseText;
+                } else if (xhr.status === 500) {
+                    errorMessage = "Server error: " + xhr.responseText;
+                } else {
+                    errorMessage = "Unexpected error: " + xhr.statusText;
+                }         
+                 showToast(errorMessage, { type: "error" });          
+            },
 
                 complete: function () {
                     $("#btn-save").prop("disabled", false);
@@ -1545,158 +1564,165 @@
             }
         }
 
-        async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
-            try {
-                const response = await $.ajax({
-                    url: '/InwardEntry/BillNoValidation',
-                    type: 'POST',
-                    data: {
-                        PARTY_CODE: PARTY_CODE,
-                        BILL_NO: BILL_NO,
-                        V_NO: V_NO
+      async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
+        try {
+            const response = await $.ajax({
+                url: '/InwardEntry/BillNoValidation',
+                type: 'GET',
+                data: {
+                    PARTY_CODE: PARTY_CODE,
+                    BILL_NO: BILL_NO,
+                    V_NO: V_NO
+                }
+            });
+
+            // Proper condition check
+            if (response.success === false) {
+                showToast("Invalid Bill No", { type: "error" });
+                return response;
+            }
+
+                return response;
+
+        } catch (error) {
+            showToast("Validation Error", { type: "error" });
+            return { success: false };
+        }
+    }
+
+       async function GatenoValidation(V_TYPE, V_NO) {
+        try {
+            const response = await $.ajax({
+                url: '/InwardEntry/GatenoValidation',
+                type: 'GET',
+                data: {
+                    V_TYPE: V_TYPE,
+                    V_NO: V_NO
+                }
+            });
+
+            // Correct condition
+            if (response.success === false) {
+                showToast(response.message, { type: "error" });
+                return response;
+            }
+
+            return response;
+
+        } catch (error) {
+            showToast("Validation Error", { type: "error" });
+            return { success: false };
+        }
+    }
+
+    function setFormReadOnly() {
+                const form = document.getElementById("InwardEntryForm");
+                if (!form) return;
+                // add readonly class
+                    form.classList.add('erppage-readonly');
+                // Hide approval button
+                $('.erppagelist-toolbar-end').hide();
+                $('#btn_approval').hide();
+
+                // Disable all inputs except hidden
+                const inputs = form.querySelectorAll("input");
+                inputs.forEach(el => {
+                    if (el.type !== "hidden") {
+                        if (
+                            el.type === "text" ||
+                            el.type === "date" ||
+                            el.type === "time" ||
+                            el.type === "number"
+                        ) {
+                            el.setAttribute("readonly", true);
+                        } else {
+                            el.setAttribute("disabled", true);
+                        }
                     }
                 });
 
-                if (!response.success) {
-                    toastr.error(response.message || "Invalid Bill No");
-                    return response;
-                }
-
-                return response;
-
-            } catch (error) {
-                toastr.error("Validation Error",error);
-                return { success: false };
-            }
-        }
-
-        async function GatenoValidation(V_TYPE, V_NO) {
-            try {
-                const response = await $.ajax({
-                    url: '/InwardEntry/GatenoValidation',
-                    type: 'POST',
-                    data: {  V_TYPE: V_TYPE, V_NO: V_NO }
+                // Disable all textareas
+                const textareas = form.querySelectorAll("textarea");
+                textareas.forEach(el => {
+                    el.setAttribute("readonly", true);
                 });
 
-                if (!response.success) {
-                    toastr.error(response.message || "Invalid Gate No");
-                    return response;
-                }
-                return response;
+                // Disable all selects
+                const selects = form.querySelectorAll("select");
+                selects.forEach(el => {
+                    el.setAttribute("disabled", true);
+                });
 
-            } catch (error) {
-                toastr.error("Validation Error",error);
-                return { success: false };
-            }
-        }
+                // Disable all buttons except Back/List buttons if needed
+                const buttons = form.querySelectorAll("button");
+                buttons.forEach(btn => {
+                    const txt = btn.innerText.trim().toLowerCase();
 
-        function setFormReadOnly() {
-            const form = document.getElementById("InwardEntryForm");
-            if (!form) return;
-
-            // Hide approval button
-            $('.erppagelist-toolbar-end').hide();
-            $('#btn_approval').hide();
-
-            // Disable all inputs except hidden
-            const inputs = form.querySelectorAll("input");
-            inputs.forEach(el => {
-                if (el.type !== "hidden") {
                     if (
-                        el.type === "text" ||
-                        el.type === "date" ||
-                        el.type === "time" ||
-                        el.type === "number"
+                        !txt.includes("back") &&
+                        !txt.includes("close")
                     ) {
+                        btn.setAttribute("disabled", true);
+                    }
+                });
+
+                // Disable clickable icons/spans
+                const clickableIcons = form.querySelectorAll(`
+                    .input-icon,
+                    .fa-search,
+                    .fa-cog,
+                    .fa-database,
+                    .fa-ellipsis-h
+                `);
+
+                clickableIcons.forEach(icon => {
+                    icon.style.pointerEvents = "none";
+                    icon.style.opacity = "0.5";
+                    icon.style.cursor = "not-allowed";
+                });
+
+                // Disable modal triggers
+                const modalTriggers = form.querySelectorAll("[data-bs-toggle='modal']");
+                modalTriggers.forEach(el => {
+                    el.removeAttribute("data-bs-toggle");
+                    el.removeAttribute("data-bs-target");
+                    el.style.pointerEvents = "none";
+                    el.style.opacity = "0.5";
+                    el.style.cursor = "not-allowed";
+                });
+
+                // Disable table controls
+                const tableControls = form.querySelectorAll(`
+                    table input,
+                    table select,
+                    table textarea,
+                    table button,
+                    table .fa,
+                    table span
+                `);
+
+                tableControls.forEach(el => {
+                    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
                         el.setAttribute("readonly", true);
-                    } else {
+                    } else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
                         el.setAttribute("disabled", true);
                     }
-                }
-            });
 
-            // Disable all textareas
-            const textareas = form.querySelectorAll("textarea");
-            textareas.forEach(el => {
-                el.setAttribute("readonly", true);
-            });
-
-            // Disable all selects
-            const selects = form.querySelectorAll("select");
-            selects.forEach(el => {
-                el.setAttribute("disabled", true);
-            });
-
-            // Disable all buttons except Back/List buttons if needed
-            const buttons = form.querySelectorAll("button");
-            buttons.forEach(btn => {
-                const txt = btn.innerText.trim().toLowerCase();
-
-                if (
-                    !txt.includes("back") &&
-                    !txt.includes("close")
-                ) {
-                    btn.setAttribute("disabled", true);
-                }
-            });
-
-            // Disable clickable icons/spans
-            const clickableIcons = form.querySelectorAll(`
-                .input-icon,
-                .fa-search,
-                .fa-cog,
-                .fa-database,
-                .fa-ellipsis-h
-            `);
-
-            clickableIcons.forEach(icon => {
-                icon.style.pointerEvents = "none";
-                icon.style.opacity = "0.5";
-                icon.style.cursor = "not-allowed";
-            });
-
-            // Disable modal triggers
-            const modalTriggers = form.querySelectorAll("[data-bs-toggle='modal']");
-            modalTriggers.forEach(el => {
-                el.removeAttribute("data-bs-toggle");
-                el.removeAttribute("data-bs-target");
-                el.style.pointerEvents = "none";
-                el.style.opacity = "0.5";
-                el.style.cursor = "not-allowed";
-            });
-
-            // Disable table controls
-            const tableControls = form.querySelectorAll(`
-                table input,
-                table select,
-                table textarea,
-                table button,
-                table .fa,
-                table span
-            `);
-
-            tableControls.forEach(el => {
-                if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-                    el.setAttribute("readonly", true);
-                } else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
-                    el.setAttribute("disabled", true);
-                }
-
-                el.style.pointerEvents = "none";
-                el.style.opacity = "0.5";
-            });
-            $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
-            $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
-            $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
-            // Add readonly class for CSS styling
-            form.classList.add("readonly-mode");
-        }
-
-        function collectTableRowData() {
-            const table = document.getElementById('tblInwardEntry');
-            if (!table) return [];
-            const rows = table.querySelectorAll('tbody tr');
-            const rowData = [];
+                    el.style.pointerEvents = "none";
+                    el.style.opacity = "0.5";
+                });
+                $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
+                $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
+                $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
+                // Add readonly class for CSS styling
+                form.classList.add("readonly-mode");
+            }
+     
+    function collectTableRowData() {
+        const table = document.getElementById('tblInwardEntry');
+        if (!table) return [];
+        const rows = table.querySelectorAll('tbody tr');
+        const rowData = [];
 
             rows.forEach(row => {
                 const itemSelect = row.querySelector('.ItemName');
@@ -1762,49 +1788,52 @@
                     await DDlState(),
                 ]);
 
-            } catch (error) {
-                toastr.error("Error loading dropdowns",error);
-            }
+        } catch (error) {
+          showToast("Error loading dropdowns", { type: "error" });
+       
         }
+    }
 
         function populateTable(data) {
               const tbody = $("#tblellipsisIconmodal tbody");
               tbody.empty();
 
-              data.forEach(function (row) {
-                let tr = `<tr>
-                          <td><input type="checkbox" class="rowCheckbox" /></td>
-                          <td>${row.saudA_NO}</td>
-                          <td>${row.saudaDate}</td>
-                          <td>${row.itemName}</td>
-                          <td>${row.saudaQty}</td>
-                          <td>${row.saudaRate}</td>
-                          <td>${row.partyInvNo}</td>
-                          <td>${row.supplieR_INVDATE}</td>
-                          <td>${row.invAmtUSD}</td>
-                          <td>${row.containeR_NO}</td>
-                          <td>${row.contWt}</td>
-                          <td>${row.conT_SIZE}</td>
-                          <td>${row.trackingEntryNo}</td>
-                          <td style="display:none;"></td>
-                      </tr>`;
-                tbody.append(tr);
-              });
-        }
+          data.forEach(function (row) {
+            let tr = `<tr>
+                      <td><input type="checkbox" class="rowCheckbox" /></td>
+                        <td>${row.saudA_NO}</td>
+                        <td>${row.saudaDate}</td>
+                        <td>${row.itemName}</td>
+                        <td>${row.iteM_CODE}</td>
+                        <td>${row.qty}</td>
+                        <td>${row.rate}</td>
+                        <td>${row.supplieR_INVNO}</td>
+                        <td>${row.supplieR_INVDATE}</td>
+                        <td>${row.supplieR_INVAMT}</td>
+                        <td>${row.containeR_NO}</td>
+                        <td>${row.grS_WEIGHT}</td>
+                        <td>${row.conT_SIZE}</td>
+                        <td>${row.v_no}</td>
+                      <td style="display:none;"></td>
+                  </tr>`;
+            tbody.append(tr);
+          });
+    }
 
-        async function DDLVtype() {
-              try {
-                const res = await fetch('/InwardEntry/DDlVType');
-                const data = await res.json();
-                const ddl = $('#ddlDocType');
-                ddl.empty().append('');
-                data.forEach(item => {
-                  ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-              } catch (error) {
-                toastr.error("Error loading VType:", error);
-              }
-        }
+    async function DDLVtype() {
+          try {
+            const res = await fetch('/InwardEntry/DDlVType');
+            const data = await res.json();
+            const ddl = $('#ddlDocType');
+            ddl.empty().append('');
+            data.forEach(item => {
+              ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+          } catch (error) {
+           showToast("rror loading VType:", { type: "error" });
+   
+          }
+    }
 
         async function DDLParty() {
           try {
@@ -1824,10 +1853,10 @@
               width: '100%'
             });
 
-          } catch (error) {
-            toastr.error("Error loading Party:", error);
-          }
-        }
+      } catch (error) {
+        showToast("Error loading Party:", { type: "error" });  
+      }
+    }
 
          async function DDLShipFrom() {
               try {
@@ -1851,98 +1880,105 @@
                   width: '100%'
                 });
 
-              } catch (error) {
-                toastr.error("Error loading Ship From:", error);
-              }
-         }
+          } catch (error) {
+                      showToast(error, { type: "error" });
+      
+          }
+     }
 
-        async function DDDocStatus() {
-        try {
-            const res = await fetch('/InwardEntry/DDDocStatus');
-            const data = await res.json();
-            const ddl = $('#ddlDocStatus');
-            ddl.empty().append('');
-            data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            } catch (error) {
-                toastr.error("Error loading Doc Status:", error);
-            }
-        }
-
-        async function DDlTransportname() {
-                  try {
-                        const res = await fetch('/InwardEntry/DDlTransportName');
-                    const data = await res.json();
-                        const ddl = $('#TxtTransporter');
-                        ddl.empty().append('<option value="">-- Select Transport Name --</option>');
-                    data.forEach(item => {
-                      ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                    });
-                  } catch (error) {
-                          toastr.error("Error loading Transporter", error);
-                  }
-                }
-
-        async function DDlPartyCity() {
-        try {
-            const res = await fetch('/InwardEntry/DDlPartycity');
-            const data = await res.json();
-            const ddl = $('#ddlPartyCity');
-            ddl.empty().append('<option value="">-- Select Party City --</option>');
-            data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            } catch (error) {
-                toastr.error("Error loading Party City:", error);
-            }
-        }
-
-       async function DDlCity() {
-       try {
-            const res = await fetch('/InwardEntry/DDlPartycity');
-            const data = await res.json();
-                    const ddl = $('#ddlcity');
-            ddl.empty().append('<option value="">Select City</option>');
-            data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            } catch (error) {
-                toastr.error("Error loading Party City:", error);
-            }
-        }
-
-       async function DDlState() {
-        try {
-                const res = await fetch('/InwardEntry/DDlstate');
-            const data = await res.json();
-                const ddl = $('#TxtState');
-            ddl.empty().append('<option value="">Select State</option>');
-            data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            } catch (error) {
-                toastr.error("Error loading State:", error);
+    async function DDDocStatus() {
+    try {
+        const res = await fetch('/InwardEntry/DDDocStatus');
+        const data = await res.json();
+        const ddl = $('#ddlDocStatus');
+        ddl.empty().append('');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+        } catch (error) {
+          showToast("Error loading Doc Status:", { type: "error" });
+    
         }
     }
 
-       function DDlPartyAdd(PartyId) {
-          return $.ajax({
-            url: '/InwardEntry/fetchSelectedAddress',
-            type: 'POST',
-            data: { PartyId: PartyId },
-            success: function (data) {
-              const ddl = $('#ddladdressline1');
-              ddl.empty().append('<option value="">-- Select Address --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            },
-            error: function (xhr, status, error) {
-              toastr.error('Error loading Party Address:', error);
+    async function DDlTransportname() {
+              try {
+                    const res = await fetch('/InwardEntry/DDlTransportName');
+                const data = await res.json();
+                    const ddl = $('#TxtTransporter');
+                    ddl.empty().append('<option value="">-- Select Transport Name --</option>');
+                data.forEach(item => {
+                  ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+              } catch (error) {
+                  showToast("Error loading Transporter", { type: "error" });
+              
+              }
             }
-          });
+
+    async function DDlPartyCity() {
+    try {
+        const res = await fetch('/InwardEntry/DDlPartycity');
+        const data = await res.json();
+        const ddl = $('#ddlPartyCity');
+        ddl.empty().append('<option value="">-- Select Party City --</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+        } catch (error) {
+           showToast("Error loading Party City:", { type: "error" });
+    
         }
+    }
+
+   async function DDlCity() {
+   try {
+        const res = await fetch('/InwardEntry/DDlPartycity');
+        const data = await res.json();
+                const ddl = $('#ddlcity');
+        ddl.empty().append('<option value="">Select City</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+        } catch (error) {
+                showToast("Error loading  City:", { type: "error" });
+         
+        }
+    }
+
+   async function DDlState() {
+    try {
+            const res = await fetch('/InwardEntry/DDlstate');
+        const data = await res.json();
+            const ddl = $('#TxtState');
+        ddl.empty().append('<option value="">Select State</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+        } catch (error) {
+                     showToast("Error loading  State:", { type: "error" });
+
+    }
+}
+
+   function DDlPartyAdd(PartyId) {
+      return $.ajax({
+        url: '/InwardEntry/fetchSelectedAddress',
+        type: 'POST',
+        data: { PartyId: PartyId },
+        success: function (data) {
+          const ddl = $('#ddladdressline1');
+          ddl.empty().append('<option value="">-- Select Address --</option>');
+          data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+          });
+        },
+        error: function (xhr, status, error) {
+                      showToast("Error loading  Party Address:", { type: "error" });
+      
+        }
+      });
+    }
 
        async function GetPartyAdress(PartyId) {
             try {
@@ -1961,10 +1997,11 @@
                 $('#TxtGSTNo').val(d.gstin ?? "");
                 $('#TxtPAN').val(d.pan ?? "");
 
-            } catch (error) {
-                    toastr.error('Failed to fetch party data',error);
-            }
+        } catch (error) {
+                    showToast("Error fetch party data:", { type: "error" });
+         
         }
+    }
 
        async function fetchDDlParty(PartyId, AddressId) {
             try {
@@ -1983,116 +2020,132 @@
                 $('#TxtGSTNo').val(d.gstin ?? "");
                 $('#TxtPAN').val(d.pan ?? "");
 
-            } catch (error) {
-                    toastr.error('Failed to fetch party data',error);
-
-            }
+        } catch (error) {
+           showToast("Failed to fetch party data:", { type: "error" });       
+        
         }
+    }
 
        async function fetchShipFromAdd(ShipFromID) {
               try {
                 const response = await fetch(`/InwardEntry/fetchShipFromAdd?ShipFromID=${ShipFromID}`);
                 const data = await response.json();
 
-                if (data.length > 0 && data[0].address) {
-                  $('#txtShipAddress').val(data[0].address);
-                } else {
-                  $('#txtShipAddress').val('');
-                }
-              } catch (error) {
-                  toastr.error('Failed to fetch ship from address:', error);
-              }
+            if (data.length > 0 && data[0].address) {
+              $('#txtShipAddress').val(data[0].address);
+            } else {
+              $('#txtShipAddress').val('');
             }
+          } catch (error) {
+            showToast(" Failed to fetch ship from address:", { type: "error" });
+              
+          }
+        }
 
-       async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
-              try {
-                const queryParams = new URLSearchParams({v_type,v_no,partycode,ExpiryDate});
+     async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
+      try {
+        const queryParams = new URLSearchParams({ v_type, v_no, partycode, ExpiryDate });
 
-                const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const data = await response.json();
+        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-                const ddl = $('#ddlTransit');
-                ddl.empty().append('<option value="">-- Select Transit No --</option>');
-                data.forEach(item => {
-                  ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-              } catch (error) {
-                  toastr.error("Error loading Transit Numbers:", error);
-              }
-            }
+        const result = await response.json();
 
-       async function GetVNo(Vtype) {
-            try {
-              const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        console.log("Transit No. Response:", result);
+
+        const ddl = $('#ddlTransit');
+        ddl.empty().append('<option value="">-- Select Transit No --</option>');
+
+        if (result.status && Array.isArray(result.data)) {
+          result.data.forEach(item => {
+            ddl.append(`<option value="${item}">${item}</option>`);
+          });
+        }
+
+      } catch (error) {
+        console.error(error);
+        showToast("Error loading Transit Numbers", { type: "error" });
+      }
+    }
+   async function GetVNo(Vtype) {
+        try {
+          const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
               const data = await res.json();
 
               if (data.error) throw new Error(data.error);
                if (!data.v_NO) throw new Error('Response missing V_NO');
 
-                $('#TxtDocNo').val(data.v_NO);
-            } catch (e) {
+            $('#TxtDocNo').val(data.v_NO);
+        } catch (e) {
+           showToast("Error loading Document Number: ", { type: "error" });
+ 
+        }
+      }
 
-                toastr.warning('Error loading Document Number: ' + e.message);
-            }
-          }
-
-       async function FetchPendindorderno(PartyCode, V_TYPE, V_DATE) {
+     async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
           try {
+            if (!PartyCode || !V_TYPE || !V_DATE) {
+              showToast("Invalid parameters passed", { type: "error" });
+              return;
+            }
+
             const result = await $.ajax({
               url: '/InwardEntryList/GetDataByPendingorder',
               type: 'GET',
               data: { PartyCode, V_TYPE, V_DATE }
             });
 
-            if (result.success) {
+            console.log("result", result);
 
-                if (result.data && result.data.length !== 0) {
-                    var myModal = new bootstrap.Modal(document.getElementById('pendingorders'));
-                    myModal.show();
-                } else {
-                    var PartyName = $('#ddlPartyName option:selected').text();
-                    toastr.info("Data Not Found For this party: " + PartyName);
-                    return;
-                }
-
-                const tableBody = document.querySelector('#tblpendingordermodal tbody');
-                tableBody.innerHTML = '';
-
-              result.data.forEach(item => {
-                const row = `
-                  <tr>
-                    <td><input type="checkbox" class="rowCheckbox" /></td>
-                    <td>${item.iteM_CODE || ''}</td>
-                    <td>${item.itemName || ''}</td>
-                    <td>${item.uniT_NAME || ''}</td>
-                    <td>${item.packinG_NOS || ''}</td>
-                    <td>${item.qty || ''}</td>
-                    <td>${item.balqty || ''}</td>
-                    <td>${item.docType || ''}</td>
-                    <td>${item.docNo || ''}</td>
-                    <td>${item.docDate || ''}</td>
-                    <td>${item.rate || ''}</td>
-                    <td>${item.remark || ''}</td>
-                    <td>${item.department || ''}</td>
-                    <td style="display:none;">${item.deptCode || ''}</td>
-                    <td>${item.emptY_YN || ''}</td>
-                    <td style="display:none;">${item.uoM_CODE || ''}</td>
-                  </tr>
-                `;
-                tableBody.insertAdjacentHTML('beforeend', row);
-              });
-
-            } else {
-
-              toastr.error("Failed to load pending orders: " + result.message);
+            if (!result || !result.success) {
+              showToast("Failed to fetch data", { type: "error" });
+              return;
             }
 
-          } catch (error) {
+            if (!result.data || result.data.length === 0) {
+              const PartyName = $('#ddlPartyName option:selected').text();
+              showToast(`Data Not Found For this party: ${PartyName}`, { type: "error" });
+              return;
+            }
 
-                toastr.error("Error loading Pending Orders.",error);
+            // Show modal
+            const modalElement = document.getElementById('pendingorders');
+            const myModal = new bootstrap.Modal(modalElement);
+            myModal.show();
+
+            // Table rendering
+            const tableBody = document.querySelector('#tblpendingordermodal tbody');
+            tableBody.innerHTML = '';
+
+            result.data.forEach(item => {
+              const row = `
+                <tr>
+                  <td><input type="checkbox" class="rowCheckbox" /></td>
+                  <td>${item.iteM_CODE ?? ''}</td>
+                  <td>${item.itemName ?? ''}</td>
+                  <td>${item.uniT_NAME ?? ''}</td>
+                  <td>${item.packinG_NOS ?? ''}</td>
+                  <td>${item.qty ?? ''}</td>
+                  <td>${item.balqty ?? ''}</td>
+                  <td>${item.docType ?? ''}</td>
+                  <td>${item.docNo ?? ''}</td>
+                  <td>${item.docDate ?? ''}</td>
+                  <td>${item.rate ?? ''}</td>
+                  <td>${item.remark ?? ''}</td>
+                  <td>${item.department ?? ''}</td>
+                  <td style="display:none;">${item.deptCode ?? ''}</td>
+                  <td>${item.emptY_YN ?? ''}</td>
+                  <td style="display:none;">${item.uoM_CODE ?? ''}</td>
+                </tr>
+              `;
+              tableBody.insertAdjacentHTML('beforeend', row);
+            });
+
+          } catch (error) {
+            console.error("Error fetching pending orders:", error);
+            showToast("Failed to load pending orders", { type: "error" });
           }
         }
 
@@ -2230,13 +2283,12 @@
 
 
 
-                  } else {
-                       toastr.error(res.message || "Failed to load data.");
-                  }
-              } catch (err) {
-                  toastr.error("Something went wrong while loading the form.");
-              }
+              } 
+          } catch (err) {
+            showToast("Something went wrong while loading the form.", { type: "error" });
+
           }
+      }
 
        async function GetFasttagVehicledetail() {
             try {
@@ -2244,11 +2296,16 @@
                 const VType = $('#ddlDocType').val();
                 const VNo = $('#TxtDocNo').val();
 
-                if(!rcNumber)
-                {
-                 toastr.info("Vehicle No Not Found");
-                 return;
-                }
+            if(!rcNumber)
+            {     
+             showToast("Vehicle No Not Found", { type: "info" });
+             $('#TxtVehicleNo').addClass('is-invalid').focus();
+             return;
+            }
+            else
+            {
+              $('#TxtVehicleNo').removeClass('is-invalid');
+            }
 
                 const res = await $.ajax({
                     url: `/InwardEntry/GetVehcleFastaginfo`,
@@ -2257,28 +2314,35 @@
                     dataType: 'json',
                 });
 
-                if (res && res.success) {
+            if (res && res.success) {
+              showToast("FastTag Info Saved Successfully", { type: "success" });
+     
 
-                    toastr.success("FastTag Info Saved Successfully");
-
-                } else {
-                    toastr.error("Data Not Found For This Vehicle No.");
-                }
-            } catch (err) {
-                    toastr.error("Error fetching vehicle details.",err);
+            } else {
+                showToast("Data Not Found For This Vehicle No", { type: "error" });
+           
             }
+        } catch (err) {
+            showToast("Error fetching vehicle details.", { type: "error" });
+               
         }
+    }
 
-       async function GetVehicledetail() {
-                try {
-                        const rcNumber = $('#TxtVehicleNo').val();
-                        const VType = $('#ddlDocType').val();
-                        const VNo = $('#TxtDocNo').val();
-                        if(!rcNumber)
-                        {
-                            toastr.info("Vehicle No Not Found");
-                            return;
+   async function GetVehicledetail() {
+            try {
+                    const rcNumber = $('#TxtVehicleNo').val(); 
+                    const VType = $('#ddlDocType').val();  
+                    const VNo = $('#TxtDocNo').val();  
+                    if(!rcNumber)
+                    {                    
+                        showToast("Vehicle No Not Found", { type: "info" });
+                        $('#TxtVehicleNo').addClass('is-invalid').focus();
+                        return;
                         }
+                    else
+                    {
+                      $('#TxtVehicleNo').removeClass('is-invalid');
+                    }
 
                     const res = await $.ajax({
                         url: `/InwardEntry/GetVehcleinfo`,
@@ -2287,16 +2351,17 @@
                         dataType: 'json',
                     });
 
-                    if (res && res.success) {
-                           toastr.success("Vehicle Info Saved Successfully");
-                    } else {
-                        toastr.error("Vehicle not found or invalid.");
-                    }
-                } catch (err) {
+                if (res && res.success) {
+                  showToast("Vehicle Info Saved Successfully", { type: "success" });
 
-                        toastr.error("Error fetching vehicle details.",err);
+                } else {
+                   showToast("Vehicle not found or invalid", { type: "error" });
                 }
+            } catch (err) {
+                       showToast("Error fetching vehicle details.", { type: "error" });
+                
             }
+        }
 
        async function GetVehicledata() {
             try {
@@ -2376,11 +2441,11 @@
 
                 $('#tblRCDetaillist tbody').append(row);
 
-            } catch (err) {
-
-                    toastr.error("Error fetching vehicle details.",err);
-            }
+        } catch (err) {
+               showToast("Error fetching vehicle details.", { type: "error" });
+             
         }
+    }
 
        function loadFastagDetails() {
             $.ajax({
@@ -2441,38 +2506,38 @@
 
             const result = await response.json();
 
-            if (result.status === false) {
-                toastr.warning(result.message);
-                return false;
-            }
+        if (result.status === false) {    
+            showToast("result.message", { type: "warning" });
+            return false;
+        }
 
             return true;
 
-        } catch (error) {
-            toastr.error("Error:", error);
-            return false;
+    } catch (error) {
+       showToast("result.message", { type: "warning" });
+        return false;
+    }
+}
+
+   function backToList() {
+        var partycode = $('#ddlPartyName').val();
+        if (partycode && mode != "view" )  {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You want to go back to the list?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, go back",
+                cancelButtonText: "Stay here"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("Index", "InwardEntryList")';
+                }
+            });
+        } else {
+            window.location.href = '@Url.Action("Index", "InwardEntryList")';
         }
     }
-
-       function backToList() {
-            var partycode = $('#ddlPartyName').val();
-            if (rowId && partycode && mode != "view")  {
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "You want to go back to the list?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Yes, go back",
-                    cancelButtonText: "Stay here"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '@Url.Action("Index", "InwardEntryList")';
-                    }
-                });
-            } else {
-                window.location.href = '@Url.Action("Index", "InwardEntryList")';
-            }
-        }
 
        function addRow($tbody, data = {}) {
             const isINMS = $('#ddlDocType').val() !== 'INMS';
@@ -2480,13 +2545,11 @@
 
             const normalStyle = "background-color:#fff;opacity:1;color:#000;";
 
-            let itemOptions = `<option value="">Select</option>`;
-            $.each(itemList, function (i, item) {
-                const selected = item.value == data.itemId ? "selected" : "";
-                itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}>
-                                    ${item.text}
-                                </option>`;
-            });
+        let itemOptions = `<option value="">Select</option>`;
+        $.each(itemList, function (i, item) {
+            const selected = item.value == data.itemId ? "selected" : "";
+            itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
+        });
 
             // DEPARTMENT
             let deptOptions = `<option value="">Select</option>`;
@@ -2549,13 +2612,12 @@
                         <input type="text" class="form-control refNo" style="${normalStyle}" value="${data.refNo ?? ''}" />
                     </td>
 
-                    <td>
-                        <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
-                        <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
-                    </td>
-
-                </tr>
-            `;
+                <td>
+                    <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
 
             $tbody.append(row);
             const $row = $tbody.find('tr:last');
@@ -2596,83 +2658,117 @@
                 const res = await fetch('/InwardEntry/DDlItemMast');
                 if (!res.ok) throw new Error("Item load failed");
 
-                itemList = await res.json();
-            } catch (err) {
+            itemList = await res.json();
+        } catch (err) {
 
-                    toastr.error("Error loading ITEM master",err);
-            }
+
+             showToast(err, { type: "warning" });
         }
+    }
 
-       async function LoadUnitMaster() {
-            try {
-                const res = await fetch('/InwardEntry/DDlUnitMast');
-                if (!res.ok) throw new Error("Unit load failed");
-                unitList = await res.json();
-            } catch (err) {
-
-                    toastr.error("Error loading UNIT master",err);
-            }
+   async function LoadUnitMaster() {
+        try {
+            const res = await fetch('/InwardEntry/DDlUnitMast');
+            if (!res.ok) throw new Error("Unit load failed");
+            unitList = await res.json();  
+        } catch (err) {
+             
+         showToast("Error loading UNIT master", { type: "warning" });
         }
+    }
 
-       async function LoadDeptMaster() {
-            try {
-                const res = await fetch('/InwardEntry/DDlDeptMast');
-                if (!res.ok) throw new Error("Department load failed");
-                deptList = await res.json();
-            } catch (err) {
-
-                    toastr.error("Error loading DEPARTMENT master",err);
-            }
+   async function LoadDeptMaster() {
+        try {
+            const res = await fetch('/InwardEntry/DDlDeptMast');
+            if (!res.ok) throw new Error("Department load failed");
+            deptList = await res.json();  
+        } catch (err) {
+         showToast(err, { type: "warning" });
         }
+    }
 
-       async function getcontainerdata(Container_No) {
-          try {
+  async function getcontainerdata(Container_No) {
+      try {
+        const res = await $.ajax({
+          url: '/InwardEntry/GetSEARCHCONTAINER',
+          type: 'GET',
+          data: { Container_No: Container_No }
+        });
+
+        if (res && res.supplier) {      
+          $('#ddlPartyName').val(res.supplier).trigger('change');
+            await DDlPartyAdd(res.supplier);  
+            await GetPartyAdress(res.supplier);
+            const Vno = document.getElementById('TxtDocNo')?.value || '';
+            const v_type = document.getElementById('ddlDocType')?.value || '';
+            const indate = document.getElementById('InDate')?.value || '';
+            fetchTransitno(v_type, Vno, res.supplier, indate);
+            
+        } else {
+                    showToast("Invalid response or supplier missing", { type: "error" });
+      
+        }
+      }
+      catch (error) {
+        showToast(err, { type: "warning" });
+      }
+    }
+    
+  async function GetEwaybillno() {
+        try {
             const res = await $.ajax({
-              url: '/InwardEntry/GetSEARCHCONTAINER',
-              type: 'GET',
-              data: { Container_No: Container_No }
-            });
-
-            if (res && res.supplier) {
-              $('#ddlPartyName').val(res.supplier).trigger('change');
-                await DDlPartyAdd(res.supplier);
-                await GetPartyAdress(res.supplier);
-                const Vno = document.getElementById('TxtDocNo')?.value || '';
-                const v_type = document.getElementById('ddlDocType')?.value || '';
-                const indate = document.getElementById('InDate')?.value || '';
-                fetchTransitno(v_type, Vno, res.supplier, indate);
-
-            } else {
-              toastr.error("Invalid response or supplier missing");
-            }
+                url: '/InwardEntry/GetEWayBillData',
+                type: 'GET',
+                data: { edate: $('#InDate').val(),inoutdata :"OUT"  },
+                dataType: 'json'
+            });           
+       
+          if(res.success)
+          {
+           showToast("Successfully", { type: "success" });
           }
-          catch (error) {
-            toastr.error("Error", error);
-          }
+
+        } catch (error) {
+            showToast(error, { type: "error" });
         }
+    }
 
-       async function GetEwaybillno(edate,inoutdata)
-        {
-            try{
-               const  res = await $.ajax({
-                url : '/InwardEntry/GetEWayBillData',
-                type : 'get',
-                data : {edate :edate , inoutdata : inoutdata}
+  function validateMobile(input) {
+      input.value = input.value.replace(/\D/g, '');
+      if (input.value.length > 10) {
+        input.value = input.value.slice(0, 10);
+      }
+    }
 
-               });
+  function getSelectedRows() {
+        const selectedData = [];
+
+        $("#tblellipsisIconmodal tbody tr").each(function () {
+            const checkbox = $(this).find(".rowCheckbox");
+
+            if (checkbox.is(":checked")) {
+                const rowData = {
+                    saudA_NO: $(this).find("td:eq(1)").text(),
+                    saudaDate: $(this).find("td:eq(2)").text(),
+                    itemName: $(this).find("td:eq(3)").text(),
+                    iteM_CODE: $(this).find("td:eq(4)").text(),
+                    qty: $(this).find("td:eq(5)").text(),
+                    rate: $(this).find("td:eq(6)").text(),
+                    supplieR_INVNO: $(this).find("td:eq(7)").text(),
+                    supplieR_INVDATE: $(this).find("td:eq(8)").text(),
+                    supplieR_INVAMT: $(this).find("td:eq(9)").text(),
+                    containeR_NO: $(this).find("td:eq(10)").text(),
+                    grS_WEIGHT: $(this).find("td:eq(11)").text(),
+                    conT_SIZE: $(this).find("td:eq(12)").text(),
+                    v_no: $(this).find("td:eq(13)").text()
+                };
+
+                selectedData.push(rowData);
             }
-            catch(error)
-            {
-              toastr.error("error", error);
-            }
-        }
+        });
 
-       function validateMobile(input) {
-          input.value = input.value.replace(/\D/g, '');
-          if (input.value.length > 10) {
-            input.value = input.value.slice(0, 10);
-          }
-        }
+        return selectedData;
+    }
 
 </script>
 

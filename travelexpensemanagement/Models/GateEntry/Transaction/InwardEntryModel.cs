@@ -105,4 +105,9 @@ namespace travelexpensemanagement.Models.GateEntry
         public string? Unit { get; set; }
 
      }
+
+
+
+
+
 }

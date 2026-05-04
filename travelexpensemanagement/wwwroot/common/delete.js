@@ -1,6 +1,7 @@
 function deleteRecord(controller, docId, options = {}) {
 
     const {
+        action = "Delete", 
         title = "Are you sure?",
         text = "This action cannot be undone.",
         successCallback = null
