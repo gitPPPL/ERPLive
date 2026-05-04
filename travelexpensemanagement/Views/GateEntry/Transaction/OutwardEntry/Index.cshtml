@@ -1,6 +1,10 @@
 ﻿@{
     ViewBag.Title = "Outward Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
+    var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
+
 }
 <fieldset>
     <legend class="legend-field">Outward Entry</legend>
@@ -20,8 +24,7 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
+                    <select class="form-control" id="ddlDocType">             
                     </select>
                 </div>
             </div>
@@ -65,9 +68,6 @@
                         <option value="BillsOfSupply">BillsOfSupply</option>
                         <option value="E‑Commerce Sale">E‑Commerce Sale</option>
 
-
-
-
                     </select>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     <div class="form-group">
                         <label for="ddlPartyNameByAddress">Party Name By Address<span class="required">*</span></label>
                         <select class="form-control" id="ddlPartyNameByAddress">
-                            <option>Select Party Name By Address</option>
+                            
                         </select>
                     </div>
                 </div>
@@ -120,18 +120,13 @@
                     </div>
                 </div>
 
-
-
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="TxtState">State</label>
                         <input type="text" class="form-control" id="TxtState" placeholder="Enter State Name" readonly  >
                     </div>
                 </div>
-
-
-
-             
+                             
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="TxtVehicleNo">Vehicle No</label>
@@ -163,7 +158,8 @@
         <div class="row">
             <div class="offset-md-8 col-md-4">
                 <div class="btn-mt button-right">
-                    <button id="btn-pending" type="button" class="btn btn-danger"><i class="fa fa-clock"></i>Pending Document</button>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" id="btnpendingorderno" data-bs-target="#pendingorders"><i class="fa fa-clock"></i>Pending Orders/Bill</button>
+
                     <button id="btn-pending" type="button" class="btn btn-primary"><i class="fa fa-tag"></i>Sticker</button>
                 </div>
             </div>
@@ -188,18 +184,73 @@
                     <tbody></tbody>
                 </table>
             </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                                        </div>
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
+
+
+            <!--Modal Popup-->
+            <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content draggable-modal">
+                        <div class="popup-header">
+                            <h5 class="popup-title" id="pendingordersLabel">Pending Order</h5>
+                            <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                        </div>
+                        <div class="modal-body">
+                            <div class="button-right">
+                                <button type="button" class="btn btn-primary" id="Btn_selectedData">
+                                    <i class="fa fa-check"></i> Selected Data
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table id="tblpendingordermodal" class="table-width">
+                                        <thead class="table-head">
+                                            <tr>
+                                                <th><input type="checkbox" id="selectAllPR" class="rowCheckbox" /></th>
+                                                <th>voucher Type</th>
+                                                <th>voucher No</th>
+                                                <th>Voucher Date</th>
+                                                <th>Item code</th>
+                                                <th>Item Name</th>
+                                                <th>Quantity</th>
+                                                <th>Purchase Qty</th>
+                                                <th>Remark</th>
+                                                <th>NOS</th>
+                                                <th>Unit Name</th>
+                                                <th>Unit Code</th>
+                                                <th>Sr.No </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="erppagelist-pagination">
+                                    <div class="pagination-left">
+                                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                                            <option value="5">5</option>
+                                            <option value="10" selected>10</option>
+                                            <option value="20">20</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+                                    <div class="pagination-center">
+                                        <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+                                        <div id="pageNumbers" class="page-numbers"></div>
+                                        <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+                                    </div>
+                                    <div class="pagination-right" id="pageInfoText">
+                                        Results: 0 - 0 of 0
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+
+
+
+
         <div class="row">
             <div class="offset-md-10 col-md-2">
                 <div class="btn-last">
@@ -215,42 +266,50 @@
     let itemMap = {};
     let UnitMap = {};
     let DeptMap = {};
-
+    let   PubUserLevel=@PubUserLevel;
+    let   LoginDate = '@logindate';
     $(document).ready(function () {
-      const urlParams = new URLSearchParams(window.location.search);
-
-      const rowId = urlParams.get('id');
-      const vtype = urlParams.get('vtype');
-      const $tbody = $("#tblOutwardEntry tbody");
+        const urlParams = new URLSearchParams(window.location.search);
+        const rowId = urlParams.get('id');
+        const vtype = urlParams.get('VType');
+        const $tbody = $("#tblOutwardEntry tbody");
         const mode = urlParams.get('mode');
-        const isReadOnly = urlParams.get('readOnly') === 'true';
+
       (async () => {
         try { 
           await LoadDropDowns();
           addRow($tbody);
-
-
             if (rowId) {
+                await LoadFormByID(rowId , vtype);
+                if (mode == 'view') {               
+                    setFormReadOnly();
+                }
+            }
+            else{
+                const selectedVType = $("#ddlDocType").val();
+                if (selectedVType) {
+                    await GetVNo(selectedVType, "GATE1");
+                }
 
-                await LoadFormByID(rowId);
-                    if (mode == 'view') {
-                        console.log('Mode', mode);
-                          setFormReadOnly();
-                    }
+                if(PubUserLevel == 1)
+                {
+                $('#DtDocDate').prop('disabled', false);
+                $('#DtTxtDocDate').prop('disabled', false);
+                }
+                else{
+                $('#DtDocDate').prop('disabled', true);
+                $('#DtTxtDocDate').prop('disabled', true);
+                }
 
+                $('#ddlDocType').prop('disabled', true);
+                let today = new Date().toISOString().split('T')[0];
+                $('#DtTxtDocDate').attr('min', LoginDate);
+                $('#DtDocDate').val(today);
+                let now = new Date();
+                $('#DtTxtDocDate').val(now.toTimeString().slice(0,8));           
             }
 
-
-
-          if (rowId && rowId !== 0) {
-            await LoadFormByID(rowId, vtype);
-            if (typeof isReadOnly !== 'undefined' && isReadOnly) {
-              setFormReadOnly();
-            }
-          }
-
-          // Save Button Click
-          $("#btn-save").click(function (e) {
+            $("#btn-save").click(function (e) {
             e.preventDefault();
 
             const V_DATE = formatDate($("#DtDocDate").val());
@@ -283,6 +342,10 @@
                 const d = new Date($("#DtDocDate").val());
                 return !isNaN(d) ? d.toISOString() : null;
               })(),
+
+                V_TIME: $.trim($('#DtTxtDocDate').val()) || null,
+
+
               PARTY_CODE: parseInt($('#ddlPartyName').val()) || null,
               PARTY_NAME: $('#ddlPartyName option:selected').text() ?? null,
               TRUCK_NO: $.trim($('#TxtVehicleNo').val()) ?? null,
@@ -300,7 +363,7 @@
 
             const payload = {
               Header: header,
-              Deatils: collectTableRowData()
+               detailsOutwardEntry: collectTableRowData()
             };
 
             $("#btn-save").prop("disabled", true);
@@ -336,10 +399,9 @@
             });
           });
 
-         // Add/Delete row buttons
-          $(document).on("click", ".btn-add-action", () => addRow($tbody));
+            $(document).on("click", ".btn-add-action", () => addRow($tbody));
 
-          $(document).on("click", ".btn-delete-action", function () {
+            $(document).on("click", ".btn-delete-action", function () {
             const $row = $(this).closest("tr");
             const wasLast = $row.is(":last-child");
             $row.remove();
@@ -353,22 +415,57 @@
             }
           });
 
-          $("#ddlDocType").change(function () {
-            if (!rowId) GetVNo(this.value);
+            $("#ddlDocType").change(function () {
+            if (!rowId) GetVNo(this.value , "GATE1");
           });
 
-          $("#ddlPartyName").on("change", function () {
+            $("#ddlPartyName").on("change", function () {
             const partyId = $(this).val();
             loadPartyAddresses(partyId);
-          });
+            fetchPartyDetails(partyId);          
+        });
 
-          $("#ddlPartyNameByAddress").on("change", function () {
+            $("#ddlPartyNameByAddress").on("change", function () {
             const partyId = $("#ddlPartyName").val();
             const addId = $(this).val();
             fetchPartyAddressDetails(partyId, addId);
-          });
+        });
 
+            $("#btnpendingorderno").click(function () {
+                const selectedValue = $('#ddlPartyName').val();
+                const BILL_NO = $('#txtWayBillNo').val();
+                const v_date = $('#DtDocDate').val();
+                console.log("v_date",v_date);
+                const typeText = $('#ddlType option:selected').text();
+            FetchPendindorderno(selectedValue,typeText,v_date,BILL_NO);
+        });
 
+            $("#Btn_selectedData").click(function () {
+                const selectedRows = getSelectedPendingRows();
+
+                if (selectedRows.length === 0) {
+                    toastr.info("Please select at least one row");
+                    return;
+                }
+
+                console.log("selectedRows", selectedRows);
+
+                // ✅ FIXED TABLE ID
+                const $tbody = $("#tblOutwardEntry tbody");
+
+                selectedRows.forEach(row => {
+                    addRow($tbody, {
+                        itemName: row.ItemCode,
+                        department: row.DeptCode || "",
+                        unit: row.UnitCode,
+                        quantity: parseFloat(row.Qty) || "",
+                        no: parseInt(row.nos) || "",
+                        remarks: row.remarks || "",
+                        refType: row.Vouchertype || "",
+                        refNo: row.VoucherNo || ""
+                    });
+                });
+            });
 
         } catch (err) {
           console.error("Error initializing page:", err);
@@ -376,44 +473,63 @@
       })();
     });
 
+        function setFormReadOnly() {
 
-      function setFormReadOnly() {
-             
-        $('#OutwardEntryForm input:not([type="hidden"]):not([type="time"])').prop('readonly', true);
+        // Make all text inputs readonly (except hidden)
+        $('#OutwardEntryForm input:not([type="hidden"])').prop('readonly', true);
 
-     
-        $('#OutwardEntryForm input[type="time"]').prop('disabled', true);
+        // Disable specific input types
+        $('#OutwardEntryForm input[type="checkbox"], input[type="radio"], input[type="file"]').prop('disabled', true);
 
-   
+        // Disable time & date inputs properly
+        $('#OutwardEntryForm input[type="time"], #OutwardEntryForm input[type="date"]').prop('disabled', true);
+
+        // Disable selects
         $('#OutwardEntryForm select').prop('disabled', true);
 
-  
+        // Make textarea readonly
         $('#OutwardEntryForm textarea').prop('readonly', true);
 
-
+        // Disable all buttons inside form
         $('#OutwardEntryForm button').prop('disabled', true);
 
-   
-        $('#tblOutwardEntry tbody tr').each(function () {
-            $(this).find('input, select').prop('disabled', true);
+        // Disable anchor tags acting like buttons
+        $('#OutwardEntryForm a').css({
+            'pointer-events': 'none',
+            'opacity': '0.5'
         });
 
-    
+        // Disable table inputs (important for dynamic rows)
+        $('#tblOutwardEntry tbody').find('input, select, textarea, button').prop('disabled', true);
+
+        // Disable modal trigger buttons separately (outside form sometimes)
+        $('#btnpendingorderno, #btn-pending').prop('disabled', true);
+
+        // Disable modal actions (if modal opens somehow)
+        $('#pendingorders').find('input, select, button').prop('disabled', true);
+
+        // Disable add/delete action icons/buttons
         $('.btn-add-action, .btn-delete-action').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
 
- 
+        // Disable pagination controls
         $('#tablePagination').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
 
-        $('#OutwardEntryForm input, #OutwardEntryForm select, #OutwardEntryForm textarea').attr('tabindex', '-1');
+        // Remove tab navigation
+        $('#OutwardEntryForm')
+            .find('input, select, textarea, button, a')
+            .attr('tabindex', '-1');
+
+        // Optional: visually indicate readonly mode
+        $('#OutwardEntryForm').css({
+            'opacity': '0.95'
+        });
     }
-
-
 
     async function LoadDropDowns() {
       await Promise.all([
@@ -450,7 +566,7 @@
       const res = await fetch("/OutwardEntry/DDlVType");
       const list = await res.json();
       const ddl = $("#ddlDocType");
-      ddl.empty().append('<option value="">-- Select Voucher Type --</option>');
+      ddl.empty().append('');
       list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
     }
 
@@ -462,8 +578,8 @@
       list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
     }
 
-    async function GetVNo(Vtype) {
-      const res = await fetch(`/OutwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
+    async function GetVNo(Vtype, tableName) {
+      const res = await fetch(`/OutwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}&tableName=${encodeURIComponent(tableName)}`);
       const data = await res.json();
       if (data.v_NO) {
         $('#NumDocNo').val(data.v_NO);
@@ -476,23 +592,65 @@
       const res = await fetch(`/OutwardEntry/fetchPartyAdd?PartyId=${encodeURIComponent(partyId)}`);
       const list = await res.json();
       const ddl = $("#ddlPartyNameByAddress");
-      ddl.empty().append('<option value="">-- Select Address --</option>');
+      ddl.empty().append('');
       list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
     }
 
-    async function fetchPartyAddressDetails(partyId, addressId) {
-      const res = await fetch(`/OutwardEntry/GetDataByPartyCode?PartyId=${encodeURIComponent(partyId)}&AddressId=${encodeURIComponent(addressId)}`);
+    async function fetchPartyDetails(partyId) {
+      const baseUrl = "/OutwardEntry/GetDataByPartyCode";
+      const queryParams = `PartyId=${encodeURIComponent(partyId)}`;
+      const url = `${baseUrl}?${queryParams}`;
+      const res = await fetch(url);
       const details = await res.json();
       if (details.length) {
         const d = details[0];
-        $("#TxtAdd1PD").val(d.add1);
-        $("#TxtAdd2PD").val(d.add2);
-        $("#TxtAdd3PD").val(d.add3);
-        $("#TxtCity").val(d.cityName);
-        $("#NumPincode").val(d.pincode);
-        $("#TxtState").val(d.state);
-        $("#TxtGSTNo").val(d.gstin);
+
+
+        $("#TxtAdd1PD").val(d.add1 || "");
+        $("#TxtAdd2PD").val(d.add2 || "");
+        $("#TxtAdd3PD").val(d.add3 || "");
+        $("#TxtCity").val(d.cityName || "");
+        $("#NumPincode").val(d.pincode || "");
+        $("#TxtState").val(d.state || "");
+        $("#TxtGSTNo").val(d.gstin || "");
+      } else {
+        clearFields();
       }
+    }
+
+    async function GetDataByPartyandAddressidCodeAsync(partyId, addressId) {
+      const baseUrl = "/OutwardEntry/GetDataByPartyandAddressidCode";
+      const queryParams = `PartyId=${encodeURIComponent(partyId)}&AddressId=${encodeURIComponent(addressId)}`;
+      const url = `${baseUrl}?${queryParams}`;
+
+      const res = await fetch(url);
+      const details = await res.json();
+
+      console.log("fetchPartyAddressDetails", details);
+
+      if (details.length) {
+        const d = details[0];  
+
+        $("#TxtAdd1PD").val(d.add1 || "");
+        $("#TxtAdd2PD").val(d.add2 || "");
+        $("#TxtAdd3PD").val(d.add3 || "");
+        $("#TxtCity").val(d.cityName || "");
+        $("#NumPincode").val(d.pincode || "");
+        $("#TxtState").val(d.state || "");
+        $("#TxtGSTNo").val(d.gstin || "");
+      } else {
+        clearFields();
+      }
+    }
+
+    function clearFields() {
+      $("#TxtAdd1PD").val("");
+      $("#TxtAdd2PD").val("");
+      $("#TxtAdd3PD").val("");
+      $("#TxtCity").val("");
+      $("#NumPincode").val("");
+      $("#TxtState").val("");
+      $("#TxtGSTNo").val("");
     }
 
     function formatDate(dateStr) {
@@ -508,17 +666,18 @@
     }
 
     function collectTableRowData() {
-      return Array.from(document.querySelectorAll('#tblOutwardEntry tbody tr')).map(row => {
+        return Array.from(document.querySelectorAll('#tblOutwardEntry tbody tr')).map(row => {
         return {
-          ITEM_CODE: parseInt(row.querySelector('select.itemName')?.value) || null,
-          ITEM_NAME: row.querySelector('select.itemName option:checked')?.text || '',
-          DEPT_CODE: parseInt(row.querySelector('select.department')?.value) || null,
-          UOM_CODE: parseInt(row.querySelector('select.unit')?.value) || null,
-          NOS: parseInt(row.querySelector('input.no')?.value) || null,
-          QTY: parseFloat(row.querySelector('input.quantity')?.value) || null,
-          REMARKS: row.querySelector('input.remarks')?.value || '',
-          REF_TYPE: row.querySelector('select.ref-type')?.value || '',
-          REF_NO: row.querySelector('input.ref-no')?.value || ''
+            ITEM_CODE: parseInt(row.querySelector('select.itemName')?.value) || null,
+            ITEM_NAME: row.querySelector('select.itemName option:checked')?.text || '',
+            DEPT_CODE: parseInt(row.querySelector('select.department')?.value) || null,
+            NOS: parseInt(row.querySelector('input.no')?.value) || null,
+            QTY: parseFloat(row.querySelector('input.quantity')?.value) || null,
+            UOM_CODE: parseInt(row.querySelector('select.unit')?.value) || null,
+            UOM_NAME: row.querySelector('select.unit option:checked')?.text || '',
+            REMARKS: row.querySelector('input.remarks')?.value || '',
+            REF_TYPE: row.querySelector('input.ref-type')?.value || '',
+            REF_NO: parseInt(row.querySelector('input.ref-no')?.value) || null
         };
       });
     }
@@ -529,8 +688,6 @@
       const selectItems = generateSelect(itemMap, data.itemName || "");
       const selectDept = generateSelect(DeptMap, data.department || "");
       const selectunit = generateSelect(UnitMap, data.unit || "");
-      const selectRef = generateSelect(refTypeOptions.reduce((o, v) => { o[v] = v; return o; }, {}), data.refType || "");
-
       const row = `
         <tr class="no-border-input">
           <td style="display:none;">${data.code || ""}</td>
@@ -540,7 +697,7 @@
           <td><input type="number" class="form-control no" value="${data.no || ''}"/></td>
           <td><input type="number" class="form-control quantity" value="${data.quantity || ''}"/></td>
           <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-          <td><select class="form-control ref-type"><option value="">-- Select Ref --</option>${selectRef}</select></td>
+           <td><input type="text" class="form-control ref-type" value="${data.refType || ''}"/></td>                   
           <td><input type="text" class="form-control ref-no" value="${data.refNo || ''}"/></td>
           <td>
             <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
@@ -559,17 +716,14 @@
           vtype: vtype
         },
         success: function (result) {
-          console.log("Raw AJAX result:", result);
-
           if (!result.success || !result.data || !result.data.header) {
             toastr.error("Invalid or missing response data.");
             return;
           }
 
           const header = result.data.header;
-          const details = result.data.details;
+          const details = result.data.details;           
 
-          // Fill header fields
           $('#TxtCode').val(header.doC_ID || '');
           $('#ddlDocType').val(header.v_TYPE || '');
           $('#NumDocNo').val(header.v_NO || '');
@@ -584,13 +738,11 @@
           $('#TxtGSTNo').val(header.partY_GST || '');
           $('#NumPincode').val(header.partY_PINCODE || '');
           $('#ddlType').val(header.iteM_TYPE || '');
-
-          // Load party addresses and set selected
+          $('#DtTxtDocDate').val(header.v_TIME || '');
           loadPartyAddresses(header.partY_CODE).then(() => {
             $('#ddlPartyNameByAddress').val(header.partY_ADDRESSID || '');
           });
 
-          // Populate table rows
           const $tbody = $("#tblOutwardEntry tbody");
           $tbody.empty();
 
@@ -607,7 +759,7 @@
               refNo: detail.reF_NO || ''
             };
 
-            addRow($tbody, rowData);  // Assuming addRow is your custom row-adding function
+            addRow($tbody, rowData);  
           });
         },
         error: function (xhr, status, error) {
@@ -617,164 +769,95 @@
       });
     }
 
+    async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
+        try {
+            const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}&BILL_NO=${BILL_NO}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const result = await res.json();
+            if (result.success) {
+                const details = result.data || [];
+                console.log("result", details);
+                const $tbody = $("#tblpendingordermodal tbody");
+                $tbody.empty();
 
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-
-    let currentPage = 1;
-    let pageSize = 10;
-
-    $(document).ready(function () {
-        loadDocumentStages();
-
-        $('#searchBox').on('keyup', function () {
-            currentPage = 1;
-            loadDocumentStages();
-        });
-    });
-
-    //Load main grid...............
-    function loadDocumentStages() {
-        const searchTerm = $('#searchBox').val();
-
-        $.ajax({
-            url: '/ApprovalStageMasterList/GetAllDocs',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
-            },
-            success: function (res) {
-                console.log(res);
-                const docs = res.items || res.data || [];
-                const totalCount = res.totalCount || 0;
-
-                const tbody = $('#tblApprovalStageMaster tbody');
-                tbody.empty();
-
-                if (docs.length === 0) {
-                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
-                    renderPagination(0, pageSize, currentPage);
-                    return;
-                }
-
-                docs.forEach(doc => {
-                    tbody.append(`
-                        <tr>
-                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
-                            <td>${doc.doC_CODE || ''}</td>
-                            <td>${doc.doC_NAME || ''}</td>
-                            <td>${doc.useR_NO || '0'}</td>
-                            <td>
-                              <div class="action-icons">
-                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
-                              <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
-                              <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
-                               <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
-                              </div>
-
-                            </td>
-                        </tr>
-                    `);
+                details.forEach(detail => {
+                    const rowData = {
+                        Vouchertype: detail.v_type,
+                        VoucherNo: detail.v_no,
+                        VoucherDate: formatDate(detail.v_DATE),
+                        ItemCode: detail.item_code,
+                        ItemName: detail.item_name,
+                        Qty: detail.qty,
+                        PQty: detail.p_QTY,
+                        remarks: detail.remark,
+                        nos: detail.nos,
+                        UnitName: detail.uniT_NAME,
+                        UnitCode: detail.uniT_CODE,
+                        SRno: detail.srno
+                    };
+                    PendingaddRow($tbody, rowData);
                 });
+            } else {
+                toastr.error("Failed to load pending orders: " + (result.message || ""));
+            }
+        } catch (error) {
+            console.error(error);
+            toastr.error("Error loading Pending Orders.");
+        }
+    }
 
-                renderPagination(totalCount, pageSize, currentPage);
-            },
-            error: function (xhr) {
-                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+    function PendingaddRow($tbody, data = {}) {
+      $tbody.find(".btn-add-action").remove();
+
+      const row = `
+        <tr class="no-border-input">
+          <td><input type="checkbox" class="row-checkbox" /></td>
+
+          <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}"/></td>
+          <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}"/></td>
+          <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}"/></td>
+          <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}"/></td>
+          <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}"/></td>
+          <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
+          <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
+          <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
+          <td><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
+          <td><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
+          <td><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
+          <td><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
+        </tr>`;
+
+      $tbody.append(row);
+    }
+
+    function getSelectedPendingRows() {
+        const selectedData = [];
+
+        $("#tblpendingordermodal tbody tr").each(function () {
+            const $row = $(this);
+            const isChecked = $row.find(".row-checkbox").is(":checked");
+
+            if (isChecked) {
+                const rowData = {
+                    Vouchertype: $row.find(".Vouchertype").val(),
+                    VoucherNo: $row.find(".VoucherNo").val(),
+                    VoucherDate: $row.find(".VoucherDate").val(),
+                    ItemCode: $row.find(".ItemCode").val(),
+                    ItemName: $row.find(".ItemName").val(),
+                    Qty: $row.find(".Qty").val(),
+                    PQty: $row.find(".PQty").val(),
+                    remarks: $row.find(".remarks").val(),
+                    nos: $row.find(".nos").val(),
+                    UnitName: $row.find(".UnitName").val(),
+                    UnitCode: $row.find(".UnitCode").val(),
+                    SRno: $row.find(".SRno").val()
+                };
+
+                selectedData.push(rowData);
             }
         });
+
+        return selectedData;
     }
-
-        function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const pagination = $('#tablePagination');
-        pagination.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-        }
-
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `
-                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-        }
-
-        pagination.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadDocumentStages();
-    }
-
-    function editDocStage(docCode) {
-        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
-    }
-
-    function viewDocStage(docCode) {
-        window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
-    }
-
-    function deleteDocStage(docCode) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this deletion!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/ApprovalStageMasterList/DeleteDocByCode',
-                    type: 'POST',
-                    data: { docCode: docCode },
-                    success: function (response) {
-                        if (response.success) {
-                            toastr.success(response.message || "Record deleted successfully.");
-                            loadDocumentStages();
-                        } else {
-                            toastr.warning("Delete failed.");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("An error occurred while deleting.");
-                    }
-                });
-            }
-        });
-    }
-
-
 
 </script>

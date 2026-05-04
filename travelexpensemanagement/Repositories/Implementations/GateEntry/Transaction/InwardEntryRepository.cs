@@ -48,9 +48,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             prefixYR = result.ToString();
                     }
 
-                    if (tableName != "GATE1")
-                        throw new Exception("Invalid table name");
-
+             
                     string lastVNoQuery = $@"
                     SELECT MAX(CAST(V_NO AS INT)) 
                     FROM {tableName}
@@ -326,7 +324,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return new RepositoryResponse { status = false, message = ex.Message };
             }
         }
-
 
         public async Task<RepositoryResponseData<int>> GetSEARCHCONTAINERAsync(string Container_No)
         {

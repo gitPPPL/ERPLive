@@ -48,8 +48,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
             return View("~/Views/GateEntry/Transaction/InwardEntry/Index.cshtml");
         }
-
-        public JsonResult GetVNo(string Vtype, string Tablename = "GATE1")
+        public JsonResult GetVNo(string Vtype, string Tablename = "Gate1")
         {
             string newV_NO = "00000";
             try

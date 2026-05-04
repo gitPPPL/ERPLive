@@ -29,11 +29,15 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
+
+
+
 
 builder.Services.Configure<EncryptionSettings>(
     builder.Configuration.GetSection("EncryptionSettings"));
-builder.Services.AddScoped<EncryptionHelper>();
+    builder.Services.AddScoped<EncryptionHelper>();
 
 builder.Services.AddDistributedMemoryCache();
 
