@@ -374,7 +374,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     deleteCmd.ExecuteNonQuery();
                 }
 
-                using (var cmd = new SqlCommand("sp_InwardEntry", conn))
+
+             using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -546,6 +547,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         if (Details.REF_TYPE == "PAUD")
                         {
                             if (!string.IsNullOrEmpty(Details.ITEM_NAME) && Details.REF_NO > 0)
+                  
                             {
 
                                 string gateNosQuery = @"  DECLARE @cols AS VARCHAR(200) SELECT @cols = STUFF((
@@ -1819,6 +1821,14 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
 
         }
+
+
+
+
+
+
+
+
 
         // Drp down
 

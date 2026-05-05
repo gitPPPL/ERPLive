@@ -191,7 +191,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
         [HttpPost]
-        public JsonResult Delete(int code, string VType)
+        public JsonResult Delete( string docId)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
 
@@ -206,10 +206,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         cmd.CommandType = CommandType.StoredProcedure;
 
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@V_NO", code);
+                        cmd.Parameters.AddWithValue("@DOC_ID", docId);
                         cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", VType);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);  
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);
 
                         cmd.ExecuteNonQuery();

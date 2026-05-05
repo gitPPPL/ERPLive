@@ -4,6 +4,7 @@
 
     var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
     var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
+    var CompCode = Convert.ToInt32(TempData["CompCode"]);
 
 }
 <fieldset>
@@ -72,6 +73,26 @@
                 </div>
             </div>
         </div>
+
+
+
+        <div class="row" id="Conditionnaldesignid" style="display: none;">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="DtExpectedDateReturn">Expected Date of Return</label>
+                    <input type="date" class="form-control" id="DtExpectedDateReturn">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ddlResponsiblePerson">Responsible Person<span class="required">*</span></label>
+                    <input class="form-control" id="txtResponsiblePerson" type="text" />
+                </div>
+            </div>
+        </div>
+
+
         <fieldset class="fieldset-sub">
             <legend class="sub-legend">Party Details</legend>
             <div class="row">
@@ -85,7 +106,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="ddlPartyNameByAddress">Party Name By Address<span class="required">*</span></label>
+                        <label for="ddlPartyNameByAddress">Party Name By Address</label>
                         <select class="form-control" id="ddlPartyNameByAddress">
                             
                         </select>
@@ -248,9 +269,6 @@
             </div>
 
 
-
-
-
         <div class="row">
             <div class="offset-md-10 col-md-2">
                 <div class="btn-last">
@@ -266,8 +284,9 @@
     let itemMap = {};
     let UnitMap = {};
     let DeptMap = {};
-    let   PubUserLevel=@PubUserLevel;
-    let   LoginDate = '@logindate';
+    let   PubUserLevel='@PubUserLevel';
+    let   CompCode='@CompCode';
+    let  LoginDate = '@logindate';
     let pendingData = [];
     let currentPage = 1;
     let rowsPerPage = 10;
@@ -278,12 +297,14 @@
         const vtype = urlParams.get('VType');
         const $tbody = $("#tblOutwardEntry tbody");
         const mode = urlParams.get('mode');
-
       (async () => {
         try { 
           await LoadDropDowns();
           addRow($tbody);
             if (rowId) {
+                $('#ddlDocType').prop('disabled', true);
+                $('#DtDocDate').prop('disabled', true);
+                $('#DtTxtDocDate').prop('disabled', true);
                 await LoadFormByID(rowId , vtype);
                 if (mode == 'view') {               
                     setFormReadOnly();
@@ -297,15 +318,13 @@
 
                 if(PubUserLevel == 1)
                 {
-                $('#DtDocDate').prop('disabled', false);
-                $('#DtTxtDocDate').prop('disabled', false);
+                    $('#DtDocDate').prop('disabled', false);
+                    $('#DtTxtDocDate').prop('disabled', false);
                 }
                 else{
-                $('#DtDocDate').prop('disabled', true);
-                $('#DtTxtDocDate').prop('disabled', true);
-                }
-
-                $('#ddlDocType').prop('disabled', true);
+                    $('#DtDocDate').prop('disabled', true);
+                    $('#DtTxtDocDate').prop('disabled', true);
+                }            
                 let today = new Date().toISOString().split('T')[0];
                 $('#DtTxtDocDate').attr('min', LoginDate);
                 $('#DtDocDate').val(today);
@@ -315,30 +334,75 @@
 
             $("#btn-save").click(function (e) {
             e.preventDefault();
+                const V_DATE = formatDate($("#DtDocDate").val());
+                const V_NO = parseInt($('#NumDocNo').val()) || null;
+                const RETURN_DATE = formatDate($("#DtExpectedDateReturn").val());
+                const RESPONSIBLE_PERSON = $.trim($('#txtResponsiblePerson').val());
+                const DocType = $.trim($('#ddlDocType').val());
+                const DocTypetext = $.trim($('#ddlDocType option:selected').text());
+                const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
 
-            const V_DATE = formatDate($("#DtDocDate").val());
-            const DocType = $.trim($('#ddlDocType').val());
-            const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
+             if (!DocType) {
+                 toastr.warning("Please select a Doc Type.");
+                 $("#ddlDocType").focus();
+                 return;
+             }
 
-            if (!DocType) {
-                toastr.warning("Please select a Doc Type.");
-                $("#ddlDocType").focus();
-                return;
-            }
+             if (!V_DATE) {
+                 toastr.warning("Please select a Voucher Date.");
+                 $("#ddlDocType").focus();
+                 return;
+             }
 
-            if (!V_DATE) {
-                toastr.warning("Please select a Voucher Date.");
-                $("#ddlDocType").focus();
-                return;
-            }
+             if(DocType === "OURT")
+             {
+                 if(RETURN_DATE <  V_DATE)
+                 {
+                     toastr.warning("Invalid Return Date. Return date should not be less than Doc date.");
+                      $("#DtExpectedDateReturn").focus();
+                     return;
+                 }
 
-            if (!PartyCode) {
-                toastr.warning("Please select a Party.");
-                $("#ddlPartyName").focus();
-                return;
-            }
+                 if(!RESPONSIBLE_PERSON)
+                 {
+                     toastr.warning("Please enter Responsible Person Name.");
+                     $("#txtResponsiblePerson").focus();
+                     return;
+                 }
+             }
 
-            const header = {
+             if(!V_NO)
+             {
+                 toastr.warning("Invalid Voucher No.");
+                 $("#NumDocNo").focus();
+                 return;
+             }
+
+             if (!PartyCode) {
+                 toastr.warning("Please select a Party.");
+                 $("#ddlPartyName").focus();
+                 return;
+             }
+
+                 if (CompCode == 2) {
+                     if (DocType === "DocType" || DocTypetext === "Sale") {
+                         toastr.warning(`Please check DocType = ${DocType} and Type= ${DocTypetext}`);
+                         $("#ddlDocType").focus();
+                         return;
+                     }
+                 }
+                 else{
+                     if ((DocType === "OUES" && DocTypetext != "E-Commerce Sale") || (DocType === "OUES"  && DocTypetext == "E-Commerce Sale") )
+                     {
+                         toastr.warning(`Sale Type and Doctype.`);
+                         $("#ddlDocType").focus();
+                         return;
+                     }
+                 }
+
+             const header = {
+             RETURN_DATE : RETURN_DATE,
+             RESPONSIBLE_PERSON : RESPONSIBLE_PERSON,
               DOC_ID: $.trim($('#TxtCode').val()) ?? null,
               V_TYPE: $('#ddlDocType').val() ?? null,
               V_NO: parseInt($('#NumDocNo').val()) || null,
@@ -346,10 +410,7 @@
                 const d = new Date($("#DtDocDate").val());
                 return !isNaN(d) ? d.toISOString() : null;
               })(),
-
-                V_TIME: $.trim($('#DtTxtDocDate').val()) || null,
-
-
+              V_TIME: $.trim($('#DtTxtDocDate').val()) || null,
               PARTY_CODE: parseInt($('#ddlPartyName').val()) || null,
               PARTY_NAME: $('#ddlPartyName option:selected').text() ?? null,
               TRUCK_NO: $.trim($('#TxtVehicleNo').val()) ?? null,
@@ -421,6 +482,13 @@
 
             $("#ddlDocType").change(function () {
             if (!rowId) GetVNo(this.value , "GATE1");
+               $('#ddlDocType').prop('disabled', true);
+                if (this.value === "OURT") {
+                document.getElementById("Conditionnaldesignid").style.display = "flex";
+                } else {
+                document.getElementById("Conditionnaldesignid").style.display = "none";
+                }
+
           });
 
             $("#ddlPartyName").on("change", function () {
@@ -446,17 +514,11 @@
 
             $("#Btn_selectedData").click(function () {
                 const selectedRows = getSelectedPendingRows();
-
                 if (selectedRows.length === 0) {
                     toastr.info("Please select at least one row");
                     return;
-                }
-
-                console.log("selectedRows", selectedRows);
-
-                // ✅ FIXED TABLE ID
+                }           
                 const $tbody = $("#tblOutwardEntry tbody");
-
                 selectedRows.forEach(row => {
                     addRow($tbody, {
                         itemName: row.ItemCode,
@@ -471,18 +533,65 @@
                 });
             });
 
-            $(document).on("change", "#selectAllPR", function () {
-            const isChecked = $(this).is(":checked");
-            $("#tblpendingordermodal tbody .row-checkbox").prop("checked", isChecked);
+            $(document).on("change", ".row-checkbox", function () {
+                const index = $(this).data("index");
+                pendingData[index].selected = $(this).is(":checked");
             });
 
-
+            $("#selectAllPR").on("change", function () {
+                const isChecked = $(this).is(":checked");
+                pendingData.forEach(row => row.selected = isChecked);
+                renderPendingTable();
+            });
 
         } catch (err) {
           console.error("Error initializing page:", err);
         }
       })();
     });
+
+
+
+
+
+    async function checkValidDate() {
+        const data = {
+            vdate: $("#DtDocDate").val(),
+            vtype: $("#ddlDocType").val(),
+            vno: $("#NumDocNo").val()
+        };
+        try {
+                const response = await fetch('/OutwardEntry/CheckValidDate', {
+                method: 'POST',
+                headers: {
+                 'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.status === false) {
+                showToast("result.message", { type: "warning" });
+                return false;
+            }
+
+            return true;
+
+        } catch (error) {
+           showToast("result.message", { type: "warning" });
+            return false;
+        }
+    }
+
+
+
+
+
+
+    function getSelectedPendingRows() {
+        return pendingData.filter(row => row.selected);
+    }
 
     function setFormReadOnly() {
         $('#OutwardEntryForm input:not([type="hidden"])').prop('readonly', true);
@@ -558,8 +667,14 @@
       const res = await fetch("/OutwardEntry/DDlParty");
       const list = await res.json();
       const ddl = $("#ddlPartyName");
+
       ddl.empty().append('<option value="">-- Select Party --</option>');
       list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+       
+      ddl.select2({
+        placeholder: "-- Select Party --",
+        allowClear: true
+      });
     }
 
     async function GetVNo(Vtype, tableName) {
@@ -667,11 +782,17 @@
     }
 
     function addRow($tbody, data = {}) {
+          
+      const $emptyRow = $tbody.find("tr").filter(function () {
+        return !$(this).find("select.itemName").val();
+      }).first();
+
       $tbody.find(".btn-add-action").remove();
 
       const selectItems = generateSelect(itemMap, data.itemName || "");
       const selectDept = generateSelect(DeptMap, data.department || "");
       const selectunit = generateSelect(UnitMap, data.unit || "");
+
       const row = `
         <tr class="no-border-input">
           <td style="display:none;">${data.code || ""}</td>
@@ -681,14 +802,20 @@
           <td><input type="number" class="form-control no" value="${data.no || ''}"/></td>
           <td><input type="number" class="form-control quantity" value="${data.quantity || ''}"/></td>
           <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-           <td><input type="text" class="form-control ref-type" value="${data.refType || ''}"/></td>                   
+          <td><input type="text" class="form-control ref-type" value="${data.refType || ''}"/></td>
           <td><input type="text" class="form-control ref-no" value="${data.refNo || ''}"/></td>
           <td>
             <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
             <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
           </td>
         </tr>`;
-      $tbody.append(row);
+
+      // 👉 insert before empty row if exists, else append
+      if ($emptyRow.length) {
+        $emptyRow.before(row);
+      } else {
+        $tbody.append(row);
+      }
     }
 
     function LoadFormByID(rowId, vtype) {
@@ -701,7 +828,7 @@
         },
         success: function (result) {
           if (!result.success || !result.data || !result.data.header) {
-            toastr.error("Invalid or missing response data.");
+            showToast("Invalid or missing response data.", { type: "error" });
             return;
           }
 
@@ -747,8 +874,8 @@
           });
         },
         error: function (xhr, status, error) {
-          console.error("AJAX error:", error);
-          toastr.error("Error loading form data: " + error);
+          showToast("Error loading form data:", { type: "error" });
+      
         }
       });
     }
@@ -757,13 +884,9 @@
         try {
             const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}&BILL_NO=${BILL_NO}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
             const result = await res.json();
-
             if (result.success) {
                 const details = result.data || [];
-
-                // Store full dataset
                 pendingData = details.map(detail => ({
                     Vouchertype: detail.v_type,
                     VoucherNo: detail.v_no,
@@ -776,43 +899,40 @@
                     nos: detail.nos,
                     UnitName: detail.uniT_NAME,
                     UnitCode: detail.uniT_CODE,
-                    SRno: detail.srno
+                    SRno: detail.srno,
+                    selected: false 
                 }));
-
                 currentPage = 1;
                 renderPendingTable();
-
             } else {
-                toastr.error("Failed to load pending orders: " + (result.message || ""));
-            }
+               showToast(`Failed to load pending orders: ${result.message}`, { type: "error" });            }
         } catch (error) {
             console.error(error);
-            toastr.error("Error loading Pending Orders.");
+           showToast(`Failed to load pending orders`, { type: "error" });
         }
     }
 
     function renderPendingTable() {
         const $tbody = $("#tblpendingordermodal tbody");
         $tbody.empty();
-
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-
         const pageData = pendingData.slice(start, end);
-
-        pageData.forEach(row => {
-            PendingaddRow($tbody, row);
+        pageData.forEach((row, i) => {
+        PendingaddRow($tbody, row, start + i);
         });
 
         updatePaginationInfo();
     }
 
-    function PendingaddRow($tbody, data = {}) {
-
+    function PendingaddRow($tbody, data = {}, index) {
         const row = `
-            <tr class="no-border-input">
-              <td><input type="checkbox" class="row-checkbox" /></td>
-
+            <tr>
+              <td>
+                <input type="checkbox" class="row-checkbox"
+                       data-index="${index}"
+                       ${data.selected ? "checked" : ""}/>
+              </td>
               <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}"/></td>
               <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}"/></td>
               <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}"/></td>
@@ -826,7 +946,6 @@
               <td><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
               <td><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
             </tr>`;
-
         $tbody.append(row);
     }
 
@@ -885,35 +1004,9 @@
             $container.append(btn);
         }
     }
-      
+
     function getSelectedPendingRows() {
-        const selectedData = [];
-
-        $("#tblpendingordermodal tbody tr").each(function () {
-            const $row = $(this);
-            const isChecked = $row.find(".row-checkbox").is(":checked");
-
-            if (isChecked) {
-                const rowData = {
-                    Vouchertype: $row.find(".Vouchertype").val(),
-                    VoucherNo: $row.find(".VoucherNo").val(),
-                    VoucherDate: $row.find(".VoucherDate").val(),
-                    ItemCode: $row.find(".ItemCode").val(),
-                    ItemName: $row.find(".ItemName").val(),
-                    Qty: $row.find(".Qty").val(),
-                    PQty: $row.find(".PQty").val(),
-                    remarks: $row.find(".remarks").val(),
-                    nos: $row.find(".nos").val(),
-                    UnitName: $row.find(".UnitName").val(),
-                    UnitCode: $row.find(".UnitCode").val(),
-                    SRno: $row.find(".SRno").val()
-                };
-
-                selectedData.push(rowData);
-            }
-        });
-
-        return selectedData;
+        return pendingData.filter(row => row.selected);
     }
 
 </script>

@@ -153,6 +153,31 @@ namespace travelexpensemanagement.Common.Globalvariable
             public bool Status { get; set; }
             public string Message { get; set; }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // How to call any page 
         //_globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1",  transactionType: "Transaction",
         //        codeVNo: "262700001", vtype: "INFU");

@@ -63,7 +63,7 @@
 		</div>
 	</div>
 </fieldset>
-
+<script src="~/common/delete.js"></script>
 <script>
 
 	let currentPage = 1;
@@ -95,7 +95,7 @@
 	function loadAllMenus(page = 1) {
 	  currentPage = page;
 	  const searchTerm = $('#searchBox').val();
-	  console.log('Loading page', page, 'search:', searchTerm);
+
 	  $.ajax({
 		url: '/OutwardEntryList/GetList',
 		type: 'GET',
@@ -107,9 +107,8 @@
 		},
 		success: function(res) {
 
-
-		  if (!res.success) {
-			toastr.error(res.message || "Failed to load data.");
+		  if (!res.success) {			
+			 showToast("Failed to load data.", { type: "error" });
 			return;
 		  }
 
@@ -155,7 +154,8 @@
 		  renderPagination(totalCount, pageSize, currentPage);
 		},
 		error: function(xhr) {
-		  toastr.error('Error loading menu list: ' + xhr.responseText);
+		
+		  showToast("Error loading menu list", { type: "error" });
 		}
 	  });
 	}
@@ -207,9 +207,7 @@
 	}
 
 	function AddOrEditFunction(code, VType) {
-		console.log('vtype', VType);
 		window.location.href = `/OutwardEntry/Index?id=${encodeURIComponent(code)}&VType=${encodeURIComponent(VType)}`;
-
 	}
 
 	function viewMenuDetails(code, VType) {
@@ -217,28 +215,23 @@
 	}
 
 	function deleteTemp(code, VType) {
-		if (!confirm('Are you sure you want to delete this Inward Entry?')) return;
 
-		$.ajax({
-			url: '/OutwardEntryList/Delete',
-			type: 'POST',
-			data: { code: code, VType: VType }, // Adding VType to request
-			success: function (res) {
-				if (res.success) {
-					toastr.success(res.message || 'Deleted successfully.');
-					loadAllMenus(); // Refresh UI or list
-				} else {
-					toastr.error(res.message || 'Failed to delete.');
-				}
-			},
-			error: function (xhr, status, error) {
-				toastr.error(`Error deleting Purchase Sauda: ${xhr.responseText || error}`);
+		if (!code || !VType) return;
+
+		var docId = VType + code;
+
+		deleteRecord("OutwardEntryList", docId, {
+			action: "Delete", // IMPORTANT: pass action here
+			title: "Are you sure you want to delete this Inward Entry?",
+			text: "This action cannot be undone.",
+
+			successCallback: function () {
+				loadAllMenus(); // Refresh UI
 			}
 		});
 	}
 
-
-		function showDocumentPopup(docCode) {
+    function showDocumentPopup(docCode) {
 		$.ajax({
 			url: '/OutwardEntryList/DocDetailsCode',
 			type: 'POST',
@@ -248,15 +241,15 @@
 				if(response.success) {
 					showDocumentPopupjQuery(response.data, docCode);
 				} else {
-					toastr.error("Failed to get document details.");
+	             showToast("Failed to get document details.", { type: "error" });
+
 				}
 			},
 			error: function() {
-				toastr.error("An error occurred while fetching document details.");
+				 showToast("An error occurred while fetching document details", { type: "error" });
+		
 			}
 		});
 	}
-
-
 
 </script>

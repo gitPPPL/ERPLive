@@ -11,13 +11,13 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-
-        public OutwardEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
+        private readonly GlobalValidationdate _globalValidationdate;
+        public OutwardEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _globalValidationdate = globalValidationdate;
         }
-
         public async Task<string> GetVNoAsync(string vType, string tableName = "")
         {
             string newV_NO = "00000";
@@ -76,9 +76,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return newV_NO;
         }
-
-
-
         public string SaveOutwardEntry(OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
         {
             try
@@ -180,6 +177,16 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd.ExecuteNonQuery();
                     }
                     transaction.Commit();
+
+
+                    if (action == "UPDATE")
+                    {
+                        _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
+                        codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
+                    }
+
+
+
                     return "Success";
                 }
                 catch (Exception)
@@ -193,7 +200,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return $"Error: {ex.Message}";
             }
         }
-
         public List<object> GetDataByPartyCodeAsync(int partyId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -241,7 +247,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return dataList;
         }
-
         public List<object> GetDataByPartyandAddressidCodeAsync(int partyId , int  addressid)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -291,7 +296,5 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return dataList;
         }
-
     }
-
 }
