@@ -2697,7 +2697,7 @@
             fetchTransitno(v_type, Vno, res.supplier, indate);
             
         } else {
-                    showToast("Invalid response or supplier missing", { type: "error" });
+           showToast("Invalid response or supplier missing", { type: "error" });
       
         }
       }
@@ -2709,9 +2709,9 @@
   async function GetEwaybillno() {
         try {
             const res = await $.ajax({
-                url: '/InwardEntry/GetEWayBillData',
+                    url: '/InwardEntry/GetEWayBillDatacall',
                 type: 'GET',
-                data: { edate: $('#InDate').val(),inoutdata :"OUT"  },
+                    data: { edate: $('#InDate').val(),inoutdata :"IN"  },
                 dataType: 'json'
             });           
        
