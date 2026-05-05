@@ -268,6 +268,10 @@
     let DeptMap = {};
     let   PubUserLevel=@PubUserLevel;
     let   LoginDate = '@logindate';
+    let pendingData = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+
     $(document).ready(function () {
         const urlParams = new URLSearchParams(window.location.search);
         const rowId = urlParams.get('id');
@@ -467,65 +471,45 @@
                 });
             });
 
+            $(document).on("change", "#selectAllPR", function () {
+            const isChecked = $(this).is(":checked");
+            $("#tblpendingordermodal tbody .row-checkbox").prop("checked", isChecked);
+            });
+
+
+
         } catch (err) {
           console.error("Error initializing page:", err);
         }
       })();
     });
 
-        function setFormReadOnly() {
-
-        // Make all text inputs readonly (except hidden)
+    function setFormReadOnly() {
         $('#OutwardEntryForm input:not([type="hidden"])').prop('readonly', true);
-
-        // Disable specific input types
         $('#OutwardEntryForm input[type="checkbox"], input[type="radio"], input[type="file"]').prop('disabled', true);
-
-        // Disable time & date inputs properly
         $('#OutwardEntryForm input[type="time"], #OutwardEntryForm input[type="date"]').prop('disabled', true);
-
-        // Disable selects
         $('#OutwardEntryForm select').prop('disabled', true);
-
-        // Make textarea readonly
         $('#OutwardEntryForm textarea').prop('readonly', true);
-
-        // Disable all buttons inside form
         $('#OutwardEntryForm button').prop('disabled', true);
-
-        // Disable anchor tags acting like buttons
         $('#OutwardEntryForm a').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
-
-        // Disable table inputs (important for dynamic rows)
         $('#tblOutwardEntry tbody').find('input, select, textarea, button').prop('disabled', true);
-
-        // Disable modal trigger buttons separately (outside form sometimes)
         $('#btnpendingorderno, #btn-pending').prop('disabled', true);
-
-        // Disable modal actions (if modal opens somehow)
         $('#pendingorders').find('input, select, button').prop('disabled', true);
-
-        // Disable add/delete action icons/buttons
         $('.btn-add-action, .btn-delete-action').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
 
-        // Disable pagination controls
         $('#tablePagination').css({
             'pointer-events': 'none',
             'opacity': '0.5'
         });
-
-        // Remove tab navigation
         $('#OutwardEntryForm')
             .find('input, select, textarea, button, a')
             .attr('tabindex', '-1');
-
-        // Optional: visually indicate readonly mode
         $('#OutwardEntryForm').css({
             'opacity': '0.95'
         });
@@ -773,30 +757,31 @@
         try {
             const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}&BILL_NO=${BILL_NO}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
             const result = await res.json();
+
             if (result.success) {
                 const details = result.data || [];
-                console.log("result", details);
-                const $tbody = $("#tblpendingordermodal tbody");
-                $tbody.empty();
 
-                details.forEach(detail => {
-                    const rowData = {
-                        Vouchertype: detail.v_type,
-                        VoucherNo: detail.v_no,
-                        VoucherDate: formatDate(detail.v_DATE),
-                        ItemCode: detail.item_code,
-                        ItemName: detail.item_name,
-                        Qty: detail.qty,
-                        PQty: detail.p_QTY,
-                        remarks: detail.remark,
-                        nos: detail.nos,
-                        UnitName: detail.uniT_NAME,
-                        UnitCode: detail.uniT_CODE,
-                        SRno: detail.srno
-                    };
-                    PendingaddRow($tbody, rowData);
-                });
+                // Store full dataset
+                pendingData = details.map(detail => ({
+                    Vouchertype: detail.v_type,
+                    VoucherNo: detail.v_no,
+                    VoucherDate: formatDate(detail.v_DATE),
+                    ItemCode: detail.item_code,
+                    ItemName: detail.item_name,
+                    Qty: detail.qty,
+                    PQty: detail.p_QTY,
+                    remarks: detail.remark,
+                    nos: detail.nos,
+                    UnitName: detail.uniT_NAME,
+                    UnitCode: detail.uniT_CODE,
+                    SRno: detail.srno
+                }));
+
+                currentPage = 1;
+                renderPendingTable();
+
             } else {
                 toastr.error("Failed to load pending orders: " + (result.message || ""));
             }
@@ -806,30 +791,101 @@
         }
     }
 
-    function PendingaddRow($tbody, data = {}) {
-      $tbody.find(".btn-add-action").remove();
+    function renderPendingTable() {
+        const $tbody = $("#tblpendingordermodal tbody");
+        $tbody.empty();
 
-      const row = `
-        <tr class="no-border-input">
-          <td><input type="checkbox" class="row-checkbox" /></td>
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
 
-          <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}"/></td>
-          <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}"/></td>
-          <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}"/></td>
-          <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}"/></td>
-          <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}"/></td>
-          <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
-          <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
-          <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-          <td><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
-          <td><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
-          <td><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
-          <td><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
-        </tr>`;
+        const pageData = pendingData.slice(start, end);
 
-      $tbody.append(row);
+        pageData.forEach(row => {
+            PendingaddRow($tbody, row);
+        });
+
+        updatePaginationInfo();
     }
 
+    function PendingaddRow($tbody, data = {}) {
+
+        const row = `
+            <tr class="no-border-input">
+              <td><input type="checkbox" class="row-checkbox" /></td>
+
+              <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}"/></td>
+              <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}"/></td>
+              <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}"/></td>
+              <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}"/></td>
+              <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}"/></td>
+              <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
+              <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
+              <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
+              <td><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
+              <td><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
+              <td><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
+              <td><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
+            </tr>`;
+
+        $tbody.append(row);
+    }
+
+    function nextPage() {
+        if (currentPage * rowsPerPage < pendingData.length) {
+            currentPage++;
+            renderPendingTable();
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPendingTable();
+        }
+    }
+
+    function changeRowsPerPage() {
+        rowsPerPage = parseInt($("#pageSizeSelect").val());
+        currentPage = 1;
+        renderPendingTable();
+    }
+
+    function updatePaginationInfo() {
+        const total = pendingData.length;
+
+        const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+        const end = Math.min(currentPage * rowsPerPage, total);
+
+        $("#pageInfoText").text(`Results: ${start} - ${end} of ${total}`);
+
+        $("#prevBtn").prop("disabled", currentPage === 1);
+        $("#nextBtn").prop("disabled", end >= total);
+
+        renderPageNumbers();
+    }
+
+    function renderPageNumbers() {
+        const totalPages = Math.ceil(pendingData.length / rowsPerPage);
+        const $container = $("#pageNumbers");
+
+        $container.empty();
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = $(`<button class="page-num">${i}</button>`);
+
+            if (i === currentPage) {
+                btn.addClass("active");
+            }
+
+            btn.click(() => {
+                currentPage = i;
+                renderPendingTable();
+            });
+
+            $container.append(btn);
+        }
+    }
+      
     function getSelectedPendingRows() {
         const selectedData = [];
 

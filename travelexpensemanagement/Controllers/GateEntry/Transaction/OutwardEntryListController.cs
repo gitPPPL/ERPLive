@@ -495,7 +495,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     var REMARK = rdr["REMARK"]?.ToString();
                                     var SRNO = rdr["SRNO"]?.ToString();
 
-
                                     if (!string.IsNullOrEmpty(Item_name) && !string.IsNullOrEmpty(Item_name))
                                     {
                                         Datalist.Add(new
