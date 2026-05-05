@@ -2034,7 +2034,7 @@
           }
         }
 
-     async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
+   async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
       try {
         const queryParams = new URLSearchParams({ v_type, v_no, partycode, ExpiryDate });
 
@@ -2059,6 +2059,7 @@
         showToast("Error loading Transit Numbers", { type: "error" });
       }
     }
+
    async function GetVNo(Vtype) {
         try {
           const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
@@ -2300,19 +2301,17 @@
             }
 
             const res = await $.ajax({
-                url: `/InwardEntry/GetVehcleFastaginfo`,
+                    url: `/InwardEntry/GetVehcleFastaginfocall`,
                 data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
                 type: 'GET', 
                 dataType: 'json',
-            });                  
+            });
 
-            if (res && res.success) {
-              showToast("FastTag Info Saved Successfully", { type: "success" });
-     
+                if (res.success == true) {
+              showToast("FastTag Info Saved Successfully", { type: "success" });    
 
             } else {
-                showToast("Data Not Found For This Vehicle No", { type: "error" });
-           
+                showToast("Data Not Found For This Vehicle No", { type: "error" });           
             }
         } catch (err) {
             showToast("Error fetching vehicle details.", { type: "error" });
@@ -2321,39 +2320,39 @@
     }
 
    async function GetVehicledetail() {
-            try {
-                    const rcNumber = $('#TxtVehicleNo').val(); 
-                    const VType = $('#ddlDocType').val();  
-                    const VNo = $('#TxtDocNo').val();  
-                    if(!rcNumber)
-                    {                    
-                        showToast("Vehicle No Not Found", { type: "info" });
-                        $('#TxtVehicleNo').addClass('is-invalid').focus();
-                        return;
-                        }
-                    else
-                    {
-                      $('#TxtVehicleNo').removeClass('is-invalid');
-                    }
+    try {
+    const rcNumber = $('#TxtVehicleNo').val(); 
+    const VType = $('#ddlDocType').val();  
+    const VNo = $('#TxtDocNo').val();  
+    if(!rcNumber)
+    {                    
+        showToast("Vehicle No Not Found", { type: "info" });
+        $('#TxtVehicleNo').addClass('is-invalid').focus();
+        return;
+    }
+    else
+    {
+        $('#TxtVehicleNo').removeClass('is-invalid');
+    }
 
-                const res = await $.ajax({
-                    url: `/InwardEntry/GetVehcleinfo`,  
-                    data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
-                    type: 'GET', 
-                    dataType: 'json',
-                });
+         const res = await $.ajax({
+            url: `/InwardEntry/GetVehcleinfo`,  
+            data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
+            type: 'GET', 
+            dataType: 'json',
+        });
 
-                if (res && res.success) {
-                  showToast("Vehicle Info Saved Successfully", { type: "success" });
-
-                } else {
-                   showToast("Vehicle not found or invalid", { type: "error" });
-                }
-            } catch (err) {
-                       showToast("Error fetching vehicle details.", { type: "error" });
-                
+            if (res.value.success == true)
+            {
+                showToast("Vehicle Info Saved Successfully", { type: "success" });
+            } else
+            {
+                showToast("Vehicle not found or invalid", { type: "error" });
             }
+        } catch (err) {
+          showToast("Error fetching vehicle details.", { type: "error" });                
         }
+   }
 
    async function GetVehicledata() {
         try {
@@ -2713,11 +2712,14 @@
                 type: 'GET',
                     data: { edate: $('#InDate').val(),inoutdata :"IN"  },
                 dataType: 'json'
-            });           
-       
-          if(res.success)
+            });
+
+          if(res.success == true)
           {
-           showToast("Successfully", { type: "success" });
+               showToast(res.message, { type: "success" });
+          }
+          else{
+              showToast(res.message, { type: "warning" });
           }
 
         } catch (error) {
