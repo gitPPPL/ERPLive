@@ -732,7 +732,7 @@
             </div>
         </div>
         <!--Modal Popup-->
-        <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel" aria-hidden="true">
+        <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel">
             <div class="modal-dialog modal-xl erppagesmodal">
                 <div class="modal-content erppagesmodal-content draggable-modal">
                     <div class="erppagesmodal-header">
@@ -1064,15 +1064,34 @@
                 $('#ddlDocStatus').prop('disabled', true);
             });
 
-        $('#Btn_selectedData').on('click', function () {
-            const selectedData = getSelectedPendingOrderRows();           
-            if (selectedData.length === 0) {
-                showToast("Please select at least one row.", { type: "warning" });   
+                $('#Btn_selectedData').on('click', function () {
+        const selectedData = getSelectedPendingOrderRows();
+        if (selectedData.length === 0) {
+            showToast("Please select at least one row.", { type: "warning" });
             return;
-            }
-            populateInwardEntryTable(selectedData);
-            $('#pendingorders').modal('hide');
-        });
+        }
+
+        // Use Bootstrap 5 modal API to hide the modal
+        const modalElement = document.getElementById('pendingorders');
+        const myModal = new bootstrap.Modal(modalElement);
+        myModal.hide();  // Correct way to hide modal in Bootstrap 5
+
+        // Perform other actions after modal is hidden
+        populateInwardEntryTable(selectedData);
+    });
+
+        // $('#Btn_selectedData').on('click', function () {
+        //     const selectedData = getSelectedPendingOrderRows();           
+        //     if (selectedData.length === 0) {
+        //         showToast("Please select at least one row.", { type: "warning" });   
+        //     return;
+        //     }
+        //    $('#pendingorders').modal('hide');  // Hide the modal first
+        // populateInwardEntryTable(selectedData);  // Then perform other actions
+
+        //     //populateInwardEntryTable(selectedData);
+        //     //$('#pendingorders').modal('hide');
+        // });
 
             $('#btn_setting').on('click', function () {
              GetVehicledetail();
