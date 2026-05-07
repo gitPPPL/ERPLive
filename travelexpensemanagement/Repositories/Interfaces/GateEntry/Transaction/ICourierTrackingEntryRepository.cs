@@ -1,7 +1,7 @@
 ﻿using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry.Transaction;
 
-namespace travelexpensemanagement.Repositories.Interfaces
+namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 {
 
     public interface ICourierTrackingEntryRepository

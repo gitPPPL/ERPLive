@@ -1,0 +1,468 @@
+﻿@{
+	ViewBag.Title = "Gate Entry Dashboard";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gate Entry Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+    <div class="GateEntryDashboard-container">
+        <div class="GateEntryDashboard-header">
+            <div class="GateEntryDashboard-header-left">
+                <div class="GateEntryDashboard-header-icon">
+                    <i class="fa fa-truck-moving"></i>
+                </div>
+                <div>
+                    <div class="GateEntryDashboard-title">Gate Entry Dashboard</div>
+                    <div class="GateEntryDashboard-subtitle">Smart Monitoring & Analytics</div>
+                </div>
+            </div>
+        </div>
+        <div class="GateEntryDashboard-sales-header-advanced">
+            <div class="GateEntryDashboard-sales-top">
+                <div class="GateEntryDashboard-sales-icon">
+                    <i class="fa fa-right-left"></i>
+                </div>
+                <div>
+                    <div class="GateEntryDashboard-sales-title">Gate Activity</div>
+                    <div class="GateEntryDashboard-sales-sub">
+                        Live Vehicle Movement Status
+                    </div>
+                </div>
+            </div>
+            <div class="GateEntryDashboard-gate-filter">
+                <label for="gateFilter">Filter Gate Activity</label>
+                <select id="gateFilter">
+                    <option value="all">All</option>
+                    <option value="gateinwardRM">Gate Inward RM</option>
+                    <option value="gateinwardstore">Gate Inward Store</option>
+                </select>
+            </div>
+            <button class="GateEntryDashboard-export-btn-advanced">
+                <i class="fa fa-file-export"></i>
+                <span>Export Data</span>
+            </button>
+        </div>
+        <div class="GateEntryDashboard-row">
+            <div class="GateEntryDashboard-left">
+                <div class="GateEntryDashboard-card-grid" id="dashboardCards"></div>
+            </div>
+            <div class="GateEntryDashboard-right">
+                <div class="GateEntryDashboard-filter">
+                    <h4>Select Category</h4>
+                    <select id="categorySelect">
+                        <option value="vehicleChart">Gate Inward</option>
+                        <option value="materialChart">Gate Outward</option>
+                    </select>
+                    <div class="GateEntryDashboard-dropdown-chart">
+                        <canvas id="dropdownChart"></canvas>
+                    </div>
+                    <div class="GateEntryDashboard-filter-item kpi-today">
+                        <span>Today</span>
+                        <strong>120</strong>
+                    </div>
+
+                    <div class="GateEntryDashboard-filter-item kpi-yesterday">
+                        <span>Yesterday</span>
+                        <strong>95</strong>
+                    </div>
+                    <div class="GateEntryDashboard-filter-item kpi-monthly">
+                        <span>Monthly</span>
+                        <strong>400</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="GateEntryDashboard-tat-header">
+            <h3>TAT Dashboard</h3>
+            <span class="tat-sub">Performance Overview</span>
+        </div>
+        <div class="GateEntryDashboard-tat-grid">
+            <div class="GateEntryDashboard-tat-card">
+                <div class="tat-left">
+                    <div class="tat-top">
+                        <div class="tat-icon"><i class="fa fa-truck"></i></div>
+                        <h4>Incoming with Validity Date</h4>
+                    </div>
+                    <div class="tat-value">18</div>
+                    <div class="tat-footer">
+                        <span class="tat-trend up">↑ 12%</span>
+                        <span class="tat-badge within">Within</span>
+                    </div>
+                </div>
+                <div class="tat-right">
+                    <canvas id="chart1"></canvas>
+                </div>
+            </div>
+            <div class="GateEntryDashboard-tat-card">
+                <div class="tat-left">
+                    <div class="tat-top">
+                        <div class="tat-icon"><i class="fa fa-calendar-times"></i></div>
+                        <h4>Incoming After Incoming Date</h4>
+                    </div>
+                    <div class="tat-value">10</div>
+                    <div class="tat-footer">
+                        <span class="tat-trend down">↓ 8%</span>
+                        <span class="tat-badge beyond">Beyond</span>
+                    </div>
+                </div>
+                <div class="tat-right">
+                    <canvas id="chart2"></canvas>
+                </div>
+            </div>
+            <div class="GateEntryDashboard-tat-card">
+                <div class="tat-left">
+                    <div class="tat-top">
+                        <div class="tat-icon"><i class="fa fa-check-circle"></i></div>
+                        <h4>WB Within TAT</h4>
+                    </div>
+                    <div class="tat-value">25</div>
+                    <div class="tat-footer">
+                        <span class="tat-trend up">↑ 15%</span>
+                        <span class="tat-badge within">Within</span>
+                    </div>
+                </div>
+                <div class="tat-right">
+                    <canvas id="chart3"></canvas>
+                </div>
+            </div>
+            <div class="GateEntryDashboard-tat-card">
+                <div class="tat-left">
+                    <div class="tat-top">
+                        <div class="tat-icon"><i class="fa fa-exclamation-triangle"></i></div>
+                        <h4>WB Beyond TAT</h4>
+                    </div>
+                    <div class="tat-value">8</div>
+                    <div class="tat-footer">
+                        <span class="tat-trend down">↓ 5%</span>
+                        <span class="tat-badge beyond">Beyond</span>
+                    </div>
+                </div>
+                <div class="tat-right">
+                    <canvas id="chart4"></canvas>
+                </div>
+            </div>
+            <div class="GateEntryDashboard-tat-card">
+                <div class="tat-left">
+                    <div class="tat-top">
+                        <div class="tat-icon"><i class="fa fa-vial"></i></div>
+                        <h4>PRE QC Within TAT</h4>
+                    </div>
+                    <div class="tat-value">14</div>
+                    <div class="tat-footer">
+                        <span class="tat-trend up">↑ 9%</span>
+                        <span class="tat-badge within">Within</span>
+                    </div>
+                </div>
+                <div class="tat-right">
+                    <canvas id="chart5"></canvas>
+                </div>
+            </div>
+            <div class="GateEntryDashboard-tat-card">
+                <div class="tat-left">
+                    <div class="tat-top">
+                        <div class="tat-icon"><i class="fa fa-times-circle"></i></div>
+                        <h4>PRE QC Beyond TAT</h4>
+                    </div>
+                    <div class="tat-value">6</div>
+                    <div class="tat-footer">
+                        <span class="tat-trend down">↓ 3%</span>
+                        <span class="tat-badge beyond">Beyond</span>
+                    </div>
+                </div>
+                <div class="tat-right">
+                    <canvas id="chart6"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+        const dashboardData = [
+            {
+                id: "vehicleChart",
+                title: "Vehicle",
+                subtitle: "Live Gate Activity",
+                icon: "fa-truck",
+                iconClass: "icon-green",
+                stats: [
+                    { label: "IN", value: 120, color: "#22c55e" },
+                    { label: "OUT", value: 90, color: "#3b82f6" },
+                    { label: "PENDING", value: 30, color: "#ef4444" }
+                ]
+            },
+            {
+                id: "materialChart",
+                title: "Party Own Material",
+                subtitle: "Material Movement",
+                icon: "fa-box-open",
+                iconClass: "icon-yellow",
+                stats: [
+                    { label: "IN", value: 60, color: "#22c55e" },
+                    { label: "OUT", value: 40, color: "#3b82f6" },
+                    { label: "PENDING", value: 15, color: "#ef4444" }
+                ]
+            },
+            {
+                id: "visitorChart",
+                title: "Visitor Entry",
+                subtitle: "Visitor Activity",
+                icon: "fa-user-check",
+                iconClass: "icon-pink",
+                stats: [
+                    { label: "IN", value: 150, color: "#22c55e" },
+                    { label: "OUT", value: 120, color: "#3b82f6" },
+                    { label: "PENDING", value: 30, color: "#ef4444" }
+                ]
+            },
+            {
+                id: "rmChart",
+                title: "Gate Inward RM",
+                subtitle: "Raw Material Status",
+                icon: "fa-industry",
+                iconClass: "icon-green",
+                stats: [
+                    { label: "Approval", value: 25, color: "#22c55e" },
+                    { label: "Pre QC", value: 18, color: "#3b82f6" },
+                    { label: "WB", value: 12, color: "#f59e0b" }
+                ]
+            },
+            {
+                id: "storeChart",
+                title: "Gate Inward Store",
+                subtitle: "Store Material Status",
+                icon: "fa-warehouse",
+                iconClass: "icon-yellow",
+                stats: [
+                    { label: "Approval", value: 20, color: "#22c55e" },
+                    { label: "Pre QC", value: 14, color: "#3b82f6" },
+                    { label: "WB", value: 10, color: "#f59e0b" }
+                ]
+            },
+            {
+                id: "rcChart",
+                title: "Vehicle RC",
+                subtitle: "RC Verification",
+                icon: "fa-id-card",
+                iconClass: "icon-pink",
+                stats: [
+                    { label: "Found", value: 80, color: "#22c55e" },
+                    { label: "Not Found", value: 20, color: "#ef4444" }
+                ]
+            }
+        ];
+
+        /* RENDER CARDS */
+        function renderDashboardCards() {
+            const container = document.getElementById("dashboardCards");
+
+            container.innerHTML = dashboardData.map(card => `
+                <div class="GateEntryDashboard-card vehicle-card">
+
+                    <div class="vehicle-card-header">
+                        <div class="GateEntryDashboard-icon ${card.iconClass}">
+                            <i class="fa ${card.icon}"></i>
+                        </div>
+
+                        <div class="vehicle-card-title">
+                            <h3>${card.title}</h3>
+                            <p>${card.subtitle}</p>
+                        </div>
+                    </div>
+
+                    <div class="vehicle-donut">
+                        <canvas id="${card.id}"></canvas>
+                    </div>
+
+                    <div class="vehicle-stats">
+                        ${card.stats.map(stat => `
+                            <div class="stat">
+                                <span>${stat.label}</span>
+                                <strong class="counter"
+                                        data-target="${stat.value}"
+                                        style="color:${stat.color}">
+                                    0
+                                </strong>
+                            </div>
+                        `).join("")}
+                    </div>
+
+                </div>
+            `).join("");
+        }
+
+        /* DONUT CHART */
+        function createDonutChart(id, stats) {
+            const ctx = document.getElementById(id);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: stats.map(s => s.label),
+                    datasets: [{
+                        data: stats.map(s => s.value),
+                        backgroundColor: stats.map(s => s.color),
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        /* INIT DASHBOARD */
+        function initDashboard() {
+            renderDashboardCards();
+
+            dashboardData.forEach(card => {
+                createDonutChart(card.id, card.stats);
+            });
+
+            startCounters();
+        }
+
+        /* COUNTER ANIMATION */
+        function startCounters() {
+            document.querySelectorAll('.counter').forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                let count = 0;
+
+                const update = () => {
+                    const increment = target / 50;
+
+                    if (count < target) {
+                        count += increment;
+                        counter.innerText = Math.ceil(count);
+                        requestAnimationFrame(update);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+
+                update();
+            });
+        }
+
+        /* DROPDOWN CHART */
+        let dropdownChartInstance = null;
+
+        function updateDropdownChart() {
+            const today = +document.querySelector(".kpi-today strong").innerText;
+            const yesterday = +document.querySelector(".kpi-yesterday strong").innerText;
+            const monthly = +document.querySelector(".kpi-monthly strong").innerText;
+
+            const ctx = document.getElementById("dropdownChart");
+
+            if (dropdownChartInstance) {
+                dropdownChartInstance.destroy();
+            }
+
+            dropdownChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ["Today", "Yesterday", "Monthly"],
+                    datasets: [{
+                        data: [today, yesterday, monthly],
+                        backgroundColor: ["#22c55e", "#f59e0b", "#3b82f6"],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: { legend: { display: true } }
+                }
+            });
+        }
+
+        /* TAT MINI CHARTS */
+        function createChart(id, data) {
+            new Chart(document.getElementById(id), {
+                type: 'line',
+                data: {
+                    labels: data.map((_, i) => i),
+                    datasets: [{
+                        data: data,
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: 'rgba(59,130,246,0.08)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // 🔥 THIS FIXES IT
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        /* INIT ALL */
+        document.addEventListener("DOMContentLoaded", function () {
+            initDashboard();
+            updateDropdownChart();
+        });
+
+        /* TAT CHART DATA */
+        createChart("chart1",[5,8,6,10,12,18]);
+        createChart("chart2",[12,11,10,9,8,10]);
+        createChart("chart3",[10,12,15,20,22,25]);
+        createChart("chart4",[10,9,8,7,6,8]);
+        createChart("chart5",[5,7,9,11,13,14]);
+        createChart("chart6",[8,7,6,5,4,6]);
+
+        /* SCROLL DRAG */
+        const slider = document.querySelector('.GateEntryDashboard-tat-grid');
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+    </script>
+
+</body>
+</html>
+

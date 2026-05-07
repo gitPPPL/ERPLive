@@ -2,7 +2,128 @@
     ViewBag.Title = "Courier Tracking Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-truck"></i>
+        </div>
+        <div class="erppage-header-title">Courier Tracking Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "CourierTrackingEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="CourierTrackingEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input" id="ddlDocType"></select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo">
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-redinput" id="ddlPartyName"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">City</label>
+                    <select class="erppage-input" id="ddlCity"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Courier Name</label>
+                    <select class="erppage-redinput" id="ddlCourierName"></select>
+                </div>
+            </div>
+
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Docket No</label>
+                    <input type="text" class="erppage-redinput" id="TxtDocketNo">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Received By</label>
+                    <select class="erppage-input" id="ddlReceivedBy"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Purpose</label>
+                    <select class="erppage-input" id="ddlPurpose"></select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Weight (gm)</label>
+                    <input type="text" class="erppage-input" id="txtWeight">
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea class="erppage-textarea" id="txtRemarks"></textarea>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="erppage-subfieldset">
+            <div class="erppage-subheader">Print Option</div>
+            <div class="erppage-body">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From</label>
+                        <input type="date" class="erppage-input" id="Dtfrom">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To</label>
+                        <input type="date" class="erppage-input" id="DtTo">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">VType</label>
+                        <select class="erppage-input" id="ddlVtype"></select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Party</label>
+                        <select class="erppage-input" id="ddlParty"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="erppage-internalaction">
+                <button type="button" id="btn-print" class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-print"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+        </fieldset>
+
+    </div>
+    <div class="erppage-actions">
+        <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+        @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+            <i class="fa fa-print"></i>Print
+        </button> *@
+    </div>
+</div>
+
+
+
+@* <fieldset>
     <legend class="legend-field">Courier Tracking Entry</legend>
     <div class="row">
         <div class="offset-md-10 col-md-2">
@@ -151,28 +272,38 @@
         </div>
     </form>
 </fieldset>
-<script src="~/common/dropdown.js"></script>
 
+ *@
+<script src="~/common/dropdown.js"></script>
+<script src="~/common/globalvalidation.js"></script>
 <script>
+    let readOnly= false;
     $(document).ready(function () {
+
+        let today = new Date();
+        let yyyy = today.getFullYear();
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
+        let dd = String(today.getDate()).padStart(2, '0');
+        let formattedDate = yyyy + '-' + mm + '-' + dd;
+        $('#DtDocDate').val(formattedDate);
 
         const params = new URLSearchParams(window.location.search);
         const docNo = params.get('id');
         const docType = params.get('type');
         const mode = params.get('mode');
+        readOnly = (mode === 'view');
 
         if (mode === "view") {
             setFormReadOnly();
             $('#CourierTrackingEntryForm')
                 .after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
         }
-
         // Bind all dropdowns (ONE LINE EACH)
         bindDropdown('CourierTrackingEntry','DocType', '#ddlDocType', '-- Select Doc Type --');
         bindDropdown('CourierTrackingEntry','City', '#ddlCity', '-- Select City --');
         bindDropdown('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --');
         bindDropdown('CourierTrackingEntry','Courier', '#ddlCourierName', '-- Select Courier --');
-        bindDropdown('CourierTrackingEntry','Employee', '#ddlReceivedBy', '-- Select Received By --');
+        bindDropdown('CourierTrackingEntry','Employee', '#ddlReceivedBy', '-- Select Received --');
         bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --');
 
         // DocType change → get DocNo
@@ -181,34 +312,33 @@
             const selectedText = $(this).find("option:selected").text();
 
             if (selectedValue) {
-                $.post('/CourierTrackingEntry/GetDocNo', {
-                    docType: selectedValue,
-                    docName: selectedText
-                }, function (response) {
-                    if (response.success) {
-                        $('#NumDocNo').val(response.nextVNo);
+                $.post('/CourierTrackingEntry/GetDocNo', { docType: selectedValue, docName: selectedText },
+                function (response) 
+                {
+                    if (response.success)
+                    {
+                       $('#NumDocNo').val(response.nextVNo);
                     }
                 });
             }
         });
 
         // EDIT MODE
-        if (docNo) {
-            $.ajax({
-                url: '/CourierTrackingEntry/GetCourierDataList',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ docNo: docNo, docType: docType }),
-                success: function (data) {
-                    bindCourierTracking(data);
-                }
-            });
-        }
+    if (docNo) {
+      $.ajax({
+          url: '/CourierTrackingEntry/GetCourierDataList',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ docNo: docNo, docType: docType }),
+          success: function (data) {
+              bindCourierTracking(data);
+          }
+      });
+    }
 
         // SAVE
-        $('#btn-save').on('click', function (e) {
+    $('#btn-save').on('click', function (e) {
             e.preventDefault();
-
             const formData = {
                 DocType: $('#ddlDocType').val(),
                 DocDate: $('#DtDocDate').val(),
@@ -252,11 +382,19 @@
         bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --', data.purpose);
 
         $('#DtDocDate').val(data.docDate ? formatDate(data.docDate) : '');
-        $('#NumDocNo').val(data.docNo || '');
-        $('#TxtDocketNo').val(data.docketNo || '');
-        $('#txtWeight').val(data.weight || '');
-        $('#txtRemarks').val(data.remarks || '');
-    }
+        
+        var docNo = '';
+        if (data.docNo && data.docNo.length > 4) {
+            docNo = data.docNo.substring(4);
+        }
+
+        // Bind to textbox
+        $('#NumDocNo').val(docNo);
+
+            $('#TxtDocketNo').val(data.docketNo || '');
+            $('#txtWeight').val(data.weight || '');
+            $('#txtRemarks').val(data.remarks || '');
+        }
     // Format Date
     function formatDate(dateStr) {
         if (!dateStr) return '';
@@ -273,301 +411,3 @@
       
 </script>
 
-@* <script>
-    $(document).ready(function () {
-
-    const params = new URLSearchParams(window.location.search);
-    const docNo = params.get('id');
-    const docType = params.get('type');
-    const mode = params.get('mode');
-    if (mode === "view") {
-         setFormReadOnly();
-         $('#CourierTrackingEntryForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
-    }
-        ddlDocType();
-        ddlPartyName();
-        $('#ddlDocType').on('change', function () {
-            const selectedValue = $(this).val();
-            const selectedText = $(this).find("option:selected").text();
-            if (selectedValue !== "") {
-                sendDocType(selectedValue, selectedText);
-            }
-        });
-        ddlCity();
-        ddlCourierName();
-        ddlReceivedBy();
-        ddlPurpose();
-        ddlVType();
-        ddlParty();
-       if (docNo) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetCourierDataList',
-            type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify({ docNo: docNo, docType: docType }),
-            success: function (response) {
-                bindCourierTracking(response);
-            },
-            error: function (xhr) {
-                alert('Error: ' + xhr.responseText);
-            }
-        });
-    }
-       $('#btn-save').on('click', function (e) {
-        e.preventDefault();
-        const formData = {
-            // Previous fields
-            DocType: $('#ddlDocType').val(),
-            DocDate: $('#DtDocDate').val(),
-            DocNo: $('#NumDocNo').val(),
-            PartyName: $('#ddlPartyName').val(),
-            City: $('#ddlCity').val(),
-            CourierName: $('#ddlCourierName').val(),
-            DocketNo: $('#TxtDocketNo').val(),
-            ReceivedBy: $('#ddlReceivedBy').val(),
-            Purpose: $('#ddlPurpose').val(),
-            Weight: $('#txtWeight').val(),
-            Remarks: $('#txtRemarks').val(),
-            V_No:docNo,
-            ACTION: docNo > 0 ? "UPDATE" : "INSERT",
-        };
-        console.log('Form Data:', formData);
-        $.ajax({
-            url: '/CourierTrackingEntry/SaveCourierData',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function (response) {
-                if (response.success) {
-                  toastr.success(response.message)
-              } else {
-                   toastr.error(response.message)
-              }
-            },
-            error: function (xhr) {
-                console.error("Error:", xhr.responseText);
-                toastr.error('Error saving data.');
-            }
-        });
-    });
-
-    })
-    function ddlDocType(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlDocType',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlDocType');
-                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlDocType:", xhr.responseText);
-            }
-        });
-    }
-    function sendDocType(docType, docName) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetDocNo',
-            type: 'POST',
-            data: {
-                docType: docType,
-                docName: docName
-            },
-            success: function (response) {
-                if (response.success) {
-                    // Update value in a textbox
-                    $('#NumDocNo').val(response.nextVNo);
-                }
-            },
-            error: function (xhr) {
-                console.error("Error:", xhr.responseText);
-            }
-        });
-    }
-    function ddlPartyName(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlPartyName',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlPartyName');
-                ddl.empty().append('<option value="">-- Select Party Name --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlPartyName:", xhr.responseText);
-            }
-        });
-    }
-    function ddlCity(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlCity',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlCity');
-                ddl.empty().append('<option value="">-- Select City --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlCity:", xhr.responseText);
-            }
-        });
-    }
-    function ddlCourierName(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlCourierName',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlCourierName');
-                ddl.empty().append('<option value="">-- Select Name --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlCourierName:", xhr.responseText);
-            }
-        });
-    }
-    function ddlReceivedBy(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlReceivedBy',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlReceivedBy');
-                ddl.empty().append('<option value="">-- Select Received By --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlReceivedBy:", xhr.responseText);
-            }
-        });
-    }
-    function ddlPurpose(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlPurpose',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlPurpose');
-                ddl.empty().append('<option value="">-- Select Purpose --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlPurpose:", xhr.responseText);
-            }
-        });
-    }
-    function ddlVType(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlVType',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlVtype');
-                ddl.empty().append('<option value="">-- Select V type --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlVtype:", xhr.responseText);
-            }
-        });
-    }
-    function ddlParty(callback) {
-        $.ajax({
-            url: '/CourierTrackingEntry/GetddlParty',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlParty');
-                ddl.empty().append('<option value="">-- Select Party Name --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlParty:", xhr.responseText);
-            }
-        });
-    }
-    function bindCourierTracking(data) {
-         console.log('i want to show data', data);
-        if (!data) {
-            alert('No data found.');
-            return;
-        }
-         ddlDocType(() => {
-            $('#ddlDocType').val(data.vType);
-        });
-
-        $('#DtDocDate').val(data.docDate ? formatDate(data.docDate) : '');
-        $('#NumDocNo').val('');
-        $('#NumDocNo').val(data.docNo || '');
-
-        ddlPartyName(() => {
-            $('#ddlPartyName').val(data.partyName);
-        });
-
-        ddlCity(() => {
-            $('#ddlCity').val(data.city);
-        });
-
-        ddlCourierName(() => {
-            $('#ddlCourierName').val(data.courierName);
-        });
-
-        $('#TxtDocketNo').val(data.docketNo || '');
-
-        ddlReceivedBy(() => {
-            $('#ddlReceivedBy').val(data.receivedBy);
-        });
-
-        ddlPurpose(() => {
-            $('#ddlPurpose').val(data.purpose);
-        });
-
-        $('#txtWeight').val(data.weight || '');
-        $('#txtRemarks').val(data.remarks || '');
-    }
-    function formatDate(dateStr) {
-        if (!dateStr) return '';
-        const parts = dateStr.split('/');
-        if (parts.length !== 3) return '';
-        const [day, month, year] = parts;
-        const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        return isoDate;
-    }
-    function setFormReadOnly() {
-        $('#CourierTrackingEntryForm input').prop('readonly', true);
-        $('#CourierTrackingEntryForm select').prop('disabled', true);
-        $('#customToggle').css('pointer-events', 'none');
-        $('#btnSubmit').hide();
-        $('#btn-save').hide();
-    }
-
-</script> *@

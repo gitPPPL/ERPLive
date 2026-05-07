@@ -202,7 +202,6 @@ namespace travelexpensemanagement.Common.DropdownService
             string query = @"SELECT Code AS Value, Name AS Text FROM DOCTYPE_MAST WHERE CODE IN ('CTIN','CTOT') ORDER BY Name";
             return ExecuteDropdown(query);
         }
-
         // City
         public List<DropdownModel> GetCity(string compCode)
         {
@@ -210,13 +209,12 @@ namespace travelexpensemanagement.Common.DropdownService
                         UNION ALL
                         SELECT City_Code, City_Name FROM COURIER_TRACKING WHERE Comp_code = @CompCode 
                         AND City_Name <> ''  AND City_Code <> '0' ) x ORDER BY Name";
-
             return ExecuteDropdown(query, new[]
             {
-        new SqlParameter("@CompCode", compCode)
-    });
+                new SqlParameter("@CompCode", compCode)
+            });
         }
-        //  Party
+        // Party
         public List<DropdownModel> GetParty(string compCode)
         {
             string query = @"SELECT DISTINCT Code AS Value, Name AS Text 
@@ -238,8 +236,7 @@ namespace travelexpensemanagement.Common.DropdownService
                 new SqlParameter("@CompCode", compCode)
             });
         }
-
-        //  Courier
+        // Courier
         public List<DropdownModel> GetCourier()
         {
             string query = @"SELECT DISTINCT COURIER_NAME AS Value, COURIER_NAME AS Text 
@@ -250,7 +247,7 @@ namespace travelexpensemanagement.Common.DropdownService
             return ExecuteDropdown(query);
         }
 
-        //  Purpose
+        // Purpose
         public List<DropdownModel> GetPurpose()
         {
             string query = @"SELECT DISTINCT Purpose AS Value, Purpose AS Text 
@@ -259,7 +256,7 @@ namespace travelexpensemanagement.Common.DropdownService
             return ExecuteDropdown(query);
         }
 
-        // ✅ Employee
+        // Employee
         public List<DropdownModel> GetEmployee(string compCode)
         {
             string query = @"SELECT Code AS Value, Name AS Text FROM EMP_MAST WHERE RESIGN_DATE IS NULL 
@@ -269,9 +266,7 @@ namespace travelexpensemanagement.Common.DropdownService
             {
                 new SqlParameter("@CompCode", compCode)
             });
-        }
-
-      
+        }     
 
     }
 }

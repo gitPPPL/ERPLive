@@ -27,9 +27,12 @@ builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<ErrorLoggerService>();
 builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
-//  Repository Registration (IMPORTANT)
+//Master page repositories
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+//Master page repositories
+// Gete Entry Transaction repositories
 builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
+builder.Services.AddScoped<ICourierTrackingEntryListRepository, CourierTrackingEntryListRepository>();
 builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
 builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
 builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
@@ -37,6 +40,7 @@ builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListReposito
 builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
 builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
 builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
+// Gete Entry Transaction repositories
 
 
 
