@@ -18,6 +18,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
         }
+
         public async Task<string> GetVNoAsync(string vType, string tableName = "")
         {
             string newV_NO = "00000";
@@ -184,8 +185,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
                         codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
                     }
-
-
 
                     return "Success";
                 }

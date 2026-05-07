@@ -18,8 +18,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         public OutwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+         DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -72,6 +71,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             });
                         }
 
+                        if (reader.NextResult() && reader.Read())
+                        {
+                            totalCount = reader["TotalCount"] != DBNull.Value ? Convert.ToInt32(reader["TotalCount"]) : 0;
+                        }
+
+
                     }
                 }
             }
@@ -80,7 +85,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { success = false, message = "Error fetching data.", error = ex.Message });
             }
 
-            return Json(new { success = true, headers = headerList, details = detailsList, totalCount });
+            return Json(new { success = true, lists = headerList, totalCount });
         }
 
         [HttpPost]
@@ -172,8 +177,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         }
                     }
                     #endregion
-                }
-                             
+                }                             
                 var resultWrapper = new
                 {
                     Header = wrapper.Header,
@@ -363,7 +367,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 }
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> ExportToPdf(string searchTerm = null)
         {
@@ -448,7 +451,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
         [HttpGet]
         public IActionResult GetDataByPendingorder(int PartyCode, string Type, DateTime v_date, int BILL_NO)
         {
@@ -525,7 +527,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { success = false, message = "Error fetching attachment data", error = ex.Message });
             }
         }
-
 
     }
 }

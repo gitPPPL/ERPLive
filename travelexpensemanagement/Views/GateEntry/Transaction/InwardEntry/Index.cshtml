@@ -833,6 +833,18 @@
             $('#InTime').prop('disabled', true);
             $('.erppagelist-toolbar-end').show();  
             $('#btn_approval').show();
+
+            if(PubUserLevel == 1)
+            {
+            $('#InDate').prop('disabled', false);
+            $('#InTime').prop('disabled', false);
+            }
+            else{
+            $('#InDate').prop('disabled', true);
+            $('#InTime').prop('disabled', true);
+            }
+
+
             if (mode === "view")
             {
              setFormReadOnly();

@@ -28,35 +28,29 @@ builder.Services.AddScoped<ErrorLoggerService>();
 builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
+
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
+builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 
-
-
-
 builder.Services.Configure<EncryptionSettings>(
-    builder.Configuration.GetSection("EncryptionSettings"));
-    builder.Services.AddScoped<EncryptionHelper>();
-
+builder.Configuration.GetSection("EncryptionSettings"));
+builder.Services.AddScoped<EncryptionHelper>();
 builder.Services.AddDistributedMemoryCache();
-
 // Session Configuration
 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.Name = ".TravelExpense.Session";
-
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
 });
 
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<GlobalVariableService>();
 builder.Services.AddScoped<ModuleService>();
 

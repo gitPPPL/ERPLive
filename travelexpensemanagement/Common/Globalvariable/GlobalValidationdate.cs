@@ -378,48 +378,130 @@ namespace travelexpensemanagement.Common.Globalvariable
             {
                 var getdata = _globalVariableService.GetGlobalVariables();
 
-                string vno = GetVNo("TRIN", "WAYBILL1");
-                int srvno = Convert.ToInt32(vno);
-
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
-                    con.Open();
+                    await con.OpenAsync();
 
                     foreach (var obj in list)
                     {
+                        string eWaybillNo = obj.FORM_NO ?? "";
+
+                        // 🔹 Skip if already exists
+                        string existsQuery = @"SELECT 1 FROM waybill1 
+                        WHERE comp_code=@comp AND branch_code=@branch 
+                        AND year_code=@year AND FORM_NO=@formNo";
+
+                        using (SqlCommand checkCmd = new SqlCommand(existsQuery, con))
+                        {
+                            checkCmd.Parameters.AddWithValue("@comp", getdata.PubCompCode);
+                            checkCmd.Parameters.AddWithValue("@branch", getdata.PubBranchCode);
+                            checkCmd.Parameters.AddWithValue("@year", getdata.PubFYearCode);
+                            checkCmd.Parameters.AddWithValue("@formNo", eWaybillNo);
+
+                            var exists = await checkCmd.ExecuteScalarAsync();
+                            if (exists != null)
+                                continue;
+                        }
+
+                        string gst = obj.PARTY_GSTIN ?? "";
+                        int party_code = 0;
+
+                        // 🔹 Get party_code from PURCHASE1
+                        string purchaseQuery = @"SELECT TOP 1 ISNULL(party_code,0) 
+                        FROM PURCHASE1 
+                        WHERE BILL_GST=@gst AND comp_code=@comp 
+                        ORDER BY v_date DESC";
+
+                        using (SqlCommand cmd2 = new SqlCommand(purchaseQuery, con))
+                        {
+                            cmd2.Parameters.AddWithValue("@gst", gst);
+                            cmd2.Parameters.AddWithValue("@comp", getdata.PubCompCode);
+
+                            var result = await cmd2.ExecuteScalarAsync();
+                            if (result != null)
+                                party_code = Convert.ToInt32(result);
+                        }
+
+                        // 🔹 If not found, get from SUBGROUP_MAST
+                        if (party_code == 0)
+                        {
+                            string subQuery = @"SELECT ISNULL(a.code,0)
+                            FROM SUBGROUP_MAST a
+                            LEFT JOIN subgroup_Address b 
+                            ON a.CODE=b.CODE AND a.COMP_CODE=b.COMP_CODE
+                            WHERE a.Active=1 
+                            AND a.nature='Supplier'
+                            AND b.GSTIN=@gst 
+                            AND a.comp_code=@comp";
+
+                            using (SqlCommand cmd3 = new SqlCommand(subQuery, con))
+                            {
+                                cmd3.Parameters.AddWithValue("@gst", gst);
+                                cmd3.Parameters.AddWithValue("@comp", getdata.PubCompCode);
+
+                                var result = await cmd3.ExecuteScalarAsync();
+                                if (result != null)
+                                    party_code = Convert.ToInt32(result);
+                            }
+                        }
+
+                        // 🔹 Skip if still not found
+                        if (party_code == 0)
+                            continue;
+
+                        // 🔹 Generate voucher number
+                        string vno = GetVNo("TRIN", "WAYBILL1");
+                        int srvno = Convert.ToInt32(vno);
+
+                        // 🔹 Insert into waybill1
                         string sql = @"INSERT INTO waybill1
-                (COMP_CODE,BRANCH_CODE,YEAR_CODE,V_TYPE,V_NO,DOC_ID,FORM_NO,FORM_DATE,PARTY_CODE,PARTY_GSTIN,
-                OTHER_GSTIN,BILL_NO,BILL_DATE,ITEM_DESC,STATUS,UUSER,UDATE,GATE_TYPE)
-                VALUES
-                (@COMP_CODE,@BRANCH_CODE,@YEAR_CODE,@V_TYPE,@V_NO,@DOC_ID,@FORM_NO,@FORM_DATE,@PARTY_CODE,@PARTY_GSTIN,
-                @OTHER_GSTIN,@BILL_NO,@BILL_DATE,@ITEM_DESC,@STATUS,@UUSER,@UDATE,'TEST')";
+                        (COMP_CODE,BRANCH_CODE,YEAR_CODE,V_TYPE,V_NO,DOC_ID,FORM_NO,FORM_DATE,PARTY_CODE,PARTY_GSTIN,
+                        OTHER_GSTIN,BILL_NO,BILL_DATE,ITEM_DESC,STATUS,UUSER,UDATE,GATE_TYPE)
+                        VALUES
+                        (@COMP_CODE,@BRANCH_CODE,@YEAR_CODE,@V_TYPE,@V_NO,@DOC_ID,@FORM_NO,@FORM_DATE,@PARTY_CODE,@PARTY_GSTIN,
+                        @OTHER_GSTIN,@BILL_NO,@BILL_DATE,@ITEM_DESC,@STATUS,@UUSER,@UDATE,'TEST')";
 
-                        using SqlCommand cmd = new SqlCommand(sql, con);
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
+                            cmd.Parameters.AddWithValue("@V_TYPE", "TRIN");
+                            cmd.Parameters.AddWithValue("@V_NO", srvno);
+                            cmd.Parameters.AddWithValue("@DOC_ID", "TRIN" + srvno);
+                            cmd.Parameters.AddWithValue("@FORM_NO", eWaybillNo);
+                            cmd.Parameters.AddWithValue("@FORM_DATE", (object)obj.FORM_DATE ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@PARTY_CODE", party_code);
+                            cmd.Parameters.AddWithValue("@PARTY_GSTIN", gst);
+                            cmd.Parameters.AddWithValue("@OTHER_GSTIN", obj.OTHER_GSTIN ?? "");
+                            cmd.Parameters.AddWithValue("@BILL_NO", obj.BILL_NO ?? "");
+                            cmd.Parameters.AddWithValue("@BILL_DATE", (object)obj.BILL_DATE ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@ITEM_DESC", obj.ITEM_DESC ?? "");
+                            cmd.Parameters.AddWithValue("@STATUS", obj.STATUS ?? 0);
+                            cmd.Parameters.AddWithValue("@UUSER", getdata.PubUserId);
+                            cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
 
-                        cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", "TRIN");
-                        cmd.Parameters.AddWithValue("@V_NO", srvno);
-                        cmd.Parameters.AddWithValue("@DOC_ID", "TRIN" + srvno);
-                        cmd.Parameters.AddWithValue("@FORM_NO", obj.FORM_NO ?? "");
-                        cmd.Parameters.AddWithValue("@FORM_DATE", (object)obj.FORM_DATE ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@PARTY_CODE", obj.PARTY_CODE ?? 0);
-                        cmd.Parameters.AddWithValue("@PARTY_GSTIN", obj.PARTY_GSTIN ?? "");
-                        cmd.Parameters.AddWithValue("@OTHER_GSTIN", obj.OTHER_GSTIN ?? "");
-                        cmd.Parameters.AddWithValue("@BILL_NO", obj.BILL_NO ?? "");
-                        cmd.Parameters.AddWithValue("@BILL_DATE", (object)obj.BILL_DATE ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@ITEM_DESC", obj.ITEM_DESC ?? "");
-                        cmd.Parameters.AddWithValue("@STATUS", obj.STATUS ?? 0);
-                        cmd.Parameters.AddWithValue("@UUSER", getdata.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-
-                        await cmd.ExecuteNonQueryAsync();
+                            await cmd.ExecuteNonQueryAsync();
+                        }
                     }
                 }
 
-                // ✅ PARALLEL API CALLS
-                var tasks = list.Select(x => GetEWayBillDataOTHER(x.FORM_NO));
+                // 🔹 Controlled parallel API calls (avoid overload)
+                var semaphore = new SemaphoreSlim(5);
+
+                var tasks = list.Select(async x =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        await GetEWayBillDataOTHER(x.FORM_NO);
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                });
+
                 await Task.WhenAll(tasks);
 
                 return "Success";

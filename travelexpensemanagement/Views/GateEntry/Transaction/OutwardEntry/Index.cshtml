@@ -280,7 +280,7 @@
 </fieldset>
 
 <script>
-    const refTypeOptions = ["PO", "Indent", "Manual"];
+
     let itemMap = {};
     let UnitMap = {};
     let DeptMap = {};
@@ -301,6 +301,7 @@
         try { 
           await LoadDropDowns();
           addRow($tbody);
+
             if (rowId) {
                 $('#ddlDocType').prop('disabled', true);
                 $('#DtDocDate').prop('disabled', true);
@@ -358,10 +359,12 @@
              {
                  if(RETURN_DATE <  V_DATE)
                  {
-                     toastr.warning("Invalid Return Date. Return date should not be less than Doc date.");
-                      $("#DtExpectedDateReturn").focus();
-                     return;
+                    showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "info" });
+                    $('#DtExpectedDateReturn').addClass('is-invalid').focus();
+                    return;           
+                
                  }
+
 
                  if(!RESPONSIBLE_PERSON)
                  {
@@ -493,6 +496,7 @@
 
             $("#ddlPartyName").on("change", function () {
             const partyId = $(this).val();
+            $('#ddlDocType').prop('disabled', true);
             loadPartyAddresses(partyId);
             fetchPartyDetails(partyId);          
         });
@@ -504,11 +508,11 @@
         });
 
             $("#btnpendingorderno").click(function () {
-                const selectedValue = $('#ddlPartyName').val();
-                const BILL_NO = $('#txtWayBillNo').val();
-                const v_date = $('#DtDocDate').val();
-                console.log("v_date",v_date);
-                const typeText = $('#ddlType option:selected').text();
+            const selectedValue = $('#ddlPartyName').val();
+            const BILL_NO = $('#txtWayBillNo').val();
+            const v_date = $('#DtDocDate').val();
+            const typeText = $('#ddlType option:selected').text();
+                      
             FetchPendindorderno(selectedValue,typeText,v_date,BILL_NO);
         });
 
@@ -550,10 +554,6 @@
       })();
     });
 
-
-
-
-
     async function checkValidDate() {
         const data = {
             vdate: $("#DtDocDate").val(),
@@ -583,11 +583,6 @@
             return false;
         }
     }
-
-
-
-
-
 
     function getSelectedPendingRows() {
         return pendingData.filter(row => row.selected);
@@ -704,7 +699,6 @@
       if (details.length) {
         const d = details[0];
 
-
         $("#TxtAdd1PD").val(d.add1 || "");
         $("#TxtAdd2PD").val(d.add2 || "");
         $("#TxtAdd3PD").val(d.add3 || "");
@@ -724,8 +718,6 @@
 
       const res = await fetch(url);
       const details = await res.json();
-
-      console.log("fetchPartyAddressDetails", details);
 
       if (details.length) {
         const d = details[0];  
@@ -839,7 +831,11 @@
           $('#ddlDocType').val(header.v_TYPE || '');
           $('#NumDocNo').val(header.v_NO || '');
           $('#DtDocDate').val(formatDate(header.v_DATE));
-          $('#ddlPartyName').val(header.partY_CODE || '');
+            DDLParty().then(() => {
+            $('#ddlPartyName')
+            .val(header.partY_CODE || '')
+            .trigger('change');
+            });
           $('#TxtVehicleNo').val(header.trucK_NO || '');
           $('#TxtRemarks').val(header.remarks || '');
           $('#TxtAdd1PD').val(header.add1 || '');
