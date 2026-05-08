@@ -2,340 +2,201 @@
     ViewBag.Title = "Transit Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Transit Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="handleBack('@Url.Action("Index", "TransitEntryList")', readOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fas fa-right-to-bracket"></i>
         </div>
+        <div class="erppage-header-title">Transit Entry</div>
     </div>
-    <form id="TransitEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type<span class="required">*</span></label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
-                    </select>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "TransitEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+
+<div id="TransitEntryForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Type</label>
+                    <Select class="erppage-redinput" id="ddlDocType">
+                        <option>Select Document Type</option>
+                    </Select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="text" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly />
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <Select class="erppage-redinput" id="ddlPartyName">
+                        <option>Select Party Name</option>
+                    </Select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No<span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party GSTIN</label>
+                    <input type="date" class="erppage-input" id="TxtPartyGSTIN" placeholder="Enter Party GSTIN" readonly />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Other Party GST</label>
+                    <input type="text" class="erppage-input" id="TxtOtherPartyGST" placeholder="Enter Other Party GST" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <Select class="erppage-input" id="ddlStatus">
+                        <option value="selectstaus">Select Status</option>
+                    </Select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPartyName">Party Name<span class="required">*</span></label>
-                    <select class="form-control" id="ddlPartyName">
-                        <option>--Select Party Name--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtPartyGSTIN">Party GSTIN<span class="required">*</span></label>
-                    <input type="text" class="form-control" id="TxtPartyGSTIN" placeholder="Enter Party GSTIN" readonly>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtBillNo">Bill No<span class="required">*</span></label>
-                    <input type="text" class="form-control" id="TxtBillNo" placeholder="Enter Bill No">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtBillDate">Bill Date<span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtBillDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumBillAmount">Bill Amount<span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumBillAmount" placeholder="Enter Bill Amount">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumHSNCode">HSN Code</label>
-                    <input type="number" class="form-control" id="NumHSNCode" placeholder="Enter HSN Amount">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtOtherPartyGST">Other Party GST</label>
-                    <input type="text" class="form-control" id="TxtOtherPartyGST" placeholder="Enter Other Party GST">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtNoItem">No of Item</label>
-                    <input type="text" class="form-control" id="TxtNoItem" placeholder="Enter No of Item">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="TxtItemDescription">Item Description</label>
-                    <input type="text" class="form-control" id="TxtItemDesc" placeholder="Enter Item Description">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumSGSTAmt">SGST Amount</label>
-                    <input type="number" class="form-control" id="NumSGSTAmt" placeholder="Enter SGST Amount">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumCGSTAmt">CGST Amount</label>
-                    <input type="number" class="form-control" id="NumCGSTAmt" placeholder="Enter CGST Amount">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumCessAmt">Cess Amount</label>
-                    <input type="number" class="form-control" id="NumCessAmt" placeholder="Enter Cess Amount">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumCessNAmount">Cess NAmount</label>
-                    <input type="number" class="form-control" id="NumCessNAmount" placeholder="Enter Cess NAmount">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtGRNo">GR No</label>
-                    <input type="text" class="form-control" id="TxtGRNo" placeholder="Enter GR No">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group position-relative">
-                    <label for="DtGRDate">GR Date</label>
-                    <div class="calender-check">
-                        <input type="date" class="form-control" id="DtGRDate" style="padding-left: 30px;">
-                        <input type="checkbox" id="chkGRDate" class="checkbox-inside">
+            
+            <fieldset class="erppage-subfieldset">
+                <legend>Document Details</legend>
+                <div class="erppage-subheader">Document Details</div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Waybill No</label>
+                        <input type="text" class="erppage-redinput" id="NumWaybillNo" placeholder="Enter Waybill No" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Create Date</label>
+                        <input type="date" class="erppage-redinput" id="DtFormDate" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Expiry Date</label>
+                        <input type="date" class="erppage-input" id="DtExpiryDate" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Order No</label>
+                        <input type="number" class="erppage-input" id="NumOrderNo" placeholder="Enter Order No" />
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtTruckNo">Truck No</label>
-                    <input type="text" class="form-control" id="TxtTruckNo" placeholder="Enter Truck No">
-                </div>
-            </div>
-  
-        </div>
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">WayBill Details</legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="NumWaybillNo">Waybill No<span class="required">*</span></label>
-                        <input type="text" class="form-control" id="NumWaybillNo" placeholder="Enter Waybill No">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill No</label>
+                        <input type="text" class="erppage-redinput" id="TxtBillNo" placeholder="Enter Bill No" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Date</label>
+                        <input type="date" class="erppage-redinput" id="DtBillDate" />
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtFormDate">Form Date<span class="required">*</span></label>
-                        <input type="date" class="form-control" id="DtFormDate">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">SGST Amount</label>
+                        <input type="number" class="erppage-input" id="NumSGSTAmt" placeholder="Enter SGST Amount" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CGST Amount</label>
+                        <input type="number" class="erppage-input" id="NumCGSTAmt" placeholder="Enter CGST Amount" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">IGST Amount</label>
+                        <input type="number" class="erppage-input" id="NumIGSTAmount" placeholder="Enter IGST Amount" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cess Amount</label>
+                        <input type="number" class="erppage-input" id="NumCessAmt" placeholder="Enter Cess Amount" />
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtExpiryDate">Expiry Date<span class="required">*</span></label>
-                        <input type="date" class="form-control" id="DtExpiryDate">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Other Amount</label>
+                        <input type="number" class="erppage-input" id="NumOtherAmount" placeholder="Enter Other Amount" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Amount</label>
+                        <input type="number" class="erppage-input" id="NumTotalAmount" placeholder="Enter Total Amount" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Amount</label>
+                        <input type="number" class="erppage-redinput" id="NumBillAmount" placeholder="Enter Bill Amount" />
+                    </div>
+                   
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Truck No</label>
+                        <input type="text" class="erppage-input" id="TxtTruckNo" placeholder="Enter Truck No" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Transport</label>
+                        <input type="text" class="erppage-input" id="TxtTransport" placeholder="Enter Transport" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">GR No</label>
+                        <input type="text" class="erppage-input" id="TxtGRNo" placeholder="Enter GR No" />
+                    </div>
+                    <div class="erppage-divfield erppage-datefield">
+                        <label class="erppage-label">GR Date</label>
+                        <div class="erppage-datebox">
+                            <input type="date" class="erppage-input erppage-dateinput" id="DtGRDate">
+                            <label class="erppage-checkbox-inside">
+                                <input type="checkbox" id="chkGRDate">
+                            </label>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="NumOrderNo">Order No</label>
-                        <input type="number" class="form-control" id="NumOrderNo" placeholder="Enter Order No">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Item Description</label>
+                        <textarea type="text" class="erppage-textarea" id="TxtItemDesc" placeholder="Enter Item Description"></textarea>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">HSN Code</label>
+                        <input type="number" class="erppage-input" id="NumHSNCode" placeholder="Enter HSN Amount" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">No of Item</label>
+                        <input type="text" class="erppage-input" id="TxtNoItem" placeholder="Enter No of Item" />
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="NumIGSTAmount">IGST Amount</label>
-                        <input type="number" class="form-control" id="NumIGSTAmount" placeholder="Enter IGST Amount">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="NumOtherAmount">Other Amount</label>
-                        <input type="number" class="form-control" id="NumOtherAmount" placeholder="Enter Other Amount">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="NumTotalAmount">Total Amount</label>
-                        <input type="number" class="form-control" id="NumTotalAmount" placeholder="Enter Total Amount">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlStatus">Status</label>
-                        <select class="form-control" id="ddlStatus">
-                            <option value="">Select Status</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtTransport">Transport</label>
-                        <input type="text" class="form-control" id="TxtTransport" placeholder="Enter Transport">
-                    </div>
-                </div>
-            </div>
+            </fieldset>
         </fieldset>
-        <div class="row">
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub">
-                    <legend class="sub-legend">Arrival Details</legend>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtArrivalDate">Arrival Date</label>
-                                <input type="date" class="form-control" id="DtArrivalDate">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-primary" type="button">
-                                <i class="fa fa-download"></i> Import and save EWayBill From Excel
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mt-2">
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Copy From
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseorderModal">Purchase Order</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-                <!--Purchase order Modal-->
-                <div class="modal fade" id="purchaseorderModal" tabindex="-1" aria-labelledby="purchaseorderLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content draggable-modal">
-                            <div class="popup-header">
-                                <h5 class="popup-title" id="purchaseorderLabel">Copy From</h5>
-                                <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-lg-4">
-                                        <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                            <input type="text" id="searchBoxPR" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-2">
-                                        <div class="form-group">
-                                            <div class="form-row">
-                                                <input type="checkbox" id="chkAppendPOModal">
-                                                <label class="checkbox-label" for="chkAppendPOModal">Append</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="btn-rightalign">
-                                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
-                                        </div>
-                                    </div>
-                                </div>
-         
-                            </div>
-                        </div>
-                    </div>
+
+        @* <fieldset class="erppage-subfieldset">
+            <legend>EWayBill Details</legend>
+            <div class="erppage-subheader">EWayBill Details</div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">EWaybill Date</label>
+                    <input type="date" class="erppage-input" id="DtEWaybillDate" disabled />
+                </div>
+                <div class="erppage-internalaction">
+                    <button type="button" class="erppage-btn erppage-btn-copy" id="btnEWayBillImportData">
+                        <i class="fa fa-download"></i>
+                        <span>Import and save EWayBill Data</span>
+                    </button>
                 </div>
             </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub">
-                    <legend class="sub-legend">EWayBill Details</legend>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtEWaybillDate">EWaybill Date</label>
-                                <input type="date" class="form-control" id="DtEWaybillDate" disabled>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Buttons -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-primary" type="button">
-                                <i class="fa fa-download"></i> Import and save EWayBill From Excel
-                            </button>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub">
-                    <legend class="sub-legend">Print Option</legend>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtFromDate">From Date</label>
-                                <input type="date" class="form-control" id="DtFromDate">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtToDate">To Date</label>
-                                <input type="date" class="form-control" id="DtToDate">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-primary" type="button">
-                                <i class="fa fa-print"></i> Print
-                            </button>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-                    
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+        </fieldset> *@
+    </div>
+    <div class="erppage-actions">
+        <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+        @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+            <i class="fa fa-print"></i>Print
+        </button> *@
+    </div>
+</div>
+
+
+
+
+
+
 <script src="~/js/common/dropdown.js"></script>
-<script>
+<script src="~/js/erpjs/gateentry/transaction/transitentry/transitentry.js"></script>
+
+@* <script>
     let readOnly = false;
     $(document).ready(async function () {
         const urlParams = new URLSearchParams(window.location.search);
@@ -350,13 +211,14 @@
         }
         //=====Set Current Date==========
         const currentDate = getCurrentDateDMY();
-        $('#DtBillDate, #DtGRDate, #DtFormDate, #DtExpiryDate, #DtArrivalDate, #DtEWaybillDate, #DtFromDate, #DtToDate').val(currentDate);
-        
+        $('#DtBillDate, #DtGRDate, #DtFormDate, #DtExpiryDate, #DtEWaybillDate, #DtFromDate, #DtToDate').val(currentDate);
+        //Gr Date Toggle====
+        Dtdisable();
+        toggleDate('#chkGRDate', '#DtGRDate');
         // Load dropdowns and form data if editing
         LoadDropDown().then(() => {
-                if (rowId) {
-                    return LoadFormByID(rowId, vtype).then(() => {
-                });
+            if (rowId) {
+                return LoadFormByID(rowId, vtype);
             }
         }).catch(error => {
                 console.error("An error occurred:", error);
@@ -368,7 +230,6 @@
                 '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
             );
         }
-        
         // Event handlers
         $("#ddlDocType").on('change', function () {
             if (rowId == null) {
@@ -379,28 +240,27 @@
             // DDLPartyName(this.value);
             bindDropdown('TransitEntry','PartyName', '#ddlPartyName', '-- Select Party Name --', null, null, false, this.value, true);
         });
-
         $("#ddlPartyName").on('change', function () {
             fetchPartyGstin(this.value);
         });
-
-        $("#btn-save").click(function (e) {
+        $('#btn-save').on('click', function (e) {
+            console.log("Button clicked!!");
             e.preventDefault();
 
             let GR_DATE = null;
-            if ($("#chkGRDate").is(":checked")) {
-                const dateVal = formatDate($("#DtGRDate").val());
+            if ($('#chkGRDate').is(':checked')) {
+                const dateVal = formatDate($('#DtGRDate').val());
                 GR_DATE = dateVal ? dateVal : null;
             }
             else{
-                GR_DATE = getCurrentDateDMY();
+                GR_DATE = null;
             }
 
             const Header = {
                 V_TYPE:           $('#ddlDocType').val() || null,
                 V_NO:             parseInt($('#NumDocNo').val()) || null,
                 DOC_ID:           $.trim($('#TxtCode').val()) || null,
-                FORM_NO:          $.trim($('#TxtBillNo').val()) || null,
+                FORM_NO:          $.trim($('#NumWaybillNo').val()) || null,
                 FORM_DATE:        formatDate($("#DtFormDate").val()) || null,
                 EXPIRY_DATE:      formatDate($("#DtExpiryDate").val()) || null,
                 PARTY_CODE:       parseInt($('#ddlPartyName').val()) || null,
@@ -426,9 +286,9 @@
                 OTHER_AMT:        parseFloat($('#NumOtherAmount').val()) || null,
                 TOTAL_AMT:        parseFloat($('#NumTotalAmount').val()) || null,
                 STATUS:           parseInt($('#ddlStatus').val()) || null,
-                GATE_NO:          parseInt($('#TxtGRNo').val()) || null,
-                GATE_DATE:        formatDate($("#chkGRDate").val()) || null,
-                ARRIVAL_DATE:     formatDate($("#DtArrivalDate").val()) || null,
+                GATE_NO:          /* parseInt($('#TxtGRNo').val()) || */ null,
+                GATE_DATE:        /* formatDate($("#chkGRDate").val()) || */ null,
+                ARRIVAL_DATE:     /* formatDate($("#DtArrivalDate").val()) || */ null,
                 action:           $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
             };
 
@@ -446,9 +306,19 @@
             if (!validateRequiredField('#DtFormDate', 'Form Date')) return;
             if (!validateRequiredField('#DtExpiryDate', 'Expiry Date')) return;
 
+            if (!validateExpiryDate()) return;
+
             const payload = Header;
 
-            // Disable button to prevent multiple submissions
+            let vNo = $('#NumDocNo').val();
+            let formNo = $('#NumWaybillNo').val();
+            checkExistOrNot(vNo, formNo).done(function(res){
+                console.log(res);
+                if (res.status === true && res.data === true) {
+                        showToast(`Waybill No ${formNo} already exists!`, { type: "warning" });
+                        return;
+                }
+                // Disable button to prevent multiple submissions
             $("#btn-save").prop("disabled", true);
 
             // AJAX Save
@@ -459,10 +329,10 @@
                 data: JSON.stringify(payload),
                 success: function (response) {
                     if (response.success) {
-                        toastr.success("Saved successfully!");
+                        showToast("Saved successfully!", { type: "success" });
                         setTimeout(() => window.location.href = '/TransitEntryList/Index', 1000);
                     } else {
-                        toastr.error(response.message || "Save failed.");
+                        showToast(response.message || "Save failed.", { type: "error" });
                     }
                 },
                 error: function (xhr) {
@@ -475,25 +345,50 @@
                         errorMessage = "Unexpected error: " + xhr.statusText;
                     }
                     console.error("Error: ", errorMessage);
-                    toastr.error(errorMessage);
+                    showToast(errorMessage, { type: "error" });
                 },
                 complete: function () {
                     $("#btn-save").prop("disabled", false);
                 }
             });
+            });
+            
         });
-
     });
 
-    ///////// Funtion
-
+    //=== Helper Funtions
+    async function isExist() {
+        const exist = await checkExist();
+        if(exist === false){
+            return true;
+        }
+        return false;
+    }
+    function Dtdisable() {
+        const currentDate = getCurrentDateDMY();
+        $('#chkGRDate').prop('checked', false);
+        $('#DtGRDate').prop('disabled', true);
+        $('#DtGRDate').val(currentDate);
+    }
+    function toggleDate(chk, input) {
+        $(chk).on('change', function () {
+            $(input).prop('disabled', !$(this).is(':checked'));
+        });
+    }
     function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
         if (isNaN(d)) return '';
         return d.toISOString().slice(0, 10);
     }
-
+    function getCurrentDateDMY(){
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
+    };
+    //==Vno
     async function GetVNo(Vtype) {
         try {
             const res = await fetch(`/TransitEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
@@ -510,7 +405,7 @@
             alert('Error loading Document Number: ' + e.message);
         }
     }
-
+    //==Dropdowns
     async function LoadDropDown(VTypeId) {
         try {
             await bindDropdown('TransitEntry','DocType', '#ddlDocType', '-- Select VType --', null, null, false, null);
@@ -520,8 +415,7 @@
             console.error("Error loading dropdowns:", error);
         }
     }
-
-    
+    //==GST Fetch
     async function fetchPartyGstin(Partycode) {
         try {
             const response = await fetch(`/TransitEntry/fetchPartyGstinNo?Partycode=${Partycode}`);
@@ -535,7 +429,7 @@
             console.error('Failed to fetch ship from address:', error);
         }
     }
-
+    //==Get by Id
     function LoadFormByID(code, vtype) {
         $.ajax({
             url: '/TransitEntryList/GetDataByID',
@@ -545,23 +439,26 @@
                 console.log('data', res);
 
                 if (!res.success || !res.data) {
-                    toastr.warning("No Data found for the given ID.");
+                    // toastr.warning("No Data found for the given ID.");
+                    showToast("No Data found for the given ID.", { type: "warning" });
                     return;
                 }
 
                 populateForm(res.data);
             },
             error: function (xhr) {
-                toastr.error("Error loading data: " + xhr.responseText);
+                // toastr.error("Error loading data: " + xhr.responseText);
+                showToast("Error loading data: ", { type: "error" });
             }
         });
     }
-
+    //==Fill Form
     function populateForm(data) {
         $("#TxtCode").val($.trim(data.v_NO));
         $("#ddlDocType").val($.trim(data.v_TYPE)).prop('disabled', true);
         $("#NumDocNo").val($.trim(data.v_NO));
-        $("#ddlPartyName").val($.trim(data.partY_CODE));
+        // $("#ddlPartyName").val($.trim(data.partY_CODE));
+        bindDropdown('TransitEntry','PartyName', '#ddlPartyName', '-- Select Party Name --', data.partY_CODE, null, false, null, true);
         $("#TxtPartyGSTIN").val($.trim(data.partY_GSTIN));
         $("#TxtBillNo").val($.trim(data.bilL_NO));
         $("#DtBillDate").val(formatDate(data.bilL_DATE));
@@ -571,7 +468,21 @@
         $("#TxtNoItem").val($.trim(data.nos));
         $("#TxtItemDesc").val($.trim(data.iteM_DESC));
         $("#TxtGRNo").val($.trim(data.gR_NO));
-        $("#DtGRDate").val(formatDate(data.gatE_DATE));
+        
+        if(data.gR_DATE !== null && data.gR_DATE !== ''){
+            $('#DtGRDate').val(formatDate(data.gR_DATE));
+            $('#chkGRDate').prop('checked', true);
+            $('#DtGRDate').prop('disabled', false);
+        }
+        else{
+            const currentDate = getCurrentDateDMY();
+            $('#chkGRDate').prop('checked', false);
+            $('#DtGRDate').prop('disabled', true);
+            $('#DtGRDate').val(currentDate);
+        }
+
+        // $("#DtGRDate").val(formatDate(data.gatE_DATE));
+        
         $("#TxtTruckNo").val($.trim(data.trucK_NO));
         $("#NumSGSTAmt").val($.trim(data.sgsT_AMT));
         $("#NumCGSTAmt").val($.trim(data.cgsT_AMT));
@@ -586,11 +497,11 @@
         $("#NumTotalAmount").val($.trim(data.totaL_AMT));
         $("#ddlStatus").val($.trim(data.status));
         $("#TxtTransport").val($.trim(data.transport));
-        const DtSBLCDue = $("#DtGRDate").val();
-        $("#chkGRDate").prop("checked", !!DtSBLCDue);
+        // const DtSBLCDue = $("#DtGRDate").val();
+        // $("#chkGRDate").prop("checked", !!DtSBLCDue);
 
     }
-
+    //==Readonly
     function setFormReadOnly() {
         const form = $('#TransitEntryForm');
         form.find(':input').prop('disabled', true);
@@ -606,14 +517,31 @@
             'pointer-events': 'none', 
             'background-color': '#e9ecef' 
         });
+        form.addClass('erppage-readonly');
     }
-    function getCurrentDateDMY(){
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const yyyy = today.getFullYear();
-        return `${yyyy}-${mm}-${dd}`;
-    };
+    //==CheckExist
+    function checkExistOrNot(vNo, formNo) {
+        return $.ajax({
+            url: '@Url.Action("GetExist", "TransitEntry")',
+            type: 'GET',
+            dataType: 'json',
+            data: { vNo: vNo, form_No: formNo }
+        });
+    }
+    //==Validate Expiry Date
+    function validateExpiryDate() {
+        const formDate = $('#DtFormDate').val();
+        const expiryDate = $('#DtExpiryDate').val();
+        const currentDate = getCurrentDateDMY();
+
+        if (formDate && expiryDate) {
+            if (new Date(expiryDate) <= new Date(formDate)) {
+                showToast('Expiry Date must be greater than From Date.', { type: "warning" });
+                $('#DtExpiryDate').val(currentDate); // clear invalid expiry date
+                return false;
+            }
+        }
+        return true;
+    }
 </script>
-
-
+ *@
