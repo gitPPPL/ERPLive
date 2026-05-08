@@ -28,41 +28,31 @@ builder.Services.AddScoped<ErrorLoggerService>();
 builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
+
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
-builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
-builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
-builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
-builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
-builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
-builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
-builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
-builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
+builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
+builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 
 
 
 builder.Services.Configure<EncryptionSettings>(
-    builder.Configuration.GetSection("EncryptionSettings"));
+builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();
-
 builder.Services.AddDistributedMemoryCache();
-
 // Session Configuration
 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.Name = ".TravelExpense.Session";
-
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
 });
 
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<GlobalVariableService>();
 builder.Services.AddScoped<ModuleService>();
 
