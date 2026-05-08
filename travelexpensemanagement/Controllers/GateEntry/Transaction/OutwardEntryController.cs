@@ -7,6 +7,7 @@ using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.GateEntry;
+using travelexpensemanagement.Repositories;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
@@ -117,25 +118,47 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(UnitList);
             }
         }
+        public JsonResult DDLcity_mast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())            {
+                string query = "select * from CITY_MAST where ACTIVE  =1 ";
+                var DDLcity_mast = _dropdownService.GetDropdownList(query);
+                return Json(DDLcity_mast);
+            }
+        }
         [HttpPost]
         public IActionResult SavedData([FromBody] OutWordEntryModel request)
         {
-            if (request?.Header == null)
+            try
             {
-                return Json(new { success = false, message = "Input model is null" });
+                if (request == null || request.Header == null)
+                {
+                    return Json(new {  success = false,  message = "Input model is null" });
+                }
+
+                if (request.detailsOutwardEntry == null ||
+                    !request.detailsOutwardEntry.Any())
+                {
+                    return Json(new { success = false,  message = "Details data is required" });
+                }
+
+                string action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
+
+                RepositoryResponse result = _outwardEntryRepository.SaveOutwardEntry( request.Header, request.detailsOutwardEntry,  action);
+
+                if (result.status)
+                {
+                    return Json(new {  success = true,  message = result.message  });
+                }
+
+                return Json(new { success = false,  message = result.message  });
             }
-            var action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
-            var result = _outwardEntryRepository.SaveOutwardEntry(request.Header, request.detailsOutwardEntry, action);
-            return result == "Success" ? Json(new { success = true }) : Json(new { success = false, message = result });
+            catch (Exception ex)
+            {
+                return Json(new  { success = false, message = ex.Message  });
+            }
         }
-        [HttpPost]
-        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
-        {
-            DateTime vdate = data.GetProperty("vdate").GetDateTime();
-            string vtype = data.GetProperty("vtype").GetString();
-            string vno = data.GetProperty("vno").GetString();
-            var result = await _globalValidationdate.CheckValidDate("Gate1", vdate, vtype, vno);
-            return Ok(result);
-        }
+
     }
 }

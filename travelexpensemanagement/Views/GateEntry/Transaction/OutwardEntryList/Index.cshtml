@@ -191,7 +191,7 @@
                     <td class="action-col">
                         <button class="act-btn edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
                         <button class="act-btn view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
-                        <button class="act-btn delete" onclick="deleteItem('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+                        <button class="act-btn delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
                         <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
                    </td>
@@ -254,13 +254,26 @@
     }
 
     // ================= UTIL =================
-    function formatDate(d) {
-        if (!d) return '';
-        let date = new Date(d);
-        if (isNaN(date)) return '';
-        return date.toLocaleDateString('en-GB');
-    }
+    function formatDate(dateStr) {
 
+        // Handle null, undefined, empty
+        if (!dateStr || dateStr === "0001-01-01T00:00:00") {
+            return '';
+        }
+
+        const d = new Date(dateStr);
+
+        // Invalid date
+        if (isNaN(d.getTime())) {
+            return '';
+        }
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
     // ================= ACTIONS =================
     function edit(code, type) {
         window.location.href = `/OutwardEntry/Index?id=${code}&VType=${type}`;
@@ -270,7 +283,7 @@
         window.location.href = `/OutwardEntry/Index?id=${code}&VType=${type}&mode=view`;
     }
 
-    function deleteItem(code, type) {
+    function deleteItem(docId) {
         Swal.fire({
             title: "Delete?",
             text: "Are you sure?",
@@ -278,7 +291,7 @@
             showCancelButton: true
         }).then(r => {
             if (r.isConfirmed) {
-                $.post('/OutwardEntryList/Delete', { code, VType: type }, function (res) {
+                $.post('/OutwardEntryList/Delete', { docId : docId }, function (res) {
                     if (res.success) {
                         toastr.success("Deleted");
                         loadAlloutward();
@@ -294,17 +307,25 @@
 
         $.ajax({
             url: '/OutwardEntryList/DocDetailsCode',
-            type: 'POST',
+            type: 'GET',
             dataType: 'json',
             data: { docCode: docCode },
+
             success: function (response) {
+
+                console.log(response);
+
                 if (response.success) {
                     showDocumentPopupjQuery(response.data, docCode);
                 } else {
-                    toastr.error("Failed to get document details.");
+                    toastr.error(response.message || "Failed to get document details.");
                 }
             },
-            error: function () {
+
+            error: function (xhr, status, error) {
+
+                console.log(xhr.responseText);
+
                 toastr.error("Error fetching document details.");
             }
         });

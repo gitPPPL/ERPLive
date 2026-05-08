@@ -1568,7 +1568,7 @@
         }
     }
 
-      async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
+    async function BillNoValidation(PARTY_CODE, BILL_NO, V_NO) {
         try {
             const response = await $.ajax({
                 url: '/InwardEntry/BillNoValidation',
@@ -1594,7 +1594,7 @@
         }
     }
 
-       async function GatenoValidation(V_TYPE, V_NO) {
+    async function GatenoValidation(V_TYPE, V_NO) {
         try {
             const response = await $.ajax({
                 url: '/InwardEntry/GatenoValidation',

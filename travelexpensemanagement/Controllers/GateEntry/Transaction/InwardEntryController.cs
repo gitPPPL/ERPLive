@@ -167,8 +167,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}";
                             return new ApiResponse { Status = "Error", Message = Message };
                         }
-                    }
-                }
+                     }
+                 }
 
                 if (header.WAYBILL_NO != null)
                 {

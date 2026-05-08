@@ -1,9 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Reflection.Metadata;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.GateEntry;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using UglyToad.PdfPig.DocumentLayoutAnalysis;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
 namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 {
@@ -18,7 +21,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
         }
-
         public async Task<string> GetVNoAsync(string vType, string tableName = "")
         {
             string newV_NO = "00000";
@@ -77,10 +79,15 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return newV_NO;
         }
-        public string SaveOutwardEntry(OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
+        public RepositoryResponse SaveOutwardEntry(OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
         {
             try
             {
+                var validation = Validdata(header, details);
+                if (validation.status== false)
+                {
+                    return new RepositoryResponse {  status = false,  message = validation.message  };
+                }
                 var g = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();         
@@ -99,7 +106,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
                         deleteCmd.ExecuteNonQuery();
                     }
-
                     // 🔵 HEADER SAVE
                     using (var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction))
                     {
@@ -145,7 +151,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     {
                         if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
                             continue;
-
                         using var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction);
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "INSERT");
@@ -179,14 +184,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                     transaction.Commit();
 
-
                     if (action == "UPDATE")
                     {
                         _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
                         codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
                     }
 
-                    return "Success";
+                    return new RepositoryResponse
+                    {
+                        status = true,
+                        message = validation.message
+                    };
                 }
                 catch (Exception)
                 {
@@ -196,7 +204,241 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             catch (Exception ex)
             {
-                return $"Error: {ex.Message}";
+                return new RepositoryResponse
+                {
+                    status = false,
+                    message = ex.Message
+                }; ;
+            }
+        }          
+        public RepositoryResponse Validdata(OutWordEntry_Header header, List<DetailsOutwardEntry> details)
+        {
+            try
+            {
+                var g = _globalVariableService.GetGlobalVariables();
+                using var conn = _dbConnection.GetErpConnection();
+                conn.Open();
+                foreach (var d in details)
+                {
+                    if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
+                        continue;        
+
+                    if (d.REF_TYPE == "SAGT" && d.REF_NO != 0)
+                    {
+                        string sql = @"
+                        SELECT bill_gst, einvoice_flg, namount
+                        FROM sale1
+                        WHERE v_type = @v_type
+                        AND v_no = @v_no
+                        AND comp_code = @comp_code
+                        AND branch_code = @branch_code
+                        AND year_code = @year_code";
+
+                        using (var cmd1 = new SqlCommand(sql, conn))
+                        {
+                            cmd1.Parameters.AddWithValue("@v_type", d.REF_TYPE);
+                            cmd1.Parameters.AddWithValue("@v_no", d.REF_NO);
+                            cmd1.Parameters.AddWithValue("@comp_code", g.PubCompCode);
+                            cmd1.Parameters.AddWithValue("@branch_code", g.PubBranchCode);
+                            cmd1.Parameters.AddWithValue("@year_code", g.PubFYearCode);
+
+                            using var reader = cmd1.ExecuteReader();
+
+                            if (reader.Read())
+                            {
+                                decimal bill_gst = Convert.ToDecimal(reader["bill_gst"]);
+                                string einvoice_flg = Convert.ToString(reader["einvoice_flg"]);
+                                decimal namount = Convert.ToDecimal(reader["namount"]);
+
+                                // ✅ FIXED CONDITION
+                                if (namount >= 100000 &&
+                                    bill_gst > 16 &&
+                                    namount != 0 &&
+                                    einvoice_flg != "Y")
+                                {
+                                    return new RepositoryResponse
+                                    {
+                                        status = false,
+                                        message = "Please Generate GST E Invoice Before Creating GatePass."
+                                    };
+                                }
+                            }
+                        }
+
+                        // =========================================
+                        // GST TAX VALIDATION
+                        // =========================================
+
+                        string sql2 = @"
+                            SELECT 1
+                            FROM Sale2
+                            WHERE Tax_Code IN
+                            (
+                            SELECT Code
+                            FROM TAX_MAST
+                            WHERE TAX_TYPE = 'GST'
+                            AND T_TYPE NOT IN ('Import')
+                            )
+                            AND (CGST_AMT + SGST_AMT + IGST_AMT) = 0
+                            AND V_type = @v_type
+                            AND V_no = @v_no
+                            AND Comp_code = @comp_code
+                            AND Branch_code = @branch_code
+                            AND Year_Code = @year_code";
+
+                        using (var cmd1 = new SqlCommand(sql2, conn))
+                        {
+                            cmd1.Parameters.AddWithValue("@v_type", d.REF_TYPE);
+                            cmd1.Parameters.AddWithValue("@v_no", d.REF_NO);
+                            cmd1.Parameters.AddWithValue("@comp_code", g.PubCompCode);
+                            cmd1.Parameters.AddWithValue("@branch_code", g.PubBranchCode);
+                            cmd1.Parameters.AddWithValue("@year_code", g.PubFYearCode);
+
+                            using var reader = cmd1.ExecuteReader();
+
+                            if (reader.Read())
+                            {
+                                return new RepositoryResponse
+                                {
+                                    status = false,
+                                    message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"
+                                };
+                            }
+                        }
+                    }
+
+                    // =========================================
+                    // EWAY BILL VALIDATION
+                    // =========================================
+
+                    if (d.REF_TYPE == "DCHL" &&
+                        string.IsNullOrWhiteSpace(header.WAYBILL_NO))
+                    {
+                        string sql3 = @"
+                        SELECT state_mast.state_type
+                        FROM state_mast
+                        LEFT JOIN city_mast
+                        ON city_mast.state_code = state_mast.code
+                        WHERE city_mast.code = @code";
+
+                        using (var cmd1 = new SqlCommand(sql3, conn))
+                        {
+                            cmd1.Parameters.AddWithValue("@code", header.PARTY_CITY);
+
+                            using var reader = cmd1.ExecuteReader();
+
+                            if (reader.Read())
+                            {
+                                string state_type = Convert.ToString(reader["state_type"]);
+
+                                if (state_type != "Local")
+                                {
+                                    return new RepositoryResponse
+                                    {
+                                        status = false,
+                                        message = "EWayBill is mandatory for Interstate Material Movement."
+                                    };
+                                }
+                            }
+                        }
+                    }
+
+                    // =========================================
+                    // QUANTITY VALIDATION
+                    // =========================================
+
+                    decimal PubRes1Dbl = 0;
+                    decimal PubRes2Dbl = 0;
+                    string PubRes1Str = "";
+
+
+
+                    if (header.ITEM_TYPE == "Sale")
+                    {
+                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from sale2  where V_TYPE ='" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code= " + d.ITEM_CODE + ""));
+                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where ref_TYPE ='" + d.REF_TYPE + "'and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + "  and YEAR_CODE =" + g.PubFYearCode + " and item_code= " + d.ITEM_CODE + " and v_type<> '" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
+                        PubRes1Str = "Sale";
+
+                    }
+                    else if (header.ITEM_TYPE == "Order")
+                    {
+                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from Order2  where V_TYPE ='" + d.REF_TYPE + "' and V_NO = " + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and item_code=" + d.ITEM_CODE + " "));
+                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + "  and item_code= " + d.ITEM_CODE + " and v_type<>'" + header.V_TYPE + "' and v_no <> " + header.V_NO + ""));
+                        PubRes1Str = "Order";
+                    }
+                    else if (header.ITEM_TYPE == "Misc")
+                    {
+                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where V_TYPE = '" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + "  and remarks= '" + d.REMARKS + "'"));
+                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + "   and remarks=  '" + d.REMARKS + "' and v_type<> '" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
+                        PubRes1Str = "Misc";
+                    }
+                    else if (header.ITEM_TYPE == "Empty")
+                    {
+                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2 where empty='Yes' and  V_TYPE ='" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + " "));
+                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2 where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + "  and v_type<>'" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
+                        PubRes1Str = "Empty";
+                    }
+                    else if (header.ITEM_TYPE == "Purchase Return")
+                    {
+                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(bill_qty),0) from purchase2 where V_TYPE ='" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and item_code=" + d.ITEM_CODE + ""));
+                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2 where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and item_code= " + d.ITEM_CODE + " and v_type= '" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
+
+                    }
+
+                    // Add current qty
+                    PubRes2Dbl += (d.QTY ?? 0);
+
+                    if (header.ITEM_TYPE != "Others")
+                    {
+                        if (PubRes1Dbl > PubRes2Dbl)
+                        {
+                            string message = $"{PubRes1Str} Pending Quantity is = {PubRes1Dbl - PubRes2Dbl + (d.QTY ?? 0)} " +
+                                             $"& Your Quantity is = {(d.QTY ?? 0)}, " +
+                                             $"Please Check it of Item Name {d.ITEM_CODE}";
+                            return new RepositoryResponse
+                            {
+                                status = true,
+                                message = message
+                            };
+                        }
+                    }
+
+                }
+                return new RepositoryResponse { status = true, message = "Success"  };
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponse  {  status = false,  message = ex.Message  };
+            }
+        }
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader[0].ToString();
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
             }
         }
         public List<object> GetDataByPartyCodeAsync(int partyId)
