@@ -1,6 +1,4 @@
 ﻿
-
-
 async function loadItemMaster() {
     const res = await fetch("/OutwardEntry/DDLItemMaster");
     const data = await res.json();
