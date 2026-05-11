@@ -12,9 +12,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly IMiscConsumptionListRepository _repo;
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        public MiscConsumptionEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-            DropdownService dropdownService, DbHelper dbHelper, IMiscConsumptionListRepository repo,
-            ModuleService.ModuleService moduleService)
+        public MiscConsumptionEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService, DbHelper dbHelper, IMiscConsumptionListRepository repo,
+           ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

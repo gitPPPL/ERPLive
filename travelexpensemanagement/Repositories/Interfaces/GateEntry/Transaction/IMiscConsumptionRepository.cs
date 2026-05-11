@@ -1,4 +1,5 @@
-﻿using travelexpensemanagement.Models;
+﻿using Microsoft.Data.SqlClient;
+using travelexpensemanagement.Models;
 
 namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 {
@@ -12,7 +13,10 @@ namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 
         string GenerateVNo(string vType);
 
+        bool ValidatePendingQuantity( MiscConsumptionEntry_Header header, List<Details> details,out string message);
+
         string SaveMiscConsumption(MiscConsumptionEntry_Header header, List<Details> details, string action);
+
 
     }
 }

@@ -155,6 +155,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             try
             {
+                if (!ValidatePendingQuantity(header, details, out string validationMessage))
+                {
+                    return validationMessage;
+                }
+
                 var g = _globalVariableService.GetGlobalVariables();
 
                 using var conn = _dbConnection.GetErpConnection();
@@ -262,8 +267,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                     cmd.Parameters.AddWithValue("@REMARKS", item.REMARKS);
 
-                    cmd.Parameters.AddWithValue("@REF_NO", header.V_NO);
-                    cmd.Parameters.AddWithValue("@REF_TYPE", header.V_TYPE);
+                    cmd.Parameters.AddWithValue("@REF_NO", item.REF_NO ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@REF_TYPE", item.REF_TYPE ?? (object)DBNull.Value);
 
                     cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
                     cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
@@ -285,6 +290,119 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             {
                 return $"Error: {ex.Message}";
             }
+        }
+
+        public bool ValidatePendingQuantity(MiscConsumptionEntry_Header header, List<Details> details,out string message)
+        {
+            message = string.Empty;
+
+            var g = _globalVariableService.GetGlobalVariables();
+
+            using var conn = _dbConnection.GetErpConnection();
+            conn.Open();
+
+            foreach (var item in details)
+            {
+              
+                if (string.IsNullOrWhiteSpace(item.ITEM_NAME))
+                    continue;
+
+                int refNo = item.REF_NO ?? 0;
+                string refType = item.REF_TYPE ?? "";
+
+                if (string.IsNullOrWhiteSpace(refType) || refNo == 0)
+                    continue;
+
+                // =========================================
+                // 1. TOTAL INWARD QTY
+                // =========================================
+                string inwardQuery = @"
+                    SELECT ISNULL(SUM(QTY), 0)
+                    FROM GATE2
+                    WHERE V_TYPE = @RefType
+                      AND V_NO = @RefNo
+                      AND COMP_CODE = @CompCode
+                      AND BRANCH_CODE = @BranchCode
+                      AND YEAR_CODE = @YearCode
+                      AND ITEM_CODE = @ItemCode
+                      AND ISNULL(REMARKS, '') = @Remarks";
+
+                decimal totalInwardQty = 0m;
+
+                using (var cmd = new SqlCommand(inwardQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@RefType", refType);
+                    cmd.Parameters.AddWithValue("@RefNo", refNo);
+                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@ItemCode", item.ITEM_CODE);
+                    cmd.Parameters.AddWithValue("@Remarks", item.REMARKS ?? "");
+
+                    object result = cmd.ExecuteScalar();
+                    totalInwardQty = result == null || result == DBNull.Value
+                        ? 0m
+                        : Convert.ToDecimal(result);
+                }
+
+                // =========================================
+                // 2. ALREADY CONSUMED QTY
+                // =========================================
+                string consumedQuery = @"
+                    SELECT ISNULL(SUM(QTY), 0)
+                    FROM GATE2
+                    WHERE REF_TYPE = @RefType
+                      AND REF_NO = @RefNo
+                      AND COMP_CODE = @CompCode
+                      AND BRANCH_CODE = @BranchCode
+                      AND YEAR_CODE = @YearCode
+                      AND ITEM_CODE = @ItemCode
+                      AND ISNULL(REMARKS, '') = @Remarks
+                      AND NOT (V_TYPE = @CurrentVType AND V_NO = @CurrentVNo)";
+
+                decimal alreadyConsumedQty = 0m;
+
+                using (var cmd = new SqlCommand(consumedQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@RefType", refType);
+                    cmd.Parameters.AddWithValue("@RefNo", refNo);
+                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@ItemCode", item.ITEM_CODE);
+                    cmd.Parameters.AddWithValue("@Remarks", item.REMARKS ?? "");
+                    cmd.Parameters.AddWithValue("@CurrentVType", header.V_TYPE);
+                    cmd.Parameters.AddWithValue("@CurrentVNo", header.V_NO);
+
+                    object result = cmd.ExecuteScalar();
+                    alreadyConsumedQty = result == null || result == DBNull.Value
+                        ? 0m
+                        : Convert.ToDecimal(result);
+                }
+
+                // =========================================
+                // 3. CURRENT QTY
+                // If QTY is decimal? use ?? 0m
+                // =========================================
+                decimal currentQty = item.QTY ?? 0m;
+
+                // =========================================
+                // 4. VALIDATION
+                // =========================================
+                if (alreadyConsumedQty + currentQty > totalInwardQty)
+                {
+                    decimal pendingQty = totalInwardQty - alreadyConsumedQty;
+
+                    message =
+                        $"Misc Inward Pending Quantity = {pendingQty}, " +
+                        $"Your Consumption Qty = {currentQty}. " +
+                        $"Please check Item: {item.ITEM_NAME} ({item.REMARKS})";
+
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

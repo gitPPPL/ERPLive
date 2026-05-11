@@ -77,10 +77,6 @@ async function Misconsumptioninit() {
 
         let selectedRows = getSelectedPendingDocuments();
 
-        if (selectedRows.length === 0) {
-            showToast("Please select at least one row.", { type: "warning" });
-            return;
-        }
         addSelectedToConsumptionTable(selectedRows);
 
         $('#pendingModal').modal('hide');
@@ -95,6 +91,34 @@ async function Misconsumptioninit() {
         }
 
         await fetchPartyAddressDetails(partyId);
+    });
+
+    $(document).on('blur', '#ddlDocType', function () {
+        const selectedValue = $(this).val();
+
+        // If dropdown has a value, lock it
+        if (selectedValue) {
+            $(this).prop('disabled', true);
+            $(this).trigger('change.select2');
+        }
+    });
+
+    // Select / Deselect all checkboxes in Pending Documents table
+    $(document).on('change', '#chkSelectAll', function () {
+        const isChecked = $(this).is(':checked');
+
+        $('#tblPendingDocument tbody .select-row').prop('checked', isChecked);
+    });
+
+    // Update header checkbox when individual rows are checked
+    $(document).on('change', '#tblPendingDocument tbody .select-row', function () {
+        const totalRows = $('#tblPendingDocument tbody .select-row').length;
+        const checkedRows = $('#tblPendingDocument tbody .select-row:checked').length;
+
+        $('#chkSelectAll').prop(
+            'checked',
+            totalRows > 0 && totalRows === checkedRows
+        );
     });
 }
 
@@ -146,21 +170,31 @@ async function fetchPartyAddressDetails(partyId) {
     try {
         const data = await MisConsumptionApi.getPartyAddress(partyId);
 
-        console.log("Address API Response:", data);
-
         if (data && data.length > 0) {
             const d = data[0];
 
+            // Fill address fields
             $("#TxtAdd1PD").val(d.add1 || "");
             $("#TxtAdd2PD").val(d.add2 || "");
             $("#TxtAdd3PD").val(d.add3 || "");
+
+            // Make address fields readonly after auto-fill
+            $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").prop("readonly", true);
+
         } else {
+            // Clear address fields
             $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").val("");
+
+            // Remove readonly if no data found
+            $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").prop("readonly", false);
         }
 
     } catch (err) {
         console.error(err);
         showToast("Error fetching address", { type: "error" });
+
+        // Optional: unlock fields if API fails
+        $("#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD").prop("readonly", false);
     }
 }
 
@@ -230,7 +264,8 @@ async function saveConsumptionEntry() {
             }, 1000);
 
         } else {
-            showToast("Error while saving", { type: "error" });
+            showToast(response.message, { type: "error" });
+           // showToast("Error while saving", { type: "error" });
         }
 
     } catch (err) {
@@ -244,8 +279,7 @@ async function saveConsumptionEntry() {
 //======Load Data On Edit======
 async function LoadFormByID(rowId, vtype) {
     try {
-
-        const result = await MisConsumptionApi.getFormById(rowId, vtype); // API call
+        const result = await MisConsumptionApi.getFormById(rowId, vtype);
 
         if (!result.success || !result.data || !result.data.header) {
             showToast("Invalid or missing response data.", { type: "error" });
@@ -254,28 +288,43 @@ async function LoadFormByID(rowId, vtype) {
 
         const header = result.data.header;
         const details = result.data.details;
-        console.log("Table Details", details);
+
         // ========= HEADER FILL =========
         $('#TxtCode').val(header.doC_ID || '');
         $('#ddlDocType').val(header.v_TYPE || '');
         $('#NumDocNo').val(header.v_NO || '');
         $('#TmDocTime').val(header.v_TIME);
-        /* $('#DtDocDate').val(formatDate(header.v_DATE));*/
         $('#DtDocDate').val(formatDate(header.v_DATE, true));
-        $('#ddlPartyName') .val(header.partY_CODE || '').trigger('change');
+        $('#ddlPartyName').val(header.partY_CODE || '') .trigger('change');
         $('#TxtVehicleNo').val(header.trucK_NO || '');
         $('#TxtRemarks').val(header.remarks || '');
         $('#TxtAdd1PD').val(header.add1 || '');
         $('#TxtAdd2PD').val(header.add2 || '');
         $('#TxtAdd3PD').val(header.add3 || '');
         $('#ddlType').val(header.iteM_TYPE || '');
+        
+        // LOCK ADDRESS FIELDS IN EDIT MODE
+        if (
+            $('#TxtAdd1PD').val() ||
+            $('#TxtAdd2PD').val() ||
+            $('#TxtAdd3PD').val()
+        ) {
+            $('#TxtAdd1PD, #TxtAdd2PD, #TxtAdd3PD')
+                .prop('readonly', true);
+        }
+
+        // LOCK DOC TYPE IN EDIT MODE
+        if ($('#ddlDocType').val()) {
+            $('#ddlDocType')
+                .prop('disabled', true)
+                .trigger('change.select2');
+        }
 
         // ========= TABLE FILL =========
         const $tbody = $("#tblConsumptionEntry tbody");
         $tbody.empty();
 
         (details || []).forEach(detail => {
-
             const rowData = {
                 code: detail.iteM_CODE || '',
                 itemName: detail.iteM_CODE || '',
@@ -283,10 +332,11 @@ async function LoadFormByID(rowId, vtype) {
                 unit: detail.uoM_CODE || '',
                 no: detail.nos || '',
                 quantity: detail.qty || '',
-                remarks: detail.remarks || ''
+                remarks: detail.remarks || '',
+                isPendingRow: !!(detail.reF_TYPE && detail.reF_NO)
             };
 
-            addRow($tbody, rowData); //reuse UI function
+            addRow($tbody, rowData);
         });
 
     } catch (error) {
@@ -315,7 +365,6 @@ function formatDate(dateStr, forInput = false) {
     return `${day}-${month}-${year}`;
 }
 
-
 //=========================
 //   FOOTER TABLE 
 //=========================
@@ -325,6 +374,7 @@ function addRow($tbody, data = {}) {
 
     const row = `
         <tr class="no-border-input">
+            <input type="hidden" class="srno-hidden" value="${data.srno || ''}">
             <td style="display:none;">${data.code || ""}</td>
 
             <td>
@@ -389,6 +439,14 @@ function addRow($tbody, data = {}) {
     $newRow.find('.unit').trigger('change');
 
     initRowSelect2($newRow);
+
+    if (data.isPendingRow) {
+        $newRow.find('.itemName').prop('disabled', true).trigger('change.select2');
+
+        $newRow.find('.unit').prop('disabled', true).trigger('change.select2');
+    }
+
+    $newRow.data("srno", data.srno || "");
 }
 
 //===helper Function===
@@ -397,21 +455,22 @@ function getKeyByValue(map, value) {
 }
 
 function addSelectedToConsumptionTable(selectedRows) {
-
     const $tbody = $("#tblConsumptionEntry tbody");
 
     selectedRows.forEach(row => {
 
-        // FAST LOOKUP
+        if (isAlreadyAdded(row.srno)) {
+            showToast("Already added this record", { type: "warning" });
+            return;
+        }
+
         const itemCode = getKeyByValue(itemMap, row.item_name);
         const unitCode = getKeyByValue(UnitMap, row.unit);
         const deptCode = getKeyByValue(DeptMap, row.department);
 
-        // find blank row (better check)
         let $blankRow = null;
 
         $tbody.find("tr").each(function () {
-
             const itemVal = $(this).find("select.itemName").val();
             const qtyVal = $(this).find("input.quantity").val();
 
@@ -425,6 +484,7 @@ function addSelectedToConsumptionTable(selectedRows) {
 
         const fillRow = ($row) => {
 
+            // Fill values
             $row.find("select.itemName")
                 .val(itemCode || "")
                 .trigger("change");
@@ -433,9 +493,28 @@ function addSelectedToConsumptionTable(selectedRows) {
                 .val(unitCode || "")
                 .trigger("change");
 
+            if (deptCode) {
+                $row.find("select.department")
+                    .val(deptCode)
+                    .trigger("change");
+            }
+
             $row.find("input.no").val(row.nos || "");
             $row.find("input.quantity").val(row.quantity || "");
             $row.find("input.remarks").val(row.remarks || "");
+            $row.find("input.srno-hidden").val(row.srno || "");
+            $row.data("srno", row.srno || "");
+            // ==========================
+            // MAKE ITEM + UNIT READONLY
+            // ==========================
+
+            // If Select2 is applied, disable select
+            $row.find("select.itemName").prop("disabled", true);
+            $row.find("select.unit").prop("disabled", true);
+
+            // Refresh Select2 UI
+            $row.find("select.itemName").trigger("change.select2");
+            $row.find("select.unit").trigger("change.select2");
         };
 
         if ($blankRow) {
@@ -514,11 +593,27 @@ async function loadUnit() {
     });
 }
 
+//====For Duplicate Check(load_Pending)
+function isAlreadyAdded(srno) {
+
+    if (!srno) return false;
+
+    const newSrno = String(srno).trim();
+
+    return $("#tblConsumptionEntry tbody tr").toArray().some(tr => {
+
+        const rowSrno = String($(tr).find("input.srno-hidden").val() || "").trim();
+
+        return rowSrno === newSrno;
+    });
+}
+
 //====Pending Documents=======
 async function loadPendingDocuments(partyId) {
     try {
 
         const data = await MisConsumptionApi.getPendingDocuments(partyId);
+        console.log("pending Document Data", data);
         const tbody = $('#tblPendingDocument tbody');
         tbody.empty();
         if (!data || data.length === 0) {
@@ -550,6 +645,7 @@ async function loadPendingDocuments(partyId) {
             `;
             tbody.append(row);
         });
+        $('#tblPendingDocument thead input[type="checkbox"]').prop('checked', false);
         $('#pendingModal').modal('show');
 
     } catch (error) {
@@ -560,27 +656,42 @@ async function loadPendingDocuments(partyId) {
 
 //===Add pending Documents=====
 function getSelectedPendingDocuments() {
+
     let selectedRows = [];
+    let hasChecked = false;
 
     $('#tblPendingDocument tbody tr').each(function () {
-        let checkbox = $(this).find('.select-row');
 
-        if (checkbox.is(':checked')) {
-            let row = $(this);
+        const checkbox = $(this).find('.select-row');
 
-            let rowData = {
-                item_name: row.find('td').eq(7).text(),
-                department: "", // abhi blank hi rahega
-                unit: row.find('td').eq(10).text(),
-                nos: row.find('td').eq(9).text(),
-                quantity: row.find('td').eq(5).text(),
-                remarks: row.find('td').eq(8).text(),
-                code: row.find('td').eq(0).text()
-            };
+        if (!checkbox.is(':checked')) return;
 
-            selectedRows.push(rowData);
+        hasChecked = true;
+
+        const row = $(this);
+        const srno = row.find('td').eq(11).text();
+
+        if (isAlreadyAdded(srno)) {
+            showToast("Already added this pending record.", { type: "warning" });
+            return; // skip this row only
         }
+
+        selectedRows.push({
+            srno: srno,
+            item_name: row.find('td').eq(7).text(),
+            department: "",
+            unit: row.find('td').eq(10).text(),
+            nos: row.find('td').eq(9).text(),
+            quantity: row.find('td').eq(5).text(),
+            remarks: row.find('td').eq(8).text(),
+            code: row.find('td').eq(0).text()
+        });
     });
+
+    // 🔥 ONLY ONE PLACE FOR THIS MESSAGE
+    if (!hasChecked) {
+        showToast("Please select at least one row.", { type: "warning" });
+    }
 
     return selectedRows;
 }

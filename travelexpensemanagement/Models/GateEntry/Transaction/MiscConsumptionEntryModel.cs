@@ -73,8 +73,10 @@
 
         public string? UOM_NAME { get; set; }
 
-
         public string? REMARKS { get; set; }
+
+        public int? REF_NO { get; set; }
+        public string? REF_TYPE { get; set; }
 
 
 

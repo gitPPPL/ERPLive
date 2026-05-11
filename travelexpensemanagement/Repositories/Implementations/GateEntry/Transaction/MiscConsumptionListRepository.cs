@@ -201,7 +201,6 @@ public class MiscConsumptionListRepository : IMiscConsumptionListRepository
 
             cmd.Parameters.AddWithValue("@Action", "LoadPendingData");
             cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
-            cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
             cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
             cmd.Parameters.AddWithValue("@PARTY_CODE", partyId);
 

@@ -113,7 +113,7 @@ function validateConsumptionForm() {
 
         // Quantity
         if (qty <= 0) {
-            showToast("Quantity must be greater than 0.", { type: "warning" });
+            showToast("Quantity is Required.", { type: "warning" });
             $(this).find(".quantity").addClass("is-invalid").focus();
             isValid = false;
             return false;
