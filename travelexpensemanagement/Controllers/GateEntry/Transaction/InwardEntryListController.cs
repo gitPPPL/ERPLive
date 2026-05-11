@@ -18,7 +18,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService _dropdownService;
+        //private readonly DropdownService _dropdownService;
 
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
          travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
