@@ -1,19 +1,13 @@
-﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Office.Word;
-using DocumentFormat.OpenXml.Spreadsheet;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
 using System.Data.Common;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Models.GateEntry;
-
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
@@ -21,6 +15,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
     {
 
         private readonly DataBaseConnection _dbConnection;
+        private readonly DropdownService _dropdownService;
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
 
@@ -107,7 +103,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = true, lists = headerList, totalCount });
         }
 
-
         [HttpGet]
         public IActionResult GetDataByPendingorder(int PartyCode, string V_TYPE, DateTime V_DATE)
         {
@@ -151,7 +146,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     var DeptCode = rdr["DEPT_CODE"]?.ToString();
                                     var EMPTY_YN = "";
                                     var UOM_CODE = rdr["UNIT_CODE"]?.ToString();
-
 
                                     if (!string.IsNullOrEmpty(ITEM_CODE) && !string.IsNullOrEmpty(ITEM_CODE))
                                     {

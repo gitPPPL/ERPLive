@@ -15,14 +15,14 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
-        private readonly DbHelper _dbHelper;
-
-
-        public BreakDownMasterController(
-            DataBaseConnection dbConnection,
-            GlobalVariableService globalVariableService,
-            DropdownService dropdownService,
-            DbHelper dbHelper )
+        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
+        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private int? userLevel;
+        private readonly GlobalValidationdate _globalValidationdate;
+        private readonly travelexpensemanagement.LogService.LogService _logService;
+        public BreakDownMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+     travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
+     ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

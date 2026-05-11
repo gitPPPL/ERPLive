@@ -25,6 +25,9 @@ namespace travelexpensemanagement.LogService
             }
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
+                //SqlCommand cmd = new SqlCommand(@" INSERT INTO LOG_TABLE
+                //    (COMP_CODE, TABLE_NAME, V_TYPE, V_NO, DESCRIPTION, EUSER, EDATE, WSID, LIP, LID) VALUES
+                //    (@COMP_CODE, @TABLE_NAME, @V_TYPE, @V_NO, @DESCRIPTION, @EUSER, @EDATE, @WSID, @LIP, @LID)", con);
                 SqlCommand cmd = new SqlCommand(@" INSERT INTO LOG_TABLE
                     (COMP_CODE, V_TYPE, V_NO, V_DATE, TABLE_NAME, FORM_NAME, TABLE_TYPE, MODE, USERID, LOG_DATE, WSID, LIP, LID) VALUES
                     (@COMP_CODE, @V_TYPE, @V_NO, @V_DATE, @TABLE_NAME, @FORM_NAME, @TABLE_TYPE, @MODE, @USERID, @LOG_DATE, @WSID, @LIP, @LID)", con);
@@ -50,6 +53,9 @@ namespace travelexpensemanagement.LogService
                 cmd.ExecuteNonQuery();
             }
         }
+        //string description = $"FieldName: Mobile, Old Value: 9876543210, New Value: 1234567890";
+        //_logService.InsertLog("Employee", "UPDATE", "EMP123", description);
+
         //string description = $"FieldName: Mobile, Old Value: 9876543210, New Value: 1234567890";
         //_logService.InsertLog("Employee", "UPDATE", "EMP123", description);
 

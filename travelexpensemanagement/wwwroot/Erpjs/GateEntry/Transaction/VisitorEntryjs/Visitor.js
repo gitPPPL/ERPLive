@@ -5,9 +5,7 @@ const isReadOnly = urlParams.get('readOnly') === 'true';
 
 let isMobileDataLoaded = false;
 let isMobileLoading = false;
-let mobileRequest = null;
-//let isMobileReady = true;
-let originalMobile = "";
+
 let formState = {
     isSaved: false,
     isReadOnlyFromUrl: isReadOnly
@@ -37,14 +35,9 @@ function VisitorInit() {
     }
 
     //==== For Handle Submit ======
-    //$('#VisitorEntryForm').on('submit', function (e) {
-    //    onFormSubmit(e);
-    //});
-    $('#VisitorEntryForm')
-        .off('submit')   // 🔴 remove old binding
-        .on('submit', function (e) {
-            onFormSubmit(e);
-        });
+    $('#VisitorEntryForm').on('submit', function (e) {
+        onFormSubmit(e);
+    });
 
     if (!rowId) {
         $('#chkOutDate').prop('checked', false);
@@ -109,76 +102,53 @@ function VisitorInit() {
     });
 
     // ===== MOBILE AUTOFILL=====
+    $('#NumMobileNo').off('blur').on('blur', function (e) {
+        e.preventDefault();
+        isMobileDataLoaded = false;
+        isMobileLoading = true;
 
-    $('#NumMobileNo').off('blur').on('blur', function () {
+        if (rowId) return;
 
         const mobile = $(this).val().trim();
 
-        if (!mobile || mobile.length < 10) return;
-        if (isMobileLoading) return;
+        if (!mobile || mobile.length < 10) {
+            isMobileLoading = false;
+            return;
+        }
 
-        // small delay to avoid blur race
-        setTimeout(() => {
-            getMobileData(mobile)
-                .catch(() => {
-                    showToast("Failed to fetch visitor data", { type: "error" });
-                });
-        }, 200);
+        VisitorAPI.getVisitorByMobile(mobile)
+
+        .done(function (res) {
+
+            if (!res.success || !res.data) return;
+
+            const v = res.data;
+
+            $('#TxtVisitorName').val(v.name || '');
+            $('#TxtAddress').val(v.address || '');
+            $('#TxtOrganization').val(v.organization || '');
+            $('#ddlPurpose').val(v.purpose || '').trigger('change');
+            $('#ddlMeetEmployee').val(v.meet_CODE || '').trigger('change');
+            $('#TxtMeetOther').val(v.meet_NAME || '');
+            $('#TxtVehicleNo').val(v.vehicle_NO || '');
+            $('#TxtMaterial').val(v.material || '');
+            $('#TxtRemarks').val(v.remarks || '');
+
+            isMobileDataLoaded = true;
+
+            setTimeout(() => {
+                $('#TxtVisitorName').focus();
+            }, 50);
+        })
+
+        .fail(function () {
+            showToast("Failed to fetch visitor data", { type: "error" });
+        })
+
+        .always(function () {
+            isMobileLoading = false;
+        });
     });
-
-    //$('#NumMobileNo').off('blur').on('blur', function (e) {
-    //    e.preventDefault();
-    //    isMobileDataLoaded = false;
-       
-    //    //if (rowId) return;
-       
-    //    const mobile = $(this).val().trim();
-
-    //    if (rowId && mobile === originalMobile) return;
-
-    //    if (!mobile || mobile.length < 10) {
-    //        isMobileLoading = false;
-    //        return;
-    //    }
-
-    //    //if (mobileRequest) {
-    //    //    mobileRequest.abort(); // ✅ cancel previous
-    //    //}
-
-    //    isMobileLoading = true;
-    //    VisitorAPI.getVisitorByMobile(mobile)
-
-    //    .done(function (res) {
-
-    //        if (!res.success || !res.data) return;
-
-    //        const v = res.data;
-
-    //        $('#TxtVisitorName').val(v.name || '');
-    //        $('#TxtAddress').val(v.address || '');
-    //        $('#TxtOrganization').val(v.organization || '');
-    //        $('#ddlPurpose').val(v.purpose || '').trigger('change');
-    //        $('#ddlMeetEmployee').val(v.meet_CODE || '').trigger('change');
-    //        $('#TxtMeetOther').val(v.meet_NAME || '');
-    //        $('#TxtVehicleNo').val(v.vehicle_NO || '');
-    //        $('#TxtMaterial').val(v.material || '');
-    //        $('#TxtRemarks').val(v.remarks || '');
-
-    //        isMobileDataLoaded = true;
-
-    //        setTimeout(() => {
-    //            $('#TxtVisitorName').focus();
-    //        }, 50);
-    //    })
-
-    //    .fail(function () {
-    //        showToast("Failed to fetch visitor data", { type: "error" });
-    //    })
-
-    //    .always(function () {
-    //        isMobileLoading = false;
-    //    });
-    //});
 
     // ===== PRINT BUTTON(logic) =====
     $('#btn_Print').off('click').on('click', function () {
@@ -279,7 +249,6 @@ function loadVisitorEntry(docId) {
         $('#chkOutDate').prop('checked', !!visitor.ouT_DATE);
         $('#TMOutTime').val(visitor.ouT_TIME || '');
         $('#NumMobileNo').val(visitor.mobilE_NO || '');
-        originalMobile = visitor.mobilE_NO || '';
         $('#ddlPurpose').val(visitor.purpose || '').trigger('change');
         $('#TxtVehicleNo').val(visitor.vehiclE_NO || '');
         $('#TxtMaterial').val(visitor.material || '');
@@ -318,21 +287,8 @@ function loadVisitorEntry(docId) {
 async function onFormSubmit(e) {
 
     e.preventDefault();
-   
-    const btn = $('#btn-save');
-    btn.prop('disabled', true);
 
-    if ( isMobileLoading) {
-        showToast("Please wait, mobile data loading...", { type: "warning" });
-        btn.prop('disabled', false);
-        return;
-    }
-
-    // if (!validateVisitorForm()) return;
-    if (!validateVisitorForm()) {
-        btn.prop('disabled', false); // ❗ re-enable
-        return;
-    }
+    if (!validateVisitorForm()) return;
     
     const validateDate = await checkValidDate();
     if (validateDate == false) {
@@ -395,6 +351,8 @@ async function onFormSubmit(e) {
         }
     };
 
+    $('.circle-loader').css('display', 'flex');
+
     VisitorAPI.saveVisitor(payload)
     .done(function (response) {
 
@@ -425,8 +383,7 @@ async function onFormSubmit(e) {
         showToast("Error while saving", { type: "error" });
     })
     .always(function () {
-       
-        btn.prop('disabled', false); 
+        $('.circle-loader').hide();
     });
 }
 
@@ -466,7 +423,7 @@ function validateVisitorForm() {
     }
 
     if (isMobileLoading) {
-        showToast("Please wait, fetching visitor data...", { type: "warning" });
+        $('#TxtVisitorName').focus();
         return false;
     }
 
@@ -675,61 +632,6 @@ async function checkValidDate() {
         showToast("Date validation failed", { type: "error" });
         return false;
     }
-}
-
-//====Get Data Form Mobile====
-function getMobileData(mobile) {
-    return new Promise((resolve, reject) => {
-
-        console.log("API CALL:", mobile);
-
-        if (mobileRequest) {
-            mobileRequest.abort();
-        }
-
-        isMobileLoading = true;
-
-        mobileRequest = VisitorAPI.getVisitorByMobile(mobile);
-
-        mobileRequest
-        .done(function (res) {
-
-            console.log("API RESPONSE RECEIVED");
-
-            if (!res.success || !res.data) {
-                resolve(null);
-                return;
-            }
-
-            const v = res.data;
-
-            // 🔥 IMPORTANT: prevent stale overwrite
-            if ($('#NumMobileNo').val().trim() !== mobile) {
-                resolve(null);
-                return;
-            }
-
-            $('#TxtVisitorName').val(v.name || '');
-            $('#TxtAddress').val(v.address || '');
-            $('#TxtOrganization').val(v.organization || '');
-            $('#ddlPurpose').val(v.purpose || '').trigger('change');
-            $('#ddlMeetEmployee').val(v.meet_CODE || '').trigger('change');
-            $('#TxtMeetOther').val(v.meet_NAME || '');
-            $('#TxtVehicleNo').val(v.vehicle_NO || '');
-            $('#TxtMaterial').val(v.material || '');
-            $('#TxtRemarks').val(v.remarks || '');
-
-            resolve(v);
-        })
-        .fail(function () {
-            reject();
-        })
-        .always(function () {
-            console.log("API FINISHED");
-            isMobileLoading = false;
-            mobileRequest = null;
-        });
-    });
 }
 
 //===Base File For(image)====

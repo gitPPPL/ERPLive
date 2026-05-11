@@ -48,7 +48,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\Erpjs\GateEntry\Transaction\VisitorEntry.js~RF3525225e.TMP" />
 	  <Content Remove="wwwroot\js\SmoothScroll.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Views\GateEntry\Transaction\MiscConsumptionEntry\n2ahf43x.iif~" />
 	</ItemGroup>
 
 	<ItemGroup>

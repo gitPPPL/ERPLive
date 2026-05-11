@@ -45,7 +45,3 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
         }
     });
 }
-
-
-
-
