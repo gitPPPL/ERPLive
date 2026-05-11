@@ -26,7 +26,7 @@
     <div class="erppage-container">
         <fieldset class="erppage-fieldset">
             <div class="erppage-grid4">
-                <div class="erppage-divfield">
+                <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Document Type</label>
                     <Select class="erppage-input" id="ddlDocType">
                         <option>Select Document Type</option>
@@ -36,12 +36,35 @@
                     <label class="erppage-label">Document No</label>
                     <input type="text" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly />
                 </div>
-                @* <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Party Name</label>
-                    <Select class="erppage-redinput" id="ddlPartyName">
-                        <option>Select Party Name</option>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate" />
+                    <input type="time" class="erppage-input" id="DtTxtDocDate" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Type</label>
+                    <Select class="erppage-input" id="ddlType">
+                        <option> Select Type </option>
+                        <option value="Sale">Sale</option>
+                        <option value="Scrap Sale">Scrap Sale</option>
+                        <option value="Order">Order</option>
+                        <option value="GST Challan">GST Challan</option>
+                        <option value="Challan">Challan</option>
+                        <option value="Challan (Other than JW)">Challan (Other than JW)</option>
+                        <option value="Challan (Internal)">Challan (Internal)</option>
+                        <option value="Challan (Godown)">Challan (Godown)</option>
+                        <option value="Jobwork Challan">Jobwork Challan</option>
+                        <option value="Misc">Misc</option>
+                        <option value="Empty">Empty</option>
+                        <option value="Others">Others</option>
+                        <option value="Sample">Sample</option>
+                        <option value="Repair">Repair</option>
+                        <option value="Purchase Return">Purchase Return</option>
+                        <option value="BillsOfSupply">Bills Of Supply</option>
+                        <option value="E‑Commerce Sale">E‑Commerce Sale</option>
                     </Select>
-                </div> *@
+                </div>
+                
             </div>
 
             <fieldset class="erppage-subfieldset">
@@ -82,9 +105,8 @@
 
 
 
-<fieldset>
-    <form id="OutwardEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+    
         <div class="row">
             <div class="col-md-3">
                 <div class="form-group">
@@ -351,8 +373,8 @@
                 </div>
             </div>
         </div>
-    </form>
-</fieldset>
+    
+
 
 <script>
 
