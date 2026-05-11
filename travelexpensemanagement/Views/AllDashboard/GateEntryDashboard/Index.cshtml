@@ -9,6 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gate Entry Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <div class="GateEntryDashboard-container">
@@ -18,10 +20,19 @@
                     <i class="fa fa-truck-moving"></i>
                 </div>
                 <div>
-                    <div class="GateEntryDashboard-title">Gate Entry Dashboard</div>
-                    <div class="GateEntryDashboard-subtitle">Smart Monitoring & Analytics</div>
+                    <div class="GateEntryDashboard-title">
+                        Gate Entry Dashboard
+                    </div>
+                    <div class="GateEntryDashboard-subtitle">
+                        Smart Monitoring & Analytics
+                    </div>
                 </div>
             </div>
+            <!-- RIGHT SIDE BUTTON -->
+            <button class="GateEntryDashboard-header-export-btn">
+                <i class="fa fa-file-excel"></i>
+                <span>Export to Excel</span>
+            </button>
         </div>
         <div class="GateEntryDashboard-sales-header-advanced">
             <div class="GateEntryDashboard-sales-top">
@@ -43,10 +54,17 @@
                     <option value="gateinwardstore">Gate Inward Store</option>
                 </select>
             </div>
-            <button class="GateEntryDashboard-export-btn-advanced">
+            <div class="GateEntryDashboard-date-filter">
+                <label for="dateRange">Select Date Range</label>
+                <div class="GateEntryDashboard-date-input-wrap">
+                    <i class="fa fa-calendar-days"></i>
+                    <input type="text" id="dateRange" placeholder="Select From & To Date" />
+                </div>
+            </div>
+            @* <button class="GateEntryDashboard-export-btn-advanced">
                 <i class="fa fa-file-export"></i>
                 <span>Export Data</span>
-            </button>
+            </button> *@
         </div>
         <div class="GateEntryDashboard-row">
             <div class="GateEntryDashboard-left">
@@ -459,6 +477,13 @@
             const x = e.pageX - slider.offsetLeft;
             const walk = (x - startX) * 1.5;
             slider.scrollLeft = scrollLeft - walk;
+        });
+
+
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "d M Y",
+            maxDate: "today"
         });
 
     </script>

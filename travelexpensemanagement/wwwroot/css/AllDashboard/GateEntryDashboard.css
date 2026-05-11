@@ -56,13 +56,14 @@
     color: #64748b;
 }
 
-/* ===== HEADER ===== */
 /* ===== GATE HEADER (ADVANCED) ===== */
 .GateEntryDashboard-sales-header-advanced {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    padding: 18px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 18px;
+    flex-wrap: nowrap;
+    padding: 12px 20px;
     border-radius: 20px;
     background: linear-gradient(135deg, #0f172a, #122f4d, #122f4d);
     color: #fff;
@@ -81,6 +82,66 @@
         pointer-events: none;
     }
 
+/* ===== HEADER ===== */
+.GateEntryDashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    margin-bottom: 15px;
+}
+
+/* LEFT */
+.GateEntryDashboard-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* EXPORT BUTTON */
+.GateEntryDashboard-header-export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #2f7d32, #66a644);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 16px rgba(47,125,50,0.25);
+}
+
+    .GateEntryDashboard-header-export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(47,125,50,0.35);
+    }
+
+    .GateEntryDashboard-header-export-btn i {
+        font-size: 14px;
+    }
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+
+    .GateEntryDashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .GateEntryDashboard-header-export-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
 /* ===== LEFT CONTENT ===== */
 .GateEntryDashboard-sales-content {
     position: relative;
@@ -121,18 +182,20 @@
 /*Filter*/
 .GateEntryDashboard-gate-filter {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+    min-width: max-content;
 }
 
     .GateEntryDashboard-gate-filter label {
-        font-size: 12px;
+        font-size: 13px;
         color: #94a3b8;
+        white-space: nowrap;
+        margin: 0;
     }
 
     .GateEntryDashboard-gate-filter select {
-        padding: 8px 10px;
+        padding: 8px 12px;
         border-radius: 8px;
         border: none;
         background: #0f172a;
@@ -140,8 +203,8 @@
         outline: none;
         cursor: pointer;
         transition: 0.3s;
-        min-width: 200px;
-        text-align: center;
+        min-width: 190px;
+        height: 40px;
     }
 
         .GateEntryDashboard-gate-filter select:hover {
@@ -197,25 +260,31 @@
 .GateEntryDashboard-export-btn-advanced {
     position: relative;
     z-index: 1;
+    margin-left: auto; /* pushes button to right */
+
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 12px;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px; /* reduced padding */
+    height: 38px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     background: #fff;
     color: #418a38;
+    font-size: 13px;
     font-weight: 600;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transition: all 0.25s ease;
 }
 
     /* BUTTON HOVER */
     .GateEntryDashboard-export-btn-advanced:hover {
-        transform: translateY(-3px) scale(1.03);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(0,0,0,0.18);
     }
 
 
@@ -688,7 +757,8 @@ canvas {
 
     .GateEntryDashboard-gate-filter {
         width: 100%;
-        align-items: stretch;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
         .GateEntryDashboard-gate-filter select {
@@ -832,3 +902,153 @@ canvas {
     }
 }
 /*Vehicle Card End*/
+
+/*Date Picker Css*/
+/* ===== DATE FILTER ===== */
+/* LEFT SECTION */
+.GateEntryDashboard-sales-top {
+    min-width: 240px;
+    flex-shrink: 0;
+}
+
+/* GATE FILTER */
+.GateEntryDashboard-gate-filter {
+    min-width: 220px;
+}
+
+/* DATE FILTER */
+.GateEntryDashboard-date-filter {
+    min-width: 260px;
+}
+
+/* EXPORT BUTTON */
+.GateEntryDashboard-export-btn-advanced {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.GateEntryDashboard-date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: max-content;
+}
+
+    .GateEntryDashboard-date-filter label {
+        font-size: 13px;
+        color: #94a3b8;
+        white-space: nowrap;
+        margin: 0;
+    }
+
+/* INPUT WRAP */
+.GateEntryDashboard-date-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 0 12px;
+    min-height: 40px;
+    min-width: 240px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.3s;
+}
+
+    .GateEntryDashboard-date-input-wrap:hover {
+        background: #1e293b;
+    }
+
+    .GateEntryDashboard-date-input-wrap i {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* INPUT */
+    .GateEntryDashboard-date-input-wrap input {
+        border: none;
+        outline: none;
+        background: transparent;
+        color: #fff;
+        width: 100%;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+        /* Placeholder */
+        .GateEntryDashboard-date-input-wrap input::placeholder {
+            color: #94a3b8;
+        }
+
+/* ===== FLATPICKR CUSTOM ===== */
+
+.flatpickr-calendar {
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.18) !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: #2f7d32 !important;
+    border-color: #2f7d32 !important;
+}
+
+.flatpickr-day.inRange {
+    background: rgba(47,125,50,0.15) !important;
+    border-color: transparent !important;
+    color: #2f7d32 !important;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* ===== TABLET ===== */
+@media (max-width: 1024px) {
+
+    .GateEntryDashboard-sales-header-advanced {
+        flex-wrap: wrap;
+        align-items: stretch;
+    }
+
+    .GateEntryDashboard-sales-top {
+        width: 100%;
+    }
+
+    .GateEntryDashboard-gate-filter,
+    .GateEntryDashboard-date-filter {
+        flex: 1;
+        min-width: 220px;
+    }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+
+    .GateEntryDashboard-sales-header-advanced {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 14px;
+    }
+
+    .GateEntryDashboard-sales-top,
+    .GateEntryDashboard-gate-filter,
+    .GateEntryDashboard-date-filter,
+    .GateEntryDashboard-export-btn-advanced {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .GateEntryDashboard-gate-filter select,
+        .GateEntryDashboard-date-input-wrap {
+            width: 100%;
+            min-width: unset;
+        }
+
+    .GateEntryDashboard-export-btn-advanced {
+        justify-content: center;
+    }
+}
+
+/*Date Picker Css End*/
