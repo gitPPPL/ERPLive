@@ -7,18 +7,82 @@
     var CompCode = Convert.ToInt32(TempData["CompCode"]);
 
 }
-<fieldset>
-    <legend class="legend-field">Outward Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fas fa-right-to-bracket"></i>
         </div>
+        <div class="erppage-header-title">Outward Entry</div>
     </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="OutwardEntryForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Type</label>
+                    <Select class="erppage-input" id="ddlDocType">
+                        <option>Select Document Type</option>
+                    </Select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="text" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly />
+                </div>
+                @* <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <Select class="erppage-redinput" id="ddlPartyName">
+                        <option>Select Party Name</option>
+                    </Select>
+                </div> *@
+            </div>
+
+            <fieldset class="erppage-subfieldset">
+                <legend>Document Details</legend>
+                <div class="erppage-subheader">Document Details</div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Waybill No</label>
+                        <input type="text" class="erppage-redinput" id="NumWaybillNo" placeholder="Enter Waybill No" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Create Date</label>
+                        <input type="date" class="erppage-redinput" id="DtFormDate" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Expiry Date</label>
+                        <input type="date" class="erppage-input" id="DtExpiryDate" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Order No</label>
+                        <input type="number" class="erppage-input" id="NumOrderNo" placeholder="Enter Order No" />
+                    </div>
+                </div>
+            </fieldset>
+        </fieldset>
+
+    </div>
+    <div class="erppage-actions">
+        <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+       
+    </div>
+</div>
+
+
+
+
+
+<fieldset>
     <form id="OutwardEntryForm">
         <input type="hidden" class="form-control" id="TxtCode" name="CODE">
         <div class="row">
@@ -41,8 +105,6 @@
                     <div class="input-divide">
                         <input type="date" class="form-control" id="DtDocDate" />
                         <input type="time" class="form-control" id="DtTxtDocDate">
-
-
                     </div>
                 </div>
             </div>
@@ -68,12 +130,10 @@
                         <option value="Purchase Return">Purchase Return</option>
                         <option value="BillsOfSupply">BillsOfSupply</option>
                         <option value="E‑Commerce Sale">E‑Commerce Sale</option>
-
                     </select>
                 </div>
             </div>
         </div>
-
 
 
         <div class="row" id="Conditionnaldesignid" style="display: none;">
