@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Data.Common;
+using System.Text.Json;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Weighbridge.Transaction;
-using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Common.DbHelper;
 
 namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
@@ -13,14 +16,23 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
+        private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public InHouseWeighbridgeEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly DataBaseConnection _dbConnection;
+        private readonly GlobalValidationdate _globalValidationdate;
+        public InHouseWeighbridgeEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, 
+        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService , GlobalVariableService globalValue,
+        ModuleService.ModuleService moduleService, DataBaseConnection dbConnection, GlobalValidationdate globalValidationdate)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
+            _dropdownService = dropdownService;
+            _globalValidationdate = globalValidationdate;
+            _dbConnection = dbConnection;
         }
+
 
         public IActionResult Index()
         {
@@ -100,33 +112,35 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetTareSlipNo()
+        public JsonResult GetTareSlipNo()
         {
-            try
+
+            var usersession = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-              var usersession = _globalValue.GetGlobalVariables();
-              var  tareNoList = await _dbHelper.GetJsonDataAsync($@"select DOC_ID, V_NO from WB1 where V_TYPE='KINH' and WB_TYPE='Tare' and COMP_CODE={usersession.PubCompCode} and YEAR_CODE={usersession.PubFYearCode} and BRANCH_CODE=1 order by V_NO ");
-                return Json(new { status = true, data = tareNoList });
-            }
-            catch(Exception ex)
-            {
-                return Json(new { status = false, message = "data load failed" });
+                string sql = $@"select V_NO ,V_TYPE  from WB1 where V_TYPE='KINH' and WB_TYPE='Tare' and COMP_CODE={usersession.PubCompCode} and YEAR_CODE={usersession.PubFYearCode} and BRANCH_CODE=1 order by V_NO ";
+                var GetTareSlipNo = _dropdownService.GetDropdownList(sql);
+                return Json(GetTareSlipNo);
             }
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetGrossSlipNo()
+        public JsonResult GetGrossSlipNo()
         {
-            try
+
+            var usersession = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                var tareNoList = await _dbHelper.GetJsonDataAsync($@"select DOC_ID, V_NO from WB1 where V_TYPE='KINH' and WB_TYPE='Gross' and COMP_CODE={usersession.PubCompCode} and YEAR_CODE={usersession.PubFYearCode} and BRANCH_CODE=1 order by V_NO ");
-                return Json(new { status = true, data = tareNoList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "data load failed" });
+                string sql = $@"
+                SELECT  V_NO ,V_TYPE  FROM WB1 WHERE V_TYPE = 'KINH' AND WB_TYPE = 'Gross' AND COMP_CODE = {usersession.PubCompCode}
+                AND YEAR_CODE = {usersession.PubFYearCode}  AND BRANCH_CODE = {usersession.PubBranchCode} ORDER BY V_NO";
+                var Partylist = _dropdownService.GetDropdownList(sql);
+                return Json(Partylist);
             }
         }
 
@@ -136,10 +150,13 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             try
             {
                 var usersession = _globalValue.GetGlobalVariables();
-                var strqry = $@"select TYPE, WEIGHT,WGT_DATE,WGT_TIME, ITEM_CODE,ITEM_NAME,FROM_PLACE,FROM_NAME,TO_PLACE,TO_NAME from  WB2 where V_NO={SlipNo} 
-              and V_TYPE='{vType}' and COMP_CODE={usersession.PubCompCode} and BRANCH_CODE=1 ";
-                var tareNoList = await _dbHelper.GetJsonDataAsync(strqry);
-                return Json(new { status = true, data = tareNoList });
+                var strqry = $@"SELECT top 2   b.VEHICLE_NO, a.*, b.* FROM WB2 a LEFT JOIN WB1 b  ON a.V_NO = b.V_NO AND a.V_TYPE = b.V_TYPE AND a.COMP_CODE = b.COMP_CODE
+                    AND a.BRANCH_CODE = b.BRANCH_CODE AND a.YEAR_CODE = b.YEAR_CODE WHERE   a.V_NO = 252603890 ; ";
+                    //WHERE   a.V_NO = {SlipNo} AND a.V_TYPE = '{vType}'
+                    //AND b.WB_TYPE = 'Tare' AND a.COMP_CODE = {usersession.PubCompCode}  AND a.YEAR_CODE = {usersession.PubFYearCode} AND a.BRANCH_CODE = {usersession.PubBranchCode};";
+
+                    var tareNoList = await _dbHelper.GetJsonDataAsync(strqry);
+                    return Json(new { status = true, data = tareNoList });
             }
             catch (Exception ex)
             {
@@ -154,9 +171,12 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             {
                 var usersession = _globalValue.GetGlobalVariables();
 
-                var strqry = $@"select TYPE, WEIGHT, WGT_DATE, WGT_TIME, ITEM_CODE, ITEM_NAME, FROM_PLACE, FROM_NAME, TO_PLACE, TO_NAME
-                from WB2 where COMP_CODE = {usersession.PubCompCode} and BRANCH_CODE = 1 and V_NO = {SlipNo} and V_TYPE = '{vType}'
-                and SNO = (select max(SNO) from WB2 where V_NO = {SlipNo} and V_TYPE = '{vType}' and COMP_CODE = {usersession.PubCompCode} and BRANCH_CODE = 1) ";                                
+                var strqry = $@"SELECT  b.VEHICLE_NO, a.*,  b.* FROM WB2 a LEFT JOIN WB1 b 
+                ON a.V_NO = b.V_NO AND a.V_TYPE = b.V_TYPE  AND a.COMP_CODE = b.COMP_CODE  AND a.BRANCH_CODE = b.BRANCH_CODE
+                AND a.YEAR_CODE = b.YEAR_CODE WHERE 
+                AND a.V_TYPE = '{vType}'
+                AND a.TYPE = 'Gross' AND a.COMP_CODE = {usersession.PubCompCode}  AND a.YEAR_CODE = {usersession.PubFYearCode} AND a.BRANCH_CODE = {usersession.PubBranchCode}  ORDER BY   a.SNO DESC; ";       
+                
                 var tareNoList = await _dbHelper.GetJsonDataAsync(strqry);
                 return Json(new { status = true, data = tareNoList });
             }
@@ -244,12 +264,11 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                     {
                         bool success = true;
                         try
-                        {
-                            //var wgtDt = Convert.ToDateTime(model.V_DATE).ToString("dd-MMM-yyyy");
+                        {              
                             using (SqlCommand cmd = new SqlCommand("[dbo].[sp_WBEntry]", con, transaction))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
-                                //cmd.Parameters.AddWithValue("@Action", model.SaveOrUpdate == "Save" ? "Add" : "Edit");
+                
                                 if (model.SaveOrUpdate == "Save")
                                     cmd.Parameters.AddWithValue("@Action", "Add");
                                 else
@@ -257,7 +276,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode ?? (object)DBNull.Value);
-                                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
                                 cmd.Parameters.AddWithValue("@DOC_ID", model.DOC_ID ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@V_NO", model.V_NO ?? (object)DBNull.Value);
@@ -376,6 +395,21 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
             return table;
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("Gate1", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+
+
+
 
 
     }
