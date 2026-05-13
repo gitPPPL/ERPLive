@@ -6,7 +6,7 @@
         bg: "",
         color: "#fff"
     };
-
+    
     const settings = { ...defaults, ...options };
 
     // Auto icon and bg if not provided

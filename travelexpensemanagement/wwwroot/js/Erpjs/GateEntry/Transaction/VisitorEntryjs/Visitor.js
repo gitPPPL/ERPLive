@@ -6,7 +6,6 @@ const isReadOnly = urlParams.get('readOnly') === 'true';
 let isMobileDataLoaded = false;
 let isMobileLoading = false;
 let mobileRequest = null;
-//let isMobileReady = true;
 let originalMobile = "";
 let formState = {
     isSaved: false,
@@ -18,11 +17,11 @@ function VisitorInit() {
 
     setCurrentDate();
     setCurrentTime();
-
+    $("#NumDocNo").focus();
     if (rowId) {
 
         loadEmpList().then(() => {
-            initSelect2();   // init AFTER data load
+            initSelect2();  
             loadVisitorEntry(rowId);
             if (isReadOnly) {
                 setVisitorEntryFormReadOnly();
@@ -31,17 +30,13 @@ function VisitorInit() {
 
     } else {
         loadEmpList().then(() => {
-            initSelect2();   // same for new form
+            initSelect2();   
             GetVNo();
         });
     }
 
-    //==== For Handle Submit ======
-    //$('#VisitorEntryForm').on('submit', function (e) {
-    //    onFormSubmit(e);
-    //});
     $('#VisitorEntryForm')
-        .off('submit')   // 🔴 remove old binding
+        .off('submit')   
         .on('submit', function (e) {
             onFormSubmit(e);
         });
@@ -126,60 +121,6 @@ function VisitorInit() {
         }, 200);
     });
 
-    //$('#NumMobileNo').off('blur').on('blur', function (e) {
-    //    e.preventDefault();
-    //    isMobileDataLoaded = false;
-       
-    //    //if (rowId) return;
-       
-    //    const mobile = $(this).val().trim();
-
-    //    if (rowId && mobile === originalMobile) return;
-
-    //    if (!mobile || mobile.length < 10) {
-    //        isMobileLoading = false;
-    //        return;
-    //    }
-
-    //    //if (mobileRequest) {
-    //    //    mobileRequest.abort(); // ✅ cancel previous
-    //    //}
-
-    //    isMobileLoading = true;
-    //    VisitorAPI.getVisitorByMobile(mobile)
-
-    //    .done(function (res) {
-
-    //        if (!res.success || !res.data) return;
-
-    //        const v = res.data;
-
-    //        $('#TxtVisitorName').val(v.name || '');
-    //        $('#TxtAddress').val(v.address || '');
-    //        $('#TxtOrganization').val(v.organization || '');
-    //        $('#ddlPurpose').val(v.purpose || '').trigger('change');
-    //        $('#ddlMeetEmployee').val(v.meet_CODE || '').trigger('change');
-    //        $('#TxtMeetOther').val(v.meet_NAME || '');
-    //        $('#TxtVehicleNo').val(v.vehicle_NO || '');
-    //        $('#TxtMaterial').val(v.material || '');
-    //        $('#TxtRemarks').val(v.remarks || '');
-
-    //        isMobileDataLoaded = true;
-
-    //        setTimeout(() => {
-    //            $('#TxtVisitorName').focus();
-    //        }, 50);
-    //    })
-
-    //    .fail(function () {
-    //        showToast("Failed to fetch visitor data", { type: "error" });
-    //    })
-
-    //    .always(function () {
-    //        isMobileLoading = false;
-    //    });
-    //});
-
     // ===== PRINT BUTTON(logic) =====
     $('#btn_Print').off('click').on('click', function () {
 
@@ -203,6 +144,17 @@ function VisitorInit() {
         }
 
         showToast("Please save data first", { type: "warning" });
+    });
+
+    $('#ddlMeetEmployee, #TxtMeetOther').on('change input', function () {
+        const meetEmployee = $('#ddlMeetEmployee').val();
+        const meetOtherName = $('#TxtMeetOther').val().trim();
+
+        // If either field has value, remove validation from both
+        if (meetEmployee || meetOtherName) {
+            clearInvalid($('#ddlMeetEmployee'));
+            clearInvalid($('#TxtMeetOther'));
+        }
     });
 }
 
@@ -318,9 +270,6 @@ function loadVisitorEntry(docId) {
 async function onFormSubmit(e) {
 
     e.preventDefault();
-   
-    const btn = $('#btn-save');
-    btn.prop('disabled', true);
 
     if ( isMobileLoading) {
         showToast("Please wait, mobile data loading...", { type: "warning" });
@@ -328,16 +277,12 @@ async function onFormSubmit(e) {
         return;
     }
 
-    // if (!validateVisitorForm()) return;
-    if (!validateVisitorForm()) {
-        btn.prop('disabled', false); // ❗ re-enable
-        return;
-    }
-    
     const validateDate = await checkValidDate();
     if (validateDate == false) {
         return;
     }
+
+    if (!validateVisitorForm()) return;
 
     const meetEmployee = $('#ddlMeetEmployee').val();
     const meetOtherName = $('#TxtMeetOther').val().trim();
@@ -424,113 +369,55 @@ async function onFormSubmit(e) {
     .fail(function () {
         showToast("Error while saving", { type: "error" });
     })
-    .always(function () {
-       
-        btn.prop('disabled', false); 
-    });
+    
 }
 
 //=========Validation ===========
 function validateVisitorForm() {
 
-    //==Voucher No==
-    const vNo = $('#NumDocNo').val();
-    if (!vNo || parseInt(vNo) === 0) {
-        showToast("Invalid Voucher No.", { type: "warning" });
-        $('#NumDocNo').addClass('is-invalid').focus();
-        return false;
-    } else {
-        $('#NumDocNo').removeClass('is-invalid');
-    }
+    if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
+    if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
 
-    //==Doc Date==
-    const docDate = $('#DtDocDate').val();
-    if (!docDate) {
-        showToast("Doc Date required.", { type: "warning" });
-        $('#DtDocDate').addClass('is-invalid').focus();
-        return false;
-    } else {
-        $('#DtDocDate').removeClass('is-invalid');
-    }
-
-    //===Mobile===
     const mobile = $('#NumMobileNo').val();
-    if (mobile) {
-        if (!validatePhone(mobile)) {
-            showToast("Please enter valid 10-digit mobile number.", { type: "warning" });
-            $('#NumMobileNo').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#NumMobileNo').removeClass('is-invalid');
-        }
-    }
 
-    if (isMobileLoading) {
-        showToast("Please wait, fetching visitor data...", { type: "warning" });
+    if (mobile && !validatePhone(mobile)) {
+        setInvalid($('#NumMobileNo'), 'Please enter valid 10-digit mobile number.');
         return false;
     }
 
-    //==Visitor Name==
-    const visitorName = $('#TxtVisitorName').val().trim();
-    if (!visitorName) {
-        setInvalid($('#TxtVisitorName'), 'Visitor Name is required');
-        return false;
-    } else {
-        clearInvalid($('#TxtVisitorName'));
-    }
-
-    //===Purpose===
-    if (!$('#ddlPurpose').val()) {
-        setInvalid($('#ddlPurpose'), 'Purpose is required');
-        return false;
-    } else {
-        clearInvalid($('#ddlPurpose'));
-    }
+    if (!validateRequiredField('#TxtVisitorName', 'Visitor Name')) return;
+    if (!validateRequiredField('#ddlPurpose', 'Purpose')) return;
 
     //==Meet Employee OR Other==
     const meetEmployee = $('#ddlMeetEmployee').val();
     const meetOtherName = $('#TxtMeetOther').val().trim();
 
     if (!meetEmployee && !meetOtherName) {
-        showToast("Meet Employee OR Meet Other is Required.", { type: "warning" });
-        $('#ddlMeetEmployee').addClass('is-invalid');
+        setInvalid($('#ddlMeetEmployee'), 'Meet Employee OR Meet Other is Required.');
         $('#TxtMeetOther').addClass('is-invalid');
-        $('#ddlMeetEmployee').focus();
         return false;
-    } else {
-        $('#ddlMeetEmployee').removeClass('is-invalid');
-        $('#TxtMeetOther').removeClass('is-invalid');
     }
 
     //==In Time==
-    const inTime = $('#TMInTime').val();
-    if (!inTime) {
-        showToast("In Time required.", { type: "warning" });
-        $('#TMInTime').addClass('is-invalid').focus();
-        return false;
-    } else {
-        $('#TMInTime').removeClass('is-invalid');
-    }
+    if (!validateRequiredField('#TMInTime', 'In Time')) return;
 
     //== Out Date vs Doc Date ==
     const outDate = $('#DtOutDate').val();
     const isOutDateChecked = $('#chkOutDate').is(':checked');
-
+    const docDate = $('#DtDocDate').val();
     if (isOutDateChecked && outDate) {
         let doc = new Date(docDate);
         let out = new Date(outDate);
 
         if (out < doc) {
-            showToast("Out Date cannot be less than Doc Date.", { type: "warning" });
-            $('#DtOutDate').addClass('is-invalid').focus();
+            setInvalid($('#DtOutDate'), 'Out Date cannot be less than Doc Date.');
             return false;
-        } else {
-            $('#DtOutDate').removeClass('is-invalid');
         }
     }
 
     //==Out Time Validation==
     const outTime = $('#TMOutTime').val();
+    const inTime = $('#TMInTime').val();
 
     if (inTime && outTime) {
 
@@ -544,11 +431,8 @@ function validateVisitorForm() {
         }
 
         if (outTime && isOutDateChecked && !outDate) {
-            showToast("Out Date required when Out Time is entered.", { type: "warning" });
-            $('#DtOutDate').addClass('is-invalid').focus();
+            setInvalid($('#DtOutDate'), 'Out Date required when Out Time is entered.');
             return false;
-        } else {
-            $('#DtOutDate').removeClass('is-invalid');
         }
 
         if (isOutDateChecked && outDate) {
@@ -558,11 +442,8 @@ function validateVisitorForm() {
         }
 
         if (inDateTime > outDateTime) {
-            showToast("Invalid Out Time. Out Time cannot be less than In Time.", { type: "warning" });
-            $('#TMOutTime').addClass('is-invalid').focus();
+            setInvalid($('#TMOutTime'), 'Invalid Out Time. Out Time cannot be less than In Time.');
             return false;
-        } else {
-            $('#TMOutTime').removeClass('is-invalid');
         }
     }
 
@@ -680,9 +561,6 @@ async function checkValidDate() {
 //====Get Data Form Mobile====
 function getMobileData(mobile) {
     return new Promise((resolve, reject) => {
-
-        console.log("API CALL:", mobile);
-
         if (mobileRequest) {
             mobileRequest.abort();
         }
@@ -694,8 +572,6 @@ function getMobileData(mobile) {
         mobileRequest
         .done(function (res) {
 
-            console.log("API RESPONSE RECEIVED");
-
             if (!res.success || !res.data) {
                 resolve(null);
                 return;
@@ -703,7 +579,7 @@ function getMobileData(mobile) {
 
             const v = res.data;
 
-            // 🔥 IMPORTANT: prevent stale overwrite
+            //IMPORTANT: prevent stale overwrite
             if ($('#NumMobileNo').val().trim() !== mobile) {
                 resolve(null);
                 return;
@@ -725,7 +601,6 @@ function getMobileData(mobile) {
             reject();
         })
         .always(function () {
-            console.log("API FINISHED");
             isMobileLoading = false;
             mobileRequest = null;
         });

@@ -47,21 +47,26 @@ function validateEmail(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
+
 function validatePhone(phone) {
     const regex = /^\d{10}$/;
     return regex.test(phone);
 }
+
 function validateRequiredField(selector, fieldName) {
     const $field = $(selector);
     const value = $field.val()?.trim();
 
     if (!value) {
-        toastr.warning(`${fieldName} is required`);
-        $field.focus();
+        //toastr.warning(`${fieldName} is required`);
+        //$field.focus();
+        setInvalid($(selector), `${fieldName} is required`)
         return false;
+       
     }
     return true;
 }
+
 const MessageStore = {
     insert: '✅ Data inserted successfully!',
     update: '✅ Data updated successfully!',

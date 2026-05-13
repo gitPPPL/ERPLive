@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models.GateEntry;
-using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.Models.Weighbridge.Transaction;
 using static iTextSharp.text.pdf.AcroFields;
 
@@ -112,7 +108,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                     WbCondtion = " AND g.V_TYPE IN ( select  DISTINCT CODE from DOCTYPE_MAST where DOCTYPE='GateInward' ) ";
                 }
 
-
                var userDt = _globalValue.GetGlobalVariables();
                string strqry = $@"
                SELECT V_NO,V_TYPE,TRUCK_NO, PARTY_CODE, sg.NAME partyName, d.NAME as VtypeName FROM GATE1 g 
@@ -159,7 +154,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             }
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetPlaceMast()
         {
@@ -175,7 +169,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetPartyList()
         {
@@ -189,7 +182,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 return Json(new { status = false, messsage = "data load failed" });
             }
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetWeighBridgeById(string id)

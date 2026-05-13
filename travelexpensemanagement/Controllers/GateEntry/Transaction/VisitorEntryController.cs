@@ -148,8 +148,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 if (result)
                 {
-                    _logService.InsertLog("VISITOR","Visitor Entry", "TRANSACTION", "DELETE", VType, VNo, null
-                );
+                    _logService.InsertLog("VISITOR", "Visitor Entry", "TRANSACTION", "DELETE", VType, VNo, null );
 
                     return Json(new { success = true, message = "Visitor deleted successfully." });
                 }

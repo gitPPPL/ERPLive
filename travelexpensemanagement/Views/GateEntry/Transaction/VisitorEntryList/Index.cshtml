@@ -29,40 +29,33 @@
 		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
 			<i class="fa fa-file-excel"></i>Export
 		</button>
-		@* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
-			<i class="fa fa-envelope"></i>Mail
-		</button>
-		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
-			<i class="fa fa-check-circle"></i>Approved
-		</button> *@
 	</div>
 </div>
 <div class="erppagelist-container">
 	<div class="excel-wrapper fixed-grid-wrapper">
 		<table id="tblVisitorEntry" class="excel-table fixed-grid-table">
 			<colgroup>
-				<col style="display:none;" /> <!-- FIXED -->
-				<col style="width: 80px;" />  <!-- Serial No -->
-				<col style="width: 110px;" /> <!-- Visit Date -->
-				@* <col style="width: 70px;" /> *@  <!-- Slip No -->
-				<col style="width: 150px;" /> <!-- Visitor Name -->
-				<col style="width: 180px;" /> <!-- Organization -->
-				<col style="width: 65px;" />  <!-- In Time -->
-				<col style="width: 75px;" />  <!-- Out Time -->
-				<col style="width: 150px;" /> <!-- Meet Person -->
-				<col style="width: 100px;" /> <!-- Purpose -->
-				<col style="width: 150px;" /> <!-- Address -->
-				<col style="width: 100px;" /> <!-- Mobile -->
-				<col style="width: 100px;" /> <!-- Vehicle No -->
+				<col style="display:none;" /> 
+				<col style="width: 80px;" />  
+				<col style="width: 110px;" /> 
 				
-				<col style="width: 140px;" /> <!-- Action -->
+				<col style="width: 150px;" /> 
+				<col style="width: 180px;" /> 
+				<col style="width: 65px;" />  
+				<col style="width: 75px;" />  
+				<col style="width: 150px;" /> 
+				<col style="width: 100px;" /> 
+				<col style="width: 150px;" /> 
+				<col style="width: 100px;" /> 
+				<col style="width: 100px;" /> 
+				
+				<col style="width: 140px;" /> 
 			</colgroup>
 			<thead>
 				<tr>
 					<th style="display:none;">Code</th>
 					<th>Serial No</th>
 					<th>Visit Date</th>
-					@* <th>Slip No</th> *@
 					<th>Visitor Name</th>
 					<th>Organization</th>
 					<th>In Time</th>
@@ -101,5 +94,6 @@
 	</div>
 </div>
 
+<script src="~/common/delete.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/visitorentrylistjs/visitorentrylist.js"></script>
  

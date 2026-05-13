@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Models;
+﻿using travelexpensemanagement.Models;
 
 namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 {

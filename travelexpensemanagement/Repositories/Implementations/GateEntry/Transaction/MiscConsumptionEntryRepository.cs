@@ -32,8 +32,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             var g = _globalVariableService.GetGlobalVariables();
 
-            string query = $"SELECT code, name FROM ITEMDEPT_MAST WHERE active = 1 AND comp_code = {g.PubCompCode}";
-            return _dropdownService.GetDropdownList(query);
+            string query = $"SELECT code, name FROM ITEMDEPT_MAST  WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);         
         }
 
         public List<object> GetUnitList()

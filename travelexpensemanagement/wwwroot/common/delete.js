@@ -66,7 +66,7 @@ function deleteRecordbytype(controller, docId, doctype, options = {}) {
             vNo: docId,
             docType: doctype
         };
-         console.log('Sending Data:', requestData);
+         
         $.ajax({
             url: `/${controller}/${action}`,
             type: 'POST',
