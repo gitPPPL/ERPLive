@@ -1,24 +1,19 @@
 ﻿
-using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Office.Word;
-using DocumentFormat.OpenXml.Spreadsheet;
-using iText.StyledXmlParser.Jsoup.Select;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
+using System.Data.Common;
+using System.Globalization;
 using System.Net.Http.Headers;
-using System.Reflection.Emit;
 using System.Text.Json;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
-
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.GateEntry;
+using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces;
+using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
@@ -27,73 +22,38 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly GlobalValidationdate _globalValidationdate;
-
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-
+        private readonly IInwardEntryRepository _inwardEntryRepository;
         private readonly HttpClient _httpClient;
         public int pubBPPurchTolQty = 2000;
 
-        public InwardEntryController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, 
-            travelexpensemanagement.Common.DropdownService.DropdownService dropdownService,travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-            ModuleService.ModuleService moduleService , GlobalValidationdate globalValidationdate  )
+        public InwardEntryController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+            travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
+            ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate , IInwardEntryRepository inwardEntryRepository)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;   
+            _moduleService = moduleService;
+            _inwardEntryRepository = inwardEntryRepository;
         }
 
         public IActionResult Index()
         {
             TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
             TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
-
             return View("~/Views/GateEntry/Transaction/InwardEntry/Index.cshtml");
         }
-        public JsonResult GetVNo(string Vtype)
+        public JsonResult GetVNo(string Vtype, string Tablename = "Gate1")
         {
             string newV_NO = "00000";
             try
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
-
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    con.Open();
-                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
-                    using (SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con))
-                    {
-                        prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-
-                        string prefixYR = prefixCmd.ExecuteScalar().ToString();
-
-                        string lastV_NO_Query = @" SELECT MAX(CAST(V_NO AS INT))  FROM GATE1   WHERE COMP_CODE = @CompCode   AND YEAR_CODE = @YearCode   AND BRANCH_CODE = @BranchCode   AND V_TYPE = @Vtype";
-
-                        using (SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con))
-                        {
-                            lastVnoCmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                            lastVnoCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                            lastVnoCmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
-                            lastVnoCmd.Parameters.AddWithValue("@Vtype", Vtype);
-
-                            object result = lastVnoCmd.ExecuteScalar();
-
-                            if (result != DBNull.Value && result != null)
-                            {
-                                int lastV_NO = Convert.ToInt32(result);
-                                newV_NO = (lastV_NO + 1).ToString("D5");
-                            }
-                            else
-                            {
-                                newV_NO = prefixYR + "00001";
-                            }
-                        }
-                    }
-                }
+                newV_NO = _inwardEntryRepository.GetVNoAsync(Vtype,Tablename).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
@@ -101,253 +61,25 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { error = "An error occurred while generating the V_NO." });
             }
 
-            return Json(new { V_NO = newV_NO });
-        }
-        public JsonResult DDlVType()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateInward') order by Name ";
-
-                var VtypeList = _dropdownService.GetDropdownList(query);
-
-                return Json(VtypeList);
-            }
-        }
-        public JsonResult DDlParty()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE = " + getdata.PubCompCode + "    AND ACTIVE=1  and name <> '' order by name ";
-
-                var Partylist = _dropdownService.GetDropdownList(query);
-
-                return Json(Partylist);
-            }
-
-        }
-        public JsonResult DDlShipFrom()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE =" + getdata.PubCompCode + " AND ACTIVE=1 and name <> ''    order by name ";
-
-                var ShipFromList = _dropdownService.GetDropdownList(query);
-
-                return Json(ShipFromList);
-            }
-
-        }
-        public JsonResult DDDocStatus()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document'   and Name <> ''  Order by CODE";
-
-                var DocStatusList = _dropdownService.GetDropdownList(query);
-
-                return Json(DocStatusList);
-            }
-
-        }
-        public JsonResult DDlPartycity()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select Code,Name from City_mast  Where Name <> ''  Order by name";
-
-                var PartyCitylist = _dropdownService.GetDropdownList(query);
-
-                return Json(PartyCitylist);
-            }
-
+            return Json(new { V_NO = newV_NO }); // ✅ FIXED
         }
 
-        public JsonResult DDlstate()
+        public async Task<JsonResult> GetDataByPartyCode(int PartyId, int addressid)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE , name from STATE_MAST  where active = 1  AND name <> '' order by NAME ";
-
-                var DDlstate = _dropdownService.GetDropdownList(query);
-
-                return Json(DDlstate);
-            }
-
+            var data = await _inwardEntryRepository.GetDataByPartyCodeAsync(PartyId, addressid);
+            return Json(data);
         }
 
-        public JsonResult DDlTransportName()
+        public async Task<JsonResult> GetPartyAddressbyCode(int PartyId)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "SELECT CODE , NAME  FROM TRANSPORT_MAST  WHERE COMP_CODE =" + getdata.PubCompCode + "  AND ACTIVE = 1  and NAME <> ''   order by NAME asc";
-
-                var TransportNamelist = _dropdownService.GetDropdownList(query);
-
-                return Json(TransportNamelist);
-            }
-
-        }
-        public JsonResult DDlItemMast()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select b.CODE , b.name from item_mast b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
-                var ItemList = _dropdownService.GetDropdownList(query);
-                return Json(ItemList);
-            }
+            var data = await _inwardEntryRepository.GetPartyAddressByCodeAsync(PartyId);
+            return Json(data);
         }
 
-        public JsonResult DDlDeptMast()
+        public async Task<JsonResult> fetchShipFromAdd(int ShipFromID)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select b.CODE , b.name  from ITEMDEPT_MAST b where B.ACTIVE=1 and b.Tran_type='Store' AND b.comp_code=" + getdata.PubCompCode + "  group by b.name ,b.CODE  order by b.name ";
-                var DeptList = _dropdownService.GetDropdownList(query);
-                return Json(DeptList);
-            }
-        }
-        public JsonResult DDlUnitMast()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "Select  b.CODE , b.name  from ITEMUNIT_MAST b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
-                var UnitList = _dropdownService.GetDropdownList(query);
-                return Json(UnitList);
-            }
-        }
-            
-        public JsonResult GetDataByPartyCode(int PartyId, int addressid)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @"SELECT  a.Add1, a.Add2, a.Add3, a.GSTIN, a.City_Code, b.Name AS State, a.Pincode , c.NAME as cityName ,a.PAN,a.STATE_CODE
-                                FROM  Subgroup_Address a
-                                LEFT JOIN STATE_MAST b ON a.STATE_CODE = b.code
-                                LEFT JOIN CITY_MAST c ON a.CITY_CODE = c.code
-                                WHERE   a.comp_code = @CompCode AND a.Code =@PartyId and   a.Address_Id = @Address_Id ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-                    cmd.Parameters.AddWithValue("@Address_Id", addressid);
-
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                Add1 = reader["Add1"].ToString(),
-                                Add2 = reader["Add2"].ToString(),
-                                Add3 = reader["Add3"].ToString(),
-                                GSTIN = reader["GSTIN"].ToString(),
-                                City_Code = reader["City_Code"].ToString(),
-                                STATE_CODE = reader["STATE_CODE"].ToString(),
-                                State = reader["State"].ToString(),
-                                Pincode = reader["Pincode"].ToString(),
-                                cityName = reader["cityName"].ToString(),
-                                PAN = reader["PAN"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
-        }
-
-        public JsonResult GetPartyAddressbyCode(int PartyId)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @"SELECT  a.Add1, a.Add2, a.Add3, a.GSTIN, a.City_Code, b.Name AS State, a.Pincode , c.NAME as cityName ,a.PAN,a.STATE_CODE
-                                FROM  Subgroup_Address a
-                                LEFT JOIN STATE_MAST b ON a.STATE_CODE = b.code
-                                LEFT JOIN CITY_MAST c ON a.CITY_CODE = c.code
-                                WHERE   a.comp_code = @CompCode AND a.Code =@PartyId  order by  a.ADDRESS_ID asc  ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                Add1 = reader["Add1"].ToString(),
-                                Add2 = reader["Add2"].ToString(),
-                                Add3 = reader["Add3"].ToString(),
-                                GSTIN = reader["GSTIN"].ToString(),
-                                City_Code = reader["City_Code"].ToString(),
-                                STATE_CODE = reader["STATE_CODE"].ToString(),
-                                State = reader["State"].ToString(),
-                                Pincode = reader["Pincode"].ToString(),
-                                cityName = reader["cityName"].ToString(),
-                                PAN = reader["PAN"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
-        }
-
-        public JsonResult fetchShipFromAdd(int ShipFromID)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @" SELECT CONCAT(A.ADD1, ' ', A.ADD2, ' ', A.ADD3) AS FullAddress  FROM SUBGROUP_MAST A
-                WHERE Nature IN ('Customer','Supplier','Broker','Staff')   AND COMP_CODE = @CompCode 
-                AND A.ACTIVE = 1   AND A.code = @ShipFromID";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@ShipFromID", ShipFromID);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                Address = reader["FullAddress"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
+            var data = await _inwardEntryRepository.FetchShipFromAddressAsync(ShipFromID);
+            return Json(data);
         }
 
         public class ApiResponse
@@ -361,16 +93,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             if (request?.Header == null)
             {
-                return Json(new  { success = false, status = "Error",   message = "Input model is null" });
+                return Json(new { success = false, status = "Error", message = "Input model is null" });
             }
 
             var action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
 
             var result = SubmitRequest(request.Header, request.Deatils, action);
 
-            return Json(new { success = result.Status == "Success",  status = result.Status, message = result.Message });
+            return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
         }
-          
+        
         private ApiResponse SubmitRequest(InwardEntry_Header header, List<Details> details, string action)
         {
             try
@@ -387,29 +119,29 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     dynamic data = jsonResult.Value;
                     header.V_NO = Convert.ToInt32(data.V_NO);
                 }
-                                
+
                 sql = @"SELECT V_No FROM waybill1 WHERE V_No =@V_No  AND V_Type = 'TRIN'   AND Party_Code = @Party_Code  
                 AND comp_Code = @comp_Code  AND Branch_Code = @Branch_Code;";
                 using (var cmd1 = new SqlCommand(sql, conn))
+                {
+                    cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
+                    cmd1.Parameters.AddWithValue("@V_No", header.V_NO);
+                    cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
+                    cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+
+                    using var reader1 = cmd1.ExecuteReader();
+
+                    var response = new ApiResponse();
+
+                    if (reader1.Read())
                     {
-                        cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
-                        cmd1.Parameters.AddWithValue("@V_No", header.V_NO);
-                        cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
-                        cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                        var V_NO = reader1["V_NO"];
 
-                        using var reader1 = cmd1.ExecuteReader();
-
-                        var response = new ApiResponse();
-
-                        if (reader1.Read())
+                        if (g.PubUserId != "1" && g.PubUserId != "53")
                         {
-                            var V_NO = reader1["V_NO"];
-
-                            if (g.PubUserId != "1" && g.PubUserId != "53")
-                            {
-                                Message = $"Gate no. {V_NO} exist in MRN No.{header.V_NO}  Modification not allowed.";
-                                return new ApiResponse { Status = "Error", Message = Message };
-                            }
+                            Message = $"Gate no. {V_NO} exist in MRN No.{header.V_NO}  Modification not allowed.";
+                            return new ApiResponse { Status = "Error", Message = Message };
+                        }
                     }
                 }
 
@@ -435,8 +167,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}";
                             return new ApiResponse { Status = "Error", Message = Message };
                         }
-                    }
-                }
+                     }
+                 }
 
                 if (header.WAYBILL_NO != null)
                 {
@@ -454,14 +186,14 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         using var READERS = cmd.ExecuteReader();
                         var response = new ApiResponse();
                         if (READERS.Read())
-                        {                          
+                        {
                             Message = $"Waybill no. not valid for Party=>{header.PARTY_NAME}, Please check in Transit Entry.";
                             return new ApiResponse { Status = "Error", Message = Message };
                         }
                     }
                 }
 
-                if(header.TRANSIT_NO != null)
+                if (header.TRANSIT_NO != null)
                 {
                     sql = @"SELECT TOP 1 CONCAT(V_type, V_no) AS V_NO  FROM Purchase1 WHERE Transit_No = @TransitNo  AND Comp_Code = @CompCode
                             AND Branch_Code = @BranchCode;";
@@ -548,17 +280,20 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     }
                 }
-           
-                var CountryCode = 0;
+
+                int CountryCode = 0;
+
                 if (header.V_TYPE == "INRM")
                 {
-                    sql = @"SELECT COUNTRY_CODE  FROM SUBGROUP_MAST  WHERE CODE = @FORM_NO  AND Comp_Code = @CompCode  AND ACTIVE = 1;";
+                    sql = @"SELECT COUNTRY_CODE  FROM SUBGROUP_MAST  WHERE CODE = @FORM_NO  
+                    AND Comp_Code = @CompCode  AND ACTIVE = 1;";
 
                     using (var cmd = new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue("@FORM_NO", header.WAYBILL_NO);
+                        cmd.Parameters.Add("@FORM_NO", SqlDbType.BigInt)
+                        .Value = Convert.ToInt64(header.WAYBILL_NO);
                         cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-               
+
                         using var READERS = cmd.ExecuteReader();
 
                         var response = new ApiResponse();
@@ -571,7 +306,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
 
                     var INV_NO = 0;
-  
+
 
                     if (CountryCode != 1)
                     {
@@ -591,7 +326,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             if (READERS.Read())
                             {
                                 INV_NO = Convert.ToInt32(READERS["INV_NO"]);
-                            }                                                     
+                            }
 
                         }
 
@@ -601,7 +336,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     var SUPPLIER_INVNOs = 0;
 
                     if (INV_NO != null)
-                    {                     
+                    {
 
                         sql = @"SELECT SUPPLIER_INVNO  FROM EXIM1 WHERE SUPPLIER_INVNO = @SUPPLIER_INVNO   AND 
                          SUPPLIER = @SUPPLIER AND COMP_CODE = @COMP_CODE;";
@@ -639,7 +374,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     deleteCmd.ExecuteNonQuery();
                 }
 
-                using (var cmd = new SqlCommand("sp_InwardEntry", conn))
+
+             using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -718,7 +454,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     cmd.ExecuteNonQuery();
                 }
-                  
+
                 foreach (var Details in details)
                 {
                     if (string.IsNullOrWhiteSpace(Details.ITEM_NAME))
@@ -811,8 +547,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         if (Details.REF_TYPE == "PAUD")
                         {
                             if (!string.IsNullOrEmpty(Details.ITEM_NAME) && Details.REF_NO > 0)
+                  
                             {
-                                
+
                                 string gateNosQuery = @"  DECLARE @cols AS VARCHAR(200) SELECT @cols = STUFF((
                                 SELECT ',' + CAST(V_No AS VARCHAR(20))   FROM gate2   WHERE ref_TYPE = @RefType 
                                 AND ref_NO = @RefNo   AND COMP_CODE = @CompCode   AND BRANCH_CODE = @BranchCode    AND v_type = @VType
@@ -844,7 +581,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                                     pubRes1Dbl = Convert.ToDouble(cmd.ExecuteScalar());
                                 }
-                                                    
+
                                 double pubRes2Dbl = 0;
                                 string sql2 = @"SELECT ISNULL(SUM(qty),0) FROM gate2 WHERE ref_TYPE = @RefType  AND ref_NO = @RefNo  
                                  AND COMP_CODE = @CompCode 
@@ -980,409 +717,39 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
                 }
 
-                return new ApiResponse { Status = "Success",  Message = Message };
+                return new ApiResponse { Status = "Success", Message = Message };
             }
             catch (Exception ex)
             {
-                return new ApiResponse {  Status = "Error",  Message = ex.Message };
+                return new ApiResponse { Status = "Error", Message = ex.Message };
             }
-        }
-
-        public JsonResult BillNoValidation(int PARTY_CODE, string BILL_NO, int V_NO)
-        {
-            try
-            {
-                if (PARTY_CODE <= 0 || string.IsNullOrWhiteSpace(BILL_NO))
-                {
-                    return Json(new { success = false });
-                }
-
-                var g = _globalVariableService.GetGlobalVariables();
-
-                using var conn = _dbConnection.GetErpConnection();
-                conn.Open();
-
-                string sql = @"SELECT TOP 1 doc_id, V_date  FROM GATE1
-                WHERE PARTY_CODE = @PartyCode  AND BILL_NO = @BillNo
-                AND V_TYPE IN('INST', 'INRM', 'INFU', 'INJB', 'INMS', 'INSR', 'INRT') AND V_NO<> @VNo AND COMP_CODE = @CompCode
-                AND Branch_Code = @BranchCode  AND Year_Code = @YearCode; ";
-
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@PartyCode", PARTY_CODE);
-                    cmd.Parameters.AddWithValue("@BillNo", BILL_NO);
-                    cmd.Parameters.AddWithValue("@VNo", V_NO);
-                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-
-                    using var reader = cmd.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        var docId = reader["doc_id"]?.ToString();
-                        var vDate = reader["V_date"] != DBNull.Value ? Convert.ToDateTime(reader["V_date"]).ToString("dd-MMM-yyyy") : "";                
-                        return Json(new {  success = false,  message = $"Bill No '{BILL_NO}' already exists at Serial No: {docId} dated: {vDate}"  });
-                    }
-                }
-                return Json(new { success = true, message = "Valid"  });
-            }
-            catch (Exception ex)
-            {      
-                Console.Error.WriteLine($"Error in BillNoValidation: {ex.Message}");
-                return Json(new { success = false,  message = "An error occurred while validating the Bill No." });
-            }
-        }
-
-        public JsonResult GatenoValidation(string V_TYPE , int V_NO)
-        {
-            try
-            {
-                if (V_NO <= 0 )
-                {
-                    return Json(new  { success = false, message = "Invalid Party or Bill No."});
-                }
-
-                var g = _globalVariableService.GetGlobalVariables();
-
-                using var conn = _dbConnection.GetErpConnection();
-                conn.Open();
-
-               string sql = @"SELECT TOP 1 CONCAT(V_TYPE, V_NO)  AS  V_NO FROM Purchase1  WHERE V_TYPE IN ( SELECT code  FROM doctype_mast  
-                WHERE doctype = 'MaterialReceipt') AND GATE_TYPE = @GATE_TYPE  AND GATE_No = @GATE_NO AND Comp_Code = @Comp_Code AND 
-                Branch_Code = @Branch_Code;";
-
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@GATE_TYPE", V_TYPE);
-                    cmd.Parameters.AddWithValue("@GATE_NO", V_NO);
-                    cmd.Parameters.AddWithValue("@Comp_Code", g.PubCompCode);
-                    cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
-
-                    using var reader = cmd.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        var VNO = reader["V_NO"]?.ToString();             
-                        return Json(new { success = false, message = $"Gate no. {VNO} exist in MRN No.{V_NO}  Modification not allowed." });
-                    }
-                }
-                return Json(new { success = true, message = "Valid" });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error in BillNoValidation: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while validating the Bill No." });
-            }
-        }
-
-        public JsonResult fetchSelectedAddress(int PartyId)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @"
-                SELECT DISTINCT  address_id AS code, add1 AS name  FROM  SUBGROUP_ADDRESS 
-                WHERE  code = " + PartyId + " AND COMP_CODE = " + getdata.PubCompCode + "    and ADD1 <> ''  ORDER BY  ADDRESS_ID;";
-
-                var selectAddList = _dropdownService.GetDropdownList(query);
-
-                return Json(selectAddList);
-            }
-
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetVehcleinfo([FromQuery] string rc_number, string VType, int VNo)
+        public async Task<IActionResult> BillNoValidation(int PARTY_CODE, string BILL_NO, int V_NO)
         {
-            try
+            var result = await _inwardEntryRepository.ValidateBillNoAsync(PARTY_CODE, BILL_NO, V_NO);
+
+            return Json(new
+            {  success = result.status == true,  message = result.message });
+        }
+        [HttpGet]
+        public async Task<IActionResult> GatenoValidation(string V_TYPE, int V_NO)
+        {
+            var result = await _inwardEntryRepository.ValidateGateNoAsync(V_TYPE, V_NO);
+
+            return Json(new
             {
-                using var client = new HttpClient();
-
-                string url = "https://kyc-api.surepass.io/api/v1/rc/rc-full";
-                string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc1MTg3ODU4MiwianRpIjoiYzczZmFkMTAtZjk0MC00NzdkLThlNDgtMjU3ZTViMzVkYjY4IiwidHlwZSI6ImFjY2VzcyIsImlkZW50aXR5IjoiZGV2LnBhc2h1cGF0aWdycF9jb25zb2xlQHN1cmVwYXNzLmlvIiwibmJmIjoxNzUxODc4NTgyLCJleHAiOjIzODI1OTg1ODIsImVtYWlsIjoicGFzaHVwYXRpZ3JwX2NvbnNvbGVAc3VyZXBhc3MuaW8iLCJ0ZW5hbnRfaWQiOiJtYWluIiwidXNlcl9jbGFpbXMiOnsic2NvcGVzIjpbInVzZXIiXX19.vVom9nrkmom4XGJUEXAkntNzof1lHNwlHsRBdErWXQQ"; // Replace with your actual token
-
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var payload = new JObject
-                {
-                    ["id_number"] = rc_number
-                };
-
-                var content = new StringContent(payload.ToString(), System.Text.Encoding.UTF8, "application/json");
-
-                HttpResponseMessage response = await client.PostAsync(url, content);
-                string responseData = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new JsonResult(new { error = "API request failed", status = (int)response.StatusCode, details = responseData });
-                }
-
-                var jsonResponse = JObject.Parse(responseData);
-
-                var vehicleData = jsonResponse["data"];
-                if (vehicleData == null)
-                {
-                    return new JsonResult(new { error = "No vehicle data found" });
-                }
-                               
-                var vehicleInfo = new RcRequest
-                {
-                    RcNumber = vehicleData["rc_number"]?.ToString(),
-                    ClientId = vehicleData["client_id"]?.ToString(),
-                    RegistrationDate = vehicleData["registration_date"]?.ToObject<DateTime?>(),
-                    OwnerName = vehicleData["owner_name"]?.ToString(),
-                    FatherName = vehicleData["father_name"]?.ToString(),
-                    PresentAddress = vehicleData["present_address"]?.ToString(),
-                    PermanentAddress = vehicleData["permanent_address"]?.ToString(),
-                    MobileNumber = vehicleData["mobile_number"]?.ToString(),
-                    VehicleCategory = vehicleData["vehicle_category"]?.ToString(),
-                    VehicleChasiNumber = vehicleData["vehicle_chasi_number"]?.ToString(),
-                    VehicleEngineNumber = vehicleData["vehicle_engine_number"]?.ToString(),
-                    MakerDescription = vehicleData["maker_description"]?.ToString(),
-                    MakerModel = vehicleData["maker_model"]?.ToString(),
-                    BodyType = vehicleData["body_type"]?.ToString(),
-                    FuelType = vehicleData["fuel_type"]?.ToString(),
-                    Color = vehicleData["color"]?.ToString(),
-                    NormsType = vehicleData["norms_type"]?.ToString(),
-                    FitUpTo = vehicleData["fit_up_to"]?.ToObject<DateTime?>(),
-                    Financer = vehicleData["financer"]?.ToString(),
-                    Financed = vehicleData["financed"]?.ToObject<bool?>(),
-                    InsuranceCompany = vehicleData["insurance_company"]?.ToString(),
-                    InsurancePolicyNumber = vehicleData["insurance_policy_number"]?.ToString(),
-                    InsuranceUpto = vehicleData["insurance_upto"]?.ToObject<DateTime?>(),
-                    ManufacturingDate = vehicleData["manufacturing_date"]?.ToObject<DateTime?>(),
-                    ManufacturingDateFormatted = vehicleData["manufacturing_date_formatted"]?.ToString(),
-                    RegisteredAt = vehicleData["registered_at"]?.ToString(),
-                    LatestBy = vehicleData["latest_by"]?.ToString(),
-                    LessInfo = vehicleData["less_info"]?.ToObject<bool?>(),
-                    TaxUpto = vehicleData["tax_upto"]?.ToObject<DateTime?>(),
-                    TaxPaidUpto = vehicleData["tax_paid_upto"]?.ToObject<DateTime?>(),
-                    CubicCapacity = vehicleData["cubic_capacity"]?.ToString(),
-                    VehicleGrossWeight = vehicleData["vehicle_gross_weight"]?.ToString(),
-                    NoCylinders = vehicleData["no_cylinders"]?.ToString(),
-                    SeatCapacity = vehicleData["seat_capacity"]?.ToString(),
-                    SleeperCapacity = vehicleData["sleeper_capacity"]?.ToString(),
-                    StandingCapacity = vehicleData["standing_capacity"]?.ToString(),
-                    Wheelbase = vehicleData["wheelbase"]?.ToString(),
-                    UnladenWeight = vehicleData["unladen_weight"]?.ToString(),
-                    VehicleCategoryDescription = vehicleData["vehicle_category_description"]?.ToString(),
-                    PuccNumber = vehicleData["pucc_number"]?.ToString(),
-                    PuccUpto = vehicleData["pucc_upto"]?.ToObject<DateTime?>(),
-                    PermitNumber = vehicleData["permit_number"]?.ToString(),
-                    PermitIssueDate = vehicleData["permit_issue_date"]?.ToObject<DateTime?>(),
-                    PermitValidFrom = vehicleData["permit_valid_from"]?.ToObject<DateTime?>(),
-                    PermitValidUpto = vehicleData["permit_valid_upto"]?.ToObject<DateTime?>(),
-                    PermitType = vehicleData["permit_type"]?.ToString(),
-                    NationalPermitNumber = vehicleData["national_permit_number"]?.ToString(),
-                    NationalPermitUpto = vehicleData["national_permit_upto"]?.ToObject<DateTime?>(),
-                    NationalPermitIssuedBy = vehicleData["national_permit_issued_by"]?.ToString(),
-                    NonUseStatus = vehicleData["non_use_status"]?.ToString(),
-                    NonUseFrom = vehicleData["non_use_from"]?.ToObject<DateTime?>(),
-                    NonUseTo = vehicleData["non_use_to"]?.ToObject<DateTime?>(),
-                    BlacklistStatus = vehicleData["blacklist_status"]?.ToString(),
-                    NocDetails = vehicleData["noc_details"]?.ToString(),
-                    OwnerNumber = vehicleData["owner_number"]?.ToString(),
-                    RcStatus = vehicleData["rc_status"]?.ToString(),
-                    MaskedName = vehicleData["masked_name"]?.ToObject<bool?>(),
-                    ChallanDetails = vehicleData["challan_details"]?.ToString()
-                };
-
-                var global = _globalVariableService.GetGlobalVariables();
-                using var conn = _dbConnection.GetErpConnection();
-                conn.Open();
-
-                string sql = ""; 
-            
-
-                string deletequery = " DELETE from GATE_VAHAN  WHERE  V_TYPE = @Vtype  AND V_NO=@V_no and COMP_CODE =@Compcode  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YEAR_CODE";
-
-                using (var cmd1 = new SqlCommand(deletequery, conn))
-                {
-                    cmd1.Parameters.AddWithValue("@Vtype", VType);
-                    cmd1.Parameters.AddWithValue("@V_no", VNo);
-                    cmd1.Parameters.AddWithValue("@Compcode", global.PubCompCode);
-                    cmd1.Parameters.AddWithValue("@BranchCode", global.PubBranchCode);
-                    cmd1.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
-
-                    cmd1.ExecuteNonQuery();
-                }
-
-                        sql = "INSERT INTO GATE_VAHAN (COMP_CODE, BRANCH_CODE, YEAR_CODE, V_TYPE, V_NO, client_id, rc_number, registration_date, owner_name, father_name, present_address, permanent_address, " +
-                        "mobile_number, vehicle_category, vehicle_chasi_number, vehicle_engine_number, maker_description, maker_model, body_type, fuel_type, Color, norms_type, fit_up_to, financer, financed, " +
-                        "insurance_company, insurance_policy_number, insurance_upto, manufacturing_date, manufacturing_date_formatted, registered_at, latest_by, less_info, tax_upto, tax_paid_upto, cubic_capacity, " +
-                        "vehicle_gross_weight, no_cylinders, seat_capacity, sleeper_capacity, standing_capacity, wheelbase, unladen_weight, vehicle_category_description, pucc_number, pucc_upto, permit_number, permit_issue_date, " +
-                        "permit_valid_from, permit_valid_upto, permit_type, national_permit_number, national_permit_upto, national_permit_issued_by, non_use_status, non_use_from, non_use_to, " +
-                        "blacklist_status, noc_details, owner_number, rc_status, masked_name, challan_details, UUSER, UDATE, AED, WSID, LIP, LID) " +
-                        "VALUES (@COMP_CODE, @BRANCH_CODE, @YEAR_CODE, @V_TYPE, @V_NO, @client_id, @rc_number, @registration_date, @owner_name, @father_name, @present_address, @permanent_address, " +
-                        "@mobile_number, @vehicle_category, @vehicle_chasi_number, @vehicle_engine_number, @maker_description, @maker_model, @body_type, @fuel_type, @color, @norms_type, @fit_up_to, @financer, @financed, " +
-                        "@insurance_company, @insurance_policy_number, @insurance_upto, @manufacturing_date, @manufacturing_date_formatted, @registered_at, @latest_by, @less_info, @tax_upto, @tax_paid_upto, @cubic_capacity, " +
-                        "@vehicle_gross_weight, @no_cylinders, @seat_capacity, @sleeper_capacity, @standing_capacity, @wheelbase, @unladen_weight, @vehicle_category_description, @pucc_number, @pucc_upto, @permit_number, @permit_issue_date, " +
-                        "@permit_valid_from, @permit_valid_upto, @permit_type, @national_permit_number, @national_permit_upto, @national_permit_issued_by, @non_use_status, @non_use_from, @non_use_to, " +
-                        "@blacklist_status, @noc_details, @owner_number, @rc_status, @masked_name, @challan_details, @UUSER, GETDATE(), @AED, @WSID, @LIP, @LID)";
-
-               
-                    using (var cmd = new SqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                        cmd.Parameters.AddWithValue("@V_NO", VNo);
-                        cmd.Parameters.AddWithValue("@client_id", vehicleInfo.ClientId ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@rc_number", vehicleInfo.RcNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@registration_date", vehicleInfo.RegistrationDate ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@owner_name", vehicleInfo.OwnerName ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@father_name", vehicleInfo.FatherName ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@present_address", vehicleInfo.PresentAddress ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@permanent_address", vehicleInfo.PermanentAddress ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@mobile_number", vehicleInfo.MobileNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@vehicle_category", vehicleInfo.VehicleCategory ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@vehicle_chasi_number", vehicleInfo.VehicleChasiNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@vehicle_engine_number", vehicleInfo.VehicleEngineNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@maker_description", vehicleInfo.MakerDescription ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@maker_model", vehicleInfo.MakerModel ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@body_type", vehicleInfo.BodyType ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@fuel_type", vehicleInfo.FuelType ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@color", vehicleInfo.Color ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@norms_type", vehicleInfo.NormsType ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@fit_up_to", vehicleInfo.FitUpTo ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@financer", vehicleInfo.Financer ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@financed", vehicleInfo.Financed ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@insurance_company", vehicleInfo.InsuranceCompany ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@insurance_policy_number", vehicleInfo.InsurancePolicyNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@insurance_upto", vehicleInfo.InsuranceUpto ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@manufacturing_date", vehicleInfo.ManufacturingDate ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@manufacturing_date_formatted", vehicleInfo.ManufacturingDateFormatted ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@registered_at", vehicleInfo.RegisteredAt ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@latest_by", vehicleInfo.LatestBy ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@less_info", vehicleInfo.LessInfo ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@tax_upto", vehicleInfo.TaxUpto ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@tax_paid_upto", vehicleInfo.TaxPaidUpto ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@cubic_capacity", vehicleInfo.CubicCapacity ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@vehicle_gross_weight", vehicleInfo.VehicleGrossWeight ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@no_cylinders", vehicleInfo.NoCylinders ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@seat_capacity", vehicleInfo.SeatCapacity ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@sleeper_capacity", vehicleInfo.SleeperCapacity ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@standing_capacity", vehicleInfo.StandingCapacity ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@wheelbase", vehicleInfo.Wheelbase ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@unladen_weight", vehicleInfo.UnladenWeight ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@vehicle_category_description", vehicleInfo.VehicleCategoryDescription ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@pucc_number", vehicleInfo.PuccNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@pucc_upto", vehicleInfo.PuccUpto ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@permit_number", vehicleInfo.PermitNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@permit_issue_date", vehicleInfo.PermitIssueDate ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@permit_valid_from", vehicleInfo.PermitValidFrom ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@permit_valid_upto", vehicleInfo.PermitValidUpto ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@permit_type", vehicleInfo.PermitType ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@national_permit_number", vehicleInfo.NationalPermitNumber ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@national_permit_upto", vehicleInfo.NationalPermitUpto ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@national_permit_issued_by", vehicleInfo.NationalPermitIssuedBy ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@non_use_status", vehicleInfo.NonUseStatus ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@non_use_from", vehicleInfo.NonUseFrom ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@non_use_to", vehicleInfo.NonUseTo ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@blacklist_status", vehicleInfo.BlacklistStatus ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@noc_details", vehicleInfo.NocDetails ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@owner_number", vehicleInfo.OwnerName ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@rc_status", vehicleInfo.RcStatus ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@masked_name", vehicleInfo.MaskedName ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@challan_details", vehicleInfo.ChallanDetails ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@AED", "A");
-                        cmd.Parameters.AddWithValue("@WSID", global.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@LIP", global.PubLocalId);
-                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-                        cmd.Parameters.AddWithValue("@UUSER", global.PubUserId);
-
-                        // Execute the query
-                        cmd.ExecuteNonQuery();
-                    }
-
-                return new JsonResult(new { success = true, message = "Data inserted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new { error = ex.Message });
-            }
+                success = result.status == true,
+                message = result.message
+            });
         }
 
-        public class RcRequest
+        [HttpGet]
+        public async Task<JsonResult> GetVehcleinfo(string rc_number, string VType, int VNo)
         {
-            public string? RcNumber { get; set; }
-            public int? CompCode { get; set; }
-            public int? BranchCode { get; set; }
-            public int? YearCode { get; set; }
-            public string? VType { get; set; }
-            public int? VNo { get; set; }
-            public string? ClientId { get; set; }
-            public DateTime? RegistrationDate { get; set; }
-            public string? OwnerName { get; set; }
-            public string? FatherName { get; set; }
-            public string? PresentAddress { get; set; }
-            public string? PermanentAddress { get; set; }
-            public string? MobileNumber { get; set; }
-            public string? VehicleCategory { get; set; }
-            public string? VehicleChasiNumber { get; set; }
-            public string? VehicleEngineNumber { get; set; }
-            public string? MakerDescription { get; set; }
-            public string? MakerModel { get; set; }
-            public string? BodyType { get; set; }
-            public string? FuelType { get; set; }
-            public string? Color { get; set; }
-            public string? NormsType { get; set; }
-            public DateTime? FitUpTo { get; set; }
-            public string? Financer { get; set; }
-            public bool? Financed { get; set; }
-            public string? InsuranceCompany { get; set; }
-            public string? InsurancePolicyNumber { get; set; }
-            public DateTime? InsuranceUpto { get; set; }
-            public DateTime? ManufacturingDate { get; set; }
-            public string? ManufacturingDateFormatted { get; set; }
-            public string? RegisteredAt { get; set; }
-            public string? LatestBy { get; set; }
-            public bool? LessInfo { get; set; }
-            public DateTime? TaxUpto { get; set; }
-            public DateTime? TaxPaidUpto { get; set; }
-            public string? CubicCapacity { get; set; }
-            public string? VehicleGrossWeight { get; set; }
-            public string? NoCylinders { get; set; }
-            public string? SeatCapacity { get; set; }
-            public string? SleeperCapacity { get; set; }
-            public string? StandingCapacity { get; set; }
-            public string? Wheelbase { get; set; }
-            public string? UnladenWeight { get; set; }
-            public string? VehicleCategoryDescription { get; set; }
-            public string? PuccNumber { get; set; }
-            public DateTime? PuccUpto { get; set; }
-            public string? PermitNumber { get; set; }
-            public DateTime? PermitIssueDate { get; set; }
-            public DateTime? PermitValidFrom { get; set; }
-            public DateTime? PermitValidUpto { get; set; }
-            public string? PermitType { get; set; }
-            public string? NationalPermitNumber { get; set; }
-            public DateTime? NationalPermitUpto { get; set; }
-            public string? NationalPermitIssuedBy { get; set; }
-            public string? NonUseStatus { get; set; }
-            public DateTime? NonUseFrom { get; set; }
-            public DateTime? NonUseTo { get; set; }
-            public string? BlacklistStatus { get; set; }
-            public string? NocDetails { get; set; }
-            public string? OwnerNumber { get; set; }
-            public string? RcStatus { get; set; }
-            public bool? MaskedName { get; set; }
-            public string? ChallanDetails { get; set; }
-            public int? UUser { get; set; }
-            public DateTime? UDate { get; set; }
-            public int? EUser { get; set; }
-            public DateTime? EDate { get; set; }
-            public string? Aed { get; set; }
-            public string? Wsid { get; set; }
-            public string? Lip { get; set; }
-            public string? Lid { get; set; }
-            public int? SrNo { get; set; }
+            var res = await _globalValidationdate.GetVehicleInfo(rc_number, VType, VNo);
+            return new JsonResult(res);
         }
 
         public JsonResult GetVehicledetail(int v_no, string v_type)
@@ -1427,7 +794,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     father_name = reader["father_name"],
                                     permanent_address = reader["permanent_address"],
                                     mobile_number = reader["mobile_number"],
-                                    maker_model = reader["maker_model"],                                  
+                                    maker_model = reader["maker_model"],
                                     present_address = reader["present_address"],
                                     vehicle_category = reader["vehicle_category"],
                                     vehicle_chasi_number = reader["vehicle_chasi_number"],
@@ -1495,131 +862,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetVehcleFastaginfo([FromQuery] string rc_number, string VType, int VNo)
+        public async Task<JsonResult> GetVehcleFastaginfocall([FromQuery] string rc_number, string VType, int VNo)
         {
             try
-            {
-                using var client = new HttpClient();
-                string url = "https://kyc-api.surepass.app/api/v1/fastag/fastag-verification-v2";
-
-                string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc1MTg3ODU4MiwianRpIjoiYzczZmFkMTAtZjk0MC00NzdkLThlNDgtMjU3ZTViMzVkYjY4IiwidHlwZSI6ImFjY2VzcyIsImlkZW50aXR5IjoiZGV2LnBhc2h1cGF0aWdycF9jb25zb2xlQHN1cmVwYXNzLmlvIiwibmJmIjoxNzUxODc4NTgyLCJleHAiOjIzODI1OTg1ODIsImVtYWlsIjoicGFzaHVwYXRpZ3JwX2NvbnNvbGVAc3VyZXBhc3MuaW8iLCJ0ZW5hbnRfaWQiOiJtYWluIiwidXNlcl9jbGFpbXMiOnsic2NvcGVzIjpbInVzZXIiXX19.vVom9nrkmom4XGJUEXAkntNzof1lHNwlHsRBdErWXQQ";
-
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var payload = new JObject
-                {
-                    ["rc_number"] = rc_number
-                };
-
-                 var content = new StringContent(payload.ToString(), System.Text.Encoding.UTF8, "application/json");
-
-                HttpResponseMessage response = await client.PostAsync(url, content);
-                string responseData = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new JsonResult(new
-                    {
-                        error = "API request failed",
-                        status = (int)response.StatusCode,
-                        details = responseData
-                    });
-                }
-
-                var global = _globalVariableService.GetGlobalVariables();
-
-                using var conn = _dbConnection.GetErpConnection();
-                conn.Open();
-
-                // ✅ DELETE OLD DATA
-                string deletequery = @"DELETE FROM GATE_FASTAG WHERE V_TYPE = @Vtype AND V_NO = @V_no  AND COMP_CODE = @Compcode  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YEAR_CODE";
-
-                using (var cmd1 = new SqlCommand(deletequery, conn))
-                {
-                    cmd1.Parameters.AddWithValue("@Vtype", VType);
-                    cmd1.Parameters.AddWithValue("@V_no", VNo);
-                    cmd1.Parameters.AddWithValue("@Compcode", global.PubCompCode);
-                    cmd1.Parameters.AddWithValue("@BranchCode", global.PubBranchCode);
-                    cmd1.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
-                    cmd1.ExecuteNonQuery();
-                }
-
-                // ✅ INSERT QUERY
-                string sql = @"INSERT INTO GATE_FASTAG
-                (YEAR_CODE,COMP_CODE,BRANCH_CODE,V_TYPE,V_NO,ClientId,RcNumber,BankName,TagId,Status,FastagId,
-                LaneDirection,TransactionDateTime,SeqNo,TollPlazaGeoCode,TollPlazaName,VehicleType,UUSER,UDATE,AED,WSID,LIP,LID,TransactionId)
-                VALUES
-                (@YEAR_CODE,@COMP_CODE,@BRANCH_CODE,@V_TYPE,@V_NO,@ClientId,@RcNumber,@BankName,@TagId,@Status,@FastagId,
-                @LaneDirection,@TransactionDateTime,@SeqNo,@TollPlazaGeoCode,@TollPlazaName,@VehicleType,@UUSER,GETDATE(),@AED,@WSID,@LIP,@LID,@TRANSACTIONID)";
-
-                // ✅ PARSE JSON
-                var json = JObject.Parse(responseData);
-                var data = json["data"];
-                var transactions = data["transactions"];
-
-                int rowNo = 0;
-
-
-
-                if(!transactions.HasValues)
-                {
-                  return new JsonResult(new { error = "Data Not Found" ,status = false });
-                }
-
-                foreach (var item in transactions)
-                {
-                    var model = new FasttagList
-                    {
-                        V_TYPE = VType,
-                        V_NO = VNo,
-                        ClientId = data["client_id"]?.ToString(),
-                        RcNumber = data["rc_number"]?.ToString(),
-                        BankName = data["bank_name"]?.ToString(),
-                        TagId = data["tag_id"]?.ToString(),
-                        Status = data["status"]?.ToString(),
-                        LaneDirection = item["lane_direction"]?.ToString()?.FirstOrDefault(),
-                        TransactionDateTime = Convert.ToDateTime(item["transaction_date_time"]),
-                        SeqNo = item["seq_no"]?.ToString(),
-                        TollPlazaGeoCode = item["toll_plaza_geocode"]?.ToString(),
-                        TollPlazaName = item["toll_plaza_name"]?.ToString(),
-                        VehicleType = item["vehicle_type"]?.ToString()
-                    };
-
-                    using (var cmd = new SqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = global.PubFYearCode;
-                        cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = global.PubCompCode;
-                        cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = global.PubBranchCode;
-                        cmd.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 4).Value = model.V_TYPE ?? "";
-                        cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = model.V_NO;
-                        cmd.Parameters.Add("@ClientId", SqlDbType.NVarChar, 100).Value = model.ClientId ?? "";
-                        cmd.Parameters.Add("@RcNumber", SqlDbType.NVarChar, 20).Value = model.RcNumber ?? "";
-                        cmd.Parameters.Add("@BankName", SqlDbType.NVarChar, 100).Value = model.BankName ?? "";
-                        cmd.Parameters.Add("@TagId", SqlDbType.NVarChar, 50).Value = model.TagId ?? "";
-                        cmd.Parameters.Add("@Status", SqlDbType.NVarChar, 20).Value = model.Status ?? "";
-                        cmd.Parameters.Add("@FastagId", SqlDbType.Int).Value = (object?)model.FastagId ?? DBNull.Value;
-                        cmd.Parameters.Add("@LaneDirection", SqlDbType.Char, 1).Value = (object?)model.LaneDirection ?? DBNull.Value;
-                        cmd.Parameters.Add("@TransactionDateTime", SqlDbType.DateTime2).Value = (object?)model.TransactionDateTime ?? DBNull.Value;
-                        cmd.Parameters.Add("@TRANSACTIONID", SqlDbType.BigInt).Value = rowNo;
-                        cmd.Parameters.Add("@SeqNo", SqlDbType.NVarChar, 50).Value = model.SeqNo ?? "";
-                        cmd.Parameters.Add("@TollPlazaGeoCode", SqlDbType.NVarChar, 50).Value = model.TollPlazaGeoCode ?? "";
-                        cmd.Parameters.Add("@TollPlazaName", SqlDbType.NVarChar, 150).Value = model.TollPlazaName ?? "";
-                        cmd.Parameters.Add("@VehicleType", SqlDbType.NVarChar, 10).Value = model.VehicleType ?? "";
-                        cmd.Parameters.Add("@UUSER", SqlDbType.Int).Value = global.PubUserId;
-                        cmd.Parameters.Add("@AED", SqlDbType.NVarChar, 1).Value = "A";
-                        cmd.Parameters.Add("@WSID", SqlDbType.NVarChar, 30).Value = global.PubWorkStationID ?? "";
-                        cmd.Parameters.Add("@LIP", SqlDbType.NVarChar, 30).Value = global.PubLocalId ?? "";
-                        cmd.Parameters.Add("@LID", SqlDbType.NVarChar, 30).Value = Environment.MachineName;
-                        cmd.ExecuteNonQuery();
-                        rowNo++;
-                    }
-                }
-
-                return new JsonResult(new {success = true,message = "Data saved successfully", count = transactions.Count() });
+            {  
+                var res = await _globalValidationdate.GetVehcleFastaginfo(rc_number, VType, VNo);
+                return new JsonResult(new { success = true, message = "Data saved successfully",  data = res });
             }
             catch (HttpRequestException ex)
             {
@@ -1630,7 +878,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = "Unexpected error", details = ex.Message });
             }
         }
-
+      
         public JsonResult GetFasttagdetail(int v_no, string v_type)
         {
             try
@@ -1694,27 +942,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = er.Message });
             }
         }
-
-        public class FasttagList
-    {
-        public string? V_TYPE { get; set; }
-        public int V_NO { get; set; }               
-        public string ClientId { get; set; }
-        public string RcNumber { get; set; }
-        public string BankName { get; set; }
-        public string TagId { get; set; }
-        public string Status { get; set; }
-        public long TransactionId { get; set; }
-        public int? FastagId { get; set; }
-        public char? LaneDirection { get; set; }
-        public DateTime? TransactionDateTime { get; set; } 
-        public string SeqNo { get; set; }
-        public string TollPlazaGeoCode { get; set; }
-        public string TollPlazaName { get; set; }
-        public string VehicleType { get; set; }
-
-    }
-
+  
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
         {
@@ -1725,190 +953,168 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Ok(result);
         }
 
-        public JsonResult GetSEARCHCONTAINER(String Container_No)
+        public async Task<JsonResult> GetSEARCHCONTAINER(string Container_No)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-            int supplier = 0;
-            using (SqlConnection con = _dbConnection.GetErpConnection())
+            var res = await _inwardEntryRepository.GetSEARCHCONTAINERAsync(Container_No);
+
+            return Json(new
             {
-                con.Open();          
-            
-                string SQL = @"SELECT TOP 1  SUPPLIER  FROM EXIM1 a  LEFT JOIN EXIM2 b  ON a.V_TYPE = b.V_TYPE   AND a.V_NO = b.V_NO  AND a.COMP_CODE = b.COMP_CODE 
-                    AND a.BRANCH_CODE = b.BRANCH_CODE   AND a.YEAR_CODE = b.YEAR_CODE   WHERE b.Container_No = @Container_No";
-
-                using (SqlCommand CMD1 = new SqlCommand(SQL, con))
-                {
-                    CMD1.Parameters.Add("@Container_No", SqlDbType.VarChar).Value = Container_No;
-
-                    using (SqlDataReader reader = CMD1.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                             supplier = Convert.ToInt32(reader["SUPPLIER"]);
-                        }
-                        else
-                        {
-                            return Json( new { StatusCode = false, meessage = "Container Detail not found in Import Tracking." });
-                        }
-                    }
-                }
-            }
-            return Json(new { StatusCode = false, meessage = "SuccessFully" , supplier = supplier });
+                StatusCode = res.status,
+                message = res.message,
+                supplier = res.data
+            });
         }
 
-
         [HttpGet]
-        public JsonResult DDlTransitNo(string v_type, int v_no, int partycode, DateTime ExpiryDate)
+        public async Task<JsonResult> DDlTransitNo(string v_type, int v_no, int partycode, DateTime ExpiryDate)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<object>();
-            var date = ExpiryDate.Date;
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-                string query = @"
-                    SELECT V_No  FROM WAYBILL1  WHERE V_TYPE = 'TRIN'  AND V_No NOT IN (SELECT TRANSIT_NO  FROM GATE1 WHERE V_TYPE = @V_Type
-                    AND V_No = @V_No  AND TRANSIT_NO <> 0 AND COMP_CODE = @CompCode  AND BRANCH_CODE = @BRANCH_CODE )
-                    AND PARTY_CODE = @PartyCode   AND Status = 1  AND COMP_CODE = @CompCode AND BRANCH_CODE = @BRANCH_CODE
-                    AND EXPIRY_DATE IS NOT NULL  AND EXPIRY_DATE >= @ExpiryDate  ORDER BY V_No;";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                  
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@V_Type", (object)v_type ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@V_No", v_no);
-                    cmd.Parameters.AddWithValue("@PartyCode", partycode);
-                    DateTime expiryDate = ExpiryDate.AddMonths(-1);
-                    cmd.Parameters.AddWithValue("@ExpiryDate", expiryDate);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            dataList.Add(new
-                            {
-                                value = reader["V_No"].ToString(),
-                                text = reader["V_No"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(dataList);
+            var res = await _inwardEntryRepository.DDlTransitNoAsync(v_type, v_no, partycode, ExpiryDate);
+            return Json(res);
         }
 
-
         [HttpGet]
-        public async Task<JsonResult> GetEWayBillData(DateTime edate, string inoutdata)
+        public async Task<JsonResult> GetEWayBillDatacall(DateTime edate, string inoutdata)
         {
-            string dt = edate.ToString("dd/MM/yyyy");
-
-            string baseUrl = "https://api.mastergst.com/ewaybillapi/v1.03";
-
-            string dataUrl = inoutdata == "IN"
-                ? $"{baseUrl}/ewayapi/getewaybillsofotherparty?email=it%40pashupatigrp.com&date={Uri.EscapeDataString(dt)}"
-                : $"{baseUrl}/ewayapi/getewaybillsbydate?email=it%40pashupatigrp.com&date={Uri.EscapeDataString(dt)}";
-
-            using var client = new HttpClient();
-
-            // 🔹 Common Headers
-            client.DefaultRequestHeaders.Add("ip_address", "103.74.69.13");
-            client.DefaultRequestHeaders.Add("client_id", "bbba189e-a0b5-4596-9cdb-8f1e77e3a543");
-            client.DefaultRequestHeaders.Add("client_secret", "a7dd0b00-d60b-4424-941b-ad45e834b76b");
-            client.DefaultRequestHeaders.Add("gstin", "05AAFCP0864M1Z7");
-            client.DefaultRequestHeaders.Add("auth_access_type", "read");
-
             try
-            {
-                // =========================
-                // 🔐 STEP 1: AUTHENTICATION
-                // =========================
-                string username = "mastergst";
-                string password = Uri.EscapeDataString("Malli#123");
-
-                string authUrl = $"{baseUrl}/authenticate?email=it%40pashupatigrp.com&username={username}&password={password}";
-
-                var authResponse = await client.GetAsync(authUrl);
-                var authContent = await authResponse.Content.ReadAsStringAsync();
-
-                var authJson = JObject.Parse(authContent);
-
-                if (authJson["status_cd"]?.ToString() != "1")
-                {
-                    return new JsonResult(new
-                    {
-                        success = false,
-                        message = "Authentication failed",
-                        response = authJson
-                    });
-                }
-
-                string token = authJson["data"]?["AuthToken"]?.ToString();
-
-                if (string.IsNullOrEmpty(token))
-                {
-                    return new JsonResult(new
-                    {
-                        success = false,
-                        message = "Auth token not received"
-                    });
-                }
-
-                // =========================
-                // 🔥 STEP 2: ADD TOKEN
-                // =========================
-                client.DefaultRequestHeaders.Remove("Authorization");
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-
-                // =========================
-                // 📦 STEP 3: GET DATA
-                // =========================
-                var response = await client.GetAsync(dataUrl);
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine("API Response: " + responseContent);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new JsonResult(new
-                    {
-                        success = false,
-                        message = "HTTP Error",
-                        status = response.StatusCode,
-                        response = responseContent
-                    });
-                }
-
-                var json = JObject.Parse(responseContent);
-
-                if (json["errorCode"] != null)
-                {
-                    return new JsonResult(new
-                    {
-                        success = false,
-                        apiError = json
-                    });
-                }
-
-                // ✅ SUCCESS
-                return new JsonResult(new
-                {
-                    success = true,
-                    data = json
-                });
+            {    
+                var result = await _globalValidationdate.GetEWayBillData(edate, inoutdata);
+                return result;
             }
             catch (Exception ex)
             {
-                return new JsonResult(new
-                {
-                    success = false,
-                    message = "Exception occurred",
-                    error = ex.Message
-                });
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public JsonResult fetchSelectedAddress(int PartyId)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = @"
+                SELECT DISTINCT  address_id AS code, add1 AS name  FROM  SUBGROUP_ADDRESS 
+                WHERE  code = " + PartyId + " AND COMP_CODE = " + getdata.PubCompCode + "    and ADD1 <> ''  ORDER BY  ADDRESS_ID;";
+                var selectAddList = _dropdownService.GetDropdownList(query);
+                return Json(selectAddList);
+            }
+
+        }
+        public JsonResult DDlVType()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                var parameters = new Dictionary<string, object> { { "@Type", "v_type" } };
+                var data = _dropdownService.GetMultipleDropdownList("sp_GetDropdownData", CommandType.StoredProcedure, parameters);
+                return Json(data);
+            }
+        }
+        public JsonResult DDlParty()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE = " + getdata.PubCompCode + "    AND ACTIVE=1  and name <> '' order by name ";
+
+                var Partylist = _dropdownService.GetDropdownList(query);
+
+                return Json(Partylist);
+            }
+
+        }
+        public JsonResult DDlShipFrom()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE, name from SUBGROUP_MAST where Nature in ('Customer','Supplier','Broker','Staff') and COMP_CODE =" + getdata.PubCompCode + " AND ACTIVE=1 and name <> ''    order by name ";
+
+                var ShipFromList = _dropdownService.GetDropdownList(query);
+
+                return Json(ShipFromList);
+            }
+
+        }
+        public JsonResult DDDocStatus()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document'   and Name <> ''  Order by CODE";
+
+                var DocStatusList = _dropdownService.GetDropdownList(query);
+
+                return Json(DocStatusList);
+            }
+
+        }
+        public JsonResult DDlPartycity()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from City_mast  Where Name <> ''  Order by name";
+
+                var PartyCitylist = _dropdownService.GetDropdownList(query);
+
+                return Json(PartyCitylist);
+            }
+
+        }
+        public JsonResult DDlstate()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE , name from STATE_MAST  where active = 1  AND name <> '' order by NAME ";
+
+                var DDlstate = _dropdownService.GetDropdownList(query);
+
+                return Json(DDlstate);
+            }
+
+        }
+        public JsonResult DDlTransportName()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "SELECT CODE , NAME  FROM TRANSPORT_MAST  WHERE COMP_CODE =" + getdata.PubCompCode + "  AND ACTIVE = 1  and NAME <> ''   order by NAME asc";
+
+                var TransportNamelist = _dropdownService.GetDropdownList(query);
+
+                return Json(TransportNamelist);
+            }
+
+        }
+        public JsonResult DDlItemMast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select b.CODE , b.name from item_mast b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
+                var ItemList = _dropdownService.GetDropdownList(query);
+                return Json(ItemList);
+            }
+        }
+        public JsonResult DDlDeptMast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select b.CODE , b.name  from ITEMDEPT_MAST b where B.ACTIVE=1 and b.Tran_type='Store' AND b.comp_code=" + getdata.PubCompCode + "  group by b.name ,b.CODE  order by b.name ";
+                var DeptList = _dropdownService.GetDropdownList(query);
+                return Json(DeptList);
+            }
+        }
+        public JsonResult DDlUnitMast()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select  b.CODE , b.name  from ITEMUNIT_MAST b where B.ACTIVE=1 AND b.comp_code=" + getdata.PubCompCode + " group by b.name ,b.CODE  order by b.name ";
+                var UnitList = _dropdownService.GetDropdownList(query);
+                return Json(UnitList);
             }
         }
     }

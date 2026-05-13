@@ -33,9 +33,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 UserLevel = userLevel
             };
             return View("~/Views/Weighbridge/Transaction/InHouseWeighbridgeEntryList/Index.cshtml", model);
-        }
-
-        
+        }        
 
         [HttpGet]
         public async Task<IActionResult> GetInHouseWBridgeList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -106,8 +104,8 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                         {
 
                             string[] deleteQueries = {
-                        "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
+                            "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
+                            "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
 
                         };
 
