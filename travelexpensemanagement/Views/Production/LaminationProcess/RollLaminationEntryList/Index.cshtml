@@ -1,0 +1,234 @@
+﻿@{
+    ViewBag.Title = "Roll Lamination Entry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+<fieldset>
+    <legend class="legend-field">Roll Lamination Entry List</legend>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." />
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                <button onclick="window.location.href='@Url.Action("Index", "RollLaminationEntry")'" class="btn btn-add">
+                    <i class="fa fa-plus"></i> Add
+                </button>
+                <button class="btn btn-print" onclick="printCityMasterReport()">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <button class="btn btn-export">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+                <button class="btn btn-mail">
+                    <i class="fa fa-envelope"></i> Mail
+                </button>
+                <button class="btn btn-approved">
+                    <i class="fa fa-check"></i> Approved
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblRollLaminationEntryList" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">Code</th>
+                        <th>Vno</th>
+                        <th>Vtype</th>
+                        <th>Vdate</th>
+                        <th>Item Name</th>
+                        <th>Roll No</th>
+                        <th>Meter</th>
+                        <th>Gross Weight</th>
+                        <th>Net Weight</th>
+                        <th>Average Weight</th>
+                        <th>Gram</th>
+                        <th>Roll No Lam</th>
+                        <th>Meter Lam</th>
+                        <th>Net Weight Lam</th>
+                        <th>Average Weight Lam</th>
+                        <th>Gram Lam</th>
+                        <th>Size</th>
+                        <th>Size Lam</th>
+                        <th>Tenacity</th>
+                        <th>Place</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Pagination container -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</fieldset>
+<script>
+    let currentPage = 1;
+    const pageSize = 10;
+    $(document).ready(function(){
+         loadAllRollLaminationList(currentPage);
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllRollLaminationList(currentPage);
+        });
+    })
+    function loadAllRollLaminationList(page){
+        currentPage = page || 1;
+        const searchTerm = $('#searchBox').val().trim();
+        $('.circle-loader').css('display', 'flex');
+        $.ajax({
+            url: '/RollLaminationEntryList/GetAllRollLaminationList',
+            type: 'GET',
+            dataType: 'json',
+             data : {
+                pageNumber: currentPage,
+                pageSize: pageSize,
+                searchTerm: searchTerm
+            },
+            success: function (response){
+                $('.circle-loader').css('display', 'none');
+                console.log(response);
+                const rollLamination = response.rollLaminationList;
+                const totalCount = response.totalCount;
+                let tbody = $('#tblRollLaminationEntryList tbody');
+                tbody.empty();
+                if (!rollLamination || rollLamination.length === 0) {
+                    tbody.append('<tr><td colspan="10" class="text-center text-muted">No Roll Lamination Data found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+                rollLamination.forEach(roll =>{
+                    tbody.append(`<tr>
+                           <td>${roll.vNo || ''}</td>
+                           <td>${roll.vType || ''}</td>
+                           <td>${GetDateYYYYMMDD(roll.vDate) || ''}</td>
+                           <td>${roll.itemName || ''}</td>
+                           <td>${roll.rollNo || ''}</td>
+                           <td>${roll.meter || ''}</td>
+                           <td>${roll.grossWeight || ''}</td>
+                           <td>${roll.netWeight || ''}</td>
+                           <td>${roll.averageWeight || ''}</td>
+                           <td>${roll.gram || ''}</td>
+                           <td>${roll.rollNoLam || ''}</td>
+                           <td>${roll.meterLam || ''}</td>
+                           <td>${roll.netWeightLam || ''}</td>
+                           <td>${roll.averageWeightLam || ''}</td>
+                           <td>${roll.gramLam || ''}</td>
+                           <td>${roll.size || ''}</td>
+                           <td>${roll.sizeLam || ''}</td>
+                           <td>${roll.tenacity || ''}</td>
+                           <td>${roll.place || ''}</td>
+                           <td>
+                                <i class="fa fa-edit btn-edit" title="Edit" onclick="EditRollLamination('${roll.vNo}')"></i>
+                                <i class="fa fa-eye btn-view" title="View" onclick="ViewRollLamination('${roll.vNo}')"></i>
+                                <i class="fa fa-trash btn-delete" title="Delete" onclick="DeleteRollLamination('${roll.vNo}')"></i>
+                                <i class="fa fa-file btn-details btn-document" title="Details"></i>
+                            </td>
+                        </tr>`);
+                });
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            Error: function(xhr){
+                $('.circle-loader').css('display', 'none');
+                toastr.error('Error loading Order Recipe list: ' + xhr.responseText);
+            }
+        });
+    };
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const container = $('#tablePagination');
+        container.empty();
+        if (total === 0 || totalPages <= 1) return;
+        let html = '';
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+        container.html(html);
+    };
+    function goToPage(page) {
+        currentPage = page;
+        loadAllRollLaminationList(currentPage);
+    };
+    function GetDateYYYYMMDD(date){
+        let parts = date.split('T');
+        let newDate = parts[0];
+        return newDate;
+    };
+    function ViewRollLamination(vNo){
+        var url = '/RollLaminationEntry/Index?vNo=' + encodeURIComponent(vNo) +
+        '&mode=view';
+        window.location.href = url;
+    };
+    function EditRollLamination(vNo){
+        var url = '/RollLaminationEntry/Index?vNo=' + encodeURIComponent(vNo) +
+        '&mode=edit';
+        window.location.href = url;
+    };
+    function DeleteRollLamination(vNo){
+        confirmAction().then((confirmed) => {
+            if (!confirmed) return;
+            $.ajax({
+                url: '/RollLaminationEntryList/DeleteRollLamination',
+                type: 'POST',
+                dataType: 'json',
+                data: {vNo : vNo},
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'Roll Lamination Data has been successfully deleted.',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            customClass: {
+                                popup: 'swal-success-popup'
+                            },
+                            didOpen: () => {
+                                Swal.getPopup().style.cssText +=
+                                    'border: 1px solid #a5dc86; box-shadow: 0 0 15px rgba(165, 220, 134, 0.6);';
+                            }
+                        });
+                       loadAllRollLaminationList();
+                    } else {
+                        Swal.fire('Error!', 'Error deleting Roll Lamination Data: ' + res.message, 'error');
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire('Error!', 'Error deleting Roll Lamination Data: ' + xhr.responseText, 'error');
+                }
+            });
+        });
+    };
+</script>
