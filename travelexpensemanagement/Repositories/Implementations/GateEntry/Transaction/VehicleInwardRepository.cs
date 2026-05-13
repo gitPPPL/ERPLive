@@ -407,7 +407,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     res.message = (int)response.StatusCode + "\nAPI request failed\nDetails:" + responseData;
                     //res.data = responseData;
                     return res;
-                    //return new JsonResult(new { error = "API request failed", status = (int)response.StatusCode, details = responseData });
                 }
 
                 var jsonResponse = JObject.Parse(responseData);
@@ -418,7 +417,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     res.status = false;
                     res.message = "No vehicle data found";
                     return res;
-                    //return new JsonResult(new { error = "No vehicle data found" });
                 }
                 var vehicleInfo = new RcRequest
                 {
@@ -486,14 +484,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 res.status = true;
                 res.data = vehicleInfo;
                 return res;
-                //return new JsonResult(new { success = true, vehicleInfo = vehicleInfo });
             }
             catch (Exception ex)
             {
                 res.status = false;
                 res.message = ex.Message;
                 return res;
-                //return new JsonResult(new { error = ex.Message });
             }
         }
         public async Task<RepositoryResponseData<vehicleInfoDb>> VehicleInfoFromDB(string vehicleNo)
@@ -534,14 +530,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 res.status = true;
                 res.data = vehicleInfo;
                 return res;
-                //return Json(new { success = true, vehicleInfo = vehicleInfo });
             }
             catch (Exception ex)
             {
                 res.status = true;
                 res.message = ex.Message;
                 return res;
-                //return Json(new { success = false, message = ex.Message });
             }
         }
         public async Task<RepositoryResponseData<List<TransportInwardModel>>> TransportInwardRecordsById(string id)
@@ -564,15 +558,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 res.status = true;
                 res.data = transportInwardList;
                 return res;
-                //return Json(new { status = true, data = transportlist });
-
             }
             catch (Exception ex)
             {
                 res.status = false;
                 res.message = "Data load failed" + ex.Message;
                 return res;
-                //return Json(new { status = false, message = "data load failed" });
             }
         }
         public async Task<RepositoryResponseData<DocInfo>> MaxVNo(string V_type)
@@ -609,14 +600,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = true;
                 response.data = docIdNoList;
                 return response;
-                //return Json(new { status = true, data = docIdNoList });
             }
             catch (Exception ex)
             {
                 response.status = false;
                 response.message = "Data load failed" + ex.Message;
                 return response;
-                //return Json(new { status = false, message = "data load failed" });
             }
         }
         public async Task<RepositoryResponseList<ExpandoObject>> DocType()
@@ -628,14 +617,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = true;
                 response.data = Doctype.ToList();
                 return response;
-                //return Json(new { status = true, data = Doctype });
             }
             catch (Exception ex)
             {
                 response.status = true;
                 response.message = "Data load failed: " + ex.Message;
                 return response;
-                //return Json(new { status = false, message = "data load failed" });
             }
         }
         public async Task<RepositoryResponseList<ExpandoObject>> PartyList()
@@ -648,14 +635,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = true;
                 response.data = PartyList.ToList();
                 return response;
-                //return Json(new { status = true, data = PartyList });
             }
             catch (Exception ex)
             {
                 response.status = true;
                 response.message = "Data load failed: " + ex.Message;
                 return response;
-                //return Json(new { status = true, message = "data load failed" });
             }
         }
         public async Task<RepositoryResponseList<ExpandoObject>> TransportationList()
@@ -663,19 +648,16 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             var response = new RepositoryResponseList<ExpandoObject>();
             try
             {
-                //var transactionList = await _dbHelper.GetJsonDataAsync($@"select CODE,NAME,PARTY_CODE from TRANSPORT_MAST where  COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} order by NAME ");
                 var transactionList = await _dbHelper.GetJsonDataAsync($@"select CODE,NAME,PARTY_CODE from TRANSPORT_MAST where  COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} order by LTRIM(RTRIM(NAME)) ");
                 response.status = true;
                 response.data = transactionList.ToList();
                 return response;
-                //return Json(new { status = true, data = transactionList });
             }
             catch (Exception ex)
             {
                 response.status = true;
                 response.message = "Data load failed: " + ex.Message;
                 return response;
-                //return Json(new { status = false, message = "data load failed" });
             }
         }
         public async Task<RepositoryResponseList<ExpandoObject>> DONo()
@@ -693,14 +675,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = true;
                 response.data = transactionList.ToList();
                 return response;
-                //return Json(new { status = true, data = transactionList });
             }
             catch (Exception ex)
             {
                 response.status = true;
                 response.message = "Data load failed: " + ex.Message;
                 return response;
-                //return Json(new { status = false, message = "Data load failed" });
             }
         }
     }

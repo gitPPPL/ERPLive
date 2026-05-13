@@ -89,12 +89,13 @@ $(document).ready(function () {
 
         if (!validateRequiredField('#ddlDocType', 'Doc Type') || !validateRequiredField('#NumDocNo', 'Doc No') || !validateRequiredField('#DtDocDate', 'Doc Date')) return;
 
-        if (docType === "KSIN" && !gateNo) {
-            showToast('Gate No is required for KSIN documents.', { type: "warning" });
-            $('#ddlGateNo').focus();
-            return;
-        }
-
+        //=====================================================================
+        //if (docType === "KSIN" && !gateNo) {
+        //    showToast('Gate No is required for KSIN documents.', { type: "warning" });
+        //    $('#ddlGateNo').focus();
+        //    return;
+        //}
+        //=====================================================================
         if (!validateBigWeighbridgeTable()) {
             return;
         }

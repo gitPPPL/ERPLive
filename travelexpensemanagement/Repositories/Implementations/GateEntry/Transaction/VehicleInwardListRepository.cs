@@ -157,14 +157,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 res.status = true;
                 res.data = dataList.ToList();
                 return res;
-                //return Json(new { status = true, data = dataList });
             }
             catch (Exception ex)
             {
                 res.status = false;
                 res.message = ex.Message;
                 return res;
-                //return Json(new { status = false, message = ex.Message });
             }
         }
         public async Task<RepositoryResponseList<TransportInwardListModel>> GetTransportInwardList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -215,7 +213,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     response.totalCount = totalCount;
                     response.data = TransportInwardList;
                     return response;
-                    //return Json(new { success = true, data = TransportInwardList, totalCount });
                 }
             }
             catch (Exception ex)

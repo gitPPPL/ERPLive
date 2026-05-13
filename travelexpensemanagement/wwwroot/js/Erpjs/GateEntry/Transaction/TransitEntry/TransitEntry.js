@@ -37,7 +37,6 @@ $(document).ready(async function () {
     $('#ddlDocType').focus();
     if (mode !== "view" && rowId !== null) {
         $('#DtFormDate').focus().addClass('erppage-input');
-        //$('#DtFormDate').addClass('erppage-input');
     }
     setEnterKeyFocus(allFieldIds);
     //=====Set Current Date==========
@@ -67,7 +66,6 @@ $(document).ready(async function () {
         if (rowId == null) {
             GetVNo(this.value);
             document.getElementById("ddlDocType").disabled = true;
-            //$('#NumWaybillNo').focus();
         }
         bindDropdown('TransitEntry', 'PartyName', '#ddlPartyName', '-- Select Party Name --', null, null, false, this.value, true);
     });

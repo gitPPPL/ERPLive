@@ -160,7 +160,6 @@ function initEventListeners(docId) {
     $('#btnGetVAHANData').on('click', async function () {
         const vehicleNo = $('#TxtVehicleNo').val();
         if (!vehicleNo) {
-            // toastr.info("Please enter a Vehicle No");
             showToast("Please enter Vehicle No", { type: "info" });
             return;
         }
