@@ -33,7 +33,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             _dbConnection = dbConnection;
         }
 
-
         public IActionResult Index()
         {
             return View("~/Views/Weighbridge/Transaction/InHouseWeighbridgeEntry/Index.cshtml");
@@ -43,36 +42,14 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         public async Task<IActionResult> GetMaxVNo(string V_type)
         {
             try
-            {
-                var userSession = _globalValue.GetGlobalVariables();
-                var companyCode = userSession.PubCompCode;
-                var yearCode = userSession.PubFYearCode;
-                var branchCode = "1";
-                var vType = V_type;
-                var tableName = "WB1";
-
-                var yearParams = new Dictionary<string, object> { { "@YearCd", yearCode } };
-                var vnoParams = new Dictionary<string, object>
-                    {
-                    { "@COMP_CODE", companyCode },
-                    { "@BRANCH_CODE", branchCode },
-                    { "@YEAR_CODE", yearCode },
-                    { "@V_TYPE", vType },
-                    { "@TableName", tableName }
-                    };
-
-                string nextVNo = await _dbHelper.GetExecuteScalarAsync<string>("sp_GetMaxVNo", vnoParams, isStoredProc: true);
-                string year = await _dbHelper.GetExecuteScalarAsync<string>("SELECT dbo.fn_GetCurrentYear(@YearCd)", yearParams);
-                var docId = (vType) + (year) + (nextVNo);
-                var newVno = year + nextVNo;
-                var docIdNoList = new { DocId = docId, VNo = newVno };
+            {              
+                var docIdNoList =  _globalValidationdate.GetVNo(V_type , "WB1");
                 return Json(new { status = true, data = docIdNoList });
             }
             catch (Exception ex)
             {
                 return Json(new { status = false, message = "data load failed" });
             }
-
         }
 
         public async Task<IActionResult> GetGateNo()
@@ -111,7 +88,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
         }
 
-
         [HttpGet]
         public JsonResult GetTareSlipNo()
         {
@@ -125,7 +101,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 return Json(GetTareSlipNo);
             }
         }
-
 
         [HttpGet]
         public JsonResult GetGrossSlipNo()
@@ -149,7 +124,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             try
             {
                 var usersession = _globalValue.GetGlobalVariables();
-                var strqry = $@"SELECT top 2   b.VEHICLE_NO, a.*, b.* FROM WB2 a LEFT JOIN WB1 b  ON a.V_NO = b.V_NO AND a.V_TYPE = b.V_TYPE AND a.COMP_CODE = b.COMP_CODE
+                var strqry = $@"SELECT b.VEHICLE_NO, a.*, b.* FROM WB2 a LEFT JOIN WB1 b  ON a.V_NO = b.V_NO AND a.V_TYPE = b.V_TYPE AND a.COMP_CODE = b.COMP_CODE
                 AND a.BRANCH_CODE = b.BRANCH_CODE AND a.YEAR_CODE = b.YEAR_CODE 
                 WHERE a.V_NO = { SlipNo}
                 AND a.V_TYPE = '{vType}'
@@ -173,7 +148,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             {
                 var usersession = _globalValue.GetGlobalVariables();
 
-                var strqry = $@"SELECT  b.VEHICLE_NO, a.*,  b.* FROM WB2 a LEFT JOIN WB1 b 
+                var strqry = $@" SELECT  b.VEHICLE_NO, a.*,  b.* FROM WB2 a LEFT JOIN WB1 b 
                 ON a.V_NO = b.V_NO AND a.V_TYPE = b.V_TYPE  AND a.COMP_CODE = b.COMP_CODE  AND a.BRANCH_CODE = b.BRANCH_CODE
                 AND a.YEAR_CODE = b.YEAR_CODE WHERE 
                 AND a.V_TYPE = '{vType}'

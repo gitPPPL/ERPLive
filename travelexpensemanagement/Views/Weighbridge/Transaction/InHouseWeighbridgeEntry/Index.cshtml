@@ -587,50 +587,36 @@
         }
     }
 
-    function validateBigWeighbridgeTable() {
-        debugger;
+    function validateBigWeighbridgeTable() {  
         let rowCount = 0;
             const wbType = $('#ddlWeightType').val();
-
         $('#tblInHouseWeighbridgeEntry tbody tr').each(function (i) {
-
             const idx = this.id.replace('row', '');
-
             const weight = parseFloat($(`#TxtWeight${idx}`).val()) || 0;
-
             const fromPlace = $(`#ddlFromPlace${idx}`).val() || '';
             const toPlace = $(`#ddlToPlace${idx}`).val() || '';
             const itemCode = $(`#TxtItemName${idx}`).val() || '';
             const itemName = $(`#TxtItemName${idx} option:selected`).text() || '';
             const date = $(`#TxtDate${idx}`).val() || '';
 
-            // Count rows having weight
             if (weight > 0) {
                 rowCount++;
             }
 
-            // Gross validation only after first row
+
             if (wbType === 'Gross' && i > 0) {
 
                 // From Place empty
                 if (weight > 0 && !fromPlace) {
-
-                    toastr.error(
-                        `From Place is empty of Item ${itemName}`
-                    );
-
+                    toastr.error( `From Place is empty of Item ${itemName}` );
                     $(`#ddlFromPlace${idx}`).focus();
-
                     return false;
                 }
 
                 // To Place empty
                 if (weight > 0 && !toPlace) {
-
                     toastr.error(  `To Place is empty of Item ${itemName}` );
-
                     $(`#ddlToPlace${idx}`).focus();
-
                     return false;
                 }
 
@@ -641,12 +627,9 @@
                     fromPlace === toPlace
                 ) {
 
-                    toastr.error(
-                        `From Place and To Place cannot be same of Item ${itemName}`
-                    );
+                    toastr.error( `From Place and To Place cannot be same of Item ${itemName}` );
 
                     $(`#ddlFromPlace${idx}`).focus();
-
                     return false;
                 }
 
@@ -764,11 +747,6 @@
             }
         });
     }
-
-
-
-
-
 
 
     function UpdateData(UpdateDt) {
@@ -929,8 +907,6 @@
     $("#ddlWeightType").val(data.WB_TYPE ?? '');
     toggleReadOnly();
 
-    // await getTareSlipNumbers();
-    // await getGrossSlipNumbers();
     $('#ddlTareSlipNo').val(data.TARE_NO);
     $('#ddlGrossSlipNo').val(data.GROSS_NO);
 
@@ -940,21 +916,21 @@
     async function fillItemDetailTable(itemsData) {
         const $tbody = $('#tblInHouseWeighbridgeEntry tbody');
         $tbody.empty();
-    for (let index = 0; index < itemsData.length; index++) {
+        for (let index = 0; index < itemsData.length; index++) {
             const item = itemsData[index];
             const idx = index + 1;
             addItemRecordRow();           
             await bindDropdownData(idx);
 
-    $(`#TxtWeight${idx}`).val(item.WEIGHT ?? "");
-    $(`#TxtDate${idx}`).val((item.WGT_DATE || '').substring(0, 10));
-    $(`#TxtWgtType${idx}`).val(item.TYPE ?? "");
-    $(`#TxtItemName${idx}`).val(item.ITEM_CODE ?? "").trigger('change');
-    $(`#ddlFromPlace${idx}`).val(item.FROM_PLACE ?? "").trigger('change');
-    $(`#ddlToPlace${idx}`).val(item.TO_PLACE ?? "").trigger('change');
-    $(`#TxtRemarks${idx}`).val(item.REMARKS ?? "");
-    const formattedTime = convertTo24HourFormat(item.WGT_TIME ?? "");
-    $(`#TxtTime${idx}`).val(formattedTime);
+            $(`#TxtWeight${idx}`).val(item.WEIGHT ?? "");
+            $(`#TxtDate${idx}`).val((item.WGT_DATE || '').substring(0, 10));
+            $(`#TxtWgtType${idx}`).val(item.TYPE ?? "");
+            $(`#TxtItemName${idx}`).val(item.ITEM_CODE ?? "").trigger('change');
+            $(`#ddlFromPlace${idx}`).val(item.FROM_PLACE ?? "").trigger('change');
+            $(`#ddlToPlace${idx}`).val(item.TO_PLACE ?? "").trigger('change');
+            $(`#TxtRemarks${idx}`).val(item.REMARKS ?? "");
+            const formattedTime = convertTo24HourFormat(item.WGT_TIME ?? "");
+            $(`#TxtTime${idx}`).val(formattedTime);
      
             $(`#ddlFromPlace${idx}`).prop('disabled', true);
             $(`#ddlToPlace${idx}`).prop('disabled', true);
@@ -966,7 +942,7 @@
             $(`#TxtRemarks${idx}`).prop('readOnly', true);
             $(`#BtnGetWeight${idx}`).prop('disabled', true);
             $(`#row${idx} .btn-delete-action`).hide();
-    }
+        }
     
     }
 
@@ -998,27 +974,25 @@
         const mm = String(dt.getMonth() + 1).padStart(2, '0');
         const dd = String(dt.getDate()).padStart(2, '0');
         return `${yyyy}-${mm}-${dd}`;
-    }      
-     
+    }
+
     function GetDocid(VType) {
         $.ajax({
             url: '@Url.Action("GetMaxVNo", "InHouseWeighbridgeEntry")',
             type: 'GET',
-            data:{V_type:VType},
+            data: { V_type: VType },
             success: function (response) {
-                if (response.status === true && response.data) {
-                    $('#NumDocNo').val(response.data.vNo || '');
-                    $('#TxtDocId').val(response.data.docId || '');
-                } else {
-                    $('#NumDocNo').val('');
-                    $('#TxtDocId').val('');
-                }
+                    debugger;
+                    var v_no = response.data;
+                    $('#NumDocNo').val(v_no);
+                    $('#TxtDocId').val(VType + v_no);                   
             },
+
             error: function (xhr, status, error) {
-                toastr.error('Error fetching Doc ID:', error);
+                toastr.error('Error fetching Doc ID: ' + error);
             }
         });
-     }
+    }
  
     async function GetDocData(MasterTblId, readOnly) {
         try {
@@ -1046,7 +1020,7 @@
         }
     }
 
-     function addItemRecordRow() {
+    function addItemRecordRow() {
         let tbody = $('#tblInHouseWeighbridgeEntry tbody');
         let rowCount = tbody.find('tr').length + 1;
 
@@ -1288,7 +1262,6 @@
     function allowOnlyNumbers(input) {
       input.value = input.value.replace(/[^0-9]/g, '');
     }
-    
 
      async function checkValidDate() {
     const data = {    
@@ -1319,12 +1292,6 @@
         return false;
     }
 }
-
-
-
-
-
-
 
 </script>
 
