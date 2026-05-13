@@ -1,0 +1,79 @@
+﻿body {
+    font-family: Arial;
+}
+
+.erppagevisitorprint-container {
+    width: 800px;
+    margin: auto;
+    border: 2px solid black;
+    padding: 10px;
+}
+
+.erppagevisitorprint-header {
+    text-align: center;
+    border-bottom: 2px solid black;
+    padding-bottom: 5px;
+}
+
+.erppagevisitorprint-title {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid black;
+    padding: 5px;
+    font-weight: bold;
+}
+
+.erppagevisitorprint-main {
+    display: flex;
+}
+
+.erppagevisitorprint-left {
+    width: 70%;
+    padding: 5px;
+}
+
+.erppagevisitorprint-right {
+    width: 30%;
+    border-left: 2px solid black;
+    text-align: center;
+}
+
+.field {
+    display: flex;
+    margin: 3px 0;
+}
+
+.label {
+    width: 140px;
+    font-weight: bold;
+}
+
+.photo {
+    width: 120px;
+    height: 120px;
+    border: 1px solid black;
+    margin: 10px auto;
+}
+
+.footer {
+    display: flex;
+    border-top: 2px solid black;
+    margin-top: 10px;
+}
+
+    .footer div {
+        flex: 1;
+        text-align: center;
+        padding-top: 40px;
+        border-right: 1px solid black;
+    }
+
+        .footer div:last-child {
+            border-right: none;
+        }
+
+@media print {
+    body {
+        margin: 0;
+    }
+}

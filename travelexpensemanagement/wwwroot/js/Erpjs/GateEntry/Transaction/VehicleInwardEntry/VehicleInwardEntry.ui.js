@@ -193,6 +193,7 @@ const VehicleUI = {
     //===========ReadOnly============
     setReadOnly: function setReadOnly (readOnly) {
         if (readOnly === 'true') {
+            const form = $('#TransportInwardPassEntryForm');
             $('#btn-save, #cancelBtn').hide();
             this.disableAllFields();
             var $previewContainer = $('#previewContainer');
@@ -200,6 +201,7 @@ const VehicleUI = {
                 $('#btnRemoveImage').hide();
             }
             $('#btnGetVAHANData').prop('disabled', true).css('pointer-events', 'none');
+            form.addClass('erppage-readonly');
         }
     },
     //==========Clear Vehicle Data=======

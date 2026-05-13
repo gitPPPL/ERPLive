@@ -79,6 +79,7 @@ $(document).ready(async function () {
         if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
 
         if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
+
         if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
         if (!validateRequiredField('#NumWaybillNo', 'WayBill No')) return;
         if (!validateRequiredField('#TxtBillNo', 'Bill No')) return;

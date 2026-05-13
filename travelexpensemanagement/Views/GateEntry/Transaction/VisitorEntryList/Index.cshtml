@@ -2,6 +2,7 @@
 	ViewBag.Title = "Visitor Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <div id="erp-center-toast-container"></div>
 <!-- HEADER -->
 <div class="erppagelist-header">
@@ -28,7 +29,6 @@
 		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
 			<i class="fa fa-file-excel"></i>Export
 		</button>
-		
 	</div>
 </div>
 <div class="erppagelist-container">
@@ -38,6 +38,7 @@
 				<col style="display:none;" /> 
 				<col style="width: 80px;" />  
 				<col style="width: 110px;" /> 
+				
 				<col style="width: 150px;" /> 
 				<col style="width: 180px;" /> 
 				<col style="width: 65px;" />  
@@ -47,6 +48,7 @@
 				<col style="width: 150px;" /> 
 				<col style="width: 100px;" /> 
 				<col style="width: 100px;" /> 
+				
 				<col style="width: 140px;" /> 
 			</colgroup>
 			<thead>
@@ -91,4 +93,7 @@
 		</div>
 	</div>
 </div>
+
+<script src="~/common/delete.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/visitorentrylistjs/visitorentrylist.js"></script>
+ 

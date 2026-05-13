@@ -117,9 +117,7 @@
 <body>
 
 	<div class="container-fluid">
-
 		<!-- Sidebar -->
-
 		<nav class="sidebar">
 			<div class="sidebar-fixed-top">
 			<div class="sidebar-logo">
@@ -343,23 +341,30 @@
 		</script>
 	<!-- Your existing local scripts, no duplicate jQuery here -->
 	
-	<script src="~/js/GlobalFunction.js"></script>
-	<script src="~/js/GlobalToaster.js"></script>
-	<script src="~/js/GlobalValidation.js"></script>
-	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
+	@* <script src="~/js/GlobalFunction.js"></script>
+	<script src="~/js/GlobalToaster.js"></script> *@
+	@* <script src="~/js/GlobalValidation.js"></script> *@
+	<script src="~/common/globalfunction.js"></script>
+	<script src="~/common/dropdown.js"></script>
+    @* <script src="~/common/globaltoaster.js"></script> *@
+	<script src="~/common/globalvalidation.js"></script>
+	<script src="~/common/GlobalToaster.js"></script>
+    
+
+	@* <script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script> *@
+	@* <script type="text/javascript" src="~/js/popper.js/popper.min.js"></script> *@
 	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="~/js/jquery-slimscroll/jquery.slimscroll.js"></script>
-	<script type="text/javascript" src="~/js/modernizr/modernizr.js"></script>
-	<script src="~/pages/widget/amchart/amcharts.min.js"></script>
-	<script src="~/pages/widget/amchart/serial.min.js"></script>
-	<script type="text/javascript" src="pages/todo/todo.js"></script>
-	<script type="text/javascript" src="~/pages/dashboard/custom-dashboard.js"></script>
+	@* <script type="text/javascript" src="~/js/jquery-slimscroll/jquery.slimscroll.js"></script> *@
+	@* <script type="text/javascript" src="~/js/modernizr/modernizr.js"></script> *@
+	@* <script src="~/pages/widget/amchart/amcharts.min.js"></script> *@
+	@* <script src="~/pages/widget/amchart/serial.min.js"></script> *@
+	@* <script type="text/javascript" src="pages/todo/todo.js"></script> *@
+	@* <script type="text/javascript" src="~/pages/dashboard/custom-dashboard.js"></script> *@
 	<script type="text/javascript" src="~/js/script.js"></script>
-	<script type="text/javascript" src="~/js/SmoothScroll.js"></script>
-	<script src="~/js/pcoded.min.js"></script>
-	<script src="~/js/demo-12.js"></script>
-	<script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
+	@* <script type="text/javascript" src="~/js/SmoothScroll.js"></script> *@
+	@* <script src="~/js/pcoded.min.js"></script> *@
+	@* <script src="~/js/demo-12.js"></script> *@
+	@* <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script> *@
 	<script>
 		var $window = $(window);
 		var nav = $('.fixed-button');

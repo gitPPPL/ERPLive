@@ -142,7 +142,7 @@ function validateBigWeighbridgeTable() {
         const $row = $(this);
         const weight = $row.find('.txt-weight').val()?.trim();
         const tweight = $row.find('.txt-twgt').val()?.trim();
-        const nweight = $row.find('.txt-nwgt').val()?.trim();
+        //const nweight = $row.find('.txt-nwgt').val()?.trim();
         const datetime = $row.find('.txt-datetime').val()?.trim();
         const fromDept = $row.find('.ddlFromPlace').val()?.trim();
         const toDept = $row.find('.ddlToPlace').val()?.trim();
@@ -156,13 +156,17 @@ function validateBigWeighbridgeTable() {
                 isValid = false;
                 errorMessage = `Please fill Weight, T.Weight, N.Weight, and DateTime in row ${index + 1} where Item Name is filled. and weight > 0 .`;
                 return false; // exit loop early
-            }
+            } 
             if (!fromDept || !toDept || fromDept === toDept) {
                 isValid = false;
                 errorMessage = `Please ensure 'From Department' and 'To Department' are filled and not the same in row ${index + 1}.`;
                 return false; // exit loop early
             }
-
+            //if (item && (!weight || weight <= 0)) {
+            //    isValid = false;
+            //    errorMessage = `Weight should not be blank for row ${index + 1} where Item Name is filled. and weight > 0 .`;
+            //    return false; // exit loop early
+            //}
         } else {
             if (index === 0) {
                 const allFilled = weight && nweight && datetime && fromDept && toDept && item;

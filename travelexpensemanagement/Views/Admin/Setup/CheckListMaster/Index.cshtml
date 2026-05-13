@@ -205,16 +205,7 @@
             STATUS: $('#STATUS').val(),
             REMARKS: $('#REMARKS').val()
         };
-
-        // Validation
-        // const fields = [
-        // 	{ key: 'CHECKLIST_NAME', message: 'Please enter Checklist Name.' },
-        // 	{ key: 'TASK_NAME', message: 'Please enter Task Name.' },
-        // 	{ key: 'RESPONSIBLE_USER', message: 'Please select Responsible User.' },
-        // 	{ key: 'APPROVAL_USER', message: 'Please select Approval User.' },
-        // 	{ key: 'FREQUENCY_CODE', message: 'Please select Frequency.' },
-        // 	{ key: 'DUE_DATE', message: 'Please select a Due Date.' }
-        // ];
+       
 
         for (const field of fields) {
             if (!formValues[field.key]) {

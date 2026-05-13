@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -11,12 +12,98 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        public MiscConsumptionEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
+        private readonly DropdownService _dropdownService;
+        public MiscConsumptionEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _dropdownService = dropdownService;
+        }
+      
+        public List<object> GetItemList()
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+
+            string query = $"SELECT code, name FROM item_mast WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);
         }
 
+        public List<object> GetDeptList()
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+
+            string query = $"SELECT code, name FROM ITEMDEPT_MAST  WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);         
+        }
+
+        public List<object> GetUnitList()
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+
+            string query = $"SELECT code, name FROM ITEMUNIT_MAST WHERE active = 1 AND comp_code = {g.PubCompCode}";
+            return _dropdownService.GetDropdownList(query);
+        }
+
+        public List<object> GetDropdown(string type)
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+            string query = "";
+
+            switch (type)
+            {
+                case "DocType":
+                    query = "SELECT Code, Name FROM DOCTYPE_MAST WHERE DOCTYPE IN ('MiscConsumption') ORDER BY Name";
+                    break;
+
+                case "Party":
+                    query = $"SELECT CODE, name FROM SUBGROUP_MAST WHERE ACTIVE = 1 AND COMP_CODE = {g.PubCompCode} ORDER BY name";
+                    break;
+            }
+
+            return _dropdownService.GetDropdownList(query);
+        }
+
+        public List<object> GetAddressByPartyCode(int partyId)
+        {
+            var g = _globalVariableService.GetGlobalVariables();
+            var dataList = new List<object>();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                string query = @"
+                    SELECT b.ADD1, b.ADD2, b.ADD3
+                    FROM SUBGROUP_MAST a
+                    LEFT JOIN SUBGROUP_ADDRESS b 
+                        ON b.CODE = a.CODE AND b.COMP_CODE = a.COMP_CODE
+                    WHERE a.CODE = @PartyId 
+                        AND a.COMP_CODE = @CompCode 
+                        AND a.ACTIVE = 1";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", partyId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            dataList.Add(new
+                            {
+                                Add1 = reader["ADD1"]?.ToString(),
+                                Add2 = reader["ADD2"]?.ToString(),
+                                Add3 = reader["ADD3"]?.ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return dataList;
+        }
+    
         public string GenerateVNo(string vType)
         {
             string newV_NO = "00000";
@@ -68,6 +155,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             try
             {
+                if (!ValidatePendingQuantity(header, details, out string validationMessage))
+                {
+                    return validationMessage;
+                }
+
                 var g = _globalVariableService.GetGlobalVariables();
 
                 using var conn = _dbConnection.GetErpConnection();
@@ -175,8 +267,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                     cmd.Parameters.AddWithValue("@REMARKS", item.REMARKS);
 
-                    cmd.Parameters.AddWithValue("@REF_NO", header.V_NO);
-                    cmd.Parameters.AddWithValue("@REF_TYPE", header.V_TYPE);
+                    cmd.Parameters.AddWithValue("@REF_NO", item.REF_NO ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@REF_TYPE", item.REF_TYPE ?? (object)DBNull.Value);
 
                     cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
                     cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
@@ -198,6 +290,119 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             {
                 return $"Error: {ex.Message}";
             }
+        }
+
+        public bool ValidatePendingQuantity(MiscConsumptionEntry_Header header, List<Details> details,out string message)
+        {
+            message = string.Empty;
+
+            var g = _globalVariableService.GetGlobalVariables();
+
+            using var conn = _dbConnection.GetErpConnection();
+            conn.Open();
+
+            foreach (var item in details)
+            {
+              
+                if (string.IsNullOrWhiteSpace(item.ITEM_NAME))
+                    continue;
+
+                int refNo = item.REF_NO ?? 0;
+                string refType = item.REF_TYPE ?? "";
+
+                if (string.IsNullOrWhiteSpace(refType) || refNo == 0)
+                    continue;
+
+                // =========================================
+                // 1. TOTAL INWARD QTY
+                // =========================================
+                string inwardQuery = @"
+                    SELECT ISNULL(SUM(QTY), 0)
+                    FROM GATE2
+                    WHERE V_TYPE = @RefType
+                      AND V_NO = @RefNo
+                      AND COMP_CODE = @CompCode
+                      AND BRANCH_CODE = @BranchCode
+                      AND YEAR_CODE = @YearCode
+                      AND ITEM_CODE = @ItemCode
+                      AND ISNULL(REMARKS, '') = @Remarks";
+
+                decimal totalInwardQty = 0m;
+
+                using (var cmd = new SqlCommand(inwardQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@RefType", refType);
+                    cmd.Parameters.AddWithValue("@RefNo", refNo);
+                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@ItemCode", item.ITEM_CODE);
+                    cmd.Parameters.AddWithValue("@Remarks", item.REMARKS ?? "");
+
+                    object result = cmd.ExecuteScalar();
+                    totalInwardQty = result == null || result == DBNull.Value
+                        ? 0m
+                        : Convert.ToDecimal(result);
+                }
+
+                // =========================================
+                // 2. ALREADY CONSUMED QTY
+                // =========================================
+                string consumedQuery = @"
+                    SELECT ISNULL(SUM(QTY), 0)
+                    FROM GATE2
+                    WHERE REF_TYPE = @RefType
+                      AND REF_NO = @RefNo
+                      AND COMP_CODE = @CompCode
+                      AND BRANCH_CODE = @BranchCode
+                      AND YEAR_CODE = @YearCode
+                      AND ITEM_CODE = @ItemCode
+                      AND ISNULL(REMARKS, '') = @Remarks
+                      AND NOT (V_TYPE = @CurrentVType AND V_NO = @CurrentVNo)";
+
+                decimal alreadyConsumedQty = 0m;
+
+                using (var cmd = new SqlCommand(consumedQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@RefType", refType);
+                    cmd.Parameters.AddWithValue("@RefNo", refNo);
+                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@ItemCode", item.ITEM_CODE);
+                    cmd.Parameters.AddWithValue("@Remarks", item.REMARKS ?? "");
+                    cmd.Parameters.AddWithValue("@CurrentVType", header.V_TYPE);
+                    cmd.Parameters.AddWithValue("@CurrentVNo", header.V_NO);
+
+                    object result = cmd.ExecuteScalar();
+                    alreadyConsumedQty = result == null || result == DBNull.Value
+                        ? 0m
+                        : Convert.ToDecimal(result);
+                }
+
+                // =========================================
+                // 3. CURRENT QTY
+                // If QTY is decimal? use ?? 0m
+                // =========================================
+                decimal currentQty = item.QTY ?? 0m;
+
+                // =========================================
+                // 4. VALIDATION
+                // =========================================
+                if (alreadyConsumedQty + currentQty > totalInwardQty)
+                {
+                    decimal pendingQty = totalInwardQty - alreadyConsumedQty;
+
+                    message =
+                        $"Misc Inward Pending Quantity = {pendingQty}, " +
+                        $"Your Consumption Qty = {currentQty}. " +
+                        $"Please check Item: {item.ITEM_NAME} ({item.REMARKS})";
+
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

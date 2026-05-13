@@ -186,10 +186,31 @@
 .toast-icon {
     font-size: 16px;
 }
+
+/* Active Page */
+.page-number.active {
+    border: none;
+    background: #5b6ee1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+}
+.page-number {
+    padding: 4px 8px;
+}
+/*.page-number:active {
+    border: none;
+    background: #256d29;
+    padding: 0px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+}*/
 /* ===== CONTAINER ===== */
 .erppage-container {
     margin: 16px auto;
-   /* padding: 0 10px;*/
+    /* padding: 0 10px;*/
 }
 
 /* ===== SECTION (FIELDSET) ===== */
@@ -269,7 +290,7 @@
 .erppage-subfieldset {
     border: 1px solid #bed0fb;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin: 10px 0px 10px 0px;
     background: #fff;
     overflow: hidden;
     position: relative;

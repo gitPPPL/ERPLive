@@ -242,7 +242,6 @@ $(document).ready(function () {
 //How to call
 //<input type="number" class="form-control" id="FLAG_A" name="FLAG_A" data-maxlength="5">
 
-
 function handleBack(redirectUrl, isReadOnly = false) {
 
     if (isReadOnly) {
@@ -266,3 +265,80 @@ function handleBack(redirectUrl, isReadOnly = false) {
     });
 }
 
+//================Yesterday Date===========
+function getYesterdayYMD() {
+    const today = new Date();
+    today.setDate(today.getDate() - 1); // subtract 1 day
+
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+//=====Format Date yyyy-mm-dd========
+function formatDateYMD(dateStr) {
+    if (!dateStr) return '';
+    let parts = dateStr.split('T');
+    let newDate = parts[0];
+    return newDate;
+}
+function parseIntSafe(value) {
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? null : parsed;
+}
+function parseFloatSafe(value) {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
+}
+function parseDate(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split(/[-\/]/);
+    if (parts.length === 3) {
+        let [day, month, year] = parts.map(p => parseInt(p, 10));
+        if (year < 1000) year += 2000;
+        return new Date(year, month - 1, day);
+    }
+    return null;
+}
+function parseDecimalSafe(val) {
+    const num = parseFloat(val);
+    return isNaN(num) ? null : num;
+}
+function toNullableInt(val) {
+    const parsed = parseInt(val);
+    return isNaN(parsed) ? null : parsed;
+}
+
+function toNullableDate(val) {
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : val;
+}
+
+function toNullableString(val) {
+    return val?.trim() || null;
+}
+
+function allowOnlyNumbers(input) {
+    input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+}
+
+function getCurrentFormattedDateTime() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+//============Current Date========
+function getCurrentDateYMD() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    return `${yyyy}-${mm}-${dd}`;
+};

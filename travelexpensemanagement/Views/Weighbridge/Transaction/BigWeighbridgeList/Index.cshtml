@@ -311,8 +311,6 @@
 			});
 		}
 
-
-
 		function callGetReportAsPdf() {
 				var reportName = "rpt_emp_mast";
 			var now = new Date();
@@ -347,27 +345,27 @@
 					console.error('Error generating report:', error);
 				}
 			});
-		 }
+		}
 
 
-		 function showImpExpExpensePopup(docCode) {
-			 $.ajax({
-				 url: '/BigWeighbridgeList/GetBigWBridgeEntryDetails',
-				 type: 'Get',
-				 dataType: 'json',
-				 data: { docid: docCode },
-				 success: function(response) {
-						 if(response.status) {
-						 showDocumentPopupjQuery(response.data, docCode);
-					 } else {
-						 toastr.error("Failed to get document details.");
-					 }
-				 },
-				 error: function() {
-					 toastr.error("An error occurred while fetching document details.");
-				 }
-			 });
-		 }
+		function showImpExpExpensePopup(docCode) {
+			$.ajax({
+				url: '/BigWeighbridgeList/GetBigWBridgeEntryDetails',
+				type: 'Get',
+				dataType: 'json',
+				data: { docid: docCode },
+				success: function(response) {
+						if(response.status) {
+						showDocumentPopupjQuery(response.data, docCode);
+					} else {
+						toastr.error("Failed to get document details.");
+					}
+				},
+				error: function() {
+					toastr.error("An error occurred while fetching document details.");
+				}
+			});
+		}
 
 </script>
 

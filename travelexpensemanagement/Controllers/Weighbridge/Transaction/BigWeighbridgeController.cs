@@ -175,7 +175,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetPartyList()
         {
@@ -189,7 +188,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 return Json(new { status = false, messsage = "data load failed" });
             }
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetWeighBridgeById(string id)

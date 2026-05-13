@@ -1,5 +1,4 @@
-﻿
-	let currentVisitorPage = 1;
+﻿	let currentVisitorPage = 1;
 	let visitorPageSize = 10; 
 	let totalVisitorCount = 0;
 
@@ -184,36 +183,13 @@
 		window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
 	}
 
-	// Delete
 	function deleteVisitor(docId) {
-		Swal.fire({
-			title: 'Are you sure?',
-			text: "This will permanently delete the visitor entry.",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: '#d33',
-			cancelButtonColor: '#3085d6',
-			confirmButtonText: 'Yes, delete it!',
-			cancelButtonText: 'Cancel'
-		}).then((result) => {
-			if (result.isConfirmed) {
-				$.ajax({
-					url: '/VisitorEntry/DeleteVisitorEntry',
-					type: 'POST',
-					data: { docId: docId },
-					success: function (response) {
-						if (response.success) {
-							Swal.fire('Deleted!', response.message, 'success').then(() => {
-								loadAllVisitors();
-							});
-						} else {
-							Swal.fire('Failed', response.message, 'warning');
-						}
-					},
-					error: function () {
-						Swal.fire('Error!', 'An error occurred while deleting.', 'error');
-					}
-				});
+		deleteRecord('VisitorEntry', docId, {
+			action: 'DeleteVisitorEntry',
+			title: 'Delete Confirmation',
+			text: 'Are you sure you want to delete this entry?',
+			successCallback: function () {
+				loadAllVisitors();
 			}
 		});
 	}
