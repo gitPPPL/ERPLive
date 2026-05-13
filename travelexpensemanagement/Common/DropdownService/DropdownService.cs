@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Spire.Doc.Documents;
@@ -266,8 +267,68 @@ namespace travelexpensemanagement.Common.DropdownService
             {
                 new SqlParameter("@CompCode", compCode)
             });
-        }     
+        }
+        // DocType
+        public List<DropdownModel> GetDocTypeWithParam(List<string> codes)
+        {
+            if (codes == null || !codes.Any())
+                return new List<DropdownModel>();
 
+            var parameters = new List<SqlParameter>();
+            var inClause = new List<string>();
+
+            for (int i = 0; i < codes.Count; i++)
+            {
+                string paramName = $"@Code{i}";
+                inClause.Add(paramName);
+                parameters.Add(new SqlParameter(paramName, codes[i]));
+            }
+
+            string query = $@"
+                            SELECT Code AS Value, Name AS Text
+                            FROM DOCTYPE_MAST
+                            WHERE CODE IN ({string.Join(",", inClause)})
+                            ORDER BY Name";
+
+            return ExecuteDropdown(query, parameters.ToArray());
+        }
+        // DocStatus
+        public List<DropdownModel> GetDocStatus()
+        {
+            string query = @"Select Code as Value, Name as Text from DOCSTATUS_MAST where V_TYPE='Document' Order by CODE";
+            return ExecuteDropdown(query);
+        }
+        // GetAllParty
+        public List<DropdownModel> GetAllParty(string compCode)
+        {
+            string query = @"select CODE as Value, NAME as Text from SUBGROUP_MAST where COMP_CODE =@CompCode and ACTIVE=1 order by NAME";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        // Place
+        public List<DropdownModel> GetPlace(string compCode)
+        {
+            string query = @"select CODE as Value, NAME as Text from ITEMDEPT_MAST where COMP_CODE=@CompCode and TRAN_TYPE='Store' order by NAME";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        // Item
+        public List<DropdownModel> GetItems(string compCode)
+        {
+            string query = @"select CODE as Value, NAME as Text, HSN_CODE, UNIT_NAME, UNIT_CODE from item_mast where COMP_CODE =@CompCode  order by NAME";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        
     }
 }
 

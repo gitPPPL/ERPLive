@@ -2,265 +2,101 @@
 	ViewBag.Title = "Transit Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-	<legend class="legend-field">Transit Entry List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
+<div id="erp-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Transit Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "TransitEntry")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		<div class="erppage-divfield">
+			<label class="erppage-label">EWaybill Date</label>
+			<input type="date" class="erppage-input" id="DtEWaybillDate"/>
 		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TransitEntry")'" type="submit" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
+		<button type="button" class="erppage-btn erppage-btn-copy" id="btnEWayBillImportData">
+			<i class="fa fa-download"></i>
+			<span>Import and save EWayBill Data</span>
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+			<i class="fa fa-print"></i> Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblTransitEntryList" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" /> <!-- Code, hidden -->
+				<col style="width: 80px;" />  <!-- V_Type -->
+				<col style="width: 80px;" />  <!-- V_No -->
+				<col style="width: 120px;" /> <!-- WayBill No -->
+				<col style="width: 120px;" /> <!-- Create Date -->
+				<col style="width: 120px;" /> <!-- Expiry_Date -->
+				<col style="width: 180px;" /> <!-- Party_Name -->
+				<col style="width: 140px;" /> <!-- Party_Gstin -->
+				<col style="width: 100px;" /> <!-- Bill_No -->
+				<col style="width: 120px;" /> <!-- Bill_Date -->
+				<col style="width: 80px;" />  <!-- Truck_No -->
+				<col style="width: 140px;" /> <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Voucher Type</th>
+					<th>Voucher No</th>
+					<th>WayBill No</th>
+					<th>Create Date</th>
+					<th>Expiry Date</th>
+					<th>Party Name</th>
+					<th>Party Gstin</th>
+					<th>Bill No</th>
+					<th>Bill Date</th>
+					<th>Truck No</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblTransitEntryList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>V_Type</th>
-						<th>Doctype_Name</th>
-						<th>V_No</th>
-						<th>Form_No</th>
-						<th>Form_Date</th>
-						<th>Expiry_Date</th>
-						<th>Party_Name</th>
-						<th>Party_Code</th>
-						<th>Party_Gstin</th>
-						<th>Other_Gstin</th>
-						<th>Nos</th>
-						<th>Bill_No</th>
-						<th>Bill_Date</th>
-						<th>Gr_No</th>
-						<th>Gr_Date</th>
-						<th>Truck_No</th>
-						<th>Transport</th>
-						<th>Ord_Type</th>
-						<th>Ord_No</th>
-						<th>Hsn_Code</th>
-						<th>Item_Desc</th>
-						<th>Bill_Amt</th>
-						<th>Sgst_Amt</th>
-						<th>Cgst_Amt</th>
-						<th>Igst_Amt</th>
-						<th>Cess_Amt</th>
-						<th>Cess_Nonadvolamt</th>
-						<th>Other_Amt</th>
-						<th>Total_Amt</th>
-						<th>Uuser</th>
-						<th>Udate</th>
-						<th>Status</th>
-						<th style="display:none;">Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
-
-<script>
-
-	let currentPage = 1;
-	let pageSize = 10;
-
-    $(document).ready(function () {
-		loadAllMenus();
-		$('#searchBox').on('keyup', function () {
-				currentPage = 1;
-				loadAllMenus();
-		});
-	});
-
-	//Load main grid...............
-	function loadAllMenus() {
-		const searchTerm = $('#searchBox').val();
-
-		$.ajax({
-			url: '/TransitEntryList/GetList',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
-			},
-			success: function (res) {
-				if (!res.success) {
-					toastr.error("Failed to load data.");
-					return;
-				}
-
-				const list = res.lists;
-				const totalCount = res.totalCount;
-				const tbody = $('#tblTransitEntryList tbody');
-
-				console.log('List', list);
-
-				tbody.empty();
-
-				if (list.length === 0) {
-					tbody.append('<tr><td colspan="12" class="text-center text-muted">No list found.</td></tr>');
-				} else {
-					$.each(list, function (index, item) {
-						tbody.append(`
-							<tr>
-							<td>${item.v_TYPE}</td>
-							<td>${item.doctype_Name}</td>
-							<td>${item.v_NO}</td>
-							<td>${item.forM_NO}</td>
-							<td>${formatDate(item.forM_DATE)}</td>
-							<td>${formatDate(item.expirY_DATE)}</td>
-							<td>${item.partyname}</td>
-							<td>${item.partY_CODE}</td>
-							<td>${item.partY_GSTIN}</td>
-							<td>${item.otheR_GSTIN}</td>
-							<td>${item.nos}</td>
-							<td>${item.bilL_NO}</td>
-							<td>${formatDate(item.bilL_DATE)}</td>
-							<td>${item.gR_NO}</td>
-							<td>${formatDate(item.gR_DATE)}</td>
-							<td>${item.trucK_NO}</td>
-							<td>${item.transport}</td>
-							<td>${item.orD_TYPE}</td>
-							<td>${item.orD_NO}</td>
-							<td>${item.hsN_CODE}</td>
-							<td>${item.iteM_DESC}</td>
-							<td>${item.bilL_AMT}</td>
-							<td>${item.sgsT_AMT}</td>
-							<td>${item.cgsT_AMT}</td>
-							<td>${item.igsT_AMT}</td>
-							<td>${item.cesS_AMT}</td>
-							<td>${item.cesS_NONADVOLAMT}</td>
-							<td>${item.otheR_AMT}</td>
-							<td>${item.totaL_AMT}</td>
-							<td>${item.uuser}</td>
-							<td>${formatDate(item.udate)}</td>
-								<td>
-									<button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')">
-										<i class="fas fa-edit" title="Edit"></i>
-									</button>
-									<button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')">
-										<i class="fas fa-eye" title="View Detail"></i>
-									</button>
-									<button class="btn btn-sm btn-light btn-delete" onclick="deleteTemp('${item.v_NO}', '${item.v_TYPE}')">
-										<i class="fas fa-trash text-danger" title="Delete"></i>
-									</button>
-								</td>
-							</tr>
-						`);
-					});
-					renderPagination(totalCount, pageSize, currentPage);
-				}
-			},
-			error: function (xhr) {
-				toastr.error('Error loading menu list: ' + xhr.responseText);
-				console.error(xhr);
-			}
-		});
-	}
-
- //    function formatDate(dateStr) {
-	// 	if (!dateStr) return '';
-	// 	const d = new Date(dateStr);
-	// 	if (isNaN(d)) return '';
-	// 	return d.toISOString().slice(0, 10);
-	// }
-	function formatDate(date){
-		let parts = date.split('T');
-		let newDate = parts[0];
-		return newDate;
-	};
-
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const pagination = $('#tablePagination');
-		pagination.empty();
-
-		if (totalPages <= 1) return;
-
-		let html = '';
-
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-
-		const startPage = Math.max(1, currentPage - 2);
-		const endPage = Math.min(totalPages, currentPage + 2);
-
-		for (let i = startPage; i <= endPage; i++) {
-			html += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
-
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-
-		pagination.html(html);
-	}
-
-	function goToPage(page) {
-		currentPage = page;
-		loadAllMenus();
-	}
-
-	function AddOrEditFunction(code, vtype) {
-     window.location.href = `/TransitEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}`;
-	}
-
-	function viewMenuDetails(code, vtype) {
-		window.location.href = '/TransitEntry/Index?id=' + encodeURIComponent(code) + '&vtype=' + encodeURIComponent(vtype) + '&mode=view';
-	}
-
-	function deleteTemp(code, VType) {
-			if (!confirm('Are you sure you want to delete this Transit Entry?')) return;
-
-			$.ajax({
-				url: '/TransitEntryList/Delete',
-				type: 'POST',
-				data: { code: code, VType: VType }, 
-				success: function (res) {
-					if (res.success) {
-						toastr.success(res.message || 'Deleted successfully.');
-						loadAllMenus(); 
-					} else {
-						toastr.error(res.message || 'Failed to delete.');
-					}
-				},
-				error: function (xhr, status, error) {
-					toastr.error(`Error deleting : ${xhr.responseText || error}`);
-				}
-			});
-		}
+</div>
 
 
-</script>
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/transitentrylist/transitentrylist.js"></script>

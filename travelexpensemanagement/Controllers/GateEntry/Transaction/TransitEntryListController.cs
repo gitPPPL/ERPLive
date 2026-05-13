@@ -27,9 +27,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = result.status, data = result.data, message = result.message });
         }
         [HttpPost]
-        public async Task<JsonResult> Delete(int code, string VType)
+        public async Task<JsonResult> Delete(int docId, string docType)
         {
-            var result = await _iTransitEntryListRepository.DeleteById(code, VType);
+            var result = await _iTransitEntryListRepository.DeleteById(docId, docType);
             return Json(new { success = result.status, message = result.message });
         }
     }

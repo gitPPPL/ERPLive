@@ -48,9 +48,16 @@ namespace travelexpensemanagement.Models
 
 
         public DateTime? UDATE { get; set; }
-
-
-
+   
+    }
+    public class TransitEntryCompModel
+    {
+        public string? compName { get; set; }
+        public string? Add1 { get; set; }
+        public string? Add2 { get; set; }
+    }
+    public class TransitEntryPdfModel
+    {
 
     }
 }
