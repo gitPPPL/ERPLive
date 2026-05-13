@@ -56,8 +56,9 @@ function validateRequiredField(selector, fieldName) {
     const value = $field.val()?.trim();
 
     if (!value) {
-        toastr.warning(`${fieldName} is required`);
-        $field.focus();
+        //toastr.warning(`${fieldName} is required`);
+        //$field.focus();
+        setInvalid($(selector), `${fieldName} is required`)
         return false;
     }
     return true;
@@ -243,5 +244,29 @@ function handleBack(redirectUrl, isReadOnly = false) {
         }
     });
 }
+//============Current Date========
+function getCurrentDateYMD() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    return `${yyyy}-${mm}-${dd}`;
+};
 
+//================Yesterday Date===========
+function getYesterdayYMD() {
+    const today = new Date();
+    today.setDate(today.getDate() - 1); // subtract 1 day
 
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+//=====Format Date yyyy-mm-dd========
+function formatDateYMD(date) {
+    let parts = date.split('T');
+    let newDate = parts[0];
+    return newDate;
+};

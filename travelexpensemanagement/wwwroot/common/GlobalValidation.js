@@ -56,8 +56,9 @@ function validateRequiredField(selector, fieldName) {
     const value = $field.val()?.trim();
 
     if (!value) {
-        toastr.warning(`${fieldName} is required`);
-        $field.focus();
+        //toastr.warning(`${fieldName} is required`);
+        //$field.focus();
+        setInvalid($(selector), `${fieldName} is required`)
         return false;
     }
     return true;
@@ -69,24 +70,24 @@ const MessageStore = {
     error: '❌ An error occurred. Please try again.',
     warning: '⚠️ Please check your inputs.',
     info: 'ℹ️ Just so you know...'
-  };
+};
 function showFlashMessageByKey(key, type = 'success') {
     const message = MessageStore[key];
     if (message) {
         localStorage.setItem('flashMessage', JSON.stringify({ message, type }));
     }
-  }
+}
 $(document).ready(function () {
-        const stored = localStorage.getItem('flashMessage');
-        if (stored) {
-          const {message, type} = JSON.parse(stored);
+    const stored = localStorage.getItem('flashMessage');
+    if (stored) {
+        const { message, type } = JSON.parse(stored);
         if (message && type && toastr[type]) {
             toastr[type](message);
-          } else {
+        } else {
             toastr.info(message);
-          }
-        localStorage.removeItem('flashMessage');
         }
+        localStorage.removeItem('flashMessage');
+    }
 });
 function confirmAction(message = "Are you sure you want to delete this item group?", yesText = "Yes", noText = "No") {
     return Swal.fire({
@@ -107,8 +108,8 @@ function confirmAction(message = "Are you sure you want to delete this item grou
         confirmButtonColor: '#d33',
         cancelButtonColor: '#aaa',
         buttonsStyling: false,
-        reverseButtons: true,    
-        focusCancel: true,      
+        reverseButtons: true,
+        focusCancel: true,
         customClass: {
             popup: 'custom-swal-spacing',
             confirmButton: 'btn btn-secondary',
@@ -133,11 +134,11 @@ function showDocumentPopupjQuery(data, docCode) {
     const tableRows = data.map(row => `
         <tr>
             <td>${row.code || row.doC_CODE || ''}</td>
-            <td>${row.uUser || ''}</td>
+            <td>${row.uuser || ''}</td>
             <td>${row.udate ? new Date(row.udate).toLocaleString() : ''}</td>
             <td>${row.euser || ''}</td>
             <td>${row.edate ? new Date(row.edate).toLocaleString() : ''}</td>
-            <td></td>
+            <td>${(row.active) == 1 ? 'Active' : 'Inactive'}</td>
             <td>Approved By</td>
             <td>Approved On</td>
             <td>${row.wsid || ''}</td>
@@ -148,42 +149,17 @@ function showDocumentPopupjQuery(data, docCode) {
 
     const modalHTML = `
         <div class="modal fade" id="dynamicDocModal" tabindex="-1" aria-labelledby="docModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg erppagesmodal">
-        <div class="modal-content erppagesmodal-content">
-            <div class="erppagesmodal-header">
-                <div class="erppagesmodal-header-left">
-                    <div class="erppagesmodal-header-icon">
-                        <i class="fa fa-file-signature"></i>
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="docModalLabel">Document Details for ${data[0]?.uUser || 'Unknown User'}</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
                     </div>
-                    <h5 class="erppagesmodal-title" id="docModalLabel">
-                        Document Details for ${data[0]?.uUser || 'Unknown User'}
-                    </h5>
-                </div>
-                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            <div class="erppagesmodal-body">
-                    <div class="erppagelist-container">
-                        <div class="excel-wrapper fixed-grid-wrapper">
-                            <table id="tblApprovalStageMaster" class="excel-table fixed-grid-table">
-                                <colgroup>
-                                    <col style="display:none;" /> <!-- FIXED -->
-                                    <col style="width: 120px;" />  <!-- Doc ID -->
-                                    <col style="width: 120px;" />  <!-- Created By -->
-                                    <col style="width: 120px;" />  <!-- Created On -->
-                                    <col style="width: 140px;" />  <!-- Last Modified By -->
-                                    <col style="width: 140px;" />  <!-- Last Modified On -->
-                                    <col style="width: 100px;" />  <!-- Status -->
-                                    <col style="width: 120px;" />  <!-- Approved By -->
-                                    <col style="width: 120px;" />  <!-- Approved On -->
-                                    <col style="width: 140px;" />  <!-- Last PC Name -->
-                                    <col style="width: 140px;" />  <!-- Last N-Compid -->
-                                    <col style="width: 140px;" />  <!-- Last Login By -->
-                                </colgroup>
-                                <thead>
+                    <div class="popup-card">
+                        <div class="table-responsive">
+                            <table id="tblApprovalStageMaster" class="table table-bordered">
+                                <thead class="table-head">
                                     <tr>
-                                        <th style="display:none;">Code</th>
                                         <th>Doc id</th>
                                         <th>Created By</th>
                                         <th>Created On</th>
@@ -201,10 +177,9 @@ function showDocumentPopupjQuery(data, docCode) {
                             </table>
                         </div>
                     </div>
+                </div>
             </div>
-        </div>
-    </div>
-</div>`;
+        </div>`;
 
     // Inject modal into the DOM
     document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -223,6 +198,9 @@ function showDocumentPopupjQuery(data, docCode) {
     });
 }
 
+
+
+
 // MaxLength Validation for Input Fields
 function enforceMaxlength(selector) {
     $(document).on('input', selector, function () {
@@ -240,6 +218,8 @@ $(document).ready(function () {
 });
 //How to call
 //<input type="number" class="form-control" id="FLAG_A" name="FLAG_A" data-maxlength="5">
+
+
 
 
 function handleBack(redirectUrl, isReadOnly = false) {
@@ -264,4 +244,81 @@ function handleBack(redirectUrl, isReadOnly = false) {
         }
     });
 }
+//============Current Date & Time========
+function getCurrentFormattedDateTime() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+//============Current Date========
+function getCurrentDateYMD() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    return `${yyyy}-${mm}-${dd}`;
+};
 
+//================Yesterday Date===========
+function getYesterdayYMD() {
+    const today = new Date();
+    today.setDate(today.getDate() - 1); // subtract 1 day
+
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+//=====Format Date yyyy-mm-dd========
+function formatDateYMD(dateStr) {
+    if (!dateStr) return '';
+    let parts = dateStr.split('T');
+    let newDate = parts[0];
+    return newDate;
+}
+function parseIntSafe(value) {
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? null : parsed;
+}
+function parseFloatSafe(value) {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
+}
+function parseDate(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split(/[-\/]/);
+    if (parts.length === 3) {
+        let [day, month, year] = parts.map(p => parseInt(p, 10));
+        if (year < 1000) year += 2000;
+        return new Date(year, month - 1, day);
+    }
+    return null;
+}
+function parseDecimalSafe(val) {
+    const num = parseFloat(val);
+    return isNaN(num) ? null : num;
+}
+function toNullableInt(val) {
+    const parsed = parseInt(val);
+    return isNaN(parsed) ? null : parsed;
+}
+
+function toNullableDate(val) {
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : val;
+}
+
+function toNullableString(val) {
+    return val?.trim() || null;
+}
+
+function allowOnlyNumbers(input) {
+    input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+}

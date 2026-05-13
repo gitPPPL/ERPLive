@@ -340,7 +340,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 }
                                 else
                                 {
-                                    mode = "Edit";
+                                    mode = "Update";
                                     _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
                                             codeVNo: POmodel.V_NO.ToString(), vtype: POmodel.V_TYPE);
                                 }

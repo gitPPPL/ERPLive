@@ -45,3 +45,9 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
         }
     });
 }
+
+function ensureOption($dropdown, code, name) {
+    if (code && $dropdown.find(`option[value="${code}"]`).length === 0) {
+        $dropdown.append(`<option value="${code}">${name}</option>`);
+    }
+}

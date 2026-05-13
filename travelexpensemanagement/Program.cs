@@ -9,9 +9,12 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
+
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +37,10 @@ builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
 builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
 builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
 builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
+builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
+builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
+
+
 builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
 builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
 builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();

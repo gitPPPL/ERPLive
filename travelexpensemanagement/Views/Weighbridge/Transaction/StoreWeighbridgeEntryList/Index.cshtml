@@ -30,6 +30,7 @@
 
 
 }
+<div id="erp-toast-container"></div>
 <fieldset>
 	<legend class="legend-field">Store Weighbridge Entry List</legend>
 	<div class="row">
@@ -49,7 +50,7 @@
 				}
 				@if(canPrint)
 				{
-					<button class="btn btn-print" onclick="printReport()">
+					<button class="btn btn-print" onclick="callGetReportAsPdf()">
 						<i class="fa fa-print"></i> Print
 					</button>
 
@@ -88,6 +89,8 @@
 						<th>Gate in No</th>
 						<th>Party Name</th>
 						<th>Party Weight</th>
+						@* <th>Wb Type</th>
+						<th>Remarks</th> *@
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -95,11 +98,30 @@
 			</table>
 		</div>
 		<!-- Pagination container -->
-		<div class="row">
+		@* <div class="row">
 			<div class="col-md-12">
 				<div class="pagination-end">
 					<div class="custom-pagination" id="tablePagination"></div>
 				</div>
+			</div>
+		</div> *@
+		<div class="erppagelist-pagination">
+			<div class="pagination-left">
+				<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+					<option value="5">5</option>
+					<option value="10" selected>10</option>
+					<option value="20">20</option>
+					<option value="50">50</option>
+				</select>
+			</div>
+			<div class="pagination-center">
+				<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+				<div id="pageNumbers" class="page-numbers"></div>
+
+				<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+			</div>
+			<div class="pagination-right" id="pageInfoText">
+				Results: 0 - 0 of 0
 			</div>
 		</div>
 	</div>
@@ -107,7 +129,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/common/delete.js"></script>
+<script src="~/js/erpjs/weighbridge/transaction/storeweighbridgeentrylist/storeweighbridgeentrylist.js"></script>
+
 <script>
+	// Define global permissions for the external JS file to use
+	window.permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+</script>
+
+@* <script>
 	var permissions = {
 		canEdit: @canEdit.ToString().ToLower(),
 		canDelete: @canDelete.ToString().ToLower(),
@@ -162,13 +197,13 @@
 					tbody.append(`
 							<tr>
 								<td class="d-none code">${item.DOC_ID}</td>
-								<td>${item.V_TYPE}</td>
-								<td>${item.V_NO}</td>
-								<td>${item.V_DATE}</td>
-								<td>${item.GATE_NO}</td>
-								<td>${item.PartyNm}</td>
-								<td>${item.PARTY_GROSSWT}</td>
-							   <td>${actions}</td>
+								<td>${item.V_TYPE || ''}</td>
+								<td>${item.V_NO || ''}</td>
+								<td>${item.V_DATE || ''}</td>
+								<td>${item.GATE_NO || ''}</td>
+								<td>${item.PartyNm || ''}</td>
+								<td>${item.PARTY_GROSSWT || ''}</td>
+								<td>${actions}</td>
 							</tr>
 						`);
 					});
@@ -365,7 +400,7 @@
 			 });
 		 }
 
-</script>
+</script> *@
 
 
 

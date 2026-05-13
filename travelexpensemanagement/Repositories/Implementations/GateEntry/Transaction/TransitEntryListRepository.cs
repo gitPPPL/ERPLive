@@ -20,7 +20,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _logService = logService;
         }
 
-        public async Task<RepositoryResponse> DeleteById(int code, string VType)
+        public async Task<RepositoryResponse> DeleteById(int docId, string docType)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
             var response = new RepositoryResponse();
@@ -33,17 +33,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd.CommandType = CommandType.StoredProcedure;
 
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@V_NO", code);
+                        cmd.Parameters.AddWithValue("@V_NO", docId);
                         cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", VType);
+                        cmd.Parameters.AddWithValue("@V_TYPE", docType);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);
                         await con.OpenAsync();
                         await cmd.ExecuteNonQueryAsync();
                     }
                 }
                 //===========log insert
-                _logService.InsertLog("WAYBILL1", "Transit Entry", "Transaction", "Delete", VType, code.ToString(), null);
+                _logService.InsertLog("WAYBILL1", "Transit Entry", "Transaction", "Delete", docType, docId.ToString(), null);
                 
                 response.status = true;
                 response.message = "Transit Entry deleted successfully.";
@@ -89,7 +89,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                     partyname = rdr["PARTY_NAME"] != DBNull.Value ? rdr["PARTY_NAME"].ToString() : null,
                                     PARTY_GSTIN = rdr["PARTY_GSTIN"] != DBNull.Value ? rdr["PARTY_GSTIN"].ToString() : null,
                                     BILL_NO = rdr["BILL_NO"] != DBNull.Value ? rdr["BILL_NO"].ToString() : null,
-                                    BILL_DATE = rdr["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["BILL_DATE"]) : DateTime.MinValue,
+                                    BILL_DATE = rdr["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["BILL_DATE"]) : null,
                                     BILL_AMT = rdr["BILL_AMT"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_AMT"]) : 0,
                                     HSN_CODE = rdr["HSN_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["HSN_CODE"]) : 0,
                                     OTHER_GSTIN = rdr["OTHER_GSTIN"] != DBNull.Value ? rdr["OTHER_GSTIN"].ToString() : null,
@@ -100,20 +100,19 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                     CESS_AMT = rdr["CESS_AMT"] != DBNull.Value ? Convert.ToInt32(rdr["CESS_AMT"]) : 0,
                                     CESS_NONADVOLAMT = rdr["CESS_NONADVOLAMT"] != DBNull.Value ? Convert.ToInt32(rdr["CESS_NONADVOLAMT"]) : 0,
                                     GR_NO = rdr["GR_NO"] != DBNull.Value ? rdr["GR_NO"].ToString() : null,
-                                    GR_DATE = rdr["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["GR_DATE"]) : DateTime.MinValue,
+                                    GR_DATE = rdr["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["GR_DATE"]) : null,
                                     TRUCK_NO = rdr["TRUCK_NO"] != DBNull.Value ? rdr["TRUCK_NO"].ToString() : null,
                                     FORM_NO = rdr["FORM_NO"] != DBNull.Value ? rdr["FORM_NO"].ToString() : null,
-                                    FORM_DATE = rdr["FORM_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["FORM_DATE"]) : DateTime.MinValue,
-                                    EXPIRY_DATE = rdr["EXPIRY_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["EXPIRY_DATE"]) : DateTime.MinValue,
+                                    FORM_DATE = rdr["FORM_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["FORM_DATE"]) : null,
+                                    EXPIRY_DATE = rdr["EXPIRY_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["EXPIRY_DATE"]) : null,
                                     ORD_NO = rdr["ORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ORD_NO"]) : 0,
                                     IGST_AMT = rdr["IGST_AMT"] != DBNull.Value ? Convert.ToInt32(rdr["IGST_AMT"]) : 0,
                                     OTHER_AMT = rdr["OTHER_AMT"] != DBNull.Value ? Convert.ToInt32(rdr["OTHER_AMT"]) : 0,
                                     TOTAL_AMT = rdr["TOTAL_AMT"] != DBNull.Value ? Convert.ToInt32(rdr["TOTAL_AMT"]) : 0,
                                     STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0,
                                     TRANSPORT = rdr["TRANSPORT"] != DBNull.Value ? rdr["TRANSPORT"].ToString() : null,
-                                    GATE_NO = rdr["ORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ORD_NO"]) : 0,
-                                    GATE_DATE = rdr["FORM_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["FORM_DATE"]) : DateTime.MinValue,
-
+                                    //GATE_NO = rdr["ORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ORD_NO"]) : 0,
+                                    //GATE_DATE = rdr["FORM_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["FORM_DATE"]) : null,
                                 };
                             }
                         }
@@ -122,14 +121,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = true;
                 response.data = TransitEntryModel;
                 return response;
-                //return Json(new { success = true, data = TransitEntryModel });
             }
             catch (Exception ex)
             {
                 response.status = false;
                 response.message = "Error fetching bank"+ ex.Message;
                 return response;
-                //return Json(new { success = false, message = "Error fetching bank", error = ex.Message });
             }
         }
         public async Task<RepositoryResponseList<TransitEntryModel>> GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -143,7 +140,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = false;
                 response.message = "Global variable data is null.";
                 return response;
-                //return Json(new { success = false, message = "Global variable data is null." });
             }
             var headerList = new List<TransitEntryModel>();
             try
@@ -174,17 +170,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 V_TYPE = reader["V_TYPE"] != DBNull.Value ? reader["V_TYPE"].ToString() : string.Empty,
                                 Doctype_Name = reader["doctype"] != DBNull.Value ? reader["doctype"].ToString() : string.Empty,
                                 FORM_NO = reader["FORM_NO"] != DBNull.Value ? reader["FORM_NO"].ToString() : string.Empty,
-                                FORM_DATE = reader["FORM_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["FORM_DATE"]) : DateTime.MinValue,
-                                EXPIRY_DATE = reader["EXPIRY_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["EXPIRY_DATE"]) : DateTime.MinValue,
+                                FORM_DATE = reader["FORM_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["FORM_DATE"]) : null,
+                                EXPIRY_DATE = reader["EXPIRY_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["EXPIRY_DATE"]) : null,
                                 partyname = reader["PARTY_NAME"] != DBNull.Value ? reader["PARTY_NAME"].ToString() : string.Empty,
                                 PARTY_CODE = reader["PARTY_CODE"] != DBNull.Value ? Convert.ToInt32(reader["PARTY_CODE"]) : 0,
                                 PARTY_GSTIN = reader["PARTY_GSTIN"] != DBNull.Value ? reader["PARTY_GSTIN"].ToString() : string.Empty,
                                 OTHER_GSTIN = reader["OTHER_GSTIN"] != DBNull.Value ? reader["OTHER_GSTIN"].ToString() : string.Empty,
                                 NOS = reader["NOS"] != DBNull.Value ? Convert.ToInt32(reader["NOS"]) : 0,
                                 BILL_NO = reader["BILL_NO"] != DBNull.Value ? reader["BILL_NO"].ToString() : string.Empty,
-                                BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
+                                BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : null,
                                 GR_NO = reader["GR_NO"] != DBNull.Value ? reader["GR_NO"].ToString() : string.Empty,
-                                GR_DATE = reader["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["GR_DATE"]) : DateTime.MinValue,
+                                GR_DATE = reader["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["GR_DATE"]) : null,
                                 TRUCK_NO = reader["TRUCK_NO"] != DBNull.Value ? reader["TRUCK_NO"].ToString() : string.Empty,
                                 TRANSPORT = reader["TRANSPORT"] != DBNull.Value ? reader["TRANSPORT"].ToString() : string.Empty,
                                 ORD_TYPE = reader["ORD_TYPE"] != DBNull.Value ? reader["ORD_TYPE"].ToString() : string.Empty,
@@ -200,7 +196,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 OTHER_AMT = reader["OTHER_AMT"] != DBNull.Value ? Convert.ToInt32(reader["OTHER_AMT"]) : 0,
                                 TOTAL_AMT = reader["TOTAL_AMT"] != DBNull.Value ? Convert.ToInt32(reader["TOTAL_AMT"]) : 0,
                                 UUSER = reader["UUSER"] != DBNull.Value ? Convert.ToInt32(reader["UUSER"]) : 0,
-                                UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : DateTime.MinValue
+                                UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : null,
+                                STATUS = reader["STATUS"] != DBNull.Value ? Convert.ToInt32(reader["STATUS"]) : null,
                             });
                         }
 
@@ -218,11 +215,9 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.status = false;
                 response.message = "Error fetching data. " + ex.Message;
                 return response;
-                //return Json(new { success = false, message = "Error fetching data.", error = ex.Message });
             }
             response.status = true;
             return response;
-            //return Json(new { success = true, lists = headerList, totalCount });
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -60,67 +61,38 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             return response;
             //return Json(data);
         }
-        public async Task<RepositoryResponseData<string>> MaxVNo(string Vtype)
+        public async Task<RepositoryResponseData<bool>> IsExist(int vNo, string form_No)
         {
-            string newV_NO = "00000";
-            var response = new RepositoryResponseData<string>();
+            var gv = _globalVariableService.GetGlobalVariables();
+            var response = new RepositoryResponseData<bool>();
+            bool flg = false;
             try
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
-
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
+                    string query = @"select 1 from waybill1 where V_NO <> @V_NO and comp_code=@comp_code and Branch_Code=@Branch_Code and Year_Code=@Year_Code and FORM_NO= @FORM_NO";
                     await con.OpenAsync();
-
-                    // Get PREFIXYR from YEAR_MAST table
-                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
-                    using (SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con))
+                    using (SqlCommand cmd = new SqlCommand(query, con))
                     {
-                        prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                        string prefixYR = ( await prefixCmd.ExecuteScalarAsync())?.ToString() ?? "0000";
-
-                        // Fetch last V_NO from GATE1
-                        string lastV_NO_Query = @"
-                                SELECT MAX(CAST(V_NO AS INT)) 
-                                FROM WAYBILL1 
-                                WHERE COMP_CODE = @CompCode 
-                                AND YEAR_CODE = @YearCode 
-                                AND BRANCH_CODE = @BranchCode 
-                                AND V_TYPE = @Vtype";
-
-                        using (SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con))
-                        {
-                            lastVnoCmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                            lastVnoCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                            lastVnoCmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
-                            lastVnoCmd.Parameters.AddWithValue("@Vtype", Vtype);
-
-                            object result = await lastVnoCmd.ExecuteScalarAsync();
-
-                            if (result != DBNull.Value && result != null)
-                            {
-                                int lastV_NO = Convert.ToInt32(result);
-                                newV_NO = (lastV_NO + 1).ToString("D5");
-                            }
-                            else
-                            {
-                                newV_NO = prefixYR + "00001";
-                            }
-                        }
+                        cmd.Parameters.AddWithValue("@V_NO", vNo);
+                        cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@Year_Code", gv.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@Branch_Code", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@FORM_NO", form_No);
+                        var result = await cmd.ExecuteScalarAsync();
+                        flg = result != null && Convert.ToInt32(result) == 1;
+                        response.status = true;
+                        response.data = flg;
+                        return response;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error in GetVNo: {ex.Message}");
                 response.status = false;
-                response.message = "An error occurred while generating the V_NO." + ex.Message;
+                response.message = ex.Message;
                 return response;
             }
-            response.status = false;
-            response.data = newV_NO;
-            return response;
-            //return Json(new { V_NO = newV_NO });
         }
         public async Task<RepositoryResponseList<object>> PartyGstinNo(int Partycode)
         {
@@ -151,7 +123,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             response.data = dataList;
             return response;
-            //return Json(dataList);
         }
         public async Task<RepositoryResponse> SaveData(TransitEntryModel data)
         {
@@ -169,6 +140,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             if (result == "Success")
             {
                 response.status = true;
+                response.message = action == "UPDATE" ? "Updated Successfully!" : "Inserted Successfully!";
                 return response;
             }
             else
@@ -242,7 +214,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                         else
                         {
-                            mode = "Edit";
+                            mode = "Update";
                             _globalValidationdate.LogInsertUpdateDelete(destinationTable: "WAYBILL1", sourceTable: "WAYBILL1", transactionType: "Transaction",
                                     codeVNo: data.V_NO.ToString(), vtype: data.V_TYPE);
                         }
