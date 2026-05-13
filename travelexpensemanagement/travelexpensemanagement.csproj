@@ -48,6 +48,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\css\oldmasterstyle.css" />
 	  <Content Remove="wwwroot\js\SmoothScroll.js" />
 	</ItemGroup>
 

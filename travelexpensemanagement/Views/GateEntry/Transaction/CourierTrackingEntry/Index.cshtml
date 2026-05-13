@@ -115,167 +115,9 @@
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Save</span>
         </button>
-        @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
-            <i class="fa fa-print"></i>Print
-        </button> *@
     </div>
 </div>
 
-
-
-@* <fieldset>
-    <legend class="legend-field">Courier Tracking Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "CourierTrackingEntryList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
-        </div>
-    </div>
-    <form id="CourierTrackingEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPartyName">Party Name<span class="required">*</span></label>
-                    <select class="form-control" id="ddlPartyName">
-                        <option value="">Select Party Name</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlCity">City</label>
-                    <select class="form-control" id="ddlCity">
-                        <option value="">Select City</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlCourierName">Courier Name<span class="required">*</span></label>
-                    <select class="form-control" id="ddlCourierName">
-                        <option value="">Select Courier Name</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtDocketNo">Docket No<span class="required">*</span></label>
-                    <input type="text" class="form-control" id="TxtDocketNo" placeholder="Enter Docket No">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlReceivedBy">Received By</label>
-                    <select class="form-control" id="ddlReceivedBy">
-                        <option value="">Select Received By</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPurpose">Purpose</label>
-                    <select class="form-control" id="ddlPurpose">
-                        <option value="">Select Purpose</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="txtWeight">Weight (in gm)</label>
-                    <input type="text" class="form-control" id="txtWeight" placeholder="Enter Weight (in gm)">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="txtRemarks">Remarks</label>
-                    <textarea type="text" class="form-control" id="txtRemarks" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-        </div>
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">Print Option</legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtFrom">From</label>
-                        <input type="date" class="form-control" id="Dtfrom">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtTo">To</label>
-                        <input type="date" class="form-control" id="DtTo">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlVType">VType</label>
-                        <select class="form-control" id="ddlVtype">
-                            <option value="">Select Vtype</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlParty">Party</label>
-                        <select class="form-control" id="ddlParty">
-                            <option value="">Select Party</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="button-right">
-                        <button id="btn-print" type="submit" class="btn btn-primary"><i class="fa fa-print"></i>Print</button>
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
-
- *@
-<script src="~/common/dropdown.js"></script>
-<script src="~/common/globalvalidation.js"></script>
 <script>
     let readOnly= false;
     $(document).ready(function () {
@@ -335,11 +177,13 @@
           }
       });
     }
-
-        // SAVE
+     // SAVE
     $('#btn-save').on('click', function (e) {
-            e.preventDefault();
-            const formData = {
+          if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
+          if (!validateRequiredField('#ddlCourierName', 'Courier Name')) return;
+          if (!validateRequiredField('#TxtDocketNo', 'Docket No')) return;
+          e.preventDefault();
+          const formData = {
                 DocType: $('#ddlDocType').val(),
                 DocDate: $('#DtDocDate').val(),
                 DocNo: $('#NumDocNo').val(),
@@ -354,8 +198,7 @@
                 V_No: docNo,
                 ACTION: docNo ? "UPDATE" : "INSERT"
             };
-
-            $.ajax({
+          $.ajax({
                 url: '/CourierTrackingEntry/SaveCourierData',
                 type: 'POST',
                 contentType: 'application/json',
@@ -368,11 +211,11 @@
                     toastr.error('Error saving data');
                 }
             });
-        });
+       });
 
     });
 
-    // 🔥 Bind data in edit mode
+    // Bind data in edit mode
     function bindCourierTracking(data) {
         bindDropdown('CourierTrackingEntry','DocType', '#ddlDocType', '-- Select Doc Type --', data.vType);
         bindDropdown('CourierTrackingEntry','City', '#ddlCity', '-- Select City --', data.city);

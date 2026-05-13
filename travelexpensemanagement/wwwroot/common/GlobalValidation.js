@@ -56,8 +56,9 @@ function validateRequiredField(selector, fieldName) {
     const value = $field.val()?.trim();
 
     if (!value) {
-        toastr.warning(`${fieldName} is required`);
-        $field.focus();
+        //toastr.warning(`${fieldName} is required`);
+        //$field.focus();
+        setInvalid($(selector), `${fieldName} is required`)
         return false;
     }
     return true;

@@ -1437,11 +1437,12 @@ a.fullscreen {
 }
 
 .step.completed .step-icon {
-    /*background: #5ebf2b;*/
+    background: darkseagreen !important;
     color: white;
     border-radius: 50%;
     padding: 4px;
     border: 2px solid #5ebf2b;
+    /*background-color: darkseagreen !important;*/
 }
 
 .progress-line {

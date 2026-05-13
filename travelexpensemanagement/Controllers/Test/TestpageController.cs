@@ -15,8 +15,8 @@ public class TestpageController : Controller
 {
     private readonly IWebHostEnvironment _env;
     private readonly DataBaseConnection _dbConnection;
-    private readonly string _connectionString = "Data Source=118.139.164.161;Initial Catalog=Hrms_db;Persist Security Info=True;User ID=noida;Password=Kwalityy@214#;Trust Server Certificate=True";
-    //private readonly string _connectionString = "Data Source=192.168.20.51;Initial Catalog=ERPDB;Persist Security Info=True;User ID=sa;Password=Pass@123;Trust Server Certificate=True";
+    //private readonly string _connectionString = "Data Source=118.139.164.161;Initial Catalog=Hrms_db;Persist Security Info=True;User ID=noida;Password=Kwalityy@214#;Trust Server Certificate=True";
+    private readonly string _connectionString = "Data Source=192.168.20.51;Initial Catalog=ERPDB;Persist Security Info=True;User ID=sa;Password=Pass@123;Trust Server Certificate=True";
     private readonly string PubWhatsupTokenId = "0ba3f59a551b9a8881caba3572031b81183859298391c1cbdc8e915ec725430a";
 
     public TestpageController(IWebHostEnvironment env, DataBaseConnection db)
