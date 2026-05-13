@@ -53,8 +53,8 @@
                 <div class="form-group">
                     <label for="ddlWeightType">Weight Type <span class="required">*</span></label>
                     <select class="form-control" id="ddlWeightType">                    
-                        <option>Gross</option>
-                        <option>Tare</option>
+                        <option value="Gross">Gross</option>
+                        <option value="Tare">Tare</option>
                     </select>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                     <select id="ddlTareSlipNo" class="form-control">
                         <option>-select Tare Slip No.-</option>
                     </select>
-                    @* <input type="text" class="form-control" maxlength="15" id="ddlTareSlipNo" placeholder="Enter Tare Slip No"> *@
+
                 </div>
             </div>
             <div class="col-md-3">
@@ -79,7 +79,7 @@
                     <select id="ddlGrossSlipNo" class="form-control">
                         <option>-select Gross Slip No.-</option>
                     </select>
-                    @* <input class="form-control" id="ddlGrossSlipNo" maxlength="15" placeholder="Enter Gross Slip No"> *@
+      
                 </div>
             </div>
         </div>
@@ -187,8 +187,7 @@
     let docId = "";
     let readOnly;
     let isProgrammaticChange = false;
-    let isFillingData = false;
-        
+    let isFillingData = false;        
     $(document).ready(function () {
 
         setEnterKeyFocus(allFieldIds);
@@ -278,8 +277,7 @@
 
       });
 
-
-       $('#ddlGrossSlipNo').on('select2:select', async function (e) {
+        $('#ddlGrossSlipNo').on('select2:select', async function (e) {
             if (isFillingData) return;
             if (isProgrammaticChange) return;
             var SlipNo=$(this).val();
@@ -308,17 +306,13 @@
             !validateRequiredField('#TxtVehicleNo', 'Vehicle No') ||
             !validateRequiredField('#DtDocDate','Doc Date')) return;
          
-        if (!validateBigWeighbridgeTable()) {
-        return;
-        }
-
-
+            if (!validateBigWeighbridgeTable()) {
+             return;
+            }
             const isValid = await checkValidDate();
             if (isValid === false) {
             return;
             }
-
-
 
             const $btn = $(this);
             $btn.prop('disabled', true);
@@ -365,7 +359,6 @@
 
 
     });
-
 </script>
 
 <script>
@@ -447,9 +440,6 @@
                    data: { SlipNo: slipNo, vType:vType },
                    dataType: 'json'
                });
-
-
-                     console.log("response", response);
 
                var $table = $('#tblInHouseWeighbridgeEntry tbody');
                $table.empty();
@@ -598,57 +588,103 @@
     }
 
     function validateBigWeighbridgeTable() {
-        let isValid = true;
-        let errorMessage = '';
-         let previousWeight = 0;
+        debugger;
+        let rowCount = 0;
+            const wbType = $('#ddlWeightType').val();
 
-        $('#tblInHouseWeighbridgeEntry tbody tr').each(function (index) {
-            const rowId = this.id;
-            const idx = rowId.replace('row', '');
+        $('#tblInHouseWeighbridgeEntry tbody tr').each(function (i) {
 
-            const weightRaw = $(`#TxtWeight${idx}`).val()?.trim();
-            const date = $(`#TxtDate${idx}`).val()?.trim();
-            const time = $(`#TxtTime${idx}`).val()?.trim();
-            const fromPlace = $(`#ddlFromPlace${idx}`).val()?.trim();
-            const toPlace = $(`#ddlToPlace${idx}`).val()?.trim();
-            const itemName = $(`#TxtItemName${idx}`).val()?.trim();
-            const weight = parseFloat(weightRaw) || 0;
-           
-            if (index === 0) {
-                if (!weightRaw || weight <= 0 || !date || !time) {
-                    isValid = false;
-                    errorMessage = 'Please fill required fields in the first row: Weight > 0, Date, Time';
-                    return false; 
+            const idx = this.id.replace('row', '');
+
+            const weight = parseFloat($(`#TxtWeight${idx}`).val()) || 0;
+
+            const fromPlace = $(`#ddlFromPlace${idx}`).val() || '';
+            const toPlace = $(`#ddlToPlace${idx}`).val() || '';
+            const itemCode = $(`#TxtItemName${idx}`).val() || '';
+            const itemName = $(`#TxtItemName${idx} option:selected`).text() || '';
+            const date = $(`#TxtDate${idx}`).val() || '';
+
+            // Count rows having weight
+            if (weight > 0) {
+                rowCount++;
+            }
+
+            // Gross validation only after first row
+            if (wbType === 'Gross' && i > 0) {
+
+                // From Place empty
+                if (weight > 0 && !fromPlace) {
+
+                    toastr.error(
+                        `From Place is empty of Item ${itemName}`
+                    );
+
+                    $(`#ddlFromPlace${idx}`).focus();
+
+                    return false;
+                }
+
+                // To Place empty
+                if (weight > 0 && !toPlace) {
+
+                    toastr.error(  `To Place is empty of Item ${itemName}` );
+
+                    $(`#ddlToPlace${idx}`).focus();
+
+                    return false;
+                }
+
+                // From and To same
+                if (
+                    fromPlace &&
+                    toPlace &&
+                    fromPlace === toPlace
+                ) {
+
+                    toastr.error(
+                        `From Place and To Place cannot be same of Item ${itemName}`
+                    );
+
+                    $(`#ddlFromPlace${idx}`).focus();
+
+                    return false;
+                }
+
+                // Item empty
+                if (weight > 0 && !itemCode) {
+
+                    toastr.error(
+                        `Item Code not valid of Item ${itemName}`
+                    );
+
+                    $(`#TxtItemName${idx}`).focus();
+
+                    return false;
+                }
+
+                // Date empty
+                if (weight > 0 && !date) {
+
+                    toastr.error(
+                        `Date is empty of Item ${itemName}`
+                    );
+
+                    $(`#TxtDate${idx}`).focus();
+
+                    return false;
                 }
             }
-            else {   
-                    if (!date || weight <= 0 || !time || !fromPlace || !toPlace || !itemName) {
-                        isValid = false;
-                        errorMessage = `Please fill required fields in row ${idx}: Date, Time, From Place, To Place, Item Name (since Weight > 0).`;
-                        return false;
-                    }   
-                    
-               if (fromPlace === toPlace) {
-                isValid = false;
-                errorMessage = `From Place and To Place must be different in row ${idx}.`;
-                return false;
-               }
-            }
-
-         if (index > 0 && weight <= previousWeight) {
-             isValid = false;
-             errorMessage = `Weight in row ${idx} must be greater than the previous row's weight (${previousWeight}).`;
-             return false;
-         }
-         previousWeight = weight;  
-
         });
 
-        if (!isValid) {
-            toastr.error(errorMessage);
+        // At least one row check
+        if (rowCount === 0) {
+
+            toastr.error('Please enter at least one row.');
+
+            return false;
         }
 
-        return isValid;
+        return true;
     }
 
     function GetDocTypeAsync(selectedValue) {
@@ -728,6 +764,12 @@
             }
         });
     }
+
+
+
+
+
+
 
     function UpdateData(UpdateDt) {
         $.ajax({

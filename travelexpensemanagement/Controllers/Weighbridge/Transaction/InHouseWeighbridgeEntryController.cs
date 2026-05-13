@@ -53,13 +53,13 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
                 var yearParams = new Dictionary<string, object> { { "@YearCd", yearCode } };
                 var vnoParams = new Dictionary<string, object>
-            {
-            { "@COMP_CODE", companyCode },
-            { "@BRANCH_CODE", branchCode },
-            { "@YEAR_CODE", yearCode },
-            { "@V_TYPE", vType },
-            { "@TableName", tableName }
-            };
+                    {
+                    { "@COMP_CODE", companyCode },
+                    { "@BRANCH_CODE", branchCode },
+                    { "@YEAR_CODE", yearCode },
+                    { "@V_TYPE", vType },
+                    { "@TableName", tableName }
+                    };
 
                 string nextVNo = await _dbHelper.GetExecuteScalarAsync<string>("sp_GetMaxVNo", vnoParams, isStoredProc: true);
                 string year = await _dbHelper.GetExecuteScalarAsync<string>("SELECT dbo.fn_GetCurrentYear(@YearCd)", yearParams);
@@ -80,8 +80,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             try
             {
                 var userDt = _globalValue.GetGlobalVariables();
-                //string strqry= $@"SELECT V_NO,V_TYPE,TRUCK_NO,PARTY_CODE FROM GATE1 where COMP_CODE={userDt.PubCompCode} and YEAR_CODE={userDt.PubFYearCode} and BRANCH_CODE=1 AND V_TYPE IN ( select  DISTINCT CODE from DOCTYPE_MAST where DOCTYPE='GateInward' ) ";
-                string strqry = $@"
+               string strqry = $@"
                SELECT V_NO,V_TYPE,TRUCK_NO, PARTY_CODE, sg.NAME partyName, d.NAME as VtypeName FROM GATE1 g 
                left join SUBGROUP_MAST sg on g.PARTY_CODE=sg.CODE and g.COMP_CODE=sg.COMP_CODE
                left join DOCTYPE_MAST d on g.V_TYPE=d.CODE 
@@ -151,9 +150,12 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             {
                 var usersession = _globalValue.GetGlobalVariables();
                 var strqry = $@"SELECT top 2   b.VEHICLE_NO, a.*, b.* FROM WB2 a LEFT JOIN WB1 b  ON a.V_NO = b.V_NO AND a.V_TYPE = b.V_TYPE AND a.COMP_CODE = b.COMP_CODE
-                    AND a.BRANCH_CODE = b.BRANCH_CODE AND a.YEAR_CODE = b.YEAR_CODE WHERE   a.V_NO = 252603890 ; ";
-                    //WHERE   a.V_NO = {SlipNo} AND a.V_TYPE = '{vType}'
-                    //AND b.WB_TYPE = 'Tare' AND a.COMP_CODE = {usersession.PubCompCode}  AND a.YEAR_CODE = {usersession.PubFYearCode} AND a.BRANCH_CODE = {usersession.PubBranchCode};";
+                AND a.BRANCH_CODE = b.BRANCH_CODE AND a.YEAR_CODE = b.YEAR_CODE 
+                WHERE a.V_NO = { SlipNo}
+                AND a.V_TYPE = '{vType}'
+                AND b.WB_TYPE = 'Tare' AND a.COMP_CODE = { usersession.PubCompCode}
+                AND a.YEAR_CODE = { usersession.PubFYearCode}
+                AND a.BRANCH_CODE = { usersession.PubBranchCode} ; ";
 
                     var tareNoList = await _dbHelper.GetJsonDataAsync(strqry);
                     return Json(new { status = true, data = tareNoList });
@@ -403,14 +405,9 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             DateTime vdate = data.GetProperty("vdate").GetDateTime();
             string vtype = data.GetProperty("vtype").GetString();
             string vno = data.GetProperty("vno").GetString();
-            var result = await _globalValidationdate.CheckValidDate("Gate1", vdate, vtype, vno);
+            var result = await _globalValidationdate.CheckValidDate("WB1", vdate, vtype, vno);
             return Ok(result);
         }
-
-
-
-
-
 
     }
 }
