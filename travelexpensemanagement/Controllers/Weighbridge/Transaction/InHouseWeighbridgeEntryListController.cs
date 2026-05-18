@@ -1,14 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Data.Common;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Models;
 
 namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
     public class InHouseWeighbridgeEntryListController : Controller
     {
+
+
+
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
@@ -18,15 +24,13 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
-            _moduleService = moduleService;
+            _moduleService = moduleService;         
         }
         public IActionResult Index()
         {
-
             ViewBag.CurrentMenu = "In House Weighbridge Entry";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
-
             var model = new UserMenuPermissionsViewModel
             {
                 UserMenuPermissions = permissions,
@@ -45,11 +49,10 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 {
                     {"@COMP_CODE", UsersessionDt.PubCompCode },
                     {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode},
                     {"@DOCTYPE",  "KantaInHouse"},
                     {"@Action", "WBEntryList" }
                 };
-
                 var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
@@ -71,15 +74,13 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
-
                 return Json(new { status = true, data = pagedList, totalCount });
-
             }
             catch (Exception ex)
             {
                 return Json(new { status = false, message = ex.Message });
             }
-        }
+        }        
 
         [HttpDelete]
         public async Task<IActionResult> DeleteInHouseWBridgeEntry(string docid)
@@ -92,53 +93,38 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 }
 
                 var userSession = _globalValue.GetGlobalVariables();
+
                 string VType = docid.Substring(0, 4);
                 string VNo = docid.Substring(4);
 
-                using (var con = _dbcontext.GetErpConnection())
+                using (SqlConnection con = _dbcontext.GetErpConnection())
                 {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand("sp_GetWBEntry", con))
                     {
-                        try
-                        {
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                            string[] deleteQueries = {
-                            "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                            "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-
-                        };
-
-                            foreach (var query in deleteQueries)
-                            {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
-                        }
+                        cmd.Parameters.Add("@Action", SqlDbType.NVarChar).Value = "Delete";
+                        cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = userSession.PubCompCode;
+                        cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = userSession.PubFYearCode;
+                        cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = userSession.PubBranchCode;
+                        cmd.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 4).Value = VType;
+                        cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = Convert.ToInt32(VNo);
+                        cmd.ExecuteNonQuery();
                     }
-                }
+                }             
+
+                return Json(new { status = true, message = "Data Delete Successfully" });
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new {  status = false, message = ex.Message });
             }
         }
+          
+
+
 
         [HttpGet]
         public async Task<IActionResult> GetInHouseWBridgeEntryDetails(string docid)
@@ -150,11 +136,12 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 {
                     return Json(new { status = false, message = "Invalid ID" });
                 }
+
                 var parameter = new Dictionary<string, object>
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@V_TYPE", docid.Substring(0, 4) },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }
@@ -178,7 +165,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@DOCTYPE",  "KantaInHouse"},
                     {"@Action", "Excel" }
                 };
@@ -192,6 +179,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             }
         }
 
-
     }
+
 }
+

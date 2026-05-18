@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Microsoft.AspNetCore.RateLimiting;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.EncryptionHelper;
@@ -9,9 +10,12 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Weighbridge;
+
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Weighbridge;
 using travelexpensemanagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +37,13 @@ builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
+
+builder.Services.AddScoped<IInHouseWeighbridgeEntryRepository, InHouseWeighbridgeEntryRepository>();
+
+
+
+
+
 
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
@@ -81,14 +92,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
 app.UseRateLimiter();
-
 app.UseMiddleware<SessionTimeoutMiddleware>();
-
 app.UseAuthorization();
 
 // ======================

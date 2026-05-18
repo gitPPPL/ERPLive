@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
 using System.Data.Common;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -17,6 +18,7 @@ using travelexpensemanagement.Models.GateEntry;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
+    [SessionAuthorize]
     public class InwardEntryListController : Controller
     {
 
@@ -106,7 +108,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(new { success = true, lists = headerList, totalCount });
         }
-
 
         [HttpGet]
         public IActionResult GetDataByPendingorder(int PartyCode, string V_TYPE, DateTime V_DATE)

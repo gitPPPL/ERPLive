@@ -177,13 +177,15 @@
         "TxtItemName",
         "TxtRemarks"
     ];
+
     const fieldsToToggle = [
-            '#ddlTareSlipNo',
-            '#ddlGrossSlipNo',
-            '#TxtNobags25',
-            '#TxtNobags500',
-            '#TxtNobags1000'
+        '#ddlTareSlipNo',
+        '#ddlGrossSlipNo',
+        '#TxtNobags25',
+        '#TxtNobags500',
+        '#TxtNobags1000'
      ];
+
     let docId = "";
     let readOnly;
     let isProgrammaticChange = false;
@@ -367,9 +369,10 @@
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
      }
+    async function fillTableBySlipNo(slipNo, vType) {
 
-      async function fillTableBySlipNo(slipNo, vType) {
         try {
+
             const response = await $.ajax({
                 url: "@Url.Action("GetWeighBridgeBySlipNo", "InHouseWeighbridgeEntry")",
                 type: 'GET',
@@ -377,52 +380,272 @@
                 dataType: 'json'
             });
 
-      
-            let itemsData = response.data || [];       
-            let headerData = itemsData.length > 0 ? itemsData[0] : null;
-   
+                console.log("response1",response);
+
+            const itemsData = response.data || [];
+
             const $tableBody = $('#tblInHouseWeighbridgeEntry tbody');
+
             $tableBody.empty();
 
-              $('#TxtVehicleNo').val(headerData.VEHICLE_NO);
-
-
             if (itemsData.length === 0) {
+
                 console.log("No data found");
+
                 return;
             }
+
+            const headerData = itemsData[0];
+
+            $('#TxtVehicleNo').val(headerData.vehiclE_NO || '');
 
             for (let index = 0; index < itemsData.length; index++) {
 
                 const item = itemsData[index];
-                const idx = index + 1;      
-                 addItemRecordRow();
+
+                const idx = index + 1;
+
+                addItemRecordRow();
+
                 await bindDropdownData(idx);
-                $(`#TxtWeight${idx}`).val(item.WEIGHT ?? '');
-                $(`#TxtDate${idx}`).val( item.WGT_DATE  ? item.WGT_DATE.substring(0, 10)  : '' );
-                $(`#TxtWgtType${idx}`).val(item.TYPE ?? '');
-                $(`#TxtItemName${idx}`)
-                .val(item.ITEM_CODE ?? '')
-                .trigger('change');
 
-                $(`#ddlFromPlace${idx}`)
-                .val(item.FROM_PLACE ?? '')
-                .trigger('change');
+                // =========================
+                // BASIC FIELDS
+                // =========================
 
-                $(`#ddlToPlace${idx}`)
-                .val(item.TO_PLACE ?? '')
-                .trigger('change');
-                $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
-                const formattedTime = convertTo24HourFormat(item.WGT_TIME ?? '');
+                $(`#TxtWeight${idx}`).val(item.weight ?? '');
+
+                $(`#TxtDate${idx}`).val(
+                    item.wgT_DATE
+                        ? item.wgT_DATE.substring(0, 10)
+                        : ''
+                );
+
+                $(`#TxtWgtType${idx}`).val(item.type ?? '');
+
+                $(`#TxtItemName${idx}`) .val(String(item.iteM_CODE ?? '')) .trigger('change');
+
+                // =========================
+                // FROM PLACE
+                // =========================
+
+                const fromDropdown = $(`#ddlFromPlace${idx}`);
+
+                if (item.froM_NAME) {
+
+                    fromDropdown.find(
+                        `option[value="${item.froM_NAME}"]`
+                    ).remove();
+
+                    const fromOption = new Option(
+                        item.froM_NAME,
+                        item.froM_NAME,
+                        true,
+                        true
+                    );
+
+                    fromDropdown.append(fromOption).trigger('change');
+                }
+
+                // =========================
+                // TO PLACE
+                // =========================
+
+                const toDropdown = $(`#ddlToPlace${idx}`);
+
+                if (item.tO_NAME) {
+
+                    toDropdown.find(
+                        `option[value="${item.tO_NAME}"]`
+                    ).remove();
+
+                    const toOption = new Option(
+                        item.tO_NAME,
+                        item.tO_NAME,
+                        true,
+                        true
+                    );
+
+                    toDropdown.append(toOption).trigger('change');
+                }
+
+                // =========================
+                // REMARKS
+                // =========================
+
+                $(`#TxtRemarks${idx}`).val(item.remarks ?? '');
+
+                // =========================
+                // TIME
+                // =========================
+
+                const formattedTime = convertTo24HourFormat(
+                    item.wgT_TIME ?? ''
+                );
+
                 $(`#TxtTime${idx}`).val(formattedTime);
+                
+                $(`#ddlFromPlace${idx}`).prop('disabled', true);
+
+                $(`#ddlToPlace${idx}`).prop('disabled', true);
+
+                $(`#TxtItemName${idx}`).prop('disabled', true);
+
+                $(`#TxtDate${idx}`).prop('readonly', true);
+
+                $(`#TxtTime${idx}`).prop('readonly', true);
+
+                $(`#TxtWeight${idx}`).prop('readonly', true);
+
+                $(`#TxtWgtType${idx}`).prop('readonly', true);
+
+                $(`#TxtRemarks${idx}`).prop('readonly', true);
+
+                $(`#BtnGetWeight${idx}`).prop('disabled', true);
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Error fetching weighbridge slip data:",
+                error
+            );
+        }
+    }
+
+    async function fillTableByGrossSlipNo(slipNo, vType) {
+
+        try {
+
+            const response = await $.ajax({
+                url: '@Url.Action("GetWeighBridgeByGrossSlipNo", "InHouseWeighbridgeEntry")',
+                type: 'GET',
+                data: {
+                    SlipNo: slipNo,
+                    vType: vType
+                },
+                dataType: 'json'
+            });
+
+            console.log("response2", response);
+
+            // Validate response
+            if (!response || response.status === false) {
+
+                alert(response?.message || "Invalid response");
+                return;
+            }
+
+            // Data array
+            const itemsData = response.data || [];
+
+            const $table = $('#tblInHouseWeighbridgeEntry tbody');
+            $table.empty();
+
+            if (itemsData.length === 0) {
+
+                console.log("No data found");
+                return;
+            }
+
+            const headerData = itemsData[0];
+
+            $('#TxtVehicleNo').val(headerData.vehiclE_NO || '');
+
+            for (let index = 0; index < itemsData.length; index++) {
+
+                const item = itemsData[index];
+                const idx = index + 1;
+
+                addItemRecordRow();
+
+                await bindDropdownData(idx);
+
+                // Weight
+                $(`#TxtWeight${idx}`).val(item.weight ?? "");
+
+                // Date
+                $(`#TxtDate${idx}`).val(
+                    item.wgT_DATE
+                        ? item.wgT_DATE.substring(0, 10)
+                        : ""
+                );
+
+                // Weight Type
+                $(`#TxtWgtType${idx}`).val('Tare');
+
+                // Item dropdown
+                $(`#TxtItemName${idx}`)
+                    .val(String(item.iteM_CODE ?? ''))
+                    .trigger('change');
+
+                // ======================
+                // FROM PLACE
+                // ======================
+                const fromDropdown = $(`#ddlFromPlace${idx}`);
+
+                if (item.froM_NAME) {
+
+                    if (
+                        fromDropdown.find(`option[value="${item.froM_NAME}"]`).length === 0
+                    ) {
+
+                        fromDropdown.append(
+                            new Option(
+                                item.froM_NAME,
+                                item.froM_NAME,
+                                true,
+                                true
+                            )
+                        );
+                    }
+
+                    fromDropdown.val(item.froM_NAME).trigger('change');
+                }
+
+                // ======================
+                // TO PLACE
+                // ======================
+                const toDropdown = $(`#ddlToPlace${idx}`);
+
+                if (item.tO_NAME) {
+
+                    if (
+                        toDropdown.find(`option[value="${item.tO_NAME}"]`).length === 0
+                    ) {
+
+                        toDropdown.append(
+                            new Option(
+                                item.tO_NAME,
+                                item.tO_NAME,
+                                true,
+                                true
+                            )
+                        );
+                    }
+
+                    toDropdown.val(item.tO_NAME).trigger('change');
+                }
+
+                // Remarks
+                $(`#TxtRemarks${idx}`).val(item.remarks ?? "");
+
+                // Time
+                const formattedTime = convertTo24HourFormat(item.wgT_TIME ?? "");
+
+                $(`#TxtTime${idx}`).val(formattedTime);
+
+                // Disable controls
                 $(`#ddlFromPlace${idx}`).prop('disabled', true);
                 $(`#ddlToPlace${idx}`).prop('disabled', true);
                 $(`#TxtItemName${idx}`).prop('disabled', true);
+
                 $(`#TxtDate${idx}`).prop('readonly', true);
                 $(`#TxtTime${idx}`).prop('readonly', true);
                 $(`#TxtWeight${idx}`).prop('readonly', true);
                 $(`#TxtWgtType${idx}`).prop('readonly', true);
                 $(`#TxtRemarks${idx}`).prop('readonly', true);
+
                 $(`#BtnGetWeight${idx}`).prop('disabled', true);
             }
 
@@ -431,53 +654,6 @@
             console.error("Error fetching weighbridge slip data:", error);
         }
     }
-
-    async function fillTableByGrossSlipNo(slipNo, vType){
-          try {
-               const response = await $.ajax({
-                     url: "@Url.Action("GetWeighBridgeByGrossSlipNo", "InHouseWeighbridgeEntry")",
-                   type: 'GET',
-                   data: { SlipNo: slipNo, vType:vType },
-                   dataType: 'json'
-               });
-
-               var $table = $('#tblInHouseWeighbridgeEntry tbody');
-               $table.empty();
-               var itemsData = response.data || [];
-              let headerData = itemsData.length > 0 ? itemsData[0] : null;
-                   
-                $('#TxtVehicleNo').val(headerData.VEHICLE_NO);
-
-               for (let index = 0; index < itemsData.length; index++) {
-                   const item = itemsData[index];
-                   const idx = index + 1;
-                   addItemRecordRow();
-                   await bindDropdownData(idx);
-                   $(`#TxtWeight${idx}`).val(item.WEIGHT ?? "");
-                   $(`#TxtDate${idx}`).val((item.WGT_DATE || '').substring(0, 10));
-                   $(`#TxtWgtType${idx}`).val('Tare');
-                   $(`#TxtItemName${idx}`).val(item.ITEM_NAME ?? "");
-                   $(`#ddlFromPlace${idx}`).val(item.FROM_NAME ?? "");
-                   $(`#ddlToPlace${idx}`).val(item.TO_NAME ?? "");
-                   $(`#TxtRemarks${idx}`).val(item.REMARKS ?? "");
-                   const formattedTime = convertTo24HourFormat(item.WGT_TIME ?? ""); $(`#TxtTime${idx}`).val(formattedTime);
-               $(`#ddlFromPlace${idx}`).prop('disabled', true);
-               $(`#ddlToPlace${idx}`).prop('disabled', true);
-               $(`#TxtItemName${idx}`).prop('disabled', true);
-               $(`#TxtDate${idx}`).prop('readOnly', true);
-               $(`#TxtTime${idx}`).prop('readOnly', true);
-               $(`#TxtWeight${idx}`).prop('readOnly', true);
-               $(`#TxtWgtType${idx}`).prop('readOnly', true);
-               $(`#TxtRemarks${idx}`).prop('readOnly', true);
-               $(`#BtnGetWeight${idx}`).prop('disabled', true);
-
-               }
-
-
-          } catch (error) {
-            console.error("Error fetching weighbridge slip data:", error);
-          }
-   }
 
     function getTareSlipNumbers() {
 
@@ -748,7 +924,6 @@
         });
     }
 
-
     function UpdateData(UpdateDt) {
         $.ajax({
             url: '@Url.Action("SaveOrUpdateInHouseWeighBridgeEntry", "InHouseWeighbridgeEntry")',
@@ -820,12 +995,10 @@
         const rawWeight = $r.find(`#TxtWeight${idx}`).val();
         const weight = parseDecimalSafe(rawWeight);
 
-        // Skip this row if weight is empty or <= 0
         if (!weight || weight <= 0) {
-          return; // continue to next row
+          return; 
         }
 
-        // Only rows with weight > 0 reach here
         const dateVal = $r.find(`#TxtDate${idx}`).val();
         const timeVal = $r.find(`#TxtTime${idx}`).val();
         const itemNameVal = toNullableString($r.find(`#TxtItemName${idx}`).val());
@@ -833,7 +1006,6 @@
         const toPlaceVal = toNullableString($r.find(`#ddlToPlace${idx}`).val());
         const wgtTypeVal = toNullableString($r.find(`#TxtWgtType${idx}`).val());
         const remarksVal = toNullableString($r.find(`#TxtRemarks${idx}`).val());
-
         const itemName= toNullableString($r.find(`#TxtItemName${idx}`).val()) ? $r.find(`#TxtItemName${idx} option:selected`).text() : null;
         const fromName= toNullableString($r.find(`#ddlFromPlace${idx}`).val()) ? $r.find(`#ddlFromPlace${idx} option:selected`).text() : null;
         const toName=toNullableString($r.find(`#ddlToPlace${idx}`).val()) ? $r.find(`#ddlToPlace${idx} option:selected`).text() : null ;
@@ -1104,7 +1276,8 @@
         });
     }
 
-    function bindDropdownData(rowCount) {
+    function bindDropdownData(rowCount) {           
+        
         const itemSelect = $(`#TxtItemName${rowCount}`);
         const fromAddSelect = $(`#ddlFromPlace${rowCount}`);
         const toAddSelect = $(`#ddlToPlace${rowCount}`);
@@ -1154,7 +1327,7 @@
                 '@Url.Action("GetPlaceMast", "StoreWeighbridgeEntry")',
                 fromAddSelect,
                 "- Select From Place -",
-                item => `<option value="${item.CODE}">${item.NAME}</option>`
+                item => `<option value="${item.CODE}">${item.NAME}</option>`               
             ),
             loadDropdown(
                 '@Url.Action("GetPlaceMast", "StoreWeighbridgeEntry")',
@@ -1294,5 +1467,3 @@
 }
 
 </script>
-
-
