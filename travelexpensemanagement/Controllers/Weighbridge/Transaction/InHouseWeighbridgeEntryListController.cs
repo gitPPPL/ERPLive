@@ -123,9 +123,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             }
         }
           
-
-
-
         [HttpGet]
         public async Task<IActionResult> GetInHouseWBridgeEntryDetails(string docid)
         {

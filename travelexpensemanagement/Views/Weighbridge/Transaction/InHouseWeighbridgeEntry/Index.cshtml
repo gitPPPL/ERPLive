@@ -2,152 +2,158 @@
     ViewBag.Title = "In House Weighbridge Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">In House Weighbridge Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button onclick="window.location.href='@Url.Action("Index", "InHouseWeighbridgeEntryList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-balance-scale"></i>
         </div>
+        <div class="erppage-header-title">In House Weighbridge Entry</div>
     </div>
-    <form id="InHouseWeighbridgeEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        @* <option>--Select DOC Type--</option> *@
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InHouseWeighbridgeEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="InHouseWeighbridgeEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option>Select Doc Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtDocDate">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlStatus">Status</label>
-                    <select class="form-control" id="ddlStatus">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
                         <option value="1">Open</option>
                         <option value="0">Close</option>
                         <option value="2">Cancel</option>
-
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlWeightType">Weight Type <span class="required">*</span></label>
-                    <select class="form-control" id="ddlWeightType">                    
-                        <option value="Gross">Gross</option>
-                        <option value="Tare">Tare</option>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Weight Type</label>
+                    <select class="erppage-redinput erppage-required" id="ddlWeightType">
+                        <option value="gross">Gross</option>
+                        <option value="tare">Tare</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vehicle No</label>
+                    <input type="text" class="erppage-redinput" maxlength="20" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Tare Slip No</label>
+                    <select id="ddlTareSlipNo" class="erppage-input erppage-select">
+                        <option>Select Tare Slip No.</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Gross Slip No</label>
+                    <select id="ddlGrossSlipNo" class="erppage-input erppage-select">
+                        <option>Select Gross Slip No.</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtVehicleNo">Vehicle No <span class="required">*</span></label>
-                    <input type="text" class="form-control" maxlength="20" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">No. of Bags (25 Kg)</label>
+                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="erppage-input" id="TxtNobags25">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlTareSlipNo">Tare Slip No</label>
-                    <select id="ddlTareSlipNo" class="form-control">
-                        <option>-select Tare Slip No.-</option>
-                    </select>
-
+                <div class="erppage-divfield">
+                    <label class="erppage-label">No. of Bags (500 Kg)</label>
+                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="erppage-input" id="TxtNobags500">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlGrossSlipNo">Gross Slip No</label>
-                    <select id="ddlGrossSlipNo" class="form-control">
-                        <option>-select Gross Slip No.-</option>
-                    </select>
-      
+                <div class="erppage-divfield">
+                    <label class="erppage-label">No. of Bags (1000 Kg)</label>
+                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="erppage-input" id="TxtNobags1000">
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <label class="checkbox-input-mx">
-                    <input type="checkbox" id="ChkCrystalReport" />
-                    Crystal Report
-                </label>
-            </div>
-
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtNobags25">No. of Bags (25 Kg)</label>
-                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtNobags25">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtNobags500">No. of Bags (500 Kg)</label>
-                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtNobags500">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtNobags1000">No. of Bags (1000 Kg)</label>
-                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="form-control" id="TxtNobags1000">
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblInHouseWeighbridgeEntry" class="table-width">
-                    <thead class="table-head">
-                        <tr>                           
-                            <th>Wgt Type</th>
-                            <th>Weight</th>
-                            <th>Get Weight</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>From Place</th>
-                            <th>To Place</th>
-                            <th>Item Name</th>
-                            <th>Remarks</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
+                <div class="erppage-divfield">
+                    <div class="erppagesmodal-checkbox-wrap">
+                        <label class="erppage-label">Crystal Report</label>
+                        <input type="checkbox" id="ChkCrystalReport" />
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper">
+                    <table id="tblInHouseWeighbridgeEntry" class="excel-table fixed-grid-table table-width">
+                        <colgroup>
+                            <col style="display:none;">      <!-- Code (hidden) -->
+                            <col style="width:110px;">      <!-- Wgt Type -->
+                            <col style="width:120px;">      <!-- Weight -->
+                            <col style="width:120px;">      <!-- Get Weight -->
+                            <col style="width:130px;">      <!-- Date -->
+                            <col style="width:110px;">      <!-- Time -->
+                            <col style="width:180px;">      <!-- From Place -->
+                            <col style="width:180px;">      <!-- To Place -->
+                            <col style="width:220px;">      <!-- Item Name -->
+                            <col style="width:220px;">      <!-- Remarks -->
+                            <col style="width:120px;">      <!-- Action -->
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th style="display:none;">Code</th>
+                                <th>Weight Type</th>
+                                <th>Weight</th>
+                                <th>Get Weight</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>From Place</th>
+                                <th>To Place</th>
+                                <th>Item Name</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
+                    </div>
                 </div>
             </div>
+          
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
+
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
 
@@ -188,6 +194,7 @@
 
     let docId = "";
     let readOnly;
+
     let isProgrammaticChange = false;
     let isFillingData = false;        
     $(document).ready(function () {
@@ -527,7 +534,7 @@
                 dataType: 'json'
             });
 
-            console.log("response2", response);
+                 console.log("response2", response);
 
             // Validate response
             if (!response || response.status === false) {
@@ -1200,7 +1207,7 @@
             <tr class="no-border-input" id="row${rowCount}">
                 <td><input type="text" class="form-control" id="TxtWgtType${rowCount}" placeholder="Wgt Type" /></td>
                 <td><input type="text" class="form-control" id="TxtWeight${rowCount}" placeholder="Weight" /></td>
-                <td><button type="button" class="btn btn-primary" id="BtnGetWeight${rowCount}">Get Weight</button></td>
+                <td><button type="button" class="btn btn-primary erppage-btn-common" id="BtnGetWeight${rowCount}">Get Weight</button></td>
                 <td><input type="date" class="form-control" id="TxtDate${rowCount}" /></td>
                 <td><input type="time" class="form-control" id="TxtTime${rowCount}" /></td>
                 <td>
@@ -1219,9 +1226,9 @@
                     </select>
                 </td>
                 <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" placeholder="Remarks" /></td>
-                <td>
-                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
-                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                <td class="action-col">
+                      <button class="act-btn edit" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus btn-add-action"></i></button>
+                      <button class="act-btn delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash btn-delete-action"></i></button>
                 </td>
             </tr>
         `;

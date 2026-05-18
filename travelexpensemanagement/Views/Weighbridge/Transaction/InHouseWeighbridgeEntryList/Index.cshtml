@@ -31,159 +31,109 @@
 }
 
 
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>In House Weighbridge Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "InHouseWeighbridgeEntry")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+				<i class="fa fa-print"></i>Print
+			</button>
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" onclick="exportToExcel()" data-tooltip="Export to Excel">
+				<i class="fa fa-file-excel"></i>Export
+			</button>
+		}
+		@if (canMail)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" onclick="callGetReportAsPdf()">
+				<i class="fa fa-envelope"></i>Mail
+			</button>
+		}
+		@if (canApproval)
+		{
 
-<fieldset>
-
-	<legend class="legend-field">In House Weighbridge Entry List</legend>
-
-	<div class="row">
-
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text"
-					   id="searchBox"
-					   class="form-control"
-					   placeholder="Search by All Columns Name..."
-					   aria-label="Search term">
-			</div>
-		</div>
-
-		<div class="col-lg-6">
-
-			<div class="btn-rightalign">
-
-				@if (canAdd)
-				{
-					<button onclick="window.location.href='@Url.Action("Index", "InHouseWeighbridgeEntry")'"
-							type="button"
-							class="btn btn-add">
-
-						<i class="fa fa-plus"></i>Add
-					</button>
-				}
-
-				@if (canPrint)
-				{
-					<button class="btn btn-print"
-							onclick="printCityMasterReport()">
-
-						<i class="fa fa-print"></i> Print
-					</button>
-				}
-
-				@if (canExport)
-				{
-					<button class="btn btn-export"
-							onclick="exportToExcel()">
-
-						<i class="fas fa-file-export"></i> Export
-					</button>
-				}
-
-				@if (canMail)
-				{
-					<button class="btn btn-mail"
-							onclick="callGetReportAsPdf()">
-
-						<i class="fa fa-envelope"></i> Mail
-					</button>
-				}
-
-				@if (canApproval)
-				{
-					<button class="btn btn-approved">
-
-						<i class="fa fa-check"></i> Approved
-					</button>
-				}
-
-			</div>
-
-		</div>
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i>Approved
+			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblInHouseWeighbridgeList" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" />      
+				<col style="width:140px;" /> 
+				<col style="width:140px;" />   
+				<col style="width:150px;" />    
+				<col style="width:140px;" />  
+				<col style="width:140px;" />      
+				<col style="width:150px;" />    
+				<col style="width:150px;" />     
+				<col style="width:120px;" />     
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Document Type</th>
+					<th>Document No</th>
+					<th>Document Date</th>
+					<th>Weight Type</th>
+					<th>Tare Slip No</th>
+					<th>Vehicle No</th>
+					<th>Gross Slip No</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
 
 	</div>
 
-	<div class="card">
-
-		<div class="table-responsive">
-
-			<table id="tblInHouseWeighbridgeList"
-				   class="table-width">
-
-				<thead class="table-head">
-
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Doc Type</th>
-						<th>Doc No</th>
-						<th>Doc Date</th>
-						<th>Weight Type</th>
-						<th>Tare Slip No</th>
-						<th>Vehicle No</th>
-						<th>Gross Slip No</th>
-						<th>Action</th>
-					</tr>
-
-				</thead>
-
-				<tbody></tbody>
-
-			</table>
-
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
 
-		<!-- PAGINATION -->
-
-		<div class="erppagelist-pagination">
-
-			<div class="pagination-left">
-
-				<select id="pageSizeSelect"
-						onchange="changeRowsPerPage()">
-
-					<option value="5">5</option>
-					<option value="10" selected>10</option>
-					<option value="20">20</option>
-					<option value="50">50</option>
-
-				</select>
-
-			</div>
-
-			<div class="pagination-center">
-
-				<button onclick="prevPage()"
-						class="page-nav"
-						id="prevBtn">
-
-					‹
-				</button>
-
-				<div id="pageNumbers"
-					 class="page-numbers">
-				</div>
-
-				<button onclick="nextPage()"
-						class="page-nav"
-						id="nextBtn">
-
-					›
-				</button>
-
-			</div>
-
-			<div class="pagination-right"
-				 id="pageInfoText">
-
-				Results: 0 - 0 of 0
-
-			</div>
-
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
 		</div>
-
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
 	</div>
+</div>
 
-</fieldset>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -255,39 +205,20 @@
 
 					if (permissions.canEdit) {
 
-						actions += `
-							<i class="fa fa-edit btn-edit"
-							   data-bs-toggle="tooltip"
-							   title="Edit"
-							   onclick="AddOrEditFunction('${item.DOC_ID}')">
-							</i>`;
+						actions += `<button class="act-btn edit btn-edit" title="Edit" data-bs-toggle="tooltip" onclick="AddOrEditFunction('${item.DOC_ID}')"><i class="fa fa-edit"></i></button>`;
 					}
 
-					actions += `
-						<i class="fas fa-eye btn-view"
-						   data-bs-toggle="tooltip"
-						   title="View"
-						   onclick="viewMenuDetails('${item.DOC_ID}')">
-						</i>`;
+					actions += `<button class="act-btn view btn-view" title="View" data-bs-toggle="tooltip" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
 					if (permissions.canDelete) {
 
-						actions += `
-						<i class="fas fa-trash btn-delete"
-						data-bs-toggle="tooltip"
-						title="Delete"
-						onclick="deleteItem('${item.DOC_ID}')">
-						</i>`;
+						actions += `<button class="act-btn delete btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteItem('${item.DOC_ID}')"><i class="fa fa-trash"></i></button>`;
 					}
 
 					if (permissions.canDocDetail) {
 
-						actions += `
-							<i class="fa fa-file btn-document btn-details"
-							   data-bs-toggle="tooltip"
-							   title="Document Details"
-							   onclick="showImpExpExpensePopup('${item.DOC_ID}')">
-							</i>`;
+						actions += `<button class="act-btn document  btn-document btn-details"  data-bs-toggle="tooltip"  title="Document Details" onclick="showImpExpExpensePopup('${item.DOC_ID}')"><i class="fa fa-file"></i></button>
+							`;
 					}
 
 					tbody.append(`
