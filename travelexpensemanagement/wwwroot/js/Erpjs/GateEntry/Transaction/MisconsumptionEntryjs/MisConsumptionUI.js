@@ -57,7 +57,7 @@ async function Misconsumptioninit() {
 
             if ($last.length && !$last.find(".btn-add-action").length) {
                 $last.find("td:last").prepend(
-                    `<i class="fa fa-plus btn-add-action text-success" title="Add Row"></i>`
+                    `<button class="act-btn add btn-add-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
                 );
             }
         }
@@ -408,8 +408,8 @@ function addRow($tbody, data = {}) {
             </td>
 
             <td>
-                <i class="fa fa-plus btn-add-action text-success" title="Add Row"></i>
-                <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row"></i>
+                <button class="act-btn add btn-add-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+				<button class="act-btn delete btn-delete-action" title="delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
             </td>
         </tr>
     `;
