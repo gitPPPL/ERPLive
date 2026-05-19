@@ -1,8 +1,10 @@
 ﻿using Azure;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using System.Data;
 using System.Dynamic;
 using travelexpensemanagement.Common.DbHelper;
@@ -38,12 +40,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                     response.status = false;
                     response.message = "Invalid ID";
                     return response;
-                    //return Json(new { status = false, message = "Invalid ID" });
                 }
 
                 var userSession = _globalValue.GetGlobalVariables();
                 string VType = docId.Substring(0, 4);
                 string VNo = docId.Substring(4);
+                string gateType = "";
+                int gateNo = 0;
 
                 using (var con = _dbcontext.GetErpConnection())
                 {
@@ -52,12 +55,28 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                     {
                         try
                         {
-
+                            string getGateNo = @"select GATE_NO, GATE_TYPE from WB1 where V_TYPE=@VType and V_NO=@VNo and COMP_CODE=@COMP_CODE and BRANCH_CODE=@BRANCH_CODE and YEAR_CODE=@YEAR_CODE";
+                            using (SqlCommand cmd = new SqlCommand(getGateNo, con, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
+                                cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
+                                cmd.Parameters.AddWithValue("@VType", VType);
+                                cmd.Parameters.AddWithValue("@VNo", VNo);
+                                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                                {
+                                    if (await reader.ReadAsync())
+                                    {
+                                        gateNo = reader["GATE_NO"] != DBNull.Value ? Convert.ToInt32(reader["GATE_NO"]) : 0;
+                                        gateType = reader["GATE_TYPE"]?.ToString();
+                                    }
+                                }
+                            }
                             string[] deleteQueries = {
-                        "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
+                            "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
+                            "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
 
-                        };
+                            };
 
                             foreach (var query in deleteQueries)
                             {
@@ -65,23 +84,33 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                                 {
                                     cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
                                     cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
                                     cmd.Parameters.AddWithValue("@V_TYPE", VType);
                                     cmd.Parameters.AddWithValue("@V_NO", VNo);
 
                                     await cmd.ExecuteNonQueryAsync();
                                 }
                             }
+                            
+                            using (SqlCommand cmd = new SqlCommand("sp_GetWBEntry", con, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.Parameters.AddWithValue("@Action", "UpdateGate1_Wb_Type_WithNull");
+                                cmd.Parameters.AddWithValue("@PrevGateType", gateType ?? "");
+                                cmd.Parameters.AddWithValue("@PrevGateNo", gateNo);
+                                cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
+                                cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
 
+                                cmd.ExecuteNonQuery();
+                            }
                             transaction.Commit();
-                            //=========================================Uncomment after final===============================
-                            //_logService.InsertLog("WB1", "Store WeighBridge Entry", "Transaction", "Delete", VType, VNo, null);
-                            //_logService.InsertLog("WB2", "Store WeighBridge Entry", "Transaction", "Delete", VType, VNo, null);
-                            //==============================================================================================
+                            //=========================================Log Insert
+                            _logService.InsertLog("WB1", "Store WeighBridge Entry", "Transaction", "Delete", VType, VNo, null);
+                            _logService.InsertLog("WB2", "Store WeighBridge Entry", "Transaction", "Delete", VType, VNo, null);
                             response.status = true;
                             response.message = "Data deleted successfully";
                             return response;
-                            //return Json(new { success = true, message = "Data deleted successfully" });
                         }
                         catch (Exception ex)
                         {
@@ -89,7 +118,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                             response.status = false;
                             response.message = $"Delete failed: {ex.Message}";
                             return response;
-                            //return Json(new { success = false, message = $"Delete failed: {ex.Message}" });
                         }
                     }
                 }
@@ -99,7 +127,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 response.status = false;
                 response.message = ex.Message;
                 return response;
-                //return Json(new { status = false, message = ex.Message });
             }
         }
 
@@ -122,14 +149,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 response.status = true;
                 response.data = dataList.ToList();
                 return response;
-                //return Json(new { status = true, data = dataList });
             }
             catch (Exception ex)
             {
                 response.status = false;
                 response.message = ex.Message;
                 return response;
-                //return Json(new { status = false, message = ex.Message });
             }
         }
 
@@ -188,14 +213,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 response.status = true;
                 response.totalCount = totalCount;
 
-                //return Json(new { status = true, data = dataList, totalCount = totalCount });
                 return response;
             }
             catch (Exception ex)
             {
                 response.message = ex.Message;
                 response.status = false;
-                //return Json(new { status = false, message = ex.Message });
                 return response;
             }
         }
@@ -211,7 +234,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                     response.status = false;
                     response.message = "Invalid ID";
                     return response;
-                    //return Json(new { status = false, message = "Invalid ID" });
                 }
                 var parameter = new Dictionary<string, object>
                 {
@@ -227,15 +249,69 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 response.status = true;
                 response.data = entryDetailList.ToList();
                 return response;
-                //return Json(new { status = true, data = entryDetailList });
             }
             catch (Exception ex)
             {
                 response.status = false;
                 response.message = ex.Message;
                 return response;
-                //return Json(new { status = false, message = ex.Message });
             }
+        }
+
+        public async Task<RepositoryResponseData<string>> ValidateDeleteStoreWb(string docId)
+        {
+            var response = new RepositoryResponseData<string>();
+
+            try
+            {
+                var userSession = _globalValue.GetGlobalVariables();
+
+                string VType = docId.Substring(0, 4);
+                string VNo = docId.Substring(4);
+
+                using (var con = _dbcontext.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    using (SqlCommand cmd = new SqlCommand("sp_GetWBEntry", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "ValidateGate1_ForDelete_WbDetails");
+                        cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@V_TYPE", VType);
+                        cmd.Parameters.AddWithValue("@V_NO", VNo);
+
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                response.status = true;
+                                response.data = "Exists";
+
+                                response.message = string.Format(
+                                    "This document exists in Gate Inward Serial No: <span class='highlight-serial'><b>{0}</b></span> <br>Dated: <b>{1}</b>",
+                                    reader["v_no"],
+                                    Convert.ToDateTime(reader["v_date"]).ToString("dd-MM-yyyy")
+                                );
+                            }
+                            else
+                            {
+                                response.status = true;
+                                response.data = "NotExists";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.status = false;
+                response.message = ex.Message;
+            }
+
+            return response;
         }
     }
 }

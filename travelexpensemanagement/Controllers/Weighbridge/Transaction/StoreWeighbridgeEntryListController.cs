@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 
 namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
+    [SessionAuthorize]
     public class StoreWeighbridgeEntryListController : Controller
     {
 
@@ -43,7 +45,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteStoreWBridgeEntry(string docId)
+        public async Task<IActionResult> DeleteStoreWBridgeEntry(string docId, bool flag)
         {
             if (string.IsNullOrEmpty(docId))
             {
@@ -52,7 +54,20 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             var result = await _storeWbListRepository.DeleteStoreWb(docId);
             return Json(new { success = result.status, message = result.message });
         }
-
+        [HttpPost]
+        public async Task<IActionResult> ValidateDeleteStoreWb(string docId)
+        {
+            if (string.IsNullOrEmpty(docId))
+            {
+                return Json(new { status = false, message = "Invalid ID" });
+            }
+            var result = await _storeWbListRepository.ValidateDeleteStoreWb(docId);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, message = result.message, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
         [HttpGet]
         public async Task<IActionResult> GetStoreWBridgeEntryDetails(string docid)
         {

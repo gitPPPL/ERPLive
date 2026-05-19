@@ -20,7 +20,34 @@
 .erppage-header-right {
     margin-left: auto; /* 🔥 pushes to right */
 }
+.btn-add-row-last {
+    display: flex;
+    justify-content: flex-end;
+}
 
+/* ===== ADD BUTTON (GREEN / SUCCESS STYLE) ===== */
+.erppage-btn-add {
+    background: linear-gradient(135deg, #4c6ef5, #364fc7); /* accessible blue */
+    color: #ffffff;
+    border: 1px solid #2b3a99;
+}
+
+    /* Hover */
+    .erppage-btn-add:hover {
+        background: linear-gradient(135deg, #3b5bdb, #2f44b3);
+        transform: translateY(-1px);
+    }
+
+    /* Click */
+    .erppage-btn-add:active {
+        transform: scale(0.97);
+    }
+
+    /* Icon */
+    .erppage-btn-add i {
+        font-size: 14px;
+        color: #ffffff;
+    }
 /* BACK BUTTON */
 .erppage-header-back {
     display: inline-flex;
@@ -113,7 +140,19 @@
     gap: 6px; /* optional spacing if multiple buttons */
     margin-top: 10px; /* optional spacing from fields above */
 }
+/* Active Page */
+.page-number.active {
+    border: none;
+    background: #5b6ee1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+}
 
+.page-number {
+    padding: 4px 8px;
+}
 
 /* TITLE */
 .erppage-header-title {
@@ -186,31 +225,10 @@
 .toast-icon {
     font-size: 16px;
 }
-
-/* Active Page */
-.page-number.active {
-    border: none;
-    background: #5b6ee1;
-    padding: 4px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #fff;
-}
-.page-number {
-    padding: 4px 8px;
-}
-/*.page-number:active {
-    border: none;
-    background: #256d29;
-    padding: 0px 6px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #fff;
-}*/
 /* ===== CONTAINER ===== */
 .erppage-container {
     margin: 16px auto;
-    /* padding: 0 10px;*/
+   /* padding: 0 10px;*/
 }
 
 /* ===== SECTION (FIELDSET) ===== */
@@ -288,7 +306,7 @@
 
 /* SUB FIELDSET */
 .erppage-subfieldset {
-    border: 1px solid #bed0fb;
+    border: 1px solid #c3c3c3;
     border-radius: 10px;
     margin: 10px 0px 10px 0px;
     background: #fff;

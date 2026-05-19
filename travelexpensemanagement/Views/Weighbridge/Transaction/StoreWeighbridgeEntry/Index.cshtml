@@ -3,131 +3,126 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">Store Weighbridge Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button onclick="handleBack('@Url.Action("Index", "StoreWeighbridgeEntryList")', readOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-                @* <button type="button" onclick="handleBack('@Url.Action("Index", "StoreWeighbridgeEntryList")', readOnly)">
-                    <i class="fa-solid fa-arrow-left"></i>Back to list
-                </button> *@
-            </div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-weight-hanging"></i>
         </div>
+        <div class="erppage-header-title">Store Weighbridge Entry</div>
     </div>
-    <form id="StoreWeighbridgeEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type <span class="required">*</span></label>
-                    <select class="form-control" id="ddlDocType">
-                        @* <option value="">Select DOC Type</option> *@
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "StoreWeighbridgeEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="StoreWeighbridgeEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-required" id="ddlDocType">
+                        <option>Select Doc Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
+                        <option value="1">Open</option>
+                        <option value="0">Close</option>
+                        <option value="2">Cancel</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlStatus">Status</label>
-                    <select class="form-control" id="ddlStatus">                         
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlGateNo">Gate in No@*  <span class="required">*</span> *@</label>
-                    <select class="form-control" id="ddlGateNo">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Gate in No</label>
+                    <select class="erppage-redinput erppage-required" id="ddlGateNo">
                         <option value="">Select Gate in No</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DdlPartyName">Party Name</label>
-                    <select class="form-control" id="DdlPartyName">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select id="DdlPartyName" class="erppage-input erppage-select">
                         <option selected disabled>-select party name-</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtPartyWeight">Party Weight</label>
-                    <input type="text" class="form-control" id="TxtPartyWeight" placeholder="Enter Party Weight">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party Weight</label>
+                    <input type="number" class="erppage-input" id="TxtPartyWeight" placeholder="Enter Party Weight">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="input-divide">
-                    <label class="checkbox-input-mx">
+                
+                @* <div class="erppage-divfield">
+                    <label class="erppage-label">Label12</label>
+                    <input type="text" class="erppage-input" id="Txtlabel12">
+                </div> 
+                <div class="erppage-divfield">
+                    <div class="erppagesmodal-checkbox-wrap">
+                        <label class="erppage-label">Crystal Report</label>
                         <input type="checkbox" id="ChkCrystalReport" />
-                        Crystal Report
-                    </label>
-                    <div class="form-group">
-                        <label for="Txtlabel12">Label12</label>
-                        <textarea class="form-control" id="Txtlabel12"></textarea>
                     </div>
+                </div>*@
+            </div>
+            <div class="erppage-internalaction">
+                <button type="button" id="btn-print" class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-print"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblStoreWeighbridge" class="excel-table fixed-grid-table">
+                        <colgroup>
+                            <col style="width:100px;">         <!-- Weight -->
+                            <col style="width:100px;">         <!-- Get Weight -->
+                            <col style="width:100px;">         <!-- Tare -->
+                            <col style="width:100px;">         <!-- Net -->
+                            <col style="width:140px;">         <!-- Date/Time -->
+                            <col style="width:200px;">         <!-- From Place -->
+                            <col style="width:200px;">         <!-- To Place -->
+                            <col style="width:350px;">         <!-- Item -->
+                            <col style="width:180px;">         <!-- Remarks -->
+                            <col style="width:70px;">         <!-- Action -->
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th>Weight</th>
+                                <th>Get Weight</th>
+                                <th>Tare</th>
+                                <th>Net</th>
+                                <th>Date/Time</th>
+                                <th>From Place</th>
+                                <th>To Place</th>
+                                <th>Item</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
+                
             </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblStoreWeighbridge" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
-                            <th>Weight</th>
-                            <th>Get Wgt.</th>
-                            <th>T.Wgt.</th>
-                            <th>N.Wgt.</th>
-                            <th>Date/Time</th>
-                            <th>From Place</th>
-                            <th>To Place</th>
-                            <th>Item</th>
-                            <th>Remarks</th>
-                            <th class="action-col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="erppage-actions">
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                    </div>
-                   @*  <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
-                    </div> *@
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+        </fieldset>
+    </div>
+</div>
 
-<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
-<script src="~/js/common/dropdown.js"></script>
 <script src="~/js/erpjs/weighbridge/transaction/storeweighbridgeentry/storeweighbridgeentry.js"></script>
 
 @* <script>

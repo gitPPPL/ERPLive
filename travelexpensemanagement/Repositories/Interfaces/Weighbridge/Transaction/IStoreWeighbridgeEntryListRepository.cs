@@ -9,5 +9,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transactio
         Task<RepositoryResponse> DeleteStoreWb(string docId);
         Task<RepositoryResponseList<ExpandoObject>> StoreWBDetails(string docId);
         Task<RepositoryResponseList<ExpandoObject>> ExportAllDocs();
+        Task<RepositoryResponseData<string>> ValidateDeleteStoreWb(string docId);
     }
 }

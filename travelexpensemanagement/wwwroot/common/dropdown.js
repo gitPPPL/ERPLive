@@ -34,6 +34,17 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
                     placeholder: placeholder,  
                     allowClear: true            
                 });
+                ddl.on('select2:open', function () {
+                    setTimeout(function () {
+                        let searchBox = document.querySelector(
+                            '.select2-container--open .select2-search__field'
+                        );
+
+                        if (searchBox) {
+                            searchBox.focus();
+                        }
+                    }, 0);
+                });
             }
 
             if (typeof callback === "function") {

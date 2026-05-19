@@ -244,6 +244,7 @@
     overflow: auto;
     border: 1px solid #ddd;
     border-radius: 8px;
+
 }
 
 /* TABLE */
@@ -382,7 +383,7 @@
 .fixed-grid-table {
     table-layout: fixed !important;
     /* REMOVE HARD WIDTH */
-    width: auto !important; /* 🔥 change this */
+    width: max-content !important; /* 🔥 change this */
 
     border-collapse: collapse !important;
     border-spacing: 0;
@@ -480,7 +481,7 @@ th {
 
 /* HEADER ABOVE EVERYTHING */
 .fixed-grid-table th.action-col {
-    z-index: 11;
+    z-index: 999;
     background: linear-gradient(135deg, #232323, #0f0f0f);
 }
 
