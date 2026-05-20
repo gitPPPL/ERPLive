@@ -4,193 +4,228 @@
 }
 
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">Misc Consumption Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="handleBack('@Url.Action("Index", "MiscConsumptionEntryList")', isReadOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-clipboard-list"></i>
         </div>
+        <div class="erppage-header-title">Misc Consumption Entry</div>
     </div>
-    <form id="MiscConsumptionEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "MiscConsumptionEntryList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+
+<div id="MiscConsumptionEntryForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option>Select Doc Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No<span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Time</label>
+                    <input type="time" class="erppage-redinput" id="TmDocTime" readonly>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date<span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TmDocTime">Doc Time<span class="required">*</span></label>
-                    <input type="time" class="form-control" id="TmDocTime">
-                </div>
-            </div>
-        </div>
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">Party Details<span class="required">*</span></legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlPartyName">Party Name</label>
-                        <select class="form-control" id="ddlPartyName">
-                            <option>Select Party Name</option>
-                        </select>
+            <!-- Party Bill -->
+            <fieldset class="erppage-subfieldset">
+                <legend>Party Details</legend>
+                <div class="erppage-subheader">Party Details</div>
+                <div class="erppage-body">
+                    <div class="erppage-grid4">
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Party Name</label>
+                            <select class="erppage-input erppage-required" id="ddlPartyName">
+                                <option value="selectpartyname">Select Party Name</option>
+                            </select>
+                        </div>
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Add Line 1</label>
+                            <input type="text" class="erppage-input" id="TxtAdd1PD" placeholder="Enter Address Line 1" />
+                        </div>
+                    </div>
+                    <div class="erppage-grid4">
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Add Line 2</label>
+                            <input type="text" class="erppage-input" id="TxtAdd2PD" placeholder="Enter Address Line 2">
+                        </div>
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Add Line 3</label>
+                            <input type="text" class="erppage-input" id="TxtAdd3PD" placeholder="Enter Address Line 3">
+                        </div>
+                    </div>
+                    <div class="erppage-grid4">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Vehicle No</label>
+                            <input type="text" class="erppage-redinput" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+                        </div>
+                        <div class="erppage-divfield" style="grid-template-columns: 40px 1fr auto;">
+                            <label class="erppage-label">Type</label>
+                            <select class="erppage-input erppage-select" id="ddlType">
+                                <option value="Misc">Misc</option>
+                            </select>
+                        </div>
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Remarks</label>
+                            <textarea type="text" class="erppage-textarea" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtAdd1PD">Add Line1</label>
-                        <input type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address Line 1">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtAdd2PD">Add Line2</label>
-                        <input type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address Line 2">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtAdd3PD">Add Line3</label>
-                        <input type="text" class="form-control" id="TxtAdd3PD" placeholder="Enter Address Line 3">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtVehicleNo">Vehicle No<span class="required">*</span></label>
-                        <input type="text" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlType">Type</label>
-                        <select class="form-control" id="ddlType">
-                            <option value="Misc">Misc</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtRemarks">Remarks</label>
-                        <textarea type="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="btn-mt button-right">
-                        <button id="btn-pending" type="button" class="btn btn-danger">
-                            <i class="fa fa-clock"></i> Pending Documents
+                <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px 10px;">
+                    <div class="erppage-internalaction" style="margin: 0;">
+                        <button id="btn-pending" type="button" class="erppage-btn erppage-btn-danger">
+                            <i class="fa fa-clock"></i>
+                            <span>Pending Documents</span>
                         </button>
                     </div>
                 </div>
-            </div>
-            @* Modal Popup *@
-            <!-- Modal -->
-            <div class="modal fade" id="pendingModal" tabindex="-1" role="dialog" aria-labelledby="pendingModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="popup-header">
-                            <h5 class="popup-title" id="pendingModalLabel">Pending Documents</h5>
-                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                <span>&times;</span>
-                            </button>
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblConsumptionEntry" class="excel-table fixed-grid-table">
+                            <colgroup>
+                                <col style="width:280px;">     
+                                <col style="width:180px;">     
+                                <col style="width:120px;">      
+                                <col style="width:80px;">      
+                                <col style="width:120px;">     
+                                <col style="width:220px;">     
+                                <col style="width:120px;">     
+                                <col style="width:120px;">     
+                                <col style="width:120px;">     
+                            </colgroup>
+                            <thead class="table-head">
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Item Name</th>
+                                    <th>Department</th>
+                                    <th>Unit</th>
+                                    <th>Nos</th>
+                                    <th>Quantity</th>
+                                    <th>Remarks</th>
+                                    <th>Ref Type</th>
+                                    <th>Ref No</th>
+                                    <th class="action-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+        </fieldset>
 
+        <!--Modal Popup-->
+        <div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel">
+            <div class="modal-dialog modal-xl erppagesmodal" style="max-width: 65vw;">
+                <div class="modal-content erppagesmodal-content draggable-modal">
+                    <!-- HEADER -->
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-clock"></i>
+                            </div>
+                            <h5 class="erppagesmodal-title" id="pendingModalLabel">
+                                Pending Documents
+                            </h5>
+                        </div>
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="erppagesmodal-body">
+                        <div class="erppagelist-container" style="margin:0px;">
+                            <div class="excel-wrapper" style="height:65vh;">
+                                <table id="tblPendingDocument" class="excel-table fixed-grid-table table-width">
+                                    <colgroup>
+                                        <col style="width:0px;">
+                                        <col style="width:40px;">
+                                        <col style="width:140px;">
+                                        <col style="width:130px;">
+                                        <col style="width:110px;">
+                                        <col style="width:90px;">
+                                        <col style="width:110px;">
+                                        <col style="width:180px;">
+                                        <col style="width:200px;">
+                                        <col style="width:70px;">
+                                        <col style="width:100px;">
+                                        <col style="width:80px;">
+                                    </colgroup>
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th style="display:none;">Code</th>
+                                            <th><input type="checkbox" id="chkSelectAll"></th>
+                                            <th>Voucher Type</th>
+                                            <th>Voucher No</th>
+                                            <th>Date</th>
+                                            <th>Quantity</th>
+                                            <th>Pending Qty</th>
+                                            <th>Item Name</th>
+                                            <th>Remarks</th>
+                                            <th>Nos</th>
+                                            <th>Unit Name</th>
+                                            <th>Department</th>
+                                            <th>SR NO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="erppagelist-pagination">
+                                <div class="pagination-left">
+                                    <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                                        <option value="5">5</option>
+                                        <option value="10" selected>10</option>
+                                        <option value="20">20</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </div>
+                                <div class="pagination-center">
+                                    <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                                    <div id="pageNumbers" class="page-numbers"></div>
+
+                                    <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                                </div>
+                                <div class="pagination-right" id="pageInfoText">
+                                    Results: 0 - 0 of 0
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppagesmodal-action">
+                            <button type="button" class="erppagesmodal-btn" id="PendngAddRow">
+                                <i class="fa fa-check"></i> Add Selected
+                            </button>
                         </div>
                         
-                        <div class="modal-body">
-                            <div class="card">
-                                <div class="table-responsive">
-                                    <table id="tblPendingDocument" class="table-width">
-                                        <thead class="table-head">
-                                            <tr>
-                                                <th style="display:none;">Code</th>
-                                                <th><input type="checkbox" id="chkSelectAll"></th>
-                                                <th>Voucher Type</th>             
-                                                <th>Voucher No</th>                
-                                                <th>Date</th>                      
-                                                <th>Quantity</th>             
-                                                <th>Pending Qty</th>              
-                                                <th>Item Name</th>                
-                                                <th>Remarks</th>                   
-                                                <th>Nos</th>                       
-                                                <th>Unit_name</th>                 
-                                                <th>SRNO</th>                      
 
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-2 mx-2">
-                            <div class="offset-md-8 col-md-4">
-                                <div class="button-right">
-                                    <button type="button" class="btn btn-primary" id="PendngAddRow"><i class="fa fa-plus"></i>ADD</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblConsumptionEntry" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;">Code</th>
-                            <th>Item Name</th>
-                            <th>Department</th>
-                            <th>Unit</th>
-                            <th>Nos</th>
-                            <th>Quantity</th>
-                            <th>Remarks</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
+
+    </div>
+</div>
 
 <script src="~/common/dropdown.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/misconsumptionentryjs/misconsumptioninit.js"></script>

@@ -352,7 +352,7 @@
     
 
 	@* <script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script> *@
-	@* <script type="text/javascript" src="~/js/popper.js/popper.min.js"></script> *@
+	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
 	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
 	@* <script type="text/javascript" src="~/js/jquery-slimscroll/jquery.slimscroll.js"></script> *@
 	@* <script type="text/javascript" src="~/js/modernizr/modernizr.js"></script> *@
@@ -371,11 +371,11 @@
 			$window.scroll(function(){
 				if ($window.scrollTop() >= 200) {
 				 nav.addClass('active');
-			 }
-			 else {
-				 nav.removeClass('active');
-			 }
-		 });
+				 }
+				 else {
+					 nav.removeClass('active');
+				 }
+		   });
 	</script>
 	<script>
 		function toggleSubmenu(event, id) {

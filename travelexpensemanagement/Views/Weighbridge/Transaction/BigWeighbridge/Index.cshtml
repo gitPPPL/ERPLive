@@ -2,204 +2,217 @@
     ViewBag.Title = "Big Weighbridge Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <div id="erp-toast-container"></div>
-
-<fieldset>
-    <legend class="legend-field">Big Weighbridge</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "BigWeighbridgeList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-balance-scale"></i>
         </div>
+        <div class="erppage-header-title">Big Weighbridge Entry</div>
     </div>
-    <form id="BigWeighbridgeForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type <span class="required">*</span></label>
-                    <select class="form-control" id="ddlDocType">
-                        @* <option value="">--Select DOC Type--</option> *@
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "BigWeighbridgeList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="BigWeighbridgeForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option>Select Doc Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtDocDate">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlWBType">WB Type</label>
-                    <select class="form-control" id="ddlWBType">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">WB Type</label>
+                    <select class="erppage-input erppage-required" id="ddlWBType">
                         <option value="">Select WB Type</option>
-                        <option>Raw Material</option>
-                        <option>Store</option>
-                        <option>Fuel</option>
-                        <option>Sales</option>
-                        <option>Outsider</option>
-                        <option>Misc</option>
-                        <option>JobWork</option>
-                        <option>RGP</option>
-                        <option>Sales Return</option>
+                        <option value="Raw Material">Raw Material</option>
+                        <option value="Store">Store</option>
+                        <option value="Fuel">Fuel</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Outsider">Outsider</option>
+                        <option value="Misc">Misc</option>
+                        <option value="JobWork">JobWork</option>
+                        <option value="RGP">RGP</option>
+                        <option value="Sales Return">Sales Return</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
 
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Gate No</label>
+                    <select class="erppage-redinput erppage-required" id="DdlGateNo">
+                        <option value="">Select Gate No.</option>
                     </select>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtQRCode">QR Code</label>
-                    <input type="text" class="form-control" id="TxtQRCode" placeholder="Enter QR Code">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DdlGateNo">Gate No</label>
-                    <select class="form-control" id="DdlGateNo">
-                        <option value="">-select Gate No.-</option>
-                    </select>
-                    @* <input type="number" class="form-control" id="DdlGateNo" placeholder="Enter Gate No"> *@
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPartyName">Party Name</label>
-                    <select class="form-control" id="ddlPartyName">
+
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select id="ddlPartyName" class="erppage-input erppage-select">
                         <option value="">Select Party Name</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtVehicleNo">Vehicle No</label>
-                    <input type="text" maxlength="20" class="form-control" id="TxtVehicleNo" placeholder="Enter Vehicle No">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vehicle No</label>
+                    <input type="text" maxlength="20" class="erppage-input" id="TxtVehicleNo" placeholder="Enter Vehicle No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party Gross Weight</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="erppage-input" id="NumPartyGrossWeight">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Tr Weight</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="erppage-input" id="NumTrWeight">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Net Weight</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="erppage-input" id="NumNetWeight">
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumPartyGrossWeight">Party Gross Weight</label>
-                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="NumPartyGrossWeight">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party WB No.</label>
+                    <input type="text" maxlength="20" class="erppage-input" id="TxtPartyWBNo" placeholder="Enter Party WB No.">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">No of Bags(25 Kg)</label>
+                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="erppage-input" id="NumNoBag25">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">No of Bags(500 Kg)</label>
+                    <input type="text" maxlength="8" oninput="allowOnlyNumbers(this)" class="erppage-input" id="NumNoBag500">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">No of Bags(1000 Kg)</label>
+                    <input type="text" maxlength="10" oninput="allowOnlyNumbers(this)" class="erppage-input" id="NumNoBag1000">
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumTrWeight">Tr Weight</label>
-                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="NumTrWeight">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea type="text" maxlength="500" class="erppage-textarea" id="txtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QR Code</label>
+                    <input type="text" class="erppage-input" id="TxtQRCode" placeholder="Enter QR Code">
+                </div>
+                <div class="erppage-divfield">
+                    <div class="erppagesmodal-checkbox-wrap">
+                        <label class="erppage-label">Crystal Report</label>
+                        <input type="checkbox" id="ChkCrystalReport" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                <div class="erppage-internalaction" style="margin: 0;">
+                    <button type="button" id="btn-print" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-print"></i>
+                        <span>Print Gatepass</span>
+                    </button>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumNetWeight">Net Weight</label>
-                    <input type="text" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="NumNetWeight">
+            <div class="erppagelist-container">
+                <div class="excel-wrapper">
+                    <table id="tblBigWeighbridge" class="excel-table fixed-grid-table table-width">
+                        <colgroup>
+                            <col style="display:none;">      
+                            <col style="width:120px;">       
+                            <col style="width:130px;">       
+                            <col style="width:110px;">       
+                            <col style="width:220px;">       
+                            <col style="width:180px;">       
+                            <col style="width:180px;">       
+                            <col style="width:120px;">       
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th style="display:none;">Code</th>
+                                <th>Weight</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Item</th>
+                                <th>From Place</th>
+                                <th>To Place</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtPartyWBNo">Party WB No.</label>
-                    <input type="text" maxlength="20" class="form-control" id="TxtPartyWBNo" placeholder="Enter WayBill InvNo">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumNoBag25">No of Bags(25 Kg)</label>
-                    <input type="text" maxlength="8" class="form-control" oninput="allowOnlyNumbers(this)" id="NumNoBag25">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumNoBag500">No of Bags(500 Kg)</label>
-                    <input type="text" maxlength="8" class="form-control" oninput="allowOnlyNumbers(this)" id="NumNoBag500">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumNoBag1000">No of Bags(1000 Kg)</label>
-                    <input type="text" maxlength="8" class="form-control" oninput="allowOnlyNumbers(this)" id="NumNoBag1000">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="txtRemarks">Remarks</label>
-                    <textarea type="text" maxlength="500" class="form-control" id="txtRemarks" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-8 col-md-4">
-                <label class="checkbox-input-mx button-right">
-                    <input type="checkbox" id="ChkCrystalReport" />
-                    Crystal Report
-                    <button id="btn-print" type="button" class="btn btn-success"><i class="fa fa-save"></i>Print Gatepass</button>
-                </label>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblBigWeighbridge" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th>Weight</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Item</th>
-                            <th>From Place</th>
-                            <th>To Place</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlStatus">Status</label>
-                        <select class="form-control" id="ddlStatus">
-                            <option value="1">Open</option>
-                            <option value="0">Close</option>
-                            <option value="2">Cancel</option>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtStatusDate">Date</label>
-                        <input type="datetime-local" id="DtStatusDate" class="form-control" readonly>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
+        </fieldset>
+        <div class="erppage-actions" style="background: #ededed;border: 1px solid #d1d1d1;border-radius: 4px;">
+            <div class="erppage-divfield">
+                <label class="erppage-label">Status</label>
+                <select class="erppage-input" id="ddlStatus">
+                    <option value="1">Open</option>
+                    <option value="0">Close</option>
+                    <option value="2">Cancel</option>
+                </select>
             </div>
+            <div class="erppage-divfield">
+                <label class="erppage-label">Date</label>
+                <input type="datetime-local" class="erppage-input" id="DtStatusDate" readonly>
+            </div>
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
-
-<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+    </div>
+</div>
 
 <script>
+    window.pubCompCode = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PubCompCode ?? 0));
+</script>
+
+<script src="~/js/erpjs/weighbridge/transaction/bigweighbridge/bigweighbridge.js"></script>
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+@* <script>
+    let gateType;
+    let gateNo;
+    const pubCompCode = parseInt(
+         @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PubCompCode))
+     ) || 0;
+
+     console.log("PubCompCode:", pubCompCode);
     const allFieldIds = [
       "DtDocDate","ddlWBType","TxtQRCode","DdlGateNo","ddlPartyName",
       "NumPartyGrossWeight","NumTrWeight","NumNetWeight","TxtVehicleNo",
@@ -218,12 +231,23 @@
 
     $(document).ready(function () {
       initPage();
+      $("#ddlDocType").focus();
     });
 
     async function initPage() {
           try {
             await GetDocTypeAsync();
             await handleDocLoad();
+            $('#ddlDocType').on('change blur', function () {
+                const selectedValue = $(this).val();
+                if (selectedValue) {
+                    if (event.type === 'change') {
+                        GetDocid(selectedValue);
+                    }
+                    // Disable dropdown when value is selected and focus leaves
+                    $(this).prop('disabled', true);
+                }
+            });
             
             // addItemRecordRow();
             if (!docId) {
@@ -297,11 +321,11 @@
         if (tbody.find('tr').length > 1) {
           $(this).closest('tr').remove();
         } else {
-          alert('Cannot delete the first row.');
+         toastr.error('Cannot delete the first row.');
         }
       });
 
-        $(document).on('click', '.btn-add-action', async function () {
+        $(document).on('click', '.btn-add-action , .btn-add-row', async function () {
             await addItemRecordRow();
         });
 
@@ -313,17 +337,34 @@
         // });
 
         $('#DdlGateNo').on('change', function () {
-            var gateNo = $(this).val();
-            var selectedOption = $(this).find('option:selected');
+            const gateNo = $(this).val();
+            const selectedOption = $(this).find('option:selected');
+
             if (gateNo) {
-                $('#TxtVehicleNo').val(selectedOption.data('vehicalno') || '');
-                var partyCode = selectedOption.data('party');
-                var partyName = selectedOption.data('partynm');
+                // Fill Vehicle No
+                $('#TxtVehicleNo').val(
+                    selectedOption.data('vehicalno') || ''
+                );
+
+                // Fill Party Name
+                const partyCode = selectedOption.data('party'); 
+                const partyName = selectedOption.data('partynm');
+
                 ensureOption($('#ddlPartyName'), partyCode, partyName);
                 $('#ddlPartyName').val(partyCode).trigger('change');
-            } else {
+
+                // Disable both fields after auto-fill
+                $('#ddlPartyName').prop('disabled', true);
+                $('#TxtVehicleNo').prop('readonly', true);
+            }
+            else {
+                // Clear values
                 $('#TxtVehicleNo').val('');
                 $('#ddlPartyName').val('').trigger('change');
+
+                // Enable fields again
+                $('#ddlPartyName').prop('disabled', false);
+                $('#TxtVehicleNo').prop('readonly', false);
             }
         });
 
@@ -335,9 +376,9 @@
 
     }
 
-</script>
+</script> *@
 
-<script>
+@* <script>
     // function validateWeightOrder() {
     //     const wbType = $('#ddlWBType').val()?.trim();
     //     if (!wbType) return true; // skip if not selected
@@ -442,75 +483,26 @@
 
         const wbType = $('#ddlWBType').val()?.trim();
         const docType = $('#ddlDocType').val()?.trim();
-        const docNo = $('#NumDocNo').val()?.trim();
-        const docDate = $('#DtDocDate').val()?.trim();
         const gateNo = $('#DdlGateNo').val()?.trim();
-        const party = $('#ddlPartyName').val()?.trim();
-        const vehicle = $('#TxtVehicleNo').val()?.trim();
-
+        
         // HEADER VALIDATION
-
-        if (!docType) {
-            showToast("Voucher Type not selected.", { type: "warning" });
-            $('#ddlDocType').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#ddlDocType').removeClass('is-invalid');
-        }
-
-        if (!docNo || parseInt(docNo) === 0) {
-            showToast("Invalid Voucher No.", { type: "warning" });
-            $('#NumDocNo').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#NumDocNo').removeClass('is-invalid');
-        }
-
-        if (!docDate) {
-            showToast("Voucher Date is required.", { type: "warning" });
-            $('#DtDocDate').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#DtDocDate').removeClass('is-invalid');
-        }
-
-        if (!wbType) {
-            showToast("WB Type is required.", { type: "warning" });
-            $('#ddlWBType').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#ddlWBType').removeClass('is-invalid');
-        }
+        if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+        if (!validateRequiredField('#NumDocNo', 'Doc Number')) return;
+        if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
+        if (!validateRequiredField('#ddlWBType', 'WB Type')) return;
 
         // GATE VALIDATION
         const gateRequiredTypes = [ "Raw Material", "Store", "Sales Return",  "Fuel", "Misc", "RGP", "Sales" ];
 
         if (gateRequiredTypes.includes(wbType) && !gateNo) {
-            showToast("Gate Inward No is required.", { type: "warning" });
-            $('#DdlGateNo').addClass('is-invalid').focus();
+            setInvalid($('#DdlGateNo'), 'Gate Inward No is required.');
             return false;
-        } else {
-            $('#DdlGateNo').removeClass('is-invalid');
         }
-
-        if (!party) {
-            showToast("Party Name is required.", { type: "warning" });
-            $('#ddlPartyName').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#ddlPartyName').removeClass('is-invalid');
-        }
-
-        if (!vehicle) {
-            showToast("Vehicle No is required.", { type: "warning" });
-            $('#TxtVehicleNo').addClass('is-invalid').focus();
-            return false;
-        } else {
-            $('#TxtVehicleNo').removeClass('is-invalid');
-        }
-
+        
+        if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
+        if (!validateRequiredField('#TxtVehicleNo', 'Vehicle Number')) return;
+        
         // KANT + MISC BLOCK RULE
-
         if (docType === "KANT" && wbType === "Misc") {
             showToast("Entry not allowed in Misc for Inward/Outward.", {
                 type: "warning"
@@ -519,10 +511,30 @@
         }
 
         // GRID CHECK
-
         const rows = $('#tblBigWeighbridge tbody tr');
 
-        if (rows.length === 0) {
+        let hasAnyData = false;
+
+        rows.each(function () {
+            const $row = $(this);
+
+            const weight = parseDecimalSafe(
+                $row.find("input[id^='TxtWeight']").val()
+            ) || 0;
+
+            const date = $row.find("input[id^='TxtDate']").val()?.trim();
+            const time = $row.find("input[id^='TxtTime']").val()?.trim();
+            const item = $row.find("select[id^='ddlItemname']").val();
+            const fromPlace = $row.find("select[id^='DdlFromPlace']").val();
+            const toPlace = $row.find("select[id^='DdlToPlace']").val();
+
+            if (weight > 0 || time || item || fromPlace || toPlace) {
+                hasAnyData = true;
+                return false; // break loop
+            }
+        });
+
+        if (!hasAnyData) {
             showToast("No Record in grid to save.", { type: "warning" });
             return false;
         }
@@ -532,18 +544,22 @@
         let firstWeight = null;
 
         // ROW VALIDATION
-
         for (let i = 0; i < rows.length; i++) {
 
-            const idx = rows[i].id.replace('row', '');
+            const $row = $(rows[i]);
 
-            const weight = parseDecimalSafe($(`#TxtWeight${idx}`).val());
-            const date = $(`#TxtDate${idx}`).val()?.trim();
-            const time = $(`#TxtTime${idx}`).val()?.trim();
-            const item = $(`#ddlItemname${idx}`).val();
-            const fromPlace = $(`#DdlFromPlace${idx}`).val();
-            const toPlace = $(`#DdlToPlace${idx}`).val();
+            // Get values from current row
+            const weight = parseDecimalSafe(
+                $row.find("input[id^='TxtWeight']").val()
+            ) || 0;
 
+            const date = $row.find("input[id^='TxtDate']").val()?.trim();
+            const time = $row.find("input[id^='TxtTime']").val()?.trim();
+            const item = $row.find("select[id^='ddlItemname']").val();
+            const fromPlace = $row.find("select[id^='DdlFromPlace']").val();
+            const toPlace = $row.find("select[id^='DdlToPlace']").val();
+
+            // Count valid rows
             if (weight > 0) {
                 validRowCount++;
                 weights.push(weight);
@@ -553,79 +569,51 @@
                 }
             }
 
-            // Validate only rows having weight > 0
+            // Validate only rows where weight is entered
             if (weight > 0) {
 
-                // Date
                 if (!date) {
-                    showToast(`Date required in row ${idx}`, { type: "warning" });
-                    $(`#TxtDate${idx}`).addClass('is-invalid').focus();
+                    setInvalid( $row.find("input[id^='TxtDate']"),`Date is required in row ${i + 1}.`);
                     return false;
-                } else {
-                    $(`#TxtDate${idx}`).removeClass('is-invalid');
                 }
 
-                // Time
                 if (!time) {
-                    showToast(`Time required in row ${idx}`, { type: "warning" });
-                    $(`#TxtTime${idx}`).addClass('is-invalid').focus();
+                    setInvalid( $row.find("input[id^='TxtTime']"),`Time is required in row ${i + 1}.`);
                     return false;
-                } else {
-                    $(`#TxtTime${idx}`).removeClass('is-invalid');
                 }
 
-                // Item
                 if (!item) {
-                    showToast(`Item required in row ${idx}`, { type: "warning" });
-                    $(`#ddlItemname${idx}`).addClass('is-invalid').focus();
+                    setInvalid($row.find("select[id^='ddlItemname']"),`Item Name is required in row ${i + 1}.`);
                     return false;
-                } else {
-                    $(`#ddlItemname${idx}`).removeClass('is-invalid');
                 }
 
-                // From Place (matches VB code)
                 if (!fromPlace) {
-                    showToast(`From Place required in row ${idx}`, {
-                        type: "warning"
-                    });
-                    $(`#DdlFromPlace${idx}`).addClass('is-invalid').focus();
+                    setInvalid($row.find("select[id^='DdlFromPlace']"),`From Place is required in row ${i + 1}.`);
                     return false;
-                } else {
-                    $(`#DdlFromPlace${idx}`).removeClass('is-invalid');
                 }
 
-                // To Place (matches VB code)
                 if (!toPlace) {
-                    showToast(`To Place required in row ${idx}`, {
-                        type: "warning"
-                    });
-                    $(`#DdlToPlace${idx}`).addClass('is-invalid').focus();
+                    setInvalid($row.find("select[id^='DdlToPlace']"),`To Place is required in row ${i + 1}.`);
                     return false;
-                } else {
-                    $(`#DdlToPlace${idx}`).removeClass('is-invalid');
                 }
             }
         }
 
         // NO VALID DATA CHECK
-
         if (validRowCount === 0) {
-            showToast("Weight should not be blank or 0.", { type: "warning" });
+            const $firstWeightInput = $(rows[0]).find("input[id^='TxtWeight']");
+            setInvalid($firstWeightInput,"Weight should not be blank or 0.");
             return false;
         }
 
         // SINGLE ROW CHECK
-
         if (rows.length === 1 && firstWeight === 0) {
-            showToast("Weight should not be blank or 0.", { type: "warning" });
-            $(`#TxtWeight${rows[0].id.replace('row', '')}`)
-                .addClass('is-invalid')
-                .focus();
+            const $weightInput = $(rows[0]).find('input');
+            setInvalid($weightInput, 'Weight should not be blank or 0.');
             return false;
         }
 
         // WEIGHT ORDER VALIDATION
-
         if (weights.length >= 2) {
 
             // Sales → Ascending
@@ -642,18 +630,10 @@
             }
 
             // Raw Material / Store / Fuel / Sales Return → Descending
-            if ([
-                "Raw Material",
-                "Store",
-                "Fuel",
-                "Sales Return"
-            ].includes(wbType)) {
+            if ([ "Raw Material", "Store",  "Fuel", "Sales Return"  ].includes(wbType)) {
                 for (let i = 1; i < weights.length; i++) {
                     if (weights[i] > weights[i - 1]) {
-                        showToast(
-                            "Weight must be in DESCENDING order.",
-                            { type: "warning" }
-                        );
+                        showToast("Weight must be in DESCENDING order.",{ type: "warning" } );
                         return false;
                     }
                 }
@@ -661,9 +641,7 @@
 
             // Outsider / Misc → Detect flow dynamically
             if (["Outsider", "Misc"].includes(wbType) && weights.length >= 3) {
-
                 let flow = "";
-
                 if (weights[1] < weights[0]) {
                     flow = "DESC";
                 } else if (weights[1] > weights[0]) {
@@ -673,18 +651,12 @@
                 for (let i = 2; i < weights.length; i++) {
 
                     if (flow === "DESC" && weights[i] > weights[i - 1]) {
-                        showToast(
-                            "Invalid weight. Weight must be in DESCENDING order.",
-                            { type: "warning" }
-                        );
+                        showToast("Invalid weight. Weight must be in DESCENDING order.",  { type: "warning" } );
                         return false;
                     }
 
                     if (flow === "ASC" && weights[i] < weights[i - 1]) {
-                        showToast(
-                            "Invalid weight. Weight must be in ASCENDING order.",
-                            { type: "warning" }
-                        );
+                        showToast( "Invalid weight. Weight must be in ASCENDING order.",{ type: "warning" } );
                         return false;
                     }
                 }
@@ -692,9 +664,9 @@
         }
 
         // COMPANY RULE (pubCompCode = 7)
+        if (pubCompCode === 7) {
 
-        if (typeof pubCompCode !== "undefined" && pubCompCode === 7) {
-            const lastWeight = weights[weights.length - 1] || 0;
+        const lastWeight = weights[weights.length - 1] || 0;
 
             if (lastWeight > 0 && lastWeight < 1000) {
                 const proceed = confirm(
@@ -710,7 +682,6 @@
         // IMAGE VALIDATION (ASYNC)
 
         if (
-            typeof pubCompCode !== "undefined" &&
             [1, 4].includes(pubCompCode) &&
             wbType === "Raw Material" &&
             $('#ddlStatus').val()?.toUpperCase() === "CLOSE"
@@ -729,7 +700,6 @@
         return true;
     }
     
-
     function updateNetWeight() {
       const g = parseFloat($("#NumPartyGrossWeight").val()) || 0;
       const t = parseFloat($("#NumTrWeight").val()) || 0;
@@ -769,7 +739,6 @@
                 today.getDate().toString().padStart(2, '0');
                 $('#DtDocDate').val(todayDate);
 
-
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -778,7 +747,6 @@
             const min = String(now.getMinutes()).padStart(2, '0');
             const formattedDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
             $('#DtStatusDate').val(formattedDateTime);
-
 
         }
     }
@@ -794,7 +762,7 @@
                     toastr.success("Data Insert successfully");
                     setTimeout(() => {
                         window.location.href = '/BigWeighbridgeList/Index';
-                    }, 1500);
+                    }, 1000);
                 } else {
                     toastr.error(response?.message || "Save failed. Please try again.");
                 }
@@ -843,11 +811,24 @@
         $("#DtDocDate").val((data.V_DATE || '').substring(0, 10));
         $("#ddlWBType").val(data.WB_TYPE ?? "").trigger('change');
         $("#TxtVehicleNo").val(data.VEHICLE_NO ?? "");
-
+        $("#txtRemarks").val(data.REMARKS ?? "");
+        $("#NumNetWeight").val(data.PARTY_QTY ?? "");
+        $("#NumPartyGrossWeight").val(data.PARTY_GROSSWT ?? "");
+        $("#NumTrWeight").val(data.PARTY_TRWT ?? "");
+        $("#TxtPartyWBNo").val(data.PARTY_WBNO ?? "");
+        $("#NumNoBag25").val(data.SMALL_BAG ?? "");
+        $("#NumNoBag500").val(data.MEDIUM_BAG ?? "");
+        $("#NumNoBag1000").val(data.LARGE_BAG ?? "");
+    
+        $('#ddlStatus').val(data.STATUS ?? "").trigger('change');
+        $("#DtStatusDate").val(formatDateTimeLocal(data.STATUS_DATE));
         const wbType = data.WB_TYPE ?? "";
 
         // Gate No bind
         GetGateEntryList(wbType, data.GATE_NO);
+
+       gateType= data.GATE_TYPE;
+       gateNo = data.GATE_NO;
 
         // Party Name bind
         if (wbType === "Outsider" || wbType === "Sales Return") {
@@ -910,7 +891,7 @@
     }
 
     async function collectFormData() {
-        // const WB2Items = await collectItemsDetail();
+   
         const { items: WB2Items, finalWeight } = await collectItemsDetail();
         const selectedOption = $('#DdlGateNo option:selected');
         const vtype = selectedOption.data('vtype');
@@ -941,7 +922,10 @@
             MEDIUM_BAG: toNullableString($("#NumNoBag500").val()),
             LARGE_BAG: toNullableString($("#NumNoBag1000").val()),
             SaveOrUpdate: (!docId || docId === "") ? "Save" : "Update",
-            WB2Data: WB2Items
+            WB2Data: WB2Items,
+
+            oldGateType : gateType,
+            oldGateNo: gateNo
         };
     }
 
@@ -1007,8 +991,6 @@
         const $tbody = $('#tblBigWeighbridge tbody');
         $tbody.empty();
 
-        console.log("Detail Data:", itemsData);
-
         if (!itemsData || itemsData.length === 0) {
             console.log("No detail records found.");
             return;
@@ -1026,25 +1008,17 @@
 
             // Step 3: Bind text fields
             $(`#TxtWeight${idx}`).val(item.WEIGHT ?? "");
-            $(`#TxtDate${idx}`).val(item.WGT_DATE ?? "");
+            $(`#TxtDate${idx}`).val(formatDateOnly(item.WGT_DATE));
+           
+           
             $(`#TxtTime${idx}`).val(
                 convertTo24HourFormat(item.WGT_TIME ?? "")
             );
 
             // Step 4: Bind dropdown values
-            $(`#ddlItemname${idx}`)
-                .val(item.ITEM_CODE ?? "")
-                .trigger('change');
-
-            $(`#DdlFromPlace${idx}`)
-                .val(item.FROM_PLACE ?? "")
-                .trigger('change');
-
-            $(`#DdlToPlace${idx}`)
-                .val(item.TO_PLACE ?? "")
-                .trigger('change');
-
-            console.log(`Row ${idx} bound successfully`, item);
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE ?? "").trigger('change');
+            $(`#DdlFromPlace${idx}`).val(item.FROM_PLACE ?? "").trigger('change');
+            $(`#DdlToPlace${idx}`).val(item.TO_PLACE ?? "").trigger('change');
         }
     }
 
@@ -1138,6 +1112,7 @@
             data: { wbType: wbType },
             success: function (response) {
                 if (response.status) {
+                    console.log("Gate Node :", response);
                     const $DropdownId = $('#DdlGateNo');
                     $DropdownId.empty();
                     $DropdownId.append('<option value="">- Select Gate No -</option>');
@@ -1157,7 +1132,21 @@
 
                     $DropdownId.select2({
                         placeholder: "- Select -",
-                        allowClear: true
+                        allowClear: true,
+                        emplateResult: function (data) {
+                                return data.text;
+                        },
+
+                        // Select hone ke baad sirf value (Gate No) dikhana
+                        templateSelection: function (data) {
+                            // Placeholder show karne ke liye
+                            if (!data.id) {
+                                return data.text;
+                            }
+
+                            // Selected hone par sirf value show karega
+                            return data.id;
+                        }
                     });
 
                     if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
@@ -1176,7 +1165,7 @@
             }
         });
     }
-
+    
     function GetPartyList(selectedValue = null) {
         return new Promise((resolve, reject) => {
             $.ajax({
@@ -1371,7 +1360,7 @@
         const el = document.getElementById(id);
         if (el) el.disabled = true;
       });
-    }
+    }   
 
     function addItemRecordRow() {
         let tbody = $('#tblBigWeighbridge tbody');
@@ -1379,7 +1368,7 @@
         let newRow = `
         <tr class="no-border-input" id="row${rowCount}">
             <td><input type="text" style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyDecimal(this)" id="TxtWeight${rowCount}" /></td>
-            <td><input type="datetime-local" style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtDate${rowCount}" /></td>
+            <td><input type="date" style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtDate${rowCount}" /></td>
             <td><input type="time" style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtTime${rowCount}" /></td>
             <td>
                 <select style="min-width: 500px;" class="form-control" id="ddlItemname${rowCount}">
@@ -1387,9 +1376,9 @@
                 </select>
             </td>
             <td>
-                    <select class="form-control" id="DdlFromPlace${rowCount}">
-                        <option value="">Select From</option>
-                    </select>
+                <select class="form-control" id="DdlFromPlace${rowCount}">
+                    <option value="">Select From</option>
+                </select>
                 </td>
                 <td>
                     <select class="form-control" id="DdlToPlace${rowCount}">
@@ -1405,21 +1394,21 @@
         tbody.append(newRow);
            // Auto-fill date and time when weight is entered
         $(`#TxtWeight${rowCount}`).on('input', function () {
-        let currentDate = new Date();
-        let yyyy = currentDate.getFullYear();
-        let mm = String(currentDate.getMonth() + 1).padStart(2, '0');
-        let dd = String(currentDate.getDate()).padStart(2, '0');
-        let hours = String(currentDate.getHours()).padStart(2, '0');
-        let minutes = String(currentDate.getMinutes()).padStart(2, '0');
+            let currentDate = new Date();
+            let yyyy = currentDate.getFullYear();
+            let mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+            let dd = String(currentDate.getDate()).padStart(2, '0');
+            let hours = String(currentDate.getHours()).padStart(2, '0');
+            let minutes = String(currentDate.getMinutes()).padStart(2, '0');
 
-         let formattedDateTime = `${yyyy}-${mm}-${dd} ${hours}:${minutes}`;
-         let formattedTime = `${hours}:${minutes}`;
-         $(`#TxtDate${rowCount}`).val(formattedDateTime);
-         $(`#TxtTime${rowCount}`).val(formattedTime);
-          $(`#TxtDate${rowCount}`).prop('readonly', true);
-          $(`#TxtTime${rowCount}`).prop('readonly', true);
+            let formattedDateTime = `${yyyy}-${mm}-${dd}`;
+            let formattedTime = `${hours}:${minutes}`;
+            $(`#TxtDate${rowCount}`).val(formattedDateTime);
+            $(`#TxtTime${rowCount}`).val(formattedTime);
+            $(`#TxtDate${rowCount}`).prop('readonly', true);
+            $(`#TxtTime${rowCount}`).prop('readonly', true);
         });
-        console.log(docId);
+      
         // if(!docId)
         // {
         //     $(`#TxtDate${rowCount}`).prop('readonly', true);
@@ -1521,4 +1510,24 @@
         return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
     }
 
-</script>
+    function formatDateOnly(dateStr) {
+        if (!dateStr) return '';
+        return dateStr.split('T')[0];   
+    }
+
+    function formatDateTimeLocal(dateStr) {
+        if (!dateStr) return '';
+
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '';
+
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+
+        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    }
+
+</script> *@

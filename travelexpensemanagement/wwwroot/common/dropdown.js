@@ -29,12 +29,34 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
                 ddl.val(data[0].value);  
             }
             //Initialize select2
+            //if (useSelect2) {
+            //    ddl.select2({
+            //        placeholder: placeholder,
+            //        allowClear: true
+            //    });
+            //}
+            // Initialize Select2
             if (useSelect2) {
+
+                // Destroy existing Select2 if already initialized
+                if (ddl.hasClass("select2-hidden-accessible")) {
+                    ddl.select2("destroy");
+                }
+
                 ddl.select2({
-                    placeholder: placeholder,  
-                    allowClear: true            
+                    placeholder: placeholder,
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                // Auto focus search box when dropdown opens
+                ddl.on('select2:open', function () {
+                    setTimeout(function () {
+                        document.querySelector('.select2-container--open .select2-search__field')?.focus();
+                    }, 0);
                 });
             }
+
 
             if (typeof callback === "function") {
                 callback();

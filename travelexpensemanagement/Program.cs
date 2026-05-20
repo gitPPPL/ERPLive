@@ -46,6 +46,10 @@ builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepos
 builder.Services.AddScoped<IMiscConsumptionListRepository, MiscConsumptionListRepository>();
 builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
 builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
+builder.Services.AddScoped<IBigWeighbridgeRepository, BigWeighbridgeRepository>();
+builder.Services.AddScoped<IBigWeighbridgeListRepository, BigWeighbridgeListRepository>();
+
+
 
 // Gete Entry Transaction repositories
 

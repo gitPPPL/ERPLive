@@ -32,7 +32,6 @@
 	  <Compile Remove="wwwroot\js\jquery-ui\**" />
 	  <Compile Remove="wwwroot\js\modernizr\**" />
 	  <Compile Remove="wwwroot\js\morris.js\**" />
-	  <Compile Remove="wwwroot\js\popper.js\**" />
 	  <Compile Remove="wwwroot\js\raphael\**" />
 	  <Compile Remove="wwwroot\pages\**" />
 	  <Content Remove="Controllers\LiveRFQ\**" />
@@ -43,7 +42,6 @@
 	  <Content Remove="wwwroot\js\jquery-ui\**" />
 	  <Content Remove="wwwroot\js\modernizr\**" />
 	  <Content Remove="wwwroot\js\morris.js\**" />
-	  <Content Remove="wwwroot\js\popper.js\**" />
 	  <Content Remove="wwwroot\js\raphael\**" />
 	  <Content Remove="wwwroot\pages\**" />
 	  <EmbeddedResource Remove="Controllers\LiveRFQ\**" />
@@ -54,7 +52,6 @@
 	  <EmbeddedResource Remove="wwwroot\js\jquery-ui\**" />
 	  <EmbeddedResource Remove="wwwroot\js\modernizr\**" />
 	  <EmbeddedResource Remove="wwwroot\js\morris.js\**" />
-	  <EmbeddedResource Remove="wwwroot\js\popper.js\**" />
 	  <EmbeddedResource Remove="wwwroot\js\raphael\**" />
 	  <EmbeddedResource Remove="wwwroot\pages\**" />
 	  <None Remove="Controllers\LiveRFQ\**" />
@@ -65,7 +62,6 @@
 	  <None Remove="wwwroot\js\jquery-ui\**" />
 	  <None Remove="wwwroot\js\modernizr\**" />
 	  <None Remove="wwwroot\js\morris.js\**" />
-	  <None Remove="wwwroot\js\popper.js\**" />
 	  <None Remove="wwwroot\js\raphael\**" />
 	  <None Remove="wwwroot\pages\**" />
 	</ItemGroup>
