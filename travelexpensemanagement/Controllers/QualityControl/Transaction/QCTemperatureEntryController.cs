@@ -311,7 +311,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
 
-
         private DataTable QcTempDataTable(List<TapeQuality2> data)
         {
             var table = new DataTable();

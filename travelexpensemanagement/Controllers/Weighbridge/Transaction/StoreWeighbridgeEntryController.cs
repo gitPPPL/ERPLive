@@ -36,7 +36,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         {
             return View("~/Views/Weighbridge/Transaction/StoreWeighbridgeEntry/Index.cshtml");
         }
-
         [HttpGet]
         public IActionResult GetMaxVNo(string V_type)
         {

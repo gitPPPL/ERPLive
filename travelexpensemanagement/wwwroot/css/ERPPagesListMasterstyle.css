@@ -310,7 +310,40 @@
     width: 120px;
     text-align: center;
 }
+/* ONLY THIS TABLE */
+.table-row-layout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
 
+    /* each table takes equal width */
+    .table-row-layout .erppagelist-container {
+        flex: 1;
+        min-width: 0;
+    }
+.special-6x6-table {
+    height: 175px; /* fixed height */
+    overflow-y: auto; /* vertical scroll */
+    overflow-x: auto; /* horizontal scroll */
+    position: relative;
+}
+
+    /* Sticky Header ONLY here */
+    .special-6x6-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(135deg, #232323, #0f0f0f);
+    }
+
+    /* Optional: fixed equal columns */
+    .special-6x6-table td,
+    .special-6x6-table th {
+        width: 150px;
+        min-width: 150px;
+        max-width: 150px;
+    }
 
 
 /* ACTION BUTTONS */
@@ -575,6 +608,30 @@ th {
         background: #fff;
         color: #218838;
         border: 1px solid #218838;
+    }
+
+
+/* Center the Action column header and cell content */
+.fixed-grid-table th.action-col,
+.fixed-grid-table td.action-col {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Make the TD a flex container so buttons are centered */
+.fixed-grid-table td.action-col {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px;
+}
+
+    /* Remove default button margins */
+    .fixed-grid-table td.action-col .act-btn {
+        margin: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 /*Excel table end*/
 

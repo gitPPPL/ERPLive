@@ -2,137 +2,125 @@
     ViewBag.Title = "QC Temperature Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">QC Temperature Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button onclick="window.location.href='@Url.Action("Index", "QCTemperatureEntryList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-temperature-half"></i>
         </div>
+        <div class="erppage-header-title">QC Temperature Entry</div>
     </div>
-    <form id="QCTemperatureEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" readonly>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCTemperatureEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="QCTemperatureEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtDocDate" />
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlShift">Shift <span class="required">*</span></label>
-                    <select class="form-control" id="ddlShift">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shift</label>
+                    <select class="erppage-input erppage-required" id="ddlShift">
                         <option value="">Select Shift</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TmTime">Time <span class="required">*</span></label>
-                    <input type="time" class="form-control" id="TmTime" />
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Time</label>
+                    <input type="time" class="erppage-redinput" id="TmTime">
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDenier">Denier <span class="required">*</span></label>
-                    <select class="form-control" id="ddlDenier">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Denier</label>
+                    <select class="erppage-input erppage-required" id="ddlDenier">
                         <option value="">Select Denier</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlIncharge">Incharge</label>
-                    <select class="form-control" id="ddlIncharge">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Incharge</label>
+                    <select id="ddlIncharge" class="erppage-input erppage-select">
                         <option value="">Select Incharge</option>
                     </select>
                 </div>
+
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlOperator">Operator</label>
-                    <select class="form-control" id="ddlOperator">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Operator</label>
+                    <select id="ddlOperator" class="erppage-input erppage-select">
                         <option value="">Select Operator</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlSupervisor">Supervisor</label>
-                    <select class="form-control" id="ddlSupervisor">
-                        <option>Select Supervisor</option>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Supervisor</label>
+                    <select id="ddlSupervisor" class="erppage-input erppage-select">
+                        <option value="">Select Supervisor</option>
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPlantName">Plant Name <span class="required">*</span></label>
-                    <select class="form-control" id="ddlPlantName">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Plant Name</label>
+                    <select class="erppage-input erppage-required" id="ddlPlantName">
                         <option value="">Select Plant Name</option>
-                    </select>   
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Incharge</label>
+                    <textarea typeof="text" class="erppage-textarea" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks"></textarea>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtRemarks">Remarks</label>
-                    <textarea typeof="text" class="form-control" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-        </div>
-       
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">Select Reading Details</legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="ddlSelectReading">Select Reading</label>
-                        <select class="form-control" id="ddlSelectReading">
+            <fieldset class="erppage-subfieldset">
+                <legend>Select Reading Details</legend>
+                <div class="erppage-subheader">Select Reading Details</div>
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Select Reading</label>
+                        <select class="erppage-input erppage-required" id="ddlSelectReading">
                             <option selected disabled>Select Reading</option>
-                            <option>Temperature</option>
-                            <option>Speed</option>
-                            <option>Winder</option>
+                            <option value="temperature">Temperature</option>
+                            <option value="speed">Speed</option>
+                            <option value="winder">Winder</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="TxtImport">Import Interval (in Min)</label>
-                        <input type="text" class="form-control" id="TxtImport" placeholder="Enter Import Interval (in Min)">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Import Interval</label>
+                        <input type="text" class="erppage-input" id="TxtImport" placeholder="Enter Import Interval (in Min)" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                            <div class="erppage-internalaction" style="margin: 0;">
+                                <button type="button" id="btn_import" class="erppage-btn erppage-btn-common">
+                                    <i class="fa fa-download"></i>
+                                    <span>Import</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="btn-mt">
-                        <button type="button" class="btn btn-success" id="btn_import"><i class="fa fa-refresh"></i>Import</button> 
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="table-responsive custom-table-wrapper">
-                        <table id="tblPlantZone" class="table-width">
+            </fieldset>
+            <div class="table-row-layout">
+                <div class="erppagelist-container" style="margin:0px;">
+                    <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                        <table id="tblPlantZone" class="excel-table fixed-grid-table">
                             <colgroup>
                                 <col style="width: 150px;">
                                 <col style="width: 120px;">
                                 <col style="width: 200px;">
                                 <col style="width: 150px;">
                             </colgroup>
-                            <thead class="table-head">
+                            <thead>
                                 <tr>
                                     <th>Plant Zone</th>
                                     <th>Temperature('C)</th>
@@ -144,11 +132,9 @@
                         </table>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="table-responsive custom-table-wrapper">
-                        <table id="tblScrew" class="table-width">
+                <div class="erppagelist-container" style="margin:0px;">
+                    <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                        <table id="tblScrew" class="excel-table fixed-grid-table">
                             <colgroup>
                                 <col style="width: 150px;">
                                 <col style="width: 100px;">
@@ -168,13 +154,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="table-responsive custom-table-wrapper">
-                        <table id="tblWinder" class="table-width">
+            <div class="table-row-layout">
+                <div class="erppagelist-container" style="margin:0px;">
+                    <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                        <table id="tblWinder" class="excel-table fixed-grid-table">
                             <colgroup>
                                 <col style="display:none;">
                                 <col style="width: 100px;">
@@ -185,34 +168,33 @@
                                 <col style="width: 100px;">
                                 <col style="width: 100px;">
                             </colgroup>
-                            <thead class="table-head">
+                            <thead>
                                 <tr>
                                     <th style="display:none;">Code</th>
                                     <th>Winder No.</th>
                                     <th>Width(Mm)</th>
                                     <th>Denier</th>
                                     <th>Breaking Load(Kgf)</th>
-                                    <th>Tenacity(Gpd.)</th>
+                                    <th>Tenacity (Gpd.)</th>
                                     <th>Elongation</th>
-                                    <th>Action</th>
+                                    <th class="action-col">Action</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="btn-add-row-last">
-                                <i class="fa fa-plus btn-add-row" title="Add Row" onclick="addWinderRecordRow()"><span>Add New Row</span></i>
-                            </div>
+                    <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                        <div class="erppage-internalaction" style="margin: 0;">
+                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" onclick="addWinderRecordRow()">
+                                <i class="fa fa-plus"></i>
+                                <span>Add New Row</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="table-responsive custom-table-wrapper">
-                        <table id="tblMaterial" class="table-width">
+                <div class="erppagelist-container" style="margin:0px;">
+                    <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                        <table id="tblMaterial" class="excel-table fixed-grid-table">
                             <colgroup>
                                 <col style="display:none;">
                                 <col style="width: 150px;">
@@ -228,32 +210,33 @@
                                     <th>Lot No.</th>
                                     <th>No. of Bags</th>
                                     <th>Percent(%)</th>
-                                    <th>Action</th>
+                                    <th class="action-col">Action</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="btn-add-row-last">
-                                <i class="fa fa-plus btn-add-row" title="Add Row" onclick="addMaterialRecordRow()"><span>Add New Row</span></i>
-                            </div>
+                    <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                        <div class="erppage-internalaction" style="margin: 0;">
+                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" onclick="addMaterialRecordRow()">
+                                <i class="fa fa-plus"></i>
+                                <span>Add New Row</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
+
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
 <script>
@@ -270,12 +253,8 @@
         "ddlPlantName",
         "TxtRemarks"
     ];
-
-    // const itemRecords = [    
-    // ];
-
     let docId = "", readOnly;
-
+    
     function getQueryParam(param) {
       return new URLSearchParams(window.location.search).get(param);
     }
@@ -285,13 +264,13 @@
     });
 
     async function initPage() {
-      try {
-        await handleDocLoad();
-        setEnterKeyFocus(allFieldIds);
-        wireEvents();
-    } catch (err) {
-        toastr.error('Initialization failed: ' + err);
-    }
+        try {
+            await handleDocLoad();
+            setEnterKeyFocus(allFieldIds);
+            wireEvents();
+        } catch (err) {
+            toastr.error('Initialization failed: ' + err);
+        }
     }
 
     function wireEvents() {
@@ -316,67 +295,67 @@
 
       // });
 
-    $('#btn-save').on('click', async (e) => {
-        e.preventDefault();
+        $('#btn-save').on('click', async (e) => {
+            e.preventDefault();
 
-        // Validate required fields
-        if (
-            !validateRequiredField('#NumDocNo', 'Doc No') ||
-            !validateRequiredField('#DtDocDate', 'Doc Date') ||
-            !validateRequiredField('#ddlShift', 'Shift Type') ||
-            !validateRequiredField('#TmTime', 'Time') ||
-            !validateRequiredField('#ddlPlantName', 'Plant Name') ||
-            !validateRequiredField('#ddlDenier', 'Denier')
-        ) return;
+            // Validate required fields
+            if (
+                !validateRequiredField('#NumDocNo', 'Doc No') ||
+                !validateRequiredField('#DtDocDate', 'Doc Date') ||
+                !validateRequiredField('#ddlShift', 'Shift Type') ||
+                !validateRequiredField('#TmTime', 'Time') ||
+                !validateRequiredField('#ddlPlantName', 'Plant Name') ||
+                !validateRequiredField('#ddlDenier', 'Denier')
+            ) return;
 
-         const rawValue = document.getElementById('DtDocDate')?.value;
-         const V_DATE = formatDateToSqlDateOnly(parseDateSafe(rawValue));
-         const V_TIME= getTimeAsDateTimeForSql("TmTime");
-         const SHIFT= toNullableString(document.getElementById('ddlShift')?.value);
-         const plantCode = parseIntSafe(document.getElementById('ddlPlantName')?.value);
-         const VNo =parseIntSafe(document.getElementById('NumDocNo')?.value);
-         const UpdateVno = docId ? VNo :0;
+             const rawValue = document.getElementById('DtDocDate')?.value;
+             const V_DATE = formatDateToSqlDateOnly(parseDateSafe(rawValue));
+             const V_TIME= getTimeAsDateTimeForSql("TmTime");
+             const SHIFT= toNullableString(document.getElementById('ddlShift')?.value);
+             const plantCode = parseIntSafe(document.getElementById('ddlPlantName')?.value);
+             const VNo =parseIntSafe(document.getElementById('NumDocNo')?.value);
+             const UpdateVno = docId ? VNo :0;
 
-        checkExistOrNot(V_DATE,V_TIME,SHIFT,plantCode,UpdateVno)
-            .done(async function (data) {
-                if (data?.status && data?.exists) {
-                    toastr.warning("Duplicate Parameters VDate,VTime,Shift and Plant Name");
-                    return;
-                }
+            checkExistOrNot(V_DATE,V_TIME,SHIFT,plantCode,UpdateVno)
+                .done(async function (data) {
+                    if (data?.status && data?.exists) {
+                        toastr.warning("Duplicate Parameters VDate,VTime,Shift and Plant Name");
+                        return;
+                    }
 
-                try {
-                    const formData = await collectFormData();
-                    console.log(formData);
+                    try {
+                        const formData = await collectFormData();
+                        console.log(formData);
 
-                    docId ? UpdateData(formData) : SaveData(formData);
-                } catch (err) {
-                    toastr.error("Error saving data: " + err.message);
-                }
-            })
-            .fail(function () {
-                toastr.error("Error while checking Parameter name.");
-            });
-    });
+                        docId ? UpdateData(formData) : SaveData(formData);
+                    } catch (err) {
+                        toastr.error("Error saving data: " + err.message);
+                    }
+                })
+                .fail(function () {
+                    toastr.error("Error while checking Parameter name.");
+                });
+        });
    
 
-    $('#tblWinder tbody').on('click', '.btn-winderelete-action', function () {
-        const row = $(this).closest('tr');
-        row.remove();
-    });
+        $('#tblWinder tbody').on('click', '.btn-winderelete-action', function () {
+            const row = $(this).closest('tr');
+            row.remove();
+        });
 
-    $('#tblMaterial tbody').on('click', '.btn-materialdelete-action', function () {
-        const row = $(this).closest('tr');
-        row.remove();
-    });
+        $('#tblMaterial tbody').on('click', '.btn-materialdelete-action', function () {
+            const row = $(this).closest('tr');
+            row.remove();
+        });
     
-    $(document).on('input', '[id^=TxtDenier], [id^=TxtBreakingLoad]', function(){
-     var row=$(this).closest('tr');     
-     var denier = parseFloat(row.find(`[id^=TxtDenier]`).val() || 0);
-     var breakingLoad = parseFloat(row.find(`[id^=TxtBreakingLoad]`).val() || 0);
-     var tenaCityValue= (denier !==0) ? ((breakingLoad/denier)*1000) :0;
-     row.find(`[id^=TxtTeracityGpd`).val(tenaCityValue.toFixed(3));     
+        $(document).on('input', '[id^=TxtDenier], [id^=TxtBreakingLoad]', function(){
+            var row=$(this).closest('tr');     
+            var denier = parseFloat(row.find(`[id^=TxtDenier]`).val() || 0);
+            var breakingLoad = parseFloat(row.find(`[id^=TxtBreakingLoad]`).val() || 0);
+            var tenaCityValue= (denier !==0) ? ((breakingLoad/denier)*1000) :0;
+            row.find(`[id^=TxtTeracityGpd`).val(tenaCityValue.toFixed(3));     
 
-    });
+        });
 
 
     }
@@ -384,7 +363,7 @@
 </script>
 
 <script>
-
+    //===Check Exist===
     function checkExistOrNot(V_DATE,V_TIME,SHIFT,plantCode, UpdateVno) {
         return $.ajax({
             url: '/QCTemperatureEntry/getExistOrNot',
@@ -393,54 +372,54 @@
             data: { V_DATE: V_DATE,  V_TIME: V_TIME, SHIFT: SHIFT, plantCode: plantCode, VNo:UpdateVno }
         });
     }
-
+    //===Doc Load===
     async function handleDocLoad() {
-            docId = getQueryParam('id');
-            readOnly = getQueryParam('readOnly');
-            if (docId) {                
-                $('#ddlDocType').prop('disabled', true);
-                await GetDocData(docId, readOnly);
+        docId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+        if (docId) {                
+            $('#ddlDocType').prop('disabled', true);
+            await GetDocData(docId, readOnly);
 
-            } else {
-                GetDocid();
-                const today = new Date();
-                const todayDate = today.getFullYear() + '-' +
-                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                    today.getDate().toString().padStart(2, '0');
-                    $('#DtDocDate').val(todayDate);                    
-                    ['ddlIncharge', 'ddlSupervisor', 'ddlOperator'].forEach(id => {
-                    GetEmployeeList(id);
-                    });                   
-                     GetShiftList('ddlShift');
-                     GetDenierList('ddlDenier');
-                     GetPlantList('ddlPlantName');
-                    fillPlanZoneTable();
-                    fillScrewTable();
-                    addWinderRecordRow();
-                    addMaterialRecordRow();                 
-            }
+        } else {
+            GetDocid();
+            const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+                $('#DtDocDate').val(todayDate);                    
+                ['ddlIncharge', 'ddlSupervisor', 'ddlOperator'].forEach(id => {
+                GetEmployeeList(id);
+                });                   
+                 GetShiftList('ddlShift');
+                 GetDenierList('ddlDenier');
+                 GetPlantList('ddlPlantName');
+                fillPlanZoneTable();
+                fillScrewTable();
+                addWinderRecordRow();
+                addMaterialRecordRow();                 
+        }
     }
-
+    //===Save & Update===
     function SaveData(saveDt) {
-                $.ajax({
-                    url: '@Url.Action("SaveOrUpdateQcTemperatureEntry", "QCTemperatureEntry")',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(saveDt),
-                    success: function (response) {
-                        if (response?.status) {
-                            toastr.success("Data Insert successfully");
-                            setTimeout(() => {
-                                window.location.href = '/QCTemperatureEntryList/Index';
-                            }, 1500);
-                        } else {
-                            toastr.error(response?.message || "Save failed. Please try again.");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error occurred while saving. Please contact admin.");
-                    }
-                });
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateQcTemperatureEntry", "QCTemperatureEntry")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(saveDt),
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success("Data Insert successfully");
+                    setTimeout(() => {
+                        window.location.href = '/QCTemperatureEntryList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error(response?.message || "Save failed. Please try again.");
+                }
+            },
+            error: function () {
+                toastr.error("Error occurred while saving. Please contact admin.");
+            }
+        });
     }
 
     function UpdateData(UpdateDt) {
@@ -466,7 +445,7 @@
             }
         });
     }
-
+    //===Fill Data By Id===
     async function fillHeaderData(headdata) {
         if (!Array.isArray(headdata) || headdata.length === 0) {
             console.error("Invalid or empty header data:", headdata);
@@ -541,7 +520,44 @@
             $(`#TxtPercentage${idx}`).val(item.MAT_PER);
         }
     }
+    async function fillItemDetailTable(itemsData) {
+        const $tbody = $('#tblFabricStrengthEntry tbody');
+        $tbody.empty();
 
+        for (let index = 0; index < itemsData.length; index++) {
+            const item = itemsData[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+            await bindDropdownData(idx);
+
+            $(`#TxtLID${idx}`).val(item.LID || '');
+            $(`#TxtWidth${idx}`).val(item.WIDTH ?? '');
+            $(`#TxtGram${idx}`).val(item.GRAM ?? '');
+            $(`#TxtDNR${idx}`).val(item.DNR ?? '');
+            $(`#TxtWarpWay${idx}`).val(item.WARP_MESH ?? '');
+            $(`#TxtWeftWay${idx}`).val(item.WEFT_MESH ?? '');
+            $(`#TxtWarpElong${idx}`).val(item.WARP_ELONG ?? '');
+            $(`#TxtWeftElong${idx}`).val(item.WEFT_ELONG ?? '');
+            $(`#TxtWarpMesh${idx}`).val(item.WARP_MESH ?? '');
+            $(`#TxtWeftMesh${idx}`).val(item.WEFT_MESH ?? '');
+            $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
+
+            const safeSetDropdown = (selector, value) => {
+                const $select = $(`${selector}${idx}`);
+                if ($select.find(`option[value="${value}"]`).length > 0) {
+                    $select.val(value).trigger('change');
+                }
+            };
+
+            safeSetDropdown('#ddlLoom', item.LOOM_CODE);
+            safeSetDropdown('#ddlItemName', item.ITEM_CODE);
+            safeSetDropdown('#ddlType', item.PTYPE_CODE);
+            safeSetDropdown('#ddlColor', item.COLOR_CODE);
+            safeSetDropdown('#ddlStrength', item.MESH_CODE);
+        }
+    }
+    //===Collect Data For Save & Update===
     async function collectFormData() {
 
        const rawValue = document.getElementById('DtDocDate')?.value;
@@ -722,45 +738,7 @@
         });
         return materialItems;
     }
-
-    async function fillItemDetailTable(itemsData) {
-        const $tbody = $('#tblFabricStrengthEntry tbody');
-        $tbody.empty();
-
-        for (let index = 0; index < itemsData.length; index++) {
-            const item = itemsData[index];
-            const idx = index + 1;
-
-            addItemRecordRow();
-            await bindDropdownData(idx);
-
-            $(`#TxtLID${idx}`).val(item.LID || '');
-            $(`#TxtWidth${idx}`).val(item.WIDTH ?? '');
-            $(`#TxtGram${idx}`).val(item.GRAM ?? '');
-            $(`#TxtDNR${idx}`).val(item.DNR ?? '');
-            $(`#TxtWarpWay${idx}`).val(item.WARP_MESH ?? '');
-            $(`#TxtWeftWay${idx}`).val(item.WEFT_MESH ?? '');
-            $(`#TxtWarpElong${idx}`).val(item.WARP_ELONG ?? '');
-            $(`#TxtWeftElong${idx}`).val(item.WEFT_ELONG ?? '');
-            $(`#TxtWarpMesh${idx}`).val(item.WARP_MESH ?? '');
-            $(`#TxtWeftMesh${idx}`).val(item.WEFT_MESH ?? '');
-            $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
-
-            const safeSetDropdown = (selector, value) => {
-                const $select = $(`${selector}${idx}`);
-                if ($select.find(`option[value="${value}"]`).length > 0) {
-                    $select.val(value).trigger('change');
-                }
-            };
-
-            safeSetDropdown('#ddlLoom', item.LOOM_CODE);
-            safeSetDropdown('#ddlItemName', item.ITEM_CODE);
-            safeSetDropdown('#ddlType', item.PTYPE_CODE);
-            safeSetDropdown('#ddlColor', item.COLOR_CODE);
-            safeSetDropdown('#ddlStrength', item.MESH_CODE);
-        }
-    }
-       
+    //===Doc Details===
     function GetDocid() {
         $.ajax({
             url: '@Url.Action("GetMaxVNo", "QCTemperatureEntry")',
@@ -780,7 +758,37 @@
             }
         });
     }
-     
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/QCTemperatureEntry/GetQcTemperatureById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                await fillHeaderData(response.header);
+               await fillWinderData(response.detail);
+               await fillMaterialData(response.detail);
+               fillPlanZoneTable(response.detail);
+               fillScrewTable(response.detail);
+
+                // await fillItemDetailTable(response.detail);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+    //===Dropdowns===
     function GetEmployeeList(dropDownId, selectedValue = null) {
         $.ajax({
             url: '@Url.Action("GetEmployeeMast", "QCTemperatureEntry")',
@@ -793,7 +801,7 @@
                     $DropdownId.append('<option value="">- Select Name -</option>');
 
                     $.each(response.data, function (index, item) {
-                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                        $DropdownId.append(`<option value="${item.CODE}">${item.CODE} || ${item.NAME}</option>`);
                     });
 
                     $DropdownId.select2({
@@ -920,37 +928,6 @@
         });
     }
 
-    async function GetDocData(MasterTblId, readOnly) {
-        try {
-            const response = await $.ajax({
-                url: '/QCTemperatureEntry/GetQcTemperatureById',
-                type: 'GET',
-                data: { id: MasterTblId }
-            });
-            if (response.status) {
-                await fillHeaderData(response.header);
-               await fillWinderData(response.detail);
-               await fillMaterialData(response.detail);
-               fillPlanZoneTable(response.detail);
-               fillScrewTable(response.detail);
-
-                // await fillItemDetailTable(response.detail);
-                if (readOnly === 'true') {
-                    $('#btn-save, #cancelBtn').hide();
-                    disableAllFields();
-                } else {
-                    $('#btn-save, #cancelBtn').show();
-                    enableAllFields();
-                }
-            } else {
-                toastr.error('No data returned.');
-            }
-        } catch (error) {
-            toastr.error('Failed to load data.');
-            console.error(error);
-        }
-    }
- 
     function fillPlanZoneTable(data = null) {
         $.ajax({
             url: '/QCTemperatureEntry/GetPlantZoneList',
@@ -1063,6 +1040,7 @@
         });
     }
 
+    //===Add Rows====
     function addWinderRecordRow() {
         const tbody = $('#tblWinder tbody');
         const rowCount = tbody.find('tr').length + 1;
@@ -1170,83 +1148,11 @@
         });
     }
 
-    // function fillPlanZoneTable() {
-    //     $.ajax({
-    //         url: '/QCTemperatureEntry/GetPlantZoneList',
-    //         type: 'GET',
-    //         dataType: 'json',
-    //         success: function (response) {
-    //             if (response.status) {
-    //                 console.log(response.data);
-    //                 const tbody = $('#tblPlantZone tbody');
-    //                 tbody.empty();
-    //                 let rowCount = 1;
-    //                 response.data.forEach(function (item) {
-    //                     let newRow = `
-    //                         <tr class="no-border-input" id="row${rowCount}">
-    //                             <td>
-    //                                 <input type="hidden" class="form-control" id="TxtPlantZoneId${rowCount}" value="${item.CODE}" />
-    //                                 <input type="text" class="form-control" id="TxtPlantZoneName${rowCount}" value="${item.NAME}" readonly />
-    //                             </td>
-    //                             <td><input type="text" class="form-control" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxTemperature${rowCount}" /></td>
-    //                             <td><input type="text" class="form-control" maxlength="100" id="TxtRemark${rowCount}" /></td>
-    //                             <td><input type="datetime-local" class="form-control" id="TxtDateTime${rowCount}" /></td>
-    //                         </tr>
-    //                     `;
-
-    //                     tbody.append(newRow);
-    //                     rowCount++;
-    //                 });
-    //             } else {
-    //                 toastr.error("Failed to load plant zones.");
-    //             }
-    //         },
-    //         error: function (xhr, status, error) {
-    //             toastr.error("Error while loading plant zones.");
-    //         }
-    //     });
-    // }
-
-    // function fillScrewTable() {
-    //     $.ajax({
-    //         url: '/QCTemperatureEntry/GetScrewList',
-    //         type: 'GET',
-    //         dataType: 'json',
-    //         success: function (response) {
-    //             if (response.status) {
-    //                 console.log(response.data);
-    //                 let tbody = $('#tblScrew tbody');
-    //                 tbody.empty();
-    //                 let rowCount = 1;
-    //                 response.data.forEach(function (item) {
-    //                     let newRow = `
-    //                         <tr class="no-border-input" id="row${rowCount}">
-    //                             <td>
-    //                                 <input type="hidden" class="form-control" id="TxtScrewId${rowCount}" value="${item.CODE}" />
-    //                                 <input type="text" class="form-control" id="TxtScrewName${rowCount}" value="${item.NAME}" readonly />
-    //                             </td>
-    //                             <td><input type="text" class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxSpeed${rowCount}" /></td>
-    //                             <td><input type="text" class="form-control" maxlength="100" id="TxtRemark1${rowCount}" /></td>
-    //                             <td><input type="datetime-local" class="form-control" id="TxtDateTime1${rowCount}" /></td>
-    //                         </tr>
-    //                     `;
-    //                     tbody.append(newRow);
-    //                     rowCount++;
-    //                 });
-    //             } else {
-    //                 toastr.error("Failed to load screws.");
-    //             }
-    //         },
-    //         error: function () {
-    //             toastr.error("Error while loading screw data.");
-    //         }
-    //     });
-    // }
-
+    //========Helpers======
     function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      return d.toISOString().split('T')[0];
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toISOString().split('T')[0];
     }
 
     function parseIntSafe(value) {
@@ -1259,7 +1165,7 @@
         return isNaN(parsed) ? null : parsed;
     }
 
-     function parseDate(dateStr) {
+    function parseDate(dateStr) {
         if (!dateStr) return null;
         const parts = dateStr.split(/[-\/]/);
         if (parts.length === 3) {
@@ -1268,7 +1174,7 @@
             return new Date(year, month - 1, day);
         }
         return null;
-     }
+    }
 
     function toNullableInt(val) {
         const parsed = parseInt(val);
@@ -1281,26 +1187,26 @@
     }
 
     function toNullableString(val) {
-      return val?.trim() || null;
+        return val?.trim() || null;
     }
      
     function allowOnlyDecimal(input) {
-      input.value = input.value
-        .replace(/[^0-9.]/g, '')
-        .replace(/(\..*)\./g, '$1');
+        input.value = input.value
+          .replace(/[^0-9.]/g, '')
+          .replace(/(\..*)\./g, '$1');
     }
 
     function allowOnlyNumbers(input) {
-      input.value = input.value.replace(/[^0-9]/g, '');
+        input.value = input.value.replace(/[^0-9]/g, '');
     }
 
     function setFieldsEnabled(enabled) {
-      allFieldIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.disabled = !enabled;
-        }
-      });
+        allFieldIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+              el.disabled = !enabled;
+            }
+        });
     }
     function parseDateSafe(value) {
         const d = new Date(value);
@@ -1313,30 +1219,30 @@
     }
 
     function setEnterKeyFocus(sequence) {
-               sequence.forEach((id, index) => {
-                   $(`#${id}`).on('keypress', function (e) {
-                       if (e.key === 'Enter') {
-                           e.preventDefault();
-                           if (index + 1 < sequence.length) {
-                               $(`#${sequence[index + 1]}`).focus();
-                           }
-                       }
-                   });
-               });
+         sequence.forEach((id, index) => {
+             $(`#${id}`).on('keypress', function (e) {
+                 if (e.key === 'Enter') {
+                     e.preventDefault();
+                     if (index + 1 < sequence.length) {
+                         $(`#${sequence[index + 1]}`).focus();
+                     }
+                 }
+             });
+         });
     }
 
     function enableAllFields() {
-      allFieldIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.disabled = false;
-      });
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = false;
+        });
     }
 
     function disableAllFields() {
-      allFieldIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.disabled = true;
-      });
+        allFieldIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
     }
 
     function setEnterKeyFocusOnTable(sequence, rowCount) {

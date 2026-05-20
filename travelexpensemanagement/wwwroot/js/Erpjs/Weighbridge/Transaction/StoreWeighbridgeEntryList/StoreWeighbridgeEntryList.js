@@ -81,7 +81,7 @@ function viewMenuDetails(rowId) {
 	window.location.href = '/StoreWeighbridgeEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 }
 function deleteStoreWBEntry(docId) {
-
+	
 	// STEP 1: Validate first
 	$.ajax({
 		url: `/StoreWeighbridgeEntryList/ValidateDeleteStoreWb`,
@@ -97,17 +97,23 @@ function deleteStoreWBEntry(docId) {
 
 			// STEP 2: Prepare message
 			let swalText = "This will permanently delete the Store WeighBridge entry.";
-
+			let cancelBtn = true;
+			let confirmBtn = true;
+			let swalTitle = "Are you sure?";
 			if (response.data === "Exists") {
 				swalText = response.message;
+				cancelBtn = false;
+				confirmBtn = false;
+				swalTitle = "Can't delete!!";
 			}
 
 			// STEP 3: Show only ONE popup
 			Swal.fire({
-				title: "Are you sure?",
+				title: swalTitle,
 				html: swalText,
 				icon: 'warning',
-				showCancelButton: true,
+				showCancelButton: cancelBtn,
+				showConfirmButton: confirmBtn,
 				confirmButtonColor: '#d33',
 				cancelButtonColor: '#3085d6',
 				confirmButtonText: 'Yes, delete it!',
