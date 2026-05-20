@@ -11,9 +11,11 @@
         <div class="erppage-header-title">In House Weighbridge Entry</div>
     </div>
     <div class="erppage-header-right">
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InHouseWeighbridgeEntryList")', readOnly)">
-            <i class="fa-solid fa-arrow-left"></i>Back to list
+        <button id="btnbacklist"
+                onclick="handleBack('@Url.Action("Index", "InHouseWeighbridgeEntryList")', isReadOnly)" type="button" class="btn btn-primary">
+            <i class="fa fa-list"></i>Back to list
         </button>
+
     </div>
 </div>
 <div id="InHouseWeighbridgeEntryForm">
@@ -154,7 +156,6 @@
     </div>
 </div>
 
-
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
 
 <script>
@@ -194,6 +195,7 @@
 
     let docId = "";
     let readOnly;
+    const isReadOnly = (readOnly === true);
 
     let isProgrammaticChange = false;
     let isFillingData = false;        
@@ -283,7 +285,6 @@
             $wgtType.val('Gross');
             $wgtType.prop('readonly', true);
            }
-
       });
 
         $('#ddlGrossSlipNo').on('select2:select', async function (e) {

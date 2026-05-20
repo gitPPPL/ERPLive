@@ -11,8 +11,6 @@ using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge;
-
-// ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge;
@@ -37,13 +35,7 @@ builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
-
 builder.Services.AddScoped<IInHouseWeighbridgeEntryRepository, InHouseWeighbridgeEntryRepository>();
-
-
-
-
-
 
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
@@ -106,5 +98,3 @@ app.MapControllerRoute(
     pattern: "{controller=Login}/{action=Index}/{id?}");
 
 app.Run();
-
-

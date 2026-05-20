@@ -3,7 +3,6 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
 	var currentMenu = ViewBag.CurrentMenu as string;
-
 	bool canAdd = false;
 	bool canEdit = false;
 	bool canDelete = false;
@@ -30,7 +29,6 @@
 	}
 }
 
-
 <div id="erp-center-toast-container"></div>
 <!-- HEADER -->
 <div class="erppagelist-header">
@@ -56,13 +54,13 @@
 	<div class="erppagelist-actions">
 		@if (canPrint)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Report">
 				<i class="fa fa-print"></i>Print
 			</button>
 		}
 		@if (canExport)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" onclick="exportToExcel()" data-tooltip="Export to Excel">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_exportPdf" data-tooltip="Export to Excel">
 				<i class="fa fa-file-excel"></i>Export
 			</button>
 		}
@@ -134,7 +132,6 @@
 	</div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
@@ -146,27 +143,29 @@
 		canDocDetail: @canDocDetail.ToString().ToLower()
 	};
 
-	// ================= PAGINATION VARIABLES =================
-
 	let currentPage = 1;
 	let pageSize = 10;
 	let totalCount = 0;
-
-	// ================= DOCUMENT READY =================
 
 	$(document).ready(function () {
 
 		GetMasterDataList();
 
 		$('#searchBox').on('keyup', function () {
-
 			currentPage = 1;
-
 			GetMasterDataList();
 		});
-	});
 
-	// ================= LOAD DATA =================
+		$('#btn_exportPdf').on('click', function () {
+			var text = $('#searchBox').val();
+			window.location.href = '/InHouseWeighbridgeEntry/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+		});
+
+		$('#btn_Report').on('click', function () {
+			var text = $('#searchBox').val();
+			window.open('/InHouseWeighbridgeEntry/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+		});
+	});
 
 	function GetMasterDataList() {
 		const searchTerm = $('#searchBox').val().trim();
@@ -257,8 +256,6 @@
 			}
 		});
 	}
-
-	// ================= PAGINATION =================
 
 	function renderPagination() {
 
@@ -379,8 +376,6 @@
 		GetMasterDataList();
 	}
 
-	// ================= ACTIONS =================
-
 	function AddOrEditFunction(rowId) {
 		window.location.href = '/InHouseWeighbridgeEntry/Index?id=' + encodeURIComponent(rowId);
 	}
@@ -421,66 +416,6 @@
 		});
 	}
 
-	// ================= EXPORT =================
-	function exportToExcel() {
-
-		fetch('/InHouseWeighbridgeEntryList/ExportAllDocs')
-
-			.then(response => {
-
-				if (!response.ok)
-					throw new Error("Network response was not ok");
-
-				return response.json();
-			})
-
-			.then(responseData => {
-
-				if (!responseData.status) {
-
-					toastr.error("Failed to fetch data.");
-
-					return;
-				}
-
-				const dataArray = responseData.data;
-
-				if (!Array.isArray(dataArray) || dataArray.length === 0) {
-
-					toastr.warning("No data available to export.");
-
-					return;
-				}
-
-				const worksheet = XLSX.utils.json_to_sheet(
-					dataArray,
-					{ header: Object.keys(dataArray[0]) }
-				);
-
-				const workbook = XLSX.utils.book_new();
-
-				XLSX.utils.book_append_sheet(
-					workbook,
-					worksheet,
-					"AllDocs"
-				);
-
-				const now = new Date();
-
-				const fileName =
-					`StoreWeighBridge_${now.getTime()}.xlsx`;
-
-				XLSX.writeFile(workbook, fileName);
-			})
-
-			.catch(error => {
-
-				console.error(error);
-
-				toastr.error("Failed to export data.");
-			});
-	}
-	// ================= DOCUMENT POPUP =================
 	function showImpExpExpensePopup(docCode) {
 
 		$.ajax({

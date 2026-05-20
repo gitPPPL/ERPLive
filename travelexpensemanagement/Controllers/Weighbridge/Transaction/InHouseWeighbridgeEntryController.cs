@@ -23,9 +23,9 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalValidationdate _globalValidationdate;
-        private readonly IInHouseWeighbridgeEntryRepository _inHouseWeighbridgeEntryRepository;  
-        public InHouseWeighbridgeEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, 
-        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService , GlobalVariableService globalValue,
+        private readonly IInHouseWeighbridgeEntryRepository _inHouseWeighbridgeEntryRepository;
+        public InHouseWeighbridgeEntryController(DataBaseConnection dbcontext, DbHelper dbHelper,
+        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, GlobalVariableService globalValue,
         ModuleService.ModuleService moduleService, DataBaseConnection dbConnection, GlobalValidationdate globalValidationdate, IInHouseWeighbridgeEntryRepository inHouseWeighbridgeEntryRepository)
         {
             _dbHelper = dbHelper;
@@ -46,8 +46,8 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         public async Task<IActionResult> GetMaxVNo(string V_type)
         {
             try
-            {              
-                var docIdNoList =  _globalValidationdate.GetVNo(V_type , "WB1");
+            {
+                var docIdNoList = _globalValidationdate.GetVNo(V_type, "WB1");
                 return Json(new { status = true, data = docIdNoList });
             }
             catch (Exception ex)
@@ -94,7 +94,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 return Json(Partylist);
             }
         }
-               
+
         [HttpGet]
         public async Task<IActionResult> GetWeighBridgeBySlipNo(int SlipNo, string vType)
         {
@@ -281,7 +281,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             }
             catch (Exception ex)
             {
-                return Json(new { status = false,  message = "Error: " + ex.Message });
+                return Json(new { status = false, message = "Error: " + ex.Message });
             }
         }
 
@@ -293,6 +293,39 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             string vno = data.GetProperty("vno").GetString();
             var result = await _globalValidationdate.CheckValidDate("WB1", vdate, vtype, vno);
             return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string searchTerm = null)
+        {
+            try
+            {
+                var fileBytes = await _inHouseWeighbridgeEntryRepository.ExportToExcel(searchTerm);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "InHouseWeighbridgeEntry.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error exporting excel.",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToPdf(string searchTerm = null)
+        {
+            try
+            {
+                var fileBytes = await _inHouseWeighbridgeEntryRepository.ExportToPdf(searchTerm);
+                return File(fileBytes, "application/pdf", "InHouseWeighbridgeEntry.pdf");
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error exporting pdf.", error = ex.Message });
+            }
         }
 
     }

@@ -151,32 +151,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 return Json(new { status = false, message = ex.Message });
             }
         }
-
-        [HttpGet]
-        public async Task<IActionResult> ExportAllDocs()
-        {
-            try
-            {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", usersession.PubBranchCode},
-                    {"@DOCTYPE",  "KantaInHouse"},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-
-                return Json(new { status = true, data = dataList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
-        }
-
+          
     }
-
 }
 

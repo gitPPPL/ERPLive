@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
@@ -226,6 +228,229 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge
             return table;
         }
 
+        [HttpGet]
+        public async Task<byte[]> ExportToExcel(string searchTerm = null) 
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+
+            using (var conn = _dbConnection.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_GetWBEntry", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "Excel");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@SearchTerm",  string.IsNullOrWhiteSpace(searchTerm) ? DBNull.Value : searchTerm);
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var ws = workbook.Worksheets.Add("Gate Outward");
+
+                        // Header
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            var cell = ws.Cell(1, i + 1);
+
+                            cell.Value = reader.GetName(i);
+
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Alignment.Horizontal =
+                                ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                        }
+
+                        int row = 2;
+
+                        // Data
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < reader.FieldCount; col++)
+                            {
+                                var cell = ws.Cell(row, col + 1);
+
+                                if (reader[col] == DBNull.Value)
+                                {
+                                    cell.Value = "";
+                                }
+                                else if (reader.GetFieldType(col) == typeof(DateTime))
+                                {
+                                    cell.Value = Convert.ToDateTime(reader[col]);
+                                    cell.Style.DateFormat.Format = "dd-MM-yyyy";
+                                }
+                                else
+                                {
+                                    cell.Value = reader[col].ToString();
+                                }
+                            }
+
+                            row++;
+                        }
+
+                        // Formatting
+                        ws.Columns().AdjustToContents();
+
+                        foreach (var col in ws.Columns())
+                        {
+                            if (col.Width > 40)
+                                col.Width = 40;
+
+                            if (col.Width < 10)
+                                col.Width = 10;
+                        }
+
+                        ws.Style.Alignment.WrapText = true;
+
+                        ws.SheetView.FreezeRows(1);
+
+                        var range = ws.RangeUsed();
+
+                        if (range != null)
+                        {
+                            range.CreateTable();
+                        }
+
+                        using (var stream = new MemoryStream())
+                        {
+                            workbook.SaveAs(stream);
+
+                            return stream.ToArray();
+                        }
+                    }
+                }
+            }
+        }
+
+        [HttpGet]
+        public async Task<byte[]> ExportToPdf(string searchTerm = null)   
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+
+            using (var conn = _dbConnection.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+
+                    cmd.Parameters.AddWithValue(
+                        "@SearchTerm",
+                        string.IsNullOrWhiteSpace(searchTerm)
+                            ? DBNull.Value
+                            : searchTerm
+                    );
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var stream = new MemoryStream())
+                    {
+                        Document document = new Document(
+                            PageSize.A4.Rotate(),
+                            10,
+                            10,
+                            10,
+                            10
+                        );
+
+                        PdfWriter.GetInstance(document, stream);
+
+                        document.Open();
+
+                        // Title
+                        Font titleFont = FontFactory.GetFont(
+                            FontFactory.HELVETICA_BOLD,
+                            14
+                        );
+
+                        Paragraph title = new Paragraph(
+                            "Gate Outward Report",
+                            titleFont
+                        );
+
+                        title.Alignment = Element.ALIGN_CENTER;
+
+                        document.Add(title);
+
+                        document.Add(new Paragraph(" "));
+
+                        int columnCount = reader.FieldCount;
+
+                        PdfPTable table = new PdfPTable(columnCount);
+
+                        table.WidthPercentage = 100;
+
+                        // Header Font
+                        Font headerFont = FontFactory.GetFont(
+                            FontFactory.HELVETICA_BOLD,
+                            9
+                        );
+
+                        // Headers
+                        for (int i = 0; i < columnCount; i++)
+                        {
+                            PdfPCell headerCell = new PdfPCell(
+                                new Phrase(reader.GetName(i), headerFont)
+                            );
+
+                            headerCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                            headerCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+
+                            table.AddCell(headerCell);
+                        }
+
+                        // Data Font
+                        Font dataFont = FontFactory.GetFont(
+                            FontFactory.HELVETICA,
+                            8
+                        );
+
+                        // Data Rows
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < columnCount; col++)
+                            {
+                                string value = "";
+
+                                if (reader[col] != DBNull.Value)
+                                {
+                                    if (reader.GetFieldType(col) == typeof(DateTime))
+                                    {
+                                        value = Convert
+                                            .ToDateTime(reader[col])
+                                            .ToString("dd-MM-yyyy");
+                                    }
+                                    else
+                                    {
+                                        value = reader[col].ToString();
+                                    }
+                                }
+
+                                PdfPCell dataCell = new PdfPCell(
+                                    new Phrase(value, dataFont)
+                                );
+
+                                table.AddCell(dataCell);
+                            }
+                        }
+
+                        document.Add(table);
+
+                        document.Close();
+
+                        return stream.ToArray();
+                    }
+                }
+            }
+        }
 
     }
 }
