@@ -8,7 +8,7 @@ namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 {
     public interface IInwardEntryRepository
     {
-        Task<string> GetVNoAsync(string vType, string tableName = "GATE1");
+
         Task<List<object>> GetDataByPartyCodeAsync(int partyId, int addressId);
 
         Task<List<object>> GetPartyAddressByCodeAsync(int partyId);
@@ -18,7 +18,7 @@ namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 
         Task<RepositoryResponse> ValidateGateNoAsync(string vType, int vNo);
         Task<RepositoryResponseData<int>> GetSEARCHCONTAINERAsync(string Container_No);
-        Task<RepositoryResponseList<int>> DDlTransitNoAsync(string v_type, int v_no, int partycode, DateTime ExpiryDate);
+        Task<RepositoryResponseList<int>>  DDlTransitNoAsync(string v_type, int v_no, int partycode, DateTime ExpiryDate);
 
 
     }

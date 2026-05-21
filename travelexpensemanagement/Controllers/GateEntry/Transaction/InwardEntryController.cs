@@ -41,7 +41,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             _moduleService = moduleService;
             _inwardEntryRepository = inwardEntryRepository;
         }
-
         public IActionResult Index()
         {
             TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
@@ -53,7 +52,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             string newV_NO = "00000";
             try
             {
-                newV_NO = _inwardEntryRepository.GetVNoAsync(Vtype,Tablename).GetAwaiter().GetResult();
+                newV_NO = _globalValidationdate.GetVNo(Vtype,Tablename);
             }
             catch (Exception ex)
             {
@@ -61,7 +60,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { error = "An error occurred while generating the V_NO." });
             }
 
-            return Json(new { V_NO = newV_NO }); // ✅ FIXED
+            return Json(new { V_NO = newV_NO });
         }
 
         public async Task<JsonResult> GetDataByPartyCode(int PartyId, int addressid)

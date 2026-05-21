@@ -1,0 +1,212 @@
+﻿@{
+    ViewBag.Title = "Gate Entry Dashboard List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Gate Entry Dashboard List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "GateEntryDashboard")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="tableSearch" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblGateEntryDashboardList" class="excel-table fixed-grid-table">
+            <colgroup>
+                <col style="display:none;" />
+                <col style="width: 80px;" />
+                <col style="width: 120px;" />
+                <col style="width: 180px;" />
+                <col style="width: 140px;" />
+                <col style="width: 90px;" />
+                <col style="width: 90px;" />
+                <col style="width: 150px;" />
+                <col style="width: 100px;" />
+                <col style="width: 120px;" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="display:none;">Code</th>
+                    <th>Serial No</th>
+                    <th>Truck No.</th>
+                    <th>Visitor/Driver Name</th>
+                    <th>Visitor/Driver No</th>
+                    <th>In Time</th>
+                    <th>Out Time</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let tableData = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        var title = urlParams.get('title');
+        var fromDate = urlParams.get('fromDate');
+        var toDate = urlParams.get('toDate');
+        var label = urlParams.get('label');
+        loadDashboardList(fromDate, toDate, title, label);
+    });
+
+    function loadDashboardList(fromDate, toDate, title, label) {
+        $.ajax({
+            url: '/GateEntryDashboardList/GatedataDashboardList',
+            type: 'POST',
+            data: {
+                fromDate: fromDate,
+                toDate: toDate,
+                type: title,
+                label: label
+            },
+            success: function (response) {
+                console.log('response', response)
+                tableData = response;
+                console.log('tableData', tableData)
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+    function renderTable() {
+        let tbody = $("#tblGateEntryDashboardList tbody");
+        tbody.empty();
+        let start = (currentPage - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        let paginatedData = tableData.slice(start, end);
+        $.each(paginatedData, function (index, item) {
+            let row = `
+                <tr>
+                    <td style="display:none;">${item.srno}</td>
+                    <td>${start + index + 1}</td>
+                    <td>${item.trucK_NO}</td>
+                    <td>${item.driveR_NAME}</td>
+                    <td>${item.driveR_NO}</td>
+                    <td>${item.r_TIME}</td>
+                    <td>${item.ouT_TIME}</td>
+                    <td>${item.purpose}</td>
+                    <td>${item.ouT_TIME ? 'OUT' : 'PENDING'}</td>
+                    <td><button class="btn btn-sm btn-primary"> View </button></td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+        updatePageInfo();
+    }
+    function renderPagination() {
+        let totalPages = Math.ceil(tableData.length / rowsPerPage);
+        let pageNumbers = $("#pageNumbers");
+        pageNumbers.empty();
+        for (let i = 1; i <= totalPages; i++) {
+            let activeClass = currentPage === i ? 'active-page' : '';
+            pageNumbers.append(`
+                <button class="page-btn ${activeClass}"
+                        onclick="goToPage(${i})">
+                    ${i}
+                </button>
+            `);
+        }
+    }
+    function goToPage(page) {
+        currentPage = page;
+        renderTable();
+        renderPagination();
+    }
+
+    const Pagination = {
+
+        prev: function () {
+
+            if (currentPage > 1) {
+
+                currentPage--;
+
+                renderTable();
+                renderPagination();
+            }
+        },
+
+        next: function () {
+
+            let totalPages = Math.ceil(tableData.length / rowsPerPage);
+
+            if (currentPage < totalPages) {
+
+                currentPage++;
+
+                renderTable();
+                renderPagination();
+            }
+        }
+    };
+
+    function changeRowsPerPage() {
+
+        rowsPerPage = parseInt($("#pageSizeSelect").val());
+
+        currentPage = 1;
+
+        renderTable();
+        renderPagination();
+    }
+
+    function updatePageInfo() {
+
+        let start = (currentPage - 1) * rowsPerPage + 1;
+
+        let end = Math.min(currentPage * rowsPerPage, tableData.length);
+
+        $("#pageInfoText").text(
+            `Results: ${start} - ${end} of ${tableData.length}`
+        );
+    }
+
+
+</script>

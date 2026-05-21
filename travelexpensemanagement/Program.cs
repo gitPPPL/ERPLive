@@ -92,6 +92,7 @@ builder.Services.AddRateLimiter(options =>
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
+//builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

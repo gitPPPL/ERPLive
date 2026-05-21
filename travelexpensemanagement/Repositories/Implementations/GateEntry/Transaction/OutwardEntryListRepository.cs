@@ -43,12 +43,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                 cmd.Parameters.AddWithValue("@Action", "SELECT");
 
-                cmd.Parameters.AddWithValue(
-                    "@SearchTerm",
-                    string.IsNullOrWhiteSpace(searchTerm)
-                        ? DBNull.Value
-                        : searchTerm);
-
+               cmd.Parameters.AddWithValue( "@SearchTerm",  string.IsNullOrWhiteSpace(searchTerm)  ? DBNull.Value  : searchTerm);
                 cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
                 cmd.Parameters.AddWithValue("@PageSize", pageSize);
                 cmd.Parameters.AddWithValue("@COMP_CODE", getvariabledata.PubCompCode);
@@ -65,58 +60,28 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     headerList.Add(new OutWordEntry_Header
                     {
                         DOC_ID = reader["DOC_ID"]?.ToString(),
-
-                        V_NO = reader["V_NO"] != DBNull.Value
-                            ? Convert.ToInt32(reader["V_NO"])
-                            : 0,
-
-                        REF_NO = reader["Ref_no"] != DBNull.Value
-                            ? Convert.ToInt32(reader["Ref_no"])
-                            : 0,
-
-                        V_DATE = reader["V_DATE"] != DBNull.Value
-                            ? Convert.ToDateTime(reader["V_DATE"])
-                            : DateTime.MinValue,
-
+                        V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
+                        REF_NO = reader["Ref_no"] != DBNull.Value ? Convert.ToInt32(reader["Ref_no"]) : 0,
+                        V_DATE = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]) : DateTime.MinValue,
                         TRUCK_NO = reader["Truck_no"]?.ToString(),
-
                         BILL_NO = reader["BILL_NO"]?.ToString(),
-
-                        BILL_DATE = reader["BILL_DATE"] != DBNull.Value
-                            ? Convert.ToDateTime(reader["BILL_DATE"])
-                            : DateTime.MinValue,
-
+                        BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
                         PARTY_NAME = reader["NAME"]?.ToString(),
-
                         REF_TYPE = reader["Ref_type"]?.ToString(),
-
                         V_TYPE = reader["V_TYPE"]?.ToString()
                     });
                 }
 
-                // Second Result Set
                 if (await reader.NextResultAsync() && await reader.ReadAsync())
                 {
-                    totalCount = reader["TotalCount"] != DBNull.Value
-                        ? Convert.ToInt32(reader["TotalCount"])
-                        : 0;
+                    totalCount = reader["TotalCount"] != DBNull.Value ? Convert.ToInt32(reader["TotalCount"]) : 0;
                 }
 
-                return new
-                {
-                    success = true,
-                    lists = headerList,
-                    totalCount
-                };
+                return new { success = true, lists = headerList,  totalCount  };
             }
             catch (Exception ex)
             {
-                return new
-                {
-                    success = false,
-                    message = "Error fetching data.",
-                    error = ex.Message
-                };
+                return new {  success = false, message = "Error fetching data.",  error = ex.Message };
             }
         }
 
@@ -133,14 +98,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             try
             {
                 using var con = _dbConnection.GetErpConnection();
-
                 await con.OpenAsync();
-
-                // Header
                 using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     cmd.Parameters.AddWithValue("@Action", "ShowData");
                     cmd.Parameters.AddWithValue("@ShowActionOption", "Header");
                     cmd.Parameters.AddWithValue("@V_NO", rowId);
@@ -178,7 +139,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                 }
 
-                // Details
                 using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -233,39 +193,23 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         public async Task<object> Delete(string docId)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
-
             try
             {
                 using var con = _dbConnection.GetErpConnection();
-
                 await con.OpenAsync();
-
                 using var cmd = new SqlCommand("sp_OutwardEntry", con);
-
                 cmd.CommandType = CommandType.StoredProcedure;
-
                 cmd.Parameters.AddWithValue("@Action", "DELETE");
                 cmd.Parameters.AddWithValue("@DOC_ID", docId);
                 cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
                 cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
                 cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);
-
                 await cmd.ExecuteNonQueryAsync();
-
-                return new
-                {
-                    success = true,
-                    message = "Deleted successfully"
-                };
+                return new {  success = true, message = "Deleted successfully" };
             }
             catch (Exception ex)
             {
-                return new
-                {
-                    success = false,
-                    message = "Error deleting data.",
-                    error = ex.Message
-                };
+                return new { success = false,  message = "Error deleting data.",  error = ex.Message };
             }
         }
 
@@ -303,7 +247,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                 }
             }
-
             return (new { success = true, data = docDetails });
         }
 
@@ -322,39 +265,45 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         [HttpGet]
         public async Task<byte[]> ExportToExcel(string searchTerm = null)
         {
-            string query = @" select  a.V_NO as 'Voucher No',a.V_DATE 'Voucher Date',b.Ref_type  as 'Ref Type',b.Ref_no as 'Ref No',a.Truck_no as 'Truck No',a.WayBill_No as 'WayBill No' ,a.BILL_NO as 'BILL NO' ,a.BILL_DATE as 'BILL DATE' ,d.NAME as 'Party Name'    
-            FROM gate1 AS a  
-            LEFT JOIN gate2 AS b   ON a.v_type = b.v_type   AND a.v_no = b.v_no   AND a.comp_code = b.comp_code  AND a.branch_code = b.branch_code   AND a.Year_Code = b.Year_Code  
-            LEFT JOIN DOCTYPE_MAST AS c   ON c.CODE = a.V_TYPE  
-            LEFT JOIN SUBGROUP_MAST AS d     ON d.CODE = a.PARTY_CODE    AND d.COMP_CODE = a.COMP_CODE  
-            WHERE    a.comp_code = @comp_code  AND a.YEAR_CODE = @YEAR_CODE    AND a.BRANCH_CODE = @BRANCH_CODE    AND c.DOCTYPE = 'GateOutward'  
-            AND (@SearchTerm IS NULL OR d.NAME LIKE '%' + @SearchTerm + '%')    ORDER BY   a.V_TYPE,  a.V_NO DESC  ";
-
             var global = _globalVariableService.GetGlobalVariables();
 
             using (var conn = _dbConnection.GetErpConnection())
             {
                 await conn.OpenAsync();
 
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
                     cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@SearchTerm",
+                        string.IsNullOrWhiteSpace(searchTerm)
+                        ? DBNull.Value
+                        : searchTerm);
 
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     using (var workbook = new ClosedXML.Excel.XLWorkbook())
                     {
                         var ws = workbook.Worksheets.Add("Gate Outward");
+
+                        // Header
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
                             var cell = ws.Cell(1, i + 1);
+
                             cell.Value = reader.GetName(i);
+
                             cell.Style.Font.Bold = true;
-                            cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                            cell.Style.Alignment.Horizontal =
+                                ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
                         }
+
                         int row = 2;
+
+                        // Data
                         while (await reader.ReadAsync())
                         {
                             for (int col = 0; col < reader.FieldCount; col++)
@@ -375,33 +324,36 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                     cell.Value = reader[col].ToString();
                                 }
                             }
+
                             row++;
                         }
+
+                        // Formatting
                         ws.Columns().AdjustToContents();
 
                         foreach (var col in ws.Columns())
                         {
                             if (col.Width > 40)
                                 col.Width = 40;
-                        }
 
-                        foreach (var col in ws.Columns())
-                        {
                             if (col.Width < 10)
                                 col.Width = 10;
                         }
 
                         ws.Style.Alignment.WrapText = true;
+
                         ws.SheetView.FreezeRows(1);
+
                         var range = ws.RangeUsed();
+
                         if (range != null)
                         {
                             range.CreateTable();
                         }
+
                         using (var stream = new MemoryStream())
                         {
                             workbook.SaveAs(stream);
-                            stream.Position = 0;
 
                             return stream.ToArray();
                         }
@@ -409,61 +361,95 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 }
             }
         }
-
         [HttpGet]
         public async Task<byte[]> ExportToPdf(string searchTerm = null)
         {
-            string query = @" select  a.V_NO as 'Voucher No',a.V_DATE 'Voucher Date',b.Ref_type  as 'Ref Type',b.Ref_no as 'Ref No',a.Truck_no as 'Truck No',a.WayBill_No as 'WayBill No' ,a.BILL_NO as 'BILL NO' ,a.BILL_DATE as 'BILL DATE' ,d.NAME as 'Party Name'    
-            FROM gate1 AS a  
-            LEFT JOIN gate2 AS b   ON a.v_type = b.v_type   AND a.v_no = b.v_no   AND a.comp_code = b.comp_code  AND a.branch_code = b.branch_code   AND a.Year_Code = b.Year_Code  
-            LEFT JOIN DOCTYPE_MAST AS c   ON c.CODE = a.V_TYPE  
-            LEFT JOIN SUBGROUP_MAST AS d     ON d.CODE = a.PARTY_CODE    AND d.COMP_CODE = a.COMP_CODE  
-            WHERE    a.comp_code = @comp_code  AND a.YEAR_CODE = @YEAR_CODE    AND a.BRANCH_CODE = @BRANCH_CODE    AND c.DOCTYPE = 'GateOutward'  
-            AND (@SearchTerm IS NULL OR d.NAME LIKE '%' + @SearchTerm + '%')    ORDER BY   a.V_TYPE,  a.V_NO DESC  ";
-
             var global = _globalVariableService.GetGlobalVariables();
 
             using (var conn = _dbConnection.GetErpConnection())
             {
                 await conn.OpenAsync();
 
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
                     cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+
+                    cmd.Parameters.AddWithValue(
+                        "@SearchTerm",
+                        string.IsNullOrWhiteSpace(searchTerm)
+                            ? DBNull.Value
+                            : searchTerm
+                    );
 
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     using (var stream = new MemoryStream())
                     {
-                        Document document = new Document(PageSize.A4.Rotate(), 10, 10, 10, 10);
+                        Document document = new Document(
+                            PageSize.A4.Rotate(),
+                            10,
+                            10,
+                            10,
+                            10
+                        );
+
                         PdfWriter.GetInstance(document, stream);
+
                         document.Open();
 
-                        Font titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 14);
-                        Paragraph title = new Paragraph("Gate Outward Report", titleFont);
+                        // Title
+                        Font titleFont = FontFactory.GetFont(
+                            FontFactory.HELVETICA_BOLD,
+                            14
+                        );
+
+                        Paragraph title = new Paragraph(
+                            "Gate Outward Report",
+                            titleFont
+                        );
+
                         title.Alignment = Element.ALIGN_CENTER;
+
                         document.Add(title);
 
                         document.Add(new Paragraph(" "));
 
                         int columnCount = reader.FieldCount;
+
                         PdfPTable table = new PdfPTable(columnCount);
+
                         table.WidthPercentage = 100;
 
-                        Font headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9);
+                        // Header Font
+                        Font headerFont = FontFactory.GetFont(
+                            FontFactory.HELVETICA_BOLD,
+                            9
+                        );
 
+                        // Headers
                         for (int i = 0; i < columnCount; i++)
                         {
-                            PdfPCell cell = new PdfPCell(new Phrase(reader.GetName(i), headerFont));
-                            cell.HorizontalAlignment = Element.ALIGN_CENTER;
-                            cell.BackgroundColor = BaseColor.LIGHT_GRAY;
-                            table.AddCell(cell);
+                            PdfPCell headerCell = new PdfPCell(
+                                new Phrase(reader.GetName(i), headerFont)
+                            );
+
+                            headerCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                            headerCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+
+                            table.AddCell(headerCell);
                         }
 
-                        Font dataFont = FontFactory.GetFont(FontFactory.HELVETICA, 8);
+                        // Data Font
+                        Font dataFont = FontFactory.GetFont(
+                            FontFactory.HELVETICA,
+                            8
+                        );
 
+                        // Data Rows
                         while (await reader.ReadAsync())
                         {
                             for (int col = 0; col < columnCount; col++)
@@ -474,7 +460,9 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 {
                                     if (reader.GetFieldType(col) == typeof(DateTime))
                                     {
-                                        value = Convert.ToDateTime(reader[col]).ToString("dd-MM-yyyy");
+                                        value = Convert
+                                            .ToDateTime(reader[col])
+                                            .ToString("dd-MM-yyyy");
                                     }
                                     else
                                     {
@@ -482,18 +470,23 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                     }
                                 }
 
-                                PdfPCell cell = new PdfPCell(new Phrase(value, dataFont));
-                                table.AddCell(cell);
+                                PdfPCell dataCell = new PdfPCell(
+                                    new Phrase(value, dataFont)
+                                );
+
+                                table.AddCell(dataCell);
                             }
                         }
+
                         document.Add(table);
+
                         document.Close();
+
                         return stream.ToArray();
                     }
                 }
             }
         }
-
         [HttpGet]
         public async Task<object> GetDataByPendingorder(int PartyCode, string Type, DateTime v_date, int BILL_NO)
         {

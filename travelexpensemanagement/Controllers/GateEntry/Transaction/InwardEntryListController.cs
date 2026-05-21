@@ -107,7 +107,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = true, lists = headerList, totalCount });
         }
 
-
         [HttpGet]
         public IActionResult GetDataByPendingorder(int PartyCode, string V_TYPE, DateTime V_DATE)
         {

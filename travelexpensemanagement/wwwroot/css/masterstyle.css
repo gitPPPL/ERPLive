@@ -351,9 +351,7 @@ table select {
     line-height: 16px;
 }
 
-    .btn-add-action i {
-        margin-right: 4px !important;
-    }
+    
 
 .btn-delete-action {
     position: relative;
@@ -368,9 +366,7 @@ table select {
     padding: 4px 6px;
 }
 
-    .btn-delete-action i {
-        margin-right: 4px !important;
-    }
+    
 
 .btn-mt {
     margin-top: 18px;

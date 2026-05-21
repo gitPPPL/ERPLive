@@ -72,8 +72,8 @@ namespace travelexpensemanagement.Controllers
                     {
                         con.Open();
                     }
-                    string userQuery = "SELECT CODE, WebPASSWD, PASSWD, Active, Lip, PC_NAME, PC_NAME2, PC_NAME3, COMP_CODE, USER_NAME, IsLoggedIn,USER_LEVEL FROM USER_MAST WHERE COMP_CODE = @CompanyCode AND CODE = @UserMasterCode";
-                    //string userQuery = "SELECT CODE, WebPASSWD, PASSWD, Active, Lip, PC_NAME, PC_NAME2, PC_NAME3, USER_NAME, IsLoggedIn,USER_LEVEL FROM USER_MAST WHERE CODE = @UserMasterCode";
+                    //string userQuery = "SELECT CODE, WebPASSWD, PASSWD, Active, Lip, PC_NAME, PC_NAME2, PC_NAME3, COMP_CODE, USER_NAME, IsLoggedIn,USER_LEVEL FROM USER_MAST WHERE COMP_CODE = @CompanyCode AND CODE = @UserMasterCode";
+                    string userQuery = "SELECT CODE, WebPASSWD, PASSWD, Active, Lip, PC_NAME, PC_NAME2, PC_NAME3, USER_NAME, IsLoggedIn,USER_LEVEL FROM USER_MAST WHERE CODE = @UserMasterCode";
                     using (SqlCommand cmd = new SqlCommand(userQuery, con))
                     {
                         cmd.Parameters.AddWithValue("@CompanyCode", model.CompanyCode);
@@ -144,12 +144,6 @@ namespace travelexpensemanagement.Controllers
                                         cmd2.Parameters.AddWithValue("@CompanyCode", model.CompanyCode);
                                         cmd2.Parameters.AddWithValue("@YearCode", model.FinancialYear);
                                         var menuResult = cmd2.ExecuteScalar();
-
-                                        //if (menuResult == null)
-                                        //{
-                                        //    TempData["ErrorMessage"] = $"Year code is not Found";
-                                        //    return RedirectToAction(nameof(Index)); 
-                                        //}
                                     }
                                 }
                                 // Step 4: Handle login status

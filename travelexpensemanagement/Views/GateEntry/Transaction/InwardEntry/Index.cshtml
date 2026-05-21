@@ -1918,7 +1918,6 @@
             }
           });
         }
-
            async function GetPartyAdress(PartyId) {
                 try {
                     const url = `/InwardEntry/GetPartyAddressbyCode?PartyId=${encodeURIComponent(PartyId)}`;
@@ -1926,7 +1925,7 @@
                     const data = await response.json();
 
                     const d = (data && data.length > 0) ? data[0] : {};
-
+                    $('#ddladdressline1').val(d.addresS_ID ?? "");
                     $('#TxtAddLine1').val(d.add1 ?? "");
                     $('#TxtAddLine2').val(d.add2 ?? "");
                     $('#TxtAddLine3').val(d.add3 ?? "");

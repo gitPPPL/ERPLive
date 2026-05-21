@@ -3,11 +3,6 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -377,9 +372,6 @@
 
             </div>
 
-
-
-
             <div class="GateEntryDashboard-right">
                 <div class="GateEntryDashboard-filter">
                     <h4>Select Category</h4>
@@ -604,12 +596,22 @@
             }
         });
     }
+   
     $(document).on("click", ".stat-click", function () {
         var title = $(this).data("title");
         var label = $(this).data("label");
-        console.log("Clicked:", title, label);
-        alert(title + " - " + label);
-
+        var dateRange = $("#dateRange").val();
+        var dates = dateRange.split(" to ");
+        var fromDate = dates[0];
+        var toDate = dates[1];
+        window.location.href = "/GateEntryDashboardList?title="
+            + encodeURIComponent(title)
+            + "&label="
+            + encodeURIComponent(label)
+            + "&fromDate="
+            + encodeURIComponent(fromDate)
+            + "&toDate="
+            + encodeURIComponent(toDate);
     });
 </script>
 
