@@ -49,6 +49,7 @@ builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridg
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
+builder.Services.AddScoped<IBigWeighbridgeListRepository, BigWeighbridgeListRepository>();
 
 // Gete Entry Transaction repositories
 
