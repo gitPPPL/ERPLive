@@ -4,78 +4,121 @@
 
 }
 
-<fieldset>
-	<legend class="legend-field">Incomming QC List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "IncommingQC")'" type="submit" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblIncommingQCList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>V_Type</th>
-						<th>Name</th>
-						<th>V_No</th>
-						<th>V_Date</th>
-						<th>Mrn_No</th>
-						<th>Mrn_Type</th>
-						<th>Mrn_Date</th>
-						<th>Bales</th>
-						<th>Party_Code</th>
-						<th>Party Name</th>
-						<th>Bill_No</th>
-						<th>Bill_Date</th>
-						<th>Transport</th>
-						<th>Truck_No</th>
-						<th>Inv_Qty</th>
-						<th>Recd_Qty</th>
-						<th>Short_Qty</th>
-						<th>Remarks</th>
-						<th>Deduct_Amt</th>
-						<th>Deduct_Narr</th>
-						<th>Pur_Type</th>
-						<th>Waste_Wgt</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
+<div id="erp-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>QC Temperature Entry List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "IncommingQC")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i>Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i>Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblIncommingQCList" class="excel-table fixed-grid-table">
+            <colgroup>
+                <col style="display:none;" /> <!-- Code -->
+                <col style="width: 120px;" /> <!-- Voucher Type -->
+                <col style="width: 140px;" /> <!-- Name -->
+                <col style="width: 120px;" /> <!-- Voucher No -->
+                <col style="width: 120px;" /> <!-- Voucher Date -->
+                <col style="width: 120px;" /> <!-- Mrn No -->
+                <col style="width: 120px;" /> <!-- Mrn Type -->
+                <col style="width: 120px;" /> <!-- Mrn Date -->
+                <col style="width: 80px;" />  <!-- Bales -->
+                <col style="width: 120px;" /> <!-- Party Code -->
+                <col style="width: 180px;" /> <!-- Party Name -->
+                <col style="width: 120px;" /> <!-- Bill No -->
+                <col style="width: 120px;" /> <!-- Bill Date -->
+                <col style="width: 140px;" /> <!-- Transport -->
+                <col style="width: 120px;" /> <!-- Truck No -->
+                <col style="width: 140px;" /> <!-- Invoice Quantity -->
+                <col style="width: 140px;" /> <!-- Received Quantity -->
+                <col style="width: 140px;" /> <!-- Shortage Quantity -->
+                <col style="width: 180px;" /> <!-- Remarks -->
+                <col style="width: 140px;" /> <!-- Deduction Amount -->
+                <col style="width: 180px;" /> <!-- Deduction Narration -->
+                <col style="width: 140px;" /> <!-- Purchase Type -->
+                <col style="width: 120px;" /> <!-- Waste Weight -->
+                <col style="width: 140px;" /> <!-- Action -->
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="display:none;">Code</th>
+                    <th>Voucher Type</th>
+                    <th>Name</th>
+                    <th>Voucher No</th>
+                    <th>Voucher Date</th>
+                    <th>Mrn No</th>
+                    <th>Mrn Type</th>
+                    <th>Mrn Date</th>
+                    <th>Bales</th>
+                    <th>Party Code</th>
+                    <th>Party Name</th>
+                    <th>Bill No</th>
+                    <th>Bill Date</th>
+                    <th>Transport</th>
+                    <th>Truck No</th>
+                    <th>Invoice Quantity</th>
+                    <th>Received Quantity</th>
+                    <th>Shortage Quantity</th>
+                    <th>Remarks</th>
+                    <th>Deduction Amount</th>
+                    <th>Deduction Narration</th>
+                    <th>Purchase Type</th>
+                    <th>Waste Weight</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
 <script>
     let currentPage = 1;
     let pageSize = 10;
@@ -137,20 +180,11 @@
                             <td>${doc.deducT_NARR || ''}</td>
                             <td>${doc.puR_TYPE || ''}</td>
                             <td>${doc.wastE_WGT || ''}</td>
-                            <td>
-                                <div class="action-icons">
-                                    <i class="fa fa-edit btn-edit"
-                                        data-vtype="${doc.v_TYPE}"
-                                        data-vno="${doc.v_NO}"
-                                        onclick="editEntry(this)">
-                                    </i>
-                                    <i class="fa fa-eye btn-view"
-                                        onclick="viewEntry('${doc.searchCode}')">
-                                    </i>
-                                    <i class="fa fa-trash btn-delete"
-                                        onclick="deleteDocStage('${doc.searchCode}')">
-                                    </i>
-                                </div>
+                            <td class="action-col">
+                            <button class="act-btn edit btn-edit" title="Edit" style="cursor:pointer;" data-vtype="${doc.v_TYPE}" data-vno="${doc.v_NO}" onclick="editEntry(this)"><i class="fa fa-edit"></i></button>
+                                <button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewEntry('${doc.searchCode}')"><i class="fa fa-eye"></i></button>
+                                <button class="act-btn delete btn-delete" title="Delete" style="cursor:pointer;" onclick="deleteDocStage('${doc.searchCode}')"><i class="fa fa-trash"></i></button>
+                                
                             </td>
                         </tr>
                     `);
