@@ -15,7 +15,7 @@
         <div class="erppage-header-title">Material Inward Entry</div>
     </div>
     <div class="erppage-header-right">
-        <button id="btn_backtolist" class="erppage-header-back">
+        <button id="btn_backtolist" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
     </div>
@@ -819,6 +819,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const rowId = urlParams.get('id');
         const mode = urlParams.get('mode');
+        const isReadOnly = (mode === 'view');
         const vtype = urlParams.get('vtype');
         const PubDefEWaybillAmt = 50000;
         var   PubUserLevel=@PubUserLevel;
