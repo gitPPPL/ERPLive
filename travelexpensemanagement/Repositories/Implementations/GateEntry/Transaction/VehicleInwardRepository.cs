@@ -384,7 +384,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 using var client = new HttpClient();
 
                 string url = "https://kyc-api.surepass.io/api/v1/rc/rc-full";
-                string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc1MTg3ODU4MiwianRpIjoiYzczZmFkMTAtZjk0MC00NzdkLThlNDgtMjU3ZTViMzVkYjY4IiwidHlwZSI6ImFjY2VzcyIsImlkZW50aXR5IjoiZGV2LnBhc2h1cGF0aWdycF9jb25zb2xlQHN1cmVwYXNzLmlvIiwibmJmIjoxNzUxODc4NTgyLCJleHAiOjIzODI1OTg1ODIsImVtYWlsIjoicGFzaHVwYXRpZ3JwX2NvbnNvbGVAc3VyZXBhc3MuaW8iLCJ0ZW5hbnRfaWQiOiJtYWluIiwidXNlcl9jbGFpbXMiOnsic2NvcGVzIjpbInVzZXIiXX19.vVom9nrkmom4XGJUEXAkntNzof1lHNwlHsRBdErWXQQ"; // Replace with your actual token
+                string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc1MTg3ODU4MiwianRpIjoiYzczZmFkMTAtZjk0MC00NzdkLThlNDgtMjU3ZTViMzVkYjY4IiwidHlwZSI6ImFjY2VzcyIsImlkZW50aXR5IjoiZGV2LnBhc2h1cGF0aWdycF9jb25zb2xlQHN1cmVwYXNzLmlvIiwibmJmIjoxNzUxODc4NTgyLCJleHAiOjIzODI1OTg1ODIsImVtYWlsIjoicGFzaHVwYXRpZ3JwX2NvbnNvbGVAc3VyZXBhc3MuaW8iLCJ0ZW5hbnRfaWQiOiJtYWluIiwidXNlcl9jbGFpbXMiOnsic2NvcGVzIjpbInVzZXIiXX19.vVom9nrkmom4XGJUEXAkntNzof1lHNwlHsRBdErWXQQ"; 
 
                 if (!string.IsNullOrEmpty(token))
                 {
