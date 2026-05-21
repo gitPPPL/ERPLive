@@ -14,9 +14,11 @@
         <div class="erppage-header-title">Material Inward Entry</div>
     </div>
     <div class="erppage-header-right">
-        <button id="btn_backtolist" class="erppage-header-back">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+
+
     </div>
 </div>
 <div class="erppagelist-toolbar-end" style="display:none;">
@@ -808,5 +810,5 @@
         </div>
     </div>
 </div>
-<script src="~/common/GlobalFunction.js"></script>
+<script src="~/common/globalvalidation.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.js"></script>

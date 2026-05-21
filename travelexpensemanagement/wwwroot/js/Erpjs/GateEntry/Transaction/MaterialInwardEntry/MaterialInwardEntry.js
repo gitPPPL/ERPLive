@@ -1,6 +1,7 @@
 ﻿    const urlParams = new URLSearchParams(window.location.search);
     const rowId = urlParams.get('id');
     const mode = urlParams.get('mode');
+    const isReadOnly = (mode === 'view');
     const vtype = urlParams.get('vtype');
     const PubDefEWaybillAmt = 50000;
     var   PubUserLevel='@PubUserLevel';
@@ -73,7 +74,7 @@
             }
         });
 
-    $('#TxtVehicleNo').on('change', function() {
+        $('#TxtVehicleNo').on('change', function() {
         if ($(this).val())
         {
             $('#span_drivername').show();
@@ -88,7 +89,7 @@
         }
     });
 
-    $('#TxtEWayNo').on('change', function() {
+        $('#TxtEWayNo').on('change', function() {
         if ($(this).val())
         {
             $('#span_EWayBillDate').show();
@@ -105,7 +106,7 @@
         }
     });
 
-    $('#TxtWbSlipNo').on('change', function() {
+        $('#TxtWbSlipNo').on('change', function() {
     if ($(this).val())
         {
             $('#span_PartyWBGrWt').show();
@@ -120,7 +121,7 @@
          }
     });
 
-    $("#btn-save").click(async function (e) {
+        $("#btn-save").click(async function (e) {
      e.preventDefault();
     const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
     const V_NO = parseInt($('#TxtDocNo').val()) || null;
@@ -146,11 +147,11 @@
         saveInwardEntry();
     });
 
-    $('#ddlShipFrom').on('change', function() {
+        $('#ddlShipFrom').on('change', function() {
         fetchShipFromAdd(this.value);
                 });
 
-    $("#ddlDocType").change(function () {
+        $("#ddlDocType").change(function () {
         $(this).prop('disabled', true);
     const docType = this.value;
     if (rowId == null) {
@@ -166,7 +167,7 @@
                 }
             });
 
-    $("#btnpendingorderno").click(function () {
+        $("#btnpendingorderno").click(function () {
                 const selectedValue = $('#ddlPartyName').val();
     const V_TYPE = $('#ddlDocType').val();
     const V_DATE = $('#TxtRptDate').val();
@@ -195,11 +196,11 @@
     FetchPendingOrderNo(selectedValue, V_TYPE, V_DATE);
             });
 
-    $(document).on('change', '#selectAllPR', function () {
+        $(document).on('change', '#selectAllPR', function () {
         $('#tblpendingordermodal tbody .rowCheckbox').prop('checked', $(this).is(':checked'));
                   });
 
-    $(document).on('change', '#tblpendingordermodal tbody .rowCheckbox', function () {
+        $(document).on('change', '#tblpendingordermodal tbody .rowCheckbox', function () {
                 const $currentRow = $(this).closest('tr');
     const currentItemCode = $currentRow.find('td:eq(1)').text().trim();
 
@@ -227,9 +228,9 @@
     const total = $('#tblpendingordermodal tbody .rowCheckbox').length;
     const checked = $('#tblpendingordermodal tbody .rowCheckbox:checked').length;
                 $('#selectAllPR').prop('checked', total > 0 && total === checked);
-            });
+    });
 
-    $('#ddlPartyName').on('change' , function() {
+        $('#ddlPartyName').on('change' , function() {
                     const PartyId = this.value;
     const Vno = document.getElementById('TxtDocNo')?.value || '';
     const v_type = document.getElementById('ddlDocType')?.value || '';
@@ -241,7 +242,7 @@
     $('#ddlDocStatus').prop('disabled', true);
                 });
 
-    $('#Btn_selectedData').on('click', function () {
+        $('#Btn_selectedData').on('click', function () {
             const selectedData = getSelectedPendingOrderRows();
     if (selectedData.length === 0) {
         showToast("Please select at least one row.", { type: "warning" });
@@ -257,34 +258,34 @@
     populateInwardEntryTable(selectedData);
         });
 
-    $('#btn_setting').on('click', function () {
+        $('#btn_setting').on('click', function () {
             GetVehicledetail();
         });
 
-    $('#btn_database').on('click', function () {
+        $('#btn_database').on('click', function () {
      GetFasttagVehicledetail();
     });
 
-    $('#btn_RCDetail').on('click', function () {
+        $('#btn_RCDetail').on('click', function () {
      GetVehicledata();
     });
 
-    $('#btn_FastagDetail').on('click', function () {
+        $('#btn_FastagDetail').on('click', function () {
         loadFastagDetails();
     });
 
-    $(document).on('click', '.delete-btn', function () {
+        $(document).on('click', '.delete-btn', function () {
         if (confirm('Are you sure you want to delete this row?')) {
             $(this).closest('tr').remove();
         }
     });
 
-    $(document).on('change', '.ItemName', function () {
+        $(document).on('change', '.ItemName', function () {
         const code = $(this).val();
         $(this).closest('tr').find('.itemCode').val(code);
     });
 
-    $('#SEARCHCONTAINER').on('click' , function() {
+        $('#SEARCHCONTAINER').on('click' , function() {
      var Container_No  = $('#TxtContainerNo').val();
         if(Container_No)
         {
@@ -300,29 +301,28 @@
 
     });
 
-    $('#btn_backtolist').on('click' , function(){
+        $('#btn_backtolist').on('click' , function(){
      backToList();
     });
 
-    $('#EwayBillbtn').on('click', function () {
-                    var V_date = $('#InDate').val();
+        $('#EwayBillbtn').on('click', function () {
+        var V_date = $('#InDate').val();
 
-    if (V_date) {
+        if (V_date) {
         GetEwaybillno(V_date, "IN");
-                } else {
+        } else {
         showToast("Date is empty", { type: "warning" });
-                }
-            });
+        }
+    });
 
-    $('#BtnPartyBillno').on('click', async function () {
-                try {
-                    var SUPPLIER = $('#ddlPartyName').val();
-
-    const res = await $.ajax({
+        $('#BtnPartyBillno').on('click', async function () {
+    try {
+       var SUPPLIER = $('#ddlPartyName').val();
+        const res = await $.ajax({
         url: '/InwardEntryList/GetDataByPARTTYBILLNO',
-    type: 'GET',
-    data: {SUPPLIER: SUPPLIER }
-                    });
+        type: 'GET',
+        data: {SUPPLIER: SUPPLIER }
+        });
 
     const data = res.data;
     populateTable(data);
@@ -332,23 +332,22 @@
                 }
             });
 
-    $('#btn_partybillnoselect').on('click', function () {
+        $('#btn_partybillnoselect').on('click', function () {
             const selectedrows = getSelectedRows();
 
-    if (selectedrows.length === 0) {
-        showToast("No rows selected", { type: "warning" });
-    return;
+            if (selectedrows.length === 0) {
+            showToast("No rows selected", { type: "warning" });
+            return;
             }
 
-    const  row = selectedrows[0];
-    $('#TxtBillNo').val(row.supplieR_INVNO);
-    $('#DtPartyBillDate').val(row.supplieR_INVDATE);
-    $('#TxtBillAmt').val(row.supplieR_INVAMT);
-    $('#TxtContainerNo').val(row.containeR_NO);
-          });
-
+            const  row = selectedrows[0];
+            $('#TxtBillNo').val(row.supplieR_INVNO);
+            $('#DtPartyBillDate').val(row.supplieR_INVDATE);
+            $('#TxtBillAmt').val(row.supplieR_INVAMT);
+            $('#TxtContainerNo').val(row.containeR_NO);
         });
 
+    });
     function isItemInMainTable(itemCode) {
         let exists = false;
         $('#tblInwardEntry tbody tr').each(function () {
@@ -360,7 +359,6 @@
         });
         return exists;
     }
-
     function saveInwardEntry() {
         const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
         const PARTY_NAME    = $('#ddlPartyName option:selected').text();
@@ -641,9 +639,8 @@
                     }
                 });
             }
-
     function focusCell(rowIndex, colIndex) {
-                const row = document.querySelectorAll('#tblInwardEntry tbody tr')[rowIndex];
+     const row = document.querySelectorAll('#tblInwardEntry tbody tr')[rowIndex];
     if (!row) return;
 
     const cell = row.querySelectorAll('td')[colIndex];
@@ -706,7 +703,6 @@
     return {success: false };
             }
         }
-
     function setFormReadOnly() {
                     const form = document.getElementById("InwardEntryForm");
     if (!form) return;
@@ -809,7 +805,6 @@
     // Add readonly class for CSS styling
     form.classList.add("readonly-mode");
                 }
-
     function collectTableRowData() {
             const table = document.getElementById('tblInwardEntry');
     if (!table) return [];
@@ -852,7 +847,6 @@
 
     return rowData;
             }
-
     function formatDate(dateStr) {
               if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -883,7 +877,6 @@
 
         }
     }
-
     function populateTable(data) {
                   const tbody = $("#tblellipsisIconmodal tbody");
     tbody.empty();
@@ -1050,7 +1043,6 @@
 
         }
     }
-
     function DDlPartyAdd(PartyId) {
         return $.ajax({
         url: '/InwardEntry/fetchSelectedAddress',
@@ -1148,7 +1140,8 @@
           } catch (error) {
         showToast("Error loading Transit Numbers", { type: "error" });
           }
-        }
+}
+
     async function GetVNo(Vtype) {
             try {
               const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
@@ -1369,40 +1362,51 @@
         const VType = $('#ddlDocType').val();
         const VNo = $('#TxtDocNo').val();
 
-        if(!rcNumber)
-        {
+        if (!rcNumber) {
             showToast("Vehicle No Not Found", { type: "info" });
             $('#TxtVehicleNo').addClass('is-invalid').focus();
             return;
-        }
-        else
-        {
+        } else {
             $('#TxtVehicleNo').removeClass('is-invalid');
         }
 
         const res = await $.ajax({
-            url: `/InwardEntry/GetVehcleFastaginfo`,
-            data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
+            url: `/InwardEntry/GetVehcleFastaginfocall`,
+            data: {
+                rc_number: rcNumber,
+                VType: VType,
+                VNo: VNo
+            },
             type: 'GET',
             dataType: 'json',
         });
 
-      console.log("fasttag api", res);
+        // SUCCESS CASE
+        if (res.success && res.data?.value?.status !== 403) {
+            showToast("FastTag Info Saved Successfully", { type: "success" });
+        }
+        // ERROR CASE
+        else {
+            let errorMessage = "Something went wrong";
 
-        if (res && res.success)
-        {
-        showToast("FastTag Info Saved Successfully", { type: "success" });
-        } else
-        {
-            const apiError = JSON.parse(res.value.message);
-            console.log("apiError", apiError);
-            showToast(apiError.message, { type: "info" });
+            // Parse API error details
+            if (res.data?.value?.details) {
+                try {
+                    const apiError = JSON.parse(res.data.value.details);
+                    errorMessage = apiError.message || errorMessage;
+                } catch (e) {
+                    console.log("Error parsing API details", e);
+                }
+            }
+
+            showToast(errorMessage, { type: "info" });
         }
-        } catch (err)
-        {
-            showToast("Error fetching vehicle details.", { type: "error" });
-        }
+
+    } catch (err) {
+        console.log(err);
+        showToast("Error fetching vehicle details.", { type: "error" });
     }
+}
 
     async function GetVehicledetail() {
    try {
@@ -1593,8 +1597,7 @@
         showToast("result.message", { type: "warning" });
     return false;
         }
-    }
- 
+    } 
     function addRow($tbody, data = { }) {
                 const isINMS = $('#ddlDocType').val() !== 'INMS';
     const isNewRow = !data || Object.keys(data).length === 0;

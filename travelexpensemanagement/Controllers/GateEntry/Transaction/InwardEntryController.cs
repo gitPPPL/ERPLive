@@ -868,7 +868,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             try
             {  
                 var res = await _globalValidationdate.GetVehcleFastaginfo(rc_number, VType, VNo);
-                return new JsonResult(new { success = true, message = "Data saved successfully",  data = res });
+                return new JsonResult(new { success = true,  data = res });
             }
             catch (HttpRequestException ex)
             {
