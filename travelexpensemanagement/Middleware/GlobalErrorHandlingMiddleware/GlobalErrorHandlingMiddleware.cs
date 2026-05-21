@@ -22,7 +22,7 @@ namespace travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware
             {
                 await _next(context);
 
-                // 🔹 HANDLE HTTP STATUS CODES (NO EXCEPTION)
+                // HANDLE HTTP STATUS CODES (NO EXCEPTION)
                 if (context.Response.StatusCode >= 400)
                 {
                     await HandleStatusCode(context);

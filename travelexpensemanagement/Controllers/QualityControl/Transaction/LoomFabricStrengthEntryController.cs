@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.QualityControl.Transaction;
 using travelexpensemanagement.Models.Weighbridge.Transaction;
@@ -12,17 +13,18 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
     public class LoomFabricStrengthEntryController : Controller
     {
-        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public LoomFabricStrengthEntryController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public LoomFabricStrengthEntryController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
         }
+
         public IActionResult Index()
         {
             return View("~/Views/QualityControl/Transaction/LoomFabricStrengthEntry/Index.cshtml");
@@ -42,13 +44,13 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
                 var yearParams = new Dictionary<string, object> { { "@YearCd", yearCode } };
                 var vnoParams = new Dictionary<string, object>
-            {
-            { "@COMP_CODE", companyCode },
-            { "@BRANCH_CODE", branchCode },
-            { "@YEAR_CODE", yearCode },
-            { "@V_TYPE", vType },
-            { "@TableName", tableName }
-            };
+                {
+                { "@COMP_CODE", companyCode },
+                { "@BRANCH_CODE", branchCode },
+                { "@YEAR_CODE", yearCode },
+                { "@V_TYPE", vType },
+                { "@TableName", tableName }
+                };
 
                 string nextVNo = await _dbHelper.GetExecuteScalarAsync<string>("sp_GetMaxVNo", vnoParams, isStoredProc: true);
                 string year = await _dbHelper.GetExecuteScalarAsync<string>("SELECT dbo.fn_GetCurrentYear(@YearCd)", yearParams);
@@ -119,11 +121,11 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 }
 
                 string strqry = $@"
-            SELECT CODE, NAME 
-            FROM MACHINE_MAST
-            WHERE COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
-            AND Type = 'Loom' {placeFilter}
-            ORDER BY NAME";
+                SELECT CODE, NAME 
+                FROM MACHINE_MAST
+                WHERE COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
+                AND Type = 'Loom' {placeFilter}
+                ORDER BY NAME";
                 var itemlist = await _dbHelper.GetJsonDataAsync(strqry);
 
                 return Json(new { status = true, data = itemlist });
@@ -135,30 +137,43 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProd2List(int LoomCode = 0)
+        public async Task<IActionResult> GetProd2List(int LoomCode = 0,int PlaceCode = 0, DateTime? VDate = null)
         {
             try
             {
-                var userSession = _globalValue.GetGlobalVariables();
+                var g = _globalValue.GetGlobalVariables();
+
+                string dateFilter = VDate.HasValue
+                    ? $" AND a.V_DATE <= '{VDate.Value:yyyy-MM-dd}'"
+                    : "";
+
+                string placeFilter = PlaceCode > 0
+                    ? $" AND a.PLACE_CODE = {PlaceCode}"
+                    : "";
 
                 string query = $@"
                 SELECT TOP 1
-                ISNULL(ITEM_CODE, '') AS ITEM_CODE,
-                ISNULL(PTYPE_NAME, '') AS PTYPE_NAME,
-                ISNULL(PTYPE_CODE, '') AS PTYPE_CODE,
-                ISNULL(WIDTH, 0) AS WIDTH,
-                ISNULL(MESH_CODE, '') AS MESH_CODE,
-                ISNULL(MESH, 0) AS MESH,
-                ISNULL(COLOR_CODE, '') AS COLOR_CODE,
-                ISNULL(COLOR_NAME, '') AS COLOR_NAME,
-                ISNULL(GRAM, 0.00) AS GRAM,
-                ISNULL(DNR, '') AS DNR
-               FROM prod2
-               WHERE COMP_CODE = {userSession.PubCompCode}
-              AND YEAR_CODE = {userSession.PubFYearCode}
-              AND BRANCH_CODE = 1
-              AND LOOM_CODE = '{LoomCode}'
-             order by v_date desc,shift desc";
+                    a.ITEM_CODE,
+                    b.SHORTNAME,
+                    a.PTYPE_CODE,
+                    a.PTYPE_NAME,
+                    a.WIDTH,
+                    a.GRAM,
+                    a.DNR,
+                    a.COLOR_CODE,
+                    a.COLOR_NAME,
+                    a.MESH_CODE,
+                    a.MESH
+                FROM PROD2 a
+                LEFT JOIN ITEM_MAST b
+                    ON a.ITEM_CODE = b.CODE
+                   AND a.COMP_CODE = b.COMP_CODE
+                WHERE a.COMP_CODE = {g.PubCompCode}
+                  AND a.BRANCH_CODE = {g.PubBranchCode}
+                  AND a.LOOM_CODE = {LoomCode}
+                  {placeFilter}
+                  {dateFilter}
+                ORDER BY a.V_DATE DESC, a.SHIFT DESC";
 
                 var itemList = await _dbHelper.GetJsonDataAsync(query);
 
@@ -166,47 +181,144 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = "Data load failed" });
+                return Json(new { status = false, message = ex.Message });
             }
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> GetProd2List(int LoomCode = 0)
+        //{
+        //    try
+        //    {
+        //        var userSession = _globalValue.GetGlobalVariables();
+
+        //        string query = $@"
+        //        SELECT TOP 1
+        //        ISNULL(ITEM_CODE, '') AS ITEM_CODE,
+        //        ISNULL(PTYPE_NAME, '') AS PTYPE_NAME,
+        //        ISNULL(PTYPE_CODE, '') AS PTYPE_CODE,
+        //        ISNULL(WIDTH, 0) AS WIDTH,
+        //        ISNULL(MESH_CODE, '') AS MESH_CODE,
+        //        ISNULL(MESH, 0) AS MESH,
+        //        ISNULL(COLOR_CODE, '') AS COLOR_CODE,
+        //        ISNULL(COLOR_NAME, '') AS COLOR_NAME,
+        //        ISNULL(GRAM, 0.00) AS GRAM,
+        //        ISNULL(DNR, '') AS DNR
+        //        FROM prod2
+        //       WHERE COMP_CODE = {userSession.PubCompCode}
+        //      AND YEAR_CODE = {userSession.PubFYearCode}
+        //      AND BRANCH_CODE = 1
+        //      AND LOOM_CODE = '{LoomCode}'
+        //      order by v_date desc,shift desc";
+
+        //        var itemList = await _dbHelper.GetJsonDataAsync(query);
+
+        //        return Json(new { status = true, data = itemList });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { status = false, message = "Data load failed" });
+        //    }
+        //}
+
+        //[HttpGet]
+        //public async Task<IActionResult> GetItemList(int itemCode=0)
+        //{
+        //    try
+        //    {
+        //        var usersession = _globalValue.GetGlobalVariables();
+        //        string itemFilter = "";
+        //        if(itemCode != 0)
+        //        {
+        //            itemFilter = $" and IM.CODE={itemCode} ";
+        //        }
+
+        //        string str = $@"SELECT 
+        //        ISNULL(IM.CODE, 0) AS CODE,
+        //        ISNULL(IM.NAME, '') AS NAME,
+        //        ISNULL(IM.PTYPE_CODE, 0) AS PTYPE_CODE,
+        //        ISNULL(PTYPE.NAME, '') AS PTYPE_NAME,
+        //        ISNULL(IM.WIDTH, 0) AS WIDTH,
+        //        ISNULL(IM.MESHCONV_CODE, 0) AS MESHCONV_CODE,
+        //        ISNULL(IM.COLOR_CODE, 0) AS COLOR_CODE,
+        //        ISNULL(COLOR.NAME, '') AS COLOR_NAME,
+        //        ISNULL(IM.GRAM_CODE, 0) AS GRAM_CODE,
+        //        ISNULL(GRAM.NAME, '') AS GRAM_NAME
+        //        FROM ITEM_MAST IM
+        //        LEFT JOIN ITEMPTYPE_MAST PTYPE
+        //            ON IM.PTYPE_CODE = PTYPE.CODE AND IM.COMP_CODE = PTYPE.COMP_CODE
+        //        LEFT JOIN COLOR_MAST COLOR
+        //            ON IM.COLOR_CODE = COLOR.CODE AND IM.COMP_CODE = COLOR.COMP_CODE
+        //        LEFT JOIN ITEMGRAM_MAST GRAM
+        //            ON IM.GRAM_CODE = GRAM.CODE AND IM.COMP_CODE = GRAM.COMP_CODE
+        //        WHERE IM.COMP_CODE = {usersession.PubCompCode} {itemFilter} order by NAME ";
+        //        var itemlist = await _dbHelper.GetJsonDataAsync(str);
+        //        return Json(new { status = true, data = itemlist });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { status = false, messsage = "data load failed" });
+        //    }
+        //}
+
         [HttpGet]
-        public async Task<IActionResult> GetItemList(int itemCode=0)
+        public async Task<IActionResult> GetItemList(int itemCode = 0)
         {
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();
+                var userSession = _globalValue.GetGlobalVariables();
+
                 string itemFilter = "";
-                if(itemCode != 0)
+                if (itemCode > 0)
                 {
-                    itemFilter = $" and IM.CODE={itemCode} ";
+                    itemFilter = $" AND IM.CODE = {itemCode}";
                 }
 
-                string str = $@"SELECT 
-    ISNULL(IM.CODE, 0) AS CODE,
-    ISNULL(IM.NAME, '') AS NAME,
-    ISNULL(IM.PTYPE_CODE, 0) AS PTYPE_CODE,
-    ISNULL(PTYPE.NAME, '') AS PTYPE_NAME,
-    ISNULL(IM.WIDTH, 0) AS WIDTH,
-    ISNULL(IM.MESHCONV_CODE, 0) AS MESHCONV_CODE,
-    ISNULL(IM.COLOR_CODE, 0) AS COLOR_CODE,
-    ISNULL(COLOR.NAME, '') AS COLOR_NAME,
-    ISNULL(IM.GRAM_CODE, 0) AS GRAM_CODE,
-    ISNULL(GRAM.NAME, '') AS GRAM_NAME
-FROM ITEM_MAST IM
-LEFT JOIN ITEMPTYPE_MAST PTYPE
-    ON IM.PTYPE_CODE = PTYPE.CODE AND IM.COMP_CODE = PTYPE.COMP_CODE
-LEFT JOIN COLOR_MAST COLOR
-    ON IM.COLOR_CODE = COLOR.CODE AND IM.COMP_CODE = COLOR.COMP_CODE
-LEFT JOIN ITEMGRAM_MAST GRAM
-    ON IM.GRAM_CODE = GRAM.CODE AND IM.COMP_CODE = GRAM.COMP_CODE
-WHERE IM.COMP_CODE = {usersession.PubCompCode} {itemFilter} order by NAME ";
-                var itemlist = await _dbHelper.GetJsonDataAsync(str);
-                return Json(new { status = true, data = itemlist });
+                string query = $@"
+                SELECT
+                    ISNULL(IM.CODE, 0) AS CODE,
+                    ISNULL(IM.SHORTNAME, '') AS NAME,
+                    ISNULL(IM.PTYPE_CODE, 0) AS PTYPE_CODE,
+                    ISNULL(PTYPE.NAME, '') AS PTYPE_NAME,
+                    ISNULL(SIZE.INCH, 0) AS WIDTH,
+                    ISNULL(IM.MESHCONV_CODE, 0) AS MESHCONV_CODE,
+                    ISNULL(IM.COLOR_CODE, 0) AS COLOR_CODE,
+                    ISNULL(COLOR.NAME, '') AS COLOR_NAME,
+                    ISNULL(IM.GRAM_CODE, 0) AS GRAM_CODE,
+                    ISNULL(GRAM.NAME, '') AS GRAM_NAME
+                    FROM ITEM_MAST IM
+                    INNER JOIN ITEM_MGROUP MG
+                        ON IM.MGROUP_CODE = MG.CODE
+                       AND MG.COMP_CODE = IM.COMP_CODE
+                       AND MG.MGROUP_TYPE IN ('Finish')
+                    LEFT JOIN ITEMPTYPE_MAST PTYPE
+                        ON IM.PTYPE_CODE = PTYPE.CODE
+                       AND IM.COMP_CODE = PTYPE.COMP_CODE
+                    LEFT JOIN COLOR_MAST COLOR
+                        ON IM.COLOR_CODE = COLOR.CODE
+                       AND IM.COMP_CODE = COLOR.COMP_CODE
+                    LEFT JOIN ITEMGRAM_MAST GRAM
+                        ON IM.GRAM_CODE = GRAM.CODE
+                       AND IM.COMP_CODE = GRAM.COMP_CODE
+                    LEFT JOIN ITEMSIZE_MAST SIZE
+                        ON IM.SIZE_CODE = SIZE.CODE
+                       AND IM.COMP_CODE = SIZE.COMP_CODE
+                    WHERE IM.ACTIVE = 1
+                      AND IM.COMP_CODE = {userSession.PubCompCode}
+                      {itemFilter}
+                    ORDER BY IM.SHORTNAME";
+
+                var itemList = await _dbHelper.GetJsonDataAsync(query);
+
+                return Json(new { status = true, data = itemList });
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, messsage = "data load failed" });
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
+                });
             }
         }
 
@@ -344,7 +456,6 @@ WHERE IM.COMP_CODE = {usersession.PubCompCode} {itemFilter} order by NAME ";
                                 
                                 foreach (DataRow row in prod2Table.Rows)
                                 {
-                                    
                                     var meshCode = row["MESH"].ToString();
                                     if (meshCode != null && meshCode != "")
                                     {

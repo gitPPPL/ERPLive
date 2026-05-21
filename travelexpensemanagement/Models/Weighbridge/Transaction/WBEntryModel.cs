@@ -31,7 +31,6 @@
         public int? LARGE_BAG { get; set; }
         public string ? SaveOrUpdate { get; set; }
 
-
         public string? oldGateType { get; set; }
         public int? oldGateNo { get; set; }
     

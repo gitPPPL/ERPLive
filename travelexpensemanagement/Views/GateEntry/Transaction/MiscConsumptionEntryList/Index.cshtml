@@ -12,7 +12,7 @@
 		<span>Misc Consumption Entry List</span>
 	</div>
 	<div class="erppagelist-header-right">
-		<button class="erppagelist-btn erppagelist-btn-add erppagelist-btn-add" onclick="location.href='@Url.Action("Index", "MiscConsumptionEntry")'">
+		<button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "MiscConsumptionEntry")'">
 			<i class="fa fa-plus"></i>Add New
 		</button>
 	</div>
@@ -31,12 +31,12 @@
 		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
 			<i class="fa fa-file-excel"></i>Export
 		</button>
-		 <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
 			<i class="fa fa-envelope"></i>Mail
 		</button>
 		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
 			<i class="fa fa-check-circle"></i>Approved
-		</button> 
+		</button>
 	</div>
 </div>
 
@@ -45,7 +45,7 @@
 		<table id="tblMiscConsumptionList" class="excel-table fixed-grid-table">
 			<colgroup>
 				<col style="display:none;" />
-				<col style="width: 80px;" /> 
+				<col style="width: 80px;" />
 				<col style="width: 110px;" />
 				<col style="width: 150px;" />
 				<col style="width: 180px;" />
@@ -57,13 +57,11 @@
 					<th>Voucher Type</th>
 					<th>Voucher Date</th>
 					<th>Party Name</th>
-				    @*<th>Action</th> *@
 					<th class="action-col">Action</th>
 				</tr>
 			</thead>
 			<tbody></tbody>
 		</table>
-
 	</div>
 
 	<div class="erppagelist-pagination">

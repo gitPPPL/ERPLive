@@ -175,7 +175,6 @@
       "TxtRemarks"
     ];
 
-
     let docId = "", readOnly;
 
     function getQueryParam(param) {
@@ -191,9 +190,9 @@
         await handleDocLoad();
         setEnterKeyFocus(allFieldIds);
         wireEvents();
-    } catch (err) {
+      } catch (err) {
         toastr.error('Initialization failed: ' + err);
-    }
+      }
     }
 
     function wireEvents() {
@@ -202,10 +201,10 @@
         e.preventDefault();
 
       if (!validateRequiredField('#NumDocNo','Doc No') ||
-            !validateRequiredField('#DtDocDate','Doc Date') ||
-            !validateRequiredField('#ddlShift','Shift Type') ||
-            !validateRequiredField('#ddlInspectBy','Inspect By') ||
-            !validateRequiredField('#ddlPlace','Place Type')) return;
+        !validateRequiredField('#DtDocDate','Doc Date') ||
+        !validateRequiredField('#ddlShift','Shift Type') ||
+        !validateRequiredField('#ddlInspectBy','Inspect By') ||
+        !validateRequiredField('#ddlPlace','Place Type')) return;
 
         try {
           const data = await collectFormData();          
@@ -222,95 +221,163 @@
 
       });
 
-      $('#ddlDocType').on('change', () => {
-        const val = $('#ddlDocType').val();
-        if (val) GetDocid(val);
-      });
-
-      $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
-        const tbody = $(this).closest('tbody');
-        if (tbody.find('tr').length > 1) {
-          $(this).closest('tr').remove();
-        } else {
-          alert('Cannot delete the first row.');
-
-        }
-      });
-
-    $(document).on('click', '.btn-add-row, .btn-add-action', function () {
-        addItemRecordRow();
-    });
-
-
-    $(document).on('change', 'select[id^="ddlLoom"]', function () {
-        const selectedLoomId = $(this).val();
-        const row = $(this).closest('tr');
-        if (selectedLoomId) {
-            fetchAndFillRowDataByLoom(selectedLoomId, row);
-        }
-    });
-
-    $(document).on('change', 'select[id^=ddlItemName]' , function(){
-            const selectedItemId = $(this).val();
-            const row = $(this).closest('tr');
-            if (selectedItemId) {
-                fetchAndFillRowDataByItem(selectedItemId, row);
-            }
-    });
-
-    $(document).on('change', '#ddlPlace', function () {
-        let tbody = $('#tblFabricStrengthEntry tbody');
-        tbody.find('tr').each(function (index, row) {
-            let rowIndex = index + 1;
-            bindDropdownData(rowIndex);
+        $('#ddlDocType').on('change', () => {
+            const val = $('#ddlDocType').val();
+            if (val) GetDocid(val);
         });
-    });
 
-    $(document).on('input', 'input[id^=TxtWeftWay]', function () {
-        let currentRow = $(this).closest('tr');
-        let rowIndex = currentRow.index() + 1;
-        var WeftWay =$(this).val();
-        let warpWayValue = currentRow.find('input[id^=TxtWarpWay]').val();
-        bindStrengthDropdown(rowIndex, WeftWay, warpWayValue);
+        $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+            const tbody = $(this).closest('tbody');
+            if (tbody.find('tr').length > 1) {
+                $(this).closest('tr').remove();
+            } else {
+                alert('Cannot delete the first row.');
 
-    });
+            }
+        });
 
-    $(document).on('focus', '[id^=ddlStrength]', function () {
-        const $ddl = $(this);
-        const id = $ddl.attr('id');
-        const rowNum = id.replace('ddlStrength', '');
+        $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+            addItemRecordRow();
+        });
 
-        const warpWayValue = $(`#TxtWarpWay${rowNum}`).val() || 0;
-        const weftWayValue = $(`#TxtWeftWay${rowNum}`).val() || 0;
 
-        bindStrengthDropdown(rowNum, weftWayValue, warpWayValue).then(() => {
-            const combinedValue = `${warpWayValue} - ${weftWayValue}`;
-            const options = $ddl.find('option');
-            let matchedOption = null;
+        $(document).on('change', 'select[id^="ddlLoom"]', function () {
+            const selectedLoomId = $(this).val();
+            const row = $(this).closest('tr');
+            if (selectedLoomId) {
+                fetchAndFillRowDataByLoom(selectedLoomId, row);
+            }
+        });
 
-            options.each(function () {
-                if ($(this).text() === combinedValue) {
-                    matchedOption = $(this).val();
-                    return false; // break loop
+        $(document).on('change', 'select[id^=ddlItemName]' , function(){
+                const selectedItemId = $(this).val();
+                const row = $(this).closest('tr');
+                if (selectedItemId) {
+                    fetchAndFillRowDataByItem(selectedItemId, row);
+                }
+        });
+
+        $(document).on('change', '#ddlPlace', function () {
+            let tbody = $('#tblFabricStrengthEntry tbody');
+            tbody.find('tr').each(function (index, row) {
+                let rowIndex = index + 1;
+                bindDropdownData(rowIndex);
+            });
+        });
+
+        $(document).on('input', 'input[id^=TxtWeftWay]', function () {
+            let currentRow = $(this).closest('tr');
+            let rowIndex = currentRow.index() + 1;
+            var WeftWay =$(this).val();
+            let warpWayValue = currentRow.find('input[id^=TxtWarpWay]').val();
+            bindStrengthDropdown(rowIndex, WeftWay, warpWayValue);
+
+        });
+        
+      $(document).on('input', 'input[id^="TxtWarpWay"], input[id^="TxtWeftWay"]', function () {
+
+        const $row = $(this).closest('tr');
+        const rowIndex = $row.index() + 1;
+
+        const warpWay = $row.find(`#TxtWarpWay${rowIndex}`).val().trim();
+        const weftWay = $row.find(`#TxtWeftWay${rowIndex}`).val().trim();
+
+        // Dono values filled honi chahiye
+        if (warpWay !== '' && weftWay !== '') {
+
+            const combinedText = `${warpWay} - ${weftWay}`;
+            const $strength = $row.find(`#ddlStrength${rowIndex}`);
+
+            // Strength dropdown reload karo
+            bindStrengthDropdown(rowIndex, weftWay, warpWay).then(() => {
+
+                let matchedValue = null;
+
+                // Existing options me text search karo
+                $strength.find('option').each(function () {
+                    if ($(this).text().trim() === combinedText) {
+                        matchedValue = $(this).val();
+                        return false; // break
+                    }
+                });
+
+                if (matchedValue) {
+                    // Existing option select karo
+                    $strength.val(matchedValue).trigger('change');
+                } else {
+                    // Option nahi mila to naya option add karo
+                    $strength.append(
+                        `<option value="${combinedText}">${combinedText}</option>`
+                    );
+
+                    // Newly added option select karo
+                    $strength.val(combinedText).trigger('change');
                 }
             });
+        }
+      });
 
-            if (matchedOption) {
-                $ddl.val(matchedOption).trigger('change');
-            } else {
-                if (combinedValue.trim()) {
-                    $ddl.append(`<option value="${combinedValue}">${combinedValue}</option>`);
-                    $ddl.val(combinedValue).trigger('change');
+        $(document).on('focus', '[id^=ddlStrength]', function () {
+            const $ddl = $(this);
+            const id = $ddl.attr('id');
+            const rowNum = id.replace('ddlStrength', '');
+            const warpWayValue = $(`#TxtWarpWay${rowNum}`).val() || 0;
+            const weftWayValue = $(`#TxtWeftWay${rowNum}`).val() || 0;
+
+            bindStrengthDropdown(rowNum, weftWayValue, warpWayValue).then(() => {
+                const combinedValue = `${warpWayValue} - ${weftWayValue}`;
+                const options = $ddl.find('option');
+                let matchedOption = null;
+
+                options.each(function () {
+                    if ($(this).text() === combinedValue) {
+                        matchedOption = $(this).val();
+                        return false; // break loop
+                    }
+                });
+
+                if (matchedOption) {
+                    $ddl.val(matchedOption).trigger('change');
+                } else {
+                    if (combinedValue.trim()) {
+                        $ddl.append(`<option value="${combinedValue}">${combinedValue}</option>`);
+                        $ddl.val(combinedValue).trigger('change');
+                    }
                 }
-            }
+            });
         });
-    });
 
     }
 
 </script>
 
 <script>
+
+    // function fetchAndFillRowDataByLoom(loomCode, row) {
+    //     $.ajax({
+    //         url: `/LoomFabricStrengthEntry/GetProd2List?LoomCode=${loomCode}`,
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         success: function (response) {
+    //             if (response.status && response.data.length > 0) {
+    //                 const data = response.data[0];
+    //                 row.find('input[id^="TxtLID"]').val(data.ITEM_CODE);
+    //                 row.find('select[id^="ddlItemName"]').val(data.ITEM_CODE).trigger('change');
+    //                 row.find('select[id^="ddlType"]').val(data.PTYPE_CODE).trigger('change');
+    //                 row.find('input[id^="TxtWidth"]').val(data.WIDTH);
+    //                 row.find('input[id^="TxtGram"]').val(data.GRAM);
+    //                 row.find('select[id^="ddlColor"]').val(data.COLOR_CODE).trigger('change');
+    //                 row.find('input[id^="TxtDNR"]').val(data.DNR);
+
+    //             } else {
+    //                 toastr.warning("No data found for selected loom.");
+    //             }
+    //         },
+    //         error: function () {
+    //             toastr.error("Failed to load data for selected loom.");
+    //         }
+    //     });
+    // }
 
     function fetchAndFillRowDataByLoom(loomCode, row) {
         $.ajax({
@@ -320,15 +387,48 @@
             success: function (response) {
                 if (response.status && response.data.length > 0) {
                     const data = response.data[0];
-                    row.find('input[id^="TxtLID"]').val(data.ITEM_CODE);
-                    row.find('select[id^="ddlItemName"]').val(data.ITEM_CODE).trigger('change');
-                    row.find('select[id^="ddlType"]').val(data.PTYPE_CODE).trigger('change');
-                    row.find('input[id^="TxtWidth"]').val(data.WIDTH);
-                    row.find('input[id^="TxtGram"]').val(data.GRAM);
-                    row.find('select[id^="ddlColor"]').val(data.COLOR_CODE).trigger('change');
-                    row.find('input[id^="TxtDNR"]').val(data.DNR);
+                    // Controls
+                    const $lid = row.find('input[id^="TxtLID"]');
+                    const $item = row.find('select[id^="ddlItemName"]');
+                    const $type = row.find('select[id^="ddlType"]');
+                    const $width = row.find('input[id^="TxtWidth"]');
+                    const $gram = row.find('input[id^="TxtGram"]');
+                    const $color = row.find('select[id^="ddlColor"]');
+                    const $dnr = row.find('input[id^="TxtDNR"]');
 
-                } else {
+                    // LID = Loom Code
+                    $lid.val(loomCode);
+
+                    // Wait a bit to ensure dropdowns are fully initialized
+                    setTimeout(function () {
+
+                        // Item Name
+                        if ($item.find(`option[value="${data.ITEM_CODE}"]`).length > 0) {
+                            $item.val(data.ITEM_CODE).trigger('change.select2');
+                        }
+
+                        // Type
+                        if ($type.find(`option[value="${data.PTYPE_CODE}"]`).length > 0) {
+                            $type.val(data.PTYPE_CODE).trigger('change.select2');
+                        }
+
+                        // Width
+                        $width.val(data.WIDTH);
+
+                        // Gram
+                        $gram.val(data.GRAM);
+
+                        // Color
+                        if ($color.find(`option[value="${data.COLOR_CODE}"]`).length > 0) {
+                            $color.val(data.COLOR_CODE).trigger('change.select2');
+                        }
+
+                        // DNR
+                        $dnr.val(data.DNR);
+
+                    }, 200);
+                }
+                else {
                     toastr.warning("No data found for selected loom.");
                 }
             },
@@ -340,70 +440,110 @@
 
     function fetchAndFillRowDataByItem(itemCode, row) {
         $.ajax({
-            url: `/LoomFabricStrengthEntry/GetItemList?LoomCode=${itemCode}`,
+         
+            url: `/LoomFabricStrengthEntry/GetItemList?itemCode=${itemCode}`,
             type: 'GET',
             dataType: 'json',
             success: function (response) {
                 if (response.status && response.data.length > 0) {
                     const data = response.data[0];
 
+                    console.log("Item Data:", data);
 
+                    // Type Dropdown
                     row.find('select[id^="ddlType"]').val(data.PTYPE_CODE).trigger('change');
+
+                    // Width
                     row.find('input[id^="TxtWidth"]').val(data.WIDTH);
-                    row.find('input[id^="TxtGram"]').val(data.GRAM_CODE);
+
+                    // Gram
+                    // If TxtGram is textbox, use GRAM_NAME or GRAM_CODE as needed
+                    row.find('input[id^="TxtGram"]').val(data.GRAM_NAME);   // or data.GRAM_CODE
+
+                    // Color Dropdown
                     row.find('select[id^="ddlColor"]').val(data.COLOR_CODE).trigger('change');
 
-                } else {
-                    toastr.warning("No data found for selected loom.");
+                    // Optional hidden fields
+                    row.find('input[id^="hdnItemCode"]').val(data.CODE);
+                    row.find('input[id^="hdnPTypeCode"]').val(data.PTYPE_CODE);
+                    row.find('input[id^="hdnColorCode"]').val(data.COLOR_CODE);
+                }
+                else {
+                    toastr.warning("No data found for selected item.");
                 }
             },
             error: function () {
-                toastr.error("Failed to load data for selected loom.");
+                toastr.error("Failed to load data for selected item.");
             }
         });
     }
 
-    async function handleDocLoad() {
-            docId = getQueryParam('id');
-            readOnly = getQueryParam('readOnly');
-            if (docId) {
-                $('#ddlDocType').prop('disabled', true);
-                await GetDocData(docId, readOnly);
+    // function fetchAndFillRowDataByItem(itemCode, row) {
+    //     $.ajax({
+    //         url: `/LoomFabricStrengthEntry/GetItemList?LoomCode=${itemCode}`,
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         success: function (response) {
+    //             if (response.status && response.data.length > 0) {
+    //                 const data = response.data[0];
 
-            } else {
-                GetDocid();
-                const today = new Date();
-                const todayDate = today.getFullYear() + '-' +
-                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                    today.getDate().toString().padStart(2, '0');
-                    $('#DtDocDate').val(todayDate);
-                  GetShiftList();
-                  GetPlaceList();
-                  GetEmployeeList();
-                  addItemRecordRow();
-            }
+
+    //                 row.find('select[id^="ddlType"]').val(data.PTYPE_CODE).trigger('change');
+    //                 row.find('input[id^="TxtWidth"]').val(data.WIDTH);
+    //                 row.find('input[id^="TxtGram"]').val(data.GRAM_CODE);
+    //                 row.find('select[id^="ddlColor"]').val(data.COLOR_CODE).trigger('change');
+
+    //             } else {
+    //                 toastr.warning("No data found for selected loom.");
+    //             }
+    //         },
+    //         error: function () {
+    //             toastr.error("Failed to load data for selected loom.");
+    //         }
+    //     });
+    // }
+
+    async function handleDocLoad() {
+        docId = getQueryParam('id');
+        readOnly = getQueryParam('readOnly');
+        if (docId) {
+            $('#ddlDocType').prop('disabled', true);
+            await GetDocData(docId, readOnly);
+
+        } else {
+            GetDocid();
+            const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+                $('#DtDocDate').val(todayDate);
+                GetShiftList();
+                GetPlaceList();
+                GetEmployeeList();
+                addItemRecordRow();
+        }
     }
 
     function SaveData(saveDt) {
-                $.ajax({
-                    url: '@Url.Action("SaveOrUpdateLoomFabricEntry", "LoomFabricStrengthEntry")',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(saveDt),
-                    success: function (response) {
-                        if (response?.status) {
-                            toastr.success("Data Insert successfully");
-                            setTimeout(() => {
-                                window.location.href = '/LoomFabricStrengthEntryList/Index';
-                            }, 1500);
-                        } else {
-                            toastr.error(response?.message || "Save failed. Please try again.");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error occurred while saving. Please contact admin.");
-                    }
-                });
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateLoomFabricEntry", "LoomFabricStrengthEntry")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(saveDt),
+            success: function (response) {
+                if (response?.status) {
+                    toastr.success("Data Insert successfully");
+                    setTimeout(() => {
+                        window.location.href = '/LoomFabricStrengthEntryList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error(response?.message || "Save failed. Please try again.");
+                }
+            },
+            error: function () {
+                toastr.error("Error occurred while saving. Please contact admin.");
+            }
+        });
     }
 
     function UpdateData(UpdateDt) {
@@ -625,36 +765,36 @@
     }
 
     function GetDocTypeAsync(selectedValue) {
-          return new Promise((resolve, reject) => {
-              $.ajax({
-                  url: '@Url.Action("GetDocType", "LoomFabricStrengthEntry")',
-                  type: 'GET',
-                  dataType: 'json',
-                  success: function (response) {
-                      if (response.status) {
-                          const $dropdown = $('#ddlDocType');
-                          $dropdown.empty();
-                          $.each(response.data, function (index, item) {
-                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                          });
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '@Url.Action("GetDocType", "LoomFabricStrengthEntry")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status) {
+                        const $dropdown = $('#ddlDocType');
+                        $dropdown.empty();
+                        $.each(response.data, function (index, item) {
+                            $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                        });
 
-                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                              $dropdown.val(selectedValue).trigger('change');
-                          } else {
-                              $dropdown.prop('selectedIndex', 0);
-                          }
+                        if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                            $dropdown.val(selectedValue).trigger('change');
+                        } else {
+                            $dropdown.prop('selectedIndex', 0);
+                        }
 
-                          resolve();
-                      } else {
-                          reject("Invalid response status.");
-                      }
-                  },
-                  error: function (xhr, status, error) {
-                      toastr.error("Document Type Load failed: " + error);
-                      reject(error);
-                  }
-              });
-          });
+                        resolve();
+                    } else {
+                        reject("Invalid response status.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Document Type Load failed: " + error);
+                    reject(error);
+                }
+            });
+        });
     }
 
     function GetDocid() {
@@ -711,7 +851,42 @@
         });
     }
 
-    function GetEmployeeList(selectedValue=null) {
+    // function GetEmployeeList(selectedValue=null) {
+    //     $.ajax({
+    //         url: '@Url.Action("GetUserMast", "LoomFabricStrengthEntry")',
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         success: function (response) {
+    //             if (response.status) {
+    //                 const $DropdownId = $('#ddlInspectBy');
+    //                 $DropdownId.empty();
+    //                 $DropdownId.append('<option value="">- Select Employee Name -</option>');
+    //                 $.each(response.data, function (index, item) {
+    //                     $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+    //                 });
+    //                 $DropdownId.select2({
+    //                     placeholder: "- Select -",
+    //                     allowClear: true
+    //                 });
+
+    //                 if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+    //                     $DropdownId.val(selectedValue).trigger('change');
+    //                 }
+    //                 else {
+    //                     $DropdownId.val('').trigger('change');
+    //                 }
+
+    //             } else {
+    //                 toastr.error("Employee Name Load failed");
+    //             }
+    //         },
+    //         error: function (xhr, status, error) {
+    //             toastr.error("Employee Name Load failed", error);
+    //         }
+    //     });
+    // }
+
+    function GetEmployeeList(selectedValue = null) {
         $.ajax({
             url: '@Url.Action("GetUserMast", "LoomFabricStrengthEntry")',
             type: 'GET',
@@ -720,19 +895,33 @@
                 if (response.status) {
                     const $DropdownId = $('#ddlInspectBy');
                     $DropdownId.empty();
-                    $DropdownId.append('<option value="">- Select Employee Name -</option>');
+                    $DropdownId.append('<option value="">- Select Employee -</option>');
+
                     $.each(response.data, function (index, item) {
-                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                    });
-                    $DropdownId.select2({
-                        placeholder: "- Select -",
-                        allowClear: true
+                        $DropdownId.append(
+                            `<option value="${item.CODE}" data-name="${item.NAME}">
+                                ${item.NAME} | ${item.CODE}
+                            </option>`
+                        );
                     });
 
-                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                    $DropdownId.select2({
+                        placeholder: "- Select Employee -",
+                        allowClear: true,
+                        width: '100%',
+                        templateSelection: function (data) {
+                            // Selected hone ke baad sirf NAME show hoga
+                            if (!data.id) return data.text;
+
+                            const selectedOption = $(data.element);
+                            return selectedOption.data('name') || data.text;
+                        }
+                    });
+
+                    if (selectedValue &&
+                        $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
                         $DropdownId.val(selectedValue).trigger('change');
-                    }
-                    else {
+                    } else {
                         $DropdownId.val('').trigger('change');
                     }
 
@@ -740,8 +929,8 @@
                     toastr.error("Employee Name Load failed");
                 }
             },
-            error: function (xhr, status, error) {
-                toastr.error("Employee Name Load failed", error);
+            error: function () {
+                toastr.error("Employee Name Load failed");
             }
         });
     }
@@ -985,6 +1174,7 @@
                     if (response.isExist && response.matchingCode) {
                         strengthSelect.val(response.matchingCode).trigger('change');
                     }
+
                 } else {
                     toastr.error("Failed to load strength list");
                 }
@@ -1011,7 +1201,7 @@
         return isNaN(parsed) ? null : parsed;
     }
 
-     function parseDate(dateStr) {
+    function parseDate(dateStr) {
         if (!dateStr) return null;
         const parts = dateStr.split(/[-\/]/);
         if (parts.length === 3) {
@@ -1020,7 +1210,7 @@
             return new Date(year, month - 1, day);
         }
         return null;
-     }
+    }
 
     function toNullableInt(val) {
         const parsed = parseInt(val);
@@ -1055,23 +1245,22 @@
       });
     }
 
-
     function parseDecimalSafe(val) {
         const num = parseFloat(val);
         return isNaN(num) ? null : num;
     }
 
     function setEnterKeyFocus(sequence) {
-               sequence.forEach((id, index) => {
-                   $(`#${id}`).on('keypress', function (e) {
-                       if (e.key === 'Enter') {
-                           e.preventDefault();
-                           if (index + 1 < sequence.length) {
-                               $(`#${sequence[index + 1]}`).focus();
-                           }
-                       }
-                   });
-               });
+        sequence.forEach((id, index) => {
+            $(`#${id}`).on('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (index + 1 < sequence.length) {
+                        $(`#${sequence[index + 1]}`).focus();
+                    }
+                }
+            });
+        });
     }
 
     function enableAllFields() {

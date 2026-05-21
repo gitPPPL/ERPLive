@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Data.SqlClient;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
@@ -118,7 +119,7 @@ public class MiscConsumptionListRepository : IMiscConsumptionListRepository
                 cmd.Parameters.AddWithValue("@V_NO", rowId);
                 cmd.Parameters.AddWithValue("@V_TYPE", vtype);
                 cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
-                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
                 cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
 
                 using (var rdr = cmd.ExecuteReader())
@@ -132,7 +133,9 @@ public class MiscConsumptionListRepository : IMiscConsumptionListRepository
                             UOM_CODE = rdr["UOM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["UOM_CODE"]) : 0,
                             NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
                             QTY = rdr["QTY"] != DBNull.Value ? Convert.ToInt32(rdr["QTY"]) : 0,
-                            REMARKS = rdr["REMARKS"]?.ToString()
+                            REMARKS = rdr["REMARKS"]?.ToString(),
+                            REF_TYPE= rdr["REF_TYPE"]?.ToString(),
+                            REF_NO = rdr["REF_NO"] != DBNull.Value ? Convert.ToInt32(rdr["REF_NO"]) : 0,
                         });
                     }
                 }
@@ -223,7 +226,11 @@ public class MiscConsumptionListRepository : IMiscConsumptionListRepository
                         UOM_CODE = reader["UOM_CODE"].ToString(),
                         unitname = reader["UOM_NAME"].ToString(),
                         NOS = reader["NOS"].ToString(),
+                        DEPT_CODE= reader["DEPT_CODE"].ToString(),
+                        NAME= reader["NAME"].ToString(),
                         srno = reader["srno"].ToString(),
+                        refType = reader["REF_TYPE"]?.ToString(),
+                        refNo = reader["REF_NO"]?.ToString()
                     });
                 }
             }

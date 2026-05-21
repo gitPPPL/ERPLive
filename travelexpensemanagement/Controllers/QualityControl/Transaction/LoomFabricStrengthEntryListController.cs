@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Controllers.Travelexpense;
 using Microsoft.Data.SqlClient;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
     public class LoomFabricStrengthEntryListController : Controller
     {
-        private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
+        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public LoomFabricStrengthEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public LoomFabricStrengthEntryListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
@@ -43,7 +44,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 {
                     {"@COMP_CODE", UsersessionDt.PubCompCode },
                     {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode},
                     {"@V_TYPE", "LMQC" },
                     {"@Action", "LFSEntryList" }
                 };
@@ -101,11 +102,11 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         try
                         {
 
-                            string[] deleteQueries = {
-                        "DELETE FROM PROD1_QC WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM PROD2_QC WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
+                         string[] deleteQueries = {
+                            "DELETE FROM PROD1_QC WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
+                            "DELETE FROM PROD2_QC WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
 
-                        };
+                         };
 
                             foreach (var query in deleteQueries)
                             {
@@ -113,7 +114,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 {
                                     cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
                                     cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
                                     cmd.Parameters.AddWithValue("@V_TYPE", VType);
                                     cmd.Parameters.AddWithValue("@V_NO", VNo);
 
