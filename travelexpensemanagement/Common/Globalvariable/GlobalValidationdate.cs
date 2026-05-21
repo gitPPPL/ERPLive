@@ -707,7 +707,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                     return new JsonResult(new
                     {
                         success = false,
-                        message = "API request failed"
+                        message = responseData
                     });
                 }
 
@@ -946,6 +946,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                         error = "API request failed",
                         status = (int)response.StatusCode,
                         details = responseData
+                       
                     });
                 }
 

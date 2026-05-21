@@ -3,7 +3,7 @@
     const mode = urlParams.get('mode');
     const vtype = urlParams.get('vtype');
     const PubDefEWaybillAmt = 50000;
-    var   PubUserLevel=@PubUserLevel;
+    var   PubUserLevel='@PubUserLevel';
     var   LoginDate = '@logindate';
     var   itemList = [];
     var   deptList = [];
@@ -14,137 +14,137 @@
     if (rowId)
     {
         await LoadFormByID(rowId, vtype);
-    $('#ddlDocType').prop('disabled', true);
-    $('#InDate').prop('disabled', true);
-    $('#InTime').prop('disabled', true);
-    $('.erppagelist-toolbar-end').show();
-    $('#btn_approval').show();
-    if (mode === "view")
-    {
-        setFormReadOnly();
-                }
-              }
+        $('#ddlDocType').prop('disabled', true);
+        $('#InDate').prop('disabled', true);
+        $('#InTime').prop('disabled', true);
+        $('.erppagelist-toolbar-end').show();
+        $('#btn_approval').show();
+        if (mode === "view")
+        {
+         setFormReadOnly();
+        }
+    }
     else
     {
-                if(PubUserLevel == 1)
-    {
-        $('#InDate').prop('disabled', false);
-    $('#InTime').prop('disabled', false);
-                }
-    else{
-        $('#InDate').prop('disabled', true);
-    $('#InTime').prop('disabled', true);
-                }
+        if(PubUserLevel == 1)
+        {
+            $('#InDate').prop('disabled', false);
+            $('#InTime').prop('disabled', false);
+        }
+        else
+        {
+            $('#InDate').prop('disabled', true);
+            $('#InTime').prop('disabled', true);
+        }
 
-    $('#ddlDocStatus').prop('disabled', true);
-    let today = new Date().toISOString().split('T')[0];
-    $('#InDate').attr('min', LoginDate);
-    $('#TxtRptDate').val(today);
-    let now = new Date();
-    $('#InTime').val(now.toTimeString().slice(0,8));
-    $('#TiRptDate').val(now.toTimeString().slice(0,8));
-    GetVNo($('#ddlDocType').val());
-              }
+            $('#ddlDocStatus').prop('disabled', true);
+            let today = new Date().toISOString().split('T')[0];
+            $('#InDate').attr('min', LoginDate);
+            $('#TxtRptDate').val(today);
+            let now = new Date();
+            $('#InTime').val(now.toTimeString().slice(0,8));
+            $('#TiRptDate').val(now.toTimeString().slice(0,8));
+            GetVNo($('#ddlDocType').val());
+        }
 
-    $('#ddladdressline1').on('change' , function() {
-        let selectedPartyValue = $('#ddlPartyName').val();
-    let selectedAddressValue = $('#ddladdressline1').val();
-    fetchDDlParty(selectedPartyValue, selectedAddressValue);
-            });
+        $('#ddladdressline1').on('change' , function() {
+            let selectedPartyValue = $('#ddlPartyName').val();
+            let selectedAddressValue = $('#ddladdressline1').val();
+            fetchDDlParty(selectedPartyValue, selectedAddressValue);
+        });
 
-    $(document).on('input', '.numeric-only', function () {
-        this.value = this.value.replace(/[^0-9.]/g, '');
-                });
+        $(document).on('input', '.numeric-only', function () {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+        });
 
-    $('#TxtBillNo').on('change', function() {
-                        if ($(this).val()) {
-        $('#span_partybilldate').show();
-                        } else {
-        $('#span_partybilldate').hide();
-                        }
-                });
+        $('#TxtBillNo').on('change', function() {
+            if ($(this).val()) {
+             $('#span_partybilldate').show();
+            } else {
+             $('#span_partybilldate').hide();
+            }
+        });
 
-    $('#TxtChallanNo').on('change', function() {
-                        if ($(this).val()) {
-        $('#span_ChallanDatedate').show();
-                        } else {
-        $('#span_ChallanDatedate').hide();
-                        }
-                });
+        $('#TxtChallanNo').on('change', function() {
+            if ($(this).val()) {
+                $('#span_ChallanDatedate').show();
+            } else {
+                $('#span_ChallanDatedate').hide();
+            }
+        });
 
     $('#TxtVehicleNo').on('change', function() {
-                        if ($(this).val())
-    {
-        $('#span_drivername').show();
-    $('#span_driverMobileNo').show();
-    $('#span_tranportarname').show();
-                        }
+        if ($(this).val())
+        {
+            $('#span_drivername').show();
+            $('#span_driverMobileNo').show();
+            $('#span_tranportarname').show();
+        }
     else
-    {
-        $('#span_drivername').hide();
-    $('#span_driverMobileNo').hide();
-    $('#span_tranportarname').hide();
-                        }
-                });
+        {
+            $('#span_drivername').hide();
+            $('#span_driverMobileNo').hide();
+            $('#span_tranportarname').hide();
+        }
+    });
 
     $('#TxtEWayNo').on('change', function() {
-                        if ($(this).val())
-    {
-        $('#span_EWayBillDate').show();
-    $('#span_EWayBillExpiryDate').show();
-    $('#span_EWBPartyInvNo').show();
-    $('#span_EWBPartyInvAm').show();
-                        }
-    else
-    {
-        $('#span_EWayBillDate').hide();
-    $('#span_EWayBillExpiryDate').hide();
-    $('#span_EWBPartyInvNo').hide();
-    $('#span_EWBPartyInvAm').hide();
-                        }
-                });
+        if ($(this).val())
+        {
+            $('#span_EWayBillDate').show();
+            $('#span_EWayBillExpiryDate').show();
+            $('#span_EWBPartyInvNo').show();
+            $('#span_EWBPartyInvAm').show();
+        }
+        else
+        {
+            $('#span_EWayBillDate').hide();
+            $('#span_EWayBillExpiryDate').hide();
+            $('#span_EWBPartyInvNo').hide();
+            $('#span_EWBPartyInvAm').hide();
+        }
+    });
 
     $('#TxtWbSlipNo').on('change', function() {
-                        if ($(this).val())
-    {
-        $('#span_PartyWBGrWt').show();
-    $('#span_PartyWBTrWt').show();
-    $('#span_PartyWBTime').show();
-                        }
-    else
-    {
-        $('#span_PartyWBGrWt').hide();
-    $('#span_PartyWBTrWt').hide();
-    $('#span_PartyWBTime').hide();
-                        }
-                });
+    if ($(this).val())
+        {
+            $('#span_PartyWBGrWt').show();
+            $('#span_PartyWBTrWt').show();
+            $('#span_PartyWBTime').show();
+        }
+        else
+        {
+            $('#span_PartyWBGrWt').hide();
+            $('#span_PartyWBTrWt').hide();
+            $('#span_PartyWBTime').hide();
+         }
+    });
 
     $("#btn-save").click(async function (e) {
-        e.preventDefault();
+     e.preventDefault();
     const PARTY_CODE = parseInt($('#ddlPartyName').val()) || null;
     const V_NO = parseInt($('#TxtDocNo').val()) || null;
     const BILL_NO = $('#TxtBillNo').val().trim();
     const V_TYPE = $('#ddlDocType').val();
-
-    if (BILL_NO) {
-                const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
-    if (!validation.success) {
-                    return;
-                }
-            }
-
-    const isValid = await checkValidDate();
-    if (isValid === false) {
+        if (BILL_NO) {
+            const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
+            if (!validation.success)
+            {
                 return;
             }
+        }
+
+        const isValid = await checkValidDate();
+        if (isValid === false) {
+            return;
+        }
 
     const gateValidation = await GatenoValidation(V_TYPE, V_NO);
-    if (!gateValidation.success) {
-                return;
-            }
-
-    saveInwardEntry();
-        });
+        if (!gateValidation.success) {
+            return;
+        }
+        saveInwardEntry();
+    });
 
     $('#ddlShipFrom').on('change', function() {
         fetchShipFromAdd(this.value);
@@ -165,7 +165,6 @@
     addRow($("#tblInwardEntry tbody"), { });
                 }
             });
-
 
     $("#btnpendingorderno").click(function () {
                 const selectedValue = $('#ddlPartyName').val();
@@ -258,66 +257,52 @@
     populateInwardEntryTable(selectedData);
         });
 
-            // $('#Btn_selectedData').on('click', function () {
-        //     const selectedData = getSelectedPendingOrderRows();
-        //     if (selectedData.length === 0) {
-        //         showToast("Please select at least one row.", { type: "warning" });
-        //     return;
-        //     }
-        //    $('#pendingorders').modal('hide');  // Hide the modal first
-        // populateInwardEntryTable(selectedData);  // Then perform other actions
-
-        //     //populateInwardEntryTable(selectedData);
-        //     //$('#pendingorders').modal('hide');
-        // });
-
-        $('#btn_setting').on('click', function () {
+    $('#btn_setting').on('click', function () {
             GetVehicledetail();
         });
 
     $('#btn_database').on('click', function () {
-        GetFasttagVehicledetail();
-                });
+     GetFasttagVehicledetail();
+    });
 
     $('#btn_RCDetail').on('click', function () {
-        GetVehicledata();
-                });
+     GetVehicledata();
+    });
 
     $('#btn_FastagDetail').on('click', function () {
         loadFastagDetails();
-                });
+    });
 
     $(document).on('click', '.delete-btn', function () {
-                    if (confirm('Are you sure you want to delete this row?')) {
-        $(this).closest('tr').remove();
-                    }
-                });
+        if (confirm('Are you sure you want to delete this row?')) {
+            $(this).closest('tr').remove();
+        }
+    });
 
     $(document).on('change', '.ItemName', function () {
-                    const code = $(this).val();
-    $(this).closest('tr').find('.itemCode').val(code);
-                });
+        const code = $(this).val();
+        $(this).closest('tr').find('.itemCode').val(code);
+    });
 
     $('#SEARCHCONTAINER').on('click' , function() {
-                var Container_No  = $('#TxtContainerNo').val();
-
-    if(Container_No)
-    {
-        $('#TxtContainerNo').removeClass('is-invalid');
-    getcontainerdata(Container_No);
-            }
+     var Container_No  = $('#TxtContainerNo').val();
+        if(Container_No)
+        {
+            $('#TxtContainerNo').removeClass('is-invalid');
+            getcontainerdata(Container_No);
+        }
     else
-    {
-        showToast("Please Fill Container_No", { type: "info" });
-    $('#TxtContainerNo').addClass('is-invalid').focus();
-    return false;
-            }
+        {
+            showToast("Please Fill Container_No", { type: "info" });
+            $('#TxtContainerNo').addClass('is-invalid').focus();
+            return false;
+        }
 
-            });
+    });
 
     $('#btn_backtolist').on('click' , function(){
-        backToList();
-                });
+     backToList();
+    });
 
     $('#EwayBillbtn').on('click', function () {
                     var V_date = $('#InDate').val();
@@ -882,8 +867,7 @@
             }
 
     async function LoadDropDown() {
-                try {
-
+    try {
         await Promise.all([
             await DDLVtype(),
             await DDLParty(),
@@ -897,12 +881,11 @@
             await DDlCity(),
             await DDlState(),
         ]);
+        } catch (error) {
+         showToast("Error loading dropdowns", { type: "error" });
 
-            } catch (error) {
-        showToast("Error loading dropdowns", { type: "error" });
-
-            }
         }
+    }
 
     function populateTable(data) {
                   const tbody = $("#tblellipsisIconmodal tbody");
@@ -1058,10 +1041,10 @@
 
     async function DDlState() {
         try {
-                const res = await fetch('/InwardEntry/DDlstate');
-    const data = await res.json();
-    const ddl = $('#TxtState');
-    ddl.empty().append('<option value="">Select State</option>');
+            const res = await fetch('/InwardEntry/DDlstate');
+            const data = await res.json();
+            const ddl = $('#TxtState');
+            ddl.empty().append('<option value="">Select State</option>');
             data.forEach(item => {
         ddl.append(`<option value="${item.value}">${item.text}</option>`);
             });
@@ -1072,69 +1055,67 @@
     }
 
     function DDlPartyAdd(PartyId) {
-          return $.ajax({
+        return $.ajax({
         url: '/InwardEntry/fetchSelectedAddress',
-    type: 'POST',
-    data: {PartyId: PartyId },
-    success: function (data) {
-              const ddl = $('#ddladdressline1');
-    ddl.empty().append('<option value="">-- Select Address --</option>');
-              data.forEach(item => {
-        ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            },
-    error: function (xhr, status, error) {
-        showToast("Error loading  Party Address:", { type: "error" });
+        type: 'POST',
+        data: {PartyId: PartyId },
+            success: function (data) {
+                const ddl = $('#ddladdressline1');
+                ddl.empty().append('<option value="">-- Select Address --</option>');
+                data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        },
+            error: function (xhr, status, error) {
+            showToast("Error loading  Party Address:", { type: "error" });
 
-            }
-          });
         }
+        });
+    }
 
     async function GetPartyAdress(PartyId) {
-                try {
-                    const url = `/InwardEntry/GetPartyAddressbyCode?PartyId=${encodeURIComponent(PartyId)}`;
-    const response = await fetch(url);
-    const data = await response.json();
+        try {
+        const url = `/InwardEntry/GetPartyAddressbyCode?PartyId=${encodeURIComponent(PartyId)}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-                    const d = (data && data.length > 0) ? data[0] : { };
-    $('#ddladdressline1').val(d.addresS_ID ?? "");
-    $('#TxtAddLine1').val(d.add1 ?? "");
-    $('#TxtAddLine2').val(d.add2 ?? "");
-    $('#TxtAddLine3').val(d.add3 ?? "");
-    $('#ddlcity').val(d.city_Code ?? "");
-    $('#TxtPincode').val(d.pincode ?? "");
-    $('#TxtState').val(d.statE_CODE ?? "");
-    $('#TxtGSTNo').val(d.gstin ?? "");
-    $('#TxtPAN').val(d.pan ?? "");
+        const d = (data && data.length > 0) ? data[0] : { };
+        $('#ddladdressline1').val(d.addresS_ID ?? "");
+        $('#TxtAddLine1').val(d.add1 ?? "");
+        $('#TxtAddLine2').val(d.add2 ?? "");
+        $('#TxtAddLine3').val(d.add3 ?? "");
+        $('#ddlcity').val(d.city_Code ?? "");
+        $('#TxtPincode').val(d.pincode ?? "");
+        $('#TxtState').val(d.statE_CODE ?? "");
+        $('#TxtGSTNo').val(d.gstin ?? "");
+        $('#TxtPAN').val(d.pan ?? "");
 
-            } catch (error) {
+        } catch (error) {
         showToast("Error fetch party data:", { type: "error" });
 
-            }
         }
+    }
 
     async function fetchDDlParty(PartyId, AddressId) {
-                try {
-                    const url = `/InwardEntry/GetDataByPartyCode?PartyId=${encodeURIComponent(PartyId)}&AddressId=${encodeURIComponent(AddressId)}`;
-    const response = await fetch(url);
-    const data = await response.json();
+        try {
+        const url = `/InwardEntry/GetDataByPartyCode?PartyId=${encodeURIComponent(PartyId)}&AddressId=${encodeURIComponent(AddressId)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+            const d = (data && data.length > 0) ? data[0] : { };
+            $('#TxtAddLine1').val(d.add1 ?? "");
+            $('#TxtAddLine2').val(d.add2 ?? "");
+            $('#TxtAddLine3').val(d.add3 ?? "");
+            $('#TxtCity').val(d.city_Code ?? "");
+            $('#TxtPincode').val(d.pincode ?? "");
+            $('#TxtState').val(d.statE_CODE ?? "");
+            $('#TxtGSTNo').val(d.gstin ?? "");
+            $('#TxtPAN').val(d.pan ?? "");
 
-                    const d = (data && data.length > 0) ? data[0] : { };
-
-    $('#TxtAddLine1').val(d.add1 ?? "");
-    $('#TxtAddLine2').val(d.add2 ?? "");
-    $('#TxtAddLine3').val(d.add3 ?? "");
-    $('#TxtCity').val(d.city_Code ?? "");
-    $('#TxtPincode').val(d.pincode ?? "");
-    $('#TxtState').val(d.statE_CODE ?? "");
-    $('#TxtGSTNo').val(d.gstin ?? "");
-    $('#TxtPAN').val(d.pan ?? "");
-
-            } catch (error) {
+        } catch (error) {
         showToast("Failed to fetch party data:", { type: "error" });
 
-            }
         }
+    }
 
     async function fetchShipFromAdd(ShipFromID) {
                   try {
@@ -1249,124 +1230,122 @@
         showToast("Failed to load pending orders", { type: "error" });
               }
             }
-
     function getSelectedPendingOrderRows() {
                   const selectedRows = [];
     $('#tblpendingordermodal tbody tr').each(function () {
                     const checkbox = $(this).find('.rowCheckbox');
     if (checkbox.is(':checked')) {
-                      const row = $(this).children('td');
-    const rowData = {
-        itemCode: row.eq(1).text().trim(),
-    itemName: row.eq(2).text().trim(),
-    unit: row.eq(3).text().trim(),
-    nos: row.eq(4).text().trim(),
-    qty: row.eq(5).text().trim(),
-    balQty: row.eq(6).text().trim(),
-    docType: row.eq(7).text().trim(),
-    docNo: row.eq(8).text().trim(),
-    docDate: row.eq(9).text().trim(),
-    rate: row.eq(10).text().trim(),
-    remarks: row.eq(11).text().trim(),
-    department: row.eq(12).text().trim(),
-    deptCode: row.eq(13).text().trim(),
-    emptY_YN: row.eq(14).text().trim(),
-    UOM_CODE: row.eq(15).text().trim()
-                      };
-    selectedRows.push(rowData);
-                    }
-                  });
+        const row = $(this).children('td');
+        const rowData = {
+            itemCode: row.eq(1).text().trim(),
+            itemName: row.eq(2).text().trim(),
+            unit: row.eq(3).text().trim(),
+            nos: row.eq(4).text().trim(),
+            qty: row.eq(5).text().trim(),
+            balQty: row.eq(6).text().trim(),
+            docType: row.eq(7).text().trim(),
+            docNo: row.eq(8).text().trim(),
+            docDate: row.eq(9).text().trim(),
+            rate: row.eq(10).text().trim(),
+            remarks: row.eq(11).text().trim(),
+            department: row.eq(12).text().trim(),
+            deptCode: row.eq(13).text().trim(),
+            emptY_YN: row.eq(14).text().trim(),
+            UOM_CODE: row.eq(15).text().trim()
+        };
+        selectedRows.push(rowData);
+    }
+                      });
 
-    return selectedRows;
-                }
-
+        return selectedRows;
+    }
     function populateInwardEntryTable(selectedData) {
                 const $tbody = $('#tblInwardEntry tbody');
     $tbody.empty();
 
-    $.each(selectedData, function (idx, item) {
-        addRow($tbody, {
-            itemCode: item.itemCode,
-            itemId: item.itemCode,
-            DepttName: item.deptCode,
-            unit: item.UOM_CODE,
-            nos: item.nos,
-            qty: item.qty,
-            shipRate: item.rate,
-            empty: item.emptY_YN,
-            remarks: item.remarks,
-            refType: item.docType,
-            refNo: item.docNo
-        });
-                });
-            }
+     $.each(selectedData, function (idx, item) {
+            addRow($tbody, {
+                itemCode: item.itemCode,
+                itemId: item.itemCode,
+                DepttName: item.deptCode,
+                unit: item.UOM_CODE,
+                nos: item.nos,
+                qty: item.qty,
+                shipRate: item.rate,
+                empty: item.emptY_YN,
+                remarks: item.remarks,
+                refType: item.docType,
+                refNo: item.docNo
+            });
+      });
+    }
 
     async function LoadFormByID(id, vtype) {
-                 try {
-                   const res = await $.ajax({
-        url: '/InwardEntryList/GetDataByCode',
-    method: 'POST',
-    data: {code: id, vtype: vtype }
-                   });
+    try {
+        const res = await $.ajax({
+            url: '/InwardEntryList/GetDataByCode',
+            method: 'POST',
+            data: {code: id, vtype: vtype }
+        });
 
     if (res.success) {
-                        const header = res.data.header;
-    const Details = res.data.details;
-    $('#ddlDocType').val(header.v_TYPE || '');
-    $('#TxtTransporter').val(header.transporT_CODE || '');
-    $('#TxtCode').val(header.doC_ID || '');
-    $('#TxtDocNo').val(header.v_NO || '');
-    $('#InDate').val(formatDate(header.v_DATE) || '');
-    $('#DtVehicleOutTime').val(formatDate(header.Out_Date) || '');
-    $('#InTime').val(header.v_TIME || '');
-    $('#ddlPartyName').val(header.partY_CODE).trigger('change');
-    $('#TxtAddLine1').val(header.add1 || '');
-    $('#TxtAddLine2').val(header.add2 || '');
-    $('#TxtAddLine3').val(header.add3 || '');
-    $('#TxtCity').val(header.city || '');
-    $('#ddlcity').val(header.partY_CITY || '');
-    $('#TxtPincode').val(header.partY_PINCODE || '');
-    $('#TxtState').val(header.state || '');
-    $('#TxtGSTNo').val(header.partY_GST || '');
-    $('#TxtPAN').val(header.paN_NO || '');
-    $('#ddlShipFrom').val(header.shiP_PARTY).trigger('change');
-    $('#txtShipAddress').val(header.shipAddress || '');
-    $('#ShipBillNo').val(header.shiP_BILLNO || '');
-    $('#ShipBillDate').val(formatDate(header.shiP_BILLDATE) || '');
-    $('#DtVehicleOutTime').val(formatDate(header.ouT_DATE) || '');
-    $('#TiVehicleOutTime').val(header.ouT_TIME || '');
-    $('#VehicleReturn').val(header.returN_TYPE || '');
-    $('#TxtPONo').val(header.disP_PLAN_NO || '');
-    $('#TxtRptDate').val(formatDate(header.r_DATE) || '');
-    $('#TiRptDate').val(header.r_TIME || '');
-    $('#TxtBillNo').val(header.bilL_NO || '');
-    $('#DtPartyBillDate').val(formatDate(header.bilL_DATE) || '');
-    $('#TxtChallanNo').val(header.chalL_NO || '');
-    $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
-    $('#TxtBillAmt').val(header.bilL_AMT || '');
-    $('#ddlDocStatus').val(header.status || '');
-    $('#ddlTransit').val(header.transiT_NO || '');
-    $('#TxtEWayNo').val(header.waybilL_NO || '');
-    $('#DtEWayDate').val(formatDate(header.ewB_DATE)|| '');
-    $('#TxtEWayDate').val(formatDate(header.ewB_DATE) || '');
-    $('#TxtEWBInvNo').val(header.ewB_INVNO || '');
-    $('#TxtEWBInvAmt').val(header.ewB_INVAMT || '');
-    $('#TxtWbSlipNo').val(header.partY_WBSLIPNO || '');
-    $('#TxtGrWt').val(header.gR_NO || '');
-    $('#TxtTrWt').val(header.partY_WBTRWT || '');
-    $('#DtWBTime').val(formatDate(header.partY_WBTIME) || '');
-    $('#TxtWbTime').val(header.partY_WBTIME || '');
-    $('#ddlPartyCity').val(header.partY_EWBCITY || '');
-    $('#TxtContainerNo').val(header.containeR_NO || '');
-    $('#TxtRemarks').val(header.remarks || '');
-    $('#TxtVehicleNo').val(header.trucK_NO || '');
-    $('#TxtGRNo').val(header.gR_NO || '');
-    $('#DtGRDate').val(formatDate(header.gR_DATE) || '');
-    $('#TxtDriverName').val(header.driveR_NAME || '');
-    $('#TxtDriverMobile').val(header.driveR_NO || '');
-    $('#txt_VehicleRemarks').val(header.remarks2 || '');
+        const header = res.data.header;
+        const Details = res.data.details;
+        $('#ddlDocType').val(header.v_TYPE || '');
+        $('#TxtTransporter').val(header.transporT_CODE || '');
+        $('#TxtCode').val(header.doC_ID || '');
+        $('#TxtDocNo').val(header.v_NO || '');
+        $('#InDate').val(formatDate(header.v_DATE) || '');
+        $('#DtVehicleOutTime').val(formatDate(header.Out_Date) || '');
+        $('#InTime').val(header.v_TIME || '');
+        $('#ddlPartyName').val(header.partY_CODE).trigger('change');
+        $('#TxtAddLine1').val(header.add1 || '');
+        $('#TxtAddLine2').val(header.add2 || '');
+        $('#TxtAddLine3').val(header.add3 || '');
+        $('#TxtCity').val(header.city || '');
+        $('#ddlcity').val(header.partY_CITY || '');
+        $('#TxtPincode').val(header.partY_PINCODE || '');
+        $('#TxtState').val(header.state || '');
+        $('#TxtGSTNo').val(header.partY_GST || '');
+        $('#TxtPAN').val(header.paN_NO || '');
+        $('#ddlShipFrom').val(header.shiP_PARTY).trigger('change');
+        $('#txtShipAddress').val(header.shipAddress || '');
+        $('#ShipBillNo').val(header.shiP_BILLNO || '');
+        $('#ShipBillDate').val(formatDate(header.shiP_BILLDATE) || '');
+        $('#DtVehicleOutTime').val(formatDate(header.ouT_DATE) || '');
+        $('#TiVehicleOutTime').val(header.ouT_TIME || '');
+        $('#VehicleReturn').val(header.returN_TYPE || '');
+        $('#TxtPONo').val(header.disP_PLAN_NO || '');
+        $('#TxtRptDate').val(formatDate(header.r_DATE) || '');
+        $('#TiRptDate').val(header.r_TIME || '');
+        $('#TxtBillNo').val(header.bilL_NO || '');
+        $('#DtPartyBillDate').val(formatDate(header.bilL_DATE) || '');
+        $('#TxtChallanNo').val(header.chalL_NO || '');
+        $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
+        $('#TxtBillAmt').val(header.bilL_AMT || '');
+        $('#ddlDocStatus').val(header.status || '');
+        $('#ddlTransit').val(header.transiT_NO || '');
+        $('#TxtEWayNo').val(header.waybilL_NO || '');
+        $('#DtEWayDate').val(formatDate(header.ewB_DATE)|| '');
+        $('#TxtEWayDate').val(formatDate(header.ewB_DATE) || '');
+        $('#TxtEWBInvNo').val(header.ewB_INVNO || '');
+        $('#TxtEWBInvAmt').val(header.ewB_INVAMT || '');
+        $('#TxtWbSlipNo').val(header.partY_WBSLIPNO || '');
+        $('#TxtGrWt').val(header.gR_NO || '');
+        $('#TxtTrWt').val(header.partY_WBTRWT || '');
+        $('#DtWBTime').val(formatDate(header.partY_WBTIME) || '');
+        $('#TxtWbTime').val(header.partY_WBTIME || '');
+        $('#ddlPartyCity').val(header.partY_EWBCITY || '');
+        $('#TxtContainerNo').val(header.containeR_NO || '');
+        $('#TxtRemarks').val(header.remarks || '');
+        $('#TxtVehicleNo').val(header.trucK_NO || '');
+        $('#TxtGRNo').val(header.gR_NO || '');
+        $('#DtGRDate').val(formatDate(header.gR_DATE) || '');
+        $('#TxtDriverName').val(header.driveR_NAME || '');
+        $('#TxtDriverMobile').val(header.driveR_NO || '');
+        $('#txt_VehicleRemarks').val(header.remarks2 || '');
 
-                            Details.forEach(item => {
+       Details.forEach(item => {
         addRow($('#tblInwardEntry tbody'), {
             itemCode: "345",
             itemId: item.iteM_CODE,
@@ -1380,101 +1359,101 @@
             refType: item.reF_TYPE,
             refNo: item.reF_NO
         });
-                            });
-
-
-
-                  }
-              } catch (err) {
+       });
+        }
+        } catch (err) {
         showToast("Something went wrong while loading the form.", { type: "error" });
-
-              }
-          }
+        }
+    }
 
     async function GetFasttagVehicledetail() {
-                try {
-                    const rcNumber = $('#TxtVehicleNo').val();
-    const VType = $('#ddlDocType').val();
-    const VNo = $('#TxtDocNo').val();
+    try {
+        const rcNumber = $('#TxtVehicleNo').val();
+        const VType = $('#ddlDocType').val();
+        const VNo = $('#TxtDocNo').val();
 
-    if(!rcNumber)
-    {
-        showToast("Vehicle No Not Found", { type: "info" });
-    $('#TxtVehicleNo').addClass('is-invalid').focus();
-    return;
-                }
-    else
-    {
-        $('#TxtVehicleNo').removeClass('is-invalid');
-                }
-
-    const res = await $.ajax({
-        url: `/InwardEntry/GetVehcleFastaginfo`,
-    data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
-    type: 'GET',
-    dataType: 'json',
-                    });
-
-    if (res && res.success) {
-        showToast("FastTag Info Saved Successfully", { type: "success" });
-
-
-                } else {
-        showToast("Data Not Found For This Vehicle No", { type: "error" });
-
-                }
-            } catch (err) {
-        showToast("Error fetching vehicle details.", { type: "error" });
-
-            }
+        if(!rcNumber)
+        {
+            showToast("Vehicle No Not Found", { type: "info" });
+            $('#TxtVehicleNo').addClass('is-invalid').focus();
+            return;
+        }
+        else
+        {
+            $('#TxtVehicleNo').removeClass('is-invalid');
         }
 
+        const res = await $.ajax({
+            url: `/InwardEntry/GetVehcleFastaginfo`,
+            data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
+            type: 'GET',
+            dataType: 'json',
+        });
+
+      console.log("fasttag api", res);
+
+        if (res && res.success)
+        {
+        showToast("FastTag Info Saved Successfully", { type: "success" });
+        } else
+        {
+            const apiError = JSON.parse(res.value.message);
+            console.log("apiError", apiError);
+            showToast(apiError.message, { type: "info" });
+        }
+        } catch (err)
+        {
+            showToast("Error fetching vehicle details.", { type: "error" });
+        }
+    }
+
     async function GetVehicledetail() {
-                try {
-                        const rcNumber = $('#TxtVehicleNo').val();
-    const VType = $('#ddlDocType').val();
-    const VNo = $('#TxtDocNo').val();
-    if(!rcNumber)
-    {
-        showToast("Vehicle No Not Found", { type: "info" });
-    $('#TxtVehicleNo').addClass('is-invalid').focus();
-    return;
-                            }
-    else
-    {
-        $('#TxtVehicleNo').removeClass('is-invalid');
-                        }
+   try {
+        const rcNumber = $('#TxtVehicleNo').val();
+        const VType = $('#ddlDocType').val();
+        const VNo = $('#TxtDocNo').val();
+        if(!rcNumber)
+        {
+            showToast("Vehicle No Not Found", { type: "info" });
+            $('#TxtVehicleNo').addClass('is-invalid').focus();
+            return;
+        }
+        else
+        {
+            $('#TxtVehicleNo').removeClass('is-invalid');
+        }
 
-    const res = await $.ajax({
-        url: `/InwardEntry/GetVehcleinfo`,
-    data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
-    type: 'GET',
-    dataType: 'json',
-                        });
+        const res = await $.ajax({
+            url: `/InwardEntry/GetVehcleinfo`,
+            data : {rc_number : rcNumber , VType : VType ,VNo : VNo },
+            type: 'GET',
+            dataType: 'json',
+        });
 
-    if (res && res.success) {
-        showToast("Vehicle Info Saved Successfully", { type: "success" });
+        if (res && res.success) {
+         showToast("Vehicle Info Saved Successfully", { type: "success" });
+        } else {
+            const apiError = JSON.parse(res.value.message);
+            console.log("apiError", apiError);
 
-                    } else {
-        showToast("Vehicle not found or invalid", { type: "error" });
-                    }
-                } catch (err) {
-        showToast("Error fetching vehicle details.", { type: "error" });
-
-                }
-            }
+            showToast(apiError.message, { type: "info" });
+        }
+        } catch (err) {
+         showToast("Error fetching vehicle details.", { type: "error" });
+        }
+        }
 
     async function GetVehicledata() {
                 try {
                     const res = await $.ajax({
-        url: `/InwardEntry/GetVehicledetail`,
-    type: 'GET',
-    data: {
-        v_no: $('#TxtDocNo').val(),
-    v_type: $('#ddlDocType').val()
-                        },
-    dataType: 'json',
-                    });
+                    url: `/InwardEntry/GetVehicledetail`,
+                    type: 'GET',
+                    data: {
+                        v_no: $('#TxtDocNo').val(),
+                        v_type: $('#ddlDocType').val()
+                    },
+                    dataType: 'json',
+                });
 
     $('#tblRCDetaillist tbody').empty();
     $("#RCDetailLabel").text(res.rc_number);
@@ -1547,7 +1526,6 @@
 
             }
         }
-
     function loadFastagDetails() {
         $.ajax({
             url: '/InwardEntry/GetFasttagdetail',
@@ -1619,27 +1597,7 @@
     return false;
         }
     }
-
-    function backToList() {
-            var partycode = $('#ddlPartyName').val();
-    if (partycode && mode != "view" )  {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You want to go back to the list?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, go back",
-            cancelButtonText: "Stay here"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '@Url.Action("Index", "InwardEntryList")';
-            }
-        });
-            } else {
-        window.location.href = '@Url.Action("Index", "InwardEntryList")';
-            }
-        }
-
+ 
     function addRow($tbody, data = { }) {
                 const isINMS = $('#ddlDocType').val() !== 'INMS';
     const isNewRow = !data || Object.keys(data).length === 0;
@@ -1753,7 +1711,7 @@
                 }
             }
 
-           async function LoadItemMaster() {
+    async function LoadItemMaster() {
                 try {
                     const res = await fetch('/InwardEntry/DDlItemMast');
                     if (!res.ok) throw new Error("Item load failed");
@@ -1766,7 +1724,7 @@
             }
         }
 
-       async function LoadUnitMaster() {
+    async function LoadUnitMaster() {
             try {
                 const res = await fetch('/InwardEntry/DDlUnitMast');
                 if (!res.ok) throw new Error("Unit load failed");
@@ -1776,8 +1734,8 @@
              showToast("Error loading UNIT master", { type: "warning" });
             }
         }
-
-       async function LoadDeptMaster() {
+    
+    async function LoadDeptMaster() {
             try {
                 const res = await fetch('/InwardEntry/DDlDeptMast');
                 if (!res.ok) throw new Error("Department load failed");
@@ -1786,8 +1744,8 @@
              showToast(err, { type: "warning" });
             }
         }
-
-      async function getcontainerdata(Container_No) {
+    
+    async function getcontainerdata(Container_No) {
           try {
             const res = await $.ajax({
               url: '/InwardEntry/GetSEARCHCONTAINER',
@@ -1812,8 +1770,8 @@
             showToast(err, { type: "warning" });
           }
         }
-
-      async function GetEwaybillno() {
+    
+    async function GetEwaybillno() {
             try {
                 const res = await $.ajax({
                     url: '/InwardEntry/GetEWayBillData',
@@ -1831,15 +1789,13 @@
                 showToast(error, { type: "error" });
             }
         }
-
-      function validateMobile(input) {
+    function validateMobile(input) {
           input.value = input.value.replace(/\D/g, '');
           if (input.value.length > 10) {
             input.value = input.value.slice(0, 10);
           }
-        }
-
-      function getSelectedRows() {
+}
+    function getSelectedRows() {
             const selectedData = [];
 
             $("#tblellipsisIconmodal tbody tr").each(function () {
@@ -1868,5 +1824,3 @@
 
             return selectedData;
         }
-
-
