@@ -3,907 +3,126 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">Store Weighbridge Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button onclick="handleBack('@Url.Action("Index", "StoreWeighbridgeEntryList")', readOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-                @* <button type="button" onclick="handleBack('@Url.Action("Index", "StoreWeighbridgeEntryList")', readOnly)">
-                    <i class="fa-solid fa-arrow-left"></i>Back to list
-                </button> *@
-            </div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-weight-hanging"></i>
         </div>
+        <div class="erppage-header-title">Store Weighbridge Entry</div>
     </div>
-    <form id="StoreWeighbridgeEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type <span class="required">*</span></label>
-                    <select class="form-control" id="ddlDocType">
-                        @* <option value="">Select DOC Type</option> *@
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "StoreWeighbridgeEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="StoreWeighbridgeEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-required" id="ddlDocType">
+                        <option>Select Doc Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
+                        <option value="1">Open</option>
+                        <option value="0">Close</option>
+                        <option value="2">Cancel</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date <span class="required">*</span></label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlStatus">Status</label>
-                    <select class="form-control" id="ddlStatus">                         
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlGateNo">Gate in No@*  <span class="required">*</span> *@</label>
-                    <select class="form-control" id="ddlGateNo">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Gate in No</label>
+                    <select class="erppage-redinput erppage-required" id="ddlGateNo">
                         <option value="">Select Gate in No</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DdlPartyName">Party Name</label>
-                    <select class="form-control" id="DdlPartyName">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select id="DdlPartyName" class="erppage-input erppage-select">
                         <option selected disabled>-select party name-</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtPartyWeight">Party Weight</label>
-                    <input type="text" class="form-control" id="TxtPartyWeight" placeholder="Enter Party Weight">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party Weight</label>
+                    <input type="number" class="erppage-input" id="TxtPartyWeight" placeholder="Enter Party Weight">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="input-divide">
-                    <label class="checkbox-input-mx">
+                
+                @* <div class="erppage-divfield">
+                    <label class="erppage-label">Label12</label>
+                    <input type="text" class="erppage-input" id="Txtlabel12">
+                </div> 
+                <div class="erppage-divfield">
+                    <div class="erppagesmodal-checkbox-wrap">
+                        <label class="erppage-label">Crystal Report</label>
                         <input type="checkbox" id="ChkCrystalReport" />
-                        Crystal Report
-                    </label>
-                    <div class="form-group">
-                        <label for="Txtlabel12">Label12</label>
-                        <textarea class="form-control" id="Txtlabel12"></textarea>
                     </div>
+                </div>*@
+            </div>
+            <div class="erppage-internalaction">
+                <button type="button" id="btn-print" class="erppage-btn erppage-btn-copy">
+                    <i class="fa fa-print"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblStoreWeighbridge" class="excel-table fixed-grid-table">
+                        <colgroup>
+                            <col style="width:100px;">         <!-- Weight -->
+                            <col style="width:100px;">         <!-- Get Weight -->
+                            <col style="width:100px;">         <!-- Tare -->
+                            <col style="width:100px;">         <!-- Net -->
+                            <col style="width:140px;">         <!-- Date/Time -->
+                            <col style="width:200px;">         <!-- From Place -->
+                            <col style="width:200px;">         <!-- To Place -->
+                            <col style="width:350px;">         <!-- Item -->
+                            <col style="width:180px;">         <!-- Remarks -->
+                            <col style="width:70px;">         <!-- Action -->
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th>Weight</th>
+                                <th>Get Weight</th>
+                                <th>Tare</th>
+                                <th>Net</th>
+                                <th>Date/Time</th>
+                                <th>From Place</th>
+                                <th>To Place</th>
+                                <th>Item</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
+                
             </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblStoreWeighbridge" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
-                            <th>Weight</th>
-                            <th>Get Wgt.</th>
-                            <th>T.Wgt.</th>
-                            <th>N.Wgt.</th>
-                            <th>Date/Time</th>
-                            <th>From Place</th>
-                            <th>To Place</th>
-                            <th>Item</th>
-                            <th>Remarks</th>
-                            <th class="action-col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="erppage-actions">
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                    </div>
-                   @*  <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
-                    </div> *@
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+        </fieldset>
+    </div>
+</div>
 
-<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
-<script src="~/js/common/dropdown.js"></script>
 <script src="~/js/erpjs/weighbridge/transaction/storeweighbridgeentry/storeweighbridgeentry.js"></script>
 
-@* <script>
-    var allFieldIds = [        
-        "DtDocDate",
-        "ddlStatus",
-        "ddlGateNo",
-        "DdlPartyName",
-        "TxtPartyWeight",
-        "ChkCrystalReport",
-        "Txtlabel12"
-      ];
-    const itemRecords = [
-        "TxtWeight",        
-        "TxtTWgt",
-        "TxtNWgt",
-        "TxtDateTime",
-        "TxtFrom",
-        "TxtTo",
-        "TxtItem",
-        "TxtRemarks"
-      ];
-
-    let GateList=[];
-    let docId = "";
-    let readOnly;
-    let docTypeInOut ="";     
-    let isFillingData = false;
-
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
-    /* ================= INIT ================= */
-    $(async function () {
-        try {
-            await bindDropdown('StoreWeighbridgeEntry','DocType', '#ddlDocType', '-- Select Doc Type --', null, null, true, null, false);
-            await bindDropdown('StoreWeighbridgeEntry','DocStatus', '#ddlStatus', '-- Select Status --', null, null, true, null, false);
-            await bindDropdown('StoreWeighbridgeEntry','Party', '#DdlPartyName', '-- Select Party Name --', null, null, false, null, true);
-            $('#ddlDocType').prop('selectedIndex', 0); 
-            handleDocLoad();
-            docTypeInOut=$('#ddlDocType').val();
-            toggleControls(docTypeInOut);
-            addItemRecordRow();
-        } catch (error) {
-            toastr.error('Failed to load document types: ' + error);
-        }
-    });
-    $(document).ready(function () {
-        GetGateEntryList();
-        setEnterKeyFocus(allFieldIds);
-       
-        /* ================= DOC TYPE CHANGE ================= */
-        $('#ddlDocType').on('change', function () {
-            const VType = $(this).val();
-            if (VType) {
-                GetDocid(VType);
-                docTypeInOut=VType;
-                toggleControls(docTypeInOut);
-                $('#tblStoreWeighbridge tbody').empty();            
-                GetGateEntryList();
-                addItemRecordRow();
-            }
-        });
-
-        $('#ddlGateNo').on('change', function () {
-            debugger;
-            if (isFillingData) return;  
-
-            var gateNo = $(this).val();
-            var selectedOption = $(this).find('option:selected');
-
-            if (gateNo) {
-                var partyCode = selectedOption.data('party');
-                var vType = selectedOption.data('vtype');
-                var partyName = selectedOption.data('partynm');
-
-                ensureOption($('#DdlPartyName'), partyCode, partyName);
-                $('#DdlPartyName').val(partyCode).trigger('change');
- 
-                GetGateEntryDetailList(gateNo, vType);
-            } else {
-                $('#DdlPartyName').val('');
-            }
-        });
-        /* ================= SAVE ================= */
-        $('#btn-save').on('click', async function (e) {
-            e.preventDefault();
-            const docType = $('#ddlDocType').val();
-            const gateNo = $('#ddlGateNo').val();
-       
-            if (!validateRequiredField('#ddlDocType', 'Doc Type') ||
-                !validateRequiredField('#NumDocNo', 'Doc No') ||
-                !validateRequiredField('#DtDocDate', 'Doc Date')) return ;
-            
-         
-
-        if (docType === "KSIN" && !gateNo) {
-            toastr.error('Gate No is required for KSIN documents.');
-            $('#ddlGateNo').focus();
-            return;
-        }
-
-            if (!validateBigWeighbridgeTable()) {
-                return;
-            }
-
-            const $btn = $(this);
-            $btn.prop('disabled', true);
-
-            try {
-                const tableData = await collectFormData();
-                console.log('Collected Table Data:', tableData);
-
-                if (docId) {
-                    UpdateData(tableData);
-                } else {
-                    SaveData(tableData);
-                }
-            } catch (error) {
-                console.error('Error during save:', error);
-                toastr.error('An error occurred while saving the data.');
-            } finally {
-                $btn.prop('disabled', false);
-            }
-        });
-    });
-
-    /* ========= Gate and Party TOGGLE CONTROLS ================= */
-    function toggleControls(docTypeInOut) {
-        if (docTypeInOut == "KSIN") {
-            $('#ddlGateNo').prop('disabled', false);
-            $('#DdlPartyName').prop('disabled', true);
-        } else {
-            $('#ddlGateNo').prop('disabled', true);
-            $('#DdlPartyName').prop('disabled', false);
-        }
-    }
-
-    function validateBigWeighbridgeTable() {
-        let isValid = true;
-        let errorMessage = '';
-
-        const rows = $('#tblStoreWeighbridge tbody tr');
-        const docTypeInOut = $('#ddlDocType').val();
-
-        rows.each(function (index) {
-            const rowId = this.id;
-            const idx = rowId.replace('row', '');
-
-            const weight = $(`#TxtWeight${idx}`).val()?.trim();
-            const tweight = $(`#TxtTWgt${idx}`).val()?.trim();
-            const nweight = $(`#TxtNWgt${idx}`).val()?.trim();
-            const datetime = $(`#TxtDateTime${idx}`).val()?.trim();
-            const fromDept = $(`#TxtFrom${idx}`).val()?.trim();
-            const toDept = $(`#TxtTo${idx}`).val()?.trim();
-            const item = $(`#TxtItem${idx}`).val()?.trim();
-            const parsedWeight = parseFloat(weight) || 0;
-
-            
-            if (docTypeInOut === "KSIN") {               
-                if (item && (!weight || weight <= 0 || !tweight || !nweight || !datetime)) {
-                    isValid = false;
-                    errorMessage = `Please fill Weight, T.Weight, N.Weight, and DateTime in row ${index + 1} where Item Name is filled. and weight > 0 .`;
-                    return false; // exit loop early
-                }
-               if (!fromDept || !toDept || fromDept === toDept) {
-                isValid = false;
-                errorMessage = `Please ensure 'From Department' and 'To Department' are filled and not the same in row ${index + 1}.`;
-                return false; // exit loop early
-               }
-
-            } else {               
-                if (index === 0) {
-                    const allFilled = weight && nweight && datetime && fromDept && toDept && item;
-                    if (!allFilled && weight <= 0 ) {
-                        isValid = false;
-                        errorMessage = 'First row is mandatory. Please fill all fields: Weight, N.Weight, DateTime, From, To, and Item. and weight > 0 .';
-                        return false;
-                    }
-                    if (!fromDept || !toDept || fromDept === toDept) {
-                      isValid = false;
-                      errorMessage = `Please ensure 'From Department' and 'To Department' are filled and not the same in row ${index + 1}.`;
-                      return false; // exit loop early
-                    }
-                } else {                  
-                    if (parsedWeight > 0) {
-                        const allFilled = nweight && datetime && fromDept && toDept && item;
-                        if (!allFilled) {
-                            isValid = false;
-                            errorMessage = `Please fill all required fields in row ${index + 1} where Weight > 0.`;
-                            return false;
-                        }
-                         if (!fromDept || !toDept || fromDept === toDept) {
-                            isValid = false;
-                            errorMessage = `Please ensure 'From Department' and 'To Department' are filled and not the same in row ${index + 1}.`;
-                            return false; // exit loop early
-                         }
-                    }
-                }
-            }
-        });
-
-        if (!isValid) {
-            toastr.error(errorMessage);
-        }
-
-        return isValid;
-    }
-    
-    async function handleDocLoad() {
-            docId = getQueryParam('id');
-            readOnly = getQueryParam('readOnly');
-            if (docId) { 
-                $('#ddlDocType').prop('disabled', true);         
-                await GetDocData(docId, readOnly);
-                docTypeInOut=$('#ddlDocType').val();
-                toggleControls(docTypeInOut);
-            } else {
-                const Vtype = $('#ddlDocType').val();                    
-                if(Vtype){
-                  GetDocid(Vtype);
-                }
-                const today = new Date();
-                const todayDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
-                $('#DtDocDate').val(todayDate);
-            }
-    }
-
-    function SaveData(saveDt) {
-        $.ajax({
-            url: '@Url.Action("SaveOrUpdateStoreWeighBridgeEntry", "StoreWeighbridgeEntry")',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(saveDt),
-            success: function (response) {
-                if (response?.status) {
-                    toastr.success("Data saved successfully.");
-                    setTimeout(() => {
-                        window.location.href = '/StoreWeighbridgeEntryList/Index';
-                    }, 1500);
-                } else {
-                    toastr.error(response?.message || "Save failed. Please try again.");
-                }
-            },
-            error: function () {
-                toastr.error("An error occurred while saving. Please contact the administrator.");
-            }
-        });
-    }
-
-    function UpdateData(UpdateDt) {
-        $.ajax({
-            url: '@Url.Action("SaveOrUpdateStoreWeighBridgeEntry", "StoreWeighbridgeEntry")',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(UpdateDt),
-            dataType: 'json',
-            success: function (response) {
-                if (response?.status) {
-                    toastr.success("Data updated successfully");
-                    setTimeout(() => {
-                        window.location.href = '/StoreWeighbridgeEntryList/Index';
-                    }, 1500);
-                } else {
-                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error("Data not updated: " + error);
-            }
-        });
-    }       
-
-    async function collectFormData() {
-        const id = toNullableString(docId);
-        const itemRecords = await collectItemsDetail();
-        return {
-            V_NO: parseIntSafe(document.getElementById("NumDocNo")?.value),
-            V_TYPE: toNullableString(document.getElementById("ddlDocType")?.value),
-            V_DATE: toNullableDate(document.getElementById("DtDocDate")?.value),
-            GATE_NO: parseIntSafe(document.getElementById("ddlGateNo")?.value),
-            PARTY_CODE: parseIntSafe(document.getElementById("DdlPartyName")?.value),
-            DOC_ID: toNullableString(document.getElementById("TxtDocId")?.value),
-            PARTY_QTY: null,
-            STATUS:  parseIntSafe(document.getElementById("ddlStatus")?.value),
-            VEHICLE_NO: null,            
-                V_SHIFT: null,
-                WB_TYPE: null,
-                GATE_TYPE: null,
-                GROSS_NO: null,
-                TARE_NO: null,
-                REMARKS: null,
-                STATUS_DATE: null,
-                NET_WGT: null,
-                FINAL_TYPE: null,
-                FINAL_REM: null,
-                PARTY_GROSSWT: parseDecimalSafe(document.getElementById("TxtPartyWeight")?.value),
-                PARTY_TRWT: null,
-                PARTY_WBNO: null,
-                SMALL_BAG: null,
-                MEDIUM_BAG: null,
-                LARGE_BAG: null,          
-                SaveOrUpdate: (!id || id === 0) ? 'Save' : 'Update',
-                WB2Data: itemRecords
-           
-        };
-    }
-
-    async function collectItemsDetail() {
-        const items = [];
-        let SNo  = 1;
-        $('#tblStoreWeighbridge tbody tr').each(function () {
-            const $r = $(this);
-            const weight = parseDecimalSafe($r.find('.txt-weight').val()) || 0;
-            
-            if (!weight || weight <= 0) return;
-            
-            const wgtDateRaw = $r.find('.txt-datetime').val();
-            let wgtDate = null;
-            let wgtTime = null;
-
-            if (wgtDateRaw) {
-              const [datePart, timePart] = wgtDateRaw.split('T');
-              wgtDate = datePart;
-              wgtTime = timePart;
-            }
-
-            let item = {
-                SNO: SNo,
-                ITEM_NAME: $r.find('.txt-item option:selected').text(),
-                ITEM_CODE: parseIntSafe($r.find('.txt-item').val()),
-
-                WEIGHT: weight,
-                TARE_WGT: parseDecimalSafe($r.find('.txt-twgt').val()),
-                NET_WGT: parseDecimalSafe($r.find('.txt-nwgt').val()),
-
-                WGT_DATE: wgtDate,
-                WGT_TIME: wgtTime,
-
-                FROM_NAME: $r.find('.txt-from option:selected').text(),
-                TO_NAME: $r.find('.txt-to option:selected').text(),
-                FROM_PLACE: parseIntSafe($r.find('.txt-from').val()),
-                TO_PLACE: parseIntSafe($r.find('.txt-to').val()),
-                REMARKS: toNullableString($r.find('.txt-remarks').val()),
-
-                V_SHIFT: null,
-                TYPE: null,
-                STATUS: null,
-                Ref_type: null,
-                Ref_no: null,
-                wb_time: null,
-                COND: null,
-                MOIS_PER: null,
-                MOIS_WT: null
-            }
-            SNo++;
-           if (item.ITEM_CODE) {
-                items.push(item);
-           }
-        });
-
-        return items;
-    }
-
-    async function fillHeaderData(headdata) {
-        if (!Array.isArray(headdata) || headdata.length === 0) return;
-        const data = headdata[0];
-         
-        $("#TxtDocId").val(data.DOC_ID ?? "");
-        $("#ddlDocType").val(data.V_TYPE ?? "");
-        $("#NumDocNo").val(data.V_NO ?? "");
-        $("#DtDocDate").val((data.V_DATE ?? '').substring(0, 10));
-        $("#TxtPartyWeight").val(data.PARTY_GROSSWT ?? "");
-        $("#ChkCrystalReport").prop('checked', data.CRYSTAL_REPORT ?? false);
-        $("#Txtlabel12").val(data.TXT_LABEL12 ?? "");
-
-        GetGateEntryList(data.GATE_NO);
-        // GetPartyList(data.PARTY_CODE);           
-        await bindDropdown('StoreWeighbridgeEntry','Party', '#DdlPartyName', '-- Select Party Name --', data.PARTY_CODE, null, false, null, true);
-        $('#ddlStatus').val(data.STATUS).trigger('change'); 
-    }
-
-    async function fillItemDetailTable(itemsData) {
-        docTypeInOut=$('#ddlDocType').val();
-        if(itemsData != null && itemsData.length>0){
-            itemsData.forEach(function(item){
-                const Vdate = item.WGT_DATE ?? '';
-                const Vtime = item.WGT_TIME ?? '';
-                if (Vdate && Vtime) {
-                    const dateTimeValue = `${Vdate.slice(0, 10)}T${Vtime.slice(0, 5)}`;
-                    // $(`#TxtDateTime${idx}`).val(dateTimeValue);
-                    item.dateTimeValue = dateTimeValue;
-                }
-                addItemRecordRow(item);
-                bindRowDropdowns($row, selectedValue = null)
-            });
-        }
-        // if (!Array.isArray(itemsData)) return;
-        // console.log(itemsData);
-
-        // for (let index = 0; index < itemsData.length; index++) {
-        //     const item = itemsData[index];
-        //     const idx = index + 1;
- 
-        //     addItemRecordRow();  
-        //     await bindDropdownData(idx); 
-            
-        //       console.log(item.FROM_PLACE,item.TO_PLACE,item.ITEM_CODE);
-        //       $(`#TxtFrom${idx}`).val(item.FROM_PLACE ?? "").trigger('change');
-        //       $(`#TxtTo${idx}`).val(item.TO_PLACE ?? "").trigger('change');
-        //       $(`#TxtItem${idx}`).val(item.ITEM_CODE ?? "").trigger('change');
-
-        //     $(`#TxtWeight${idx}`).val(item.WEIGHT ?? "");            
-        //     $(`#TxtTWgt${idx}`).val(item.TARE_WGT ?? "");
-        //     $(`#TxtNWgt${idx}`).val(item.NET_WGT ?? "");
-        //     $(`#TxtRemarks${idx}`).val(item.REMARKS ?? "");
- 
-        //     const Vdate = item.WGT_DATE ?? '';
-        //     const Vtime = item.WGT_TIME ?? '';
-        //     if (Vdate && Vtime) {
-        //         const dateTimeValue = `${Vdate.slice(0, 10)}T${Vtime.slice(0, 5)}`;
-        //         $(`#TxtDateTime${idx}`).val(dateTimeValue);
-        //     }
-
-        //     docTypeInOut=$('#ddlDocType').val();
-        //     if (docTypeInOut == "KSIN") {
-        //         $(`#TxtItem${idx}`).prop('disabled', true);
-        //     }else{
-        //         $(`#TxtItem${idx}`).prop('disabled', false);
-        //     }
-      
-        // }
-    }
-
-    function GetDocid(VType) {
-        $.ajax({
-            url: '@Url.Action("GetMaxVNo", "StoreWeighbridgeEntry")',
-            type: 'GET',
-            data:{V_type:VType},
-            success: function (response) {
-                if (response.status === true && response.data) {
-                    $('#NumDocNo').val(response.data.vNo || '');
-                    $('#TxtDocId').val(response.data.docId || '');
-                } else {
-                    $('#NumDocNo').val('');
-                    $('#TxtDocId').val('');
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error fetching Doc ID:', error);
-            }
-        });
-     }
-
-    function GetGateEntryList(selectedValue = null) {
-        $.ajax({
-            url: '@Url.Action("GetGateNo", "StoreWeighbridgeEntry")',
-            type: 'GET',
-            dataType: 'json',
-            success: function (response) {
-                if (response.status) {
-                    const $DropdownId = $('#ddlGateNo');
-                    $DropdownId.empty();
-                    $DropdownId.append('<option value="">- Select Gate No. -</option>');
-
-                    // Clear and refill global GateList
-                    GateList = [];
-
-                    $.each(response.data, function (index, item) {
-                        // Add item to dropdown
-                        $DropdownId.append(
-                            `<option
-                                data-VType="${item.V_TYPE}"
-                                data-party="${item.PARTY_CODE}"
-                                data-partynm="${item.partyName}"
-                                value="${item.V_NO}">
-                                ${item.V_NO} || ${item.V_TYPE} || ${item.partyName}
-                            </option>`
-                        );
-
-                        // Add item to GateList array
-                        GateList.push(item);
-                    });
-
-                    $DropdownId.select2({
-                        placeholder: "- Select -",
-                        allowClear: true
-                    });
-
-                    // Set selected value if provided and exists
-                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
-                        $DropdownId.val(selectedValue).trigger('change');
-                    } else {
-                        $DropdownId.val('').trigger('change');
-                    }
-                } else {
-                    toastr.error("Gate No. Load failed");
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error("Gate No. Load failed", xhr.error);
-            }
-        });
-    }
-
-    // async function GetGateEntryDetailList(VNo, VType) {
-    //     try {
-    //         const response = await $.ajax({
-    //             url: '@Url.Action("GetGateEntryDetailList", "StoreWeighbridgeEntry")',
-    //             type: 'GET',
-    //             data: { V_no: VNo, V_type: VType }
-    //         });
-    //         const itemsData = response.data;
-    //         if (response.status === true && Array.isArray(itemsData)) {               
-    //             $('#tblStoreWeighbridge tbody').empty();
-    //             for (let index = 0; index < itemsData.length; index++) {
-    //                 const item = itemsData[index];
-    //                 const idx = index + 1;
-                   
-    //                 addItemRecordRow();
-    //                 await bindDropdownData(idx);
-
-    //                 const $itemDropdown = $(`#TxtItem${idx}`);
-
-    //                 if ($itemDropdown.length === 0) {
-    //                     console.warn(`Dropdown #TxtItem${idx} not found`);
-    //                     continue;
-    //                 }
-
-    //                 if ($itemDropdown.find(`option[value="${item.ITEM_CODE}"]`).length === 0) {
-    //                     $itemDropdown.append(
-    //                         new Option(item.ITEM_NAME, item.ITEM_CODE, false, false)
-    //                     );
-    //                 }
-    //                 $itemDropdown.val(item.ITEM_CODE).trigger('change.select2');
-    //             }
-    //         } else {
-    //             $('#tblStoreWeighbridge tbody').empty();
-    //         }
-
-    //     } catch (error) {
-    //         toastr.error('Error fetching Gate Entry details: ' + error);
-    //         $('#tblStoreWeighbridge tbody').empty();
-    //     }
-    // }
-    async function GetGateEntryDetailList(VNo, VType) {
-        debugger;
-        try {
-            const response = await $.ajax({
-                url: '@Url.Action("GetGateEntryDetailList", "StoreWeighbridgeEntry")',
-                type: 'GET',
-                data: { V_no: VNo, V_type: VType }
-            });
-
-            const itemsData = response.data;
-
-            $('#tblStoreWeighbridge tbody').empty();
-
-            if (response.status === true && Array.isArray(itemsData) && itemsData.length > 0) {
-
-                for (let index = 0; index < itemsData.length; index++) {
-                    const item = itemsData[index];
-                    const idx = index + 1;
-
-                    // Construct dateTimeValue from WGT_DATE and WGT_TIME
-                    let dateTimeValue = '';
-                    if (item.WGT_DATE && item.WGT_TIME) {
-                        dateTimeValue = `${item.WGT_DATE.slice(0, 10)}T${item.WGT_TIME.slice(0, 5)}`;
-                    }
-
-                    // Attach dateTimeValue to item data object
-                    item.dateTimeValue = dateTimeValue;
-
-                    // Add row with server data
-                    addItemRecordRow(item);
-
-                    // Get the last added row
-                    const $row = $('#tblStoreWeighbridge tbody').find('tr').last();
-
-                    // Bind dropdowns in that row
-                    await bindRowDropdowns($row);
-
-                    // Set the item dropdown value if available
-                    const $itemDropdown = $row.find('.txt-item');
-                    if ($itemDropdown.length > 0 && item.ITEM_CODE) {
-                        // Add the option if it doesn't exist
-                        if ($itemDropdown.find(`option[value="${item.ITEM_CODE}"]`).length === 0) {
-                            $itemDropdown.append(new Option(item.ITEM_NAME, item.ITEM_CODE, false, false));
-                        }
-                        $itemDropdown.val(item.ITEM_CODE).trigger('change.select2');
-                    }
-                }
-            }
-            else{
-                addItemRecordRow();
-            }
-
-        } catch (error) {
-            toastr.error('Error fetching Gate Entry details: ' + error);
-            $('#tblStoreWeighbridge tbody').empty();
-            addItemRecordRow();
-        }
-    }
-        
-    async function GetDocData(MasterTblId, readOnly) {
-        try {
-            const response = await $.ajax({
-                url: '/StoreWeighbridgeEntry/GetStoreWeighBridgeById',
-                type: 'GET',
-                data: { id: MasterTblId }
-            });
-            if (response.status) {  
-                isFillingData = true;
-                await fillHeaderData(response.header);                
-                await fillItemDetailTable(response.detail);
-                isFillingData = false;
-                if (readOnly === 'true') {
-                    $('#btn-save, #cancelBtn').hide();
-                    disableAllFields();
-                } else {
-                    $('#btn-save, #cancelBtn').show();
-                    enableAllFields();
-                }
-            } else {
-                toastr.error('No data returned.');
-            }
-        } catch (error) {
-            toastr.error('Failed to load data.');
-            console.error(error);
-        }
-    }
-    function addItemRecordRow(data = {}) {
-
-        const tbody = $('#tblStoreWeighbridge tbody');
-
-        const itemSelect = (docTypeInOut == "KSIN")
-            ? `<select class="form-control txt-item" disabled><option value="">Select Item</option></select>`
-            : `<select class="form-control txt-item"><option value="">Select Item</option></select>`;
-
-        const row = `
-            <tr class="no-border-input weigh-row">
-
-                <td><input type="text" class="form-control txt-weight" placeholder="Weight" value="${data.WEIGHT || ''}"></td>
-
-                <td><button class="form-control btn-get-wgt">Get Weight</button></td>
-
-                <td><input type="text" class="form-control txt-twgt" placeholder="T.Wgt" value="${data.TARE_WGT || ''}"></td>
-
-                <td><input type="text" class="form-control txt-nwgt" placeholder="N.Wgt" readonly value="${data.NET_WGT || ''}"></td>
-
-                <td><input type="datetime-local" class="form-control txt-datetime" value="${data.dateTimeValue || ''}"></td>
-
-                <td><select class="form-control txt-from"><option value="">From</option></select></td>
-
-                <td><select class="form-control txt-to"><option value="">To</option></select></td>
-
-                <td>${itemSelect}</td>
-
-                <td><input type="text" class="form-control txt-remarks" value="${data.REMARKS || ''}"></td>
-
-                <td>
-                    <i class="fa fa-plus btn-add-action text-success"></i>
-                    <i class="fa fa-trash btn-delete-action text-danger"></i>
-                </td>
-
-            </tr>
-        `;
-
-        tbody.append(row);
-
-        const $row = tbody.find('tr').last();
-
-        bindRowDropdowns($row);
-    }
-    /* ================= DROPDOWNS ================= */
-    async function bindRowDropdowns($row, selectedValue = null) {
-
-        await bindDropdown('StoreWeighbridgeEntry','Place',$row.find('.txt-from'),'- From Place -',selectedValue,null,false,null,true);
-
-        await bindDropdown('StoreWeighbridgeEntry','Place',$row.find('.txt-to'),'- To Place -',selectedValue,null,false,null,true);
-
-        await bindDropdown('StoreWeighbridgeEntry','Items',$row.find('.txt-item'),'- Items -',selectedValue,null,false,null,true);
-    }
-    
-    /* Weight calculation */
-    function calculateNetWeight($row) {
-        const weight = parseFloat($row.find('.txt-weight').val()) || 0;
-        const tareWeight = parseFloat($row.find('.txt-twgt').val()) || 0;
-        const netWeight = weight - tareWeight;
-        $row.find('.txt-nwgt').val(netWeight.toFixed(2));
-    }
-    $('#tblStoreWeighbridge').on('input', '.txt-weight', function () {
-        const $row = $(this).closest('tr');
-        calculateNetWeight($row);
-    });
-    $('#tblStoreWeighbridge').on('input', '.txt-twgt', function () {
-        const $row = $(this).closest('tr');
-        calculateNetWeight($row);
-        const formattedDateTime = getCurrentFormattedDateTime();
-        $row.find('.txt-datetime').val(formattedDateTime);
-    });
-    /* Get Weight */
-    $('#tblStoreWeighbridge').on('click', '.btn-get-wgt', function (e) {
-        e.preventDefault();
-        const $row = $(this).closest('tr');
-        const formattedDateTime = getCurrentFormattedDateTime();
-        $row.find('.txt-datetime').val(formattedDateTime);
-        $row.find('.txt-weight').val(0);
-        calculateNetWeight($row);
-        $row.find('.txt-datetime').prop('readonly', true);
-    });
-
-    /* Add Row */
-    $(document).on('click', '.btn-add-row, .btn-add-action', function () {
-            addItemRecordRow();
-    });
-
-    /* Delete Row */
-    $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
-        var tbody = $(this).closest('tbody');
-        var rowCount = tbody.find('tr').length;
-        if (rowCount > 1) {
-            $(this).closest('tr').remove();
-        } else {
-            alert('Cannot delete the first row.');
-        }
-    });
-
-    //==Enable & Disable==
-    function setEnterKeyFocus(sequence) {
-        sequence.forEach((id, index) => {
-            $(`#${id}`).on('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (index + 1 < sequence.length) {
-                        $(`#${sequence[index + 1]}`).focus();
-                    }
-                }
-            });
-        });
-    }
-    function setEnterKeyFocusOnTable(sequence, rowCount) {
-        sequence.forEach((id, index) => {
-            let elementId = `#${id}${rowCount}`;
-            $(document).on('keydown', elementId, function (e) {
-                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
-                    e.preventDefault();
-
-                    let nextIndex = index + 1;
-                    if (nextIndex < sequence.length) {
-                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
-                        if ($(nextElementId).length) {
-                            $(nextElementId).focus();
-                        }
-                    } else {
-
-                        addItemRecordRow();
-                        setEnterKeyFocus(sequence, rowCount + 1);
-                        $(`#${sequence[0]}${rowCount + 1}`).focus();
-                    }
-                }
-            });
-        });
-    }
-    function enableAllFields() {
-        allFieldIds.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.disabled = false;
-        });
-    }
-    function disableAllFields() {
-        allFieldIds.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.disabled = true;
-        });
-    }
-</script> *@
 

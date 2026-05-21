@@ -83,6 +83,7 @@ function deleteRecordbytype(controller, docId, doctype, options = {}) {
                                 successCallback();
                             }
                         });
+                    
 
                 } else {
                     Swal.fire('Failed', response.message, 'warning');

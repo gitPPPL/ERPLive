@@ -1,15 +1,20 @@
-﻿using iTextSharp.text.pdf;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Reflection.Emit;
+using System.Text.Json;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Weighbridge.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 
 namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
+    [SessionAuthorize]
     public class StoreWeighbridgeEntryController : Controller
     {
         private readonly DbHelper _dbHelper;
@@ -31,7 +36,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         {
             return View("~/Views/Weighbridge/Transaction/StoreWeighbridgeEntry/Index.cshtml");
         }
-
         [HttpGet]
         public IActionResult GetMaxVNo(string V_type)
         {
@@ -51,7 +55,17 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             }
         }
 
-        //=========Dropdowns==============
+        //===Validate VDate
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("WB1", vdate, vtype, vno);
+            return Ok(result);
+        }
+        //===Dropdowns
         public JsonResult GetDropdown(string type, string VTypeId = "")
         {
             var gv = _globalValue.GetGlobalVariables();
@@ -72,15 +86,9 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             try
             {
                 var userDt = _globalValue.GetGlobalVariables();
-                //string strqry= $@"SELECT V_NO,V_TYPE,TRUCK_NO,PARTY_CODE FROM GATE1 where COMP_CODE={userDt.PubCompCode} and YEAR_CODE={userDt.PubFYearCode} and BRANCH_CODE=1 AND V_TYPE IN ( select  DISTINCT CODE from DOCTYPE_MAST where DOCTYPE='GateInward' ) ";
-                string strqry = $@"
-                   SELECT V_NO,V_TYPE,TRUCK_NO, PARTY_CODE, sg.NAME partyName, d.NAME as VtypeName FROM GATE1 g 
-                   left join SUBGROUP_MAST sg on g.PARTY_CODE=sg.CODE and g.COMP_CODE=sg.COMP_CODE
-                   left join DOCTYPE_MAST d on g.V_TYPE=d.CODE 
-                   where g.COMP_CODE={userDt.PubCompCode}  and g.YEAR_CODE={userDt.PubFYearCode} and
-                   g.BRANCH_CODE={userDt.PubBranchCode} AND g.V_TYPE IN
-                   ( select  DISTINCT CODE from DOCTYPE_MAST where DOCTYPE='GateInward' ) order by V_NO ";
-
+                string strqry = $@"select a.V_TYPE as V_TYPE, a.V_NO as V_NO, b.NAME as NAME from GATE1 a left join DOCTYPE_MAST b on b.CODE = a.V_TYPE 
+                                where a.COMP_CODE ={userDt.PubCompCode} and a.YEAR_CODE ={userDt.PubFYearCode} and a.BRANCH_CODE ={userDt.PubBranchCode}
+                                and b.DOCTYPE in ('GateInward') order by a.v_no";
                 var gateList = await _dbHelper.GetJsonDataAsync(strqry);
                 return Json(new { status = true, data = gateList });
             }
@@ -95,8 +103,26 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         {
             var gv = _globalValue.GetGlobalVariables();
             try
-            {               
-                var gatelist = await _dbHelper.GetJsonDataAsync($@"select distinct ITEM_CODE , ITEM_NAME  from GATE2 where COMP_CODE ={gv.PubCompCode} and BRANCH_CODE={gv.PubBranchCode}  and V_NO = {V_no} and V_TYPE = '{V_type}' order by ITEM_NAME");
+            {
+                var parameter = new Dictionary<string, object>
+                {
+                    {"@Action", "GetGateDetailsByGateNo" },
+                    {"@COMP_CODE", gv.PubCompCode },
+                    //{"@YEAR_CODE", gv.PubFYearCode },
+                    {"@BRANCH_CODE", gv.PubBranchCode},
+                    {"@V_NO",  V_no},
+                    {"@V_TYPE", V_type }
+                };
+                var gatelist = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
+    //            var gatelist = $@"
+    //               select distinct a.ITEM_CODE , a.ITEM_NAME, b.PARTY_CODE as Party from 
+    //GATE2 a 
+    //left join GATE1 b on a.COMP_CODE =b.COMP_CODE and a.BRANCH_CODE =b.BRANCH_CODE
+    //and b.YEAR_CODE =a.YEAR_CODE and b.V_TYPE =a.V_TYPE and b.V_NO =a.V_NO 
+    //left join ITEM_MAST c on c.CODE =a.ITEM_CODE and c.COMP_CODE = a.COMP_CODE 
+    //where a.COMP_CODE ={gv.PubCompCode} and a.BRANCH_CODE={gv.PubBranchCode}  and 
+    //a.V_NO = {V_no} and a.V_TYPE = {V_type}
+    //order by ITEM_NAME ";
                 return Json(new { status = true, data = gatelist });
             }
             catch (Exception ex)

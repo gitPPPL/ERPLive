@@ -58,7 +58,7 @@ $(document).ready(function () {
 
 							<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
 							<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+							<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
 							
 						</td>
 					</tr>

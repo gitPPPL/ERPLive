@@ -37,15 +37,15 @@ $(document).ready(function () {
 			$.each(docs, function (index, item) {
 				let actions = '';
 				if (window.permissions.canEdit) {
-					actions += `<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.DOC_ID}')"></i>`;
+					actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}')"><i class="fa fa-edit"></i></button>`;
 				}
-				actions += `<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.DOC_ID}')"></i>`;
+				actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
 				if (window.permissions.canDelete) {
-					actions += `<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteStoreWBEntry('${item.DOC_ID}')"></i>`;
+					actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteStoreWBEntry('${item.DOC_ID}')"><i class="fa fa-trash"></i></button>`;
 				}
 				if (window.permissions.canDocDetail) {
-					actions += `<i class="fa fa-file btn-document btn-details" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showStoreWbDetailsPopup('${item.DOC_ID}')"></i>`;
+					actions += `<button class="act-btn document" title="Document Details" style="cursor:pointer;" onclick="showStoreWbDetailsPopup('${item.DOC_ID}')"><i class="fa fa-file"></i></button>`;
 				}
 				tbody.append(`
 					<tr>
@@ -55,7 +55,6 @@ $(document).ready(function () {
 						<td>${item.V_DATE || ''}</td>
 						<td>${item.GATE_NO || ''}</td>
 						<td>${item.PartyNm || ''}</td>
-						<td>${item.PARTY_GROSSWT || ''}</td>
 						<td class="action-col">${actions}</td>
 					</tr>
 				`);
@@ -70,26 +69,95 @@ $(document).ready(function () {
 		storeWbPagination.load();
 	});
 });
-
 // Page Size Change
 function changeRowsPerPage() {
 	storeWbPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
 	storeWbPagination.load();
 }
-
 function AddOrEditFunction(rowId) {
 	window.location.href = '/StoreWeighbridgeEntry/Index?id=' + encodeURIComponent(rowId);
 }
-
 function viewMenuDetails(rowId) {
 	window.location.href = '/StoreWeighbridgeEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 }
-
 function deleteStoreWBEntry(docId) {
-	deleteRecord("StoreWeighbridgeEntryList", docId, {
-		action: "DeleteStoreWBridgeEntry",
-		text: "This will permanently delete the Store WeighBridge entry.",
-		successCallback: storeWbPagination.load
+	
+	// STEP 1: Validate first
+	$.ajax({
+		url: `/StoreWeighbridgeEntryList/ValidateDeleteStoreWb`,
+		type: 'POST',
+		data: { docId: docId },
+
+		success: function (response) {
+
+			if (!response.success) {
+				Swal.fire('Failed', response.message, 'warning');
+				return;
+			}
+
+			// STEP 2: Prepare message
+			let swalText = "This will permanently delete the Store WeighBridge entry.";
+			let cancelBtn = true;
+			let confirmBtn = true;
+			let swalTitle = "Are you sure?";
+			if (response.data === "Exists") {
+				swalText = response.message;
+				cancelBtn = false;
+				confirmBtn = false;
+				swalTitle = "Can't delete!!";
+			}
+
+			// STEP 3: Show only ONE popup
+			Swal.fire({
+				title: swalTitle,
+				html: swalText,
+				icon: 'warning',
+				showCancelButton: cancelBtn,
+				showConfirmButton: confirmBtn,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!',
+				cancelButtonText: 'Cancel'
+			}).then((result) => {
+
+				if (!result.isConfirmed) return;
+
+				// STEP 4: Delete
+				$.ajax({
+					url: `/StoreWeighbridgeEntryList/DeleteStoreWBridgeEntry`,
+					type: 'POST',
+					data: { docId: docId },
+
+					success: function (res) {
+
+						if (res.success) {
+
+							Swal.fire({
+								icon: 'success',
+								title: 'Deleted!',
+								text: res.message || 'Deleted successfully',
+								showConfirmButton: false,   // Hide the OK button
+								timer: 2000,                 // Auto close
+							});
+							setTimeout(() => {
+								window.location.href = '/StoreWeighbridgeEntryList/Index';
+							}, 2000);
+						} else {
+							Swal.fire('Failed', res.message, 'warning');
+						}
+					},
+
+					error: function () {
+						Swal.fire('Error!', 'Error in deleting.', 'error');
+					}
+				});
+
+			});
+		},
+
+		error: function () {
+			Swal.fire('Error!', 'Something went wrong.', 'error');
+		}
 	});
 }
 function exportToExcel() {
@@ -145,7 +213,6 @@ function exportToExcel() {
 			toastr.error("Failed to export data.");
 		});
 }
-
 function callGetReportAsPdf() {
 	var reportName = "rpt_emp_mast";
 	var now = new Date();
@@ -181,7 +248,6 @@ function callGetReportAsPdf() {
 		}
 	});
 }
-
 function showStoreWbDetailsPopup(docCode) {
 	$.ajax({
 		url: '/StoreWeighbridgeEntryList/GetStoreWBridgeEntryDetails',

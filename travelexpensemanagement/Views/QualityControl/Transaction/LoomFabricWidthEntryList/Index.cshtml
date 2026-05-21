@@ -1,5 +1,5 @@
 ﻿@{
-	ViewBag.Title = "Loom Fabric Strength Entry List";
+	ViewBag.Title = "Loom Fabric Width Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
 	var currentMenu = ViewBag.CurrentMenu as string;
@@ -27,11 +27,9 @@
 			break;
 		}
 	}
-
 }
-
 <fieldset>
-	<legend class="legend-field">Loom Fabric Strength Entry List</legend>
+	<legend class="legend-field">Loom Fabric Width Entry List</legend>
 	<div class="row">
 		<div class="col-lg-6">
 			<div class="input-group shadow-sm rounded-pill overflow-hidden">
@@ -40,52 +38,53 @@
 		</div>
 		<div class="col-lg-6">
 			<div class="btn-rightalign">
-				@if(canAdd)
+				@if (canAdd)
 				{
-					<button onclick="window.location.href='@Url.Action("Index", "LoomFabricStrengthEntry")'" type="submit" class="btn btn-add">
+					<button onclick="window.location.href='@Url.Action("Index", "LoomFabricWidthEntry")'" type="submit" class="btn btn-add">
 						<i class="fa fa-plus"></i>Add
 					</button>
 				}
-				@if(canPrint)
+				@if (canPrint)
 				{
 					<button class="btn btn-print" onclick="callGetReportAsPdf()">
-						<i class="fa fa-file-pdf"></i> PDF
+						<i class="fa fa-print"></i> Print
 					</button>
-                }
-				@if(canExport)
+				}
+				@if (canExport)
 				{
 					<button class="btn btn-export" onclick="exportToExcel()">
-						<i class="fas fa-file-excel"></i> Excel
+						<i class="fas fa-file-export"></i> Export
 					</button>
-                }
+				}
 				@if (canMail)
 				{
 					<button class="btn btn-mail">
 						<i class="fa fa-envelope"></i> Mail
 					</button>
 				}
- 				@if (canApproval)
+				@if (canApproval)
 				{
-					<button class="btn btn-approval">
-						<i class="fa fa-thumbs-up"></i> Approval
+					<button class="btn btn-approved">
+						<i class="fa fa-check"></i> Approved
 					</button>
-                }				
- 
+				}
+							
+
 			</div>
 		</div>
 	</div>
 	<div class="card">
 		<div class="table-responsive">
-			<table id="tblLoomFabricStrengthEntryList" class="table-width">
+			<table id="tblLoomFabricWidthEntryList" class="table-width">
 				<thead class="table-head">
 					<tr>
 						<th style="display:none;">Code</th>
-						<th>Vno</th>
-						<th>Vtype</th>
-						<th>Vdate</th>
-						<th>Employee</th>
-						<th>Place</th>
+						<th>Doc No</th>
+						<th>Doc Type</th>
+						<th>Doc Date</th>
 						<th>Shift</th>
+						<th>Place</th>
+						<th>Inspected By</th>						
 						<th>Remarks</th>
 						<th>Action</th>
 					</tr>
@@ -127,7 +126,7 @@
 		function GetMasterDataList() {
 			const searchTerm = $('#searchBox').val().trim();
 			$.ajax({
-				url: '@Url.Action("GetLoomFabricStrengthList", "LoomFabricStrengthEntryList")',
+				url: '@Url.Action("GetLoomFabricStrengthList", "LoomFabricWidthEntryList")',
 				type: 'GET',
 				dataType: 'json',
 				data: {
@@ -138,7 +137,7 @@
 				success: function (res) {
 					const mastListData = res.data || [];
 					const totalCount = res.totalCount || 0;
-					let tbody = $('#tblLoomFabricStrengthEntryList tbody');
+					let tbody = $('#tblLoomFabricWidthEntryList tbody');
 					tbody.empty();
 					console.log(mastListData);
 					if (mastListData.length === 0) {
@@ -160,13 +159,13 @@
 					}
 					tbody.append(`
 							<tr>
-								<td class="d-none code">${item.DOC_ID}</td>								
+								<td class="d-none code">${item.DOC_ID}</td>
 								<td>${item.V_NO}</td>
 								<td>${item.V_TYPE}</td>
-								<td>${item.V_DATE}</td>
+								<td>${item.V_DATE}</td>							
+								<td>${item.SHIFT}</td>
+							    <td>${item.PlaceName}</td>
 								<td>${item.employeename}</td>
-								<td>${item.PlaceName}</td>
-								<td>${item.SHIFT}</td>								 
 								<td>${item.REMARKS}</td>
 							   <td>${actions}</td>
 							</tr>
@@ -221,11 +220,11 @@
 		}
 
 		function AddOrEditFunction(rowId) {
-			window.location.href = '/LoomFabricStrengthEntry/Index?id=' + encodeURIComponent(rowId);
+			window.location.href = '/LoomFabricWidthEntry/Index?id=' + encodeURIComponent(rowId);
 		}
 
 		function viewMenuDetails(rowId) {
-			window.location.href = '/LoomFabricStrengthEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+			window.location.href = '/LoomFabricWidthEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 		}
 
 		$(document).on('click', '.btn-delete', function() {
@@ -235,7 +234,7 @@
 				if (!confirmed) return;
 
 				$.ajax({
-					url: '/LoomFabricStrengthEntryList/DeleteLoomFabricStrengthEntry',
+					url: '/LoomFabricWidthEntryList/DeleteLoomFabricStrengthEntry',
 					type: 'delete',
 					data: { docid: CodeforDel },
 					success: function (res) {
@@ -255,7 +254,7 @@
 		});
 
 		function exportToExcel() {
-		  fetch('/LoomFabricStrengthEntryList/ExportAllDocs')
+		  fetch('/LoomFabricWidthEntryList/ExportAllDocs')
 			.then(response => {
 			  if (!response.ok) throw new Error("Network response was not ok");
 			  return response.json();
@@ -308,8 +307,9 @@
 			  toastr.error("Failed to export data.");
 			});
 		}
+
 		function callGetReportAsPdf() {
-		    var reportName = "rpt_emp_mast";
+			var reportName = "rpt_emp_mast";
 			var now = new Date();
 			var day = String(now.getDate()).padStart(2, '0');
 			var month = String(now.getMonth() + 1).padStart(2, '0');
@@ -319,7 +319,7 @@
 			var seconds = String(now.getSeconds()).padStart(2, '0');
 			var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
 
-			 $.ajax({
+			$.ajax({
 				url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
 				type: 'GET',
 				data: { Reportname: reportName },
@@ -344,9 +344,10 @@
 			});
 		}
 
+
 		 function showImpExpExpensePopup(docCode) {
 			 $.ajax({
-				 url: '/LoomFabricStrengthEntryList/GetLoomFabricStrengthEntryDetails',
+				 url: '/LoomFabricWidthEntryList/GetLoomFabricStrengthEntryDetails',
 				 type: 'Get',
 				 dataType: 'json',
 				 data: { docid: docCode },
@@ -364,6 +365,4 @@
 		 }
 
 </script>
-
-
 

@@ -1,6 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Office.Word;
+using iTextSharp.text.pdf;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Reflection.Emit;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -79,7 +82,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 response.status = false;
                 response.message = "Data save failed.";
                 return response;
-                //return Json(new { status = false, message = "Data save failed." });
             }
             try
             {
@@ -98,7 +100,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                             using (SqlCommand cmd = new SqlCommand("[dbo].[sp_WBEntry]", con, transaction))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
-                                //cmd.Parameters.AddWithValue("@Action", model.SaveOrUpdate == "Save" ? "Add" : "Edit");
                                 if (model.SaveOrUpdate == "Save")
                                 {
                                     cmd.Parameters.AddWithValue("@Action", "Add");
@@ -164,21 +165,26 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                                 if ((int)returnParam.Value <= 0)
                                     success = false;
                             }
-                            
+
+                            //================Update Gate1===========
+                            bool isUpdated = UpdateGate1(con, transaction, model);
+                            if (isUpdated)
+                            {
+                                success = true;
+                            }
                             if (success)
                             {
                                 transaction.Commit();
-                                //=========================================Uncomment after final===============================
-                                //_logService.InsertLog("WB1", "Store WeighBridge Entry", "Transaction", mode, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
-                                //_logService.InsertLog("WB2", "Store WeighBridge Entry", "Transaction", mode, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
-                                //if(mode != "Insert")
-                                //{
-                                //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "WB1", sourceTable: "WB1", transactionType: "Transaction",
-                                //            codeVNo: model.V_NO.ToString(), vtype: model.V_TYPE);
-                                //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "WB2", sourceTable: "WB2", transactionType: "Transaction",
-                                //            codeVNo: model.V_NO.ToString(), vtype: model.V_TYPE);
-                                //}
-                                //=================================================
+                                //=========================================Log Insert===============================
+                                _logService.InsertLog("WB1", "Store WeighBridge Entry", "Transaction", mode, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
+                                _logService.InsertLog("WB2", "Store WeighBridge Entry", "Transaction", mode, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
+                                if (mode != "Insert")
+                                {
+                                    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "WB1", sourceTable: "WB1", transactionType: "Transaction",
+                                            codeVNo: model.V_NO.ToString(), vtype: model.V_TYPE);
+                                    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "WB2", sourceTable: "WB2", transactionType: "Transaction",
+                                            codeVNo: model.V_NO.ToString(), vtype: model.V_TYPE);
+                                }
                             }
                             else
                                 transaction.Rollback();
@@ -186,11 +192,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                             response.status = success;
                             response.message = success ? "Data save/update successfully." : "Failed to save or update some entry details.";
                             return response;
-                            //return Json(new
-                            //{
-                            //    status = success,
-                            //    message = success ? "Data save/update successfully." : "Failed to save or update some entry details."
-                            //});
                         }
                         catch (Exception ex)
                         {
@@ -198,7 +199,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                             response.status = false;
                             response.message = "Transaction failed: " + ex.Message;
                             return response;
-                            //return Json(new { status = false, message = "Transaction failed: " + ex.Message });
                         }
                     }
                 }
@@ -208,7 +208,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 response.status = false;
                 response.message = "Error: " + ex.Message;
                 return response;
-                //return Json(new { status = false, message = "Error: " + ex.Message });
             }
         }
         private DataTable ToWB2DataTable(List<TypeWB2> items)
@@ -255,6 +254,54 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
             }
 
             return table;
+        }
+        private bool UpdateGate1(SqlConnection con, SqlTransaction tran, WBEntryModel model)
+        {
+            var gv = _globalValue.GetGlobalVariables();
+            if(model == null)
+            {
+                return false;
+            }
+            try
+            {
+                if(model.SaveOrUpdate != "Save")
+                {
+                    
+                    using (SqlCommand cmd = new SqlCommand("sp_GetWBEntry", con, tran))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "UpdateGate1_Wb_Type_WithNull");
+                        cmd.Parameters.AddWithValue("@PrevGateType", model.oldGateType ?? "");
+                        cmd.Parameters.AddWithValue("@PrevGateNo", model.oldGateNo);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                
+                using (SqlCommand cmd2 = new SqlCommand("sp_GetWBEntry", con, tran))
+                {
+                    cmd2.CommandType = CommandType.StoredProcedure;
+                    cmd2.Parameters.AddWithValue("@Action", "UpdateGate1_Wb_Type_WithCurrentWbType");
+                    cmd2.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? "");
+                    cmd2.Parameters.AddWithValue("@V_NO", model.V_NO);
+                    cmd2.Parameters.AddWithValue("@NewGateType", model.GATE_TYPE ?? "");
+                    cmd2.Parameters.AddWithValue("@NewGateNo", model.GATE_NO);
+                    cmd2.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd2.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                    cmd2.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                    cmd2.ExecuteNonQuery();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+                throw;
+            }
         }
     }
 }

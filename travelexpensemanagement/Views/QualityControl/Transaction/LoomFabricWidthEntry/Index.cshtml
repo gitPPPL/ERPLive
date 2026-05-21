@@ -1,36 +1,28 @@
 ﻿@{
-    ViewBag.Title = "Loom Fabric Strength Entry";
+    ViewBag.Title = "Loom Fabric Width Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <fieldset>
-    <legend class="legend-field">Loom Fabric Strength Entry</legend>
-
-    <form id="LoomFabricStrengthEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <!-- First Row -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumTotalRec">Total Rec</label>
-                    <input type="number" class="form-control" id="NumTotalRec" placeholder="Enter Total Rec">
-                </div>
+    <legend class="legend-field">Loom Fabric Width Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button onclick="window.location.href='@Url.Action("Index", "LoomFabricWidthEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
             </div>
         </div>
-        <!-- Second Row -->
+    </div>
+    <form id="LoomFabricWidthEntryForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div class="form-group">
                     <label for="ddlShift">Shift</label>
                     <select class="form-control" id="ddlShift">
@@ -38,73 +30,83 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="form-group">
-                    <label for="TxtPlace">Place</label>
-                    <select class="form-control" id="ddlPlace">
-                        <option value="">Select Place</option>
-                    </select>
-                    @* <input type="text" class="form-control" id="TxtPlace" placeholder="Enter Place"> *@
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtInspectedBy">Inspected By</label>
+                    <label for="ddlInspectBy">Inspected By</label>
                     <select class="form-control" id="ddlInspectBy">
-                        <option value="">-select Inspector Name </option>
+                        <option value="">Select Inspected By</option>
                     </select>
-                    @* <input type="text" class="form-control" id="TxtInspectedBy" placeholder="Enter Inspector Name"> *@
                 </div>
             </div>
         </div>
-        <!-- Third Row -->
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlPlace">Place</label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtTime">Time</label>
+                    <div class="input-divide">
+                        <input type="time" class="form-control" id="DtTime">
+                        <button type="button" class="btn btn-success" id="btn-import" style="width:100%;"><i class="fa fa-refresh"></i>Import Obtained Width</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtTotalRec">Total Rec.</label>
+                    <input type="text" class="form-control" id="TxtTotalRec" placeholder="Enter Total Rec">
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div class="form-group">
                     <label for="TxtRemarks">Remarks</label>
-                    <textarea class="form-control" maxlength="500" id="TxtRemarks" rows="2" placeholder="Enter Remarks"></textarea>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
                 </div>
             </div>
         </div>
         <div class="card">
             <div class="table-responsive">
-                <table id="tblFabricStrengthEntry" class="table-width" style="overflow-y: clip;">
+                <table id="tblLoomFabricWidthEntry" class="table-width" style="overflow-y: clip;">
                     <colgroup>
                         <col style="width: 80px;">
                         <col style="width: 200px;">
                         <col style="width: 300px;">
                         <col style="width: 120px;">
+                        <col style="width: 100px;">
                         <col style="width: 80px;">
-                        <col style="width: 80px;">
-                        <col style="width: 120px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 120px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
                         <col style="width: 150px;">
+                        <col style="width: 120px;">
+                        <col style="width: 120px;">
+                        <col style="width: 150px;">
+                        <col style="width: 200px;">
                         <col style="width: 100px;">
                     </colgroup>
                     <thead class="table-head">
-                        <tr>
+                        <tr>                            
                             <th>LID</th>
                             <th>Loom</th>
                             <th>Item Name</th>
                             <th>Type</th>
-                            <th>Width</th>
+                            <th>Width (MM)</th>
                             <th>Gram</th>
                             <th>Color</th>
                             <th>DNR</th>
-                            <th>WarpWay</th>
-                            <th>WeftWay</th>
-                            <th>Strength</th>
-                            <th>Warp Elong</th>
-                            <th>Weft Elong</th>
-                            <th>Warp Mesh</th>
-                            <th>Weft Mesh</th>
+                            <th>Obt. Width</th>
+                            <th>Bobbin Marking</th>
                             <th>Remarks</th>
                             <th>Action</th>
                         </tr>
@@ -125,17 +127,9 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-3">
-                <div class="btn-mt">
-                    <button onclick="window.location.href='@Url.Action("Index", "LoomFabricStrengthEntryList")'" type="button" class="btn btn-draft">
-                        <i class="fa fa-list"></i>Back to list
-                    </button>
-                </div>
-            </div>
-            <div class="offset-md-5 col-md-4">
-                <div class="btn-mt button-right">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
                     <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
                 </div>
             </div>
         </div>
@@ -152,6 +146,7 @@
       "NumTotalRec",
       "ddlShift",
       "ddlPlace",
+      "DtTime",
       "ddlInspectBy",
       "TxtRemarks"
     ];
@@ -208,14 +203,8 @@
             !validateRequiredField('#ddlPlace','Place Type')) return;
 
         try {
-          const data = await collectFormData();          
-          if(data.Prod2QCData  && data.Prod2QCData.length){
-
+          const data = await collectFormData();
           docId ? UpdateData(data) : SaveData(data);
-          }else{
-            toastr.warning("Please fill First Row atleast");
-            return;
-          }
         } catch (err) {
           toastr.error("Error saving data: " + err);
         }
@@ -257,54 +246,16 @@
                 fetchAndFillRowDataByItem(selectedItemId, row);
             }
     });
+       
 
     $(document).on('change', '#ddlPlace', function () {
-        let tbody = $('#tblFabricStrengthEntry tbody');
+        let tbody = $('#tblLoomFabricWidthEntry tbody');
         tbody.find('tr').each(function (index, row) {
             let rowIndex = index + 1;
             bindDropdownData(rowIndex);
         });
     });
 
-    $(document).on('input', 'input[id^=TxtWeftWay]', function () {
-        let currentRow = $(this).closest('tr');
-        let rowIndex = currentRow.index() + 1;
-        var WeftWay =$(this).val();
-        let warpWayValue = currentRow.find('input[id^=TxtWarpWay]').val();
-        bindStrengthDropdown(rowIndex, WeftWay, warpWayValue);
-
-    });
-
-    $(document).on('focus', '[id^=ddlStrength]', function () {
-        const $ddl = $(this);
-        const id = $ddl.attr('id');
-        const rowNum = id.replace('ddlStrength', '');
-
-        const warpWayValue = $(`#TxtWarpWay${rowNum}`).val() || 0;
-        const weftWayValue = $(`#TxtWeftWay${rowNum}`).val() || 0;
-
-        bindStrengthDropdown(rowNum, weftWayValue, warpWayValue).then(() => {
-            const combinedValue = `${warpWayValue} - ${weftWayValue}`;
-            const options = $ddl.find('option');
-            let matchedOption = null;
-
-            options.each(function () {
-                if ($(this).text() === combinedValue) {
-                    matchedOption = $(this).val();
-                    return false; // break loop
-                }
-            });
-
-            if (matchedOption) {
-                $ddl.val(matchedOption).trigger('change');
-            } else {
-                if (combinedValue.trim()) {
-                    $ddl.append(`<option value="${combinedValue}">${combinedValue}</option>`);
-                    $ddl.val(combinedValue).trigger('change');
-                }
-            }
-        });
-    });
 
     }
 
@@ -386,7 +337,7 @@
 
     function SaveData(saveDt) {
                 $.ajax({
-                    url: '@Url.Action("SaveOrUpdateLoomFabricEntry", "LoomFabricStrengthEntry")',
+                    url: '@Url.Action("SaveOrUpdateLoomFabricWidthEntry", "LoomFabricWidthEntry")',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(saveDt),
@@ -394,7 +345,7 @@
                         if (response?.status) {
                             toastr.success("Data Insert successfully");
                             setTimeout(() => {
-                                window.location.href = '/LoomFabricStrengthEntryList/Index';
+                                window.location.href = '/LoomFabricWidthEntryList/Index';
                             }, 1500);
                         } else {
                             toastr.error(response?.message || "Save failed. Please try again.");
@@ -408,17 +359,16 @@
 
     function UpdateData(UpdateDt) {
         $.ajax({
-            url: '@Url.Action("SaveOrUpdateLoomFabricEntry", "LoomFabricStrengthEntry")',
+            url: '@Url.Action("SaveOrUpdateLoomFabricWidthEntry", "LoomFabricWidthEntry")',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(UpdateDt),
             dataType: 'json',
             success: function (response) {
                 if (response?.status) {
-                   toastr.success("Data Update successfully");
-                    // showFlashMessageByKey('update', 'success');
+                   toastr.success("Data Update successfully");                   
                     setTimeout(() => {
-                        window.location.href = '/LoomFabricStrengthEntryList/Index';
+                        window.location.href = '/LoomFabricWidthEntryList/Index';
                     }, 1500);
                 } else {
                     toastr.error("Update failed: " + (response?.message || "Unknown error."));
@@ -446,9 +396,10 @@
         GetEmployeeList(data.EMP_CODE ?? 0);
         $("#TxtRemarks").val(data.REMARKS ?? "");
         $("#NumTotalRec").val(0);
-
+        // $("#TxtQcTime").val(data.QCTIME ?? "");
+        const formattedTime = convertTo24HourFormat(data.QCTIME ?? "");
+        $('#DtTime').val(formattedTime);
     }
-
     function bindDropdownValue(selector, value, text = null) {
         const $el = $(selector);
         const valStr = String(value ?? '');
@@ -488,12 +439,12 @@
         const data = {
             V_No: getVal("NumDocNo"),
             V_DATE: V_DATE || null,
-            VType:'LMQC',
+            VType:'LINS',
             SHIFT: getVal("ddlShift"),
             PLACE_CODE: parseIntOrNull(getVal("ddlPlace")),
             EMP_CODE: parseIntOrNull(getVal("ddlInspectBy")),
-            REMARKS: getVal("TxtRemarks"),
-            QCTIME: getVal("TxtQcTime"),
+            REMARKS: getVal("TxtRemarks"),            
+            QCTIME: getTimeAsDateTimeForSql("DtTime"),
             QC_INCHARGE: parseIntOrNull(getVal("ddlQcIncharge")),
             CHEMIST: parseIntOrNull(getVal("ddlChemist")),
             QC_INCHARGENAME: getVal("TxtQcInchargeName"),
@@ -502,92 +453,93 @@
             SaveOrUpdate: (!DOC_ID || DOC_ID === "") ? "Save" : "Update",
             Prod2QCData: tabledt || []
         };
+
         return data;
+    }
+
+    function getTimeAsDateTimeForSql(inputId) {
+        const timeString = document.getElementById(inputId)?.value;
+        if (!timeString) return null;
+        return `${timeString}:00`; // e.g. "1970-01-01T11:53:00"
     }
 
     async function collectItemsDetail() {
         const items = [];
-        $('#tblFabricStrengthEntry tbody tr').each(function () {
+
+        $('#tblLoomFabricWidthEntry tbody tr').each(function () {
             const idx = this.id.replace('row', '');
             const $r = $(this);
-           var loomId= parseIntSafe($r.find(`#ddlLoom${idx}`).val());
 
-           if(loomId && loomId > 0){
-             items.push({
-                    SNO: parseIntSafe(idx),
-                    ITEM_CODE: parseIntSafe($r.find(`#ddlItemName${idx}`).val()),
-                    PTYPE_CODE: parseIntSafe($r.find(`#ddlType${idx}`).val()),
-                    PTYPE_NAME: $r.find(`#ddlType${idx}`).val() ? $r.find(`#ddlType${idx} option:selected`).text() : null,
+            items.push({
+                SNO: parseIntSafe(idx),
 
-                    LOOM_CODE: parseIntSafe($r.find(`#ddlLoom${idx}`).val()),
-                    COLOR_CODE: parseIntSafe($r.find(`#ddlColor${idx}`).val()),
-                    COLOR_NAME: $r.find(`#ddlColor${idx}`).val() ? $r.find(`#ddlColor${idx} option:selected`).text() : null,
-
-                    WIDTH: parseDecimalSafe($r.find(`#TxtWidth${idx}`).val()),
-                    GRAM: parseDecimalSafe($r.find(`#TxtGram${idx}`).val()),
-
-                    DNR: toNullableString($r.find(`#TxtDNR${idx}`).val()),
-
-                    WARP_ELONG: parseDecimalSafe($r.find(`#TxtWarpElong${idx}`).val()),
-                    WEFT_ELONG: parseDecimalSafe($r.find(`#TxtWeftElong${idx}`).val()),
-                    WARP_MESH: parseDecimalSafe($r.find(`#TxtWarpMesh${idx}`).val()),
-                    WEFT_MESH: parseDecimalSafe($r.find(`#TxtWeftMesh${idx}`).val()),
-                    MESH_CODE: parseIntSafe($r.find(`#ddlStrength${idx}`).val()),
-                    REMARKS: toNullableString($r.find(`#TxtRemarks${idx}`).val()),
-                    PLACE_CODE: null,
-                    EMP_CODE: 0,
-                    MESH: $r.find(`#ddlStrength${idx}`).val() ? $r.find(`#ddlStrength${idx} option:selected`).text() : null,
-                    RUNNO: null,
-                    LOOM_TYPE: null,
-                    MAKE_T: null,
-                    RESULT1: parseDecimalSafe($r.find(`#TxtWarpWay${idx}`).val()),
-                    REMARKS1: null,
-                    RESULT2: parseDecimalSafe($r.find(`#TxtWeftWay${idx}`).val()),
-                    REMARKS2: null,
-                    PRKG: null,
-                    WASTE: null,
-                    PSIZE: null,
-                    CPRDN: null,
-                    PAISA_TYPE: null,
-                    PAISA_SIZE: null,
-                    PAISA_MTR: null,
-                    PAISA_TYPE1: null,
-                    PORD_TYPE: null,
-                    PORD_NO: null,
-                    COND1: null,
-                    COND2: null,
-                    SHIFT_SCH: null,
-                    REPORT_FILTER: null,
-                    TIME1_WIDTH: null,
-                    TIME2_WIDTH: null,
-                    TIME3_WIDTH: null,
-                    TIME4_WIDTH: null,
-                    TIME5_WIDTH: null,
-                    PC_LOWMELT: null,
-                    GLUE_CONTENT: null,
-                    OTHERS: null,
-                    YELLOWP: null,
-                    BLUEP: null,
-                    OTHERP: null,
-                    GRADE: null,
-                    YELLOW160C: null,
-                    MOISTURE: null,
-                    BULKDENSITY: null,
-                    PH_FLAKES: null,
-                    OVERSIZED: null,
-                    SRNO: null,
-                    SUPPLY_TYPE: null,
-                    COLOR_TYPE: null
-             });
-           }
-            
+                ITEM_CODE: parseIntSafe($r.find(`#ddlItemName${idx}`).val()),
+                PTYPE_CODE: parseIntSafe($r.find(`#ddlType${idx}`).val()),
+                PTYPE_NAME: $r.find(`#ddlType${idx}`).val() ? $r.find(`#ddlType${idx} option:selected`).text() : null,
+                LOOM_CODE: parseIntSafe($r.find(`#ddlLoom${idx}`).val()),
+                COLOR_CODE: parseIntSafe($r.find(`#ddlColor${idx}`).val()),
+                COLOR_NAME: $r.find(`#ddlColor${idx}`).val() ? $r.find(`#ddlColor${idx} option:selected`).text() : null,
+                WIDTH: parseDecimalSafe($r.find(`#TxtWidth${idx}`).val()),
+                GRAM: parseDecimalSafe($r.find(`#TxtGram${idx}`).val()),
+                DNR: toNullableString($r.find(`#TxtDNR${idx}`).val()),
+                WARP_ELONG:null,
+                WEFT_ELONG: null,
+                WARP_MESH: null,
+                WEFT_MESH: null,
+                MESH_CODE: null,
+                REMARKS: toNullableString($r.find(`#TxtRemarks${idx}`).val()),
+                PLACE_CODE: null,
+                EMP_CODE: 0,
+                MESH: null,
+                RUNNO: null,
+                LOOM_TYPE: null,
+                MAKE_T: null,
+                RESULT1: null,
+                REMARKS1: null,
+                RESULT2: null,
+                REMARKS2: null,
+                PRKG: null,
+                WASTE: null,
+                PSIZE: null,
+                CPRDN: null,
+                PAISA_TYPE: null,
+                PAISA_SIZE: null,
+                PAISA_MTR: null,
+                PAISA_TYPE1: null,
+                PORD_TYPE: null,
+                PORD_NO: null,
+                COND1: null,
+                COND2: null,
+                SHIFT_SCH: null,
+                REPORT_FILTER: null,
+                TIME1_WIDTH: null,
+                TIME2_WIDTH: null,
+                TIME3_WIDTH: null,
+                TIME4_WIDTH: null,
+                TIME5_WIDTH: null,
+                PC_LOWMELT: null,
+                GLUE_CONTENT: null,
+                OTHERS: null,
+                YELLOWP: null,
+                BLUEP: null,
+                OTHERP: null,
+                GRADE: null,
+                YELLOW160C: null,
+                MOISTURE: null,
+                BULKDENSITY: null,
+                PH_FLAKES: null,
+                OVERSIZED: null,
+                SRNO: null,
+                SUPPLY_TYPE: null,
+                COLOR_TYPE: null
+            });
         });
 
         return items;
     }
 
     async function fillItemDetailTable(itemsData) {
-        const $tbody = $('#tblFabricStrengthEntry tbody');
+        const $tbody = $('#tblLoomFabricWidthEntry tbody');
         $tbody.empty();
 
         for (let index = 0; index < itemsData.length; index++) {
@@ -601,12 +553,9 @@
             $(`#TxtWidth${idx}`).val(item.WIDTH ?? '');
             $(`#TxtGram${idx}`).val(item.GRAM ?? '');
             $(`#TxtDNR${idx}`).val(item.DNR ?? '');
-            $(`#TxtWarpWay${idx}`).val(item.RESULT1 ?? '');
-            $(`#TxtWeftWay${idx}`).val(item.RESULT2 ?? '');
-            $(`#TxtWarpElong${idx}`).val(item.WARP_ELONG ?? '');
-            $(`#TxtWeftElong${idx}`).val(item.WEFT_ELONG ?? '');
-            $(`#TxtWarpMesh${idx}`).val(item.WARP_MESH ?? '');
-            $(`#TxtWeftMesh${idx}`).val(item.WEFT_MESH ?? '');
+           
+            $(`#TxtObtWidth${idx}`).val(0);
+            $(`#TxtBobMark${idx}`).val(0);
             $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
 
             const safeSetDropdown = (selector, value) => {
@@ -619,8 +568,7 @@
             safeSetDropdown('#ddlLoom', item.LOOM_CODE);
             safeSetDropdown('#ddlItemName', item.ITEM_CODE);
             safeSetDropdown('#ddlType', item.PTYPE_CODE);
-            safeSetDropdown('#ddlColor', item.COLOR_CODE);
-            safeSetDropdown('#ddlStrength', item.MESH_CODE);
+            safeSetDropdown('#ddlColor', item.COLOR_CODE);           
         }
     }
 
@@ -659,7 +607,7 @@
 
     function GetDocid() {
         $.ajax({
-            url: '@Url.Action("GetMaxVNo", "LoomFabricStrengthEntry")',
+            url: '@Url.Action("GetMaxVNo", "LoomFabricWidthEntry")',
             type: 'GET',
             success: function (response) {
                 if (response.status === true && response.data) {
@@ -808,13 +756,12 @@
     }
 
     function addItemRecordRow() {
-        let tbody = $('#tblFabricStrengthEntry tbody');
+        let tbody = $('#tblLoomFabricWidthEntry tbody');
         let rowCount = tbody.find('tr').length + 1;
 
         let newRow = `
         <tr class="no-border-input" id="row${rowCount}">
             <td><input type="text" style="width:100px;" class="form-control" id="TxtLID${rowCount}" readonly/></td>
-
             <td>
                 <select class="form-control" style="width:400px;" id="ddlLoom${rowCount}">
                     <option value="">- Select Loom -</option>
@@ -833,31 +780,18 @@
                 </select>
             </td>
 
-            <td><input type="text" style="width:100px;" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="TxtWidth${rowCount}" /></td>
-            <td><input type="text" style="width:100px;" maxlength="10" oninput="allowOnlyDecimal(this)" class="form-control" id="TxtGram${rowCount}" /></td>
+            <td><input type="number" style="width:100px;" class="form-control" id="TxtWidth${rowCount}" /></td>
+            <td><input type="number" style="width:100px;" class="form-control" id="TxtGram${rowCount}" /></td>
 
             <td>
                 <select class="form-control" style="width:100px;" id="ddlColor${rowCount}">
                     <option value="">- Select Color -</option>
                 </select>
             </td>
-
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtDNR${rowCount}" /></td>
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWarpWay${rowCount}" /></td>
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWeftWay${rowCount}" /></td>
-
-            <td>
-                <select class="form-control" id="ddlStrength${rowCount}">
-                    <option value="">- Select Strength -</option>
-                </select>
-            </td>
-
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWarpElong${rowCount}" /></td>
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWeftElong${rowCount}" /></td>
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWarpMesh${rowCount}" /></td>
-            <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWeftMesh${rowCount}" /></td>
-            <td><input type="text" style="width:100px; class="form-control" maxlength="300" id="TxtRemarks${rowCount}" /></td>
-
+            <td><input type="text" class="form-control" id="TxtDNR${rowCount}" /></td>
+            <td><input type="number" class="form-control" id="TxtObtWidth${rowCount}" /></td>
+            <td><input type="number" class="form-control" id="TxtBobMark${rowCount}" /></td>
+            <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" /></td>
             <td>
                 <i class="fa fa-plus btn-add-action btn-Itemadd-action" title="Add Row"></i>
                 <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
@@ -869,15 +803,14 @@
         bindDropdownData(rowCount);
         setEnterKeyFocusOnTable?.(itemRecords, rowCount);
     }
-
-    function bindDropdownData(rowCount, minStd=0, maxStd=0) {
+       
+    function bindDropdownData(rowCount) {
         const loomSelect = $(`#ddlLoom${rowCount}`);
         const itemSelect = $(`#ddlItemName${rowCount}`);
         const typeSelect = $(`#ddlType${rowCount}`);
         const colorSelect = $(`#ddlColor${rowCount}`);
-        const strengthSelect = $(`#ddlStrength${rowCount}`);
-        const placeCode=$('#ddlPlace').val() || 0;
-        console.log(placeCode, minStd, maxStd);
+       const placeCode=$('#ddlPlace').val();
+        console.log(placeCode);
         const loadDropdown = (url, selectElem, defaultText, formatter) => {
             return new Promise((resolve, reject) => {
                 $.ajax({
@@ -944,57 +877,10 @@
                 colorSelect,
                 "- Select Color -",
                 item => `<option value="${item.CODE}">${item.NAME}</option>`
-            ),
-            loadDropdown(
-                `/LoomFabricStrengthEntry/GetStrengthList?minStd=${minStd}&maxStd=${maxStd}`,
-                strengthSelect,
-                "- Select Strength -",
-                item => `<option value="${item.CODE}">${item.NAME}</option>`
             )
         ]);
     }
-
-    function bindStrengthDropdown(rowCount, minStd = 0, maxStd = 0) {
-        const strengthSelect = $(`#ddlStrength${rowCount}`);
-        return $.ajax({
-            url: `/LoomFabricStrengthEntry/GetStrengthList?minStd=${minStd}&maxStd=${maxStd}`,
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.status) {
-                    strengthSelect.empty().append(
-                        $('<option>', {
-                            value: '',
-                            text: "- Select Strength -",
-                            disabled: true,
-                            selected: true
-                        })
-                    );
-
-                    $.each(response.data, function(i, item) {
-                        strengthSelect.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                    });
-
-                    strengthSelect.select2({
-                        width: '100%',
-                        placeholder: "- Select Strength -",
-                        allowClear: true,
-                        minimumResultsForSearch: 0
-                    });
-
-                    if (response.isExist && response.matchingCode) {
-                        strengthSelect.val(response.matchingCode).trigger('change');
-                    }
-                } else {
-                    toastr.error("Failed to load strength list");
-                }
-            },
-            error: function(xhr, status, error) {
-                toastr.error(`Error loading strength list: ${error}`);
-            }
-        });
-    }
-
+       
     function formatDate(dateStr) {
       if (!dateStr) return '';
       const d = new Date(dateStr);

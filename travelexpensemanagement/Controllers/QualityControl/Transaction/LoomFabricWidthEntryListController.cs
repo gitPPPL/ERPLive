@@ -1,18 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Common.DbHelper;
 using Microsoft.Data.SqlClient;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
-    public class LoomFabricStrengthEntryListController : Controller
+    public class LoomFabricWidthEntryListController : Controller
     {
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public LoomFabricStrengthEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public LoomFabricWidthEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
@@ -21,16 +23,15 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         }
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Loom Fabric Strength Entry";
+            ViewBag.CurrentMenu = "Loom Fabric Width Entry";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
-
             var model = new UserMenuPermissionsViewModel
             {
                 UserMenuPermissions = permissions,
                 UserLevel = userLevel
             };
-            return View("~/Views/QualityControl/Transaction/LoomFabricStrengthEntryList/Index.cshtml", model);
+            return View("~/Views/QualityControl/Transaction/LoomFabricWidthEntryList/Index.cshtml", model);
         }
 
         [HttpGet]
@@ -44,7 +45,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     {"@COMP_CODE", UsersessionDt.PubCompCode },
                     {"@YEAR_CODE", UsersessionDt.PubFYearCode },
                     {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", "LMQC" },
+                    {"@V_TYPE", "LINS" },
                     {"@Action", "LFSEntryList" }
                 };
 
@@ -153,7 +154,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
                     {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", "LMQC" },
+                    {"@V_TYPE", "LINS" },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }
                 };
@@ -177,7 +178,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
                     {"@BRANCH_CODE", 1},
-                    {"@V_TYPE",  "LMQC"},
+                    {"@V_TYPE",  "LINS"},
                     {"@Action", "Excel" }
                 };
                 var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetLoomFabricEntry]", parameter);
