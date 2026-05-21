@@ -111,7 +111,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@DOCTYPE",  "KantaStore"},
                     {"@Action", "Excel" }
                 };
@@ -147,7 +147,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                         // Add Parameters
                         cmd.Parameters.AddWithValue("@COMP_CODE", UsersessionDt.PubCompCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", UsersessionDt.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", UsersessionDt.PubBranchCode);
                         cmd.Parameters.AddWithValue("@DOCTYPE", "KantaStore");
                         cmd.Parameters.AddWithValue("@Action", "WBEntryList");
                         cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
@@ -210,7 +210,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@V_TYPE", docid.Substring(0, 4) },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }

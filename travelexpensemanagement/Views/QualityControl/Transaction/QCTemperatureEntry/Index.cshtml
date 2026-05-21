@@ -43,7 +43,8 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Denier</label>
-                    <select class="erppage-input erppage-required" id="ddlDenier">
+                    @* <select class="erppage-input erppage-required" id="ddlDenier"> *@
+                    <select class="erppage-input" id="ddlDenier">
                         <option value="">Select Denier</option>
                     </select>
                 </div>
@@ -58,7 +59,7 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Operator</label>
-                    <select id="ddlOperator" class="erppage-input erppage-select">
+                    <select id="ddlOperator" class="erppage-input erppage-select erppage-required">
                         <option value="">Select Operator</option>
                     </select>
                 </div>
@@ -87,7 +88,7 @@
                 <div class="erppage-grid3">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Select Reading</label>
-                        <select class="erppage-input erppage-required" id="ddlSelectReading">
+                        <select class="erppage-input" id="ddlSelectReading">
                             <option selected disabled>Select Reading</option>
                             <option value="temperature">Temperature</option>
                             <option value="speed">Speed</option>
@@ -239,7 +240,11 @@
 
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
-<script>
+<script src="~/js/erpjs/qualitycontrol/transaction/qctemperatureentry/qctemperatureentry.js"></script>
+
+
+
+@* <script>
 
     const allFieldIds = [
         "NumDocNo",
@@ -254,6 +259,7 @@
         "TxtRemarks"
     ];
     let docId = "", readOnly;
+    const vType = 'TAPE'
     
     function getQueryParam(param) {
       return new URLSearchParams(window.location.search).get(param);
@@ -275,26 +281,6 @@
 
     function wireEvents() {
 
-      // $('#btn-save').on('click', async (e) => {
-      //   e.preventDefault();
-
-      // if (!validateRequiredField('#NumDocNo','Doc No') ||
-      //       !validateRequiredField('#DtDocDate','Doc Date') ||
-      //       !validateRequiredField('#ddlShift','Shift Type') ||
-      //       !validateRequiredField('#TmTime','Time') ||
-      //       !validateRequiredField('#ddlPlantName','Plant Name') ||
-      //       !validateRequiredField('#ddlDenier','Denier')) return;
-
-      //   try {
-      //     const data = await collectFormData();
-      //     console.log(data);
-      //     docId ? UpdateData(data) : SaveData(data);
-      //   } catch (err) {
-      //     toastr.error("Error saving data: " + err);
-      //   }
-
-      // });
-
         $('#btn-save').on('click', async (e) => {
             e.preventDefault();
 
@@ -304,10 +290,14 @@
                 !validateRequiredField('#DtDocDate', 'Doc Date') ||
                 !validateRequiredField('#ddlShift', 'Shift Type') ||
                 !validateRequiredField('#TmTime', 'Time') ||
-                !validateRequiredField('#ddlPlantName', 'Plant Name') ||
-                !validateRequiredField('#ddlDenier', 'Denier')
+                // !validateRequiredField('#ddlDenier', 'Denier')
+                !validateRequiredField('#ddlOperator', 'Denier') ||
+                !validateRequiredField('#ddlPlantName', 'Plant Name') 
             ) return;
-
+            const checkValidation = await checkValidDate();
+            if (checkValidation == false) {
+                return;
+            }
              const rawValue = document.getElementById('DtDocDate')?.value;
              const V_DATE = formatDateToSqlDateOnly(parseDateSafe(rawValue));
              const V_TIME= getTimeAsDateTimeForSql("TmTime");
@@ -377,7 +367,7 @@
         docId = getQueryParam('id');
         readOnly = getQueryParam('readOnly');
         if (docId) {                
-            $('#ddlDocType').prop('disabled', true);
+            // $('#ddlDocType').prop('disabled', true);
             await GetDocData(docId, readOnly);
 
         } else {
@@ -568,25 +558,25 @@
        const screwItem=await collectScrewData();
        const plantItems=await collectPlantZodeData();
        const DOC_ID = toNullableString(docId);
-      const allTapeQualityItems = [
-      ...(winderItem || []),
-      ...(screwItem || []),
-      ...(materialItem || []),
-      ...(plantItems || [])
-      ];
+       const allTapeQualityItems = [
+           ...(winderItem || []),
+           ...(screwItem || []),
+           ...(materialItem || []),
+           ...(plantItems || [])
+       ];
      
         const data = {
-        V_TYPE: 'TAPE',
-        V_NO: parseIntSafe(document.getElementById('NumDocNo')?.value),
-        V_DATE: V_DATE,
-        SHIFT: toNullableString(document.getElementById('ddlShift')?.value),
-        V_TIME: getTimeAsDateTimeForSql("TmTime"),
-        DENIER: parseDecimalSafe(document.getElementById('ddlDenier')?.value),
-        INCH_CODE: parseIntSafe(document.getElementById('ddlIncharge')?.value),
-        OPERATORE_CODE: parseIntSafe(document.getElementById('ddlOperator')?.value),
-        SUP_CODE: parseIntSafe(document.getElementById('ddlSupervisor')?.value),
-        DEPT_CODE: parseIntSafe(document.getElementById('ddlPlantName')?.value),
-        REMARK: toNullableString(document.getElementById('TxtRemarks')?.value),       
+            V_TYPE: vType,
+            V_NO: parseIntSafe(document.getElementById('NumDocNo')?.value),
+            V_DATE: V_DATE,
+            SHIFT: toNullableString(document.getElementById('ddlShift')?.value),
+            V_TIME: getTimeAsDateTimeForSql("TmTime"),
+            DENIER: parseDecimalSafe(document.getElementById('ddlDenier')?.value),
+            INCH_CODE: parseIntSafe(document.getElementById('ddlIncharge')?.value),
+            OPERATORE_CODE: parseIntSafe(document.getElementById('ddlOperator')?.value),
+            SUP_CODE: parseIntSafe(document.getElementById('ddlSupervisor')?.value),
+            DEPT_CODE: parseIntSafe(document.getElementById('ddlPlantName')?.value),
+            REMARK: toNullableString(document.getElementById('TxtRemarks')?.value),       
             SaveOrUpdate: (!DOC_ID || DOC_ID === "") ? "Save" : "Update",
             TapeQualitys: allTapeQualityItems
 
@@ -743,7 +733,7 @@
         $.ajax({
             url: '@Url.Action("GetMaxVNo", "QCTemperatureEntry")',
             type: 'GET',
-            data:{vType:'TAPE' , tableName:'TAPE_QUALITY1'},
+            data:{vType:vType , tableName:'TAPE_QUALITY1'},
             success: function (response) {
                 if (response.status === true && response.data) {
                     $('#NumDocNo').val(response.data.vNo || '');
@@ -1148,7 +1138,35 @@
         });
     }
 
+    
+    //===Validate VDate
+    async function checkValidDate() {
+        const data = {
+            vdate: $("#DtDocDate").val(),
+            vtype: vType,
+            vno: $("#NumDocNo").val()
+        };
+        try {
+            const response = await fetch('/QCTemperatureEntry/CheckValidDate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.status === false) {
+                showToast(result.message, { type: "warning" });
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Error:', error);
+            return false;
+        }
+    }
     //========Helpers======
+
     function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
@@ -1304,6 +1322,6 @@
          
     }
 
-</script>
+</script> *@
 
  

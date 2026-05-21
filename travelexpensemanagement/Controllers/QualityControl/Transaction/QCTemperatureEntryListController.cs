@@ -79,19 +79,19 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteQcTempratureEntry(string docid)
+        [HttpPost]
+        public async Task<IActionResult> DeleteQcTempratureEntry(string docId)
         {
             try
             {
-                if (string.IsNullOrEmpty(docid))
+                if (string.IsNullOrEmpty(docId))
                 {
                     return Json(new { status = false, message = "Invalid ID" });
                 }
 
                 var userSession = _globalValue.GetGlobalVariables();
-                string VType = docid.Substring(0, 4);
-                string VNo = docid.Substring(4);
+                string VType = docId.Substring(0, 4);
+                string VNo = docId.Substring(4);
 
                 using (var con = _dbcontext.GetErpConnection())
                 {
@@ -113,7 +113,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 {
                                     cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
                                     cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
                                     cmd.Parameters.AddWithValue("@V_TYPE", VType);
                                     cmd.Parameters.AddWithValue("@V_NO", VNo);
 
@@ -122,12 +122,12 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                             }
 
                             transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
+                            return Json(new { success = true, data = "Data deleted successfully" });
                         }
                         catch (Exception ex)
                         {
                             transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
+                            return Json(new { success = false, message = $"Delete failed: {ex.Message}" });
                         }
                     }
                 }

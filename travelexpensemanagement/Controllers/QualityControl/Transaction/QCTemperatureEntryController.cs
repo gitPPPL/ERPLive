@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Server;
 using System.Data;
+using System.Text.Json;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.QualityControl.Transaction;
 using travelexpensemanagement.Services;
-using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Server;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
@@ -14,16 +15,16 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly IMasterDataService _masterDataService;
+        private readonly GlobalValidationdate _globalValidationdate;
 
-        public QCTemperatureEntryController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IMasterDataService masterDataService)
+        public QCTemperatureEntryController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IMasterDataService masterDataService, GlobalValidationdate globalValidationdate)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
-            _moduleService = moduleService;
             _masterDataService = masterDataService;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
@@ -61,7 +62,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                          FROM TAPE_QUALITY1 
                         WHERE V_DATE=@VDate and FORMAT(V_TIME, 'hh:mm')=@V_time
                         and SHIFT=@shift and DEPT_CODE=@plantCode
-                        and COMP_CODE=@CompCode and YEAR_CODE=@YearCode and BRANCH_CODE=1 and V_TYPE=@V_type {sqlqry}
+                        and COMP_CODE=@CompCode and YEAR_CODE=@YearCode and BRANCH_CODE=@BRANCH_CODE and V_TYPE=@V_type {sqlqry}
                         ) 
                         THEN 1 ELSE 0 
                         END";
@@ -75,6 +76,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         cmd.Parameters.AddWithValue("@plantCode", plantCode);
                         cmd.Parameters.AddWithValue("@CompCode", loginDatail.PubCompCode);
                         cmd.Parameters.AddWithValue("@YearCode", loginDatail.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", loginDatail.PubBranchCode);
                         cmd.Parameters.AddWithValue("@V_type", "TAPE");
 
                         con.Open();
@@ -90,7 +92,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 return Json(new { status = false, message = "Data check failed: " + ex.Message });
             }
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetEmployeeMast()
@@ -134,7 +135,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
             var plantlist = await _dbHelper.GetJsonDataAsync(@$"
               select CODE, NAME from TAPE_QUALITY_MAST where V_TYPE = 'ROOM' and COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
-              order by NAME
+              order by SORT_NO
             ");
                 return Json(new { status = true, data = plantlist });
             }
@@ -155,7 +156,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             {
                 var screwlist = await _dbHelper.GetJsonDataAsync(@$"
               select CODE, NAME from TAPE_QUALITY_MAST where V_TYPE = 'SPED' and COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
-              order by NAME
+              order by SORT_NO
              ");
                 return Json(new { status = true, data = screwlist });
             }
@@ -202,7 +203,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 var parameter = new Dictionary<string, object> {
                     {"@COMP_CODE", usersession.PubCompCode},
                     {"@YEAR_CODE", usersession.PubFYearCode},
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@V_TYPE", VType},
                     {"@V_NO",  VNo },
                     {"@Action", "QcTempratureHeaderData"}
@@ -210,7 +211,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 var parameter1 = new Dictionary<string, object> {
                     {"@COMP_CODE", usersession.PubCompCode},
                     {"@YEAR_CODE", usersession.PubFYearCode},
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@V_TYPE", VType},
                     {"@V_NO",  VNo },
                     {"@Action", "QcTempratureDetailData"}
@@ -225,6 +226,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             {
                 return Json(new { status = false, message = "data load failed" });
             }
+        }
+
+        //===Validate VDate
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("WB1", vdate, vtype, vno);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -249,7 +261,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 cmd.CommandType = CommandType.StoredProcedure;
                                 cmd.Parameters.AddWithValue("@TapeQuality2", QcTempDataTable(model.TapeQualitys));
                                 cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
-                                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1); 
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode); 
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
                                 cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@V_NO", model.V_NO);

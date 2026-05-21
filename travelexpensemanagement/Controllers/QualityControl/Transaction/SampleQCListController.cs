@@ -54,7 +54,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     cmd.Parameters.AddWithValue("@Action", "SELECT");
                     cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                     cmd.Parameters.AddWithValue("@V_TYPE", "QCSM"); // <-- supply it (null if not filtering)
 
                     // Paging + search
@@ -133,7 +133,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     //command.Parameters.AddWithValue("@V_NO", 66);
                     command.Parameters.AddWithValue("@V_NO", vNo);
                     command.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-                    command.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    command.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                     command.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                     command.Parameters.AddWithValue("@ACTION", "VIEW");                 
                     await con.OpenAsync();
@@ -191,7 +191,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     //command.Parameters.AddWithValue("@V_NO", 66);
                     command.Parameters.AddWithValue("@V_NO", vNo);
                     command.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-                    command.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    command.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                     command.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                     command.Parameters.AddWithValue("@ACTION", "ITEMS");
 
