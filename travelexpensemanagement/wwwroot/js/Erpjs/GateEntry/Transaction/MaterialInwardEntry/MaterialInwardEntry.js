@@ -349,90 +349,87 @@
 
         });
 
-
-
     function isItemInMainTable(itemCode) {
         let exists = false;
-    $('#tblInwardEntry tbody tr').each(function () {
-                const code = $(this).find('td:eq(0)').text().trim();
-    if (code === itemCode) {
+        $('#tblInwardEntry tbody tr').each(function () {
+        const code = $(this).find('td:eq(0)').text().trim();
+        if (code === itemCode) {
         exists = true;
-    return false;
-                }
-            });
-    return exists;
+        return false;
         }
+        });
+        return exists;
+    }
 
     function saveInwardEntry() {
-                const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
-    const PARTY_NAME    = $('#ddlPartyName option:selected').text();
-    const V_TYPE        = $('#ddlDocType').val();
-    const STATUS        = parseInt($('#ddlDocStatus').val()) || null;
-    const V_NO          = parseInt($('#TxtDocNo').val()) || null;
-    const R_DATE        = formatDate($("#TxtRptDate").val()) || null;
-    const BILL_NO       = $.trim($('#TxtBillNo').val()) || null;
-    const BILL_DATE     = formatDate($("#DtPartyBillDate").val()) || null;
-    const CHALL_NO      = $.trim($('#TxtChallanNo').val()) || null;
-    const CHALL_DATE    = formatDate($("#TxtChallanDate").val()) || null;
-    const BILL_AMT      = parseFloat($('#TxtBillAmt').val()) || 0.0;
-    const TRUCK_NO      = $.trim($('#TxtVehicleNo').val()) || null;
-    const TRANSPORT_CODE= parseInt($('#TxtTransporter').val()) || null;
-    const DRIVER_NAME   = $.trim($('#TxtDriverName').val()) || null;
-    const DRIVER_NO     = $.trim($('#TxtDriverMobile').val()) || null;
-    const WAYBILL_NO    = $.trim($('#TxtEWayNo').val()) || null;
-    const EWB_DATE      = formatDate($("#DtEWayDate").val()) || null;
-    const EWB_EXPDATE   = formatDate($("#TxtEWayDate").val()) || null;
-    const EWB_INVNO     = $.trim($('#TxtEWBInvNo').val()) || null;
-    const EWB_INVAMT    = parseFloat($('#TxtEWBInvAmt').val()) || 0.0;
-    const V_DATE        = formatDate($("#InDate").val()) || null;
-    const OUT_DATE      = formatDate($("#DtVehicleOutTime").val()) || null;
-    const R_TIME        = $.trim($('#TiRptDate').val()) || null;
-    const SHIP_BILLDATE = formatDate($("#ShipBillDate").val()) || null;
-    const SHIP_PARTY    = parseInt($('#ddlShipFrom').val()) || null;
-    const SHIP_BILLNO   = $.trim($('#ShipBillNo').val()) || null;
-    const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
+        const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
+        const PARTY_NAME    = $('#ddlPartyName option:selected').text();
+        const V_TYPE        = $('#ddlDocType').val();
+        const STATUS        = parseInt($('#ddlDocStatus').val()) || null;
+        const V_NO          = parseInt($('#TxtDocNo').val()) || null;
+        const R_DATE        = formatDate($("#TxtRptDate").val()) || null;
+        const BILL_NO       = $.trim($('#TxtBillNo').val()) || null;
+        const BILL_DATE     = formatDate($("#DtPartyBillDate").val()) || null;
+        const CHALL_NO      = $.trim($('#TxtChallanNo').val()) || null;
+        const CHALL_DATE    = formatDate($("#TxtChallanDate").val()) || null;
+        const BILL_AMT      = parseFloat($('#TxtBillAmt').val()) || 0.0;
+        const TRUCK_NO      = $.trim($('#TxtVehicleNo').val()) || null;
+        const TRANSPORT_CODE= parseInt($('#TxtTransporter').val()) || null;
+        const DRIVER_NAME   = $.trim($('#TxtDriverName').val()) || null;
+        const DRIVER_NO     = $.trim($('#TxtDriverMobile').val()) || null;
+        const WAYBILL_NO    = $.trim($('#TxtEWayNo').val()) || null;
+        const EWB_DATE      = formatDate($("#DtEWayDate").val()) || null;
+        const EWB_EXPDATE   = formatDate($("#TxtEWayDate").val()) || null;
+        const EWB_INVNO     = $.trim($('#TxtEWBInvNo').val()) || null;
+        const EWB_INVAMT    = parseFloat($('#TxtEWBInvAmt').val()) || 0.0;
+        const V_DATE        = formatDate($("#InDate").val()) || null;
+        const OUT_DATE      = formatDate($("#DtVehicleOutTime").val()) || null;
+        const R_TIME        = $.trim($('#TiRptDate').val()) || null;
+        const SHIP_BILLDATE = formatDate($("#ShipBillDate").val()) || null;
+        const SHIP_PARTY    = parseInt($('#ddlShipFrom').val()) || null;
+        const SHIP_BILLNO   = $.trim($('#ShipBillNo').val()) || null;
+        const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
 
-    if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
-    if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
-    if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
-    if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
-    if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
+        if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
+        if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
+        if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
+        if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
+        if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
 
-    if (!R_DATE && !R_TIME) {
-                   if (!validateRequiredField('#TxtRptDate', 'Please select Reporting Date and Time.')) return;               
-                }
+        if (!R_DATE && !R_TIME) {
+         if (!validateRequiredField('#TxtRptDate', 'Please select Reporting Date and Time.')) return;               
+        }
 
-    if (BILL_NO && !BILL_DATE) {         
-                   if (!validateRequiredField('#DtPartyBillDate', 'Please select Party Bill Date.')) return;
-                }
+        if (BILL_NO && !BILL_DATE) {         
+             if (!validateRequiredField('#DtPartyBillDate', 'Please select Party Bill Date.')) return;
+        }
 
-    if (CHALL_NO && !CHALL_DATE) {
-                 if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
-                }
+        if (CHALL_NO && !CHALL_DATE) {
+            if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
+        }
 
-    if (!validateRequiredField('#TxtBillAmt', 'Please fill Bill Amount.')) return;
-    if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
+        if (!validateRequiredField('#TxtBillAmt', 'Please fill Bill Amount.')) return;
+        if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
 
 
 
-    if (TRUCK_NO) {
-                    var numericPart = TRUCK_NO.replace(/\D/g, '');
-    var lastFour = numericPart.slice(-4);
+        if (TRUCK_NO) {
+            var numericPart = TRUCK_NO.replace(/\D/g, '');
+            var lastFour = numericPart.slice(-4);
 
-    if (lastFour) {
+        if (lastFour) {
         
-                        if (!validateRequiredField('#TxtDriverName', 'Please enter Driver Name.')) return;
-
-    if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) {
+            if (!validateRequiredField('#TxtDriverName', 'Please enter Driver Name.')) return;
+            if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) {
 
         showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
-    $("#TxtDriverMobile").addClass("is-invalid").focus();
-    return;
-                        } else {
+        $("#TxtDriverMobile").addClass("is-invalid").focus();
+        return;
+        } else {
         $("#TxtDriverMobile").removeClass("is-invalid");
-                        }
-                    }
-                }
+        }
+        }
+        }
 
     if (WAYBILL_NO) {
                        if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
