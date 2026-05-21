@@ -996,7 +996,47 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
+/* ===== INPUT + BUTTON GROUP ===== */
+.erppage-inputgroup {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+}
 
+    /* Select/Input inside group */
+    .erppage-inputgroup .erppage-input {
+        flex: 1;
+        height: 30px;
+    }
+
+    /* Button inside group */
+    .erppage-inputgroup .erppage-btn-inline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 12px;
+        height: 30px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #2f7d32, #1b5e20);
+        color: #fff;
+        font-size: 13px;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+        /* Hover */
+        .erppage-inputgroup .erppage-btn-inline:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #256d29, #164a18);
+        }
+
+        /* Icon inside button */
+        .erppage-inputgroup .erppage-btn-inline i {
+            font-size: 13px;
+        }
 /* ===== BUTTON ===== */
 .erppage-btn-common {
     background: linear-gradient(135deg, #2563eb, #1e40af);

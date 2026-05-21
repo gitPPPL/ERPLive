@@ -310,7 +310,40 @@
     width: 120px;
     text-align: center;
 }
+/* ONLY THIS TABLE */
+.table-row-layout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
 
+    /* each table takes equal width */
+    .table-row-layout .erppagelist-container {
+        flex: 1;
+        min-width: 0;
+    }
+.special-6x6-table {
+    height: 175px; /* fixed height */
+    overflow-y: auto; /* vertical scroll */
+    overflow-x: auto; /* horizontal scroll */
+    position: relative;
+}
+
+    /* Sticky Header ONLY here */
+    .special-6x6-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(135deg, #232323, #0f0f0f);
+    }
+
+    /* Optional: fixed equal columns */
+    .special-6x6-table td,
+    .special-6x6-table th {
+        width: 150px;
+        min-width: 150px;
+        max-width: 150px;
+    }
 
 
 /* ACTION BUTTONS */

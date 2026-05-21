@@ -2,73 +2,114 @@
 	ViewBag.Title = "QC Temperature Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-	<legend class="legend-field">QC Temperature Entry List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
+<div id="erp-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>QC Temperature Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "QCTemperatureEntry")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+			<i class="fa fa-print"></i> Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" onclick="mailReport()">
+			<i class="fa fa-envelope"></i>Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+			<i class="fa fa-check-circle"></i>Approved
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblQCTemperatureList" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" /> <!-- Code -->
+				<col style="width: 120px;" /> <!-- Voucher Type -->
+				<col style="width: 120px;" /> <!-- Voucher No -->
+				<col style="width: 120px;" /> <!-- Voucher Date -->
+				<col style="width: 100px;" /> <!-- Inch_Code -->
+				<col style="width: 140px;" /> <!-- Inch_Name -->
+				<col style="width: 120px;" /> <!-- Operatore_Code -->
+				<col style="width: 140px;" /> <!-- Operate_Name -->
+				<col style="width: 80px;" />  <!-- Shift -->
+				<col style="width: 120px;" /> <!-- Voucher Time -->
+				<col style="width: 80px;" />  <!-- Denier -->
+				<col style="width: 140px;" /> <!-- Denier Name -->
+				<col style="width: 120px;" /> <!-- Sup_Code -->
+				<col style="width: 160px;" /> <!-- Sup_Name -->
+				<col style="width: 120px;" /> <!-- Uuser -->
+				<col style="width: 120px;" /> <!-- Udate -->
+				<col style="width: 180px;" /> <!-- Remark -->
+				<col style="width: 140px;" /> <!-- Plant Name -->
+				<col style="width: 140px;" /> <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Voucher Type</th>
+					<th>Voucher No</th>
+					<th>Voucher Date</th>
+					<th>Inch_Code</th>
+					<th>Inch_Name</th>
+					<th>Operatore_Code</th>
+					<th>Operate_Name</th>
+					<th>Shift</th>
+					<th>Voucher Time</th>
+					<th>Denier</th>
+					<th>Denier Name</th>
+					<th>Sup_Code</th>
+					<th>Sup_Name</th>
+					<th>Uuser</th>
+					<th>Udate</th>
+					<th>Remark</th>
+					<th>Plant Name</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "QCTemperatureEntry")'" type="submit" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblQCTemperatureList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>V_Type</th>
-						<th>V_No</th>
-						<th>V_Date</th>
-						<th>Inch_Code</th>
-						<th>Inch_Name</th>
-						<th>Operatore_Code</th>
-						<th>Operate_Name</th>
-						<th>Shift</th>
-						<th>V_Time</th>
-						<th>Denier</th>
-						<th>Denier_Name</th>
-						<th>Sup_Code</th>
-						<th>Sup_Name</th>
-						<th>Uuser</th>
-						<th>Udate</th>
-						<th>Remark</th>
-						<th>Plant_Name</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
+</div>
+
+
+
 <script>
 	let currentPage = 1;
 	let pageSize = 10;
