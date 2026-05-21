@@ -15,15 +15,9 @@
         <div class="erppage-header-title">Material Inward Entry</div>
     </div>
     <div class="erppage-header-right">
-      @*   <button id="btn_backtolist" class="erppage-header-back">
+        <button id="btn_backtolist" class="erppage-header-back">
             <i class="fa-solid fa-arrow-left"></i>Back to list
-        </button> *@
-
-        <button id="btnbacklist"
-                onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)" type="button" class="btn btn-primary">
-            <i class="fa fa-list"></i>Back to list
         </button>
-
     </div>
 </div>
 <div class="erppagelist-toolbar-end" style="display:none;">
@@ -832,7 +826,6 @@
         var   itemList = [];
         var   deptList = [];
         var   unitList = [];
-        const isReadOnly = (mode === 'view');
 
         $(document).ready(async function () {
            await LoadDropDown();
@@ -1123,7 +1116,7 @@
                     $(this).closest('tr').find('.itemCode').val(code);
                 });
 
-                $('#SEARCHCONTAINER').on('click' , function() {
+            $('#SEARCHCONTAINER').on('click' , function() {
                 var Container_No  = $('#TxtContainerNo').val();
 
             if(Container_No)
@@ -1165,9 +1158,6 @@
                     });
 
                     const data = res.data;
-
-                    console.log("data",data);
-
                     populateTable(data);
 
                 } catch (error) {
@@ -1520,8 +1510,7 @@
                     showToast("Invalid Bill No", { type: "error" });
                     return response;
                 }
-
-                    return response;
+                return response;
 
             } catch (error) {
                 showToast("Validation Error", { type: "error" });
@@ -1918,13 +1907,14 @@
             }
           });
         }
+
            async function GetPartyAdress(PartyId) {
                 try {
                     const url = `/InwardEntry/GetPartyAddressbyCode?PartyId=${encodeURIComponent(PartyId)}`;
                     const response = await fetch(url);
                     const data = await response.json();
 
-                    const d = (data && data.length > 0) ? data[0] : {};
+                    const d = (data && data.length > 0) ? data[0] : {};                  
                     $('#ddladdressline1').val(d.addresS_ID ?? "");
                     $('#TxtAddLine1').val(d.add1 ?? "");
                     $('#TxtAddLine2').val(d.add2 ?? "");
@@ -1983,14 +1973,9 @@
          async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
           try {
             const queryParams = new URLSearchParams({ v_type, v_no, partycode, ExpiryDate });
-
             const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
             const result = await response.json();
-
-            console.log("Transit No. Response:", result);
-
             const ddl = $('#ddlTransit');
             ddl.empty().append('<option value="">-- Select Transit No --</option>');
 
@@ -2000,8 +1985,7 @@
               });
             }
 
-          } catch (error) {
-            console.error(error);
+          } catch (error) {  
             showToast("Error loading Transit Numbers", { type: "error" });
           }
         }
@@ -2034,8 +2018,6 @@
                   type: 'GET',
                   data: { PartyCode, V_TYPE, V_DATE }
                 });
-
-                console.log("result", result);
 
                 if (!result || !result.success) {
                   showToast("Failed to fetch data", { type: "error" });
@@ -2081,8 +2063,7 @@
                   tableBody.insertAdjacentHTML('beforeend', row);
                 });
 
-              } catch (error) {
-                console.error("Error fetching pending orders:", error);
+              } catch (error) {       
                 showToast("Failed to load pending orders", { type: "error" });
               }
             }
@@ -2457,7 +2438,7 @@
         }
     }
 
-       function backToList() {
+            function backToList() {
             var partycode = $('#ddlPartyName').val();
             if (partycode && mode != "view" )  {
                 Swal.fire({
@@ -2525,7 +2506,6 @@
                         <td>
                             <input type="text" class="form-control quantity numeric-only"  style="${normalStyle}" value="${data.qty ?? ''}" />
                         </td>
-
                         <td>
                             <input type="text" class="form-control shiprate numeric-only" style="${normalStyle}" value="${data.shipRate ?? ''}" />
                         </td>
@@ -2640,12 +2620,11 @@
                 const Vno = document.getElementById('TxtDocNo')?.value || '';
                 const v_type = document.getElementById('ddlDocType')?.value || '';
                 const indate = document.getElementById('InDate')?.value || '';
-                fetchTransitno(v_type, Vno, res.supplier, indate);
+                await fetchTransitno(v_type, Vno, res.supplier, indate);
+                } else {
+                showToast("Invalid response or supplier missing", { type: "error" });
 
-            } else {
-                        showToast("Invalid response or supplier missing", { type: "error" });
-
-            }
+                }
           }
           catch (error) {
             showToast(err, { type: "warning" });

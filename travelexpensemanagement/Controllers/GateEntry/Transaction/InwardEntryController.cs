@@ -7,6 +7,7 @@ using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -17,6 +18,7 @@ using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
+    [SessionAuthorize] 
     public class InwardEntryController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
