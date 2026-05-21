@@ -334,7 +334,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge
             {
                 await conn.OpenAsync();
 
-                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_GetWBEntry", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -343,12 +343,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge
                     cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
 
-                    cmd.Parameters.AddWithValue(
-                        "@SearchTerm",
-                        string.IsNullOrWhiteSpace(searchTerm)
-                            ? DBNull.Value
-                            : searchTerm
-                    );
+                    cmd.Parameters.AddWithValue(  "@SearchTerm", string.IsNullOrWhiteSpace(searchTerm) ? DBNull.Value : searchTerm);
 
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     using (var stream = new MemoryStream())
