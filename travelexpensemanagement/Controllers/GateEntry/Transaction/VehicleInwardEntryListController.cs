@@ -32,11 +32,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var result = await _VehicleInwardListRepository.GetTransportInwardList(searchTerm, pageNumber, pageSize);
             return Json(new { success = result.status, data = result.data, totalCount = result.totalCount });
         }
-        [HttpDelete]
-        public async Task<IActionResult> DeleteVehicleInwardEntry(string docid)
+        [HttpPost]
+        public async Task<IActionResult> DeleteVehicleInwardEntry(string docId)
         {
-            var result = await _VehicleInwardListRepository.DeleteTransportInward(docid);
-            return Json(new { status = result.status, message = result.message });
+            var result = await _VehicleInwardListRepository.DeleteTransportInward(docId);
+            return Json(new { success = result.status, message = result.message });
         }
         [HttpGet]
         public async Task<IActionResult> GetVehicleInwardEntryDetails(string docid)

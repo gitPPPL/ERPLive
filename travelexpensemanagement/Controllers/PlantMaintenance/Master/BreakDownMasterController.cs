@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.PlantMaintenance.Master.BreakDownMaster;
-using travelexpensemanagement.ModuleService;
 
 namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
 {
@@ -28,24 +26,20 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-   
+            _moduleService = moduleService;
         }
-
         public IActionResult Index()
         {
             return View("~/Views/PlantMaintenance/Master/BreakDownMaster/Index.cshtml");
         }
-
         [HttpPost]
         public IActionResult SaveOrUpdateData([FromBody] BreakDownMaster model)
         {
             var globalVariable = _globalVariableService.GetGlobalVariables();
-
             if (model == null)
             {
                 return Json(new { success = false, message = "Model is null" });
             }
-
             try
             {
                 string action = (model.CODE == null || model.CODE == 0) ? "Insert" : "Update";
@@ -54,7 +48,6 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
                 {
                     SqlCommand cmd = new SqlCommand("SP_BreakDown_Master", con);
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     cmd.Parameters.AddWithValue("@COMP_CODE", globalVariable.PubCompCode);
                     cmd.Parameters.AddWithValue("@CODE", model.CODE);
                     cmd.Parameters.AddWithValue("@NAME", model.NAME);
@@ -73,25 +66,21 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
+                string message = action == "Insert" ? "Data Inserted Successfully!!" : "Data Updated Successfully!!";
 
-                string message = action == "Insert"
-                    ? "Data Inserted Successfully!!"
-                    : "Data Updated Successfully!!";
-
-                return Json(new { success = true, message });
+                return Json(new { success = true, message = message });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
         [HttpGet]
         public IActionResult loadOnEdit(int code)
         {
             object data = null;
-            var globalVariable = _globalVariableService.GetGlobalVariables();
 
+            var globalVariable = _globalVariableService.GetGlobalVariables();
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -115,12 +104,13 @@ namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
                             shortName = reader["SHORTNAME"]?.ToString(),
                             type = reader["TYPE"]?.ToString(),
                             remark = reader["REMARKS"]?.ToString(),
+
                             active = reader["ACTIVE"] == DBNull.Value ? 0 : Convert.ToInt32(reader["ACTIVE"])
                         };
                     }
                 }
 
-                return Json(new { success = true, data });
+                return Json(new { success = true, data = data });
             }
             catch (Exception ex)
             {

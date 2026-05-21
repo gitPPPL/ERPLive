@@ -94,6 +94,8 @@ Pagination.create = function (config) {
         }
     };
 
+  
+
     return {
         load: loadData,
         setPageSize: function (size) {

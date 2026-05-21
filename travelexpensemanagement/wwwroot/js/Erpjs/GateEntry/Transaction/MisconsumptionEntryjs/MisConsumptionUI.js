@@ -57,7 +57,7 @@ async function Misconsumptioninit() {
 
             if ($last.length && !$last.find(".btn-add-action").length) {
                 $last.find("td:last").prepend(
-                    `<button class="act-btn add btn-add-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
+                    `<button class="act-btn add btn-add-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
                 );
             }
         }
@@ -162,6 +162,19 @@ function initSelect2() {
         placeholder: "-- Select Party --",
         allowClear: true,
         width: '100%'
+    });
+
+    //search field auto focus
+    $('#ddlPartyName').on('select2:open', function () {
+        setTimeout(function () {
+            let searchBox = document.querySelector(
+                '.select2-container--open .select2-search__field'
+            );
+
+            if (searchBox) {
+                searchBox.focus();
+            }
+        }, 0);
     });
 }
 
@@ -288,7 +301,7 @@ async function LoadFormByID(rowId, vtype) {
 
         const header = result.data.header;
         const details = result.data.details;
-
+        console.log("Details Data", details);
         // ========= HEADER FILL =========
         $('#TxtCode').val(header.doC_ID || '');
         $('#ddlDocType').val(header.v_TYPE || '');
@@ -333,6 +346,8 @@ async function LoadFormByID(rowId, vtype) {
                 no: detail.nos || '',
                 quantity: detail.qty || '',
                 remarks: detail.remarks || '',
+                refType: detail.reF_TYPE || '',
+                refNo: detail.reF_NO || '',
                 isPendingRow: !!(detail.reF_TYPE && detail.reF_NO)
             };
 
@@ -374,23 +389,26 @@ function addRow($tbody, data = {}) {
 
     const row = `
         <tr class="no-border-input">
-            <input type="hidden" class="srno-hidden" value="${data.srno || ''}">
+           <td style="display:none;">
+                ${data.code || ""}
+                <input type="hidden" class="srno-hidden" value="${data.srno || ''}">
+            </td>
             <td style="display:none;">${data.code || ""}</td>
 
             <td>
-                <select class="form-control itemName">
+                <select class="form-control itemName" disabled>
                     <option value="">-- Select --</option>
                 </select>
             </td>
 
             <td>
-                <select class="form-control department">
+                <select class="form-control department" disabled>
                     <option value="">-- Select --</option>
                 </select>
             </td>
 
             <td>
-                <select class="form-control unit">
+                <select class="form-control unit" disabled>
                     <option value="">-- Select --</option>
                 </select>
             </td>
@@ -404,13 +422,23 @@ function addRow($tbody, data = {}) {
             </td>
 
             <td>
-                <input type="text" class="form-control remarks" value="${data.remarks || ''}"/>
+                <input type="text" class="form-control remarks" value="${data.remarks || ''}"readonly />
+            </td>
+
+            <td> 
+             <input  class="refType" value="${data.refType || ''}" readonly>
             </td>
 
             <td>
-                <button class="act-btn add btn-add-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
-				<button class="act-btn delete btn-delete-action" title="delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+             <input  class="refNo" value="${data.refNo || ''}" readonly>
             </td>
+
+            <td class="action-col">
+                  	<button class="act-btn add btn-add-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+					<button class="act-btn delete btn-delete-action" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>  
+               
+            </td>
+
         </tr>
     `;
 
@@ -420,6 +448,9 @@ function addRow($tbody, data = {}) {
     bindSelectOptions($newRow.find('.itemName'), itemList);
     bindSelectOptions($newRow.find('.department'), deptList);
     bindSelectOptions($newRow.find('.unit'), unitList);
+
+    $newRow.find('.refType').val(data.refType || '');
+    $newRow.find('.refNo').val(data.refNo || '');
 
     if (data.itemName) {
         $newRow.find('.itemName').val(data.itemName);
@@ -466,7 +497,7 @@ function addSelectedToConsumptionTable(selectedRows) {
 
         const itemCode = getKeyByValue(itemMap, row.item_name);
         const unitCode = getKeyByValue(UnitMap, row.unit);
-        const deptCode = getKeyByValue(DeptMap, row.department);
+        const deptCode = row.depT_CODE || row.department || "";
 
         let $blankRow = null;
 
@@ -494,16 +525,24 @@ function addSelectedToConsumptionTable(selectedRows) {
                 .trigger("change");
 
             if (deptCode) {
-                $row.find("select.department")
-                    .val(deptCode)
-                    .trigger("change");
+            $row.find("select.department")
+                .val(deptCode)
+                .trigger("change");
             }
+
+            //if (deptCode) {
+            //    $row.find("select.department")
+            //        .val(deptCode)
+            //        .trigger("change");
+            //}
 
             $row.find("input.no").val(row.nos || "");
             $row.find("input.quantity").val(row.quantity || "");
             $row.find("input.remarks").val(row.remarks || "");
             $row.find("input.srno-hidden").val(row.srno || "");
             $row.data("srno", row.srno || "");
+            $row.find(".refType").val(row.refType || "");
+            $row.find(".refNo").val(row.refNo || "");
             // ==========================
             // MAKE ITEM + UNIT READONLY
             // ==========================
@@ -515,6 +554,8 @@ function addSelectedToConsumptionTable(selectedRows) {
             // Refresh Select2 UI
             $row.find("select.itemName").trigger("change.select2");
             $row.find("select.unit").trigger("change.select2");
+            $row.find("select.department").trigger("change.select2");
+            
         };
 
         if ($blankRow) {
@@ -624,7 +665,9 @@ async function loadPendingDocuments(partyId) {
         }
         data.forEach(item => {
             const row = `
-                <tr>
+               <tr data-ref-type="${item.refType || ''}"
+                   data-ref-no="${item.refNo || ''}"
+                    data-dept-code="${item.depT_CODE || ''}">
                     <td style="display:none;">${item.v_NO}</td>
 
                     <td>
@@ -640,6 +683,7 @@ async function loadPendingDocuments(partyId) {
                     <td>${item.remarks || ''}</td>
                     <td>${item.nos || ''}</td>
                     <td>${item.unitname || ''}</td>
+                    <td>${item.name || ''}</td>
                     <td>${item.srno || ''}</td>
                 </tr>
             `;
@@ -669,6 +713,9 @@ function getSelectedPendingDocuments() {
         hasChecked = true;
 
         const row = $(this);
+        // const deptCode = row.find('td').eq(11).text().trim();
+        const deptCode = row.data('deptCode');
+
         const srno = row.find('td').eq(11).text();
 
         if (isAlreadyAdded(srno)) {
@@ -679,12 +726,15 @@ function getSelectedPendingDocuments() {
         selectedRows.push({
             srno: srno,
             item_name: row.find('td').eq(7).text(),
-            department: "",
+            depT_CODE: deptCode,
+            department: deptCode,
             unit: row.find('td').eq(10).text(),
             nos: row.find('td').eq(9).text(),
-            quantity: row.find('td').eq(5).text(),
+            quantity: row.find('td').eq(6).text(),
             remarks: row.find('td').eq(8).text(),
-            code: row.find('td').eq(0).text()
+            code: row.find('td').eq(0).text(),
+            refType: row.data('refType'),
+            refNo: row.data('refNo')
         });
     });
 
@@ -711,6 +761,8 @@ function collectTableRowData() {
         const nos = row.querySelector('input.no');
         const qty = row.querySelector('input.quantity');
         const remarks = row.querySelector('input.remarks');
+        const refType = row.querySelector('.refType');
+        const refNo = row.querySelector('.refNo');
 
         // skip completely empty rows (IMPORTANT FIX)
         const isEmpty =
@@ -729,7 +781,9 @@ function collectTableRowData() {
             UOM_CODE: Number(unit?.value) || null,
             NOS: Number(nos?.value) || null,
             QTY: parseFloat(qty?.value) || null,
-            REMARKS: remarks?.value || ''
+            REMARKS: remarks?.value || '',
+            REF_TYPE: refType?.value?.trim() || null,
+            REF_NO: refNo?.value?.trim() || null
         });
 
     });

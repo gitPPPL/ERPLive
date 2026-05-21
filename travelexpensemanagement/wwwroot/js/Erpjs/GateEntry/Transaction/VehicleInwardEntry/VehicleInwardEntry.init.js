@@ -114,11 +114,16 @@ function initEventListeners(docId) {
         console.log("docId", docId);
         e.preventDefault();
         const validate = await VehicleValidation.validateSave();
-        const validateDate = await VehicleValidation.validateDate();
         if (validate) {
             return;
         }
+        const validateDate = await VehicleValidation.validateDate();
         if (validateDate) {
+            return;
+        }
+        const mobileNo = $('#NumDriverMobile').val();
+        const validateMobile = VehicleValidation.validateDriverPhone(mobileNo);
+        if (validateMobile) {
             return;
         }
         try {
@@ -136,7 +141,8 @@ function initEventListeners(docId) {
     //=======Mobile Last Focus=========
     $('#NumDriverMobile').on('blur', function () {
         const mobileNo = $(this).val();
-        if (!validateForm('#TransportInwardPassEntryForm')) return;
+        //if (!validateForm('#TransportInwardPassEntryForm')) return;
+        if (VehicleValidation.validateDriverPhone(mobileNo)) return;
         if (mobileNo) {
             VehicleApi.getDriverDetails(mobileNo);
         }
@@ -160,7 +166,6 @@ function initEventListeners(docId) {
     $('#btnGetVAHANData').on('click', async function () {
         const vehicleNo = $('#TxtVehicleNo').val();
         if (!vehicleNo) {
-            // toastr.info("Please enter a Vehicle No");
             showToast("Please enter Vehicle No", { type: "info" });
             return;
         }

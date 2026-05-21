@@ -31,12 +31,12 @@
 		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
 			<i class="fa fa-file-excel"></i>Export
 		</button>
-		 <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
 			<i class="fa fa-envelope"></i>Mail
 		</button>
 		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
 			<i class="fa fa-check-circle"></i>Approved
-		</button> 
+		</button>
 	</div>
 </div>
 
@@ -45,7 +45,7 @@
 		<table id="tblMiscConsumptionList" class="excel-table fixed-grid-table">
 			<colgroup>
 				<col style="display:none;" />
-				<col style="width: 80px;" /> 
+				<col style="width: 80px;" />
 				<col style="width: 110px;" />
 				<col style="width: 150px;" />
 				<col style="width: 180px;" />
@@ -57,13 +57,11 @@
 					<th>Voucher Type</th>
 					<th>Voucher Date</th>
 					<th>Party Name</th>
-				    @*<th>Action</th> *@
 					<th class="action-col">Action</th>
 				</tr>
 			</thead>
 			<tbody></tbody>
 		</table>
-
 	</div>
 
 	<div class="erppagelist-pagination">
@@ -86,60 +84,6 @@
 		</div>
 	</div>
 </div>
-
-@* <fieldset>
-	<legend class="legend-field">Misc Consumption Entry List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "MiscConsumptionEntry")'" type="submit" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblMiscConsumptionList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
-						<th>Party Name</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset> *@
 
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>

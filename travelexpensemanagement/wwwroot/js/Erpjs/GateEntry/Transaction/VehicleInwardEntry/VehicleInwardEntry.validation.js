@@ -9,13 +9,22 @@
         if (!validateRequiredField('#TxtDrivername', 'Driver Name')) return true;
         if (!validateRequiredField('#ddlCustomerName', 'Customer Name')) return true;
         if (!validateRequiredField('#NumDriverMobile', 'Mobile Number')) return true;
-        if (!validateForm('#TransportInwardPassEntryForm')) return true;
         return false;
     },
     validateDate: async function validateDate() {
         const checkValidation = await VehicleApi.checkValidDate();
         if (checkValidation == false) {
             return true;
+        }
+        return false;
+    },
+    validateDriverPhone: function validateDriverPhone(mobileNumber) {
+        if (mobileNumber) {
+            if (!validatePhone(mobileNumber)) {
+                showToast('Please enter valid 10 digit mobile number', { type: 'warning' });
+                $('#NumDriverMobile').focus();
+                return true;
+            }
         }
         return false;
     },

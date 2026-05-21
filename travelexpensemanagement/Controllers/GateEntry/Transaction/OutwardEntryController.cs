@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Text.Json;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -12,6 +13,8 @@ using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
+
+    [SessionAuthorize]
     public class OutwardEntryController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -42,7 +45,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
         public JsonResult GetVNo(string Vtype , string Tablename)
         {
-          string   newV_NO = _outwardEntryRepository.GetVNoAsync(Vtype, Tablename).GetAwaiter().GetResult();
+          string   newV_NO = _globalValidationdate.GetVNo(Vtype, Tablename);
           return Json(new { V_NO = newV_NO });
         }
         public JsonResult DDlVType()

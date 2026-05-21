@@ -1,0 +1,1064 @@
+﻿@{
+    ViewBag.Title = "Roll Lamination Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #PendingRecordPanel {
+        position: absolute;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        width: 600px;
+        max-height: 300px;
+        overflow: auto;
+        display: none;
+        border-radius: 4px;
+    }
+</style>
+<div class="circle-loader" style="display: none;">
+    <div class="container">
+        Loading...
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+        <div class="spinner-part"></div>
+    </div>
+</div>
+
+<fieldset>
+    <legend class="legend-field">Roll Before & After Lamination</legend>
+
+    <form id="LaminationForm" method="post">
+        <div class="row">
+            <div class="offset-md-8 col-md-4">
+                <div class="button-right">
+                    <button onclick="window.location.href='@Url.Action("Index", "RollLaminationEntryList")'" type="button" class="btn btn-draft">
+                        <i class="fa fa-list"></i>Back to list
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- BEFORE LAMINATION -->
+            <div class="col-md-6">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Roll Before Lamination</legend>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Document No</label>
+                                <input type="text" class="form-control" id="NumDocumentNumber" readonly>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <input type="checkbox" id="chkJobWork">
+                                <label class="checkbox-label" for="chkJobWork">JobWork</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Shift</label>
+                                <select class="form-control" id="ddlShiftBefore">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" class="form-control" id="txtDateBefore">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label style="width:25%;">Item Name</label>
+                                <select class="form-control" id="ddlItemBefore" style="width:100%;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Roll No</label>
+                                <input type="text" class="form-control" id="txtRollBefore">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Meter</label>
+                                <input type="number" class="form-control" id="txtMeterBefore">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Gross Weight</label>
+                                <input type="number" class="form-control" id="txtGrossBefore">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tare Weight</label>
+                                <input type="number" class="form-control" id="txtTareBefore">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Net Weight</label>
+                                <input type="number" class="form-control" id="txtNetBefore" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Average Weight</label>
+                                <input type="number" class="form-control" id="txtAvgBefore" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Gram</label>
+                                <input type="number" class="form-control" id="txtGramBefore" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Size</label>
+                                <input type="number" class="form-control" id="txtSizeBefore" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Loom No</label>
+                                <select class="form-control" id="ddlLoomNo"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label style="width:25%;">Remarks</label>
+                                <textarea type="text" class="form-control" id="txtRemarksBefore" style="height:50px;width:100%;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <!-- AFTER LAMINATION -->
+            <div class="col-md-6">
+                <fieldset class="fieldset-sub-divide">
+                    <legend class="sub-legend">Roll After Lamination</legend>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Place</label>
+                                <select class="form-control" id="ddlPlace"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>PORD No</label>
+                                <select type="text" class="form-control" id="ddlPordNo"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Shift</label>
+                                <select class="form-control" id="ddlShiftAfter" disabled>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" class="form-control" id="txtDateAfter" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label style="width:25%;">Item Name</label>
+                                <select type="text" class="form-control" id="ddlItemAfter" style="width:100%;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Roll No</label>
+                                <input type="text" class="form-control" id="txtRollAfter">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Meter</label>
+                                <input type="number" class="form-control" id="txtMeterAfter">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Batch No</label>
+                                <input type="text" class="form-control" id="txtBatchNo">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Gross Weight</label>
+                                <input type="number" class="form-control" id="txtGrossAfter">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tare Weight</label>
+                                <input type="number" class="form-control" id="txtTareAfter">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Net Weight</label>
+                                <input type="number" class="form-control" id="txtNetAfter" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Average Weight</label>
+                                <input type="number" class="form-control" id="txtAvgAfter" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Gram</label>
+                                <input type="number" class="form-control" id="txtGramAfter" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Size</label>
+                                <input type="text" class="form-control" id="txtSizeAfter" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Machine No</label>
+                                <select class="form-control" id="ddlMachineNo"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" id="ddlStatus">
+                                    <option>Ok</option>
+                                    <option>Hold</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label style="width:25%;">Remarks</label>
+                                <textarea type="text" class="form-control" id="txtRemarksAfter" style="height:50px;width:100%"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        @* =================================================Pending Record==============================================================*@
+        <div id="PendingRecordPanel" style="display:none;">
+            <div class="table-responsive">
+                <table id="tblPendingRecordPanel" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Roll Number</th>
+                            <th>Meter</th>
+                            <th>Gross Weight</th>
+                            <th>Tare Weight</th>
+                            <th>Net Weight</th>
+                            <th style="display:none">Loom No</th>
+                            <th>Loom Type</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SAVE BUTTON -->
+        <div class="row">
+            <div class="offset-md-9 col-md-3">
+                <div class="button-right btn-mt">
+                    <button type="submit" class="btn btn-primary" id="btnSave">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    $(document).ready(function(){
+        let currentDate = getCurrentDateDMY();
+        const vNo = getQueryParam('vNo');
+        const mode = getQueryParam('mode');
+        $('#txtDateBefore').val(currentDate);
+        $('#txtDateAfter').val(currentDate);
+        ddlItemBeforeLam();
+        ddlItemAfterLam();
+        if (!mode) {
+            GetVNo();
+        }
+        ddlPordNo();
+        ddlPlace();
+        ddlStatus();
+        $('#btnSave').on('click', function(e){
+            e.preventDefault();
+            if (!validateRequiredField('#ddlPlace','Place')) return;
+            if (!validateRequiredField('#ddlItemBefore','Item Name Before lamination')) return;
+            if (!validateRequiredField('#ddlItemAfter','Item Name After Lamination')) return;
+            if (!validateRequiredField('#txtRollBefore','Roll No Before Lamination')) return;
+            if (!validateRequiredField('#txtRollAfter','Item Name After Lamination')) return;
+        if(mode === 'edit'){
+            UpdateRollLamination();
+                }
+        else{
+            saveRollLamination();
+                }
+            })
+        let placeCode = $('#ddlPlace').val();
+        ddlLoomNo(placeCode);
+        ddlMachineNo(placeCode);
+        GetBatchNo();
+        if(vNo){
+            GetRollDetailsByVno(vNo);
+            }
+            if (mode === 'view') {
+                setFormReadOnly();
+                $('#LaminationForm').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+            }
+    });
+    function getQueryParam(param){
+            const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    };
+    $('#ddlShiftBefore').on('change', function () {
+            $('#ddlShiftAfter').val($(this).val());
+    });
+    $('#txtDateBefore').on('change', function () {
+            $('#txtDateAfter').val($(this).val());
+    });
+    function getCurrentDateDMY(){
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
+    };
+    function ddlItemBeforeLam(selectedValue = null) {
+        $.ajax({
+            url: '/RollLaminationEntry/GetddlUnLaminatedItem',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    $dropdown = $('#ddlItemBefore');
+                    $dropdown.empty();
+                    $dropdown.append(`<option selected disabled value="">-Select Item Name-</option>`);
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.Code}">${item.Name}</option>`);
+                    });
+                    $dropdown.select2({
+                        placeholder: "-Select Item-",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Item Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Item Load failed: " + error);
+            }
+        });
+    };
+    function ddlItemAfterLam(selectedValue = null) {
+        return $.ajax({
+            url: '/RollLaminationEntry/GetddlLaminatedItem',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    $dropdown = $('#ddlItemAfter');
+                    $dropdown.empty();
+                    $dropdown.append(`<option selected disabled value="">-Select Item Name-</option>`);
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.Code}">${item.Name}</option>`);
+                    });
+                    $dropdown.select2({
+                        placeholder: "-Select Item-",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Item Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Item Load failed: " + error);
+            }
+        });
+    };
+    async function GetVNo() {
+        try {
+            const res = await fetch(`/RollLaminationEntry/GetVNo`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+            $('#NumDocumentNumber').val(data.v_NO);
+        } catch (e) {
+            console.error('GetVNo failed:', e);
+            toastr.error('Error loading Document Number: ' + e.message);
+        }
+    };
+    function ddlPlace(callback){
+        $.ajax({
+            url: '/RollLaminationEntry/GetddlPlace',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlPlace');
+                ddl.empty();
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                toastr.error("Error loading ddlPlace:", xhr.responseText);
+            }
+        });
+    };
+    function ddlPordNo(selectedValue = null){
+        return $.ajax({
+            url: '/RollLaminationEntry/GetddlOrderNo',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    let $dropdown = $('#ddlPordNo');
+                    $dropdown.empty();
+                    $dropdown.append(`<option value="">-- Select Order No --</option>`);
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.Code}" data-vtype="${item.V_Type}">${item.Name}</option>`);
+                    });
+                    $dropdown.select2({
+                        placeholder: "-Select Order No-",
+                        allowClear: true,
+                        width: '100%',
+                        templateResult: function (data) {
+                            if (!data.id) return data.text;
+                            return $(data.element).text();
+                        },
+                        templateSelection: function (data) {
+                            if (!data.id) return "-Select Order No-";
+                            return data.id;
+                        }
+                    });
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Order No. Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Order No. Load failed: " + error);
+            }
+        });
+    };
+    function ddlLoomNo(placeCode, selectedValue = null){
+        return $.ajax({
+            url: '/RollLaminationEntry/GetddlLoomNo',
+            type: 'GET',
+            dataType: 'json',
+            data: {placeCode:placeCode},
+            success: function (response) {
+                if (response.status) {
+                    let $dropdown = $('#ddlLoomNo');
+                    $dropdown.empty();
+                    $dropdown.append(`<option value="">-- Select Loom No --</option>`);
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.Code}">${item.Name}</option>`);
+                    });
+                    $dropdown.select2({
+                        placeholder: "-Select Loom No-",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Loom No. Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Loom No. Load failed: " + error);
+            }
+        });
+    };
+    function ddlMachineNo(placeCode, selectedValue = null){
+        return $.ajax({
+            url: '/RollLaminationEntry/GetddlMachineNo',
+            type: 'GET',
+            dataType: 'json',
+            data: {placeCode:placeCode},
+            success: function (response) {
+                if (response.status) {
+                    let $dropdown = $('#ddlMachineNo');
+                    $dropdown.empty();
+                    $dropdown.append(`<option value="">-- Select Machine No --</option>`);
+                    $.each(response.data, function (index, item) {
+                        $dropdown.append(`<option value="${item.Code}">${item.Name}</option>`);
+                    });
+                    $dropdown.select2({
+                        placeholder: "-Select Machine No-",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $dropdown.val(selectedValue).trigger('change');
+                    } else {
+                        $dropdown.val('').trigger('change');
+                    }
+                } else {
+                    toastr.error("Machine No. Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Machine No. Load failed: " + error);
+            }
+        });
+    };
+    $('#ddlPlace').on('change', function(){
+        let placeCode = $(this).val();
+        ddlLoomNo(placeCode);
+        ddlMachineNo(placeCode);
+    });
+    function ddlStatus(callback){
+        $.ajax({
+            url: '/RollLaminationEntry/GetddlStatus',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlStatus');
+                ddl.empty().append('<option value="">-- Select Status --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                toastr.error("Error loading ddlStatus:", xhr.responseText);
+            }
+        });
+    };
+    function GetItemSize(itemCode, txtSize){
+        $.ajax({
+            url: '/RollLaminationEntry/GetItemSize',
+            type: 'GET',
+            dataType: 'json',
+            data: { itemCode: itemCode },
+            success: function (data) {
+                let val = data.itemSize;
+                $(txtSize).val(val);
+            },
+            error: function (xhr) {
+                toastr.error("Error loading Item Size:", xhr.responseText);
+            }
+        });
+    };
+    $('#ddlItemBefore').on('select2:select select2:unselect', function(){
+        let itemCode = $(this).val();
+    GetItemSize(itemCode, '#txtSizeBefore');
+    })
+    $('#ddlItemAfter').on('select2:select select2:unselect', function(){
+        let itemCode = $(this).val();
+    GetItemSize(itemCode, '#txtSizeAfter');
+    })
+    function calculateNetWgt(txtGross, txtTare, txtNet){
+        let grWt = parseFloat($(txtGross).val()) || 0.00;
+        let trWt = parseFloat($(txtTare).val()) || 0.00;
+        let netWt = grWt - trWt;
+        $(txtNet).val(netWt.toFixed(2));
+    }
+    $(document).on('input', '#txtGrossBefore, #txtTareBefore', function(){
+        calculateNetWgt('#txtGrossBefore', '#txtTareBefore', '#txtNetBefore');
+    });
+    $(document).on('input', '#txtGrossAfter, #txtTareAfter', function(){
+        calculateNetWgt('#txtGrossAfter', '#txtTareAfter', '#txtNetAfter');
+    });
+    function calculateAvgWgt(txtNet, txtMeter, txtAvg){
+        let netWt = parseFloat($(txtNet).val()) || 0.00;
+        let meter = parseFloat($(txtMeter).val()) || 0.00;
+        let avgWt = 0;
+        if(meter > 0){
+            avgWt = (netWt / meter) * 1000;
+        }
+        $(txtAvg).val(avgWt.toFixed(2));
+    }
+    $(document).on('input', '#txtGrossAfter, #txtTareAfter, #txtMeterAfter', function(){
+        calculateAvgWgt('#txtNetAfter', '#txtMeterAfter', '#txtAvgAfter');
+    });
+    $(document).on('input', '#txtGrossBefore, #txtTareBefore, #txtMeterBefore', function(){
+        calculateAvgWgt('#txtNetBefore', '#txtMeterBefore', '#txtAvgBefore');
+    });
+    function calculateGram(txtAvg, txtSize, txtGram){
+        let avgWt = parseFloat($(txtAvg).val()) || 0.00;
+        let size = parseFloat($(txtSize).val()) || 0.00;
+        let gram = 0;
+        if(size > 0){
+            gram = (avgWt / size);
+        }
+        $(txtGram).val(gram.toFixed(2));
+    }
+    $(document).on('input', '#txtGrossBefore, #txtTareBefore', function(){
+        calculateGram('#txtAvgBefore', '#txtSizeBefore', '#txtGramBefore');
+    });
+    $(document).on('input', '#txtGrossAfter, #txtTareAfter', function(){
+        calculateGram('#txtAvgAfter', '#txtSizeAfter', '#txtGramAfter');
+    });
+    function RollLaminationData(){
+        const rollData = {
+            vNo : parseInt($('#NumDocumentNumber').val()) || 0,
+            jobWork : $('#chkJobWork').is(':checked') ? 1 : 0,
+            shiftBefore : $('#ddlShiftBefore').val() || '',
+            dateBefore : $('#txtDateBefore').val() || '',
+            itemBefore : parseInt($('#ddlItemBefore').val()) || 0,
+            itemNameBefore : $('#ddlItemBefore').find("option:selected").text() || '',
+            rollNoBefore : $('#txtRollBefore').val() || '',
+            meterBefore : parseInt($('#txtMeterBefore').val()) || 0,
+            grossBefore : parseFloat($('#txtGrossBefore').val()) || 0,
+            tareBefore : parseFloat($('#txtTareBefore').val()) || 0,
+            netBefore : parseFloat($('#txtNetBefore').val()) || 0,
+            avgBefore : parseFloat($('#txtAvgBefore').val()) || 0,
+            gramBefore : parseFloat($('#txtGramBefore').val()) || 0,
+            sizeBefore : parseFloat($('#txtSizeBefore').val()) || 0,
+            loomNo : parseInt($('#ddlLoomNo').val()) || 0,
+            remarksBefore : $('#txtRemarksBefore').val() || '',
+            placeCode : parseInt($('#ddlPlace').val()) || 0,
+            pordNo : parseInt($('#ddlPordNo').val()) || 0,
+            shiftAfter : $('#ddlShiftAfter').val() || '',
+            dateAfter : $('#txtDateAfter').val() || '',
+            itemAfter : parseInt($('#ddlItemAfter').val()) || 0,
+            itemNameAfter : $('#ddlItemAfter').find("option:selected").text() || '',
+            rollNoAfter : $('#txtRollAfter').val() || '',
+            meterAfter : parseInt($('#txtMeterAfter').val()) || 0,
+            batchNo : $('#txtBatchNo').val() || '',
+            grossAfter : parseFloat($('#txtGrossAfter').val()) || 0,
+            tareAfter : parseFloat($('#txtTareAfter').val()) || 0,
+            netAfter : parseFloat($('#txtNetAfter').val()) || 0,
+            avgAfter : parseFloat($('#txtAvgAfter').val()) || 0,
+            gramAfter : parseFloat($('#txtGramAfter').val()) || 0,
+            sizeAfter : parseFloat($('#txtSizeAfter').val()) || 0,
+            machineNo : parseInt($('#ddlMachineNo').val()) || 0,
+            status : parseInt($('#ddlStatus').val()) || 0,
+            remarksAfter : $('#txtRemarksAfter').val() || 0
+        }
+        return rollData;
+    }
+    function saveRollLamination(){
+        const rollData = RollLaminationData();
+        console.log("rollData: ", rollData)
+        if (!rollData) {
+            return;
+        }
+        $('.circle-loader').css('display', 'flex');
+        $.ajax({
+            url: '/RollLaminationEntry/SaveRollLamination',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(rollData),
+            success: function (response) {
+                $('.circle-loader').css('display', 'none');
+                if (response.success) {
+                    showFlashMessageByKey('insert', 'success');
+                    setTimeout(function () {
+                        window.location.href = '/RollLaminationEntryList/Index';
+                    }, 1500);
+                }
+                else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function (xhr) {
+                $('.circle-loader').css('display', 'none');
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+    let isDdlItemBeforeOpen = false;
+    let isClickInsidePanel = false;
+    let currentSearchText = '';
+    function loadPreviewData(filterText = '') {
+        $.ajax({
+            url: '/RollLaminationEntry/GetPendingLaminationRecord',
+            type: 'GET',
+            dataType: 'JSON',
+            data: { filterText: filterText },
+            success: function (response) {
+                if (!response.success) {
+                    toastr.error(response.message);
+                    return;
+                }
+                let pendingRecord = response.pendingList || [];
+                renderPendingTable(pendingRecord);
+            },
+            error: function (xhr) {
+                toastr.error('Error: ' + xhr.responseText);
+            }
+        });
+    }
+    function renderPendingTable(data) {
+        let tbody = $('#tblPendingRecordPanel tbody');
+        tbody.empty();
+        if (!data || data.length === 0) {
+            tbody.append(`<tr><td colspan="7" class="text-center">No Data</td></tr>`);
+            return;
+        }
+        data.forEach(record => {
+        tbody.append(`
+                <tr>
+                    <td>${record.itemName || ''}</td>
+                    <td>${record.rollNo || ''}</td>
+                    <td>${record.meter || ''}</td>
+                    <td>${record.grossWt || ''}</td>
+                    <td>${record.tareWt || ''}</td>
+                    <td>${record.netWt || ''}</td>
+                    <td style="display:none">${record.loomNo || ''}</td>
+                    <td>${record.loomType || ''}</td>
+                </tr>
+            `);
+        });
+    }
+    function showPopup() {
+        if (!isDdlItemBeforeOpen) return;
+        let select2 = $('#ddlItemBefore').data('select2');
+        if (!select2) return;
+        let $container = select2.$container;
+        if (!$container || !$container.length) return;
+        let offset = $container.offset();
+        let panel = $('#PendingRecordPanel');
+        let panelWidth = panel.outerWidth();
+        let gap = 10;
+        let leftPos = offset.left - panelWidth - gap;
+        if (leftPos < 0) {
+            leftPos = offset.left + $container.outerWidth() + gap;
+        }
+        panel.css({
+            top: offset.top,
+            left: leftPos,
+            display: 'block'
+        });
+    }
+    $('#ddlItemBefore').on('select2:open', function () {
+        isDdlItemBeforeOpen = true;
+        $(document).off('.preview');
+        $('#PendingRecordPanel').show();
+        $(document).on('keydown.preview', function (e) {
+            if (!isDdlItemBeforeOpen) return;
+            if (!$('#ddlItemBefore').data('select2')) return;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                setTimeout(() => {
+                    let text = getActiveSelect2Text();
+                    if (!text) return;
+                    currentSearchText = text;
+                    loadPreviewData(text);
+                    showPopup();
+                }, 100);
+            }
+        });
+        $(document).on('mouseenter.preview', '.select2-results__option', function () {
+            if (!isDdlItemBeforeOpen) return;
+            let text = $(this).text();
+            currentSearchText = text;
+            loadPreviewData(text);
+            showPopup();
+        });
+    setTimeout(function () {
+        const searchInput =
+        document.querySelector('.select2-container--open .select2-search__field');
+        if (searchInput) {
+            $(searchInput)
+            .off('keyup.preview')
+            .on('keyup.preview', function () {
+                if (!isDdlItemBeforeOpen) return;
+                currentSearchText = this.value;
+                loadPreviewData(this.value);
+                showPopup();
+            });
+        }
+    }, 0);
+    loadPreviewData('');
+});
+function getActiveSelect2Text() {
+    let highlighted = $('.select2-results__option--highlighted');
+    if (highlighted.length) {
+        return highlighted.text().trim();
+    }
+    return '';
+}
+$('#PendingRecordPanel').on('mousedown', function (e) {
+    isClickInsidePanel = true;
+    e.stopPropagation();
+});
+$(document).on('mousedown', function (e) {
+    if (!$(e.target).closest('#PendingRecordPanel').length) {
+        isClickInsidePanel = false;
+    }
+});
+$('#ddlItemBefore').on('select2:close', function () {
+    isDdlItemBeforeOpen = false;
+    $(document).off('.preview');
+    setTimeout(() => {
+        if (!isClickInsidePanel) {
+            $('#PendingRecordPanel').hide();
+        }
+        isClickInsidePanel = false;
+    }, 0);
+});
+$('#txtRollBefore').on('focusout', function(){
+    IsExistRoll();
+})
+function IsPendingRoll(){
+    let itemCode = $('#ddlItemBefore').val();
+    let rollNo = $('#txtRollBefore').val();
+    $.ajax({
+        url: '/RollLaminationEntry/ValidatePendingRoll',
+        type: 'GET',
+        dataType: 'json',
+        data: {itemCode:itemCode, rollNo:rollNo},
+        success: function (response) {
+            if(!response.isExist){
+                Swal.fire({
+                    icon: "warning",
+                    title: "Information",
+                    text: "Item not in pending list.",
+                });
+            }
+            else{
+                GetRollDetails();
+            }
+        },
+        error: function (xhr) {
+            toastr.error(xhr.responseText);
+        }
+    });
+}
+function IsExistRoll(){
+    let itemCode = $('#ddlItemBefore').val();
+    let rollNo = $('#txtRollBefore').val();
+    let vNo = $('#NumDocumentNumber').val();
+    $.ajax({
+        url: '/RollLaminationEntry/ValidateRollExist',
+        type: 'GET',
+        dataType: 'json',
+        data: {itemCode:itemCode, rollNo:rollNo, vNo:vNo},
+        success: function (response) {
+            if(response.isExist === true){
+                Swal.fire({
+                    icon: "warning",
+                    title: "Information",
+                    text: "Item and Roll No already exists.",
+                });
+            }
+            else if(response.isExist === false){
+                IsPendingRoll();
+            }
+        },
+        error: function (xhr) {
+            toastr.error(xhr.responseText);
+        }
+    });
+}
+function GetRollDetails(){
+    let itemCode = $('#ddlItemBefore').val();
+    let rollNo = $('#txtRollBefore').val();
+    $.ajax({
+        url:'/RollLaminationEntry/GetRollDetails',
+        type:'GET',
+        dataType:'JSON',
+        data:{itemCode:itemCode, rollNo:rollNo},
+        success:function(response){
+            if (!response || response.length === 0) {
+                return;
+            }
+            const data = response.rollDetails;
+            $('#txtMeterBefore').val(data.meter);
+            $('#txtGrossBefore').val(data.grossWt);
+            $('#txtTareBefore').val(data.tareWt);
+            $('#txtNetBefore').val(data.netWt);
+            $('#txtAvgBefore').val(data.avgWt);
+            $('#txtGramBefore').val(data.gram);
+            let placeCode = $('#ddlPlace').val();
+            ddlLoomNo(placeCode, data.loomNo);
+            $('#txtRollAfter').val(rollNo);
+        },
+        error:function(xhr){
+            toastr.error("Error loading Roll Details:", xhr.responseText);
+        }
+    });
+}
+function GetBatchNo(){
+    $.ajax({
+        url: '/RollLaminationEntry/GetBatchNo',
+        type: 'GET',
+        dataType: 'JSON',
+        success: function (response) {
+            if (!response || response.length === 0) {
+                return;
+            }
+            const data = response.batchNo;
+            $('#txtBatchNo').val(data);
+        },
+        error: function (xhr) {
+            toastr.error("Error loading Roll Details:", xhr.responseText);
+        }
+    });
+}
+function GetRollDetailsByVno(vNo){
+    $.ajax({
+        url: '/RollLaminationEntry/GetRollDetailsByVno',
+        type: 'GET',
+        dataType: 'JSON',
+        data: { vNo: vNo },
+        success: function (response) {
+            if (response && response.length !== 0) {
+                console.log("Response: ", response);
+                bindRollDetails(response);
+            }
+        },
+        error: function (xhr) {
+            toastr.error("Error loading Roll Details:", xhr.responseText);
+        }
+    });
+}
+function bindRollDetails(res){
+    const data = res.rollDetails;
+    $('#NumDocumentNumber').val(data.vNo);
+    (data.jobWork === 1) ? $('#chkJobWork').prop('checked', true) : $('#chkJobWork').prop('checked', false);
+    $('#ddlShiftBefore').val(data.shiftBefore);
+    $('#txtDateBefore').val(GetDateYYYYMMDD(data.dateBefore));
+    ddlItemBeforeLam(data.itemBefore);
+    $('#txtRollBefore').val(data.rollNoBefore);
+    $('#txtMeterBefore').val(data.meterBefore);
+    $('#txtGrossBefore').val(data.grossBefore);
+    $('#txtTareBefore').val(data.tareBefore);
+    $('#txtNetBefore').val(data.netBefore);
+    $('#txtAvgBefore').val(data.avgBefore);
+    $('#txtGramBefore').val(data.gramBefore);
+    $('#txtSizeBefore').val(data.sizeBefore);
+    ddlLoomNo(data.placeCode, data.loomNo)
+    $('#txtRemarksBefore').val(data.remarksBefore);
+    ddlPlace(() => {
+        $('#ddlPlace').val(data.placeCode);
+    });
+    $('#ddlShiftAfter').val(data.shiftAfter);
+    $('#txtDateAfter').val(GetDateYYYYMMDD(data.dateAfter));
+    ddlItemAfterLam(data.itemAfter);
+    $('#txtRollAfter').val(data.rollNoAfter);
+    $('#txtMeterAfter').val(data.meterAfter);
+    $('#txtBatchNo').val(data.batchNo);
+    $('#txtGrossAfter').val(data.grossAfter);
+    $('#txtTareAfter').val(data.tareAfter);
+    $('#txtNetAfter').val(data.netAfter);
+    $('#txtAvgAfter').val(data.avgAfter);
+    $('#txtGramAfter').val(data.gramAfter);
+    $('#txtSizeAfter').val(data.sizeAfter);
+    ddlMachineNo(data.placeCode, data.machineNo)
+    ddlStatus(() => {
+        $('#ddlStatus').val(data.status);
+    });
+    $('#txtRemarksAfter').val(data.remarksAfter);
+}
+function GetDateYYYYMMDD(date) {
+    let parts = date.split('T');
+    let newDate = parts[0];
+    return newDate;
+};
+function UpdateRollLamination() {
+    const rollData = RollLaminationData();
+    console.log("rollData: ", rollData)
+    if (!rollData) {
+        return;
+    }
+    $('.circle-loader').css('display', 'flex');
+    $.ajax({
+        url: '/RollLaminationEntry/UpdateRollLamination',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(rollData),
+        success: function (response) {
+            $('.circle-loader').css('display', 'none');
+            if (response.success) {
+                showFlashMessageByKey('update', 'success');
+                setTimeout(function () {
+                    window.location.href = '/RollLaminationEntryList/Index';
+                }, 1500);
+            }
+            else {
+                toastr.error(response.message);
+            }
+        },
+        error: function (xhr) {
+            $('.circle-loader').css('display', 'none');
+            toastr.error('Error: ' + xhr.responseText);
+        }
+    });
+}
+function setFormReadOnly() {
+    $('#LaminationForm input, textarea').prop('readonly', true);
+    $('#LaminationForm select').prop('disabled', true);
+    $('#LaminationForm input[type="checkbox"]').prop('disabled', true);
+    $('#btnSave').hide();
+}
+</script>

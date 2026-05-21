@@ -14,6 +14,7 @@
     const vtype = urlParams.get('VType');
     const $tbody = $("#tblOutwardEntry tbody");
     const mode = urlParams.get('mode');
+    const isReadOnly = (mode === 'view');
     $(document).ready(function () {
 
         (async () => {
@@ -63,63 +64,32 @@
                     const ITEM_TYPE = $.trim($('#ddlType option:selected').text());
                     const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
 
-                    if (!DocType) {
-                        toastr.warning("Please select a Doc Type.");
-                        $("#ddlDocType").focus();
-                        return;
-                    }
-
-                    if (!V_DATE) {
-                        toastr.warning("Please select a Voucher Date.");
-                        $("#DtDocDate").focus();
-                        return;
-                    }
+                    if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type.')) return;
+                    if (!validateRequiredField('#DtDocDate', 'Please select a Voucher Date.')) return;
+                               
 
                     if (DocType === "OURT") {
 
-                        if (!RETURN_DATE) {
-                            toastr.warning("Please select Return Date.");
-                            $("#DtExpectedDateReturn").focus();
-                            return;
-                        }
-
-                        if (new Date(RETURN_DATE) < new Date(V_DATE)) {
-                            showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "info" });
-                            $('#DtExpectedDateReturn').addClass('is-invalid').focus();
-                            return;
-                        }
-
-                        if (!RESPONSIBLE_PERSON) {
-                            toastr.warning("Please enter Responsible Person Name.");
-                            $("#txtResponsiblePerson").focus();
-                            return;
-                        }
+                        if (!validateRequiredField('#DtExpectedDateReturn', 'Please select Return Date.')) return;
+                        if (!validateRequiredField('#DtExpectedDateReturn', 'Invalid Return Date. Return date should not be less than Doc date.')) return;
+                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return; 
+                        
                     }
 
-                    if (!V_NO) {
-                        toastr.warning("Invalid Voucher No.");
-                        $("#NumDocNo").focus();
-                        return;
-                    }
 
-                    if (!PartyCode) {
-                        toastr.warning("Please select a Party.");
-                        $("#ddlPartyName").focus();
-                        return;
-                    }
+                    if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
+
 
                     if (CompCode == 2) {
                         if (DocType === "DocType" || ITEM_TYPE === "Sale") {
-                            toastr.warning(`Please check DocType = ${DocType} and Type = ${ITEM_TYPE}`);
-                            $("#ddlDocType").focus();
-                            return;
+                            if (!validateRequiredField('#ddlDocType', 'Please check DocType and Doc No')) return;                     
                         }
+                          
                         else {
-                            // Fixed Logic
+        
                             if (DocType === "OUES" && ITEM_TYPE !== "E-Commerce Sale") {
-                                toastr.warning(`Sale Type and Doctype mismatch.`);
-                                $("#ddlDocType").focus();
-                                return;
+                                if (!validateRequiredField('#ddlDocType', 'Sale Type and Doctype mismatch.')) return; 
+                             
                             }
 
                         }

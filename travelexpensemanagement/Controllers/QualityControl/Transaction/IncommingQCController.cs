@@ -152,7 +152,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var globalVar = _globalVariableService.GetGlobalVariables();
             string MRNType = new string(MRNText.TakeWhile(char.IsLetter).ToArray());
             string MRNNo = new string(MRNText.SkipWhile(char.IsLetter).ToArray());
-
             try
             {
                 using (var conn = _dbConnection.GetErpConnection())

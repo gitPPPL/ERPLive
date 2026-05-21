@@ -21,64 +21,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
         }
-        public async Task<string> GetVNoAsync(string vType, string tableName = "")
-        {
-            string newV_NO = "00000";
 
-            try
-            {
-                var getdata = _globalVariableService.GetGlobalVariables();
-
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    await con.OpenAsync();
-
-                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
-                    string prefixYR;
-
-                    using (SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con))
-                    {
-                        prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                        prefixYR = (await prefixCmd.ExecuteScalarAsync())?.ToString() ?? "0000";
-                    }
-                             
-
-                    string lastV_NO_Query = $@"
-                        SELECT MAX(CAST(V_NO AS INT)) 
-                        FROM {tableName}
-                        WHERE COMP_CODE = @CompCode 
-                        AND YEAR_CODE = @YearCode 
-                        AND BRANCH_CODE = @BranchCode 
-                        AND V_TYPE = @Vtype";
-
-                    using (SqlCommand cmd = new SqlCommand(lastV_NO_Query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@BranchCode", 1);
-                        cmd.Parameters.AddWithValue("@Vtype", vType);
-
-                        object result = await cmd.ExecuteScalarAsync();
-
-                        if (result != DBNull.Value && result != null)
-                        {
-                            int lastV_NO = Convert.ToInt32(result);
-                            newV_NO = (lastV_NO + 1).ToString("D5");
-                        }
-                        else
-                        {
-                            newV_NO = prefixYR + "00001";
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error generating V_NO", ex);
-            }
-
-            return newV_NO;
-        }
         public RepositoryResponse SaveOutwardEntry(OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
         {
             try
@@ -210,8 +153,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     message = ex.Message
                 }; ;
             }
-        }          
-        public RepositoryResponse Validdata(OutWordEntry_Header header, List<DetailsOutwardEntry> details)
+        }
+        public RepositoryResponse Validdata(  OutWordEntry_Header header,  List<DetailsOutwardEntry> details)
         {
             try
             {
@@ -221,43 +164,32 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 foreach (var d in details)
                 {
                     if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
-                        continue;        
-
+                        continue;
                     if (d.REF_TYPE == "SAGT" && d.REF_NO != 0)
                     {
-                        string sql = @"
-                        SELECT bill_gst, einvoice_flg, namount
-                        FROM sale1
-                        WHERE v_type = @v_type
-                        AND v_no = @v_no
-                        AND comp_code = @comp_code
-                        AND branch_code = @branch_code
-                        AND year_code = @year_code";
-
-                        using (var cmd1 = new SqlCommand(sql, conn))
+                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                         {
-                            cmd1.Parameters.AddWithValue("@v_type", d.REF_TYPE);
-                            cmd1.Parameters.AddWithValue("@v_no", d.REF_NO);
-                            cmd1.Parameters.AddWithValue("@comp_code", g.PubCompCode);
-                            cmd1.Parameters.AddWithValue("@branch_code", g.PubBranchCode);
-                            cmd1.Parameters.AddWithValue("@year_code", g.PubFYearCode);
-
-                            using var reader = cmd1.ExecuteReader();
-
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@Action", "Validdata");
+                            cmd.Parameters.AddWithValue("@ShowActionOption", "SAGT");
+                            cmd.Parameters.AddWithValue("@REF_TYPE", d.REF_TYPE);
+                            cmd.Parameters.AddWithValue("@REF_NO", d.REF_NO);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
+                            using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
                                 decimal bill_gst = Convert.ToDecimal(reader["bill_gst"]);
                                 string einvoice_flg = Convert.ToString(reader["einvoice_flg"]);
                                 decimal namount = Convert.ToDecimal(reader["namount"]);
 
-                                // ✅ FIXED CONDITION
                                 if (namount >= 100000 &&
                                     bill_gst > 16 &&
                                     namount != 0 &&
                                     einvoice_flg != "Y")
                                 {
-                                    return new RepositoryResponse
-                                    {
+                                    return new RepositoryResponse  {
                                         status = false,
                                         message = "Please Generate GST E Invoice Before Creating GatePass."
                                     };
@@ -265,37 +197,20 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             }
                         }
 
-                        // =========================================
+                        // =====================================================
                         // GST TAX VALIDATION
-                        // =========================================
+                        // =====================================================
 
-                        string sql2 = @"
-                            SELECT 1
-                            FROM Sale2
-                            WHERE Tax_Code IN
-                            (
-                            SELECT Code
-                            FROM TAX_MAST
-                            WHERE TAX_TYPE = 'GST'
-                            AND T_TYPE NOT IN ('Import')
-                            )
-                            AND (CGST_AMT + SGST_AMT + IGST_AMT) = 0
-                            AND V_type = @v_type
-                            AND V_no = @v_no
-                            AND Comp_code = @comp_code
-                            AND Branch_code = @branch_code
-                            AND Year_Code = @year_code";
-
-                        using (var cmd1 = new SqlCommand(sql2, conn))
-                        {
-                            cmd1.Parameters.AddWithValue("@v_type", d.REF_TYPE);
-                            cmd1.Parameters.AddWithValue("@v_no", d.REF_NO);
-                            cmd1.Parameters.AddWithValue("@comp_code", g.PubCompCode);
-                            cmd1.Parameters.AddWithValue("@branch_code", g.PubBranchCode);
-                            cmd1.Parameters.AddWithValue("@year_code", g.PubFYearCode);
-
-                            using var reader = cmd1.ExecuteReader();
-
+                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@Action", "Validdata");
+                            cmd.Parameters.AddWithValue("@ShowActionOption", "GSTVALID");
+                            cmd.Parameters.AddWithValue("@REF_TYPE", d.REF_TYPE);
+                            cmd.Parameters.AddWithValue("@REF_NO", d.REF_NO);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
+                            using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
                                 return new RepositoryResponse
@@ -307,30 +222,19 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                     }
 
-                    // =========================================
-                    // EWAY BILL VALIDATION
-                    // =========================================
-
                     if (d.REF_TYPE == "DCHL" &&
                         string.IsNullOrWhiteSpace(header.WAYBILL_NO))
                     {
-                        string sql3 = @"
-                        SELECT state_mast.state_type
-                        FROM state_mast
-                        LEFT JOIN city_mast
-                        ON city_mast.state_code = state_mast.code
-                        WHERE city_mast.code = @code";
-
-                        using (var cmd1 = new SqlCommand(sql3, conn))
+                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                         {
-                            cmd1.Parameters.AddWithValue("@code", header.PARTY_CITY);
-
-                            using var reader = cmd1.ExecuteReader();
-
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@Action", "Validdata");
+                            cmd.Parameters.AddWithValue("@ShowActionOption", "STATECHECK");
+                            cmd.Parameters.AddWithValue("@PARTY_CITY", header.PARTY_CITY);
+                            using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                string state_type = Convert.ToString(reader["state_type"]);
-
+                                string state_type =  Convert.ToString(reader["state_type"]);
                                 if (state_type != "Local")
                                 {
                                     return new RepositoryResponse
@@ -343,72 +247,63 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                     }
 
-                    // =========================================
-                    // QUANTITY VALIDATION
-                    // =========================================
-
-                    decimal PubRes1Dbl = 0;
-                    decimal PubRes2Dbl = 0;
-                    string PubRes1Str = "";
-
-
-
-                    if (header.ITEM_TYPE == "Sale")
-                    {
-                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from sale2  where V_TYPE ='" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code= " + d.ITEM_CODE + ""));
-                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where ref_TYPE ='" + d.REF_TYPE + "'and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + "  and YEAR_CODE =" + g.PubFYearCode + " and item_code= " + d.ITEM_CODE + " and v_type<> '" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
-                        PubRes1Str = "Sale";
-
-                    }
-                    else if (header.ITEM_TYPE == "Order")
-                    {
-                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from Order2  where V_TYPE ='" + d.REF_TYPE + "' and V_NO = " + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and item_code=" + d.ITEM_CODE + " "));
-                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + "  and item_code= " + d.ITEM_CODE + " and v_type<>'" + header.V_TYPE + "' and v_no <> " + header.V_NO + ""));
-                        PubRes1Str = "Order";
-                    }
-                    else if (header.ITEM_TYPE == "Misc")
-                    {
-                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where V_TYPE = '" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + "  and remarks= '" + d.REMARKS + "'"));
-                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2  where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + "   and remarks=  '" + d.REMARKS + "' and v_type<> '" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
-                        PubRes1Str = "Misc";
-                    }
-                    else if (header.ITEM_TYPE == "Empty")
-                    {
-                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2 where empty='Yes' and  V_TYPE ='" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + " "));
-                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2 where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and YEAR_CODE =" + g.PubFYearCode + " and item_code=" + d.ITEM_CODE + "  and v_type<>'" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
-                        PubRes1Str = "Empty";
-                    }
-                    else if (header.ITEM_TYPE == "Purchase Return")
-                    {
-                        PubRes1Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(bill_qty),0) from purchase2 where V_TYPE ='" + d.REF_TYPE + "' and V_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and item_code=" + d.ITEM_CODE + ""));
-                        PubRes2Dbl = Convert.ToDecimal(GetText("select  isnull(Sum(qty),0) from gate2 where ref_TYPE ='" + d.REF_TYPE + "' and ref_NO =" + d.REF_NO + " and COMP_CODE =" + g.PubCompCode + " and BRANCH_CODE =" + g.PubBranchCode + " and item_code= " + d.ITEM_CODE + " and v_type= '" + header.V_TYPE + "' and v_no <>" + header.V_NO + ""));
-
-                    }
-
-                    // Add current qty
-                    PubRes2Dbl += (d.QTY ?? 0);
+                    decimal mainQty = 0;
+                    decimal gateQty = 0;
 
                     if (header.ITEM_TYPE != "Others")
                     {
-                        if (PubRes1Dbl > PubRes2Dbl)
+                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                         {
-                            string message = $"{PubRes1Str} Pending Quantity is = {PubRes1Dbl - PubRes2Dbl + (d.QTY ?? 0)} " +
-                                             $"& Your Quantity is = {(d.QTY ?? 0)}, " +
-                                             $"Please Check it of Item Name {d.ITEM_CODE}";
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@Action", "Validdata");
+                            cmd.Parameters.AddWithValue("@ShowActionOption", "QTYVALID");
+                            cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE);
+                            cmd.Parameters.AddWithValue("@REF_TYPE", d.REF_TYPE);
+                            cmd.Parameters.AddWithValue("@REF_NO", d.REF_NO);
+                            cmd.Parameters.AddWithValue("@ITEM_CODE", d.ITEM_CODE);
+                            cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
+                            cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
+                            using var reader = cmd.ExecuteReader();
+                            if (reader.Read())
+                            {
+                                mainQty = Convert.ToDecimal(reader["MainQty"]);
+                                gateQty =  Convert.ToDecimal(reader["GateQty"]);
+                            }
+                        }
+                        gateQty += (d.QTY ?? 0);
+  
+                        if (gateQty > mainQty)
+                        {
+                            decimal pendingQty =
+                                mainQty - (gateQty - (d.QTY ?? 0));
+
                             return new RepositoryResponse
                             {
-                                status = true,
-                                message = message
+                                status = false,
+                                message =
+                                    $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
+                                    $"& Your Quantity is = {(d.QTY ?? 0)}, " +
+                                    $"Please Check Item Code {d.ITEM_CODE}"
                             };
                         }
                     }
-
                 }
-                return new RepositoryResponse { status = true, message = "Success"  };
+                return new RepositoryResponse
+                {
+                    status = true,
+                    message = "Success"
+                };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse  {  status = false,  message = ex.Message  };
+                return new RepositoryResponse
+                {
+                    status = false,
+                    message = ex.Message
+                };
             }
         }
         public string GetText(string query)
@@ -445,25 +340,15 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             var dataList = new List<object>();
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
-
-                string query = @"
-                SELECT  top 1 a.ADDRESS_ID ,   a.Add1, a.Add2, a.Add3, a.GSTIN, 
-                a.City_Code, b.Name AS State, 
-                c.Name AS City, a.Pincode
-                FROM Subgroup_Address AS a 
-                LEFT JOIN STATE_MAST AS b ON a.STATE_CODE = b.Code
-                LEFT JOIN CITY_MAST AS c ON a.CITY_CODE = c.Code
-                WHERE a.Comp_Code = @CompCode  
-                AND  a.Code = @PartyId  order by a.ADDRESS_ID asc ;";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", con))
                 {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@PartyId", partyId);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "GetDataByPartyCodeAsync");
+                    cmd.Parameters.AddWithValue( "@COMP_CODE",  getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue( "@PARTY_CODE",  partyId);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -471,8 +356,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         {
                             dataList.Add(new
                             {
-                                Add1 = reader["Add1"]?.ToString(),
                                 ADDRESS_ID = reader["ADDRESS_ID"]?.ToString(),
+                                Add1 = reader["Add1"]?.ToString(),
                                 Add2 = reader["Add2"]?.ToString(),
                                 Add3 = reader["Add3"]?.ToString(),
                                 GSTIN = reader["GSTIN"]?.ToString(),
@@ -485,49 +370,37 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                 }
             }
-
             return dataList;
         }
-        public List<object> GetDataByPartyandAddressidCodeAsync(int partyId , int  addressid)
+        public List<object> GetDataByPartyandAddressidCodeAsync(  int partyId, int addressid)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             var dataList = new List<object>();
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
-
-                string query = @"
-                SELECT top 1 a.Add1, a.Add2, a.Add3, a.GSTIN, a.ADDRESS_ID ,
-                a.City_Code, b.Name AS State, 
-                c.Name AS City, a.Pincode
-                FROM Subgroup_Address AS a 
-                LEFT JOIN STATE_MAST AS b ON a.STATE_CODE = b.Code
-                LEFT JOIN CITY_MAST AS c ON a.CITY_CODE = c.Code
-                WHERE a.Comp_Code = @CompCode  
-                AND a.Code = @PartyId   and  a.ADDRESS_ID = @addressid ;";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", con))
                 {
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@PartyId", partyId);
-                    cmd.Parameters.AddWithValue("@addressid", addressid);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-
+                    cmd.Parameters.AddWithValue(  "@Action",  "GetByPartyandAddressid");
+                    cmd.Parameters.AddWithValue(  "@COMP_CODE",   getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue(  "@PARTY_CODE", partyId);
+                    cmd.Parameters.AddWithValue(  "@PARTY_ADDRESSID", addressid );
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             dataList.Add(new
                             {
+                                ADDRESS_ID =  reader["ADDRESS_ID"]?.ToString(),
                                 Add1 = reader["Add1"]?.ToString(),
-                                ADDRESS_ID = reader["ADDRESS_ID"]?.ToString(),
-                                Add2 = reader["Add2"]?.ToString(),
+                                Add2 =  reader["Add2"]?.ToString(),
                                 Add3 = reader["Add3"]?.ToString(),
-                                GSTIN = reader["GSTIN"]?.ToString(),
+                                GSTIN =  reader["GSTIN"]?.ToString(),
                                 City_Code = reader["City_Code"]?.ToString(),
                                 State = reader["State"]?.ToString(),
-                                Pincode = reader["Pincode"]?.ToString(),
+                                Pincode =  reader["Pincode"]?.ToString(),
                                 cityName = reader["City"]?.ToString()
                             });
                         }

@@ -1,0 +1,1144 @@
+﻿@{
+    ViewBag.Title = "Flakes QC Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Flakes QC Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button id="btnbacklist"
+                        onclick="confirmAndGoBack()" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="FlakesQCEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="NumDocNo">Doc No<span class="required">*</span></label>
+                            <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="DtDocDate">Doc Date<span class="required">*</span></label>
+                            <input type="date" class="form-control " id="DtDocDate">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="ddlShift">Shift<span class="required">*</span></label>
+                            <select class="form-control" id="ddlShift">
+                                <option value="">Select Shift</option>
+                                <option value="A"> A </option>
+                                <option value="B"> B </option>
+                                <option value="C"> C </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="DtTime">Time<span class="required">*</span></label>
+                            <input type="time" class="form-control" id="DtTime">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="ddlQCIncharge">QC Incharge<span class="required">*</span></label>
+                            <select class="form-control" id="ddlQCIncharge">
+                                <option value="">Select QC Incharge</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="ddlChemist">Chemist<span class="required">*</span></label>
+                            <select class="form-control" id="ddlChemist">
+                                <option value="">Select Chemist</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="ddlInspBy">Insp. By</label>
+                            <select class="form-control" id="ddlInspBy">
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="ddlProdPlace">Prod. Place<span class="required">*</span></label>
+                            <select class="form-control" id="ddlProdPlace">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="TxtRemarks">Remarks</label>
+                            <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="btn-mt">
+                            <button type="button" class="btn btn-primary" id="btn_Copy" data-bs-toggle="modal"><i class="fa fa-copy"></i>Copy From</button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="col-md-4">
+                <fieldset class="fieldset-sub">
+                    <legend class="sub-legend">Print Details</legend>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtFrom">From</label>
+                                <input type="date" class="form-control" id="DtFrom">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="DtTo">To</label>
+                                <input type="date" class="form-control" id="DtTo">
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="ddlItem">Item</label>
+                                <select class="form-control" id="ddlItem">
+                                    <option value="">Select Item</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="checkbox-input-mt">
+                                <input type="checkbox" id="ChkFullName" />
+                                Full Name
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="offset-md-4 col-md-8">
+                            <div class="button-right">
+                                <button type="button" class="btn btn-primary" id="btn_summary"><i class="fa fa-print"></i>Summary</button>
+                                <button type="button" class="btn btn-primary" id="btn_detail"><i class="fa fa-print"></i>Detail</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <!--Popup Modal-->
+        <div class="modal fade" id="CopyFromModal" tabindex="-1" aria-labelledby="CopyFromLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="CopyFromLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                <input type="text" id="searchBoxCF" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <input type="checkbox" id="chkAppendFYModal">
+                                    <label class="checkbox-label" for="chkAppendFYModal">Append</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="btn-rightalign">
+                                <button type="button" class="btn btn-primary" id="CopyData"></i>Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblCopyFrommodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllPR" /></th>
+                                            <th> Bag No </th>
+                                            <th width="300px">Item Name</th>
+                                            <th>Prod Place</th>
+                                            <th>Lot No</th>
+                                            <th>WB Qty</th>
+                                            <th>Gross Qty</th>
+                                            <th>Tare Qty</th>
+                                            <th> Qty </th>
+                                            <th>V Type</th>
+                                            <th>V No</th>
+                                            <th hidden> Item Code </th>
+                                            <th hidden> Dept code</th>
+                                            <th hidden> Dept </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Popup Modal End-->
+
+        <div class="row">
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblFlakesQCEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>ICode</th>
+                            <th width="300px">Item Name</th>
+                            <th width="200px">Dept</th>
+                            <th>Batch No</th>
+                            <th >Bag No</th>
+                            <th width="60px">WB. Wt.</th>
+                            <th width="60px">Gr. Wt.</th>
+                            <th width="60px">Tr. Wt.</th>
+                            <th width="60px">Net Wt.</th>
+                            <th width="60px">HDPE</th>
+                            <th width="60px">PVC/PPM</th>
+                            <th >PC/Low Melt</th>
+                            <th width="60px">Wrapper</th>
+                            <th width="60px">Metal</th>
+                            <th width="60px">Stone</th>
+                            <th width="60px">Rubber</th>
+                            <th width="60px">Glue</th>
+                            <th width="60px">Other</th>
+                            <th width="80px">Total<span class="required">*</span></th>
+                            <th>Grd</th>
+                            <th>Yellow %</th>
+                            <th width="60px">Blue %</th>
+                            <th>Other %</th>
+                            <th>Color Mix</th>
+                            <th>Yellow 160C</th>
+                            <th>Moisture</th>
+                            <th>Bulk Density</th>
+                            <th>PH</th>
+                            <th>Over Sized</th>
+                            <th>Remarks</th>
+                            <th style="display:none;">Ref Type</th>
+                            <th style="display:none;">Ref No</th>
+                            <th style="display:none;">DeptCode</th>
+                        </tr> 
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+         
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-saves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn-Cancel" onclick="confirmAndGoBack()" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script>
+    const $tbody = $('#tblFlakesQCEntry tbody');
+    const refTypeOptions = ["PO", "Indent", "Manual"];
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+    let itemNameOptions = '';
+
+
+    $(document).ready(function () {
+        LoadDropDown().then(() => {
+            if (rowId) {
+              LoadFormByID(rowId);
+              document.getElementById("DtDocDate").disabled = true;
+              document.getElementById("ddlShift").disabled = true;
+              document.getElementById("ddlProdPlace").disabled = true;
+            }
+        });         
+
+        if (!rowId) {
+            GetVNo();
+            document.getElementById('DtDocDate').valueAsDate = new Date();
+            document.getElementById('DtTime').value = ((d=>`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`)(new Date()));
+
+        }
+
+        if (mode === "view") {
+                setFormReadOnly();
+                    $('#FlakesQCEntryForm').after(
+                '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+                );
+            }
+
+        $('#btn_Copy').on('click', function () {
+
+            const docDate   =  $('#DtDocDate').val();
+            const DeptCode  = $('#ddlProdPlace').val();
+            const ShiftType = $('#ddlShift').val();
+
+            if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
+            if (!validateRequiredField('#ddlShift', 'SHIFT')) return;
+            if (!validateRequiredField('#ddlProdPlace', 'Prod Place')) return;
+  
+         
+                     
+            CheckConditionCpyFrm(DeptCode, ShiftType, formatDate(docDate));
+        });
+
+        $('#CopyData').on('click', function () {
+            const selectedRows = getSelectedRowsData();
+                   
+            if (selectedRows.length > 0) {
+                var modalEl = document.getElementById('CopyFromModal');
+                var modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+                if (modalInstance) {
+                modalInstance.hide(); 
+                }
+                addSelectedRowsToTable(selectedRows);
+
+                document.getElementById("DtDocDate").disabled = true;
+                document.getElementById("ddlShift").disabled = true;
+                document.getElementById("ddlProdPlace").disabled = true;
+       
+
+            } else {
+                 toastr.warning('No rows selected');
+            }
+        });
+
+        $('#selectAllPR').on('change', function () {
+            const isChecked = $(this).prop('checked');
+            $('#tblCopyFrommodal tbody input[type="checkbox"]').each(function () {
+                $(this).prop('checked', isChecked);
+            });
+        });
+
+        $('#tblCopyFrommodal').on('change', 'tbody input[type="checkbox"]', function () {
+            const totalCheckboxes = $('#tblCopyFrommodal tbody input[type="checkbox"]').length;
+            const checkedCheckboxes = $('#tblCopyFrommodal tbody input[type="checkbox"]:checked').length;
+            $('#selectAllPR').prop('checked', totalCheckboxes === checkedCheckboxes);
+        });
+
+        $tbody.on("change", ".item-name-select", function () {
+            const $select = $(this);
+            const selectedValue = $select.val();
+            const $row = $select.closest("tr");
+            const $iCodeInput = $row.find("td:nth-child(2) input.form-control");
+            $iCodeInput.val(selectedValue);
+        });
+
+        $("#btn-saves").click(function (e) {
+            e.preventDefault();
+            const DOC_ID = $.trim($('#TxtCode').val());
+            const V_NO = parseFloat($.trim($('#NumDocNo').val())) || 0;
+            const V_DATE = formatDate($("#DtDocDate").val());
+            const SHIFT = $.trim($('#ddlShift option:selected').text()) || "";
+            const QCTIME = $.trim($('#DtTime').val()) || null;
+            const QC_INCHARGE = parseInt($('#ddlQCIncharge').val()) || 0;
+            const QC_INCHARGENAME = $.trim($('#ddlQCIncharge option:selected').text()) || "";
+            const CHEMIST = parseInt($('#ddlChemist').val()) || 0;
+            const CHEMISTNAME = $.trim($('#ddlChemist option:selected').text()) || "";
+            const EMP_CODE = parseInt($('#ddlInspBy').val()) || 0;
+            const PLACE_CODE = parseInt($('#ddlProdPlace').val()) || 0;
+            const REMARKS = $.trim($('#TxtRemarks').val());
+            const action = (!DOC_ID || DOC_ID.trim() === '') ? 'INSERT' : 'UPDATE';
+            const Header = {
+                DOC_ID,
+                V_NO,
+                V_DATE,
+                SHIFT,
+                QCTIME,
+                QC_INCHARGE,
+                QC_INCHARGENAME,
+                CHEMIST,
+                CHEMISTNAME,
+                EMP_CODE,
+                PLACE_CODE,
+                REMARKS,
+                action
+            };
+
+            const Deatils  = collectInsertRows();
+                const payload = {
+                Header,
+                Deatils
+            };
+
+            if (!validateRequiredField('#NumDocNo', 'Doc_No')) return;
+            if (!validateRequiredField('#DtDocDate', 'V_Date')) return;
+            if (!validateRequiredField('#ddlShift', 'SHIFT')) return;
+            if (!validateRequiredField('#DtTime', 'Time')) return;
+            if (!validateRequiredField('#ddlQCIncharge', 'QC Incharge')) return;
+            if (!validateRequiredField('#ddlChemist', 'Chemist')) return;
+            if (!validateRequiredField('#ddlProdPlace', 'ProdPlace')) return;
+
+             const table = document.getElementById("tblFlakesQCEntry");
+            const tbody = table.querySelector("tbody");
+
+            if (tbody.rows.length === 0) {
+            toastr.warning("Fill data in Details");
+            return ;
+            }
+
+                let hasValidationError = false;
+
+    $("#tblFlakesQCEntry tbody tr").each(function (index, row) {
+        const itemCode = $(row).find(".ITEM_CODE").val().trim();
+
+        if (itemCode !== "") {
+                const total = $(row).find(".TIME4_WIDTH").val().trim();
+                
+
+            if (!total) {
+                toastr.warning(`Row ${index + 1}:  Total   Fields.`);
+                $(row).find(".TIME4_WIDTH").focus();
+                hasValidationError = true;
+                return false;
+            }
+        }
+    });
+
+    if (hasValidationError) return;
+
+            $("#btn-saves").prop("disabled", true);
+
+            $.ajax({
+                url: '/FlakesQCEntry/SavedData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Saved successfully!");
+                        setTimeout(() => window.location.href = '/FlakesQCEntryList/Index', 1000);
+                    } else {
+                        toastr.error(response.message || "Save failed.");
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = "Something went wrong.";
+                    if (xhr.status === 400) {
+                        errorMessage = "Bad Request: " + xhr.responseText;
+                    } else if (xhr.status === 500) {
+                        errorMessage = "Server error: " + xhr.responseText;
+                    } else {
+                        errorMessage = "Unexpected error: " + xhr.statusText;
+                    }
+                    toastr.error("Error: " + errorMessage);
+                },
+                complete: function () {
+                    $("#btn-saves").prop("disabled", false);
+                }
+            });
+        });
+
+         bindRowValueChange();
+
+    });
+
+     function confirmAndGoBack() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You will be redirected to the list page.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, go back',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '@Url.Action("Index", "FlakesQCEntryList")';
+            }
+        });
+    }
+
+    function generateSelect(options, selected = "") {
+       return options.map(opt => `<option ${selected === opt ? 'selected' : ''}>${opt}</option>`).join('');
+    }
+    
+    function collectInsertRows(tableSelector = '#tblFlakesQCEntry') {
+      return $(tableSelector).find('tbody tr').map((_, tr) => {
+        const $tr = $(tr);
+            return{
+            BLUEP:       parseDecimal($tr.find('.BLUEP').val()),
+            BULKDENSITY: parseDecimal($tr.find('.BULKDENSITY').val()),
+            DEPT_CODE:   parseInt($tr.find('.DEPT_CODE').val()?.trim() || '0'),
+            TIME5_WIDTH: parseDecimal($tr.find('.COLOR_NAME').val()),
+            DEPT_NAME:   $tr.find('.ddlItem').val()?.trim() || '',
+            CPRDN:       parseDecimal($tr.find('.CPRDN').val()),
+            DNR:         $tr.find('.DNR').val()?.trim() || '',
+            GRADE:       $tr.find('.GRADE').val()?.trim() || '',
+            GLUE_CONTENT:parseDecimal($tr.find('.GLUE_CONTENT').val()),
+            WBWt:        parseDecimal($tr.find('.wbWt').val()),
+            GrWt:        parseDecimal($tr.find('.grWt').val()),
+   
+            ITEM_CODE:   parseInt($tr.find('.ITEM_CODE').val()?.trim() || '0'),
+            MOISTURE:    parseDecimal($tr.find('.MOISTURE').val()),
+            NET_WT:      parseDecimal($tr.find('.NET_WT').val()),
+            OTHERP:      parseDecimal($tr.find('.OTHERP').val()),
+            OTHERS:      parseDecimal($tr.find('.OTHERS').val()),
+            OVERSIZED:   parseDecimal($tr.find('.OVERSIZED').val()),
+            PC_LOWMELT:  parseDecimal($tr.find('.PC_LOWMELT').val()),
+            PH_FLAKES:   parseDecimal($tr.find('.PH_FLAKES').val()),
+            Pord_No:     parseInt($tr.find('.REF_NO').val()?.trim() || '0'),
+            Pord_Type:   $tr.find('.Pord_Type').val()?.trim() || '',
+            PRKG:        parseDecimal($tr.find('.NET_WT').val()),
+            PTYPE_NAME:  $tr.find('.BatchNo').val()?.trim() || '',
+            REMARKS:     $tr.find('.REMARKS').val()?.trim() || '',
+            RESULT1:     parseDecimal($tr.find('.grWt').val()),
+            RESULT2:     parseDecimal($tr.find('.trWt').val()),
+            WASTE:       parseDecimal($tr.find('.HD').val()),
+            WIDTH:       parseDecimal($tr.find('.bagNo').val()),
+            YELLOW160C:  parseDecimal($tr.find('.YELLOW160C').val()),
+            YELLOWP:     parseDecimal($tr.find('.YELLOWP').val()),
+            TIME1_WIDTH: parseDecimal($tr.find('.TIME1_WIDTH').val()),
+            TIME2_WIDTH: parseDecimal($tr.find('.TIME2_WIDTH').val()),
+            TIME3_WIDTH: parseDecimal($tr.find('.TIME3_WIDTH').val()),
+            TIME4_WIDTH: parseDecimal($tr.find('.TIME4_WIDTH').val()),
+            Refcode:   parseInt($tr.find('.REF_NO').val()?.trim() || '0'),
+            REfType:   $tr.find('.Pord_Type').val()?.trim() || '',
+    };
+      }).get();
+    }
+    
+    function parseDecimal(value) {
+        const parsed = parseFloat(value?.trim() || '0');
+        return isNaN(parsed) ? 0 : parsed;
+    }
+    
+    function mapDetailToRowData(detail) {
+        return {
+            code: detail.refcode || '',
+            iCode: detail.iteM_CODE || '',
+             itemName: detail.iteM_CODE || '',
+            dept: detail.depT_NAME || '',
+             batchNo: detail.batchNo || '',
+             bagNo: detail.bagNo || '',
+            wbWt: detail.wbWt || '',
+            grWt: detail.grWt || '',
+            trWt: detail.trWt || '',
+            netWt: detail.neT_WT || '',
+            hdpe: detail.waste || '',
+            pvcPpm: detail.dnr || '',
+            pcLowMelt: detail.pC_LOWMELT || '',
+            wrapper: detail.cprdn || '',
+            metal: detail.timE1_WIDTH || '',
+            stone: detail.timE2_WIDTH || '',
+            rubber: detail.timE3_WIDTH || '',
+            glue: detail.gluE_CONTENT || '',
+            other: detail.others || '',
+            total: detail.timE4_WIDTH || '',
+            grd: detail.grade || '',
+            yellow: detail.yellowp || '',
+            blue: detail.bluep || '',
+            otherPercent: detail.otherp || '',
+             colorMix: detail.timE5_WIDTH || '',
+            yellow160c: detail.yelloW160C || '',
+            moisture: detail.moisture || '',
+            bulkDensity: detail.bulkdensity || '',
+            ph: detail.pH_FLAKES || '',
+            overSized: detail.oversized || '',
+            remarks: detail.remarks || '',
+            refType: detail.rEfType || '',
+            refNo: detail.refcode || '',
+            deptCode: detail.depT_CODE || '',
+            placeCode: detail.placeCode || '',
+            placeName: detail.placeName || '',
+
+        };
+    }
+    
+    async function LoadFormByID(id) {
+        try {
+            const res = await $.ajax({
+                url: '/FlakesQCEntryList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            });
+
+            if (res.success) {
+                const header = res.data.header;
+                const details = res.data.deatils;
+
+                 console.log('payload' , res );
+
+                $('#TxtCode').val(header.doC_ID || '');
+                $('#NumDocNo').val(header.v_NO || '');
+                 $('#DtDocDate').val(formatDate(header.v_DATE) || '');
+                $('#ddlShift').val(header.shift || '');
+                $('#DtTime').val(header.qctime || '');
+                $('#ddlQCIncharge').val(header.qC_INCHARGE || '');
+                $('#ddlChemist').val(header.chemist || '');
+                $('#ddlInspBy').val(header.emP_CODE || '');
+                $('#ddlProdPlace').val(header.placE_CODE || '');
+                $('#TxtRemarks').val(header.remarks || '');
+     
+                populateTableRowsFromData(details);
+
+            } else {
+                console.error('Error in API response:', res.message);
+                toastr.error(res.message || "Failed to load data.");
+            }
+        } catch (err) {
+            console.error("Failed to load data:", err);
+            toastr.error("Something went wrong while loading the form.");
+        }
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      if (isNaN(date)) return null;
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`; 
+    }
+    
+    function loadItemNameDropdown() {
+        $.ajax({
+            url: '/FlakesQCEntry/DDLGridItem',
+            method: 'GET',
+            success: function (data) {
+             itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+            }
+          });
+
+
+    }
+    
+    async function GetVNo() {
+        try {
+            const res = await fetch('/FlakesQCEntry/GetVNo');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            if (!data.v_NO) throw new Error('Response missing v_NO');
+            $('#NumDocNo').val(data.v_NO);
+        } catch (e) {
+            toastr.warning('Error loading Document Number: ' + e.message);
+        }
+    }
+       
+    async function LoadDropDown() {
+        try {
+            await Promise.all([
+                DDlInspBy(),
+                DDlItem(),
+                DDLPordPlace(),
+                DDLChemist(),
+                DDLQCIncharge(),
+                loadItemNameDropdown()
+            ]);
+         
+        } catch (error) {
+            console.error("Error loading dropdowns:", error);
+        }
+    }
+    
+    async function DDlInspBy() {
+        try {
+            const response = await fetch('/FlakesQCEntry/DDLInspBy');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlInspBy');
+            ddl.empty().append('<option value="">-- Select Insp. By --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Insp. By:", error);
+            toastr.error('Error loading Insp. By: ' + error.message);
+        }
+    }
+    
+    async function DDlItem() {
+        try {
+            const response = await fetch('/FlakesQCEntry/DDLItem');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlItem');
+            ddl.empty().append('<option value="">-- Select Item --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Item:", error);
+            toastr.error('Error loading Item: ' + error.message);
+        }
+    }
+    
+    async function DDLPordPlace() {
+        try {
+            const response = await fetch('/FlakesQCEntry/DDLPordPlace');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlProdPlace');
+            ddl.empty().append('<option value="">-- Select Prod. Place --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Prod. Place:", error);
+            toastr.error('Error loading Prod. Place: ' + error.message);
+        }
+    }
+    
+    async function DDLChemist() {
+        try {
+            const response = await fetch('/FlakesQCEntry/DDLChemist');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlChemist');
+            ddl.empty().append('<option value="">-- Select Chemist --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Chemist:", error);
+            toastr.error('Error loading Chemist: ' + error.message);
+        }
+    }
+    
+    async function DDLQCIncharge() {
+        try {
+            const response = await fetch('/FlakesQCEntry/DDLQCIncharge');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            const ddl = $('#ddlQCIncharge');
+            ddl.empty().append('<option value="">-- Select QC Incharge --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading QC Incharge:", error);
+            toastr.error('Error loading QC Incharge: ' + error.message);
+        }
+    }
+    
+    function CheckConditionCpyFrm(DeptCode, Shifttype, v_date) {
+        const formattedDate = new Date(v_date).toISOString().split('T')[0];
+        $.ajax({
+            type: 'GET',
+            url: '/FlakesQCEntryList/CheackConditionCpyFrm',
+            data: {
+                DeptCode: DeptCode,
+                Shifttype: Shifttype,
+                v_date: formattedDate
+            },
+            success: function(data) { 
+               
+                console.log("data",data);
+                
+                if (data.success == true) {
+                    $('#CopyFromModal').modal('show');
+                      $('#tblCopyFrommodal tbody').empty();
+                       fetchData(DeptCode,Shifttype,v_date);
+                } else if (data.success == false) {
+                    toastr.info("No Bags are Pending for QC of Date: " + v_date + ", Shift: " + Shifttype);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Request failed:", error);
+            }
+        });
+    }
+    
+    function fetchData(deptCode,shiftType,vDate) {      
+        $.ajax({
+            url: '/FlakesQCEntryList/GetDataCopyForm',
+            type: 'GET',
+            data: {
+                DeptCode: deptCode,
+                Shifttype: shiftType,
+                v_date: vDate
+            },
+
+            success: function (response) {
+                if (response.success == true) {
+                     response.data.forEach(item => {
+                        const row = `
+                            <tr>
+                                <td><input type="checkbox" class="selectItem" /></td>
+                                <td>${item.bagNo}</td>
+                                <td >${item.itemName}</td>
+                                <td>${item.prodPlace}</td>
+                                <td>${item.lotNo}</td>
+                                <td>${item.wbQty}</td>
+                                <td>${item.qty}</td>
+                                <td>${item.tareQty} </td>
+                                <td>${item.qty} </td>
+                                <td>${item.vType}</td>
+                                <td>${item.vNo}</td>
+                                <td hidden>${item.itemCode}</td>
+                                <td hidden>${item.deptCode}</td>
+                                <td hidden>${item.deptName}</td>
+                            </tr>
+                        `;
+                        $('#tblCopyFrommodal tbody').append(row);
+                    });
+                } else {
+                     console.log(response.message);
+                     toastr.info("No Bags are Pending for QC of Date: " + v_date + ", Shift: " + Shifttype);
+                }
+            },
+            error: function (error) {
+                 toastr.Error('Error fetching data: ' + error.responseText);
+            }
+        });
+    }
+    
+    function getSelectedRowsData() {
+        var selectedRowsData = [];
+        $('#tblCopyFrommodal tbody tr').each(function() {
+            var checkbox = $(this).find('input[type="checkbox"]');
+            if (checkbox.prop('checked')) {
+                var rowData = {};
+                rowData.bagNo = $(this).find('td:nth-child(2)').text().trim();
+                rowData.itemName = $(this).find('td:nth-child(3)').text().trim();
+                rowData.prodPlace = $(this).find('td:nth-child(4)').text().trim();
+                rowData.lotNo = $(this).find('td:nth-child(5)').text().trim();
+                rowData.wbQty = $(this).find('td:nth-child(6)').text().trim();
+                rowData.grossQty = $(this).find('td:nth-child(7)').text().trim();
+                rowData.tareQty = $(this).find('td:nth-child(8)').text().trim();
+                rowData.qty = $(this).find('td:nth-child(9)').text().trim();
+                rowData.vType = $(this).find('td:nth-child(10)').text().trim();
+                rowData.vNo = $(this).find('td:nth-child(11)').text().trim();
+                rowData.itemCode = $(this).find('td:nth-child(12)').text().trim();
+                rowData.deptCode = $(this).find('td:nth-child(13)').text().trim();
+                rowData.DEPT_NAME = $(this).find('td:nth-child(14)').text().trim();
+                selectedRowsData.push(rowData);
+            }
+        });
+        return selectedRowsData;
+    }
+
+    function addRow(data = {}) {
+        $tbody.find('.btn-add-action').remove();
+        const cells = [
+            `<td style="display:none;">${data.code || ''}</td>`,
+            `<td><input type="text" class="form-control ITEM_CODE" value="${data.iCode || ''}" readonly/></td>`,
+            `<td>
+                <select class="form-control item-name-select" style="width:300px;">
+                    <option value="">--Select--</option>
+                    ${itemNameOptions}
+                </select>
+            </td>`,
+            `<td style="width:100px">
+                <input type="text" class="form-control ddlItem" value="${data.dept || ''}" readonly style="width: 200px;" />
+            </td>`,
+            `<td><input type="text" class="form-control BatchNo" value="${data.batchNo || ''}" readonly/></td>`,
+            `<td><input type="text" class="form-control bagNo" value="${data.bagNo || ''}" readonly/></td>`,
+            `<td><input type="number" class="form-control wbWt" value="${data.wbWt || ''}" readonly style="width: 60px;"/></td>`,
+            `<td><input type="number" class="form-control grWt" value="${data.grWt || ''}" readonly style="width: 60px;"/></td>`,
+            `<td><input type="number" class="form-control trWt" value="${data.trWt || ''}" readonly style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control NET_WT" value="${data.netWt || ''}" readonly style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control HD" value="${data.hdpe || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control DNR" value="${data.pvcPpm || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control PC_LOWMELT" value="${data.pcLowMelt || ''}" /></td>`,
+            `<td><input type="number" class="form-control CPRDN" value="${data.wrapper || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control TIME1_WIDTH" value="${data.metal || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control TIME2_WIDTH" value="${data.stone || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control TIME3_WIDTH" value="${data.rubber || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control GLUE_CONTENT" value="${data.glue || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control OTHERS" value="${data.other || ''}" style="width: 60px;" /></td>`,
+             `<td><input type="number" class="form-control TIME4_WIDTH" value="${data.total}"  readonly style="width: 80px;" /></td>`,
+            `<td><input type="text" class="form-control GRADE" value="${data.grd || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control YELLOWP" value="${data.yellow || ''}" /></td>`,
+            `<td><input type="number" class="form-control BLUEP" value="${data.blue || ''}" style="width: 60px;" /></td>`,
+            `<td><input type="number" class="form-control OTHERP" value="${data.otherPercent || ''}" /></td>`,
+            `<td><input type="text" class="form-control COLOR_NAME" value="${data.colorMix || ''}" /></td>`,
+            `<td><input type="number" class="form-control YELLOW160C" value="${data.yellow160c || ''}" /></td>`,
+            `<td><input type="number" class="form-control MOISTURE" value="${data.moisture || ''}" /></td>`,
+            `<td><input type="number" class="form-control BULKDENSITY" value="${data.bulkDensity || ''}" /></td>`,
+            `<td><input type="number" class="form-control PH_FLAKES" value="${data.ph || ''}" /></td>`,
+            `<td><input type="number" class="form-control OVERSIZED" value="${data.overSized || ''}" /></td>`,
+            `<td><input type="text" class="form-control Remarks" value="${data.remarks || ''}" /></td>`,
+            `<td style="display:none;"><input type="text" class="form-control Pord_Type" value="${data.refType || ''}" /></td>`,
+            `<td style="display:none;"><input type="text" class="form-control REF_NO" value="${data.refNo || ''}" /></td>`,
+            `<td style="display:none;"><input type="text" class="form-control DEPT_CODE" value="${data.deptCode || ''}" /></td>`
+        ];
+
+        const row = `<tr class="no-border-input">${cells.join('')}</tr>`;
+        $tbody.append(row);
+
+        if (data.itemName) {
+            $tbody.find('tr:last .item-name-select').val(data.itemName);
+        }
+    }
+
+    function populateTableRowsFromData(details = []) {
+        if (!Array.isArray(details)) return;
+        $tbody.empty();
+        details.forEach(detail => {
+            const data = mapDetailToRowData(detail);
+            const cells = [
+                `<td style="display:none;">${data.code}</td>`,
+                `<td><input type="text" class="form-control ITEM_CODE" value="${data.iCode}" readonly /></td>`,
+               
+                `<td><select class="form-control item-name-select" style="width:300px;">
+                    <option value="">--Select--</option>
+                    ${itemNameOptions}
+                </select></td>`,
+                 `<td><input type="text" class="form-control ddlItem" value="${data.placeName}" readonly style="width: 200px;" /></td>`,
+                `<td><input type="text" class="form-control BatchNo" value="${data.batchNo}" readonly /></td>`,
+                `<td><input type="text" class="form-control bagNo" value="${data.bagNo}" readonly /></td>`,
+                `<td><input type="number" class="form-control wbWt" value="${data.wbWt}" readonly style="width: 60px;" /></td>`,
+                `<td><input type="number" class="form-control grWt" value="${data.grWt}" readonly style="width: 60px;" /></td>`,
+                `<td><input type="number" class="form-control trWt" value="${data.trWt}" readonly style="width: 60px;" /></td>`,
+                `<td><input type="number" class="form-control NET_WT" value="${data.netWt}" readonly  style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control HD" value="${data.hdpe}" style="width: 60px;" /></td>`,
+                `<td><input type="number" class="form-control DNR" value="${data.pvcPpm}"  style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control PC_LOWMELT" value="${data.pcLowMelt}" /></td>`,
+                `<td><input type="number" class="form-control CPRDN" value="${data.wrapper}" style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control TIME1_WIDTH" value="${data.metal}" style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control TIME2_WIDTH" value="${data.stone}" style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control TIME3_WIDTH" value="${data.rubber}" style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control GLUE_CONTENT" value="${data.glue}" style="width: 60px;"/></td>`,
+                `<td><input type="number" class="form-control OTHERS" value="${data.other}" style="width: 60px;"/></td>`,
+               `<td><input type="number" class="form-control TIME4_WIDTH" value="${data.total}"   readonly style="width: 80px;"    /></td>`,
+               `<td><input type="text" class="form-control GRADE" value="${data.grd}"  /></td>`,
+                `<td><input type="number" class="form-control YELLOWP" value="${data.yellow}" /></td>`,
+                `<td><input type="number" class="form-control BLUEP" value="${data.blue}" /></td>`,
+                `<td><input type="number" class="form-control OTHERP" value="${data.otherPercent}" /></td>`,
+                `<td><input type="text" class="form-control COLOR_NAME" value="${data.colorMix}" /></td>`,
+                `<td><input type="number" class="form-control YELLOW160C" value="${data.yellow160c}" /></td>`,
+                `<td><input type="number" class="form-control MOISTURE" value="${data.moisture}" /></td>`,
+                `<td><input type="number" class="form-control BULKDENSITY" value="${data.bulkDensity}" /></td>`,
+                `<td><input type="number" class="form-control PH_FLAKES" value="${data.ph}" style="width: 60px;" /></td>`,
+                `<td><input type="number" class="form-control OVERSIZED" value="${data.overSized}" /></td>`,
+                `<td><input type="text" class="form-control Remarks" value="${data.remarks}" /></td>`,
+                `<td style="display:none;"><input type="text" class="form-control Pord_Type" value="${data.refType}" readonly /></td>`,
+                `<td style="display:none;"><input type="text" class="form-control REF_NO" value="${data.refNo}" readonly /></td>`,
+                `<td style="display:none;"><input type="text" class="form-control DEPT_CODE" value="${data.placeCode}" readonly /></td>`
+            ];
+
+            const row = `<tr class="no-border-input">${cells.join('')}</tr>`;
+            $tbody.append(row);
+                  
+            if (data.itemName) {
+                $tbody.find('tr:last .item-name-select').val(data.itemName);
+            }
+        });
+    }
+
+    function addSelectedRowsToTable(selectedRowsData) {
+           console.log('Selected row data ' ,selectedRowsData );
+          selectedRowsData.forEach(data => {
+              addRow({
+                    iCode: data.itemCode || '',
+                    itemName: data.itemCode || '',
+                    dept: data.DEPT_NAME || '',
+                    batchNo: data.lotNo || '',
+                    bagNo: data.bagNo || '',
+                    wbWt: data.wbQty || '',
+                    grWt: data.grossQty || '',
+                    trWt: data.tareQty || '',
+                    netWt: data.qty || '',
+                    hdpe: '',
+                    pvcPpm: '',
+                    pcLowMelt: '',
+                    wrapper: '',
+                    metal: '',
+                    stone: '',
+                    rubber: '',
+                    glue: '',
+                    other: '',
+                    total: '',
+                    grd: '',
+                    yellow: '',
+                    blue: '',
+                    otherPercent: '',
+                    colorMix: '',
+                    yellow160c: '',
+                    moisture: '',
+                    bulkDensity: '',
+                    ph: '',
+                    overSized: '',
+                    remarks: '',
+                    refType: data.vType || '',
+                    refNo:data.vNo || '',
+                    deptCode: data.deptCode || ''
+              });
+          });
+      }
+    
+    function setFormReadOnly() {
+        const form = $('#FlakesQCEntryForm');
+        form.find(':input').prop('disabled', true);
+        form.find('textarea').css('background-color', '#f0f0f0');
+        form.find('table tbody tr').css('background-color', '#f9f9f9');
+
+         $('#tblFlakesQCEntry tbody tr').each(function() {
+            $(this).find(':input').prop('disabled', true);
+            $(this).css('background-color', '#f9f9f9');
+         });
+
+        $('#btn-saves').hide();
+        $('#btn-Cancel').hide();
+   
+    }
+    
+    function calculateTotalForRow($row) {
+        const hdpe      = parseFloat($row.find('.HD').val()) || 0;
+        const pvcPpm    = parseFloat($row.find('.DNR').val()) || 0;
+        const pcLowMelt = parseFloat($row.find('.PC_LOWMELT').val()) || 0;
+        const wrapper   = parseFloat($row.find('.CPRDN').val()) || 0;
+        const metal     = parseFloat($row.find('.TIME1_WIDTH').val()) || 0;
+        const stone     = parseFloat($row.find('.TIME2_WIDTH').val()) || 0;
+        const rubber    = parseFloat($row.find('.TIME3_WIDTH').val()) || 0;
+        const glue      = parseFloat($row.find('.GLUE_CONTENT').val()) || 0;
+        const other     = parseFloat($row.find('.OTHERS').val()) || 0;
+
+        const total = hdpe + pvcPpm + pcLowMelt + wrapper + metal + stone + rubber + glue + other;
+
+        $row.find('.TIME4_WIDTH').val(total.toFixed(2));
+
+        return total;
+    }
+    
+    function fetchAndUpdateItemData($row, totalPpm) {
+        const itemCode = parseInt($row.find('.ITEM_CODE').val(), 10);
+        const depotCode = parseInt($row.find('.DEPT_CODE').val(), 10);
+        const HDPE = parseInt($row.find('.HD').val(), 10);
+        const PVCPPM = parseInt($row.find('.DNR').val(), 10);
+        const PCLowMelt = parseInt($row.find('.PC_LOWMELT').val(), 10);
+        const Wrapper = parseInt($row.find('.CPRDN').val(), 10);
+        const Metal = parseInt($row.find('.TIME1_WIDTH').val(), 10);
+        const Stone = parseInt($row.find('.TIME2_WIDTH').val(), 10);
+        const Rubber = parseInt($row.find('.TIME3_WIDTH').val(), 10);
+        const Glue = parseInt($row.find('.GLUE_CONTENT').val(), 10);
+        const Yellowp = parseInt($row.find('.YELLOWP').val(), 10);
+        const BLUEP = parseInt($row.find('.BLUEP').val(), 10);
+        const OTHERP = parseInt($row.find('.OTHERP').val(), 10);
+        const YELLOW160C = parseInt($row.find('.YELLOW160C').val(), 10);
+
+
+
+        if (isNaN(itemCode) || isNaN(depotCode) || totalPpm <= 0) {
+            console.warn('Invalid inputs for fetching item data', { totalPpm, itemCode, depotCode });
+            return;
+        }
+
+        const $select = $row.find('.item-name-select');
+        $select.prop('disabled', true);
+
+        $.ajax({
+            url: '/FlakesQCEntryList/GetDataTotalppmChangge',
+            method: 'POST',
+            data: {
+                totalPpm: totalPpm,
+                itemCode: itemCode,
+                depotCode: depotCode,
+                HDPE :HDPE,
+                PVCPPM:PVCPPM,
+                PCLowMelt :PCLowMelt ,
+                Wrapper:Wrapper,
+                Metal:Metal,
+                Stone:Stone,
+                Rubber:Rubber,
+                Glue:Glue,
+                Yellowp:Yellowp,
+                BLUEP:BLUEP,
+                OTHERP:OTHERP,
+                YELLOW160C:YELLOW160C
+            },
+            success: function (data) {
+                if (!data || typeof data !== 'object') {
+                    console.warn('Invalid response format:', data);
+                    return;
+                }
+
+                console.log('After Data' , data);
+
+                const itemName = data.itemName?.trim();
+                const GRD = data.grd?.trim();
+                const newItemCode = parseInt(data.itemCode, 10);
+                           
+                if (!itemName) {
+                    console.warn('itemName not found in response:', data);
+                    return;
+                }
+
+                let optionFound = false;
+                $select.find('option').each(function () {
+                    if ($(this).text().trim() === itemName) {
+                        $select.val($(this).val());
+                        optionFound = true;
+                        return false;
+                    }
+                });
+
+                if (!optionFound) {
+                    const optionValue = newItemCode || '';
+                    const newOption = new Option(itemName, optionValue, true, true);
+                    $select.append(newOption);
+                    $select.val(optionValue);
+                }
+
+                if (!isNaN(newItemCode) && newItemCode !== itemCode) {
+                    $row.find('.ITEM_CODE').val(newItemCode);
+                }
+
+                if (GRD && GRD.trim() !== '') {
+                   $row.find('.GRADE').val(GRD);
+                }
+
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    console.error('API endpoint not found (404):', '/FlakesQCEntryList/GetDataTotalppmChangge');
+                } else {
+                    console.error(`API error (${xhr.status}): ${error}`);
+                }
+            },
+            complete: function () {
+                $select.prop('disabled', false);
+            }
+        });
+    }
+
+    function bindRowValueChange() {
+        $tbody.on('input', '.HD, .DNR, .PC_LOWMELT, .CPRDN, .TIME1_WIDTH, .TIME2_WIDTH, .TIME3_WIDTH, .GLUE_CONTENT, .OTHERS', function () {
+        const $row = $(this).closest('tr');
+        const totalPpm = calculateTotalForRow($row);
+        fetchAndUpdateItemData($row, totalPpm);
+    });
+
+
+
+
+
+
+    }
+
+</script>
+
+

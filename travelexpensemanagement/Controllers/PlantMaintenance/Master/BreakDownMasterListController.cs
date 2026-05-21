@@ -7,17 +7,16 @@ using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Purchase.Transaction;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Common.Globalvariable;
 namespace travelexpensemanagement.Controllers.PlantMaintenance.Master
 {
     public class BreakDownMasterListController : Controller
     {
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbConnection;
-        private readonly GlobalVariableService _globalVariable;
+        private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public BreakDownMasterListController(DataBaseConnection dbConnection, GlobalVariableService _globalVariable, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
+        public BreakDownMasterListController(DataBaseConnection dbConnection, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService)
         {
             _dbHelper = dbHelper;
             _dbConnection = dbConnection;

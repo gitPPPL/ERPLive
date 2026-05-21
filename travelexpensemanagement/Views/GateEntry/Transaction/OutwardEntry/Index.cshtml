@@ -15,9 +15,17 @@
         <div class="erppage-header-title">Outward Entry</div>
     </div>
     <div class="erppage-header-right">
-        <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
+        @* <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+ *@
+        <button id="btnbacklist"
+                onclick="handleBack('@Url.Action("Index", "OutwardEntryList")', isReadOnly)" type="button" class="btn btn-primary">
+            <i class="fa fa-list"></i>Back to list
+        </button>
+
+
+
     </div>
 </div>
 <div id="OutwardEntryForm">
@@ -60,7 +68,7 @@
                         <option value="Repair">Repair</option>
                         <option value="Purchase Return">Purchase Return</option>
                         <option value="BillsOfSupply">Bills Of Supply</option>
-                        <option value="E‑Commerce Sale">E‑Commerce Sale</option>
+                        <option value="E-Commerce Sale">E-Commerce Sale</option>
                     </Select>
                 </div>
             </div>
@@ -149,9 +157,9 @@
             <!-- Column Width Control -->
             <colgroup>
                 <col style="display:none;" /> <!-- Code -->
-                <col style="width: 180px;" /> <!-- Item Name -->
+                <col style="width: 250px;" /> <!-- Item Name -->
                 <col style="width: 150px;" /> <!-- Department -->
-                <col style="width: 80px;" />  <!-- Unit -->
+                <col style="width: 120px;" />  <!-- Unit -->
                 <col style="width: 70px;" />  <!-- No -->
                 <col style="width: 100px;" /> <!-- Quantity -->
                 <col style="width: 180px;" /> <!-- Remarks -->

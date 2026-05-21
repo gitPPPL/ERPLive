@@ -1,25 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Controllers.Travelexpense;
-using travelexpensemanagement.Dbconnection;
-using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 
 namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
+    [SessionAuthorize]
     public class StoreWeighbridgeEntryListController : Controller
     {
 
-        private readonly DbHelper _dbHelper;
-        private readonly DataBaseConnection _dbcontext;
-        private readonly GlobalVariableService _globalValue;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public StoreWeighbridgeEntryListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly ModuleService.ModuleService _moduleService;
+
+        private readonly IStoreWeighbridgeEntryListRepository _storeWbListRepository;
+
+        public StoreWeighbridgeEntryListController(ModuleService.ModuleService moduleService, IStoreWeighbridgeEntryListRepository storeWbListRepository)
         {
-            _dbHelper = dbHelper;
-            _dbcontext = dbcontext;
-            _globalValue = globalValue;
             _moduleService = moduleService;
+            _storeWbListRepository = storeWbListRepository;
         }
         public IActionResult Index()
         {
@@ -32,7 +29,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
                 UserMenuPermissions = permissions,
                 UserLevel = userLevel
             };
-            //return View("~/Views/Weighbridge/Transaction/BigWeighbridgeList/Index.cshtml", model);
             return View("~/Views/Weighbridge/Transaction/StoreWeighbridgeEntryList/Index.cshtml", model);
 
         }
@@ -40,158 +36,62 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         [HttpGet]
         public async Task<IActionResult> GetStoreWBridgeList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            try
+            var result = await _storeWbListRepository.GetList(searchTerm, pageNumber, pageSize);
+            if (!result.status)
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@DOCTYPE",  "KantaStore"},
-                    {"@Action", "WBEntryList" }
-                };
-
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
-                        {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "DOC_ID" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new { status = true, data = pagedList, totalCount });
-
+                return Json(new { status = result.status, message = result.message });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return Json(new { status = result.status, data = result.data, totalCount = result.totalCount});
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteStoreWBridgeEntry(string docid)
+        [HttpPost]
+        public async Task<IActionResult> DeleteStoreWBridgeEntry(string docId, bool flag)
         {
-            try
+            if (string.IsNullOrEmpty(docId))
             {
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-
-                var userSession = _globalValue.GetGlobalVariables();
-                string VType = docid.Substring(0, 4);
-                string VNo = docid.Substring(4);
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
-                    {
-                        try
-                        {
-
-                            string[] deleteQueries = {
-                        "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-
-                        };
-
-                            foreach (var query in deleteQueries)
-                            {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
-                        }
-                    }
-                }
+                return Json(new { status = false, message = "Invalid ID" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            var result = await _storeWbListRepository.DeleteStoreWb(docId);
+            return Json(new { success = result.status, message = result.message });
         }
-
+        [HttpPost]
+        public async Task<IActionResult> ValidateDeleteStoreWb(string docId)
+        {
+            if (string.IsNullOrEmpty(docId))
+            {
+                return Json(new { status = false, message = "Invalid ID" });
+            }
+            var result = await _storeWbListRepository.ValidateDeleteStoreWb(docId);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, message = result.message, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
         [HttpGet]
         public async Task<IActionResult> GetStoreWBridgeEntryDetails(string docid)
         {
-            try
+            if (string.IsNullOrEmpty(docid))
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", docid.Substring(0, 4) },
-                    {"@V_NO", docid.Substring(4) },
-                    {"@Action", "EntryDetail" }
-                };
-                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-                return Json(new { status = true, data = entryDetailList });
+                return Json(new { status = false, message = "Invalid ID" });
             }
-            catch (Exception ex)
+            var result = await _storeWbListRepository.StoreWBDetails(docid);
+            if (!result.status)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new { status = result.status, message = result.message });
             }
+            return Json(new { status = result.status, data = result.data});
         }
 
         [HttpGet]
         public async Task<IActionResult> ExportAllDocs()
         {
-            try
+            var result = await _storeWbListRepository.ExportAllDocs();
+            if (!result.status)
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@DOCTYPE",  "KantaStore"},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-
-                return Json(new { status = true, data = dataList });
+                return Json(new { status = result.status, message = result.message });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return Json(new { status = result.status, data = result.data });
         }
 
     }

@@ -18,11 +18,9 @@ namespace travelexpensemanagement.Common.DbHelper
     public class DbHelper
     {
         private readonly DataBaseConnection _dbConnection;
-
-        public DbHelper(DataBaseConnection dbConnection )
+        public DbHelper(DataBaseConnection dbConnection)
         {
             _dbConnection = dbConnection;
-       
         }
         public DataTable GetDataTableFromStoredProcedure(string storedProcedureName, List<SqlParameter> parameters = null)
         {
@@ -238,6 +236,7 @@ namespace travelexpensemanagement.Common.DbHelper
         {
             return $"ISNULL({column}, '') <> ''";
         }
+
         public static DateTime? ConvertToDate(object dateObj)
         {
             if (dateObj == null || dateObj == DBNull.Value)
@@ -372,6 +371,7 @@ namespace travelexpensemanagement.Common.DbHelper
 
             return null;
         }
+
         public void ExecuteNonQuery(string query, List<SqlParameter> parameters = null, bool isStoredProc = false)
         {
             try
@@ -449,12 +449,7 @@ namespace travelexpensemanagement.Common.DbHelper
             throw new NotImplementedException();
         }
 
-
-
-
-
-
-
+       
 
     }
 }

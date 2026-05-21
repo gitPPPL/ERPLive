@@ -152,8 +152,8 @@ function addRow($tbody, data = {}) {
       </td>
 
       <td>
-        <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
-        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+        <button class="act-btn edit" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus btn-add-action"></i></button>
+        <button class="act-btn delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash btn-delete-action"></i></button> 
       </td>
     </tr>`;
 

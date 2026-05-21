@@ -34,6 +34,20 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
                     placeholder: placeholder,  
                     allowClear: true            
                 });
+
+                 ddl.on('select2:open', function () {
+                    setTimeout(function () {
+                        let searchBox = document.querySelector(
+                            '.select2-container--open .select2-search__field'
+                        );
+
+                        if (searchBox) {
+                            searchBox.focus();
+                        }
+                    }, 0);
+                });
+
+
             }
 
             if (typeof callback === "function") {
@@ -44,4 +58,10 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
             console.error("Dropdown error:", xhr.responseText);
         }
     });
+}
+
+function ensureOption($dropdown, code, name) {
+    if (code && $dropdown.find(`option[value="${code}"]`).length === 0) {
+        $dropdown.append(`<option value="${code}">${name}</option>`);
+    }
 }

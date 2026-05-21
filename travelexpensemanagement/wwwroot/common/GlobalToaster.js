@@ -76,3 +76,6 @@ $(document).on('change', 'select', function () {
 //showToast("Cannot delete the last row!", { type: "error" });
 //showToast("Low stock warning!", { type: "warning" });
 //showToast("Custom info message", { type: "info" });
+
+
+

@@ -61,16 +61,18 @@ namespace travelexpensemanagement.Common.Globalvariable
                             PubBranchCode = 1,
                             PubLoginDate = loginDate,
                             PubSessiontime = DateTime.Now,
-                            ip_address = "103.74.69.13",            
-                            client_id =  "8a2017bb-6f67-4bf9-bc62-46bd802ed390",
-                            client_secret =  "5e3dd92c-64ba-440f-a964-1a396397da66",
+                            ip_address = "103.74.69.13",
+                            client_id = "8a2017bb-6f67-4bf9-bc62-46bd802ed390",
+                            client_secret = "5e3dd92c-64ba-440f-a964-1a396397da66",
                             gstin = "05AAFCP0864M1Z7",
                             auth_access_type = "read"
                         };
                     }
                 }
             }
+
             return sessionData;
         }
     }
 }
+

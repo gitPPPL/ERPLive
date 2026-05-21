@@ -5,6 +5,7 @@ using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
@@ -20,9 +21,10 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly IMiscConsumptionRepository _repository;
+        private readonly travelexpensemanagement.LogService.LogService _logService;
         public MiscConsumptionEntryController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
             DropdownService dropdownService, DbHelper dbHelper, GlobalValidationdate globalValidationdate, IMiscConsumptionRepository repository,
-            ModuleService.ModuleService moduleService)
+            ModuleService.ModuleService moduleService, travelexpensemanagement.LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -31,6 +33,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             _dbHelper = dbHelper;
             _moduleService = moduleService;
             _repository = repository;
+            _logService = logService;
         }
 
         public IActionResult Index()
@@ -67,7 +70,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var data = _repository.GetAddressByPartyCode(partyId);
             return Json(data);
         }
-   
+         
         [HttpGet]
         public JsonResult GetVNo(string Vtype)
         {
@@ -99,6 +102,19 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 var result = _repository.SaveMiscConsumption( request.Header, request.Deatils, action );
 
+                _logService.InsertLog("GATE1", "MiscConsumptionEntry", "Transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
+                          request.Header.V_DATE);
+
+                _logService.InsertLog("GATE2", "MiscConsumptionEntry", "Transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
+                          request.Header.V_DATE);
+
+                if (action == "UPDATE")
+                {
+                    _globalValidationdate.LogInsertUpdateDelete("GATE1", "GATE1", "Transaction", request.Header.V_NO.ToString(), request.Header.V_TYPE);
+
+                    _globalValidationdate.LogInsertUpdateDelete("GATE2", "GATE2", "Transaction", request.Header.V_NO.ToString(), request.Header.V_TYPE);
+                }
+
                 if (result == "Success")
                 {
                     return Json(new { success = true, message = "Saved successfully" });
@@ -121,10 +137,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             DateTime vdate = data.GetProperty("vdate").GetDateTime();
             string vtype = data.GetProperty("vtype").GetString();
             string vno = data.GetProperty("vno").GetString();
-            var result = await _globalValidationdate.CheckValidDate("VISITOR", vdate, vtype, vno);
-            Console.WriteLine("vdate: " + vdate);
-            Console.WriteLine("today: " + DateTime.Today);
-            Console.WriteLine("LoginDate: " + global.PubLoginDate.Date);
+            var result = await _globalValidationdate.CheckValidDate("GATE1", vdate, vtype, vno);
             return Ok(result);
         }
 

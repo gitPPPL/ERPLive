@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 
 namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
@@ -12,13 +12,15 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
+        private readonly IBigWeighbridgeListRepository _bigWeighbridgeListRepository;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public BigWeighbridgeListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        public BigWeighbridgeListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IBigWeighbridgeListRepository bigWeighbridgeListRepository)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
+            _bigWeighbridgeListRepository = bigWeighbridgeListRepository;
         }
         
         public IActionResult Index()
@@ -36,108 +38,58 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBigWBridgeList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetBigWBridgeList(string searchTerm = "",  int pageNumber = 1,int pageSize = 10)
         {
             try
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
+                var result = await _bigWeighbridgeListRepository.GetBigWBridgeListAsync(searchTerm, pageNumber, pageSize);
+
+                return Json(new
                 {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@DOCTYPE",  "KantaBig"},
-                    {"@Action", "WBEntryList" }
-                };
-
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
-                        {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "DOC_ID" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new { status = true, data = pagedList, totalCount });
-
+                    status = true,
+                    data = result.Data,
+                    totalCount = result.TotalCount
+                });
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
+                });
             }
         }
 
-        [HttpDelete]
+        [HttpPost]
+        public async Task<IActionResult> CheckDeleteBigWBridgeEntry(string docId)
+        {
+            if (string.IsNullOrWhiteSpace(docId))
+                return Json(new { success = false, message = "Invalid ID" });
+
+            var result = await _bigWeighbridgeListRepository.CheckDeleteBigWBridgeEntryAsync(docId);
+
+            return Json(new
+            {
+                success = result.Status,
+                message = result.Message,
+                data = result.Data
+            });
+        }
+
+        [HttpPost]
         public async Task<IActionResult> DeleteBigWBridgeEntry(string docid)
         {
-            try
+            if (string.IsNullOrWhiteSpace(docid))
+                return Json(new { success = false, message = "Invalid ID" });
+
+            var result = await _bigWeighbridgeListRepository.DeleteBigWBridgeEntryAsync(docid);
+
+            return Json(new
             {
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-
-                var userSession = _globalValue.GetGlobalVariables();
-                string VType = docid.Substring(0, 4);
-                string VNo = docid.Substring(4);
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
-                    {
-                        try
-                        {
-
-                        string[] deleteQueries = {
-                        "DELETE FROM wb1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM wb2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-
-                        };
-
-                            foreach (var query in deleteQueries)
-                            {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+                success = result.Status,
+                message = result.Message
+            });
         }
 
         [HttpGet]
@@ -145,26 +97,31 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         {
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                if (string.IsNullOrEmpty(docid))
+                if (string.IsNullOrWhiteSpace(docid))
                 {
-                    return Json(new { status = false, message = "Invalid ID" });
+                    return Json(new
+                    {
+                        status = false,
+                        message = "Invalid ID"
+                    });
                 }
-                var parameter = new Dictionary<string, object>
+
+                var result = await _bigWeighbridgeListRepository
+                    .GetBigWBridgeEntryDetailsAsync(docid);
+
+                return Json(new
                 {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", docid.Substring(0, 4) },
-                    {"@V_NO", docid.Substring(4) },
-                    {"@Action", "EntryDetail" }
-                };
-                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-                return Json(new { status = true, data = entryDetailList });
+                    status = true,
+                    data = result
+                });
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
+                });
             }
         }
 
@@ -173,22 +130,21 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         {
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@DOCTYPE",  "KantaBig"},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
+                var result = await _bigWeighbridgeListRepository.ExportAllDocsAsync();
 
-                return Json(new { status = true, data = dataList });
+                return Json(new
+                {
+                    status = true,
+                    data = result
+                });
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
+                });
             }
         }
 

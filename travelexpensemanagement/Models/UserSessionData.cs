@@ -18,7 +18,6 @@
         public string? gstin { get; set; }
         public string? auth_access_type { get; set; }
 
-
     }
 
 }

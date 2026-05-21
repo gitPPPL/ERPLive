@@ -2,6 +2,7 @@
 	ViewBag.Title = "Gate Entry Dashboard";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +10,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gate Entry Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <div class="GateEntryDashboard-container">
@@ -18,10 +21,19 @@
                     <i class="fa fa-truck-moving"></i>
                 </div>
                 <div>
-                    <div class="GateEntryDashboard-title">Gate Entry Dashboard</div>
-                    <div class="GateEntryDashboard-subtitle">Smart Monitoring & Analytics</div>
+                    <div class="GateEntryDashboard-title">
+                        Gate Entry Dashboard
+                    </div>
+                    <div class="GateEntryDashboard-subtitle">
+                        Smart Monitoring & Analytics
+                    </div>
                 </div>
             </div>
+            <!-- RIGHT SIDE BUTTON -->
+            <button class="GateEntryDashboard-header-export-btn">
+                <i class="fa fa-file-excel"></i>
+                <span>Export to Excel</span>
+            </button>
         </div>
         <div class="GateEntryDashboard-sales-header-advanced">
             <div class="GateEntryDashboard-sales-top">
@@ -43,15 +55,323 @@
                     <option value="gateinwardstore">Gate Inward Store</option>
                 </select>
             </div>
-            <button class="GateEntryDashboard-export-btn-advanced">
-                <i class="fa fa-file-export"></i>
-                <span>Export Data</span>
-            </button>
-        </div>
-        <div class="GateEntryDashboard-row">
-            <div class="GateEntryDashboard-left">
-                <div class="GateEntryDashboard-card-grid" id="dashboardCards"></div>
+            <div class="GateEntryDashboard-date-filter">
+                <label for="dateRange">Select Date Range</label>
+                <div class="GateEntryDashboard-date-input-wrap">
+                    <i class="fa fa-calendar-days"></i>
+                    <input type="text" id="dateRange" placeholder="Select From & To Date" />
+                </div>
+                <button type="button" id="btnSearch">Search</button>
             </div>
+
+        </div>
+
+        <div class="GateEntryDashboard-row">
+            @* <div class="GateEntryDashboard-left">
+                <div class="GateEntryDashboard-card-grid" id="dashboardCards"></div>
+            </div> *@
+
+            <div class="GateEntryDashboard-left">
+
+                <div class="GateEntryDashboard-card-grid" id="dashboardCards">
+                    <!-- Vehicle Card -->
+                    @* <div class="GateEntryDashboard-card vehicle-card"> *@
+                <div>
+                        <div class="vehicle-card-header">
+
+                            <div class="GateEntryDashboard-icon icon-green">
+                                <i class="fa fa-truck"></i>
+                            </div>
+
+                            <div class="vehicle-card-title">
+                                <h3>Vehicle</h3>
+                                <p>Live Gate Activity</p>
+                            </div>
+
+                        </div>
+
+                        <div class="vehicle-donut">
+                            <canvas id="vehicleChart"></canvas>
+                        </div>
+
+                        <div class="vehicle-card">
+                        
+                            <div class="vehicle-stats">
+                        
+                                <div class="stat">
+                                    <span>IN</span>
+                                   
+                                    <strong class="stat-click"
+                                            data-title="Vehicle"
+                                            data-label="IN"
+                                            style="color:#3b82f6; cursor:pointer;">
+                                        <span id="outCount">0</span>
+                                    </strong>
+
+
+
+                                </div>
+
+                                <div class="stat">
+                                    <span>OUT</span>
+                                    <strong class="stat-click"
+                                            data-title="Vehicle"
+                                            data-label="OUT"
+                                            style="color:#3b82f6; cursor:pointer;">
+                                        <span id="outCount">0</span>
+                                    </strong>
+                                </div>
+
+                                <div class="stat">
+                                    <span>PENDING</span>
+                                    <strong class="stat-click"
+                                            data-title="Vehicle"
+                                            data-label="PENDING"
+                                            style="color:#ef4444; cursor:pointer;">
+                                        <span id="pendingCount">0</span>
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Party Own Material Card -->
+                    <div class="GateEntryDashboard-card vehicle-card">
+
+                        <div class="vehicle-card-header">
+
+                            <div class="GateEntryDashboard-icon icon-yellow">
+                                <i class="fa fa-box-open"></i>
+                            </div>
+
+                            <div class="vehicle-card-title">
+                                <h3>Party Own Material</h3>
+                                <p>Material Movement</p>
+                            </div>
+
+                        </div>
+
+                        <div class="vehicle-donut">
+                            <canvas id="materialChart"></canvas>
+                        </div>
+
+                        <div class="vehicle-stats">
+
+                            <div class="stat">
+                                <span>IN</span>
+                                <strong class="stat-click"
+                                        data-title="Party Own Material"
+                                        data-label="IN"
+                                        style="color:#22c55e; cursor:pointer;">
+                                    <span class="counter" data-target="60">60</span>
+                                </strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>OUT</span>
+                                <strong class="stat-click"
+                                        data-title="Party Own Material"
+                                        data-label="OUT"
+                                        style="color:#3b82f6; cursor:pointer;">
+                                    <span class="counter" data-target="40">40</span>
+                                </strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>PENDING</span>
+                                <strong class="stat-click"
+                                        data-title="Party Own Material"
+                                        data-label="PENDING"
+                                        style="color:#ef4444; cursor:pointer;">
+                                    <span class="counter" data-target="15">15</span>
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Visitor Entry Card -->
+                    <div class="GateEntryDashboard-card vehicle-card">
+
+                        <div class="vehicle-card-header">
+
+                            <div class="GateEntryDashboard-icon icon-pink">
+                                <i class="fa fa-user-check"></i>
+                            </div>
+
+                            <div class="vehicle-card-title">
+                                <h3>Visitor Entry</h3>
+                                <p>Visitor Activity</p>
+                            </div>
+
+                        </div>
+
+                        <div class="vehicle-donut">
+                            <canvas id="visitorChart"></canvas>
+                        </div>
+
+                        <div class="vehicle-stats">
+
+                            <div class="stat">
+                                <span>IN</span>
+                                <strong class="stat-click"
+                                        data-title="Visitor Entry"
+                                        data-label="IN"
+                                        style="color:#22c55e; cursor:pointer;">
+                                    <span class="counter" data-target="150">150</span>
+                                </strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>OUT</span>
+                                <strong class="stat-click"
+                                        data-title="Visitor Entry"
+                                        data-label="OUT"
+                                        style="color:#3b82f6; cursor:pointer;">
+                                    <span class="counter" data-target="120">120</span>
+                                </strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>PENDING</span>
+                                <strong class="stat-click"
+                                        data-title="Visitor Entry"
+                                        data-label="PENDING"
+                                        style="color:#ef4444; cursor:pointer;">
+                                    <span class="counter" data-target="30">30</span>
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Gate Inward RM -->
+                    <div class="GateEntryDashboard-card vehicle-card">
+
+                        <div class="vehicle-card-header">
+
+                            <div class="GateEntryDashboard-icon icon-green">
+                                <i class="fa fa-industry"></i>
+                            </div>
+
+                            <div class="vehicle-card-title">
+                                <h3>Gate Inward RM</h3>
+                                <p>Raw Material Status</p>
+                            </div>
+
+                        </div>
+
+                        <div class="vehicle-donut">
+                            <canvas id="rmChart"></canvas>
+                        </div>
+
+                        <div class="vehicle-stats">
+
+                            <div class="stat">
+                                <span>Approval</span>
+                                <strong style="color:#22c55e;">25</strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>Pre QC</span>
+                                <strong style="color:#3b82f6;">18</strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>WB</span>
+                                <strong style="color:#f59e0b;">12</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Gate Inward Store -->
+                    <div class="GateEntryDashboard-card vehicle-card">
+
+                        <div class="vehicle-card-header">
+
+                            <div class="GateEntryDashboard-icon icon-yellow">
+                                <i class="fa fa-warehouse"></i>
+                            </div>
+
+                            <div class="vehicle-card-title">
+                                <h3>Gate Inward Store</h3>
+                                <p>Store Material Status</p>
+                            </div>
+
+                        </div>
+
+                        <div class="vehicle-donut">
+                            <canvas id="storeChart"></canvas>
+                        </div>
+
+                        <div class="vehicle-stats">
+
+                            <div class="stat">
+                                <span>Approval</span>
+                                <strong style="color:#22c55e;">20</strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>Pre QC</span>
+                                <strong style="color:#3b82f6;">14</strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>WB</span>
+                                <strong style="color:#f59e0b;">10</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Vehicle RC -->
+                    <div class="GateEntryDashboard-card vehicle-card">
+
+                        <div class="vehicle-card-header">
+
+                            <div class="GateEntryDashboard-icon icon-pink">
+                                <i class="fa fa-id-card"></i>
+                            </div>
+
+                            <div class="vehicle-card-title">
+                                <h3>Vehicle RC</h3>
+                                <p>RC Verification</p>
+                            </div>
+
+                        </div>
+
+                        <div class="vehicle-donut">
+                            <canvas id="rcChart"></canvas>
+                        </div>
+
+                        <div class="vehicle-stats">
+
+                            <div class="stat">
+                                <span>Found</span>
+                                <strong style="color:#22c55e;">80</strong>
+                            </div>
+
+                            <div class="stat">
+                                <span>Not Found</span>
+                                <strong style="color:#ef4444;">20</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
             <div class="GateEntryDashboard-right">
                 <div class="GateEntryDashboard-filter">
                     <h4>Select Category</h4>
@@ -184,164 +504,58 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
 
-        const dashboardData = [
-            {
-                id: "vehicleChart",
-                title: "Vehicle",
-                subtitle: "Live Gate Activity",
-                icon: "fa-truck",
-                iconClass: "icon-green",
-                stats: [
-                    { label: "IN", value: 120, color: "#22c55e" },
-                    { label: "OUT", value: 90, color: "#3b82f6" },
-                    { label: "PENDING", value: 30, color: "#ef4444" }
-                ]
-            },
-            {
-                id: "materialChart",
-                title: "Party Own Material",
-                subtitle: "Material Movement",
-                icon: "fa-box-open",
-                iconClass: "icon-yellow",
-                stats: [
-                    { label: "IN", value: 60, color: "#22c55e" },
-                    { label: "OUT", value: 40, color: "#3b82f6" },
-                    { label: "PENDING", value: 15, color: "#ef4444" }
-                ]
-            },
-            {
-                id: "visitorChart",
-                title: "Visitor Entry",
-                subtitle: "Visitor Activity",
-                icon: "fa-user-check",
-                iconClass: "icon-pink",
-                stats: [
-                    { label: "IN", value: 150, color: "#22c55e" },
-                    { label: "OUT", value: 120, color: "#3b82f6" },
-                    { label: "PENDING", value: 30, color: "#ef4444" }
-                ]
-            },
-            {
-                id: "rmChart",
-                title: "Gate Inward RM",
-                subtitle: "Raw Material Status",
-                icon: "fa-industry",
-                iconClass: "icon-green",
-                stats: [
-                    { label: "Approval", value: 25, color: "#22c55e" },
-                    { label: "Pre QC", value: 18, color: "#3b82f6" },
-                    { label: "WB", value: 12, color: "#f59e0b" }
-                ]
-            },
-            {
-                id: "storeChart",
-                title: "Gate Inward Store",
-                subtitle: "Store Material Status",
-                icon: "fa-warehouse",
-                iconClass: "icon-yellow",
-                stats: [
-                    { label: "Approval", value: 20, color: "#22c55e" },
-                    { label: "Pre QC", value: 14, color: "#3b82f6" },
-                    { label: "WB", value: 10, color: "#f59e0b" }
-                ]
-            },
-            {
-                id: "rcChart",
-                title: "Vehicle RC",
-                subtitle: "RC Verification",
-                icon: "fa-id-card",
-                iconClass: "icon-pink",
-                stats: [
-                    { label: "Found", value: 80, color: "#22c55e" },
-                    { label: "Not Found", value: 20, color: "#ef4444" }
-                ]
-            }
-        ];
-
-        /* RENDER CARDS */
-        function renderDashboardCards() {
-            const container = document.getElementById("dashboardCards");
-
-            container.innerHTML = dashboardData.map(card => `
-                <div class="GateEntryDashboard-card vehicle-card">
-
-                    <div class="vehicle-card-header">
-                        <div class="GateEntryDashboard-icon ${card.iconClass}">
-                            <i class="fa ${card.icon}"></i>
-                        </div>
-
-                        <div class="vehicle-card-title">
-                            <h3>${card.title}</h3>
-                            <p>${card.subtitle}</p>
-                        </div>
-                    </div>
-
-                    <div class="vehicle-donut">
-                        <canvas id="${card.id}"></canvas>
-                    </div>
-
-                    <div class="vehicle-stats">
-                        ${card.stats.map(stat => `
-                            <div class="stat">
-                                <span>${stat.label}</span>
-                                <strong class="counter"
-                                        data-target="${stat.value}"
-                                        style="color:${stat.color}">
-                                    0
-                                </strong>
-                            </div>
-                        `).join("")}
-                    </div>
-
-                </div>
-            `).join("");
+</body>
+</html>
+<script>
+    let vehicleChart;
+    // PAGE LOAD
+    $(document).ready(function () {
+    flatpickr("#dateRange", {
+        mode: "range",
+        dateFormat: "d M Y",
+        defaultDate: [new Date(), new Date()]
+    });
         }
 
-        /* DONUT CHART */
-        function createDonutChart(id, stats) {
-            const ctx = document.getElementById(id);
-
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: stats.map(s => s.label),
-                    datasets: [{
-                        data: stats.map(s => s.value),
-                        backgroundColor: stats.map(s => s.color),
-                        borderWidth: 0,
-                        hoverOffset: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        /* INIT DASHBOARD */
-        function initDashboard() {
-            renderDashboardCards();
+        // TODAY DATE
+        let today = new Date();
+        let dd = String(today.getDate()).padStart(2, '0');
+        let mm = today.toLocaleString('default', { month: 'short' });
+        let yyyy = today.getFullYear();
+        let formattedDate = dd + ' ' + mm + ' ' + yyyy;
+        $("#dateRange").val(formattedDate + " to " + formattedDate);
+        getDashboardData(formattedDate, formattedDate);
 
             dashboardData.forEach(card => {
                 createDonutChart(card.id, card.stats);
-            });
+    });
 
-            startCounters();
-        }
+    // SEARCH BUTTON
+    $("#btnSearch").click(function () {
+        var dateRange = $("#dateRange").val();
+        var dates = dateRange.split(" to ");
+        var fromDate = dates[0];
+        var toDate = dates[1];
+        getDashboardData(fromDate, toDate);
 
-        /* COUNTER ANIMATION */
-        function startCounters() {
-            document.querySelectorAll('.counter').forEach(counter => {
-                const target = +counter.getAttribute('data-target');
-                let count = 0;
-
-                const update = () => {
-                    const increment = target / 50;
+    });
+    // AJAX FUNCTION
+    function getDashboardData(fromDate, toDate) {
+        $.ajax({
+            url: '/GateEntryDashboard/GetData',
+            type: 'POST',
+            data: {
+                FromDate: fromDate,
+                ToDate: toDate
+            },
+            success: function (response) {
+                let inCount = response.inVehicleCount;
+                let outCount = response.outVehicleCount;
+                let pendingCount = response.pendingVehicleCount;
+                loadVehicleChart(inCount, outCount, pendingCount);
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
 
                     if (count < target) {
                         count += increment;
@@ -349,46 +563,47 @@
                         requestAnimationFrame(update);
                     } else {
                         counter.innerText = target;
-                    }
+            }
                 };
 
                 update();
-            });
+        });
+    }
+    // CHART FUNCTION
+    function loadVehicleChart(inCount, outCount, pendingCount) {
+        $("#inCount").text(inCount);
+        $("#outCount").text(outCount);
+        $("#pendingCount").text(pendingCount);
+        if (vehicleChart) {
+            vehicleChart.destroy();
         }
-
-        /* DROPDOWN CHART */
-        let dropdownChartInstance = null;
-
-        function updateDropdownChart() {
-            const today = +document.querySelector(".kpi-today strong").innerText;
-            const yesterday = +document.querySelector(".kpi-yesterday strong").innerText;
-            const monthly = +document.querySelector(".kpi-monthly strong").innerText;
-
-            const ctx = document.getElementById("dropdownChart");
-
-            if (dropdownChartInstance) {
-                dropdownChartInstance.destroy();
-            }
-
-            dropdownChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ["Today", "Yesterday", "Monthly"],
-                    datasets: [{
-                        data: [today, yesterday, monthly],
-                        backgroundColor: ["#22c55e", "#f59e0b", "#3b82f6"],
-                        borderWidth: 0,
-                        hoverOffset: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: { legend: { display: true } }
-                }
-            });
-        }
+        const ctx = document.getElementById('vehicleChart').getContext('2d');
+        vehicleChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['IN', 'OUT', 'PENDING'],
+                datasets: [{
+                    data: [
+                        inCount,
+                        outCount,
+                        pendingCount
+                    ],
+                    backgroundColor: [
+                        '#22c55e',
+                        '#3b82f6',
+                        '#ef4444'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
 
         /* TAT MINI CHARTS */
         function createChart(id, data) {
@@ -413,55 +628,29 @@
                     scales: {
                         x: { display: false },
                         y: { display: false }
-                    }
                 }
-            });
-        }
-
-        /* INIT ALL */
-        document.addEventListener("DOMContentLoaded", function () {
-            initDashboard();
-            updateDropdownChart();
+            }
         });
+    }
+   
+    $(document).on("click", ".stat-click", function () {
+        var title = $(this).data("title");
+        var label = $(this).data("label");
+        var dateRange = $("#dateRange").val();
+        var dates = dateRange.split(" to ");
+        var fromDate = dates[0];
+        var toDate = dates[1];
+        window.location.href = "/GateEntryDashboardList?title="
+            + encodeURIComponent(title)
+            + "&label="
+            + encodeURIComponent(label)
+            + "&fromDate="
+            + encodeURIComponent(fromDate)
+            + "&toDate="
+            + encodeURIComponent(toDate);
+    });
 
-        /* TAT CHART DATA */
-        createChart("chart1",[5,8,6,10,12,18]);
-        createChart("chart2",[12,11,10,9,8,10]);
-        createChart("chart3",[10,12,15,20,22,25]);
-        createChart("chart4",[10,9,8,7,6,8]);
-        createChart("chart5",[5,7,9,11,13,14]);
-        createChart("chart6",[8,7,6,5,4,6]);
-
-        /* SCROLL DRAG */
-        const slider = document.querySelector('.GateEntryDashboard-tat-grid');
-
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        slider.addEventListener('mousedown', (e) => {
-            isDown = true;
-            startX = e.pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
-        });
-
-        slider.addEventListener('mouseleave', () => {
-            isDown = false;
-        });
-
-        slider.addEventListener('mouseup', () => {
-            isDown = false;
-        });
-
-        slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - slider.offsetLeft;
-            const walk = (x - startX) * 1.5;
-            slider.scrollLeft = scrollLeft - walk;
-        });
-
-    </script>
+</script>
 
 </body>
 </html>

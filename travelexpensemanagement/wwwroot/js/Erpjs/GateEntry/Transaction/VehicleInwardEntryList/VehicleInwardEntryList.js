@@ -40,7 +40,7 @@
 					}
 					actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>`;
 					if (window.permissions.canDelete) {
-						actions += `<button class="act-btn delete" title="View" style="cursor:pointer;"><i class="fa fa-trash"></i></button>`;
+						actions += `<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteVehicleEntry('${item.docid}')"><i class="fa fa-trash"></i></button>`;
 					}
 					if (window.permissions.canDocDetail) {
 						actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.docid}')"><i class="fa fa-file-alt"></i></button>`;
@@ -164,33 +164,13 @@
 		window.location.href = '/VehicleInwardEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 	}
 
-	$(document).on('click', /* '.btn-delete' */'.delete', function() {
-		const $row = $(this).closest('tr');
-		const CodeforDel = $row.find('.code').text().trim();
-		confirmAction().then((confirmed) => {
-			if (!confirmed) return;
-
-			$.ajax({
-				url: '/VehicleInwardEntryList/DeleteVehicleInwardEntry',
-				type: 'delete',
-				data: {docid: CodeforDel },
-				success: function (res) {
-					if (res.status) {
-						$row.remove();
-						setTimeout(() => {
-							window.location.href = '/VehicleInwardEntryList/Index';
-						}, 1500);
-						showFlashMessageByKey('delete', 'success');
-					} else {
-						Swal.fire('Error!', 'Error deleting item group: ' + res.message, 'error');
-					}
-				},
-				error: function (xhr) {
-					Swal.fire('Error!', 'Error deleting item group: ' + xhr.responseText, 'error');
-				}
-			});
+	function deleteVehicleEntry(docId) {
+		deleteRecord("VehicleInwardEntryList", docId, {
+			action: "DeleteVehicleInwardEntry",
+			text: "This will permanently delete the vehicle inward entry.",
+			successCallback: GetMasterDataList
 		});
-	});
+	}
 
 	function exportToExcel() {
 		fetch('/VehicleInwardEntryList/ExportAllDocs')

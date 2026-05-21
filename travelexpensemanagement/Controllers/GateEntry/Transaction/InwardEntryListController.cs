@@ -2,6 +2,8 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
+using travelexpensemanagement.Authorize;
+=========
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -11,6 +13,7 @@ using travelexpensemanagement.Models.GateEntry;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
+    [SessionAuthorize]
     public class InwardEntryListController : Controller
     {
 

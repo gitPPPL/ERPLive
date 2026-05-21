@@ -19,7 +19,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
         }
-      
+        
         public List<object> GetItemList()
         {
             var g = _globalVariableService.GetGlobalVariables();
@@ -32,8 +32,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             var g = _globalVariableService.GetGlobalVariables();
 
-            string query = $"SELECT code, name FROM ITEMDEPT_MAST WHERE active = 1 AND comp_code = {g.PubCompCode}";
-            return _dropdownService.GetDropdownList(query);
+            string query = $"SELECT code, name FROM ITEMDEPT_MAST WHERE TRAN_TYPE= 'Store' and active = 1 AND comp_code = {g.PubCompCode} order by Name";
+            return _dropdownService.GetDropdownList(query);         
         }
 
         public List<object> GetUnitList()
@@ -164,26 +164,27 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
+                
 
                 // DELETE OLD DETAILS
-                string deleteSql = @"DELETE FROM GATE2 WHERE COMP_CODE = @CompCode AND V_NO = @VNo AND BRANCH_CODE = @BranchCode AND YEAR_CODE = @YearCode;";
+                string deleteSql = @"DELETE FROM GATE2 WHERE COMP_CODE = @CompCode AND V_NO = @VNo AND  V_TYPE = @VType AND BRANCH_CODE = @BranchCode AND YEAR_CODE = @YearCode;";
 
                 using (var deleteCmd = conn.CreateCommand())
                 {
+                    
                     deleteCmd.CommandText = deleteSql;
                     deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
                     deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
+                    deleteCmd.Parameters.AddWithValue("@VType", header.V_TYPE);
                     deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
                     deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
                     deleteCmd.ExecuteNonQuery();
                 }
 
-                conn.Close();
-                conn.Open();
-
                 // HEADER SAVE
                 using (var cmd = new SqlCommand("sp_MiscConsumptionEntry", conn))
                 {
+                   
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Action", action);
@@ -240,9 +241,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     if (string.IsNullOrWhiteSpace(item.ITEM_NAME))
                         continue;
 
+                    
                     using var cmd = new SqlCommand("sp_MiscConsumptionEntry", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
-
+                    
                     cmd.Parameters.AddWithValue("@Action", "INSERT");
                     cmd.Parameters.AddWithValue("@SaveAction", "Details");
 
@@ -281,13 +283,18 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
                     cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
+                    Console.WriteLine(item.REF_TYPE);
+                    Console.WriteLine(item.REF_NO);
+
                     cmd.ExecuteNonQuery();
                 }
 
+                
                 return "Success";
             }
             catch (Exception ex)
             {
+               
                 return $"Error: {ex.Message}";
             }
         }
@@ -303,106 +310,68 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             foreach (var item in details)
             {
-              
-                if (string.IsNullOrWhiteSpace(item.ITEM_NAME))
+                
+                if (item.ITEM_CODE == null || item.ITEM_CODE == 0)
                     continue;
 
-                int refNo = item.REF_NO ?? 0;
-                string refType = item.REF_TYPE ?? "";
-
-                if (string.IsNullOrWhiteSpace(refType) || refNo == 0)
+                if (string.IsNullOrWhiteSpace(item.REF_TYPE) ||
+                    item.REF_NO == null ||
+                    item.REF_NO == 0)
                     continue;
 
-                // =========================================
-                // 1. TOTAL INWARD QTY
-                // =========================================
-                string inwardQuery = @"
-                    SELECT ISNULL(SUM(QTY), 0)
-                    FROM GATE2
-                    WHERE V_TYPE = @RefType
-                      AND V_NO = @RefNo
-                      AND COMP_CODE = @CompCode
-                      AND BRANCH_CODE = @BranchCode
-                      AND YEAR_CODE = @YearCode
-                      AND ITEM_CODE = @ItemCode
-                      AND ISNULL(REMARKS, '') = @Remarks";
+                using var cmd = new SqlCommand("sp_MiscConsumptionEntry", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
 
-                decimal totalInwardQty = 0m;
+                // Action
+                cmd.Parameters.AddWithValue("@Action", "ValidatePendingQty");
 
-                using (var cmd = new SqlCommand(inwardQuery, conn))
+                // Current Voucher
+                cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE ?? "");
+                cmd.Parameters.AddWithValue("@V_NO", header.V_NO ?? 0);
+
+                // Reference Voucher
+                cmd.Parameters.AddWithValue("@REF_TYPE", item.REF_TYPE ?? "");
+                cmd.Parameters.AddWithValue("@REF_NO", item.REF_NO ?? 0);
+
+                // Item Details
+                cmd.Parameters.AddWithValue("@ITEM_CODE", item.ITEM_CODE ?? 0);
+                cmd.Parameters.AddWithValue("@ITEM_NAME", item.ITEM_NAME ?? "");
+                cmd.Parameters.AddWithValue("@QTY", item.QTY ?? 0m);
+                cmd.Parameters.AddWithValue("@REMARKS", item.REMARKS ?? "");
+
+                // Company Details
+                cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
+
+                
+                using var reader = cmd.ExecuteReader();
+
+                if (reader.Read())
                 {
-                    cmd.Parameters.AddWithValue("@RefType", refType);
-                    cmd.Parameters.AddWithValue("@RefNo", refNo);
-                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@ItemCode", item.ITEM_CODE);
-                    cmd.Parameters.AddWithValue("@Remarks", item.REMARKS ?? "");
+                    bool isValid = Convert.ToBoolean(reader["IsValid"]);
 
-                    object result = cmd.ExecuteScalar();
-                    totalInwardQty = result == null || result == DBNull.Value
-                        ? 0m
-                        : Convert.ToDecimal(result);
-                }
+                   
+                    if (!isValid)
+                    {
+                        decimal pendingQty = Convert.ToDecimal(reader["PendingQty"]);
+                        decimal currentQty = Convert.ToDecimal(reader["CurrentQty"]);
+                        string itemName = Convert.ToString(reader["ItemName"]);
+                        string remarks = Convert.ToString(reader["Remarks"]);
 
-                // =========================================
-                // 2. ALREADY CONSUMED QTY
-                // =========================================
-                string consumedQuery = @"
-                    SELECT ISNULL(SUM(QTY), 0)
-                    FROM GATE2
-                    WHERE REF_TYPE = @RefType
-                      AND REF_NO = @RefNo
-                      AND COMP_CODE = @CompCode
-                      AND BRANCH_CODE = @BranchCode
-                      AND YEAR_CODE = @YearCode
-                      AND ITEM_CODE = @ItemCode
-                      AND ISNULL(REMARKS, '') = @Remarks
-                      AND NOT (V_TYPE = @CurrentVType AND V_NO = @CurrentVNo)";
+                        message =
+                            $"Misc Inward Pending Quantity = {pendingQty}, " +
+                            $"Your Consumption Qty = {currentQty}. " +
+                            $"Please check Item: {itemName} ({remarks})";
 
-                decimal alreadyConsumedQty = 0m;
-
-                using (var cmd = new SqlCommand(consumedQuery, conn))
-                {
-                    cmd.Parameters.AddWithValue("@RefType", refType);
-                    cmd.Parameters.AddWithValue("@RefNo", refNo);
-                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@ItemCode", item.ITEM_CODE);
-                    cmd.Parameters.AddWithValue("@Remarks", item.REMARKS ?? "");
-                    cmd.Parameters.AddWithValue("@CurrentVType", header.V_TYPE);
-                    cmd.Parameters.AddWithValue("@CurrentVNo", header.V_NO);
-
-                    object result = cmd.ExecuteScalar();
-                    alreadyConsumedQty = result == null || result == DBNull.Value
-                        ? 0m
-                        : Convert.ToDecimal(result);
-                }
-
-                // =========================================
-                // 3. CURRENT QTY
-                // If QTY is decimal? use ?? 0m
-                // =========================================
-                decimal currentQty = item.QTY ?? 0m;
-
-                // =========================================
-                // 4. VALIDATION
-                // =========================================
-                if (alreadyConsumedQty + currentQty > totalInwardQty)
-                {
-                    decimal pendingQty = totalInwardQty - alreadyConsumedQty;
-
-                    message =
-                        $"Misc Inward Pending Quantity = {pendingQty}, " +
-                        $"Your Consumption Qty = {currentQty}. " +
-                        $"Please check Item: {item.ITEM_NAME} ({item.REMARKS})";
-
-                    return false;
+                        return false;
+                    }
                 }
             }
 
             return true;
         }
+
+
     }
 }

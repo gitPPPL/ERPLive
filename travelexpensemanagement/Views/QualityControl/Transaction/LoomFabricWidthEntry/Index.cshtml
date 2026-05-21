@@ -1,0 +1,1024 @@
+﻿@{
+    ViewBag.Title = "Loom Fabric Width Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">Loom Fabric Width Entry</legend>
+    <div class="row">
+        <div class="offset-md-10 col-md-2">
+            <div class="btn-right">
+                <button onclick="window.location.href='@Url.Action("Index", "LoomFabricWidthEntryList")'" type="button" class="btn btn-primary">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+    </div>
+    <form id="LoomFabricWidthEntryForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No</label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlShift">Shift</label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlInspectBy">Inspected By</label>
+                    <select class="form-control" id="ddlInspectBy">
+                        <option value="">Select Inspected By</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date</label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="ddlPlace">Place</label>
+                    <select class="form-control" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="DtTime">Time</label>
+                    <div class="input-divide">
+                        <input type="time" class="form-control" id="DtTime">
+                        <button type="button" class="btn btn-success" id="btn-import" style="width:100%;"><i class="fa fa-refresh"></i>Import Obtained Width</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtTotalRec">Total Rec.</label>
+                    <input type="text" class="form-control" id="TxtTotalRec" placeholder="Enter Total Rec">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblLoomFabricWidthEntry" class="table-width" style="overflow-y: clip;">
+                    <colgroup>
+                        <col style="width: 80px;">
+                        <col style="width: 200px;">
+                        <col style="width: 300px;">
+                        <col style="width: 120px;">
+                        <col style="width: 100px;">
+                        <col style="width: 80px;">
+                        <col style="width: 150px;">
+                        <col style="width: 120px;">
+                        <col style="width: 120px;">
+                        <col style="width: 150px;">
+                        <col style="width: 200px;">
+                        <col style="width: 100px;">
+                    </colgroup>
+                    <thead class="table-head">
+                        <tr>                            
+                            <th>LID</th>
+                            <th>Loom</th>
+                            <th>Item Name</th>
+                            <th>Type</th>
+                            <th>Width (MM)</th>
+                            <th>Gram</th>
+                            <th>Color</th>
+                            <th>DNR</th>
+                            <th>Obt. Width</th>
+                            <th>Bobbin Marking</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Pagination container -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                    </div>
+                    <div class="pagination-end">
+                        <div class="custom-pagination" id="tablePagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-md-10 col-md-2">
+                <div class="btn-last">
+                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</fieldset>
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+
+    const allFieldIds = [
+      "NumDocNo",
+      "DtDocDate",
+      "NumTotalRec",
+      "ddlShift",
+      "ddlPlace",
+      "DtTime",
+      "ddlInspectBy",
+      "TxtRemarks"
+    ];
+
+    const itemRecords = [
+      "TxtLID",
+      "ddlLoom",
+      "ddlItemName",
+      "ddlType",
+      "TxtWidth",
+      "TxtGram",
+      "ddlColor",
+      "TxtDNR",
+      "TxtWarpWay",
+      "TxtWeftWay",
+      "ddlStrength",
+      "TxtWarpElong",
+      "TxtWeftElong",
+      "TxtWarpMesh",
+      "TxtWeftMesh",
+      "TxtRemarks"
+    ];
+
+
+    let docId = "", readOnly;
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    $(document).ready(function () {
+      initPage();
+    });
+
+    async function initPage() {
+      try {
+        await handleDocLoad();
+        setEnterKeyFocus(allFieldIds);
+        wireEvents();
+    } catch (err) {
+        toastr.error('Initialization failed: ' + err);
+    }
+    }
+
+    function wireEvents() {
+
+      $('#btn-save').on('click', async (e) => {
+        e.preventDefault();
+
+      if (!validateRequiredField('#NumDocNo','Doc No') ||
+            !validateRequiredField('#DtDocDate','Doc Date') ||
+            !validateRequiredField('#ddlShift','Shift Type') ||
+            !validateRequiredField('#ddlInspectBy','Inspect By') ||
+            !validateRequiredField('#ddlPlace','Place Type')) return;
+
+        try {
+          const data = await collectFormData();
+          docId ? UpdateData(data) : SaveData(data);
+        } catch (err) {
+          toastr.error("Error saving data: " + err);
+        }
+
+      });
+
+      $('#ddlDocType').on('change', () => {
+        const val = $('#ddlDocType').val();
+        if (val) GetDocid(val);
+      });
+
+      $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+        const tbody = $(this).closest('tbody');
+        if (tbody.find('tr').length > 1) {
+          $(this).closest('tr').remove();
+        } else {
+          alert('Cannot delete the first row.');
+
+        }
+      });
+
+    $(document).on('click', '.btn-add-row, .btn-add-action', function () {
+        addItemRecordRow();
+    });
+
+
+    $(document).on('change', 'select[id^="ddlLoom"]', function () {
+        const selectedLoomId = $(this).val();
+        const row = $(this).closest('tr');
+        if (selectedLoomId) {
+            fetchAndFillRowDataByLoom(selectedLoomId, row);
+        }
+    });
+
+    $(document).on('change', 'select[id^=ddlItemName]' , function(){
+            const selectedItemId = $(this).val();
+            const row = $(this).closest('tr');
+            if (selectedItemId) {
+                fetchAndFillRowDataByItem(selectedItemId, row);
+            }
+    });
+       
+
+    $(document).on('change', '#ddlPlace', function () {
+        let tbody = $('#tblLoomFabricWidthEntry tbody');
+        tbody.find('tr').each(function (index, row) {
+            let rowIndex = index + 1;
+            bindDropdownData(rowIndex);
+        });
+    });
+
+
+    }
+
+</script>
+
+<script>
+
+    function fetchAndFillRowDataByLoom(loomCode, row) {
+        $.ajax({
+            url: `/LoomFabricStrengthEntry/GetProd2List?LoomCode=${loomCode}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status && response.data.length > 0) {
+                    const data = response.data[0];
+                    row.find('input[id^="TxtLID"]').val(data.ITEM_CODE);
+                    row.find('select[id^="ddlItemName"]').val(data.ITEM_CODE).trigger('change');
+                    row.find('select[id^="ddlType"]').val(data.PTYPE_CODE).trigger('change');
+                    row.find('input[id^="TxtWidth"]').val(data.WIDTH);
+                    row.find('input[id^="TxtGram"]').val(data.GRAM);
+                    row.find('select[id^="ddlColor"]').val(data.COLOR_CODE).trigger('change');
+                    row.find('input[id^="TxtDNR"]').val(data.DNR);
+
+                } else {
+                    toastr.warning("No data found for selected loom.");
+                }
+            },
+            error: function () {
+                toastr.error("Failed to load data for selected loom.");
+            }
+        });
+    }
+
+    function fetchAndFillRowDataByItem(itemCode, row) {
+        $.ajax({
+            url: `/LoomFabricStrengthEntry/GetItemList?LoomCode=${itemCode}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status && response.data.length > 0) {
+                    const data = response.data[0];
+
+
+                    row.find('select[id^="ddlType"]').val(data.PTYPE_CODE).trigger('change');
+                    row.find('input[id^="TxtWidth"]').val(data.WIDTH);
+                    row.find('input[id^="TxtGram"]').val(data.GRAM_CODE);
+                    row.find('select[id^="ddlColor"]').val(data.COLOR_CODE).trigger('change');
+
+                } else {
+                    toastr.warning("No data found for selected loom.");
+                }
+            },
+            error: function () {
+                toastr.error("Failed to load data for selected loom.");
+            }
+        });
+    }
+
+    async function handleDocLoad() {
+            docId = getQueryParam('id');
+            readOnly = getQueryParam('readOnly');
+            if (docId) {
+                $('#ddlDocType').prop('disabled', true);
+                await GetDocData(docId, readOnly);
+
+            } else {
+                GetDocid();
+                const today = new Date();
+                const todayDate = today.getFullYear() + '-' +
+                    (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    today.getDate().toString().padStart(2, '0');
+                    $('#DtDocDate').val(todayDate);
+                  GetShiftList();
+                  GetPlaceList();
+                  GetEmployeeList();
+                  addItemRecordRow();
+            }
+    }
+
+    function SaveData(saveDt) {
+                $.ajax({
+                    url: '@Url.Action("SaveOrUpdateLoomFabricWidthEntry", "LoomFabricWidthEntry")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(saveDt),
+                    success: function (response) {
+                        if (response?.status) {
+                            toastr.success("Data Insert successfully");
+                            setTimeout(() => {
+                                window.location.href = '/LoomFabricWidthEntryList/Index';
+                            }, 1500);
+                        } else {
+                            toastr.error(response?.message || "Save failed. Please try again.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error occurred while saving. Please contact admin.");
+                    }
+                });
+    }
+
+    function UpdateData(UpdateDt) {
+        $.ajax({
+            url: '@Url.Action("SaveOrUpdateLoomFabricWidthEntry", "LoomFabricWidthEntry")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(UpdateDt),
+            dataType: 'json',
+            success: function (response) {
+                if (response?.status) {
+                   toastr.success("Data Update successfully");                   
+                    setTimeout(() => {
+                        window.location.href = '/LoomFabricWidthEntryList/Index';
+                    }, 1500);
+                } else {
+                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Data not updated: " + error);
+            }
+        });
+    }
+
+    async function fillHeaderData(headdata) {
+        if (!Array.isArray(headdata) || headdata.length === 0) {
+            console.error("Invalid or empty header data:", headdata);
+            toastr.error("No header data found to populate the form.");
+            return;
+        }
+        const data = headdata[0];
+        console.log(data);
+        $("#TxtDocId").val(data.DOC_ID ?? "");
+        $("#NumDocNo").val(data.V_NO ?? "");
+        $("#DtDocDate").val(data.V_DATE ? data.V_DATE.substring(0, 10) : "");
+        GetShiftList(data.SHIFT ?? 0);
+        GetPlaceList(data.PLACE_CODE ?? 0);
+        GetEmployeeList(data.EMP_CODE ?? 0);
+        $("#TxtRemarks").val(data.REMARKS ?? "");
+        $("#NumTotalRec").val(0);
+        // $("#TxtQcTime").val(data.QCTIME ?? "");
+        const formattedTime = convertTo24HourFormat(data.QCTIME ?? "");
+        $('#DtTime').val(formattedTime);
+    }
+    function bindDropdownValue(selector, value, text = null) {
+        const $el = $(selector);
+        const valStr = String(value ?? '');
+        if (!$el.length) {
+            console.warn(`Dropdown ${selector} not found`);
+            return;
+        }
+        const optionExists = $el.find("option").filter(function () {
+            return $(this).val() == valStr;
+        }).length > 0;
+        if (!optionExists) {
+            const displayText = text ?? valStr;
+            $el.append(new Option(displayText, valStr));
+            console.log(`Appended missing option to ${selector}: [${valStr}] ${displayText}`);
+        }
+        $el.val(valStr).trigger('change');
+    }
+
+    async function collectFormData() {
+        const getVal = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() || null : null;
+        };
+        const parseIntOrNull = (val) => {
+            const num = parseInt(val);
+            return isNaN(num) ? null : num;
+        };
+        const parseDateOrNull = (val) => {
+            const date = new Date(val);
+            return isNaN(date.getTime()) ? null : date.toISOString();
+        };
+
+        const V_DATE = parseDateOrNull(getVal("DtDocDate"));
+        const tabledt = await collectItemsDetail();
+         const DOC_ID = toNullableString(docId);
+
+        const data = {
+            V_No: getVal("NumDocNo"),
+            V_DATE: V_DATE || null,
+            VType:'LINS',
+            SHIFT: getVal("ddlShift"),
+            PLACE_CODE: parseIntOrNull(getVal("ddlPlace")),
+            EMP_CODE: parseIntOrNull(getVal("ddlInspectBy")),
+            REMARKS: getVal("TxtRemarks"),            
+            QCTIME: getTimeAsDateTimeForSql("DtTime"),
+            QC_INCHARGE: parseIntOrNull(getVal("ddlQcIncharge")),
+            CHEMIST: parseIntOrNull(getVal("ddlChemist")),
+            QC_INCHARGENAME: getVal("TxtQcInchargeName"),
+            CHEMISTNAME: getVal("TxtChemistName"),
+            SRNO: parseIntOrNull(getVal("NumTotalRec")),
+            SaveOrUpdate: (!DOC_ID || DOC_ID === "") ? "Save" : "Update",
+            Prod2QCData: tabledt || []
+        };
+
+        return data;
+    }
+
+    function getTimeAsDateTimeForSql(inputId) {
+        const timeString = document.getElementById(inputId)?.value;
+        if (!timeString) return null;
+        return `${timeString}:00`; // e.g. "1970-01-01T11:53:00"
+    }
+
+    async function collectItemsDetail() {
+        const items = [];
+
+        $('#tblLoomFabricWidthEntry tbody tr').each(function () {
+            const idx = this.id.replace('row', '');
+            const $r = $(this);
+
+            items.push({
+                SNO: parseIntSafe(idx),
+
+                ITEM_CODE: parseIntSafe($r.find(`#ddlItemName${idx}`).val()),
+                PTYPE_CODE: parseIntSafe($r.find(`#ddlType${idx}`).val()),
+                PTYPE_NAME: $r.find(`#ddlType${idx}`).val() ? $r.find(`#ddlType${idx} option:selected`).text() : null,
+                LOOM_CODE: parseIntSafe($r.find(`#ddlLoom${idx}`).val()),
+                COLOR_CODE: parseIntSafe($r.find(`#ddlColor${idx}`).val()),
+                COLOR_NAME: $r.find(`#ddlColor${idx}`).val() ? $r.find(`#ddlColor${idx} option:selected`).text() : null,
+                WIDTH: parseDecimalSafe($r.find(`#TxtWidth${idx}`).val()),
+                GRAM: parseDecimalSafe($r.find(`#TxtGram${idx}`).val()),
+                DNR: toNullableString($r.find(`#TxtDNR${idx}`).val()),
+                WARP_ELONG:null,
+                WEFT_ELONG: null,
+                WARP_MESH: null,
+                WEFT_MESH: null,
+                MESH_CODE: null,
+                REMARKS: toNullableString($r.find(`#TxtRemarks${idx}`).val()),
+                PLACE_CODE: null,
+                EMP_CODE: 0,
+                MESH: null,
+                RUNNO: null,
+                LOOM_TYPE: null,
+                MAKE_T: null,
+                RESULT1: null,
+                REMARKS1: null,
+                RESULT2: null,
+                REMARKS2: null,
+                PRKG: null,
+                WASTE: null,
+                PSIZE: null,
+                CPRDN: null,
+                PAISA_TYPE: null,
+                PAISA_SIZE: null,
+                PAISA_MTR: null,
+                PAISA_TYPE1: null,
+                PORD_TYPE: null,
+                PORD_NO: null,
+                COND1: null,
+                COND2: null,
+                SHIFT_SCH: null,
+                REPORT_FILTER: null,
+                TIME1_WIDTH: null,
+                TIME2_WIDTH: null,
+                TIME3_WIDTH: null,
+                TIME4_WIDTH: null,
+                TIME5_WIDTH: null,
+                PC_LOWMELT: null,
+                GLUE_CONTENT: null,
+                OTHERS: null,
+                YELLOWP: null,
+                BLUEP: null,
+                OTHERP: null,
+                GRADE: null,
+                YELLOW160C: null,
+                MOISTURE: null,
+                BULKDENSITY: null,
+                PH_FLAKES: null,
+                OVERSIZED: null,
+                SRNO: null,
+                SUPPLY_TYPE: null,
+                COLOR_TYPE: null
+            });
+        });
+
+        return items;
+    }
+
+    async function fillItemDetailTable(itemsData) {
+        const $tbody = $('#tblLoomFabricWidthEntry tbody');
+        $tbody.empty();
+
+        for (let index = 0; index < itemsData.length; index++) {
+            const item = itemsData[index];
+            const idx = index + 1;
+
+            addItemRecordRow();
+            await bindDropdownData(idx);
+
+            $(`#TxtLID${idx}`).val(item.LID || '');
+            $(`#TxtWidth${idx}`).val(item.WIDTH ?? '');
+            $(`#TxtGram${idx}`).val(item.GRAM ?? '');
+            $(`#TxtDNR${idx}`).val(item.DNR ?? '');
+           
+            $(`#TxtObtWidth${idx}`).val(0);
+            $(`#TxtBobMark${idx}`).val(0);
+            $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
+
+            const safeSetDropdown = (selector, value) => {
+                const $select = $(`${selector}${idx}`);
+                if ($select.find(`option[value="${value}"]`).length > 0) {
+                    $select.val(value).trigger('change');
+                }
+            };
+
+            safeSetDropdown('#ddlLoom', item.LOOM_CODE);
+            safeSetDropdown('#ddlItemName', item.ITEM_CODE);
+            safeSetDropdown('#ddlType', item.PTYPE_CODE);
+            safeSetDropdown('#ddlColor', item.COLOR_CODE);           
+        }
+    }
+
+    function GetDocTypeAsync(selectedValue) {
+          return new Promise((resolve, reject) => {
+              $.ajax({
+                  url: '@Url.Action("GetDocType", "LoomFabricStrengthEntry")',
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (response) {
+                      if (response.status) {
+                          const $dropdown = $('#ddlDocType');
+                          $dropdown.empty();
+                          $.each(response.data, function (index, item) {
+                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                          });
+
+                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                              $dropdown.val(selectedValue).trigger('change');
+                          } else {
+                              $dropdown.prop('selectedIndex', 0);
+                          }
+
+                          resolve();
+                      } else {
+                          reject("Invalid response status.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error("Document Type Load failed: " + error);
+                      reject(error);
+                  }
+              });
+          });
+    }
+
+    function GetDocid() {
+        $.ajax({
+            url: '@Url.Action("GetMaxVNo", "LoomFabricWidthEntry")',
+            type: 'GET',
+            success: function (response) {
+                if (response.status === true && response.data) {
+                    $('#NumDocNo').val(response.data.vNo || '');
+                    $('#TxtDocId').val(response.data.docId || '');
+                } else {
+                    $('#txtDocNo').val('');
+                    $('#TxtDocId').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error fetching Doc ID:', error);
+            }
+        });
+    }
+
+    function GetPlaceList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetPlaceMast", "LoomFabricStrengthEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlPlace');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Place Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Place Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Place Name Load failed", error);
+            }
+        });
+    }
+
+    function GetEmployeeList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetUserMast", "LoomFabricStrengthEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlInspectBy');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Employee Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Employee Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Employee Name Load failed", error);
+            }
+        });
+    }
+
+    function GetShiftList(selectedValue=null) {
+        $.ajax({
+            url: '@Url.Action("GetShiftList", "LoomFabricStrengthEntry")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    const $DropdownId = $('#ddlShift');
+                    $DropdownId.empty();
+                    $DropdownId.append('<option value="">- Select Shift Name -</option>');
+                    $.each(response.data, function (index, item) {
+                        $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                    });
+                    $DropdownId.select2({
+                        placeholder: "- Select -",
+                        allowClear: true
+                    });
+
+                    if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
+                        $DropdownId.val(selectedValue).trigger('change');
+                    }
+                    else {
+                        $DropdownId.val('').trigger('change');
+                    }
+
+                } else {
+                    toastr.error("Shift Name Load failed");
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Shift Name Load failed", error);
+            }
+        });
+    }
+
+    async function GetDocData(MasterTblId, readOnly) {
+        try {
+            const response = await $.ajax({
+                url: '/LoomFabricStrengthEntry/GetLoomFabricSById',
+                type: 'GET',
+                data: { id: MasterTblId }
+            });
+            if (response.status) {
+                await fillHeaderData(response.header);
+                await fillItemDetailTable(response.detail);
+                if (readOnly === 'true') {
+                    $('#btn-save, #cancelBtn').hide();
+                    disableAllFields();
+                } else {
+                    $('#btn-save, #cancelBtn').show();
+                    enableAllFields();
+                }
+            } else {
+                toastr.error('No data returned.');
+            }
+        } catch (error) {
+            toastr.error('Failed to load data.');
+            console.error(error);
+        }
+    }
+
+    function addItemRecordRow() {
+        let tbody = $('#tblLoomFabricWidthEntry tbody');
+        let rowCount = tbody.find('tr').length + 1;
+
+        let newRow = `
+        <tr class="no-border-input" id="row${rowCount}">
+            <td><input type="text" style="width:100px;" class="form-control" id="TxtLID${rowCount}" readonly/></td>
+            <td>
+                <select class="form-control" style="width:400px;" id="ddlLoom${rowCount}">
+                    <option value="">- Select Loom -</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="form-control" style="width:400px;" id="ddlItemName${rowCount}">
+                    <option value="">- Select Item Name -</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="form-control" style="width:200px;" id="ddlType${rowCount}">
+                    <option value="">- Select Type -</option>
+                </select>
+            </td>
+
+            <td><input type="number" style="width:100px;" class="form-control" id="TxtWidth${rowCount}" /></td>
+            <td><input type="number" style="width:100px;" class="form-control" id="TxtGram${rowCount}" /></td>
+
+            <td>
+                <select class="form-control" style="width:100px;" id="ddlColor${rowCount}">
+                    <option value="">- Select Color -</option>
+                </select>
+            </td>
+            <td><input type="text" class="form-control" id="TxtDNR${rowCount}" /></td>
+            <td><input type="number" class="form-control" id="TxtObtWidth${rowCount}" /></td>
+            <td><input type="number" class="form-control" id="TxtBobMark${rowCount}" /></td>
+            <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" /></td>
+            <td>
+                <i class="fa fa-plus btn-add-action btn-Itemadd-action" title="Add Row"></i>
+                <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
+            </td>
+        </tr>
+        `;
+
+        tbody.append(newRow);
+        bindDropdownData(rowCount);
+        setEnterKeyFocusOnTable?.(itemRecords, rowCount);
+    }
+       
+    function bindDropdownData(rowCount) {
+        const loomSelect = $(`#ddlLoom${rowCount}`);
+        const itemSelect = $(`#ddlItemName${rowCount}`);
+        const typeSelect = $(`#ddlType${rowCount}`);
+        const colorSelect = $(`#ddlColor${rowCount}`);
+       const placeCode=$('#ddlPlace').val();
+        console.log(placeCode);
+        const loadDropdown = (url, selectElem, defaultText, formatter) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status) {
+                            selectElem.empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: defaultText,
+                                    disabled: true,
+                                    selected: true
+                                })
+                            );
+
+                            $.each(response.data, function (i, item) {
+                                selectElem.append(formatter(item));
+                            });
+
+                            selectElem.select2({
+                                width: '100%',
+                                placeholder: defaultText,
+                                allowClear: true,
+                                minimumResultsForSearch: 0
+                            });
+
+                            resolve();
+                        } else {
+                            toastr.error(`${defaultText} load failed`);
+                            resolve();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(`Error loading ${defaultText}: ${error}`);
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+        return Promise.all([
+            loadDropdown(
+                `/LoomFabricStrengthEntry/GetLoomList?PlaceCode=${placeCode}`,
+                loomSelect,
+                "- Select Loom -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetItemList", "LoomFabricStrengthEntry")',
+                itemSelect,
+                "- Select Item -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetItemType", "LoomFabricStrengthEntry")',
+                typeSelect,
+                "- Select Type -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            ),
+            loadDropdown(
+                '@Url.Action("GetColor", "LoomFabricStrengthEntry")',
+                colorSelect,
+                "- Select Color -",
+                item => `<option value="${item.CODE}">${item.NAME}</option>`
+            )
+        ]);
+    }
+       
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    function parseIntSafe(value) {
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function parseFloatSafe(value) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+     function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split(/[-\/]/);
+        if (parts.length === 3) {
+            let [day, month, year] = parts.map(p => parseInt(p, 10));
+            if (year < 1000) year += 2000;
+            return new Date(year, month - 1, day);
+        }
+        return null;
+     }
+
+    function toNullableInt(val) {
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? null : parsed;
+    }
+
+    function toNullableDate(val) {
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? null : val;
+    }
+
+    function toNullableString(val) {
+      return val?.trim() || null;
+    }
+
+    function allowOnlyDecimal(input) {
+      input.value = input.value
+        .replace(/[^0-9.]/g, '')
+        .replace(/(\..*)\./g, '$1');
+    }
+
+    function allowOnlyNumbers(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function setFieldsEnabled(enabled) {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.disabled = !enabled;
+        }
+      });
+    }
+
+
+    function parseDecimalSafe(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? null : num;
+    }
+
+    function setEnterKeyFocus(sequence) {
+               sequence.forEach((id, index) => {
+                   $(`#${id}`).on('keypress', function (e) {
+                       if (e.key === 'Enter') {
+                           e.preventDefault();
+                           if (index + 1 < sequence.length) {
+                               $(`#${sequence[index + 1]}`).focus();
+                           }
+                       }
+                   });
+               });
+    }
+
+    function enableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+
+    function disableAllFields() {
+      allFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+      });
+    }
+
+    function setEnterKeyFocusOnTable(sequence, rowCount) {
+        sequence.forEach((id, index) => {
+            let elementId = `#${id}${rowCount}`;
+            $(document).on('keydown', elementId, function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+
+                    let nextIndex = index + 1;
+                    if (nextIndex < sequence.length) {
+                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
+                        if ($(nextElementId).length) {
+                            $(nextElementId).focus();
+                        }
+                    } else {
+
+                        addItemRecordRow();
+                        setEnterKeyFocus(sequence, rowCount + 1);
+                        $(`#${sequence[0]}${rowCount + 1}`).focus();
+                    }
+                }
+            });
+        });
+    }
+
+    function convertTo24HourFormat(timeStr) {
+        if (!timeStr) return '';
+
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
+            return timeStr.substring(0, 5);
+        }
+
+        const [time, modifier] = timeStr.split(' ');
+        if (!time || !modifier) return '';
+
+        let [hours, minutes] = time.split(':');
+
+        if (modifier.toUpperCase() === 'PM' && hours !== '12') {
+            hours = String(Number(hours) + 12);
+        } else if (modifier.toUpperCase() === 'AM' && hours === '12') {
+            hours = '00';
+        }
+
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+
+</script>
+
+
