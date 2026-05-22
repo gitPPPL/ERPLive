@@ -2,145 +2,140 @@
     ViewBag.Title = "Loom Fabric Strength Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Loom Fabric Strength Entry</legend>
-
-    <form id="LoomFabricStrengthEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <!-- First Row -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumTotalRec">Total Rec</label>
-                    <input type="number" class="form-control" id="NumTotalRec" placeholder="Enter Total Rec">
-                </div>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-tshirt"></i>
         </div>
-        <!-- Second Row -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlShift">Shift</label>
-                    <select class="form-control" id="ddlShift">
+        <div class="erppage-header-title">Loom Fabric Strength Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "LoomFabricStrengthEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="LoomFabricStrengthEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Total Rec</label>
+                    <input type="number" class="erppage-input" id="NumTotalRec" placeholder="Enter Total Rec" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shift</label>
+                    <select class="erppage-input erppage-select" id="ddlShift">
                         <option value="">Select Shift</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtPlace">Place</label>
-                    <select class="form-control" id="ddlPlace">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-select" id="ddlPlace">
                         <option value="">Select Place</option>
                     </select>
-                    @* <input type="text" class="form-control" id="TxtPlace" placeholder="Enter Place"> *@
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtInspectedBy">Inspected By</label>
-                    <select class="form-control" id="ddlInspectBy">
-                        <option value="">-select Inspector Name </option>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Inspected By</label>
+                    <select class="erppage-input erppage-select" id="ddlInspectBy">
+                        <option value="">Select Inspected By</option>
                     </select>
-                    @* <input type="text" class="form-control" id="TxtInspectedBy" placeholder="Enter Inspector Name"> *@
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-textarea" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks"></textarea>
                 </div>
             </div>
-        </div>
-        <!-- Third Row -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtRemarks">Remarks</label>
-                    <textarea class="form-control" maxlength="500" id="TxtRemarks" rows="2" placeholder="Enter Remarks"></textarea>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblFabricStrengthEntry" class="excel-table fixed-grid-table">
+                        <colgroup>
+                            <col style="display:none;">            <!-- Code -->
+                            <col style="width:90px;">              <!-- LID -->
+                            <col style="width:100px;">             <!-- Loom -->
+                            <col style="width:150px;">             <!-- Item Name -->
+                            <col style="width:180px;">             <!-- Type -->
+                            <col style="width:100px;">             <!-- Width -->
+                            <col style="width:100px;">             <!-- Gram -->
+                            <col style="width:120px;">             <!-- Color -->
+                            <col style="width:100px;">             <!-- DNR -->
+                            <col style="width:120px;">             <!-- WarpWay -->
+                            <col style="width:120px;">             <!-- WeftWay -->
+                            <col style="width:120px;">             <!-- Strength -->
+                            <col style="width:130px;">             <!-- Warp Elong -->
+                            <col style="width:130px;">             <!-- Weft Elong -->
+                            <col style="width:120px;">             <!-- Warp Mesh -->
+                            <col style="width:120px;">             <!-- Weft Mesh -->
+                            <col style="width:200px;">             <!-- Remarks -->
+                            <col style="width:100px;">             <!-- Action -->
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th style="display:none;">Code</th>
+                                <th>LID</th>
+                                <th>Loom</th>
+                                <th>Item Name</th>
+                                <th>Type</th>
+                                <th>Width</th>
+                                <th>Gram</th>
+                                <th>Color</th>
+                                <th>DNR</th>
+                                <th>WarpWay</th>
+                                <th>WeftWay</th>
+                                <th>Strength</th>
+                                <th>Warp Elong</th>
+                                <th>Weft Elong</th>
+                                <th>Warp Mesh</th>
+                                <th>Weft Mesh</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblFabricStrengthEntry" class="table-width" style="overflow-y: clip;">
-                    <colgroup>
-                        <col style="width: 80px;">
-                        <col style="width: 200px;">
-                        <col style="width: 300px;">
-                        <col style="width: 120px;">
-                        <col style="width: 80px;">
-                        <col style="width: 80px;">
-                        <col style="width: 120px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 120px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 100px;">
-                        <col style="width: 150px;">
-                        <col style="width: 100px;">
-                    </colgroup>
-                    <thead class="table-head">
-                        <tr>
-                            <th>LID</th>
-                            <th>Loom</th>
-                            <th>Item Name</th>
-                            <th>Type</th>
-                            <th>Width</th>
-                            <th>Gram</th>
-                            <th>Color</th>
-                            <th>DNR</th>
-                            <th>WarpWay</th>
-                            <th>WeftWay</th>
-                            <th>Strength</th>
-                            <th>Warp Elong</th>
-                            <th>Weft Elong</th>
-                            <th>Warp Mesh</th>
-                            <th>Weft Mesh</th>
-                            <th>Remarks</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
                     </div>
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
                     </div>
                 </div>
             </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="btn-mt">
-                    <button onclick="window.location.href='@Url.Action("Index", "LoomFabricStrengthEntryList")'" type="button" class="btn btn-draft">
-                        <i class="fa fa-list"></i>Back to list
-                    </button>
-                </div>
-            </div>
-            <div class="offset-md-5 col-md-4">
-                <div class="btn-mt button-right">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+    </div>
+</div>
+
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
 
@@ -1047,9 +1042,10 @@
             <td><input type="text" style="width:100px; class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxtWeftMesh${rowCount}" /></td>
             <td><input type="text" style="width:100px; class="form-control" maxlength="300" id="TxtRemarks${rowCount}" /></td>
 
-            <td>
-                <i class="fa fa-plus btn-add-action btn-Itemadd-action" title="Add Row"></i>
-                <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
+            <td class="action-col">
+                <button class="act-btn add btn-add-action btn-Itemadd-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+                <button class="act-btn delete btn-delete-action btn-Itemdelete-action" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                
             </td>
         </tr>
         `;

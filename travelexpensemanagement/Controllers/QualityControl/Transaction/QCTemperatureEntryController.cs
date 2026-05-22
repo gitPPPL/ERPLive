@@ -1,15 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Server;
 using System.Data;
+using System.Dynamic;
 using System.Text.Json;
+using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.QualityControl.Transaction;
+using travelexpensemanagement.Repositories;
 using travelexpensemanagement.Services;
+
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
+    [SessionAuthorize]
     public class QCTemperatureEntryController : Controller
     {
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
@@ -17,14 +25,18 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         private readonly GlobalVariableService _globalValue;
         private readonly IMasterDataService _masterDataService;
         private readonly GlobalValidationdate _globalValidationdate;
+        private readonly DropdownService _dropdownService;
 
-        public QCTemperatureEntryController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IMasterDataService masterDataService, GlobalValidationdate globalValidationdate)
+        public QCTemperatureEntryController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, 
+            GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IMasterDataService masterDataService, 
+            GlobalValidationdate globalValidationdate, DropdownService dropdownService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _masterDataService = masterDataService;
             _globalValidationdate = globalValidationdate;
+            _dropdownService = dropdownService;
         }
         public IActionResult Index()
         {
@@ -93,40 +105,60 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetEmployeeMast()
+        public JsonResult GetDropdown(string type, string VTypeId = "")
         {
-            var emplist = await _masterDataService.GetEmployeeMastAsync();
-            return Json(emplist);
+            //var gv = _globalValue.GetGlobalVariables();
+            string query = "";
+            switch (type)
+            {
+                case "Employee":
+                    query = $@"SELECT CODE, CONCAT(CODE, ' || ', NAME) as  NAME ,DEPT_CODE
+                            FROM EMP_MAST 
+                            WHERE COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode} 
+                              AND ACTIVE = 1  and RESIGN_DATE is null
+                            ORDER BY NAME
+                    ";
+                    break;
+                case "Shift":
+                    query = $@"
+                        SELECT DISTINCT SHIFT AS CODE, SHIFT AS NAME 
+                        FROM SHIFT_MAST 
+                        WHERE COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode} 
+                        ORDER BY NAME
+                    ";
+                    break;
+                case "Plant":
+                    query = $@"
+                        select CODE, NAME from ITEMDEPT_MAST where TRAN_TYPE='Production' and PLACE_TYPE IN ('Tapeline', 'Lamination') and COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} order by NAME 
+                    ";
+                    break;
+                case "Denier":
+                    query = $@"
+                            select CODE, NAME from TAPE_NFABRIC_MAST 
+                            where COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} 
+                            order by NAME 
+                    ";
+                    break;
+                case "Material":
+                    query = $@"
+                        SELECT ITEM_MAST.CODE, ITEM_MAST.NAME
+                        FROM ITEM_MAST left join ITEM_GROUP
+                        on ITEM_MAST.GROUP_CODE= ITEM_GROUP.CODE and ITEM_MAST.COMP_CODE= ITEM_GROUP.COMP_CODE
+                        WHERE ITEM_MAST.COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode} and ITEM_GROUP.SALE_GROUP= 'Raw'
+                        order by ITEM_MAST.NAME ";
+                    break;
+                case "Winder":
+                    query = $@"
+                      select CODE, NAME from TAPE_QUALITY_MAST where V_TYPE = 'WIND' and COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
+                      order by NAME
+                     ";
+                    break;
+                
+            }
+            var data = _dropdownService.GetDropdownList(query);
+            return Json(data);
         }
-
-        [HttpGet]
-        public async Task<IActionResult> GetShiftMast()
-        {
-            var shiftList = await _masterDataService.GetShiftMastAsync();
-            return Json(shiftList);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetPlantMast()
-        {
-            var plantlist = await _masterDataService.GetItemDepartmentMastForProdAsync();
-            return Json(plantlist); 
-        }
-        [HttpGet]
-        public async Task<IActionResult> GetDenierMast()
-        {
-            var denierList = await _masterDataService.GetDenierMastAsync();
-            return Json(denierList);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetMaterialList()
-        {
-            var winderlist = await _masterDataService.GetRawItemListAsync();
-            return Json(winderlist);
-        }
-
+        
         [HttpGet]
         public async Task<IActionResult> GetPlantZoneList()
         {
@@ -157,27 +189,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 var screwlist = await _dbHelper.GetJsonDataAsync(@$"
               select CODE, NAME from TAPE_QUALITY_MAST where V_TYPE = 'SPED' and COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
               order by SORT_NO
-             ");
-                return Json(new { status = true, data = screwlist });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    status = true,
-                    message = "data load failed"
-                });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> WinderList()
-        {
-            try
-            {
-              var screwlist = await _dbHelper.GetJsonDataAsync(@$"
-              select CODE, NAME from TAPE_QUALITY_MAST where V_TYPE = 'WIND' and COMP_CODE = {_globalValue.GetGlobalVariables().PubCompCode}
-              order by NAME
              ");
                 return Json(new { status = true, data = screwlist });
             }
@@ -277,7 +288,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 cmd.Parameters.AddWithValue("@Action", model.SaveOrUpdate == "Save" ? "Add" : "Edit");
                                 cmd.Parameters.AddWithValue("@UUSER", usersessionDt.PubUserId); 
                                 cmd.Parameters.AddWithValue("@WSID", Environment.MachineName ?? (object)DBNull.Value);
-                                cmd.Parameters.AddWithValue("@LIP", HttpContext.Connection.RemoteIpAddress?.ToString() ?? (object)DBNull.Value);
+                                cmd.Parameters.AddWithValue("@LIP", usersessionDt.PubLocalId);
 
                                 var errorParam = new SqlParameter("@ErrorMessage", SqlDbType.NVarChar, -1)
                                 {
@@ -376,7 +387,48 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             return table;
         }
 
+        [HttpGet]
+        public async Task<JsonResult> ImportDataByReading(int timeInterval, string type, string shift, int deptCode, string vType)
+        {
+            var gv = _globalValue.GetGlobalVariables();
+            var dataList = new List<dynamic>();
+            try
+            {
+                using(SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    using(SqlCommand cmd = new SqlCommand("sp_TapeQuality", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "ImportReadingData");
+                        cmd.Parameters.AddWithValue("@TYPE", type ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@V_TYPE", vType ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@SHIFT", shift ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DEPT_CODE", deptCode != 0 ? (object)deptCode : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@TimeInterval", timeInterval != 0 ? (object)timeInterval : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        await con.OpenAsync();
 
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var row = new ExpandoObject() as IDictionary<string, object>;
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    row.Add(reader.GetName(i), reader.IsDBNull(i) ? null : reader.GetValue(i));
+                                }
+                                dataList.Add(row);
+                            }
+                        }
+                         return Json(new { success = true, data = dataList }); 
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }
   

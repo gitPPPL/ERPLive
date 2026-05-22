@@ -1,120 +1,4 @@
 ﻿
-//let currentPage = 1;
-//let pageSize = 10;
-
-//$(document).ready(function () {
-//	GetMasterDataList();
-//	$('#searchBox').on('keyup', function () {
-//		currentPage = 1;
-//		GetMasterDataList();
-//	});
-//});
-
-//function GetMasterDataList() {
-//	const searchTerm = $('#searchBox').val().trim();
-//	$.ajax({
-//		url: '/QCTemperatureEntryList/GetQcTempratureList',
-//		type: 'GET',
-//		dataType: 'json',
-//		data: {
-//			searchTerm: searchTerm,
-//			pageNumber: currentPage,
-//			pageSize: pageSize
-//		},
-//		success: function (res) {
-//			const mastListData = res.data || [];
-//			const totalCount = res.totalCount || 0;
-//			let tbody = $('#tblQCTemperatureList tbody');
-//			tbody.empty();
-//			console.log(mastListData);
-//			if (mastListData.length === 0) {
-//				tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
-//				return;
-//			}
-//			$.each(mastListData, function (index, item) {
-//				let actions = '';
-//				if (window.permissions.canEdit) {
-//					actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}')"><i class="fa fa-edit"></i></button>`;
-//				}
-//				actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
-
-//				if (window.permissions.canDelete) {
-//					actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteQCTemperatureEntry('${item.DOC_ID}')"><i class="fa fa-trash"></i></button>`;
-//				}
-//				if (window.permissions.canDocDetail) {
-//					actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.DOC_ID}')"><i class="fa fa-file-alt"></i></button>`;
-//				}
-//				tbody.append(`
-//		    <tr>
-//			<td class="d-none code">${item.DOC_ID}</td>
-//			<td>${item.V_TYPE}</td>
-//			<td>${item.V_NO}</td>
-//			<td>${item.V_DATE}</td>
-//			<td>${item.INCH_CODE}</td>
-//			<td>${item.InchargeName}</td>
-//			<td>${item.OPERATORE_CODE}</td>
-//			<td>${item.OperatorName}</td>
-//			<td>${item.SHIFT}</td>
-//			<td>${item.V_TIME}</td>
-//			<td>${item.DENIER}</td>
-//			<td>${item.DenierName}</td>
-//			<td>${item.SUP_CODE}</td>
-//			<td>${item.SupervisorName}</td>
-//			<td>${item.Plant_Name || ''}</td>
-//			<td>${item.REMARK}</td>
-//			<td class="action-col">${actions}</td>
-//		    </tr>
-//	        `);
-
-//			});
-
-//			renderPagination(totalCount, pageSize, currentPage);
-//		},
-//		error: function (xhr) {
-//			toastr.error('Error loading Shift Data list: ' + xhr.responseText);
-//		}
-//	});
-//}
-
-//function renderPagination(total, pageSize, currentPage) {
-//	const totalPages = Math.ceil(total / pageSize);
-//	const paginationContainer = $('#tablePagination');
-//	paginationContainer.empty();
-
-//	if (total <= 0 || totalPages <= 1) return;
-
-//	let paginationHtml = '';
-
-//	if (currentPage > 1) {
-//		paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-//		paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-//	}
-
-//	let startPage = Math.max(1, currentPage - 2);
-//	let endPage = Math.min(totalPages, currentPage + 2);
-
-//	if (currentPage <= 3) endPage = Math.min(5, totalPages);
-//	if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-//	for (let i = startPage; i <= endPage; i++) {
-//		paginationHtml += `
-//					<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
-//							onclick="goToPage(${i})">${i}</button>`;
-//	}
-
-//	if (currentPage < totalPages) {
-//		paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-//		paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-//	}
-
-//	paginationContainer.html(paginationHtml);
-//}
-
-//function goToPage(page) {
-//	currentPage = page;
-//	GetMasterDataList();
-//}
-
 let qcTemperaturePagination;
 $(document).ready(function () {
 	qcTemperaturePagination = Pagination.create({
@@ -133,21 +17,20 @@ $(document).ready(function () {
 				},
 				success: function (res) {
 					params.callback({
-						data: res.lists,
+						data: res.data,
 						totalCount: res.totalCount
 					});
 				},
 				error: function (xhr) {
-					// toastr.error('Error loading data');
 					showToast('Error loading data', { type: "error" });
 				}
 			});
 		},
 		render: function (docs) {
-			const tbody = $('#tblTransitEntryList tbody');
+			const tbody = $('#tblQCTemperatureList tbody');
 			tbody.empty();
 			if (!docs.length) {
-				tbody.append(`<tr><td colspan="12" class="text-center text-muted">No list found.</td></tr>'`);
+				tbody.append(`<tr><td colspan="16" class="text-center text-muted">No list found.</td></tr>'`);
 				return;
 			}
 
@@ -165,23 +48,14 @@ $(document).ready(function () {
 					actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.DOC_ID}')"><i class="fa fa-file-alt"></i></button>`;
 				}
 				tbody.append(`
-				r>
+				<tr>
 				<td class="d-none code">${item.DOC_ID}</td>
-				<td>${item.V_TYPE}</td>
-				<td>${item.V_NO}</td>
-				<td>${item.V_DATE}</td>
-				<td>${item.INCH_CODE}</td>
-				<td>${item.InchargeName}</td>
-				<td>${item.OPERATORE_CODE}</td>
-				<td>${item.OperatorName}</td>
-				<td>${item.SHIFT}</td>
-				<td>${item.V_TIME}</td>
-				<td>${item.DENIER}</td>
-				<td>${item.DenierName}</td>
-				<td>${item.SUP_CODE}</td>
-				<td>${item.SupervisorName}</td>
-				<td>${item.Plant_Name || ''}</td>
-				<td>${item.REMARK}</td>
+				<td>${item.V_NO || ''}</td>
+				<td>${item.V_DATE || ''}</td>
+				<td>${item.SHIFT || ''}</td>
+				<td>${item.V_TIME || ''}</td>
+				<td>${item.DenierName || ''}</td>
+				<td>${item.PlantName || ''}</td>
 				<td class="action-col">${actions}</td>
 				</tr>
 				`);
@@ -228,12 +102,12 @@ function exportToExcel() {
 		})
 		.then(responseData => {
 			if (!responseData.status) {
-				toastr.error("Failed to fetch data.");
+				showToast("Failed to fetch data.", { type: "error" });
 				return;
 			}
 			const dataArray = responseData.data;
 			if (!Array.isArray(dataArray) || dataArray.length === 0) {
-				toastr.warning("No data available to export.");
+				showToast("No data available to export.", { type: "warning" })
 				return;
 			}
 
@@ -271,7 +145,7 @@ function exportToExcel() {
 		})
 		.catch(error => {
 			console.error("Export failed:", error);
-			toastr.error("Failed to export data.");
+			showToast("Failed to export data.", { type: "error" });
 		});
 }
 
@@ -321,11 +195,11 @@ function showImpExpExpensePopup(docCode) {
 			if (response.status) {
 				showDocumentPopupjQuery(response.data, docCode);
 			} else {
-				toastr.error("Failed to get document details.");
+				showToast("Failed to get document details.", { type: "error" });
 			}
 		},
 		error: function () {
-			toastr.error("An error occurred while fetching document details.");
+			showToast("An error occurred while fetching document details.", { type: "error" });
 		}
 	});
    

@@ -53,10 +53,10 @@
 		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
 	</div>
 	<div class="erppagelist-actions">
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="callGetReportAsPdf()">
 			<i class="fa fa-print"></i> Print
 		</button>
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" onclick="exportToExcel()">
 			<i class="fa fa-file-excel"></i> Export
 		</button>
 		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" onclick="mailReport()">
@@ -72,45 +72,45 @@
 		<table id="tblQCTemperatureList" class="excel-table fixed-grid-table">
 			<colgroup>
 				<col style="display:none;" /> <!-- Code -->
-				<col style="width: 120px;" /> <!-- Voucher Type -->
+				@* <col style="width: 120px;" /> <!-- Voucher Type --> *@
 				<col style="width: 120px;" /> <!-- Voucher No -->
 				<col style="width: 120px;" /> <!-- Voucher Date -->
-				<col style="width: 100px;" /> <!-- Inch_Code -->
+				@* <col style="width: 100px;" /> <!-- Inch_Code -->
 				<col style="width: 140px;" /> <!-- Inch_Name -->
 				<col style="width: 120px;" /> <!-- Operatore_Code -->
-				<col style="width: 140px;" /> <!-- Operate_Name -->
+				<col style="width: 140px;" /> <!-- Operate_Name --> *@
 				<col style="width: 80px;" />  <!-- Shift -->
 				<col style="width: 120px;" /> <!-- Voucher Time -->
-				<col style="width: 80px;" />  <!-- Denier -->
+				@* <col style="width: 80px;" />  <!-- Denier --> *@
 				<col style="width: 140px;" /> <!-- Denier Name -->
-				<col style="width: 120px;" /> <!-- Sup_Code -->
-				<col style="width: 160px;" /> <!-- Sup_Name -->
+				@* <col style="width: 120px;" /> <!-- Sup_Code --> *@
+				@* <col style="width: 160px;" /> <!-- Sup_Name --> *@
 				@* <col style="width: 120px;" /> <!-- Uuser --> *@
 				@* <col style="width: 120px;" /> <!-- Udate --> *@
 				<col style="width: 140px;" /> <!-- Plant Name -->
-				<col style="width: 180px;" /> <!-- Remark -->
+				@* <col style="width: 180px;" /> <!-- Remark --> *@
 				<col style="width: 140px;" /> <!-- Action -->
 			</colgroup>
 			<thead>
 				<tr>
 					<th style="display:none;">Code</th>
-					<th>Voucher Type</th>
-					<th>Voucher No</th>
-					<th>Voucher Date</th>
-					<th>Inch_Code</th>
-					<th>Inch_Name</th>
-					<th>Operatore_Code</th>
-					<th>Operate_Name</th>
+					@* <th>Voucher Type</th> *@
+					<th>Doc @* Voucher *@ No</th>
+					<th>Doc @* Voucher *@ Date</th>
+					@* <th>Inch_Code</th> *@
+					@* <th>Inch_Name</th> *@
+					@* <th>Operatore_Code</th> *@
+					@* <th>Operate_Name</th> *@
 					<th>Shift</th>
 					<th>Voucher Time</th>
-					<th>Denier</th>
+					@* <th>Denier</th> *@
 					<th>Denier Name</th>
-					<th>Sup_Code</th>
-					<th>Sup_Name</th>
+					@* <th>Sup_Code</th> *@
+					@* <th>Sup_Name</th> *@
 					@* <th>Uuser</th> *@
 					@* <th>Udate</th> *@
 					<th>Plant Name</th>
-					<th>Remark</th>
+					@* <th>Remark</th> *@
 					<th class="action-col">Action</th>
 				</tr>
 			</thead>
@@ -128,10 +128,10 @@
 			</select>
 		</div>
 		<div class="pagination-center">
-			<button onclick="Pagination.prev" class="page-nav" id="prevBtn">‹</button>
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
 			<div id="pageNumbers" class="page-numbers"></div>
 
-			<button onclick="Pagination.next" class="page-nav" id="nextBtn">›</button>
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
 		</div>
 		<div class="pagination-right" id="pageInfoText">
 			Results: 0 - 0 of 0

@@ -27,27 +27,17 @@ async function initPage() {
         setEnterKeyFocus(allFieldIds);
         wireEvents();
     } catch (err) {
-        toastr.error('Initialization failed: ' + err);
+        showToast('Initialization failed: ' + err, { type: "error" });
     }
 }
-
 function wireEvents() {
 
     $('#btn-save').on('click', async (e) => {
         e.preventDefault();
 
         // Validate required fields
-        if (
-            !validateRequiredField('#NumDocNo', 'Doc No') ||
-            !validateRequiredField('#DtDocDate', 'Doc Date') ||
-            !validateRequiredField('#ddlShift', 'Shift Type') ||
-            !validateRequiredField('#TmTime', 'Time') ||
-            // !validateRequiredField('#ddlDenier', 'Denier')
-            !validateRequiredField('#ddlOperator', 'Denier') ||
-            !validateRequiredField('#ddlPlantName', 'Plant Name')
-        ) return;
-        const checkValidation = await checkValidDate();
-        if (checkValidation == false) {
+        const isValid = await Validate();
+        if (!isValid) {
             return;
         }
         const rawValue = document.getElementById('DtDocDate')?.value;
@@ -61,7 +51,7 @@ function wireEvents() {
         checkExistOrNot(V_DATE, V_TIME, SHIFT, plantCode, UpdateVno)
             .done(async function (data) {
                 if (data?.status && data?.exists) {
-                    toastr.warning("Duplicate Parameters VDate,VTime,Shift and Plant Name");
+                    showToast("Duplicate Parameters VDate,VTime,Shift and Plant Name", { type: "warning" });
                     return;
                 }
 
@@ -71,11 +61,11 @@ function wireEvents() {
 
                     docId ? UpdateData(formData) : SaveData(formData);
                 } catch (err) {
-                    toastr.error("Error saving data: " + err.message);
+                    showToast("Error saving data: " + err.message, { type: "error" });
                 }
             })
             .fail(function () {
-                toastr.error("Error while checking Parameter name.");
+                showToast("Error while checking Parameter name.", { type: "error" });
             });
     });
 
@@ -114,7 +104,6 @@ async function handleDocLoad() {
     docId = getQueryParam('id');
     readOnly = getQueryParam('readOnly');
     if (docId) {
-        // $('#ddlDocType').prop('disabled', true);
         await GetDocData(docId, readOnly);
 
     } else {
@@ -124,12 +113,7 @@ async function handleDocLoad() {
             (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
             today.getDate().toString().padStart(2, '0');
         $('#DtDocDate').val(todayDate);
-        ['ddlIncharge', 'ddlSupervisor', 'ddlOperator'].forEach(id => {
-            GetEmployeeList(id);
-        });
-        GetShiftList('ddlShift');
-        GetDenierList('ddlDenier');
-        GetPlantList('ddlPlantName');
+        BindHeaderDropDown();
         fillPlanZoneTable();
         fillScrewTable();
         addWinderRecordRow();
@@ -145,20 +129,19 @@ function SaveData(saveDt) {
         data: JSON.stringify(saveDt),
         success: function (response) {
             if (response?.status) {
-                toastr.success("Data Insert successfully");
-                setTimeout(() => {
-                    window.location.href = '/QCTemperatureEntryList/Index';
-                }, 1500);
+                showToast("Data Insert successfully", { type: "success" });
+                //setTimeout(() => {
+                //    window.location.href = '/QCTemperatureEntryList/Index';
+                //}, 1500);
             } else {
-                toastr.error(response?.message || "Save failed. Please try again.");
+                showToast(response?.message || "Save failed. Please try again.", { type: "error" });
             }
         },
         error: function () {
-            toastr.error("Error occurred while saving. Please contact admin.");
+            showToast("Error occurred while saving. Please contact admin.", { type: "error" });
         }
     });
 }
-
 function UpdateData(UpdateDt) {
     $.ajax({
         url: '/QCTemperatureEntry/SaveOrUpdateQcTemperatureEntry',
@@ -168,17 +151,16 @@ function UpdateData(UpdateDt) {
         dataType: 'json',
         success: function (response) {
             if (response?.status) {
-                toastr.success("Data Update successfully");
-                // showFlashMessageByKey('update', 'success');
-                setTimeout(() => {
-                    window.location.href = '/QCTemperatureEntryList/Index';
-                }, 1500);
+                showToast("Data Update successfully", { type: "success" });
+                //setTimeout(() => {
+                //    window.location.href = '/QCTemperatureEntryList/Index';
+                //}, 1500);
             } else {
-                toastr.error("Update failed: " + (response?.message || "Unknown error."));
+                showToast("Update failed: " + (response?.message || "Unknown error."), { type: "error" });
             }
         },
         error: function (xhr, status, error) {
-            toastr.error("Data not updated: " + error);
+            showToast("Data not updated: " + error, { type: "error" });
         }
     });
 }
@@ -186,7 +168,7 @@ function UpdateData(UpdateDt) {
 async function fillHeaderData(headdata) {
     if (!Array.isArray(headdata) || headdata.length === 0) {
         console.error("Invalid or empty header data:", headdata);
-        toastr.error("No header data found to populate the form.");
+        showToast("No header data found to populate the form.", { type: "error" });
         return;
     }
     const data = headdata[0];
@@ -196,12 +178,14 @@ async function fillHeaderData(headdata) {
     $("#DtDocDate").val(data.V_DATE ? data.V_DATE.substring(0, 10) : "");
     $("#TmTime").val(data.V_TIME ? data.V_TIME.substring(0, 5) : "");
     $("#TxtRemarks").val(data.REMARK ?? "");
-    GetEmployeeList('ddlIncharge', data.INCH_CODE ?? 0);
-    GetEmployeeList('ddlOperator', data.OPERATORE_CODE ?? 0);
-    GetEmployeeList('ddlSupervisor', data.SUP_CODE ?? 0);
-    GetShiftList('ddlShift', data.SHIFT ?? "");
-    GetDenierList('ddlDenier', data.DENIER ?? 0);
-    GetPlantList('ddlPlantName', data.DEPT_CODE ?? 0);
+    BindHeaderDropDown({
+        inchargeId: data.INCH_CODE ?? 0,
+        supervisorId: data.OPERATORE_CODE ?? 0,
+        operatorId: data.SUP_CODE ?? 0,
+        shiftId: data.SHIFT ?? "",
+        denierId: data.DENIER ?? 0,
+        plantId: data.DEPT_CODE ?? 0
+    });
 }
 
 async function fillWinderData(data) {
@@ -215,12 +199,12 @@ async function fillWinderData(data) {
         const idx = index + 1;
 
         addWinderRecordRow();
-        const winderSelect = $(`#ddlWinder${idx}`);
+        const winderSelect = (`#ddlWinder${idx}`);
         await loadDropdown({
-            url: '/QCTemperatureEntry/WinderList',
+            type: 'Winder',
             selectElem: winderSelect,
             defaultText: "- Select Winder -",
-            formatter: item => `<option value="${item.CODE}">${item.NAME}</option>`
+            selectedValue: item.CODE
         });
 
         $(`#ddlWinder${idx}`).val(item.WINDER_CODE).trigger('change');
@@ -243,12 +227,12 @@ async function fillMaterialData(data) {
         const idx = index + 1;
 
         addMaterialRecordRow();
-        const materialSelect = $(`#ddlMaterial${idx}`);
+        const materialSelect = (`#ddlMaterial${idx}`);
         await loadDropdown({
-            url: '/QCTemperatureEntry/GetMaterialList',
+            type: 'Material',
             selectElem: materialSelect,
             defaultText: "- Select Material -",
-            formatter: item => `<option value="${item.CODE}">${item.NAME}</option>`
+            selectedValue: item.CODE
         });
 
         $(`#ddlMaterial${idx}`).val(item.MAT_CODE).trigger('change');
@@ -257,43 +241,7 @@ async function fillMaterialData(data) {
         $(`#TxtPercentage${idx}`).val(item.MAT_PER);
     }
 }
-async function fillItemDetailTable(itemsData) {
-    const $tbody = $('#tblFabricStrengthEntry tbody');
-    $tbody.empty();
 
-    for (let index = 0; index < itemsData.length; index++) {
-        const item = itemsData[index];
-        const idx = index + 1;
-
-        addItemRecordRow();
-        await bindDropdownData(idx);
-
-        $(`#TxtLID${idx}`).val(item.LID || '');
-        $(`#TxtWidth${idx}`).val(item.WIDTH ?? '');
-        $(`#TxtGram${idx}`).val(item.GRAM ?? '');
-        $(`#TxtDNR${idx}`).val(item.DNR ?? '');
-        $(`#TxtWarpWay${idx}`).val(item.WARP_MESH ?? '');
-        $(`#TxtWeftWay${idx}`).val(item.WEFT_MESH ?? '');
-        $(`#TxtWarpElong${idx}`).val(item.WARP_ELONG ?? '');
-        $(`#TxtWeftElong${idx}`).val(item.WEFT_ELONG ?? '');
-        $(`#TxtWarpMesh${idx}`).val(item.WARP_MESH ?? '');
-        $(`#TxtWeftMesh${idx}`).val(item.WEFT_MESH ?? '');
-        $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
-
-        const safeSetDropdown = (selector, value) => {
-            const $select = $(`${selector}${idx}`);
-            if ($select.find(`option[value="${value}"]`).length > 0) {
-                $select.val(value).trigger('change');
-            }
-        };
-
-        safeSetDropdown('#ddlLoom', item.LOOM_CODE);
-        safeSetDropdown('#ddlItemName', item.ITEM_CODE);
-        safeSetDropdown('#ddlType', item.PTYPE_CODE);
-        safeSetDropdown('#ddlColor', item.COLOR_CODE);
-        safeSetDropdown('#ddlStrength', item.MESH_CODE);
-    }
-}
 //===Collect Data For Save & Update===
 async function collectFormData() {
 
@@ -491,7 +439,7 @@ function GetDocid() {
             }
         },
         error: function (xhr, status, error) {
-            toastr.error('Error fetching Doc ID:', error);
+            showToast('Error fetching Doc ID:' + error, { type: "error" });
         }
     });
 }
@@ -511,161 +459,18 @@ async function GetDocData(MasterTblId, readOnly) {
 
             // await fillItemDetailTable(response.detail);
             if (readOnly === 'true') {
-                $('#btn-save, #cancelBtn').hide();
-                disableAllFields();
-            } else {
-                $('#btn-save, #cancelBtn').show();
-                enableAllFields();
+                setFormReadOnly();
             }
         } else {
-            toastr.error('No data returned.');
+            showToast('No data returned.', { type: "error" });
         }
     } catch (error) {
-        toastr.error('Failed to load data.');
+        showToast('Failed to load data.', { type: "error" });
         console.error(error);
     }
 }
-//===Dropdowns===
-function GetEmployeeList(dropDownId, selectedValue = null) {
-    $.ajax({
-        url: '/QCTemperatureEntry/GetEmployeeMast',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $DropdownId = $('#' + dropDownId);  // ✅ Fixed
-                $DropdownId.empty();
-                $DropdownId.append('<option value="">- Select Name -</option>');
-
-                $.each(response.data, function (index, item) {
-                    $DropdownId.append(`<option value="${item.CODE}">${item.CODE} || ${item.NAME}</option>`);
-                });
-
-                $DropdownId.select2({
-                    placeholder: "- Select -",
-                    allowClear: true
-                });
-
-                if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $DropdownId.val(selectedValue).trigger('change');
-                } else {
-                    $DropdownId.val('').trigger('change');
-                }
-
-            } else {
-                toastr.error("Name Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Name Load failed", error);
-        }
-    });
-}
-
-function GetShiftList(dropdownId, selectedValue = null) {
-    $.ajax({
-        url: '/QCTemperatureEntry/GetShiftMast',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $DropdownId = $('#' + dropdownId);
-                $DropdownId.empty();
-                $DropdownId.append('<option value="">- Select Shift Name -</option>');
-                $.each(response.data, function (index, item) {
-                    $DropdownId.append(`<option value="${item.NAME}">${item.NAME}</option>`);
-                });
-                $DropdownId.select2({
-                    placeholder: "- Select -",
-                    allowClear: true
-                });
-
-                if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $DropdownId.val(selectedValue).trigger('change');
-                }
-                else {
-                    $DropdownId.val('').trigger('change');
-                }
-
-            } else {
-                toastr.error("Shift Name Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Shift Name Load failed", error);
-        }
-    });
-}
-
-function GetDenierList(dropdownId, selectedValue = null) {
-    $.ajax({
-        url: '/QCTemperatureEntry/GetDenierMast',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $DropdownId = $('#' + dropdownId);
-                $DropdownId.empty();
-                $DropdownId.append('<option value="">- Select Denier Name -</option>');
-                $.each(response.data, function (index, item) {
-                    $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                });
-                $DropdownId.select2({
-                    placeholder: "- Select -",
-                    allowClear: true
-                });
-
-                if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $DropdownId.val(selectedValue).trigger('change');
-                }
-                else {
-                    $DropdownId.val('').trigger('change');
-                }
-
-            } else {
-                toastr.error("Denier Name Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Denier Name Load failed", error);
-        }
-    });
-}
-
-function GetPlantList(dropdownId, selectedValue = null) {
-    $.ajax({
-        url: '/QCTemperatureEntry/GetPlantMast',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $DropdownId = $('#' + dropdownId);
-                $DropdownId.empty();
-                $DropdownId.append('<option value="">- Select Plant Name -</option>');
-                $.each(response.data, function (index, item) {
-                    $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                });
-                $DropdownId.select2({
-                    placeholder: "- Select -",
-                    allowClear: true
-                });
-                if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $DropdownId.val(selectedValue).trigger('change');
-                }
-                else {
-                    $DropdownId.val('').trigger('change');
-                }
-            } else {
-                toastr.error("Plant Name Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Plant Name Load failed", error);
-        }
-    });
-}
-
-function fillPlanZoneTable(data = null) {
+//===Fill Plant Zone and Screw Table====
+function fillPlanZoneTable(data = null, isImported = false) {
     $.ajax({
         url: '/QCTemperatureEntry/GetPlantZoneList',
         type: 'GET',
@@ -679,8 +484,10 @@ function fillPlanZoneTable(data = null) {
                 const plantZoneValues = (data || []).filter(item => item.TYPE === 'ROOM');
 
                 let rowCount = 1;
-
-                response.data.forEach(function (item) {
+                const zonesToRender = isImported
+                    ? response.data.filter(pz => plantZoneValues.some(p => p.ROOM_CODE === pz.CODE))
+                    : response.data;
+                zonesToRender.forEach(function (item) {
                     // Default empty values
                     let temperature = '';
                     let remark = '';
@@ -693,37 +500,38 @@ function fillPlanZoneTable(data = null) {
                             temperature = match.TEMP_READ ?? '';
                             remark = match.TEMP_REM ?? '';
                             datetime = match.TIME_TAKEN
-                                ? new Date(match.TIME_TAKEN).toISOString().slice(0, 16)
+                                //? new Date(match.TIME_TAKEN).toISOString().slice(0, 16)
+                                ? formatDateToSqlDatetime(match.TIME_TAKEN)
                                 : '';
                         }
                     }
-
+                    //addPlantZoneRecordRow()
                     const newRow = `
                             <tr class="no-border-input" id="row${rowCount}">
                                 <td>
                                     <input type="hidden" class="form-control" id="TxtPlantZoneId${rowCount}" value="${item.CODE}" />
                                     <input type="text" class="form-control" id="TxtPlantZoneName${rowCount}" value="${item.NAME}" readonly />
                                 </td>
-                                <td><input type="text" class="form-control" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxTemperature${rowCount}" value="${temperature}" /></td>
+                                <td><input type="text" class="form-control temperature-input" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxTemperature${rowCount}" value="${temperature}" /></td>
                                 <td><input type="text" class="form-control" maxlength="100" id="TxtRemark${rowCount}" value="${remark}" /></td>
-                                <td><input type="datetime-local" class="form-control" id="TxtDateTime${rowCount}" value="${datetime}" /></td>
+                                <td><input type="datetime-local" class="form-control" id="TxtDateTime${rowCount}" value="${datetime}" disabled/></td>
                             </tr>
                         `;
-
+                    
                     tbody.append(newRow);
                     rowCount++;
                 });
+                setFocusInColumn('.temperature-input');
             } else {
-                toastr.error("Failed to load plant zones.");
+                showToast("Failed to load plant zones.", { type: "error" });
             }
         },
         error: function () {
-            toastr.error("Error while loading plant zones.");
+            showToast("Error while loading plant zones.", { type: "error" });
         }
     });
 }
-
-function fillScrewTable(data = null) {
+function fillScrewTable(data = null, isImported = false) {
     $.ajax({
         url: '/QCTemperatureEntry/GetScrewList',
         type: 'GET',
@@ -735,8 +543,10 @@ function fillScrewTable(data = null) {
                 const screwValues = (data || []).filter(item => item.TYPE === 'SPED');
 
                 let rowCount = 1;
-
-                response.data.forEach(function (item) {
+                const screwsToRender = isImported
+                    ? response.data.filter(s => screwValues.some(p => p.SPEED_CODE === s.CODE))
+                    : response.data;
+                screwsToRender.forEach(function (item) {
                     let speed = '';
                     let remark = '';
                     let datetime = '';
@@ -748,7 +558,8 @@ function fillScrewTable(data = null) {
                             speed = match.SPEED_READ ?? '';
                             remark = match.TEMP_REM ?? '';
                             datetime = match.TIME_TAKEN
-                                ? new Date(match.TIME_TAKEN).toISOString().slice(0, 16)
+                                //? new Date(match.TIME_TAKEN).toISOString().slice(0, 16)
+                                ? formatDateToSqlDatetime(match.TIME_TAKEN)
                                 : '';
                         }
                     }
@@ -759,27 +570,30 @@ function fillScrewTable(data = null) {
                                     <input type="hidden" class="form-control" id="TxtScrewId${rowCount}" value="${item.CODE}" />
                                     <input type="text" class="form-control" id="TxtScrewName${rowCount}" value="${item.NAME}" readonly />
                                 </td>
-                                <td><input type="text" class="form-control" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxSpeed${rowCount}" value="${speed}" /></td>
+                                <td><input type="text" class="form-control speed-input" maxlength="10" oninput="allowOnlyDecimal(this)" id="TxSpeed${rowCount}" value="${speed}" /></td>
                                 <td><input type="text" class="form-control" maxlength="100" id="TxtRemark1${rowCount}" value="${remark}" /></td>
-                                <td><input type="datetime-local" class="form-control" id="TxtDateTime1${rowCount}" value="${datetime}" /></td>
+                                <td><input type="datetime-local" class="form-control" id="TxtDateTime1${rowCount}" value="${datetime}" disabled/></td>
                             </tr>
                         `;
                     tbody.append(newRow);
                     rowCount++;
                 });
+                setFocusInColumn('.speed-input');
             } else {
-                toastr.error("Failed to load screws.");
+                showToast("Failed to load screws.", { type: "error" });
             }
         },
         error: function () {
-            toastr.error("Error while loading screw data.");
+            showToast("Error while loading screw data.", { type: "error" });
         }
     });
 }
 
 //===Add Rows====
+        //===WINDER===
 function addWinderRecordRow() {
     const tbody = $('#tblWinder tbody');
+    tbody.find('.btn-add-action').remove();
     const rowCount = tbody.find('tr').length + 1;
 
     const newRow = `
@@ -794,26 +608,29 @@ function addWinderRecordRow() {
                 <td><input type="text" class="form-control" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxtBreakingLoad${rowCount}" /></td>
                 <td><input type="text" class="form-control" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxtTeracityGpd${rowCount}" /></td>
                 <td><input type="text" class="form-control" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxtElongation${rowCount}" /></td>
-                <td class="action-col">                   
-                    <i class="fa fa-trash btn-delete-action btn-winderelete-action" title="Delete Row"></i>
+                <td class="action-col">   
+                    <button class="act-btn add btn-add-action btn-add-Winder-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+                    <button class="act-btn delete btn-delete-action btn-winderelete-action" title="Delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
                 </td>
             </tr>
         `;
 
     tbody.append(newRow);
 
-    const winderSelect = $(`#ddlWinder${rowCount}`);
+    const winderSelect = (`#ddlWinder${rowCount}`);
+
+    
 
     loadDropdown({
-        url: '/QCTemperatureEntry/WinderList',
+        type: 'Winder',
         selectElem: winderSelect,
-        defaultText: "- Select Winder -",
-        formatter: item => `<option value="${item.CODE}">${item.NAME}</option>`
+        defaultText: "- Select Winder -"
     });
 }
-
+        //===MATERIAL===
 function addMaterialRecordRow() {
     const tbody = $('#tblMaterial tbody');
+    tbody.find('.btn-add-action').remove();
     const rowCount = tbody.find('tr').length + 1;
 
     const newRow = `
@@ -826,66 +643,55 @@ function addMaterialRecordRow() {
                 <td><input type="text" class="form-control" maxlength="30" id="TxtLot${rowCount}" /></td>
                 <td><input type="text" class="form-control" maxlength="7" oninput="allowOnlyNumbers(this)" id="TxtNoOfBags${rowCount}" /></td>
                 <td><input type="text" class="form-control" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxtPercentage${rowCount}" /></td>
-                <td class="action-col">                    
-                    <i class="fa fa-trash btn-delete-action btn-materialdelete-action" title="Delete Row"></i>
+                <td class="action-col">   
+                    <button class="act-btn add btn-add-action btn-add-Material-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+                    <button class="act-btn delete btn-delete-action btn-materialdelete-action" title="Delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
                 </td>
             </tr>
         `;
 
     tbody.append(newRow);
 
-    const materialSelect = $(`#ddlMaterial${rowCount}`);
+    const materialSelect = (`#ddlMaterial${rowCount}`);
     loadDropdown({
-        url: '/QCTemperatureEntry/GetMaterialList',
+        type: 'Material',
         selectElem: materialSelect,
-        defaultText: "- Select Material -",
-        formatter: item => `<option value="${item.CODE}">${item.NAME}</option>`
+        defaultText: "- Select Material -"
     });
 }
-
-function loadDropdown({ url, selectElem, defaultText = "- Select -", formatter }) {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url,
-            type: 'GET',
-            dataType: 'json',
-            success: function (response) {
-                if (response.status) {
-                    selectElem.empty().append(
-                        $('<option>', {
-                            value: '',
-                            text: defaultText,
-                            disabled: true,
-                            selected: true
-                        })
-                    );
-
-                    $.each(response.data, function (i, item) {
-                        selectElem.append(formatter(item));
-                    });
-
-                    selectElem.select2({
-                        width: '100%',
-                        placeholder: defaultText,
-                        allowClear: true,
-                        minimumResultsForSearch: 0
-                    });
-
-                    resolve();
-                } else {
-                    toastr.error(`${defaultText} load failed`);
-                    resolve();
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error(`Error loading ${defaultText}: ${error}`);
-                reject(error);
-            }
-        });
-    });
+//===Add Row
+$(document).on('click', '.btn-add-Winder-action', function () {
+    addWinderRecordRow();
+});
+$(document).on('click', '.btn-add-Material-action', function () {
+    addMaterialRecordRow();
+});
+//===Header Dropdowns===
+async function BindHeaderDropDown(data = {}) {
+    await Promise.all([
+        bindDropdown('QCTemperatureEntry', 'Employee', '#ddlIncharge', '-- Select Incharge Name --', data.inchargeId || null, null, false, null, true),
+        bindDropdown('QCTemperatureEntry', 'Employee', '#ddlSupervisor', '-- Select Supervisor Name --', data.supervisorId || null, null, false, null, true),
+        bindDropdown('QCTemperatureEntry', 'Employee', '#ddlOperator', '-- Select Operator Name --', data.operatorId || null, null, false, null, true),
+        bindDropdown('QCTemperatureEntry', 'Shift', '#ddlShift', '-- Select Shift --', data.shiftId || null, null, true, null, false),
+        bindDropdown('QCTemperatureEntry', 'Denier', '#ddlDenier', '-- Select Denier --', data.denierId || null, null, false, null, true),
+        bindDropdown('QCTemperatureEntry', 'Plant', '#ddlPlantName', '-- Select Plant --', data.plantId || null, null, false, null, true)
+    ]);
+}
+//===Table dropdowns
+async function loadDropdown({ type, selectElem, defaultText = "- Select -"/*, formatter*/, selectedValue = null }) {
+    await bindDropdown('QCTemperatureEntry', type, selectElem, defaultText, selectedValue, null, false, null, true);
 }
 
-
+//===Set Readonly
+function setFormReadOnly() {
+    const form = $('#QCTemperatureEntryForm');
+    $('#btn_import').prop('disabled', true).css('pointer-events', 'none');
+    $('#btn-save, #btnWinderRecordRow, #btnMaterialRecordRow').hide();
+    $('.btn-delete-action')
+        .addClass('disabled')
+        .css('pointer-events', 'none');
+    form.addClass('erppage-readonly');
+}
 //===Validate VDate
 async function checkValidDate() {
     const data = {
@@ -912,77 +718,192 @@ async function checkValidDate() {
         return false;
     }
 }
-//========Helpers======
-
-function formatDate(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return d.toISOString().split('T')[0];
-}
-
-function parseIntSafe(value) {
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? null : parsed;
-}
-
-function parseFloatSafe(value) {
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? null : parsed;
-}
-
-function parseDate(dateStr) {
-    if (!dateStr) return null;
-    const parts = dateStr.split(/[-\/]/);
-    if (parts.length === 3) {
-        let [day, month, year] = parts.map(p => parseInt(p, 10));
-        if (year < 1000) year += 2000;
-        return new Date(year, month - 1, day);
+//===Validations===
+async function Validate() {
+    let isValid = true
+    if (
+        !validateRequiredField('#NumDocNo', 'Doc No') ||
+        !validateRequiredField('#DtDocDate', 'Doc Date') ||
+        !validateRequiredField('#ddlShift', 'Shift Type') ||
+        !validateRequiredField('#TmTime', 'Time') ||
+        // !validateRequiredField('#ddlDenier', 'Denier')
+        !validateRequiredField('#ddlOperator', 'Operator Name') ||
+        !validateRequiredField('#ddlPlantName', 'Plant Name')
+    ) {
+        isValid = false;
+        return isValid;
     }
-    return null;
+    const checkValidation = await checkValidDate();
+    if (checkValidation == false) {
+        isValid = false;
+        return isValid;
+    }
+    const isWinderValid = validateWinderTable();
+    if (!isWinderValid) {
+        isValid = false;
+        return isValid;
+    }
+    const isMaterialValid = validateMaterialTable();
+    if (!isMaterialValid) {
+        isValid = false;
+        return isValid;
+    }
+    const isPlantDuplicate = checkDuplicatePlantZones();
+    if (isPlantDuplicate) {
+        isValid = false;
+        return isValid;
+    }
+    const isSpeedDuplicate = checkDuplicateSpeedItem();
+    if (isSpeedDuplicate) {
+        isValid = false;
+        return isValid;
+    }
+    return isValid;
 }
+//===Validate Tables====
+function validateWinderTable() {
+    let isValid = true;
+    const tbody = $('#tblWinder tbody');
 
-function toNullableInt(val) {
-    const parsed = parseInt(val);
-    return isNaN(parsed) ? null : parsed;
+    tbody.find('tr').each(function () {
+        // Winder select
+        const winderSelect = $(this).find('select[id^="ddlWinder"]');
+        const winderValue = winderSelect.val();
+        if (!winderValue) {
+            setInvalid(winderSelect, "Winder name empty!");
+            isValid = false;
+        }
+    });
+
+    return isValid;
 }
+function validateMaterialTable() {
+    let isValid = true;
+    const tbody = $('#tblMaterial tbody');
 
-function toNullableDate(val) {
-    const date = new Date(val);
-    return isNaN(date.getTime()) ? null : val;
+    tbody.find('tr').each(function () {
+        // Winder select
+        const winderSelect = $(this).find('select[id^="ddlMaterial"]');
+        const winderValue = winderSelect.val();
+        if (!winderValue) {
+            setInvalid(winderSelect, "Material name empty!");
+            isValid = false;
+        }
+    });
+
+    return isValid;
 }
+//===Duplicate item 
+function checkDuplicatePlantZones() {
+    const seen = {}; // To track already seen Plant Zone Names
+    let hasDuplicate = false;
 
-function toNullableString(val) {
-    return val?.trim() || null;
+    $('#tblPlantZone tbody tr').each(function () {
+        const nameInput = $(this).find('input[id^="TxtPlantZoneName"]');
+        const name = nameInput.val()?.trim();
+
+        // Skip empty names
+        if (!name) return;
+
+        if (seen[name]) {
+            hasDuplicate = true;
+            setInvalid(nameInput, "Duplicate plant item!");
+
+        } else {
+            seen[name] = nameInput;
+        }
+    });
+
+    return hasDuplicate; // true if duplicates exist
 }
+function checkDuplicateSpeedItem() {
+    const seen = {}; // To track already seen Plant Zone Names
+    let hasDuplicate = false;
 
+    $('#tblScrew tbody tr').each(function () {
+        const nameInput = $(this).find('input[id^="TxtScrewName"]');
+        const name = nameInput.val()?.trim();
+
+        // Skip empty names
+        if (!name) return;
+
+        if (seen[name]) {
+            hasDuplicate = true;
+            setInvalid(nameInput, "Duplicate Speed item!");
+
+        } else {
+            seen[name] = nameInput;
+        }
+    });
+
+    return hasDuplicate; // true if duplicates exist
+}
+//===Temp and Speed Column Focus====
+function setFocusInColumn(selector) {
+    $(selector).on('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === 'Tab') {
+            const inputs = $(selector);
+            const index = inputs.index(this);
+
+            // Check if this is NOT the last input
+            if (index < inputs.length - 1) {
+                e.preventDefault(); // prevent default only if not last
+                const nextInput = inputs.eq(index + 1);
+                nextInput.focus();
+            }
+            // If it's the last input, do nothing and let default behavior occur
+        }
+    });
+}
+//===Import===
+$('#btn_import').on('click', function () {
+    let timeInterval = parseIntSafe($('#TxtImportInterval').val());
+    if (timeInterval <= 0) timeInterval = 180;
+    let readingCode = parseIntSafe($('#ddlSelectReading').val());
+    let type = (readingCode == 0) ? 'ROOM' :
+               (readingCode == 1) ? 'SPED' :
+               (readingCode == 2) ? 'WIND' : '';
+    let shift = $('#ddlShift').val() || '';
+    let deptCode = parseIntSafe($('#ddlPlantName').val());
+    getImportedData(timeInterval, type, shift, deptCode);
+})
+function getImportedData(timeInterval, type, shift, deptCode) {
+    $.ajax({
+        url: '/QCTemperatureEntry/ImportDataByReading',
+        type: 'GET',
+        dataType: 'JSON',
+        data: { timeInterval: timeInterval, type: type, shift: shift, deptCode: deptCode, vType: vType },
+        success: function (response) {
+            if (response?.success) {
+                if (response.data) {
+                    if (type === 'ROOM') {
+                        fillPlanZoneTable(response.data, true);
+                    }
+                    else if (type === 'SPED') {
+                        fillScrewTable(response.data, true)
+                    }
+                    else if (type === 'WIND') {
+                        fillWinderData(response.data);
+                    }
+                }
+            } else {
+            }
+        },
+        error: function () {
+            showToast("Error occurred while importing!", { type: "error" });
+        }
+    });
+}
+//========Helpers======
 function allowOnlyDecimal(input) {
     input.value = input.value
         .replace(/[^0-9.]/g, '')
         .replace(/(\..*)\./g, '$1');
 }
-
-function allowOnlyNumbers(input) {
-    input.value = input.value.replace(/[^0-9]/g, '');
-}
-
-function setFieldsEnabled(enabled) {
-    allFieldIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.disabled = !enabled;
-        }
-    });
-}
 function parseDateSafe(value) {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
 }
-
-function parseDecimalSafe(val) {
-    const num = parseFloat(val);
-    return isNaN(num) ? null : num;
-}
-
 function setEnterKeyFocus(sequence) {
     sequence.forEach((id, index) => {
         $(`#${id}`).on('keypress', function (e) {
@@ -995,45 +916,6 @@ function setEnterKeyFocus(sequence) {
         });
     });
 }
-
-function enableAllFields() {
-    allFieldIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.disabled = false;
-    });
-}
-
-function disableAllFields() {
-    allFieldIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.disabled = true;
-    });
-}
-
-function setEnterKeyFocusOnTable(sequence, rowCount) {
-    sequence.forEach((id, index) => {
-        let elementId = `#${id}${rowCount}`;
-        $(document).on('keydown', elementId, function (e) {
-            if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
-                e.preventDefault();
-
-                let nextIndex = index + 1;
-                if (nextIndex < sequence.length) {
-                    let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
-                    if ($(nextElementId).length) {
-                        $(nextElementId).focus();
-                    }
-                } else {
-
-                    addItemRecordRow();
-                    setEnterKeyFocus(sequence, rowCount + 1);
-                    $(`#${sequence[0]}${rowCount + 1}`).focus();
-                }
-            }
-        });
-    });
-}
-
 function formatDateToSqlDatetime(input) {
     if (!input) return null;
 
@@ -1050,7 +932,6 @@ function formatDateToSqlDatetime(input) {
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
-
 function formatDateToSqlDateOnly(date) {
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) return null;
 
@@ -1061,7 +942,6 @@ function formatDateToSqlDateOnly(date) {
 
     return `${year}-${month}-${day}`;
 }
-
 function getTimeAsDateTimeForSql(inputId) {
     const timeString = document.getElementById(inputId)?.value;
     if (!timeString) return null;

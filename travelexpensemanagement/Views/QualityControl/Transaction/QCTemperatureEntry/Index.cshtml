@@ -2,6 +2,7 @@
     ViewBag.Title = "QC Temperature Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
@@ -90,14 +91,14 @@
                         <label class="erppage-label">Select Reading</label>
                         <select class="erppage-input" id="ddlSelectReading">
                             <option selected disabled>Select Reading</option>
-                            <option value="temperature">Temperature</option>
-                            <option value="speed">Speed</option>
-                            <option value="winder">Winder</option>
+                            <option value="0">Temperature</option>
+                            <option value="1">Speed</option>
+                            <option value="2">Winder</option>
                         </select>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Import Interval</label>
-                        <input type="text" class="erppage-input" id="TxtImport" placeholder="Enter Import Interval (in Min)" />
+                        <input type="text" class="erppage-input" id="TxtImportInterval" placeholder="Enter Import Interval (in Min)" />
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
@@ -116,10 +117,10 @@
                     <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
                         <table id="tblPlantZone" class="excel-table fixed-grid-table">
                             <colgroup>
-                                <col style="width: 150px;">
+                                <col style="width: 115px;">
+                                <col style="width: 100px;">
+                                <col style="width: 100px;">
                                 <col style="width: 120px;">
-                                <col style="width: 200px;">
-                                <col style="width: 150px;">
                             </colgroup>
                             <thead>
                                 <tr>
@@ -137,10 +138,10 @@
                     <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
                         <table id="tblScrew" class="excel-table fixed-grid-table">
                             <colgroup>
-                                <col style="width: 150px;">
                                 <col style="width: 100px;">
-                                <col style="width: 200px;">
-                                <col style="width: 150px;">
+                                <col style="width: 80px;">
+                                <col style="width: 155px;">
+                                <col style="width: 60px;">
                             </colgroup>
                             <thead class="table-head">
                                 <tr>
@@ -161,13 +162,13 @@
                         <table id="tblWinder" class="excel-table fixed-grid-table">
                             <colgroup>
                                 <col style="display:none;">
-                                <col style="width: 100px;">
-                                <col style="width: 100px;">
-                                <col style="width: 100px;">
-                                <col style="width: 130px;">
-                                <col style="width: 130px;">
-                                <col style="width: 100px;">
-                                <col style="width: 100px;">
+                                <col style="width: 80px;">
+                                <col style="width: 60px;">
+                                <col style="width: 60px;">
+                                <col style="width: 30px;">
+                                <col style="width: 60px;">
+                                <col style="width: 60px;">
+                                <col style="width: 60px;">
                             </colgroup>
                             <thead>
                                 <tr>
@@ -175,8 +176,8 @@
                                     <th>Winder No.</th>
                                     <th>Width(Mm)</th>
                                     <th>Denier</th>
-                                    <th>Breaking Load(Kgf)</th>
-                                    <th>Tenacity (Gpd.)</th>
+                                    <th>B Load</th>
+                                    <th>Tenacity(Gpd.)</th>
                                     <th>Elongation</th>
                                     <th class="action-col">Action</th>
                                 </tr>
@@ -184,14 +185,14 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                    @* <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
                         <div class="erppage-internalaction" style="margin: 0;">
-                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" onclick="addWinderRecordRow()">
+                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" id="btnWinderRecordRow" onclick="addWinderRecordRow()">
                                 <i class="fa fa-plus"></i>
                                 <span>Add New Row</span>
                             </button>
                         </div>
-                    </div>
+                    </div> *@
                 </div>
                 <div class="erppagelist-container" style="margin:0px;">
                     <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
@@ -199,17 +200,17 @@
                             <colgroup>
                                 <col style="display:none;">
                                 <col style="width: 150px;">
-                                <col style="width: 120px;">
-                                <col style="width: 120px;">
-                                <col style="width: 100px;">
-                                <col style="width: 100px;">
+                                <col style="width: 40px;">
+                                <col style="width: 40px;">
+                                <col style="width: 40px;">
+                                <col style="width: 70px;">
                             </colgroup>
                             <thead class="table-head">
                                 <tr>
                                     <th style="display:none;">Code</th>
                                     <th>Material</th>
                                     <th>Lot No.</th>
-                                    <th>No. of Bags</th>
+                                    <th>No.of Bags</th>
                                     <th>Percent(%)</th>
                                     <th class="action-col">Action</th>
                                 </tr>
@@ -217,14 +218,14 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                    @* <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
                         <div class="erppage-internalaction" style="margin: 0;">
-                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" onclick="addMaterialRecordRow()">
+                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" id="btnMaterialRecordRow" onclick="addMaterialRecordRow()">
                                 <i class="fa fa-plus"></i>
                                 <span>Add New Row</span>
                             </button>
                         </div>
-                    </div>
+                    </div> *@
                 </div>
             </div>
 

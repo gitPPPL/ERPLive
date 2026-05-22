@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Dynamic;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using Microsoft.Data.SqlClient;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
+    [SessionAuthorize]
     public class QCTemperatureEntryListController : Controller
     {
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
@@ -39,43 +43,57 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             try
             {
                 var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", "TAPE" },
-                    {"@Action", "QcTempratureEntryList" }
-                };
+                var dataList = new List<dynamic>();
+                int totalCount = 0;
 
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetQcTempratureEntry]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
+                using (SqlConnection conn = _dbcontext.GetErpConnection())
                 {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
+                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_GetQcTempratureEntry]", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Add Parameters
+                        cmd.Parameters.AddWithValue("@COMP_CODE", UsersessionDt.PubCompCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", UsersessionDt.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", UsersessionDt.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@V_TYPE", "TAPE");
+                        cmd.Parameters.AddWithValue("@Action", "QcTempratureEntryList");
+                        cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+                        await conn.OpenAsync();
+
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                         {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "V_NO" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+                            // --- RESULT SET 1: QCTempEntryList ---
+                            while (await reader.ReadAsync())
+                            {
+                                var row = new ExpandoObject() as IDictionary<string, object>;
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    row.Add(reader.GetName(i), reader.IsDBNull(i) ? null : reader.GetValue(i));
+                                }
+                                dataList.Add(row);
+                            }
 
-                return Json(new { status = true, data = pagedList, totalCount });
+                            // --- RESULT SET 2: TotalCount ---
+                            if (await reader.NextResultAsync())
+                            {
+                                if (await reader.ReadAsync())
+                                {
+                                    totalCount = Convert.ToInt32(reader["TotalCount"]);
+                                }
+                            }
+                        }
+                    }
+                }
+                return Json(new { success = true, data = dataList, totalCount });
 
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -152,7 +170,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE",  usersession.PubBranchCode},
                     {"@V_TYPE", "TAPE" },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }

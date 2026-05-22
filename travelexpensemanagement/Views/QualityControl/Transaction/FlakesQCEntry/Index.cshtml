@@ -2,195 +2,284 @@
     ViewBag.Title = "Flakes QC Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Flakes QC Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="confirmAndGoBack()" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-cubes"></i>
         </div>
+        <div class="erppage-header-title">Flakes QC Entry</div>
     </div>
-    <form id="FlakesQCEntryForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="NumDocNo">Doc No<span class="required">*</span></label>
-                            <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="DtDocDate">Doc Date<span class="required">*</span></label>
-                            <input type="date" class="form-control " id="DtDocDate">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="ddlShift">Shift<span class="required">*</span></label>
-                            <select class="form-control" id="ddlShift">
-                                <option value="">Select Shift</option>
-                                <option value="A"> A </option>
-                                <option value="B"> B </option>
-                                <option value="C"> C </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label for="DtTime">Time<span class="required">*</span></label>
-                            <input type="time" class="form-control" id="DtTime">
-                        </div>
-                    </div>
-
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "FlakesQCEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="FlakesQCEntryForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="ddlQCIncharge">QC Incharge<span class="required">*</span></label>
-                            <select class="form-control" id="ddlQCIncharge">
-                                <option value="">Select QC Incharge</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="ddlChemist">Chemist<span class="required">*</span></label>
-                            <select class="form-control" id="ddlChemist">
-                                <option value="">Select Chemist</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="ddlInspBy">Insp. By</label>
-                            <select class="form-control" id="ddlInspBy">
-                            </select>
-
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="ddlProdPlace">Prod. Place<span class="required">*</span></label>
-                            <select class="form-control" id="ddlProdPlace">
-                            </select>
-                        </div>
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
                 </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="TxtRemarks">Remarks</label>
-                            <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="btn-mt">
-                            <button type="button" class="btn btn-primary" id="btn_Copy" data-bs-toggle="modal"><i class="fa fa-copy"></i>Copy From</button>
-                        </div>
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shift</label>
+                    <select class="erppage-input erppage-required" id="ddlShift">
+                        <option value="">Select Shift</option>
+                        <option value="A"> A </option>
+                        <option value="B"> B </option>
+                        <option value="C"> C </option>
+                    </select>
                 </div>
-                
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Time</label>
+                    <input type="time" class="erppage-redinput" id="DtTime" />
+                </div>
             </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub">
-                    <legend class="sub-legend">Print Details</legend>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtFrom">From</label>
-                                <input type="date" class="form-control" id="DtFrom">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtTo">To</label>
-                                <input type="date" class="form-control" id="DtTo">
-                            </div>
-                        </div>
-                        </div>
-                        <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="ddlItem">Item</label>
-                                <select class="form-control" id="ddlItem">
-                                    <option value="">Select Item</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="checkbox-input-mt">
-                                <input type="checkbox" id="ChkFullName" />
-                                Full Name
-                            </label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="offset-md-4 col-md-8">
-                            <div class="button-right">
-                                <button type="button" class="btn btn-primary" id="btn_summary"><i class="fa fa-print"></i>Summary</button>
-                                <button type="button" class="btn btn-primary" id="btn_detail"><i class="fa fa-print"></i>Detail</button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Incharge</label>
+                    <select class="erppage-input erppage-required" id="ddlQCIncharge">
+                        <option value="">Select QC Incharge</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Chemist</label>
+                    <select class="erppage-input erppage-required" id="ddlChemist">
+                        <option value="">Select Chemist</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Insp. By</label>
+                    <select class="erppage-input erppage-select" id="ddlInspBy">
+                        <option value="">Select Insp. By</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Prod. Place</label>
+                    <select class="erppage-input erppage-required" id="ddlProdPlace">
+                        <option value="">Select Prod. Place</option>
+                    </select>
+                </div>
             </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-textarea" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+                <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;justify-content: flex-start;">
+                    <div class="erppage-internalaction" style="margin: 0;">
+                        <button type="button" id="btn_Copy" data-bs-toggle="modal" data-bs-target="#CopyFromModal" class="erppage-btn erppage-btn-common">
+                            <i class="fa fa-copy"></i>
+                            <span>Copy From</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <fieldset class="erppage-subfieldset">
+                <legend>Print Details</legend>
+                <div class="erppage-subheader">Print Details</div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From Date</label>
+                        <input type="date" class="erppage-input" id="DtFrom">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To Date</label>
+                        <input type="date" class="erppage-input" id="DtTo">
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Item Name</label>
+                        <select class="erppage-redinput erppage-required" id="ddlItem">
+                            <option value="">Select Item Name</option>
+                        </select>
+                        <div class="erppagesmodal-checkbox-wrap">
+                            <input type="checkbox" id="chkFullName">
+                            <label>Full Name</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
+                    <div class="erppage-internalaction" style="margin: 0;">
+                        <button type="button" id="btn_summary" class="erppage-btn erppage-btn-print">
+                            <i class="fa fa-print"></i>
+                            <span>Summary</span>
+                        </button>
+                        <button type="button" id="btn_detail" class="erppage-btn erppage-btn-print">
+                            <i class="fa fa-print"></i>
+                            <span>Detail</span>
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblFlakesQCEntry" class="excel-table fixed-grid-table">
+                        <colgroup>
+                            <col style="display:none;">  <!-- Code -->
+                            <col style="width:120px;">   <!-- Item Code -->
+                            <col style="width:350px;">   <!-- Item Name -->
+                            <col style="width:200px;">   <!-- Dept -->
+                            <col style="width:140px;">   <!-- Batch No -->
+                            <col style="width:120px;">   <!-- Bag No -->
+                            <col style="width:100px;">   <!-- WB. Wt. -->
+                            <col style="width:100px;">   <!-- Gr. Wt. -->
+                            <col style="width:100px;">   <!-- Tr. Wt. -->
+                            <col style="width:100px;">   <!-- Net Wt. -->
+                            <col style="width:100px;">   <!-- HDPE -->
+                            <col style="width:120px;">   <!-- PVC/PPM -->
+                            <col style="width:130px;">   <!-- PC/Low Melt -->
+                            <col style="width:100px;">   <!-- Wrapper -->
+                            <col style="width:100px;">   <!-- Metal -->
+                            <col style="width:100px;">   <!-- Stone -->
+                            <col style="width:100px;">   <!-- Rubber -->
+                            <col style="width:100px;">   <!-- Glue -->
+                            <col style="width:100px;">   <!-- Other -->
+                            <col style="width:100px;">   <!-- Total -->
+                            <col style="width:80px;">    <!-- Grd -->
+                            <col style="width:100px;">   <!-- Yellow % -->
+                            <col style="width:100px;">   <!-- Blue % -->
+                            <col style="width:100px;">   <!-- Other % -->
+                            <col style="width:120px;">   <!-- Color Mix -->
+                            <col style="width:130px;">   <!-- Yellow 160C -->
+                            <col style="width:120px;">   <!-- Moisture -->
+                            <col style="width:140px;">   <!-- Bulk Density -->
+                            <col style="width:80px;">    <!-- PH -->
+                            <col style="width:120px;">   <!-- Over Sized -->
+                            <col style="width:200px;">   <!-- Remarks -->
+                            <col style="display:none;">  <!-- Ref Type -->
+                            <col style="display:none;">  <!-- Ref No -->
+                            <col style="display:none;">  <!-- DeptCode -->
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th style="display:none;">Code</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Dept</th>
+                                <th>Batch No</th>
+                                <th>Bag No</th>
+                                <th>WB. Wt.</th>
+                                <th>Gr. Wt.</th>
+                                <th>Tr. Wt.</th>
+                                <th>Net Wt.</th>
+                                <th>HDPE</th>
+                                <th>PVC/PPM</th>
+                                <th>PC/Low Melt</th>
+                                <th>Wrapper</th>
+                                <th>Metal</th>
+                                <th>Stone</th>
+                                <th>Rubber</th>
+                                <th>Glue</th>
+                                <th>Other</th>
+                                <th>Total</th>
+                                <th>Grd</th>
+                                <th>Yellow %</th>
+                                <th>Blue %</th>
+                                <th>Other %</th>
+                                <th>Color Mix</th>
+                                <th>Yellow 160C</th>
+                                <th>Moisture</th>
+                                <th>Bulk Density</th>
+                                <th>PH</th>
+                                <th>Over Sized</th>
+                                <th>Remarks</th>
+                                <th style="display:none;">Ref Type</th>
+                                <th style="display:none;">Ref No</th>
+                                <th style="display:none;">DeptCode</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-saves" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-
-        <!--Popup Modal-->
+        @* Modal Popup *@
         <div class="modal fade" id="CopyFromModal" tabindex="-1" aria-labelledby="CopyFromLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="CopyFromLabel">Copy From</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-4">
-                            <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                <input type="text" id="searchBoxCF" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
-                            </div>
+            <div class="modal-dialog modal-lg erppagesmodal">
+                <div class="modal-content erppagesmodal-content">
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon"><i class="fa fa-copy"></i></div>
+                            <h5 class="erppagesmodal-title" id="CopyFromLabel">Copy From</h5>
                         </div>
-                        <div class="col-lg-2">
-                            <div class="form-group">
-                                <div class="form-row">
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="erppagesmodal-body">
+                        <div class="erppagesrow erppagesmodal-topbar">
+                            <div class="erppagescol-4">
+                                <div class="erppagesmodal-group">
+                                    <input type="text" id="searchBoxCF" class="erppagesmodal-input" placeholder="Search Module..." />
+                                </div>
+                            </div>
+                            <div class="erppagescol-4 erppagesmodal-checkbox-col">
+                                <div class="erppagesmodal-checkbox-wrap">
                                     <input type="checkbox" id="chkAppendFYModal">
-                                    <label class="checkbox-label" for="chkAppendFYModal">Append</label>
+                                    <label for="chkAppendFYModal">Append</label>
+                                </div>
+                            </div>
+                            <div class="erppagescol-4">
+                                <div class="erppagesmodal-action">
+                                    <button type="button" class="erppagesmodal-btn" id="CopyData">
+                                        <i class="fa fa-copy"></i> Copy
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="btn-rightalign">
-                                <button type="button" class="btn btn-primary" id="CopyData"></i>Copy</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-body">
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblCopyFrommodal" class="table-width">
-                                    <thead class="table-head">
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblCopyFrommodal" class="excel-table fixed-grid-table">
+                                    <thead>
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" /></th>
-                                            <th> Bag No </th>
-                                            <th width="300px">Item Name</th>
+                                            <th>Bag No</th>
+                                            <th class="col-item-name">Item Name</th>
                                             <th>Prod Place</th>
                                             <th>Lot No</th>
-                                            <th>WB Qty</th>
-                                            <th>Gross Qty</th>
-                                            <th>Tare Qty</th>
-                                            <th> Qty </th>
-                                            <th>V Type</th>
-                                            <th>V No</th>
-                                            <th hidden> Item Code </th>
-                                            <th hidden> Dept code</th>
-                                            <th hidden> Dept </th>
+                                            <th>WB Quantity</th>
+                                            <th>Gross Quantity</th>
+                                            <th>Tare Quantity</th>
+                                            <th>Quantity</th>
+                                            <th>Voucher Type</th>
+                                            <th>Voucher No</th>
+                                            <th hidden>Item Code</th>
+                                            <th hidden>Dept code</th>
+                                            <th hidden>Dept</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -201,66 +290,10 @@
                 </div>
             </div>
         </div>
-        <!--Popup Modal End-->
+    </div>
+</div>
 
-        <div class="row">
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblFlakesQCEntry" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;">Code</th>
-                            <th>ICode</th>
-                            <th width="300px">Item Name</th>
-                            <th width="200px">Dept</th>
-                            <th>Batch No</th>
-                            <th >Bag No</th>
-                            <th width="60px">WB. Wt.</th>
-                            <th width="60px">Gr. Wt.</th>
-                            <th width="60px">Tr. Wt.</th>
-                            <th width="60px">Net Wt.</th>
-                            <th width="60px">HDPE</th>
-                            <th width="60px">PVC/PPM</th>
-                            <th >PC/Low Melt</th>
-                            <th width="60px">Wrapper</th>
-                            <th width="60px">Metal</th>
-                            <th width="60px">Stone</th>
-                            <th width="60px">Rubber</th>
-                            <th width="60px">Glue</th>
-                            <th width="60px">Other</th>
-                            <th width="80px">Total<span class="required">*</span></th>
-                            <th>Grd</th>
-                            <th>Yellow %</th>
-                            <th width="60px">Blue %</th>
-                            <th>Other %</th>
-                            <th>Color Mix</th>
-                            <th>Yellow 160C</th>
-                            <th>Moisture</th>
-                            <th>Bulk Density</th>
-                            <th>PH</th>
-                            <th>Over Sized</th>
-                            <th>Remarks</th>
-                            <th style="display:none;">Ref Type</th>
-                            <th style="display:none;">Ref No</th>
-                            <th style="display:none;">DeptCode</th>
-                        </tr> 
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-         
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-saves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                    <button id="btn-Cancel" onclick="confirmAndGoBack()" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+  
 
 <script>
     const $tbody = $('#tblFlakesQCEntry tbody');
