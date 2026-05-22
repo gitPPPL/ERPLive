@@ -365,30 +365,31 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             try
             {          
                 using (SqlConnection conCheck = _dbConnection.GetErpConnection())
-                using (SqlCommand cmdCheck = new SqlCommand("sp_FlakesQCEntry", conCheck))
-                {
-                    cmdCheck.CommandType = CommandType.StoredProcedure;
-                    cmdCheck.Parameters.AddWithValue("@ACTION", "CheackConditionCpyFrm");
-                    cmdCheck.Parameters.AddWithValue("@DEPT_CODE", DeptCode);
-                    cmdCheck.Parameters.AddWithValue("@SHIFT", Shifttype);
-                    cmdCheck.Parameters.AddWithValue("@v_date", v_date.Date);
-                    cmdCheck.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                    cmdCheck.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
-                    if (DeptCode == 0)
-                        cmdCheck.Parameters["@DEPT_CODE"].Value = DBNull.Value;
 
-                    DataTable dtCheck = new DataTable();
+                //using (SqlCommand cmdCheck = new SqlCommand("sp_FlakesQCEntry", conCheck))
+                //{
+                //    cmdCheck.CommandType = CommandType.StoredProcedure;
+                //    cmdCheck.Parameters.AddWithValue("@ACTION", "CheackConditionCpyFrm");
+                //    cmdCheck.Parameters.AddWithValue("@DEPT_CODE", DeptCode);
+                //    cmdCheck.Parameters.AddWithValue("@SHIFT", Shifttype);
+                //    cmdCheck.Parameters.AddWithValue("@v_date", v_date.Date);
+                //    cmdCheck.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                //    cmdCheck.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                //    if (DeptCode == 0)
+                //        cmdCheck.Parameters["@DEPT_CODE"].Value = DBNull.Value;
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmdCheck))
-                    {
-                        da.Fill(dtCheck);
-                    }
+                //    DataTable dtCheck = new DataTable();
 
-                    if (dtCheck.Rows.Count == 0)
-                    {
-                        return Json(new  { success = false, message = "Condition failed or no data found for copy form." });
-                    }
-                }
+                //    using (SqlDataAdapter da = new SqlDataAdapter(cmdCheck))
+                //    {
+                //        da.Fill(dtCheck);
+                //    }
+
+                //    if (dtCheck.Rows.Count == 0)
+                //    {
+                //        return Json(new  { success = false, message = "Condition failed or no data found for copy form." });
+                //    }
+                //}
                 // STEP 2: Fetch actual data
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {

@@ -36,8 +36,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Shift</label>
-                    <select class="erppage-input erppage-required" id="ddlShift">
-                        <option value="">Select Shift</option>
+                    <select class="erppage-input erppage-required" id="ddlShift">                 
                         <option value="A"> A </option>
                         <option value="B"> B </option>
                         <option value="C"> C </option>
@@ -88,7 +87,7 @@
                     </div>
                 </div>
             </div>
-            <fieldset class="erppage-subfieldset">
+            @* <fieldset class="erppage-subfieldset">
                 <legend>Print Details</legend>
                 <div class="erppage-subheader">Print Details</div>
                 <div class="erppage-grid4">
@@ -123,7 +122,7 @@
                         </button>
                     </div>
                 </div>
-            </fieldset>
+            </fieldset> *@
             <div class="erppagelist-container">
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblFlakesQCEntry" class="excel-table fixed-grid-table">
@@ -321,7 +320,7 @@
 
         if (!rowId) {
             GetVNo();
-              $('#DtDocDate').attr('min', LoginDate);
+             // $('#DtDocDate').attr('min', LoginDate);
             document.getElementById('DtDocDate').valueAsDate = new Date();
             document.getElementById('DtTime').value = ((d=>`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`)(new Date()));
 
@@ -499,21 +498,6 @@
 
     });
 
-     function confirmAndGoBack() {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You will be redirected to the list page.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, go back',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '@Url.Action("Index", "FlakesQCEntryList")';
-            }
-        });
-    }
 
     function generateSelect(options, selected = "") {
        return options.map(opt => `<option ${selected === opt ? 'selected' : ''}>${opt}</option>`).join('');
@@ -627,13 +611,13 @@
 
                 $('#TxtCode').val(header.doC_ID || '');
                 $('#NumDocNo').val(header.v_NO || '');
-                 $('#DtDocDate').val(formatDate(header.v_DATE) || '');
+                $('#DtDocDate').val(formatDate(header.v_DATE) || '');
                 $('#ddlShift').val(header.shift || '');
                 $('#DtTime').val(header.qctime || '');
-                $('#ddlQCIncharge').val(header.qC_INCHARGE || '');
-                $('#ddlChemist').val(header.chemist || '');
-                $('#ddlInspBy').val(header.emP_CODE || '');
-                $('#ddlProdPlace').val(header.placE_CODE || '');
+                $('#ddlQCIncharge').val(header.qC_INCHARGE || '').trigger('change');
+                $('#ddlChemist').val(header.chemist || '').trigger('change');
+                $('#ddlInspBy').val(header.emP_CODE || '').trigger('change');
+                $('#ddlProdPlace').val(header.placE_CODE || '').trigger('change');
                 $('#TxtRemarks').val(header.remarks || '');
      
                 populateTableRowsFromData(details);
@@ -687,7 +671,7 @@
         try {
             await Promise.all([
                 DDlInspBy(),
-                DDlItem(),
+               // DDlItem(),
                 DDLPordPlace(),
                 DDLChemist(),
                 DDLQCIncharge(),
@@ -699,17 +683,37 @@
             console.error("Error loading dropdowns:", error);
         }
     }
-    
+
     async function DDlInspBy() {
         try {
             const response = await fetch('/FlakesQCEntry/DDLInspBy');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+
             const data = await response.json();
+
             const ddl = $('#ddlInspBy');
+
             ddl.empty().append('<option value="">-- Select Insp. By --</option>');
+
             data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+
+                // Showing Code + Text
+                ddl.append(`
+                    <option value="${item.value}">
+                        ${item.value} - ${item.text}
+                    </option>
+                `);
             });
+
+            // Enable Search Box
+            ddl.select2({
+                placeholder: "-- Select Insp. By --",
+                allowClear: true,
+                width: '100'
+            });
+
         } catch (error) {
             console.error("Error loading Insp. By:", error);
             toastr.error('Error loading Insp. By: ' + error.message);
@@ -753,40 +757,80 @@
             toastr.error('Error loading Prod. Place: ' + error.message);
         }
     }
-    
+
     async function DDLChemist() {
         try {
             const response = await fetch('/FlakesQCEntry/DDLChemist');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+
             const data = await response.json();
+
             const ddl = $('#ddlChemist');
+
             ddl.empty().append('<option value="">-- Select Chemist --</option>');
+
             data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+
+                // Showing Code + Text
+                ddl.append(`
+                    <option value="${item.value}">
+                        ${item.value} - ${item.text}
+                    </option>
+                `);
             });
+
+            // Enable Search Box
+            ddl.select2({
+                placeholder: "-- Select Chemist --",
+                allowClear: true,
+                width: '100%'
+            });
+
         } catch (error) {
             console.error("Error loading Chemist:", error);
             toastr.error('Error loading Chemist: ' + error.message);
         }
     }
-    
+
     async function DDLQCIncharge() {
         try {
             const response = await fetch('/FlakesQCEntry/DDLQCIncharge');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+
             const data = await response.json();
+
             const ddl = $('#ddlQCIncharge');
+
             ddl.empty().append('<option value="">-- Select QC Incharge --</option>');
+
             data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+
+                // Showing Code + Text
+                ddl.append(`
+                    <option value="${item.value}">
+                        ${item.value} - ${item.text}
+                    </option>
+                `);
             });
+
+            // Enable Search Box
+            ddl.select2({
+                placeholder: "-- Select QC Incharge --",
+                allowClear: true,
+                width: '100%'
+            });
+
         } catch (error) {
             console.error("Error loading QC Incharge:", error);
             toastr.error('Error loading QC Incharge: ' + error.message);
         }
     }
 
-        function fetchData(deptCode, shiftType, vDate) {
+    function fetchData(deptCode, shiftType, vDate) {
 
         const $tbody = $('#tblCopyFrommodal tbody');
         $tbody.empty();
@@ -810,8 +854,9 @@
 
                 console.log("response", response);
 
-                if (!response || response.success === false) {
-                    toastr.info(response?.message || 'No data found');
+                if (response.success === false) {
+                       toastr.info(  `No Bags are Pending for QC of Date: ${vDate}, Shift: ${shiftType}` );
+
                     return;
                 }
 
@@ -854,10 +899,7 @@
                     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
                     modal.show();
 
-                // } else {
-
-                    toastr.info(  `No Bags are Pending for QC of Date: ${vDate}, Shift: ${shiftType}` );
-                }
+                 } 
             },
 
             error: function (xhr, status, error) {
@@ -900,56 +942,259 @@
     }
 
     function addRow(data = {}) {
+
         $tbody.find('.btn-add-action').remove();
+
         const cells = [
+
             `<td style="display:none;">${data.code || ''}</td>`,
-            `<td><input type="text" class="form-control ITEM_CODE" value="${data.iCode || ''}" readonly/></td>`,
+
+            `<td>  <input type="text"
+                       class="form-control ITEM_CODE"
+                       value="${data.iCode || ''}"
+                       readonly
+                       style="width:200px;background-color:#dbeafe;" />
+            </td>`,
+
             `<td>
-                <select class="form-control item-name-select" style="width:300px;">
+                <select class="form-control item-name-select" disabled
+                        style="width:300px;background-color:#dbeafe;">
                     <option value="">--Select--</option>
                     ${itemNameOptions}
                 </select>
             </td>`,
+
             `<td style="width:100px">
-                <input type="text" class="form-control ddlItem" value="${data.dept || ''}" readonly style="width: 200px;" />
+                <input type="text"
+                       class="form-control ddlItem" 
+                       value="${data.dept || ''}"
+                       readonly
+                       style="width:200px;background-color:#dbeafe;" />
             </td>`,
-            `<td><input type="text" class="form-control BatchNo" value="${data.batchNo || ''}" readonly/></td>`,
-            `<td><input type="text" class="form-control bagNo" value="${data.bagNo || ''}" readonly/></td>`,
-            `<td><input type="number" class="form-control wbWt" value="${data.wbWt || ''}" readonly style="width: 60px;"/></td>`,
-            `<td><input type="number" class="form-control grWt" value="${data.grWt || ''}" readonly style="width: 60px;"/></td>`,
-            `<td><input type="number" class="form-control trWt" value="${data.trWt || ''}" readonly style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control NET_WT" value="${data.netWt || ''}" readonly style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control HD" value="${data.hdpe || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control DNR" value="${data.pvcPpm || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control PC_LOWMELT" value="${data.pcLowMelt || ''}" /></td>`,
-            `<td><input type="number" class="form-control CPRDN" value="${data.wrapper || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control TIME1_WIDTH" value="${data.metal || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control TIME2_WIDTH" value="${data.stone || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control TIME3_WIDTH" value="${data.rubber || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control GLUE_CONTENT" value="${data.glue || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control OTHERS" value="${data.other || ''}" style="width: 60px;" /></td>`,
-             `<td><input type="number" class="form-control TIME4_WIDTH" value="${data.total}"  readonly style="width: 80px;" /></td>`,
-            `<td><input type="text" class="form-control GRADE" value="${data.grd || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control YELLOWP" value="${data.yellow || ''}" /></td>`,
-            `<td><input type="number" class="form-control BLUEP" value="${data.blue || ''}" style="width: 60px;" /></td>`,
-            `<td><input type="number" class="form-control OTHERP" value="${data.otherPercent || ''}" /></td>`,
-            `<td><input type="text" class="form-control COLOR_NAME" value="${data.colorMix || ''}" /></td>`,
-            `<td><input type="number" class="form-control YELLOW160C" value="${data.yellow160c || ''}" /></td>`,
-            `<td><input type="number" class="form-control MOISTURE" value="${data.moisture || ''}" /></td>`,
-            `<td><input type="number" class="form-control BULKDENSITY" value="${data.bulkDensity || ''}" /></td>`,
-            `<td><input type="number" class="form-control PH_FLAKES" value="${data.ph || ''}" /></td>`,
-            `<td><input type="number" class="form-control OVERSIZED" value="${data.overSized || ''}" /></td>`,
-            `<td><input type="text" class="form-control Remarks" value="${data.remarks || ''}" /></td>`,
-            `<td style="display:none;"><input type="text" class="form-control Pord_Type" value="${data.refType || ''}" /></td>`,
-            `<td style="display:none;"><input type="text" class="form-control REF_NO" value="${data.refNo || ''}" /></td>`,
-            `<td style="display:none;"><input type="text" class="form-control DEPT_CODE" value="${data.deptCode || ''}" /></td>`
+
+            `<td>
+                <input type="text"
+                       class="form-control BatchNo"
+                       value="${data.batchNo || ''}"
+                       readonly
+                       style="width:60px;background-color:#dbeafe;" />
+            </td>`,
+
+            `<td>
+                <input type="text"
+                       class="form-control bagNo"
+                       value="${data.bagNo || ''}"
+                       readonly
+                       style="width:60px;background-color:#dbeafe;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control wbWt"
+                       value="${data.wbWt || ''}"
+                       readonly
+                       style="width:60px;background-color:#dbeafe;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control grWt"
+                       value="${data.grWt || ''}"
+                       readonly
+                       style="width:60px;background-color:#dbeafe;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control trWt"
+                       value="${data.trWt || ''}"
+                       readonly
+                       style="width:60px;background-color:#dbeafe;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control NET_WT"
+                       value="${data.netWt || ''}"
+                       readonly
+                       style="width:60px;background-color:#dbeafe;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control HD"
+                       value="${data.hdpe || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control DNR"
+                       value="${data.pvcPpm || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control PC_LOWMELT"
+                       value="${data.pcLowMelt || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control CPRDN"
+                       value="${data.wrapper || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control TIME1_WIDTH"
+                       value="${data.metal || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control TIME2_WIDTH"
+                       value="${data.stone || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control TIME3_WIDTH"
+                       value="${data.rubber || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control GLUE_CONTENT"
+                       value="${data.glue || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control OTHERS"
+                       value="${data.other || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control TIME4_WIDTH"
+                       value="${data.total || ''}"
+                       readonly
+                       style="width:80px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="text"
+                       class="form-control GRADE"
+                       value="${data.grd || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control YELLOWP"
+                       value="${data.yellow || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control BLUEP"
+                       value="${data.blue || ''}"
+                       style="width:60px;background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control OTHERP"
+                       value="${data.otherPercent || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="text"
+                       class="form-control COLOR_NAME"
+                       value="${data.colorMix || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control YELLOW160C"
+                       value="${data.yellow160c || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control MOISTURE"
+                       value="${data.moisture || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control BULKDENSITY"
+                       value="${data.bulkDensity || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control PH_FLAKES"
+                       value="${data.ph || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="number"
+                       class="form-control OVERSIZED"
+                       value="${data.overSized || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td>
+                <input type="text"
+                       class="form-control REMARKS"
+                       value="${data.remarks || ''}"
+                       style="background-color:#d4edda;" />
+            </td>`,
+
+            `<td style="display:none;">
+                <input type="text"
+                       class="form-control Pord_Type"
+                       value="${data.refType || ''}" />
+            </td>`,
+
+            `<td style="display:none;">
+                <input type="text"
+                       class="form-control REF_NO"
+                       value="${data.refNo || ''}" />
+            </td>`,
+
+            `<td style="display:none;">
+                <input type="text"
+                       class="form-control DEPT_CODE"
+                       value="${data.deptCode || ''}" />
+            </td>`
         ];
 
         const row = `<tr class="no-border-input">${cells.join('')}</tr>`;
+
         $tbody.append(row);
 
         if (data.itemName) {
-            $tbody.find('tr:last .item-name-select').val(data.itemName);
+            $tbody.find('tr:last .item-name-select')
+                  .val(data.itemName)
+                  .trigger('change');
         }
     }
 
@@ -962,41 +1207,41 @@
                 `<td style="display:none;">${data.code}</td>`,
                 `<td><input type="text" class="form-control ITEM_CODE" value="${data.iCode}" readonly /></td>`,
                
-                `<td><select class="form-control item-name-select" style="width:300px;">
+                `<td><select class="form-control item-name-select" style="width:300px; background-color:#dbeafe; disabled">
                     <option value="">--Select--</option>
                     ${itemNameOptions}
                 </select></td>`,
-                 `<td><input type="text" class="form-control ddlItem" value="${data.placeName}" readonly style="width: 200px;" /></td>`,
-                `<td><input type="text" class="form-control BatchNo" value="${data.batchNo}" readonly /></td>`,
-                `<td><input type="text" class="form-control bagNo" value="${data.bagNo}" readonly /></td>`,
-                `<td><input type="number" class="form-control wbWt" value="${data.wbWt}" readonly style="width: 60px;" /></td>`,
-                `<td><input type="number" class="form-control grWt" value="${data.grWt}" readonly style="width: 60px;" /></td>`,
-                `<td><input type="number" class="form-control trWt" value="${data.trWt}" readonly style="width: 60px;" /></td>`,
-                `<td><input type="number" class="form-control NET_WT" value="${data.netWt}" readonly  style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control HD" value="${data.hdpe}" style="width: 60px;" /></td>`,
-                `<td><input type="number" class="form-control DNR" value="${data.pvcPpm}"  style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control PC_LOWMELT" value="${data.pcLowMelt}" /></td>`,
-                `<td><input type="number" class="form-control CPRDN" value="${data.wrapper}" style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control TIME1_WIDTH" value="${data.metal}" style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control TIME2_WIDTH" value="${data.stone}" style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control TIME3_WIDTH" value="${data.rubber}" style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control GLUE_CONTENT" value="${data.glue}" style="width: 60px;"/></td>`,
-                `<td><input type="number" class="form-control OTHERS" value="${data.other}" style="width: 60px;"/></td>`,
-               `<td><input type="number" class="form-control TIME4_WIDTH" value="${data.total}"   readonly style="width: 80px;"    /></td>`,
-               `<td><input type="text" class="form-control GRADE" value="${data.grd}"  /></td>`,
-                `<td><input type="number" class="form-control YELLOWP" value="${data.yellow}" /></td>`,
-                `<td><input type="number" class="form-control BLUEP" value="${data.blue}" /></td>`,
-                `<td><input type="number" class="form-control OTHERP" value="${data.otherPercent}" /></td>`,
-                `<td><input type="text" class="form-control COLOR_NAME" value="${data.colorMix}" /></td>`,
-                `<td><input type="number" class="form-control YELLOW160C" value="${data.yellow160c}" /></td>`,
-                `<td><input type="number" class="form-control MOISTURE" value="${data.moisture}" /></td>`,
-                `<td><input type="number" class="form-control BULKDENSITY" value="${data.bulkDensity}" /></td>`,
-                `<td><input type="number" class="form-control PH_FLAKES" value="${data.ph}" style="width: 60px;" /></td>`,
-                `<td><input type="number" class="form-control OVERSIZED" value="${data.overSized}" /></td>`,
-                `<td><input type="text" class="form-control Remarks" value="${data.remarks}" /></td>`,
-                `<td style="display:none;"><input type="text" class="form-control Pord_Type" value="${data.refType}" readonly /></td>`,
-                `<td style="display:none;"><input type="text" class="form-control REF_NO" value="${data.refNo}" readonly /></td>`,
-                `<td style="display:none;"><input type="text" class="form-control DEPT_CODE" value="${data.placeCode}" readonly /></td>`
+                 `<td><input type="text" class="form-control ddlItem" value="${data.placeName}" readonly style="width: 200px; background-color:#dbeafe;" /></td>`,
+                `<td><input type="text" class="form-control BatchNo" value="${data.batchNo}" readonly style= "background-color:#dbeafe;" /></td>`,
+                `<td><input type="text" class="form-control bagNo" value="${data.bagNo}" readonly style= "background-color:#dbeafe;" /></td>`,
+                `<td><input type="number" class="form-control wbWt" value="${data.wbWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
+                `<td><input type="number" class="form-control grWt" value="${data.grWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
+                `<td><input type="number" class="form-control trWt" value="${data.trWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
+                `<td><input type="number" class="form-control NET_WT" value="${data.netWt}" readonly  style="width: 60px;background-color:#dbeafe;"/></td>`,
+                `<td><input type="number" class="form-control HD" value="${data.hdpe}" style="width: 60px;background-color:#d4edda;" /></td>`,
+                `<td><input type="number" class="form-control DNR" value="${data.pvcPpm}"  style="width: 60px;background-color:#d4edda;"/></td>`,
+                `<td><input type="number" class="form-control PC_LOWMELT" value="${data.pcLowMelt}" style="background-color:#d4edda;" /></td>`,
+                `<td><input type="number" class="form-control CPRDN" value="${data.wrapper}" style="width: 60px;background-color:#d4edda;"/></td>`,
+                `<td><input type="number" class="form-control TIME1_WIDTH" value="${data.metal}" style="width: 60px;background-color:#d4edda;"/></td>`,
+                `<td><input type="number" class="form-control TIME2_WIDTH" value="${data.stone}" style="width: 60px;background-color:#d4edda;"/></td>`,
+                `<td><input type="number" class="form-control TIME3_WIDTH" value="${data.rubber}" style="width: 60px;background-color:#d4edda;"/></td>`,
+                `<td><input type="number" class="form-control GLUE_CONTENT" value="${data.glue}" style="width: 60px;background-color:#d4edda;"/></td>`,
+                `<td><input type="number" class="form-control OTHERS" value="${data.other}" style="width: 60px;background-color:#d4edda;"/></td>`,
+               `<td><input type="number" class="form-control TIME4_WIDTH" value="${data.total}"   readonly style="width: 80px;background-color:#d4edda;"    /></td>`,
+               `<td><input type="text" class="form-control GRADE" value="${data.grd}" style="background-color:#d4edda;"  /></td>`,
+                `<td><input type="number" class="form-control YELLOWP" value="${data.yellow}" style="background-color:#d4edda;"   /></td>`,
+                `<td><input type="number" class="form-control BLUEP" value="${data.blue}" style="background-color:#d4edda;"  /></td>`,
+                `<td><input type="number" class="form-control OTHERP" value="${data.otherPercent}" style="background-color:#d4edda;"  /></td>`,
+                `<td><input type="text" class="form-control COLOR_NAME" value="${data.colorMix}" style="background-color:#d4edda;"  /></td>`,
+                `<td><input type="number" class="form-control YELLOW160C" value="${data.yellow160c}" style="background-color:#d4edda;" /></td>`,
+                `<td><input type="number" class="form-control MOISTURE" value="${data.moisture}"  style="background-color:#d4edda;" /></td>`,
+                `<td><input type="number" class="form-control BULKDENSITY" value="${data.bulkDensity}"  style="background-color:#d4edda;" /></td>`,
+                `<td><input type="number" class="form-control PH_FLAKES" value="${data.ph}" style="background-color:#d4edda;" /></td>`,
+                `<td><input type="number" class="form-control OVERSIZED" value="${data.overSized}" style="background-color:#d4edda;" /></td>`,
+                `<td><input type="text" class="form-control Remarks" value="${data.remarks}" style="background-color:#d4edda;" /></td>`,
+                `<td style="display:none;"><input type="text" class="form-control Pord_Type" value="${data.refType}" readonly  style="background-color:#d4edda;"/></td>`,
+                `<td style="display:none;"><input type="text" class="form-control REF_NO" value="${data.refNo}" readonly style="background-color:#d4edda;" /></td>`,
+                `<td style="display:none;"><input type="text" class="form-control DEPT_CODE" value="${data.placeCode}" readonly style="background-color:#d4edda;" /></td>`
             ];
 
             const row = `<tr class="no-border-input">${cells.join('')}</tr>`;
@@ -1193,7 +1438,7 @@
 
     }
 
-        function handleBack(redirectUrl, isReadOnly = false) {
+    function handleBack(redirectUrl, isReadOnly = false) {
 
         if (isReadOnly) {
             window.location.href = redirectUrl;
@@ -1215,9 +1460,6 @@
             }
         });
     }
-
-
-
 
 </script>
 
