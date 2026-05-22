@@ -57,6 +57,33 @@
 /* Body */
 .erppagesmodal-body {
     padding: 16px;
+    max-height: 85vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+    /* Chrome, Edge, Safari */
+    .erppagesmodal-body::-webkit-scrollbar {
+        width: 6px; /* thin scrollbar */
+    }
+
+    .erppagesmodal-body::-webkit-scrollbar-track {
+        background: transparent; /* no big gray background */
+    }
+
+    .erppagesmodal-body::-webkit-scrollbar-thumb {
+        background: #bdbdbd;
+        border-radius: 10px;
+    }
+
+        .erppagesmodal-body::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+/* Firefox */
+.erppagesmodal-body {
+    scrollbar-width: thin;
+    scrollbar-color: #bdbdbd transparent;
 }
 
 /* Fieldset */
@@ -153,6 +180,29 @@
         transform: translateY(-1px);
         box-shadow: 0 6px 14px rgba(47,125,50,0.25);
     }
+
+/* Top bar spacing */
+.erppagesmodal-topbar {
+    margin-bottom: 10px;
+}
+
+/* Center checkbox vertically */
+.erppagesmodal-checkbox-col {
+    display: flex;
+    align-items: center;
+}
+
+/* Checkbox alignment */
+.erppagesmodal-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Specific column width (instead of inline) */
+.col-item-name {
+    width: 300px;
+}
 
 /* Responsive */
 @media(max-width:768px) {

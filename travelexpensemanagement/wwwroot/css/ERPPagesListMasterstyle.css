@@ -238,24 +238,15 @@
     border-radius: 6px;
 }
 
-/* WRAPPER */
-.excel-wrapper {
-    width: 100%;
-    overflow: auto;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
+
 
 /* TABLE */
 .excel-table {
     position: relative;
-    table-layout: fixed;
-    border-collapse: collapse;
     background: #fff;
     border-radius: 8px;
     /* IMPORTANT FIX */
     overflow: visible; /* 🔥 change this */
-    width: max-content;
     min-width: 100%;
 }
 /* ACTION BAR */
@@ -309,7 +300,40 @@
     width: 120px;
     text-align: center;
 }
+/* ONLY THIS TABLE */
+.table-row-layout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 10px; /* vertical gap between rows */
+}
 
+    /* each table takes equal width */
+    .table-row-layout .erppagelist-container {
+        flex: 1;
+        min-width: 0;
+    }
+.special-6x6-table {
+    height: 175px; /* fixed height */
+    overflow-y: auto; /* vertical scroll */
+   
+}
+
+    /* Sticky Header ONLY here */
+    .special-6x6-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(135deg, #232323, #0f0f0f);
+    }
+
+    /* Optional: fixed equal columns */
+    .special-6x6-table td,
+    .special-6x6-table th {
+        width: auto;
+        min-width: 0;
+        max-width: none;
+    }
 
 
 /* ACTION BUTTONS */
@@ -382,7 +406,7 @@
 .fixed-grid-table {
     table-layout: fixed !important;
     /* REMOVE HARD WIDTH */
-    width: auto !important; /* 🔥 change this */
+    width: max-content !important; /* 🔥 change this */
 
     border-collapse: collapse !important;
     border-spacing: 0;
@@ -420,8 +444,6 @@
 
 /* Wrapper scroll */
 .fixed-grid-wrapper {
-    width: 100%;
-    overflow-x: auto;
     position: relative;
 }
 /* TOASTER ITEM */
@@ -480,7 +502,7 @@ th {
 
 /* HEADER ABOVE EVERYTHING */
 .fixed-grid-table th.action-col {
-    z-index: 11;
+    z-index: 999;
     background: linear-gradient(135deg, #232323, #0f0f0f);
 }
 
@@ -502,6 +524,9 @@ th {
     width: 100%;
     min-width: 100%;
     overflow-x: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0; /* remove padding inside wrapper */
 }
 /*Tooltip*/
 .tooltip-btn {
@@ -533,6 +558,8 @@ th {
 /* Improve scroll behavior */
 .erppagelist-container::-webkit-scrollbar,
 .excel-wrapper::-webkit-scrollbar {
+    width: 6px; /* vertical scrollbar width */
+
     height: 6px;
 }
 
@@ -574,6 +601,30 @@ th {
         background: #fff;
         color: #218838;
         border: 1px solid #218838;
+    }
+
+
+/* Center the Action column header and cell content */
+.fixed-grid-table th.action-col,
+.fixed-grid-table td.action-col {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Make the TD a flex container so buttons are centered */
+.fixed-grid-table td.action-col {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px;
+}
+
+    /* Remove default button margins */
+    .fixed-grid-table td.action-col .act-btn {
+        margin: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 /*Excel table end*/
 

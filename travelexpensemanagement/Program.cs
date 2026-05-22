@@ -10,9 +10,11 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.QualityControl;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge;
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge;
 using travelexpensemanagement.Services;
 
@@ -36,6 +38,8 @@ builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 builder.Services.AddScoped<IInHouseWeighbridgeEntryRepository, InHouseWeighbridgeEntryRepository>();
+builder.Services.AddScoped<IFlakesQCEntryRepository, FlakesQCEntryRepository>();
+builder.Services.AddScoped<IFlakesQCEntryListRepository, FlakesQCEntryListRepository>();
 
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
