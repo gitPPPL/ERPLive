@@ -757,29 +757,22 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             try
             {
-
                 var global = _globalVariableService.GetGlobalVariables();
 
                 using (var conn = _dbConnection.GetErpConnection())
                 {
                     conn.Open();
 
-                    string sql = @"SELECT client_id , rc_number , registration_date , owner_name , father_name ,present_address,permanent_address,mobile_number,maker_description,maker_model,
-                    vehicle_category ,vehicle_chasi_number , vehicle_engine_number ,body_type,fuel_type,color ,norms_type ,fit_up_to ,financer ,
-                    financed ,insurance_company ,insurance_policy_number , insurance_upto ,manufacturing_date ,manufacturing_date_formatted ,registered_at 
-                    ,less_info ,tax_upto ,tax_paid_upto , cubic_capacity ,vehicle_gross_weight,no_cylinders,seat_capacity,sleeper_capacity,
-                    standing_capacity,wheelbase,unladen_weight ,vehicle_category,
-                    vehicle_category_description,pucc_number,pucc_upto,permit_number,permit_issue_date,permit_valid_from,permit_valid_upto,
-                    permit_type,national_permit_number,national_permit_upto ,national_permit_issued_by ,non_use_status,non_use_from, non_use_to,
-                    blacklist_status,noc_details,owner_number,rc_status,masked_name,challan_details  FROM GATE_VAHAN
-                    WHERE COMP_CODE = @CompCode     AND YEAR_CODE = @YearCode    AND V_NO = @VNo     AND V_TYPE = @VType";
-
-                    using (var cmd = new SqlCommand(sql, conn))
+                    using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                     {
-                        cmd.Parameters.AddWithValue("@CompCode", global.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YearCode", global.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@VNo", v_no);
-                        cmd.Parameters.AddWithValue("@VType", v_type);
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@V_NO", v_no);
+                        cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                        cmd.Parameters.AddWithValue("@Action", "GetVehicledetail");
+
 
                         using (var reader = cmd.ExecuteReader())
                         {
@@ -861,7 +854,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = er.Message });
             }
         }
-
         [HttpGet]
         public async Task<JsonResult> GetVehcleFastaginfocall([FromQuery] string rc_number, string VType, int VNo)
         {
@@ -879,7 +871,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = "Unexpected error", details = ex.Message });
             }
         }
-      
+
         public JsonResult GetFasttagdetail(int v_no, string v_type)
         {
             try
@@ -890,27 +882,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 {
                     conn.Open();
 
-                    string sql = @"SELECT ClientId, RcNumber, BankName, TagId, Status,
-                           LaneDirection, TransactionDateTime, SeqNo,
-                           TollPlazaGeoCode, TollPlazaName, VehicleType
-                           FROM GATE_FASTAG
-                           WHERE COMP_CODE = @CompCode
-                           AND YEAR_CODE = @YearCode
-                           AND V_NO = @VNo
-                           AND V_TYPE = @VType";
-
-                    using (var cmd = new SqlCommand(sql, conn))
+                    using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                     {
-                        cmd.Parameters.AddWithValue("@CompCode", global.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YearCode", global.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@VNo", v_no);
-                        cmd.Parameters.AddWithValue("@VType", v_type);
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@V_NO", v_no);
+                        cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                        cmd.Parameters.AddWithValue("@Action", "GETFASTTAGDETAIL");
 
                         using (var reader = cmd.ExecuteReader())
                         {
                             var list = new List<object>();
 
-                            while (reader.Read()) // 👈 loop for multiple rows
+                            while (reader.Read())
                             {
                                 var result = new
                                 {
@@ -943,7 +929,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new { error = er.Message });
             }
         }
-  
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
         {
@@ -1005,9 +990,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                var parameters = new Dictionary<string, object> { { "@Type", "v_type" } };
-                var data = _dropdownService.GetMultipleDropdownList("sp_GetDropdownData", CommandType.StoredProcedure, parameters);
-                return Json(data);
+                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateInward') order by Name ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);        
             }
         }
         public JsonResult DDlParty()

@@ -218,30 +218,23 @@ namespace travelexpensemanagement.Common.Globalvariable
 
             return newV_NO;
         }
-
         private async Task<string> AuthenticateEWayBillAsync()
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
+            var GlobalVaraible = _globalVariableService.GetGlobalVariables();
+            var LoadGeneralSetting = await _globalVariableService.LoadGeneralSetting();
             try
             {
-                string unm = "API_pashupati";
-                string pas = Uri.EscapeDataString("Ksp@5588");
-
+                string password = LoadGeneralSetting.PubEinvPass;
+                string unm = LoadGeneralSetting.PubEinvUName;
+                string pas = Uri.EscapeDataString(password);
                 using var client = new HttpClient();
-
-                string url =
-                    "https://api.mastergst.com/ewaybillapi/v1.03/authenticate" +
-                    "?email=it%40pashupatigrp.com" +
-                    $"&username={unm}&password={pas}";
-
+                string url =  "https://api.mastergst.com/ewaybillapi/v1.03/authenticate" + "?email=it%40pashupatigrp.com" +  $"&username={unm}&password={pas}";
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
-
-                request.Headers.Add("ip_address", getdata.ip_address);
-                request.Headers.Add("client_id", getdata.client_id);
-                request.Headers.Add("client_secret", getdata.client_secret);
-                request.Headers.Add("gstin", getdata.gstin);
-                request.Headers.Add("auth_access_type", getdata.auth_access_type);
-
+                request.Headers.Add("ip_address", LoadGeneralSetting.PubEinvIP);
+                request.Headers.Add("client_id", LoadGeneralSetting.PubEWayBillCID);
+                request.Headers.Add("client_secret", LoadGeneralSetting.PubEWayBillCSID);
+                request.Headers.Add("gstin", LoadGeneralSetting.PubEinvGSTIN);
+                request.Headers.Add("auth_access_type", "read");
                 var response = await client.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
 
@@ -254,9 +247,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 if (root.TryGetProperty("status_cd", out var status) &&
                     status.GetString() == "1")
                 {
-
                     return status.GetString();
-
                 }
 
                 return null;
@@ -272,7 +263,8 @@ namespace travelexpensemanagement.Common.Globalvariable
         {
             try
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
+                var GlobalVaraible = _globalVariableService.GetGlobalVariables();
+                var LoadGeneralSetting = await _globalVariableService.LoadGeneralSetting();
 
                 string token = await AuthenticateEWayBillAsync();
                 if (string.IsNullOrEmpty(token))
@@ -287,13 +279,13 @@ namespace travelexpensemanagement.Common.Globalvariable
                 using var client = new HttpClient();
 
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-                request.Headers.Add("ip_address", getdata.ip_address);
-                request.Headers.Add("client_id", getdata.client_id);
-                request.Headers.Add("client_secret", getdata.client_secret);
-                request.Headers.Add("gstin", getdata.gstin);
-                request.Headers.Add("auth_access_type", getdata.auth_access_type);
-                request.Headers.Add("authtoken", token);
 
+                request.Headers.Add("ip_address", LoadGeneralSetting.PubEinvIP);
+                request.Headers.Add("client_id", LoadGeneralSetting.PubEWayBillCID);
+                request.Headers.Add("client_secret", LoadGeneralSetting.PubEWayBillCSID);
+                request.Headers.Add("gstin", LoadGeneralSetting.PubEinvGSTIN );
+                request.Headers.Add("auth_access_type", GlobalVaraible.auth_access_type);
+                request.Headers.Add("authtoken", token);
                 var response = await client.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
 
@@ -329,7 +321,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                     string query = @"SELECT BILL_GST, ISNULL(party_code,0) FROM PURCHASE1 WHERE comp_code = @compCode";
 
                     using SqlCommand cmd = new SqlCommand(query, con);
-                    cmd.Parameters.AddWithValue("@compCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@compCode", GlobalVaraible.PubCompCode);
 
                     using SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
@@ -376,7 +368,7 @@ namespace travelexpensemanagement.Common.Globalvariable
         {
             try
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
+                var GlobalVaraible = _globalVariableService.GetGlobalVariables();
 
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
@@ -386,16 +378,13 @@ namespace travelexpensemanagement.Common.Globalvariable
                     {
                         string eWaybillNo = obj.FORM_NO ?? "";
 
-                        // 🔹 Skip if already exists
-                        string existsQuery = @"SELECT 1 FROM waybill1 
-                        WHERE comp_code=@comp AND branch_code=@branch 
-                        AND year_code=@year AND FORM_NO=@formNo";
+                        string existsQuery = @"SELECT 1 FROM waybill1   WHERE comp_code=@comp AND branch_code=@branch  AND year_code=@year AND FORM_NO=@formNo";
 
                         using (SqlCommand checkCmd = new SqlCommand(existsQuery, con))
                         {
-                            checkCmd.Parameters.AddWithValue("@comp", getdata.PubCompCode);
-                            checkCmd.Parameters.AddWithValue("@branch", getdata.PubBranchCode);
-                            checkCmd.Parameters.AddWithValue("@year", getdata.PubFYearCode);
+                            checkCmd.Parameters.AddWithValue("@comp", GlobalVaraible.PubCompCode);
+                            checkCmd.Parameters.AddWithValue("@branch", GlobalVaraible.PubBranchCode);
+                            checkCmd.Parameters.AddWithValue("@year", GlobalVaraible.PubFYearCode);
                             checkCmd.Parameters.AddWithValue("@formNo", eWaybillNo);
 
                             var exists = await checkCmd.ExecuteScalarAsync();
@@ -415,7 +404,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                         using (SqlCommand cmd2 = new SqlCommand(purchaseQuery, con))
                         {
                             cmd2.Parameters.AddWithValue("@gst", gst);
-                            cmd2.Parameters.AddWithValue("@comp", getdata.PubCompCode);
+                            cmd2.Parameters.AddWithValue("@comp", GlobalVaraible.PubCompCode);
 
                             var result = await cmd2.ExecuteScalarAsync();
                             if (result != null)
@@ -437,7 +426,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                             using (SqlCommand cmd3 = new SqlCommand(subQuery, con))
                             {
                                 cmd3.Parameters.AddWithValue("@gst", gst);
-                                cmd3.Parameters.AddWithValue("@comp", getdata.PubCompCode);
+                                cmd3.Parameters.AddWithValue("@comp", GlobalVaraible.PubCompCode);
 
                                 var result = await cmd3.ExecuteScalarAsync();
                                 if (result != null)
@@ -463,9 +452,9 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                         using (SqlCommand cmd = new SqlCommand(sql, con))
                         {
-                            cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
-                            cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", GlobalVaraible.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalVaraible.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", GlobalVaraible.PubFYearCode);
                             cmd.Parameters.AddWithValue("@V_TYPE", "TRIN");
                             cmd.Parameters.AddWithValue("@V_NO", srvno);
                             cmd.Parameters.AddWithValue("@DOC_ID", "TRIN" + srvno);
@@ -478,7 +467,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                             cmd.Parameters.AddWithValue("@BILL_DATE", (object)obj.BILL_DATE ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@ITEM_DESC", obj.ITEM_DESC ?? "");
                             cmd.Parameters.AddWithValue("@STATUS", obj.STATUS ?? 0);
-                            cmd.Parameters.AddWithValue("@UUSER", getdata.PubUserId);
+                            cmd.Parameters.AddWithValue("@UUSER", GlobalVaraible.PubUserId);
                             cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
 
                             await cmd.ExecuteNonQueryAsync();
@@ -517,18 +506,19 @@ namespace travelexpensemanagement.Common.Globalvariable
         {
             try
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
+                var GlobalVaraible = _globalVariableService.GetGlobalVariables();
+                var LoadGeneralSetting = await _globalVariableService.LoadGeneralSetting();
 
                 string apiUrl = $"https://api.mastergst.com/ewaybillapi/v1.03/ewayapi/getewaybill?email=it%40pashupatigrp.com&ewbNo={ewaybno}";
 
                 using var client = new HttpClient();
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
-                request.Headers.Add("ip_address", getdata.ip_address);
-                request.Headers.Add("client_id", getdata.client_id);
-                request.Headers.Add("client_secret", getdata.client_secret);
-                request.Headers.Add("gstin", getdata.gstin);
-                request.Headers.Add("auth_access_type", getdata.auth_access_type);
+                request.Headers.Add("ip_address", LoadGeneralSetting.PubEinvIP);
+                request.Headers.Add("client_id", LoadGeneralSetting.PubEWayBillCID);
+                request.Headers.Add("client_secret", LoadGeneralSetting.PubEWayBillCSID);
+                request.Headers.Add("gstin", LoadGeneralSetting.PubEinvGSTIN);
+                request.Headers.Add("auth_access_type", GlobalVaraible.auth_access_type);            
 
                 var response = await client.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
@@ -611,8 +601,8 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                     // ✅ OTHER PARAMS
                     cmd.Parameters.AddWithValue("@ewaybno", ewaybno);
-                    cmd.Parameters.AddWithValue("@Comp_code", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Comp_code", GlobalVaraible.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalVaraible.PubBranchCode);
 
                     await cmd.ExecuteNonQueryAsync();
                 }

@@ -324,7 +324,7 @@ async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
 
         if (!result.data || result.data.length === 0) {
             const PartyName = $('#ddlPartyName option:selected').text();
-            showToast(`Data Not Found For this party: ${PartyName}`, { type: "error" });
+            showToast(`Data Not Found For this party: ${PartyName}`, { type: "info" });
             return;
         }
 
@@ -614,19 +614,33 @@ async function LoadDeptMaster() {
 }
 
 async function GetEwaybillno() {
+
     try {
+
         const res = await $.ajax({
-            url: '/InwardEntry/GetEWayBillData',
+            url: '/InwardEntry/GetEWayBillDatacall',
             type: 'GET',
-            data: { edate: $('#InDate').val(), inoutdata: "OUT" },
-            dataType: 'json'
+            data: {
+                edate: $('#InDate').val(),
+                inoutdata: "OUT"
+            }
+            // remove dataType temporarily
         });
+
+        console.log("Response:", res);
 
         if (res.success) {
             showToast("Successfully", { type: "success" });
+        } else {
+            showToast(res.message || "Failed", { type: "error" });
         }
 
     } catch (error) {
-        showToast(error, { type: "error" });
+
+        console.log("Full Error:", error);
+
+        showToast(error.responseText || error.statusText || "Parser Error", {
+            type: "error"
+        });
     }
 }

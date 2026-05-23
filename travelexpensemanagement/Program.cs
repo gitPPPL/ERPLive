@@ -40,7 +40,8 @@ builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 builder.Services.AddScoped<IInHouseWeighbridgeEntryRepository, InHouseWeighbridgeEntryRepository>();
 builder.Services.AddScoped<IFlakesQCEntryRepository, FlakesQCEntryRepository>();
 builder.Services.AddScoped<IFlakesQCEntryListRepository, FlakesQCEntryListRepository>();
-
+builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
+builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();

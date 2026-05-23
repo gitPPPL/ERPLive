@@ -13,7 +13,6 @@ namespace travelexpensemanagement.Models.QualityControl.Transaction
     {
         public FlakesQCEntryLIst_Header Header { get; set; }
         public List<FlakesQCEntryList_Details> Deatils { get; set; }
-
     }
     public class FlakesQCEntryLIst_Header
     {
@@ -31,25 +30,17 @@ namespace travelexpensemanagement.Models.QualityControl.Transaction
         public string? QC_INCHARGENAME { get; set; }
         public string? CHEMISTNAME { get; set; }
         public string? action { get; set; }
-
         public string? EnmpName { get; set; }
         public string? Place { get; set; }
-
     }
-
     public class FlakesQCEntryList_Details
-    {
-   
+    {   
         public int? ITEM_CODE { get; set; }
-        public int? DEPT_CODE { get; set; }
-     
+        public int? DEPT_CODE { get; set; }     
         public string? Item_Name { get; set; }
-        public string? DEPT_NAME { get; set; }
-     
-        public decimal? NET_WT { get; set; }
-      
+        public string? DEPT_NAME { get; set; }     
+        public decimal? NET_WT { get; set; }      
         public string? REMARKS { get; set; }
-
         public string? COLOR_NAME { get; set; }
         public string?  PTYPE_NAME { get; set; }
         public decimal? WIDTH { get; set; }
@@ -80,28 +71,17 @@ namespace travelexpensemanagement.Models.QualityControl.Transaction
         public decimal? YELLOWP { get; set; }
         public int? EMP_CODE { get; set; }
         public int? Pord_No { get; set; }
-
         public string? BatchNo  { get; set; }
-
         public decimal? BagNo { get; set; }
-
         public decimal? WBWt { get; set; }
         public decimal? GrWt { get; set; }
         public decimal? TrWt { get; set; }
         public string? REfType { get; set; }
         public string? Pord_Type { get; set; }
-
         public int? Refcode { get; set; }
-
         public int? HD { get; set; }    
-
-
         public int? PlaceCode { get; set; }
-
         public string? PlaceName { get; set; }
-
-
-
     }
 
 }

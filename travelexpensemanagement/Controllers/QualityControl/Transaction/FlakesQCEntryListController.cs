@@ -240,22 +240,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     return Json(new  { success = true, message = "Flakes QC Entry deleted successfully." });
                 }
 
-                return Json(new
-                {
-                    success = false,
-                    message = "Unable to delete Flakes QC Entry."
-                });
+                return Json(new  { success = false,  message = "Unable to delete Flakes QC Entry."  });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Error deleting Flakes QC Entry.",
-                    error = ex.Message
-                });
+                return Json(new  {  success = false,  message = "Error deleting Flakes QC Entry.",  error = ex.Message });
             }
         }
+
         [HttpPost]
         public JsonResult GetDataTotalppmChangge(float totalPpm, int itemCode, int depotCode , float HDPE , float PVCPPM ,
             float PCLowMelt , float Wrapper , float Metal , float Stone , float Rubber , float Glue , float Yellowp ,
@@ -434,20 +426,11 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
                             if (results.Any())
                             {
-                                return Json(new
-                                {
-                                    success = true,
-                                    message = "Data fetched successfully",
-                                    data = results
-                                });
+                                return Json(new { success = true, message = "Data fetched successfully",  data = results  });
                             }
                             else
                             {
-                                return Json(new
-                                {
-                                    success = false,
-                                    message = "No data found"
-                                });
+                                return Json(new {  success = false,  message = "No data found" });
                             }
                         }
                     }
@@ -477,25 +460,19 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             try
             {
                 var fileBytes = await _flakesQCEntryListRepository.ExportToExcel(searchTerm);
-
-                return File( fileBytes,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    "GateOutwardReport.xlsx"
-                );
+                return File( fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "GateOutwardReport.xlsx" );
             }
             catch (Exception ex)
             {
                 return Json(new {  success = false, message = "Error exporting excel.",  error = ex.Message });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> ExportToPdf(string searchTerm = null)
         {
             try
             {
                 var fileBytes = await _flakesQCEntryListRepository.ExportToPdf(searchTerm);
-
                 return File( fileBytes, "application/pdf", "GateOutwardReport.pdf" );
             }
             catch (Exception ex)

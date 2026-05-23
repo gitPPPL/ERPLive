@@ -1,4 +1,5 @@
-﻿function validateForm(formSelector) {
+﻿/// <reference path="delete.js" />
+function validateForm(formSelector) {
     console.log("Validating form...");
     let isValid = true;
     $(formSelector).find('.error-message').remove();
