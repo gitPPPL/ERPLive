@@ -128,7 +128,7 @@
                     <table id="tblFlakesQCEntry" class="excel-table fixed-grid-table">
                         <colgroup>
                             <col style="display:none;">  <!-- Code -->
-                            <col style="width:120px;">   <!-- Item Code -->
+                            <col style="width:80px;">   <!-- Item Code -->
                             <col style="width:350px;">   <!-- Item Name -->
                             <col style="width:200px;">   <!-- Dept -->
                             <col style="width:140px;">   <!-- Batch No -->
@@ -297,6 +297,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     const $tbody = $('#tblFlakesQCEntry tbody');
     const refTypeOptions = ["PO", "Indent", "Manual"];
@@ -316,53 +317,42 @@
               document.getElementById("ddlShift").disabled = true;
               document.getElementById("ddlProdPlace").disabled = true;
             }
-        });         
+        });        
 
         if (!rowId) {
             GetVNo();
              // $('#DtDocDate').attr('min', LoginDate);
             document.getElementById('DtDocDate').valueAsDate = new Date();
             document.getElementById('DtTime').value = ((d=>`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`)(new Date()));
-
         }
 
         if (mode === "view") {
-                setFormReadOnly();
-                    $('#FlakesQCEntryForm').after(
-                '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
-                );
-            }
+            setFormReadOnly();
+            $('#FlakesQCEntryForm').after('<span class="badge bg-secondary ms-2">Read‑Only Mode</span>');
+        }
 
         $('#btn_Copy').on('click', function () {
-
             const docDate   =  $('#DtDocDate').val();
             const DeptCode  = $('#ddlProdPlace').val();
             const ShiftType = $('#ddlShift').val();
-
             if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
             if (!validateRequiredField('#ddlShift', 'SHIFT')) return;
-            if (!validateRequiredField('#ddlProdPlace', 'Prod Place')) return;      
-                     
+            if (!validateRequiredField('#ddlProdPlace', 'Prod Place')) return;                           
             fetchData(DeptCode, ShiftType, formatDate(docDate));
         });
 
         $('#CopyData').on('click', function () {
-            const selectedRows = getSelectedRowsData();
-                   
+            const selectedRows = getSelectedRowsData();                   
             if (selectedRows.length > 0) {
                 var modalEl = document.getElementById('CopyFromModal');
                 var modalInstance = bootstrap.Modal.getInstance(modalEl);
-
                 if (modalInstance) {
                 modalInstance.hide(); 
                 }
                 addSelectedRowsToTable(selectedRows);
-
                 document.getElementById("DtDocDate").disabled = true;
                 document.getElementById("ddlShift").disabled = true;
-                document.getElementById("ddlProdPlace").disabled = true;
-       
-
+                document.getElementById("ddlProdPlace").disabled = true;     
             } else {
                  toastr.warning('No rows selected');
             }
@@ -493,11 +483,9 @@
                 }
             });
         });
-
-         bindRowValueChange();
-
+       
+        bindRowValueChange();
     });
-
 
     function generateSelect(options, selected = "") {
        return options.map(opt => `<option ${selected === opt ? 'selected' : ''}>${opt}</option>`).join('');

@@ -57,7 +57,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     cmd.Parameters.AddWithValue("@PageSize", pageSize);
                     cmd.Parameters.AddWithValue("@COMP_CODE", globalVars.PubCompCode ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", globalVars.PubFYearCode ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVars.PubBranchCode);
 
                     conn.Open();
                     using (var reader = cmd.ExecuteReader())
@@ -137,7 +137,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         cmd.Parameters.AddWithValue("@searchOption", "Header");
                         cmd.Parameters.AddWithValue("@V_NO", code);
                         cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", "SFQC");
 
