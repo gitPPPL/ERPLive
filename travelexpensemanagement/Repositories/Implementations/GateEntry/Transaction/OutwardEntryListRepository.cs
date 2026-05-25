@@ -25,7 +25,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
         }
-
         public async Task<object> GetList( string searchTerm = "", int pageNumber = 1,  int pageSize = 10)
         {
             var getvariabledata = _globalVariableService.GetGlobalVariables();
@@ -84,7 +83,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return new {  success = false, message = "Error fetching data.",  error = ex.Message };
             }
         }
-
         public async Task<object> GetDataByCode(int rowId, string vtype)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
@@ -120,9 +118,9 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             WAYBILL_NO = rdr["WAYBILL_NO"]?.ToString(),
                             V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
                             V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
+                            RETURN_DATE = rdr["RETURN_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["RETURN_DATE"]) : DateTime.MinValue,
                             V_TIME = rdr["V_TIME"]?.ToString(),
-                            ITEM_TYPE = rdr["ITEM_TYPE"]?.ToString(),
-                          
+                            ITEM_TYPE = rdr["ITEM_TYPE"]?.ToString(),                          
                             PARTY_CODE = rdr["PARTY_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_CODE"]) : 0,
                             Add1 = rdr["ADD1"]?.ToString(),
                             Add2 = rdr["ADD2"]?.ToString(),
@@ -131,6 +129,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             City = rdr["CITY"]?.ToString(),
                             STATE_CODE = rdr["STATE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["STATE_CODE"]) : 0,
                             state = rdr["state"]?.ToString(),
+                            RESPONSIBLE_PERSONB = rdr["RESPONSIBLE_PERSON"]?.ToString(),
                             PARTY_PINCODE = rdr["PARTY_PINCODE"]?.ToString(),
                             TRUCK_NO = rdr["TRUCK_NO"]?.ToString(),
                             PARTY_GST = rdr["PARTY_GST"]?.ToString(),
@@ -190,7 +189,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 };
             }
         }
-
         public async Task<object> Delete(string docId)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
@@ -213,7 +211,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return new { success = false,  message = "Error deleting data.",  error = ex.Message };
             }
         }
-
         public async Task<object> DocDetailsCode(string docCode)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -250,7 +247,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             return (new { success = true, data = docDetails });
         }
-
         public class InwardEntryDetailDto
         {
             public string? Code { get; set; }
@@ -262,7 +258,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             public string? LIP { get; set; }
             public string? LID { get; set; }
         }
-
         [HttpGet]
         public async Task<byte[]> ExportToExcel(string searchTerm = null)
         {
@@ -362,6 +357,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 }
             }
         }
+
         [HttpGet]
         public async Task<byte[]> ExportToPdf(string searchTerm = null)
         {
@@ -488,6 +484,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 }
             }
         }
+
         [HttpGet]
         public async Task<object> GetDataByPendingorder(int PartyCode, string Type, DateTime v_date, int BILL_NO)
         {

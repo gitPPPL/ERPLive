@@ -144,9 +144,11 @@ function LoadFormByID(rowId, vtype) {
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#NumDocNo').val(header.v_NO || '');
             $('#DtDocDate').val(formatDate(header.v_DATE));
+            $('#DtExpectedDateReturn').val(formatDate(header.returN_DATE));
             DDLParty().then(() => { $('#ddlPartyName') .val(header.partY_CODE || '') .trigger('change');
             });
             $('#TxtVehicleNo').val(header.trucK_NO || '');
+            $('#txtResponsiblePerson').val(header.responsiblE_PERSONB || '');
             $('#TxtWayBillNo').val(header.waybilL_NO || '');
             $('#TxtRemarks').val(header.remarks || '');
             $('#TxtAdd1PD').val(header.add1 || '');

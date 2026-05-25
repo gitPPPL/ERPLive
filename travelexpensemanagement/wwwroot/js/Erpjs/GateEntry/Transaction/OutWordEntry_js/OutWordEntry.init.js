@@ -171,7 +171,7 @@
 
                     const header = {
                         RETURN_DATE: RETURN_DATE,
-                        RESPONSIBLE_PERSON: RESPONSIBLE_PERSON,
+                        RESPONSIBLE_PERSONB: RESPONSIBLE_PERSON,
                         DOC_ID: $.trim($('#TxtCode').val()) || null,
                         V_TYPE: $('#ddlDocType').val() || null,
                         V_NO: parseInt($('#NumDocNo').val()) || null,

@@ -1,4 +1,5 @@
 ﻿
+using DocumentFormat.OpenXml.Office.Word;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json.Linq;
@@ -64,31 +65,26 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(new { V_NO = newV_NO });
         }
-
         public async Task<JsonResult> GetDataByPartyCode(int PartyId, int addressid)
         {
             var data = await _inwardEntryRepository.GetDataByPartyCodeAsync(PartyId, addressid);
             return Json(data);
         }
-
         public async Task<JsonResult> GetPartyAddressbyCode(int PartyId)
         {
             var data = await _inwardEntryRepository.GetPartyAddressByCodeAsync(PartyId);
             return Json(data);
         }
-
         public async Task<JsonResult> fetchShipFromAdd(int ShipFromID)
         {
             var data = await _inwardEntryRepository.FetchShipFromAddressAsync(ShipFromID);
             return Json(data);
         }
-
         public class ApiResponse
         {
             public string Status { get; set; }
             public string Message { get; set; }
         }
-
         [HttpPost]
         public IActionResult SavedData([FromBody] InwardEntryModel request)
         {
@@ -102,8 +98,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var result = SubmitRequest(request.Header, request.Deatils, action);
 
             return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
-        }
-        
+        }        
         private ApiResponse SubmitRequest(InwardEntry_Header header, List<Details> details, string action)
         {
             try
@@ -120,9 +115,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     dynamic data = jsonResult.Value;
                     header.V_NO = Convert.ToInt32(data.V_NO);
                 }
+                      
 
-                sql = @"SELECT V_No FROM waybill1 WHERE V_No =@V_No  AND V_Type = 'TRIN'   AND Party_Code = @Party_Code  
-                AND comp_Code = @comp_Code  AND Branch_Code = @Branch_Code;";
+
+
+
+         
                 using (var cmd1 = new SqlCommand(sql, conn))
                 {
                     cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
@@ -379,7 +377,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
              using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Action", action);
                     cmd.Parameters.AddWithValue("@SaveAction", "Header");
@@ -389,25 +386,26 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
                     cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                     cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
-                    cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                    cmd.Parameters.Add("@RETURN_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.V_DATE);
                     cmd.Parameters.AddWithValue("@V_TIME", header.V_TIME);
-                    cmd.Parameters.AddWithValue("@R_DATE", header.R_DATE);
+                    cmd.Parameters.Add("@R_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null  ? DBNull.Value : Convert.ToDateTime(header.R_DATE);
                     cmd.Parameters.AddWithValue("@R_TIME", header.R_TIME);
                     cmd.Parameters.AddWithValue("@DISP_PLAN_NO", header.DISP_PLAN_NO);
                     cmd.Parameters.AddWithValue("@DISP_PLAN_TYPE", header.DISP_PLAN_TYPE);
                     cmd.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
                     cmd.Parameters.AddWithValue("@PARTY_ADDRESSID", header.PARTY_ADDRESSID);
                     cmd.Parameters.AddWithValue("@BILL_NO", header.BILL_NO);
-                    cmd.Parameters.AddWithValue("@BILL_DATE", header.BILL_DATE);
+                    cmd.Parameters.Add("@BILL_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.BILL_DATE);
                     cmd.Parameters.AddWithValue("@BILL_AMT", header.BILL_AMT);
                     cmd.Parameters.AddWithValue("@CHALL_NO", header.CHALL_NO);
-                    cmd.Parameters.AddWithValue("@CHALL_DATE", header.CHALL_DATE);
+                    cmd.Parameters.Add("@CHALL_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.CHALL_DATE);
                     cmd.Parameters.AddWithValue("@TRUCK_NO", header.TRUCK_NO);
                     cmd.Parameters.AddWithValue("@TRANSPORT_CODE", header.TRANSPORT_CODE);
                     cmd.Parameters.AddWithValue("@DRIVER_NAME", header.DRIVER_NAME);
                     cmd.Parameters.AddWithValue("@DRIVER_NO", header.DRIVER_NO);
-                    cmd.Parameters.AddWithValue("@EWB_DATE", header.EWB_DATE);
-                    cmd.Parameters.AddWithValue("@EWB_EXPDATE", header.EWB_EXPDATE);
+                    cmd.Parameters.Add("@EWB_DATE", SqlDbType.SmallDateTime).Value =
+                    header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.EWB_EXPDATE);
+                    cmd.Parameters.Add("@EWB_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null  ? DBNull.Value : Convert.ToDateTime(header.EWB_EXPDATE);
                     cmd.Parameters.AddWithValue("@EWB_INVNO", header.EWB_INVNO);
                     cmd.Parameters.AddWithValue("@EWB_INVAMT", header.EWB_INVAMT);
                     cmd.Parameters.AddWithValue("@PARTY_WBSLIPNO", header.PARTY_WBSLIPNO);
@@ -427,11 +425,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@PARTY_PINCODE", header.PARTY_PINCODE);
                     cmd.Parameters.AddWithValue("@SHIP_PARTY", header.SHIP_PARTY);
                     cmd.Parameters.AddWithValue("@SHIP_BILLNO", header.SHIP_BILLNO);
-                    cmd.Parameters.AddWithValue("@SHIP_BILLDATE", header.SHIP_BILLDATE);
+                    cmd.Parameters.Add("@SHIP_BILLDATE", SqlDbType.SmallDateTime).Value =
+                    header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.SHIP_BILLDATE);
                     cmd.Parameters.AddWithValue("@RETURN_TYPE", header.RETURN_TYPE);
                     cmd.Parameters.AddWithValue("@GR_NO", header.GR_NO);
                     cmd.Parameters.AddWithValue("@OUT_TIME", header.OUT_TIME);
-                    cmd.Parameters.AddWithValue("@GR_DATE", header.GR_DATE);
+                    cmd.Parameters.Add("@GR_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.GR_DATE);
                     cmd.Parameters.AddWithValue("@RC_NO", header.RC_NO);
                     cmd.Parameters.AddWithValue("@DL_NO", header.DL_NO);
                     cmd.Parameters.AddWithValue("@INSU_NO", header.INSU_NO);
@@ -452,7 +451,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
                     cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
                     cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-
                     cmd.ExecuteNonQuery();
                 }
 
@@ -465,7 +463,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     {
                         sql = @"SELECT Party_Code FROM Order1  WHERE Party_Code = @PartyCode  AND V_TYPE = @V_TYPE
                         AND V_NO = @V_NO   AND COMP_CODE = @CompCode AND Branch_Code = @BranchCode;";
-
                         using (var cmd = new SqlCommand(sql, conn))
                         {
                             cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
@@ -473,21 +470,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             cmd.Parameters.AddWithValue("@V_NO", Details.REF_NO);
                             cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
                             cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-
                             using var READERS = cmd.ExecuteReader();
-
                             var response = new ApiResponse();
-
                             if (READERS.Read())
                             {
                                 var Party_Code = READERS["Party_Code"].ToString();
                                 Message = $"Party Name not matched with Order Party Name";
                                 return new ApiResponse { Status = "Error", Message = Message };
-
                             }
                         }
                     }
-
                     if (header.V_TYPE == "INRT")
                     {
                         sql = @"SELECT Party_Code FROM GATE1 WHERE Party_Code = @PartyCode  AND V_TYPE = @V_TYPE AND V_NO = @V_NO 
@@ -514,7 +506,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             }
                         }
                     }
-
                     if (header.V_TYPE == "INSR")
                     {
                         sql = @"SELECT Party_Code  FROM SALE1  WHERE Party_Code = @PartyCode   AND V_TYPE =@V_TYPE  AND V_NO = @V_NO 
@@ -542,7 +533,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         }
 
                     }
-
                     if (header.V_TYPE == "INFU" || header.V_TYPE == "INST" || header.V_TYPE == "INRM")
                     {
                         if (Details.REF_TYPE == "PAUD")
@@ -680,7 +670,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd3.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                     cmd3.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                     cmd3.Parameters.AddWithValue("@V_NO", header.V_NO);
-                    cmd3.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                    cmd3.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.V_DATE);
                     cmd3.Parameters.AddWithValue("@DOC_ID", (header.V_TYPE) + header.V_NO);
                     cmd3.Parameters.AddWithValue("@TRF_TYPE", "");
                     cmd3.Parameters.AddWithValue("@TRF_NO", "");
@@ -717,7 +707,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
                     codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
                 }
-
                 return new ApiResponse { Status = "Success", Message = Message };
             }
             catch (Exception ex)
@@ -957,7 +946,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var res = await _inwardEntryRepository.DDlTransitNoAsync(v_type, v_no, partycode, ExpiryDate);
             return Json(res);
         }
-
 
         [HttpGet]
         public async Task<JsonResult> GetEWayBillDatacall(DateTime edate, string inoutdata)
