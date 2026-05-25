@@ -115,18 +115,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     dynamic data = jsonResult.Value;
                     header.V_NO = Convert.ToInt32(data.V_NO);
                 }
-                      
 
-
-
-
-         
-                using (var cmd1 = new SqlCommand(sql, conn))
+                using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
                 {
+                    cmd1.CommandType = CommandType.StoredProcedure;
+
                     cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
                     cmd1.Parameters.AddWithValue("@V_No", header.V_NO);
                     cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
                     cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                    cmd1.Parameters.AddWithValue("@Action", "GatenoModification");
 
                     using var reader1 = cmd1.ExecuteReader();
 
@@ -134,12 +132,17 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     if (reader1.Read())
                     {
-                        var V_NO = reader1["V_NO"];
+                        var V_NO = reader1["V_No"].ToString();
 
                         if (g.PubUserId != "1" && g.PubUserId != "53")
                         {
-                            Message = $"Gate no. {V_NO} exist in MRN No.{header.V_NO}  Modification not allowed.";
-                            return new ApiResponse { Status = "Error", Message = Message };
+                            Message = $"Gate no. {V_NO} exist in MRN No. {header.V_NO} Modification not allowed.";
+
+                            return new ApiResponse
+                            {
+                                Status = "Error",
+                                Message = Message
+                            };
                         }
                     }
                 }
