@@ -106,6 +106,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 string sql = "";
                 var g = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
+                var SUPPLIER_INVNOs = 0;
+                int CountryCode = 0;
                 conn.Open();
                 string Message = "";
 
@@ -124,25 +126,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd1.Parameters.AddWithValue("@V_No", header.V_NO);
                     cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
                     cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
-                    cmd1.Parameters.AddWithValue("@Action", "GatenoModification");
-
+                    cmd1.Parameters.AddWithValue("@Action", "GatenoModifica");
                     using var reader1 = cmd1.ExecuteReader();
-
                     var response = new ApiResponse();
-
                     if (reader1.Read())
                     {
                         var V_NO = reader1["V_No"].ToString();
-
                         if (g.PubUserId != "1" && g.PubUserId != "53")
                         {
                             Message = $"Gate no. {V_NO} exist in MRN No. {header.V_NO} Modification not allowed.";
-
-                            return new ApiResponse
-                            {
-                                Status = "Error",
-                                Message = Message
-                            };
+                            return new ApiResponse { Status = "Error", Message = Message };
                         }
                     }
                 }
@@ -150,45 +143,41 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 if (header.TRANSIT_NO != null)
 
                 {
-                    sql = @"SELECT V_No FROM waybill1 WHERE V_No = @V_No AND V_Type = 'TRIN' AND Party_Code = @PartyCode 
-                          AND comp_Code = @CompCode AND Branch_Code = @BranchCode;";
-                    using (var cmd = new SqlCommand(sql, conn))
+                    using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
                     {
-                        cmd.Parameters.AddWithValue("@V_No", header.TRANSIT_NO);
-                        cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
-                        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                        cmd1.CommandType = CommandType.StoredProcedure;
 
-                        using var READERS = cmd.ExecuteReader();
-
+                        cmd1.Parameters.AddWithValue("@V_NO", header.TRANSIT_NO);
+                        cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
+                        cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
+                        cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                        cmd1.Parameters.AddWithValue("@Action", "TRANSIT_NO");
+                        using var reader1 = cmd1.ExecuteReader();
                         var response = new ApiResponse();
-
-                        if (READERS.Read())
-                        {
-                            var V_NO = READERS["V_NO"];
-                            Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}";
-                            return new ApiResponse { Status = "Error", Message = Message };
+                        if (reader1.Read())
+                        {                
+                                var V_NO = reader1["V_NO"];
+                                Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}";
+                                return new ApiResponse { Status = "Error", Message = Message };                    
                         }
-                     }
+                    }
                  }
 
                 if (header.WAYBILL_NO != null)
                 {
-                    sql = @"SELECT Form_No  FROM waybill1  WHERE Form_No = @FormNo AND V_Type = 'TRIN'  AND
-                    Party_Code = @PartyCode AND comp_Code = @CompCode
-                    AND Branch_Code = @BranchCode;";
-
-                    using (var cmd = new SqlCommand(sql, conn))
+                    using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
                     {
-                        cmd.Parameters.AddWithValue("@FormNo", header.WAYBILL_NO);
-                        cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
-                        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                        cmd1.CommandType = CommandType.StoredProcedure;
 
-                        using var READERS = cmd.ExecuteReader();
+                        cmd1.Parameters.AddWithValue("@WAYBILL_NO", header.TRANSIT_NO);
+                        cmd1.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
+                        cmd1.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                        cmd1.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                        cmd1.Parameters.AddWithValue("@Action", "WAYBILL_NO");
+                        using var reader1 = cmd1.ExecuteReader();
                         var response = new ApiResponse();
-                        if (READERS.Read())
-                        {
+                        if (reader1.Read())
+                        {              
                             Message = $"Waybill no. not valid for Party=>{header.PARTY_NAME}, Please check in Transit Entry.";
                             return new ApiResponse { Status = "Error", Message = Message };
                         }
@@ -197,21 +186,20 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 if (header.TRANSIT_NO != null)
                 {
-                    sql = @"SELECT TOP 1 CONCAT(V_type, V_no) AS V_NO  FROM Purchase1 WHERE Transit_No = @TransitNo  AND Comp_Code = @CompCode
-                            AND Branch_Code = @BranchCode;";
-                    using (var cmd = new SqlCommand(sql, conn))
+
+                    using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
                     {
-                        cmd.Parameters.AddWithValue("@TransitNo", header.TRANSIT_NO);
-                        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                        cmd1.CommandType = CommandType.StoredProcedure;
 
-                        using var READERS = cmd.ExecuteReader();
-
+                        cmd1.Parameters.AddWithValue("@TRANSIT_NO", header.TRANSIT_NO);     
+                        cmd1.Parameters.AddWithValue("COMP_CODE", g.PubCompCode);
+                        cmd1.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                        cmd1.Parameters.AddWithValue("@Action", "Trnsitnowaybillno");
+                        using var reader1 = cmd1.ExecuteReader();
                         var response = new ApiResponse();
-
-                        if (READERS.Read())
+                        if (reader1.Read())
                         {
-                            var V_NO = READERS["V_NO"];
+                            var V_NO = reader1["V_NO"];
                             Message = $"Transit no. {header.TRANSIT_NO} exist in MRN No.= {V_NO}";
                             return new ApiResponse { Status = "Error", Message = Message };
                         }
@@ -283,12 +271,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
                 }
 
-                int CountryCode = 0;
-
                 if (header.V_TYPE == "INRM")
                 {
-                    sql = @"SELECT COUNTRY_CODE  FROM SUBGROUP_MAST  WHERE CODE = @FORM_NO  
-                    AND Comp_Code = @CompCode  AND ACTIVE = 1;";
+                    sql = @"SELECT COUNTRY_CODE  FROM SUBGROUP_MAST  WHERE CODE = @FORM_NO   AND Comp_Code = @CompCode  AND ACTIVE = 1;";
 
                     using (var cmd = new SqlCommand(sql, conn))
                     {
@@ -329,19 +314,15 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                             {
                                 INV_NO = Convert.ToInt32(READERS["INV_NO"]);
                             }
-
                         }
-
 
                     }
 
-                    var SUPPLIER_INVNOs = 0;
+              
 
                     if (INV_NO != null)
                     {
-
-                        sql = @"SELECT SUPPLIER_INVNO  FROM EXIM1 WHERE SUPPLIER_INVNO = @SUPPLIER_INVNO   AND 
-                         SUPPLIER = @SUPPLIER AND COMP_CODE = @COMP_CODE;";
+                        sql = @"SELECT SUPPLIER_INVNO  FROM EXIM1 WHERE SUPPLIER_INVNO = @SUPPLIER_INVNO   AND  SUPPLIER = @SUPPLIER AND COMP_CODE = @COMP_CODE;";
 
                         using (var cmd = new SqlCommand(sql, conn))
                         {
@@ -377,7 +358,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 }
 
 
-             using (var cmd = new SqlCommand("sp_InwardEntry", conn))
+                using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandType = CommandType.StoredProcedure;

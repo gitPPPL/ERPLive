@@ -334,15 +334,15 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
 
                 int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
-                _globalValidationdate.LogInsertUpdateDelete(
-                    destinationTable: "PROD1_QC",
-                    sourceTable: "PROD1_QC",
-                    transactionType: "Transaction",
-                    codeVNo: code.ToString(),
-                    vtype: "SFQC"
-                );
+                //_globalValidationdate.LogInsertUpdateDelete(
+                //    destinationTable: "PROD1_QC",
+                //    sourceTable: "PROD1_QC",
+                //    transactionType: "Transaction",
+                //    codeVNo: code.ToString(),
+                //    vtype: "SFQC"
+                //);
 
-                return rowsAffected > 0;
+                return true;
             }
             catch
             {

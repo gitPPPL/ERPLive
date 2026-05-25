@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Data;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -11,6 +12,7 @@ using travelexpensemanagement.Repositories.Interfaces.QualityControl;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
+    [SessionAuthorize]
     public class FlakesQCEntryController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -130,7 +132,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
 
         }
-
         [HttpPost]
         public IActionResult SavedData([FromBody] FlakesQCEntryLIst_Model request)
         {

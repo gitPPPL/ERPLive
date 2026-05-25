@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Reflection.Emit;
 using System.Runtime.ConstrainedExecution;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -18,6 +19,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
+    [SessionAuthorize]
     public class FlakesQCEntryListController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -235,7 +237,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             {
                 bool result = await _flakesQCEntryListRepository.Delete(code);
 
-                if (result)
+                if (result == true)
                 {
                     return Json(new  { success = true, message = "Flakes QC Entry deleted successfully." });
                 }
@@ -320,7 +322,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
                     }
                 }
-
 
                     if (code > 0)
                     {

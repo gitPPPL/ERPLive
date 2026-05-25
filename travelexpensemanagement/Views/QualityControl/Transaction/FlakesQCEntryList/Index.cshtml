@@ -22,10 +22,10 @@
 		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
 	</div>
 	<div class="erppagelist-actions">
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Report">
 			<i class="fa fa-print"></i>Print
 		</button>
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn_exportExcel">
 			<i class="fa fa-file-excel"></i>Export
 		</button>
 		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
@@ -69,6 +69,7 @@
 	</div>
 
 	<div class="erppagelist-pagination">
+
 		<div class="pagination-left">
 			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
 				<option value="5">5</option>
@@ -77,15 +78,17 @@
 				<option value="50">50</option>
 			</select>
 		</div>
-		<div class="pagination-center">
-			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
-			<div id="pageNumbers" class="page-numbers"></div>
 
-			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
 		</div>
+
 		<div class="pagination-right" id="pageInfoText">
 			Results: 0 - 0 of 0
 		</div>
+
 	</div>
 </div>
 
@@ -115,51 +118,37 @@
 		});
 
 		$('#btn_Report').on('click', function () {
-
-		let text = $('#searchBox').val();
-
-		const url = '/FlakesQCEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text);
-
-		window.open(url, '_blank', 'noopener,noreferrer');
+			let text = $('#searchBox').val();
+			const url = '/FlakesQCEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text);
+			window.open(url, '_blank', 'noopener,noreferrer');
 		});
 
 	});
 
 	// ================= LOAD DATA =================
 	function loadAllMenus() {
-
 		const searchTerm = $('#searchBox').val();
-
 		$.ajax({
-
 			url: '/FlakesQCEntryList/GetList',
 			type: 'GET',
 			dataType: 'json',
-
 			data: {
 				searchTerm: searchTerm,
 				pageNumber: currentPage,
 				pageSize: pageSize
 			},
-
 			success: function (res) {
-
 				if (!res.success) {
-
 					toastr.error("Failed to load data.");
 					return;
 				}
                 console.log(res);
 				const list = res.lists || [];
 				totalCount = res.totalCount || 0;
-
 				let tbody = $('#tblFlakesQCList tbody');
-
 				tbody.empty();
-
 				// No Records
 				if (list.length === 0) {
-
 					tbody.append(`
 						<tr>
 							<td colspan="9" class="text-center text-muted">
@@ -167,50 +156,38 @@
 							</td>
 						</tr>
 					`);
-
 					renderPagination();
 					return;
 				}
 
 				// Render Rows
 				$.each(list, function (index, item) {
-
 					tbody.append(`
-
 						<tr>
-
 							<td style="display:none;">
 								${item.header.v_NO ?? ''}
 							</td>
-
 							<td>
 								${item.header.v_NO ?? ''}
 							</td>
-
 							<td>
 								${item.header.v_TYPE ?? ''}
 							</td>
-
 							<td>
 								${formatDate(item.header.v_DATE)}
 							</td>
-
 							<td>
 								${item.header.enmpName ?? ''}
 							</td>
-
 							<td>
 								${item.header.place ?? ''}
 							</td>
-
 							<td>
 								${item.header.shift ?? ''}
 							</td>
-
 							<td>
 								${item.header.remarks ?? ''}
 							</td>
-
 							<td class="action-col">
 							<button class="act-btn edit" title="Edit" onclick="AddOrEditFunction('${item.header.v_NO}')"><i class="fa fa-edit"></i></button>
 						<button class="act-btn view" title="View Detail" onclick="viewMenuDetails('${item.header.v_NO}')"><i class="fa fa-eye"></i></button>
@@ -218,7 +195,6 @@
 						<button class="act-btn document"  title="Show Document" onclick="showDocumentPopup('${item.header.doC_ID}')"><i class="fa fa-file"></i></button>
 								
 							</td>
-
 						</tr>
 
 					`);
@@ -226,27 +202,20 @@
 				});
 
 				renderPagination();
-
 			},
-
 			error: function (xhr) {
-
 				toastr.error('Error loading menu list: ' + xhr.responseText);
 
 			}
-
 		});
 	}
 
 	// ================= FORMAT DATE =================
 	function formatDate(dateStr) {
-
 		if (!dateStr || dateStr === "0001-01-01T00:00:00") {
 			return '';
 		}
-
 		const date = new Date(dateStr);
-
 		if (isNaN(date.getTime())) {
 			return '';
 		}
@@ -258,31 +227,22 @@
 		return `${day}-${month}-${year}`;
 
 	}
-
 	// ================= PAGINATION =================
 	function renderPagination() {
-
 		const totalPages = Math.ceil(totalCount / pageSize) || 1;
-
 		let html = '';
 		let maxVisible = 5;
-
 		let start = Math.max(
 			1,
 			currentPage - Math.floor(maxVisible / 2)
 		);
-
 		let end = start + maxVisible - 1;
-
 		if (end > totalPages) {
-
 			end = totalPages;
-
 			start = Math.max(
 				1,
 				end - maxVisible + 1
 			);
-
 		}
 
 		// First Page
@@ -389,7 +349,6 @@
 			loadAllMenus();
 		}
 	}
-
 	// ================= EDIT =================
 	function AddOrEditFunction(code) {
 		window.location.href = '/FlakesQCEntry/Index?id=' + encodeURIComponent(code);
@@ -400,56 +359,60 @@
 		window.location.href = '/FlakesQCEntry/Index?id=' + encodeURIComponent(code) + '&mode=view';
 	}
 
-	// ================= DELETE =================
 	function deleteTemp(code) {
-		if (!confirm('Are you sure you want to delete this Flakes QC Entry?')) {
-			return;
-		}
-		$.ajax({
 
-			url: '/FlakesQCEntryList/Delete',
-			type: 'DELETE',
-			data: { code: code },
-			success: function (res) {
-				if (res.success) 
-				{
-					toastr.success('Deleted successfully.');
-					loadAllMenus();
-				}
-				else
-				{
-					toastr.error(res.message || 'Failed to delete.');
-				}
-			},
-			error: function () {
-				toastr.error('Error deleting Flakes QC Entry.');
+		Swal.fire({
+			title: "Are you sure?",
+			text: "You want to delete this Inward Entry?",
+			icon: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#d33",
+			cancelButtonColor: "#3085d6",
+			confirmButtonText: "Yes, delete it!"
+		}).then((result) => {
+
+			if (result.isConfirmed) {
+
+				$.ajax({
+					url: '/FlakesQCEntryList/Delete',
+					type: 'DELETE',
+					data: { code: code },
+
+					success: function (res) {
+
+						if (res.success) {
+							toastr.success(res.message || "Deleted successfully");
+							loadAllMenus();
+						}
+						else {
+							toastr.error(res.message || 'Failed to delete.');
+						}
+					},
+
+					error: function () {
+						toastr.error('Error deleting record.');
+					}
+				});
 			}
 		});
 	}
 
     function showDocumentPopup(docCode) {
-
 		$.ajax({
 			url: '/FlakesQCEntryList/DocDetailsCode',
 			type: 'GET',
 			dataType: 'json',
 			data: { docCode: docCode },
-
 			success: function (response) {
-
 				console.log(response);
-
 				if (response.success) {
 					showDocumentPopupjQuery(response.data, docCode);
 				} else {
 					toastr.error(response.message || "Failed to get document details.");
 				}
 			},
-
 			error: function (xhr, status, error) {
-
 				console.log(xhr.responseText);
-
 				toastr.error("Error fetching document details.");
 			}
 		});

@@ -424,30 +424,30 @@
             if (!validateRequiredField('#ddlChemist', 'Chemist')) return;
             if (!validateRequiredField('#ddlProdPlace', 'ProdPlace')) return;
 
-             const table = document.getElementById("tblFlakesQCEntry");
+            const table = document.getElementById("tblFlakesQCEntry");
             const tbody = table.querySelector("tbody");
 
             if (tbody.rows.length === 0) {
-            toastr.warning("Fill data in Details");
-            return ;
+                toastr.warning("Fill data in Details");
+                return ;
             }
 
                 let hasValidationError = false;
 
-    $("#tblFlakesQCEntry tbody tr").each(function (index, row) {
-        const itemCode = $(row).find(".ITEM_CODE").val().trim();
+            $("#tblFlakesQCEntry tbody tr").each(function (index, row) {
+            const itemCode = $(row).find(".ITEM_CODE").val().trim();
 
-        if (itemCode !== "") {
-                const total = $(row).find(".TIME4_WIDTH").val().trim();
+            if (itemCode !== "") {
+                    const total = $(row).find(".TIME4_WIDTH").val().trim();
                 
 
-            if (!total) {
-                toastr.warning(`Row ${index + 1}:  Total   Fields.`);
-                $(row).find(".TIME4_WIDTH").focus();
-                hasValidationError = true;
-                return false;
+                if (!total) {
+                    toastr.warning(`Row ${index + 1}:  Total   Fields.`);
+                    $(row).find(".TIME4_WIDTH").focus();
+                    hasValidationError = true;
+                    return false;
+                }
             }
-        }
     });
 
     if (hasValidationError) return;

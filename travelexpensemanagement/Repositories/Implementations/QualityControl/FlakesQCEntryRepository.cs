@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Office.Word;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -33,22 +34,16 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                 conn.Open();
 
                 // DELETE OLD DATA
-                string deleteSql = @"
-                    DELETE FROM PROD2_QC
-                    WHERE COMP_CODE = @CompCode
-                    AND V_NO = @VNo
-                    AND BRANCH_CODE = @BranchCode
-                    AND YEAR_CODE = @YearCode";
+                string deleteSql = @"  DELETE FROM PROD2_QC WHERE COMP_CODE = @CompCode
+                    AND V_NO = @VNo AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YearCode";
 
                 using (var deleteCmd = conn.CreateCommand())
                 {
                     deleteCmd.CommandText = deleteSql;
-
                     deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
                     deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
                     deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
                     deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-
                     deleteCmd.ExecuteNonQuery();
                 }
 
@@ -60,8 +55,8 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                     cmd.Parameters.AddWithValue("@Action", action);
                     cmd.Parameters.AddWithValue("@SaveAction", "Header");
                     cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
-                    cmd.Parameters.AddWithValue("@DOC_ID", "SFQC" + header.V_NO);
-                    cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                    cmd.Parameters.AddWithValue("@DOC_ID", "SFQC" + header.V_NO);    
+                    cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.V_DATE);
                     cmd.Parameters.AddWithValue("@V_TYPE", "SFQC");
                     cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
@@ -76,9 +71,9 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                     cmd.Parameters.AddWithValue("@CHEMISTNAME", header.CHEMISTNAME);
                     cmd.Parameters.AddWithValue("@REMARKS", header.REMARKS ?? "");
                     cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                    cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+                    cmd.Parameters.Add("@UDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;   
                     cmd.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                    cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
+                    cmd.Parameters.Add("@EDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;           
                     cmd.Parameters.AddWithValue("@AED", "A");
                     cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
                     cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
@@ -87,7 +82,6 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                     cmd.ExecuteNonQuery();
                 }
 
-                // SAVE DETAILS
                 foreach (var d in details)
                 {
                     if (d.ITEM_CODE == 0)
@@ -102,7 +96,10 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                     cmd2.Parameters.AddWithValue("@DOC_ID", "SFQC" + header.V_NO);
                     cmd2.Parameters.AddWithValue("@V_NO", header.V_NO);
                     cmd2.Parameters.AddWithValue("@V_TYPE", "SFQC");
-                    cmd2.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                    cmd2.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value =
+                    header.V_DATE == null
+                    ? DBNull.Value
+                    : Convert.ToDateTime(header.V_DATE);          
                     cmd2.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                     cmd2.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                     cmd2.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
@@ -142,9 +139,9 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                     cmd2.Parameters.AddWithValue("@Pord_No", d.Pord_No);
                     cmd2.Parameters.AddWithValue("@Pord_Type", d.Pord_Type);
                     cmd2.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                    cmd2.Parameters.AddWithValue("@UDATE", DateTime.Now);
+                    cmd2.Parameters.Add("@UDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;
                     cmd2.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                    cmd2.Parameters.AddWithValue("@EDATE", DateTime.Now);
+                    cmd2.Parameters.Add("@EDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;
                     cmd2.Parameters.AddWithValue("@AED", "A");
                     cmd2.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
                     cmd2.Parameters.AddWithValue("@LIP", g.PubLocalId);
@@ -152,32 +149,23 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
 
                     cmd2.ExecuteNonQuery();
 
-                    if (action == "UPDATE")
-                    {
-                        _globalValidationdate.LogInsertUpdateDelete(destinationTable: "PROD1_QC", sourceTable: "PROD1_QC", transactionType: "Transaction",
-                        codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
-                    }
+                    //if (action == "UPDATE")
+                    //{
+                    //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "PROD1_QC", sourceTable: "PROD1_QC", transactionType: "Transaction",
+                    //    codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
+                    //}
 
-                    // UPDATE PROD_SFG2
-                    string updateSql = @"
-                        UPDATE PROD_SFG2
-                        SET REF_TYPE = 'SFQC',
-                            REF_NO = @REF_NO
-                        WHERE V_TYPE = @REfType
-                        AND V_NO = @V_NO
-                        AND COMP_CODE = @CompCode
-                        AND BRANCH_CODE = @BranchCode";
-
+                    //UPDATE PROD_SFG2
+                    string updateSql = @" UPDATE PROD_SFG2 SET REF_TYPE = 'SFQC', REF_NO = @REF_NO
+                    WHERE V_TYPE = @REfType AND V_NO = @V_NO AND COMP_CODE = @CompCode AND BRANCH_CODE = @BranchCode";
                     using (var updateCmd = conn.CreateCommand())
                     {
                         updateCmd.CommandText = updateSql;
-
                         updateCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
                         updateCmd.Parameters.AddWithValue("@V_NO", d.Refcode);
                         updateCmd.Parameters.AddWithValue("@REF_NO", header.V_NO);
                         updateCmd.Parameters.AddWithValue("@REfType", d.REfType);
                         updateCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-
                         updateCmd.ExecuteNonQuery();
                     }
                 }

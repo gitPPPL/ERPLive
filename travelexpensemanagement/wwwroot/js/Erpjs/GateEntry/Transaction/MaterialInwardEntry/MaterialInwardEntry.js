@@ -130,61 +130,61 @@
         }
 
         const Header = {
-            V_TYPE: $('#ddlDocType').val(),
-            V_NO: V_NO,
-            DOC_ID: $.trim($('#TxtCode').val()) || null,
-            V_DATE: V_DATE,
-            OUT_DATE: OUT_DATE,
-            V_TIME: $.trim($('#InTime').val()) || null,
-            R_DATE: R_DATE,
-            R_TIME: R_TIME,
-            OUT_TIME:  $.trim($('#TiVehicleOutTime').val()) || null,
-            DISP_PLAN_NO: parseInt($('#TxtPONo').val()) || null,
-            DISP_PLAN_TYPE: $('#TxtPONo').val(),
-            PARTY_CODE: PARTY_CODE,
-            PARTY_ADDRESSID: parseInt($('#ddladdressline1').val()) || null,
-            BILL_NO: BILL_NO,
-            BILL_DATE: BILL_DATE,
-            BILL_AMT: BILL_AMT,
-            CHALL_NO: CHALL_NO,
-            CHALL_DATE: CHALL_DATE,
-            TRUCK_NO: TRUCK_NO,
-            TRANSPORT_CODE: TRANSPORT_CODE,
-            DRIVER_NAME: DRIVER_NAME,
-            DRIVER_NO: DRIVER_NO,
-            EWB_DATE: EWB_DATE,
-            EWB_EXPDATE: EWB_EXPDATE,
-            EWB_INVNO: EWB_INVNO,
-            EWB_INVAMT: EWB_INVAMT,
-            PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
-            TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
-            PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
-            PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
-            PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
-            PARTY_EWBCITY: parseInt($('#ddlPartyCity').val()) || null,
-            TRANSIT_NO: parseInt($('#ddlTransit').val()) || null,
-            WAYBILL_NO: WAYBILL_NO,
-            REMARKS: $.trim($('#TxtRemarks').val()) || null,
-            Remarks2: $.trim($('#txt_VehicleRemarks').val()) || null,
-            ADD1: $.trim($('#TxtAddLine1').val()) || null,
-            ADD2: $.trim($('#TxtAddLine2').val()) || null,
-            ADD3: $.trim($('#TxtAddLine3').val()) || null,
-            PARTY_CITY: parseInt($('#ddlcity').val()) || null,
-            PARTY_GST: $.trim($('#TxtGSTNo').val()) || null,
-            PARTY_PINCODE: $.trim($('#TxtPAN').val()) || null,
-            SHIP_PARTY: parseInt($('#ddlShipFrom').val()) || null,
-            SHIP_BILLNO: $.trim($('#ShipBillNo').val()) || null,
-            SHIP_BILLDATE: formatDate($("#ShipBillDate").val()) || null,
-            RETURN_TYPE: $.trim($('#VehicleReturn').val()) || null,
-            CONTAINER_NO: $.trim($('#TxtContainerNo').val()) || null,
-            GR_NO: $.trim($('#TxtGRNo').val()) || null,
-            GR_DATE: formatDate($("#DtGRDate").val()) || null,
-            STATUS: STATUS,
-            action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
-            PAN_NO: $.trim($('#TxtPAN').val()) || null,
-            PARTY_NAME : PARTY_NAME
+        V_TYPE: $('#ddlDocType').val(),
+        V_NO: V_NO,
+        DOC_ID: $.trim($('#TxtCode').val()) || null,
+        V_DATE: V_DATE,
+        OUT_DATE: OUT_DATE,
+        V_TIME: $.trim($('#InTime').val()) || null,
+        R_DATE: R_DATE,
+        R_TIME: R_TIME,
+        OUT_TIME:  $.trim($('#TiVehicleOutTime').val()) || null,
+        DISP_PLAN_NO: parseInt($('#TxtPONo').val()) || null,
+        DISP_PLAN_TYPE: $('#TxtPONo').val(),
+        PARTY_CODE: PARTY_CODE,
+        PARTY_ADDRESSID: parseInt($('#ddladdressline1').val()) || null,
+        BILL_NO: BILL_NO,
+        BILL_DATE: BILL_DATE,
+        BILL_AMT: BILL_AMT,
+        CHALL_NO: CHALL_NO,
+        CHALL_DATE: CHALL_DATE,
+        TRUCK_NO: TRUCK_NO,
+        TRANSPORT_CODE: TRANSPORT_CODE,
+        DRIVER_NAME: DRIVER_NAME,
+        DRIVER_NO: DRIVER_NO,
+        EWB_DATE: EWB_DATE,
+        EWB_EXPDATE: EWB_EXPDATE,
+        EWB_INVNO: EWB_INVNO,
+        EWB_INVAMT: EWB_INVAMT,
+        PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
+        TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
+        PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
+        PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
+        PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
+        PARTY_EWBCITY: parseInt($('#ddlPartyCity').val()) || null,
+        TRANSIT_NO: parseInt($('#ddlTransit').val()) || null,
+        WAYBILL_NO: WAYBILL_NO,
+        REMARKS: $.trim($('#TxtRemarks').val()) || null,
+        Remarks2: $.trim($('#txt_VehicleRemarks').val()) || null,
+        ADD1: $.trim($('#TxtAddLine1').val()) || null,
+        ADD2: $.trim($('#TxtAddLine2').val()) || null,
+        ADD3: $.trim($('#TxtAddLine3').val()) || null,
+        PARTY_CITY: parseInt($('#ddlcity').val()) || null,
+        PARTY_GST: $.trim($('#TxtGSTNo').val()) || null,
+        PARTY_PINCODE: $.trim($('#TxtPAN').val()) || null,
+        SHIP_PARTY: parseInt($('#ddlShipFrom').val()) || null,
+        SHIP_BILLNO: $.trim($('#ShipBillNo').val()) || null,
+        SHIP_BILLDATE: formatDate($("#ShipBillDate").val()) || null,
+        RETURN_TYPE: $.trim($('#VehicleReturn').val()) || null,
+        CONTAINER_NO: $.trim($('#TxtContainerNo').val()) || null,
+        GR_NO: $.trim($('#TxtGRNo').val()) || null,
+        GR_DATE: formatDate($("#DtGRDate").val()) || null,
+        STATUS: STATUS,
+        action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
+        PAN_NO: $.trim($('#TxtPAN').val()) || null,
+        PARTY_NAME : PARTY_NAME
         };
-    const Deatils = collectTableRowData();
+        const Deatils = collectTableRowData();
 
         if (!Deatils || Deatils.length === 0) {
         showToast("Please fill at least one row in Detail", { type: "info" });
@@ -258,16 +258,14 @@
         data: JSON.stringify(payload),
 
         success: function (response) {
-                        if (response.status === "Success") {
-                            if (response.message) {
-            showToast("Saved successfully!", { type: "success" });
-                            }
-        setTimeout(function () {window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);
-                        }
-        else {
-            showToast(response.message, { type: "error" });
-                        }
-                    },
+            if (response.status === "Success") {   
+                showToast("Saved successfully!", { type: "success" });
+                setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);                                
+            }
+            else {
+            showToast(response.message, { type: "info" });
+            }
+        },
 
         error: function (xhr) {
             let errorMessage = "Something went wrong.";
