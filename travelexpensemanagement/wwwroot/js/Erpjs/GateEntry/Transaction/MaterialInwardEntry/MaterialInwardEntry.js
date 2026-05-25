@@ -79,216 +79,214 @@
         }
         }
 
-    if (WAYBILL_NO) {
-                       if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
-    if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
-    if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
-    if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                       
+        if (WAYBILL_NO) {
+        if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
+        if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
+        if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
+        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                       
 
-                }
+        }
 
-                if (R_DATE > V_DATE) {
-                  if (!validateRequiredField('#TxtRptDate', 'Reporting Date cannot be greater than In Date.')) return;                     
-                }
+        if (R_DATE > V_DATE) {
+        if (!validateRequiredField('#TxtRptDate', 'Reporting Date cannot be greater than In Date.')) return;                     
+        }
 
-                if (BILL_DATE > V_DATE) {
-                 if (!validateRequiredField('#DtPartyBillDate', 'Bill Date cannot be greater than In Date.')) return;
-                }
+        if (BILL_DATE > V_DATE) {
+        if (!validateRequiredField('#DtPartyBillDate', 'Bill Date cannot be greater than In Date.')) return;
+        }
 
-    if (SHIP_PARTY && !SHIP_BILLNO) {
-                      if (!validateRequiredField('#ddlShipFrom', 'Shipping Bill No. is required.')) return;
-                    }
+        if (SHIP_PARTY && !SHIP_BILLNO) {
+        if (!validateRequiredField('#ddlShipFrom', 'Shipping Bill No. is required.')) return;
+        }
 
-    if (SHIP_BILLNO && !SHIP_PARTY) {
-                    if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
-                    }
+        if (SHIP_BILLNO && !SHIP_PARTY) {
+        if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
+        }
 
-    if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
-                            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {        
-                             if (!validateRequiredField('#TxtBillAmt', 'Bill Amount compulsory for')) return;
-                      
-                            }
-                        }
+        if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
+        if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {        
+        if (!validateRequiredField('#TxtBillAmt', 'Bill Amount compulsory for')) return;                      
+        }
+        }
 
-                        if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-
+        if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
         showToast("Transit No. and E-Way Bill required.", { type: "info" });
-    if (!TRANSIT_NO) {
-        $("#ddlTransit").addClass("is-invalid").focus();
-                        } else {
-        $("#TxtEWayNo").addClass("is-invalid").focus();
-                        }
-    return;
-                    }
+            if (!TRANSIT_NO) {
+             $("#ddlTransit").addClass("is-invalid").focus();
+            } else {
+             $("#TxtEWayNo").addClass("is-invalid").focus();
+            }
+             return;
+            }
 
-    if (TRANSIT_NO && EWB_EXPDATE) {
-                        const expDate = new Date(EWB_EXPDATE);
-    const inDate = new Date(V_DATE);
+        if (TRANSIT_NO && EWB_EXPDATE) {
+            const expDate = new Date(EWB_EXPDATE);
+            const inDate = new Date(V_DATE);
 
-    if (expDate < inDate) {
-        showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });
-    return;
-                        }
-                    }
+            if (expDate < inDate) {
+                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });
+                return;
+            }
+        }
 
-    const Header = {
-        V_TYPE: $('#ddlDocType').val(),
-    V_NO: V_NO,
-    DOC_ID: $.trim($('#TxtCode').val()) || null,
-    V_DATE: V_DATE,
-    OUT_DATE: OUT_DATE,
-    V_TIME: $.trim($('#InTime').val()) || null,
-    R_DATE: R_DATE,
-    R_TIME: R_TIME,
-    OUT_TIME:  $.trim($('#TiVehicleOutTime').val()) || null,
-    DISP_PLAN_NO: parseInt($('#TxtPONo').val()) || null,
-    DISP_PLAN_TYPE: $('#TxtPONo').val(),
-    PARTY_CODE: PARTY_CODE,
-    PARTY_ADDRESSID: parseInt($('#ddladdressline1').val()) || null,
-    BILL_NO: BILL_NO,
-    BILL_DATE: BILL_DATE,
-    BILL_AMT: BILL_AMT,
-    CHALL_NO: CHALL_NO,
-    CHALL_DATE: CHALL_DATE,
-    TRUCK_NO: TRUCK_NO,
-    TRANSPORT_CODE: TRANSPORT_CODE,
-    DRIVER_NAME: DRIVER_NAME,
-    DRIVER_NO: DRIVER_NO,
-    EWB_DATE: EWB_DATE,
-    EWB_EXPDATE: EWB_EXPDATE,
-    EWB_INVNO: EWB_INVNO,
-    EWB_INVAMT: EWB_INVAMT,
-    PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
-    TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
-    PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
-    PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
-    PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
-    PARTY_EWBCITY: parseInt($('#ddlPartyCity').val()) || null,
-    TRANSIT_NO: parseInt($('#ddlTransit').val()) || null,
-    WAYBILL_NO: WAYBILL_NO,
-    REMARKS: $.trim($('#TxtRemarks').val()) || null,
-    Remarks2: $.trim($('#txt_VehicleRemarks').val()) || null,
-    ADD1: $.trim($('#TxtAddLine1').val()) || null,
-    ADD2: $.trim($('#TxtAddLine2').val()) || null,
-    ADD3: $.trim($('#TxtAddLine3').val()) || null,
-    PARTY_CITY: parseInt($('#ddlcity').val()) || null,
-    PARTY_GST: $.trim($('#TxtGSTNo').val()) || null,
-    PARTY_PINCODE: $.trim($('#TxtPAN').val()) || null,
-    SHIP_PARTY: parseInt($('#ddlShipFrom').val()) || null,
-    SHIP_BILLNO: $.trim($('#ShipBillNo').val()) || null,
-    SHIP_BILLDATE: formatDate($("#ShipBillDate").val()) || null,
-    RETURN_TYPE: $.trim($('#VehicleReturn').val()) || null,
-    CONTAINER_NO: $.trim($('#TxtContainerNo').val()) || null,
-    GR_NO: $.trim($('#TxtGRNo').val()) || null,
-    GR_DATE: formatDate($("#DtGRDate").val()) || null,
-    STATUS: STATUS,
-    action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
-    PAN_NO: $.trim($('#TxtPAN').val()) || null,
-    PARTY_NAME : PARTY_NAME
-                        };
+        const Header = {
+            V_TYPE: $('#ddlDocType').val(),
+            V_NO: V_NO,
+            DOC_ID: $.trim($('#TxtCode').val()) || null,
+            V_DATE: V_DATE,
+            OUT_DATE: OUT_DATE,
+            V_TIME: $.trim($('#InTime').val()) || null,
+            R_DATE: R_DATE,
+            R_TIME: R_TIME,
+            OUT_TIME:  $.trim($('#TiVehicleOutTime').val()) || null,
+            DISP_PLAN_NO: parseInt($('#TxtPONo').val()) || null,
+            DISP_PLAN_TYPE: $('#TxtPONo').val(),
+            PARTY_CODE: PARTY_CODE,
+            PARTY_ADDRESSID: parseInt($('#ddladdressline1').val()) || null,
+            BILL_NO: BILL_NO,
+            BILL_DATE: BILL_DATE,
+            BILL_AMT: BILL_AMT,
+            CHALL_NO: CHALL_NO,
+            CHALL_DATE: CHALL_DATE,
+            TRUCK_NO: TRUCK_NO,
+            TRANSPORT_CODE: TRANSPORT_CODE,
+            DRIVER_NAME: DRIVER_NAME,
+            DRIVER_NO: DRIVER_NO,
+            EWB_DATE: EWB_DATE,
+            EWB_EXPDATE: EWB_EXPDATE,
+            EWB_INVNO: EWB_INVNO,
+            EWB_INVAMT: EWB_INVAMT,
+            PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
+            TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
+            PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
+            PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
+            PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
+            PARTY_EWBCITY: parseInt($('#ddlPartyCity').val()) || null,
+            TRANSIT_NO: parseInt($('#ddlTransit').val()) || null,
+            WAYBILL_NO: WAYBILL_NO,
+            REMARKS: $.trim($('#TxtRemarks').val()) || null,
+            Remarks2: $.trim($('#txt_VehicleRemarks').val()) || null,
+            ADD1: $.trim($('#TxtAddLine1').val()) || null,
+            ADD2: $.trim($('#TxtAddLine2').val()) || null,
+            ADD3: $.trim($('#TxtAddLine3').val()) || null,
+            PARTY_CITY: parseInt($('#ddlcity').val()) || null,
+            PARTY_GST: $.trim($('#TxtGSTNo').val()) || null,
+            PARTY_PINCODE: $.trim($('#TxtPAN').val()) || null,
+            SHIP_PARTY: parseInt($('#ddlShipFrom').val()) || null,
+            SHIP_BILLNO: $.trim($('#ShipBillNo').val()) || null,
+            SHIP_BILLDATE: formatDate($("#ShipBillDate").val()) || null,
+            RETURN_TYPE: $.trim($('#VehicleReturn').val()) || null,
+            CONTAINER_NO: $.trim($('#TxtContainerNo').val()) || null,
+            GR_NO: $.trim($('#TxtGRNo').val()) || null,
+            GR_DATE: formatDate($("#DtGRDate").val()) || null,
+            STATUS: STATUS,
+            action: $.trim($('#TxtCode').val()) ? 'UPDATE' : 'INSERT',
+            PAN_NO: $.trim($('#TxtPAN').val()) || null,
+            PARTY_NAME : PARTY_NAME
+        };
     const Deatils = collectTableRowData();
 
-    if (!Deatils || Deatils.length === 0) {
+        if (!Deatils || Deatils.length === 0) {
         showToast("Please fill at least one row in Detail", { type: "info" });
-    return;
+        return;
+        }
+
+        const itemCodeSet = new Set();
+
+        for (let i = 0; i < Deatils.length; i++) {
+                   const row = Deatils[i];
+
+        if (row.ITEM_CODE !== null) {
+            if (itemCodeSet.has(row.ITEM_CODE)) {
+            showToast(`Duplicate ITEM_CODE: ${row.ITEM_CODE} (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 0);
+            return;
+            }
+        itemCodeSet.add(row.ITEM_CODE);
+
+            if (row.DEPT_CODE === null) {
+            showToast(`Department required (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 11);
+            return;
             }
 
-    const itemCodeSet = new Set();
-
-    for (let i = 0; i < Deatils.length; i++) {
-               const row = Deatils[i];
-
-    if (row.ITEM_CODE !== null) {
-                if (itemCodeSet.has(row.ITEM_CODE)) {
-        showToast(`Duplicate ITEM_CODE: ${row.ITEM_CODE} (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 0);
-    return;
-                }
-    itemCodeSet.add(row.ITEM_CODE);
-
-    if (row.DEPT_CODE === null) {
-        showToast(`Department required (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 11);
-    return;
-                }
-
-    if (row.UOM_NAME === null) {
-        showToast(`Unit required (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 3);
-    return;
-                }
-
-    if (row.NOS === null) {
-        showToast(`NOS required (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 4);
-    return;
-                }
-
-    if (row.QTY === null) {
-        showToast(`Quantity required (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 5);
-    return;
-                }
-
-    if (!row.EMPTY) {
-        showToast(`EMPTY field required (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 7);
-    return;
-                }
-
-    if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
-                    if (!row.REF_TYPE) {
-        showToast(`Reference Type required (Row ${i + 1})`, { type: "warning" });
-    focusCell(i, 9);
-    return;
-                    }
-                }
+            if (row.UOM_NAME === null) {
+            showToast(`Unit required (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 3);
+            return;
             }
-          }
 
-    const payload = {
+            if (row.NOS === null) {
+            showToast(`NOS required (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 4);
+            return;
+            }
+
+            if (row.QTY === null) {
+            showToast(`Quantity required (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 5);
+            return;
+            }
+
+            if (!row.EMPTY) {
+            showToast(`EMPTY field required (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 7);
+            return;
+            }
+
+            if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
+            if (!row.REF_TYPE) {
+            showToast(`Reference Type required (Row ${i + 1})`, { type: "warning" });
+            focusCell(i, 9);
+            return;
+            }
+            }
+        }
+    }
+
+        const payload = {
         Header: Header,
-    Deatils: Deatils
-                    };
+        Deatils: Deatils
+        };
 
-    $("#btn-save").prop("disabled", true);
+        $("#btn-save").prop("disabled", true);
 
-    $.ajax({
-        url: '/InwardEntry/SavedData',
-    type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify(payload),
+        $.ajax({
+            url: '/InwardEntry/SavedData',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
 
-    success: function (response) {
-                    if (response.status === "Success") {
-                        if (response.message) {
-        showToast("Saved successfully!", { type: "success" });
+        success: function (response) {
+                        if (response.status === "Success") {
+                            if (response.message) {
+            showToast("Saved successfully!", { type: "success" });
+                            }
+        setTimeout(function () {window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);
                         }
-    setTimeout(function () {window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);
-                    }
-    else {
-        showToast(response.message, { type: "error" });
-                    }
-                },
+        else {
+            showToast(response.message, { type: "error" });
+                        }
+                    },
 
-    error: function (xhr) {
-        let errorMessage = "Something went wrong.";
+        error: function (xhr) {
+            let errorMessage = "Something went wrong.";
 
-    if (xhr.status === 400) {
-        errorMessage = "Bad Request: " + xhr.responseText;
-                    } else if (xhr.status === 500) {
-        errorMessage = "Server error: " + xhr.responseText;
-                    } else {
-        errorMessage = "Unexpected error: " + xhr.statusText;
-                    }
-    showToast(errorMessage, {type: "error" });
-                },
+        if (xhr.status === 400) {
+            errorMessage = "Bad Request: " + xhr.responseText;
+                        } else if (xhr.status === 500) {
+            errorMessage = "Server error: " + xhr.responseText;
+                        } else {
+            errorMessage = "Unexpected error: " + xhr.statusText;
+                        }
+        showToast(errorMessage, {type: "error" });
+                    },
 
-    complete: function () {
-        $("#btn-save").prop("disabled", false);
-                    }
-                });
-            }
+        complete: function () {
+            $("#btn-save").prop("disabled", false);
+                        }
+                    });
+    }
     function focusCell(rowIndex, colIndex) {
      const row = document.querySelectorAll('#tblInwardEntry tbody tr')[rowIndex];
     if (!row) return;
@@ -460,17 +458,19 @@
     async function LoadDropDown() {
     try {
         await Promise.all([
-            await DDLVtype(),
-            await DDLParty(),
-            await DDLShipFrom(),
-            await DDDocStatus(),
-            await DDlPartyCity(),
-            await LoadItemMaster(),
-            await LoadUnitMaster(),
-            await LoadDeptMaster(),
-            await DDlTransportname(),
-            await DDlCity(),
-            await DDlState(),
+             DDLVtype(),
+             DDLParty(),
+             DDLShipFrom(),
+             DDDocStatus(),
+             DDlPartyCity(),
+             LoadItemMaster(),
+             LoadUnitMaster(),
+             LoadDeptMaster(),
+             DDlTransportname(),
+             DDlCity(),
+             DDlState()
+            
+
         ]);
         } catch (error) {
          showToast("Error loading dropdowns", { type: "error" });
@@ -766,6 +766,7 @@
         if (res.success) {
             const header = res.data.header;
             const Details = res.data.details;
+     
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#TxtTransporter').val(header.transporT_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
@@ -799,6 +800,14 @@
             $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
+
+            await fetchTransitno(
+                header.v_TYPE,
+                header.v_NO,
+                header.partY_CODE,
+                formatDate(header.ewB_DATE) 
+            );
+
             $('#ddlTransit').val(header.transiT_NO || '');
             $('#TxtEWayNo').val(header.waybilL_NO || '');
             $('#DtEWayDate').val(formatDate(header.ewB_DATE) || '');

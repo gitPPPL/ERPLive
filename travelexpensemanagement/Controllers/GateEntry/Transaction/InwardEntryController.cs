@@ -958,6 +958,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(res);
         }
 
+
         [HttpGet]
         public async Task<JsonResult> GetEWayBillDatacall(DateTime edate, string inoutdata)
         {

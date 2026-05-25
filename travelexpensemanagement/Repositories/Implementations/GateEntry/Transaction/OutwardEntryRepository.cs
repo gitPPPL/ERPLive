@@ -61,9 +61,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                         cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
-                        cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                        cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = Convert.ToDateTime(header.V_DATE);
                         cmd.Parameters.AddWithValue("@V_TIME", header.V_TIME);
-                        cmd.Parameters.AddWithValue("@RETURN_DATE", header.RETURN_DATE);
+                        cmd.Parameters.Add("@RETURN_DATE", SqlDbType.SmallDateTime).Value =
+                        Convert.ToDateTime(header.RETURN_DATE);                        
                         cmd.Parameters.AddWithValue("@RESPONSIBLE_PERSON", header.RESPONSIBLE_PERSONB);
                         cmd.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
                         cmd.Parameters.AddWithValue("@PARTY_NAME", header.PARTY_NAME);
@@ -127,11 +128,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                     transaction.Commit();
 
-                    if (action == "UPDATE")
-                    {
-                        _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
-                        codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
-                    }
+                    //if (action == "UPDATE")
+                    //{
+                    //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
+                    //    codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
+                    //}
 
                     return new RepositoryResponse
                     {
@@ -180,16 +181,20 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                decimal bill_gst = Convert.ToDecimal(reader["bill_gst"]);
+                                string bill_gst = Convert.ToString(reader["bill_gst"]);
                                 string einvoice_flg = Convert.ToString(reader["einvoice_flg"]);
                                 decimal namount = Convert.ToDecimal(reader["namount"]);
 
+                                decimal billGstValue = 0;
+                                decimal.TryParse(bill_gst, out billGstValue);
+
                                 if (namount >= 100000 &&
-                                    bill_gst > 16 &&
+                                    billGstValue > 16 &&
                                     namount != 0 &&
                                     einvoice_flg != "Y")
                                 {
-                                    return new RepositoryResponse  {
+                                    return new RepositoryResponse
+                                    {
                                         status = false,
                                         message = "Please Generate GST E Invoice Before Creating GatePass."
                                     };
@@ -213,11 +218,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                return new RepositoryResponse
-                                {
-                                    status = false,
-                                    message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"
-                                };
+                                return new RepositoryResponse { status = false, message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"  };
                             }
                         }
                     }
@@ -286,7 +287,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 message =
                                     $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
                                     $"& Your Quantity is = {(d.QTY ?? 0)}, " +
-                                    $"Please Check Item Code {d.ITEM_CODE}"
+                                    $"Please Check Item Name {d.ITEM_NAME}"
                             };
                         }
                     }

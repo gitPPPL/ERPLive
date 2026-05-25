@@ -159,7 +159,7 @@ $(document).ready(async function () {
         const selectedValue = $('#ddlPartyName').val();
         const V_TYPE = $('#ddlDocType').val();
         const V_DATE = $('#TxtRptDate').val();
-
+        $('#ddlPartyName').prop('disabled', true);
         if (!selectedValue) {
             invalidateField('ddlPartyName', 'Please Select Party Name!', 'info');
             return;

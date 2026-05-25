@@ -75,12 +75,5 @@
         public string? Lid { get; set; }
         public int? SrNo { get; set; }
 
-
-
-
-
-
-
-
     }
 }

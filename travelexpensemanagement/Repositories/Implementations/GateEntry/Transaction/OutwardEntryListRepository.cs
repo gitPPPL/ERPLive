@@ -122,6 +122,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
                             V_TIME = rdr["V_TIME"]?.ToString(),
                             ITEM_TYPE = rdr["ITEM_TYPE"]?.ToString(),
+                          
                             PARTY_CODE = rdr["PARTY_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_CODE"]) : 0,
                             Add1 = rdr["ADD1"]?.ToString(),
                             Add2 = rdr["ADD2"]?.ToString(),
@@ -133,7 +134,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             PARTY_PINCODE = rdr["PARTY_PINCODE"]?.ToString(),
                             TRUCK_NO = rdr["TRUCK_NO"]?.ToString(),
                             PARTY_GST = rdr["PARTY_GST"]?.ToString(),
-                            REMARKS = rdr["Remarks2"]?.ToString(),
+                            REMARKS = rdr["Remarks"]?.ToString(),
                             DOC_ID = rdr["DOC_ID"]?.ToString()
                         };
                     }

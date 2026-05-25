@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Net.Http;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 
@@ -19,7 +20,6 @@ namespace travelexpensemanagement.Common.Globalvariable
             _httpContextAccessor = httpContextAccessor;
             _dbConnection = dbConnection;
         }
-
         public UserSessionData GetGlobalVariables()
         {
             var httpContext = _httpContextAccessor.HttpContext;
@@ -32,6 +32,8 @@ namespace travelexpensemanagement.Common.Globalvariable
             var sessionComp = httpContext.Session.GetString("COMP_CODE");
             var formattedDate = httpContext.Session.GetString("SessionLogindate");
 
+            var CompanyData = GetCompanydata();
+            string pubCompGSTIN = CompanyData.gstin;
 
 
             if (string.IsNullOrEmpty(userCode))
@@ -43,10 +45,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 DateTime.TryParse(formattedDate, out loginDate);
             UserSessionData sessionData = null;
 
-            string query = @" SELECT  b.COMP_CODE AS COMP_CODE, a.CODE, a.USER_NAME, a.USER_LEVEL, a.PC_NAME, a.LIP, c.NAME, c.ADD1, c.ADD2, 
-            c.ADD3, c.GSTIN, c.PAN, c.PHONE, c.FAX, c.EMAIL, c.WEBSITE, c.EXCISE, c.SERVICETAX, c.RegAdd1, c.RegAdd2, c.CINNO
-            FROM USER_MAST a  LEFT JOIN SUBUSER_MAST b ON a.CODE = b.USER_CODE  LEFT JOIN COMP_MAST c ON b.COMP_CODE = c.CODE
-            WHERE a.CODE = @UserCode AND c.ACTIVE = 1";
+            string query = @" SELECT COMP_CODE, CODE, USER_NAME, USER_LEVEL, PC_NAME, LIP  FROM USER_MAST WHERE CODE = @UserCode";
 
             //using (SqlConnection con = new SqlConnection(_dbConnection.GetConDbConnection()))
             using (SqlConnection con = _dbConnection.GetConDbConnection())
@@ -74,6 +73,55 @@ namespace travelexpensemanagement.Common.Globalvariable
                             PubSessiontime = DateTime.Now,
 
                             // Company Info
+                            CompanyName = CompanyData.CompanyName,
+                            Address1 = CompanyData.Address1,
+                            Address2 = CompanyData.Address2,
+                            Address3 = CompanyData.Address3,
+                            gstin = CompanyData.gstin,
+                            PAN = CompanyData.PAN,
+                            Phone = CompanyData.Phone,
+                            Fax = CompanyData.Fax,
+                            Email = CompanyData.Email,
+                            Website = CompanyData.Website,
+                            Excise = CompanyData.Excise,
+                            ServiceTax = CompanyData.ServiceTax,
+                            RegAdd1 = CompanyData.RegAdd1,
+                            RegAdd2 = CompanyData.RegAdd2,
+                            CINNO = CompanyData.CINNO,
+                            // API
+                            ip_address = "103.74.69.13",
+                            client_id = "8a2017bb-6f67-4bf9-bc62-46bd802ed390",
+                            client_secret = "5e3dd92c-64ba-440f-a964-1a396397da66",
+                            auth_access_type = "read"
+                        };
+                    }
+                }
+            }
+
+            return sessionData;
+        }
+        public CompanyModel GetCompanydata()
+        {
+            CompanyModel CompanyData = new CompanyModel();
+            var httpContext = _httpContextAccessor.HttpContext;
+            var sessionComp = httpContext.Session.GetString("COMP_CODE");
+
+            string query = @"SELECT NAME, ADD1, ADD2, ADD3, GSTIN, PAN, PHONE, FAX, EMAIL, WEBSITE, EXCISE, SERVICETAX,
+            RegAdd1, RegAdd2, CINNO  FROM COMP_MAST WHERE CODE = @Code";
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@Code", sessionComp);
+
+                con.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        CompanyData = new CompanyModel
+                        {
                             CompanyName = reader["NAME"]?.ToString(),
                             Address1 = reader["ADD1"]?.ToString(),
                             Address2 = reader["ADD2"]?.ToString(),
@@ -94,78 +142,14 @@ namespace travelexpensemanagement.Common.Globalvariable
                             RegAdd1 = reader["RegAdd1"]?.ToString(),
                             RegAdd2 = reader["RegAdd2"]?.ToString(),
 
-                            CINNO = reader["CINNO"]?.ToString(),
-
-                            // API
-                            ip_address = "103.74.69.13",
-                            client_id = "8a2017bb-6f67-4bf9-bc62-46bd802ed390",
-                            client_secret = "5e3dd92c-64ba-440f-a964-1a396397da66",
-                            auth_access_type = "read"
+                            CINNO = reader["CINNO"]?.ToString()
                         };
                     }
                 }
             }
 
-            return sessionData;
+            return CompanyData;
         }
-
-        //public UserSessionData GetGlobalVariables()
-        //{
-        //    var httpContext = _httpContextAccessor.HttpContext;
-
-        //    if (httpContext == null)
-        //        throw new Exception("HttpContext is null.");
-
-        //    var userCode = httpContext.Session.GetString("CODE");
-        //    var sessionYearCode = httpContext.Session.GetString("SessionYearCode");
-        //    var sessionComp = httpContext.Session.GetString("COMP_CODE");
-        //    var formattedDate = httpContext.Session.GetString("SessionLogindate");
-
-        //    if (string.IsNullOrEmpty(userCode))
-        //        throw new Exception("User code not found in session. Login first.");
-
-        //    DateTime loginDate = DateTime.Now;
-        //    if (!string.IsNullOrEmpty(formattedDate))
-        //        DateTime.TryParse(formattedDate, out loginDate);
-
-        //    UserSessionData sessionData = null;
-
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    using (SqlCommand cmd = new SqlCommand(@"SELECT COMP_CODE, CODE, USER_NAME, USER_LEVEL, PC_NAME, LIP 
-        //                                     FROM USER_MAST WHERE CODE = @UserCode", con))
-        //    {
-        //        cmd.Parameters.AddWithValue("@UserCode", userCode);
-        //        con.Open();
-
-        //        using (SqlDataReader reader = cmd.ExecuteReader())
-        //        {
-        //            if (reader.Read())
-        //            {
-        //                sessionData = new UserSessionData
-        //                {
-        //                    PubCompCode = sessionComp,
-        //                    PubUserId = reader["CODE"]?.ToString(),
-        //                    PubUserName = reader["USER_NAME"]?.ToString(),
-        //                    PubUserLevel = reader["USER_LEVEL"]?.ToString(),
-        //                    PubWorkStationID = reader["PC_NAME"]?.ToString(),
-        //                    PubLocalId = reader["LIP"]?.ToString(),
-        //                    PubFYearCode = sessionYearCode,
-        //                    PubBranchCode = 1,
-        //                    PubLoginDate = loginDate,
-        //                    PubSessiontime = DateTime.Now,
-        //                    ip_address = "103.74.69.13",
-        //                    client_id = "8a2017bb-6f67-4bf9-bc62-46bd802ed390",
-        //                    client_secret = "5e3dd92c-64ba-440f-a964-1a396397da66",
-        //                    gstin = "05AAFCP0864M1Z7",
-        //                    auth_access_type = "read"
-        //                };
-        //            }
-        //        }
-        //    }
-
-        //    return sessionData;
-        //}
-
         public async Task<GlobalGeneralSettingModel> LoadGeneralSetting()
         {
             var httpContext = _httpContextAccessor.HttpContext;
@@ -177,8 +161,6 @@ namespace travelexpensemanagement.Common.Globalvariable
             var userData = GetGlobalVariables();
 
             string pubCompGSTIN = userData.gstin;
-
-
             if (string.IsNullOrEmpty(compCode))
                 throw new Exception("COMP_CODE not found in session.");
 
@@ -344,8 +326,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                                     model.PubEinvPass = Convert.ToString(rdr["EINV_LPASS"]);
                                     model.PubEinvCID = Convert.ToString(rdr["EINV_LCLIENTID"]);
                                     model.PubEinvCSID = Convert.ToString(rdr["EINV_LCLIENTSID"]);
-                                    model.PubEinvGSTIN = Convert.ToString(rdr["EINV_LGSTIN"]);
-                                    //model.PubEinvGSTIN = pubCompGSTIN;
+                                    model.PubEinvGSTIN = pubCompGSTIN;
                                 }
                                 else
                                 {
@@ -356,8 +337,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                                     model.PubEinvPass = Convert.ToString(rdr["EINV_TPASS"]);
                                     model.PubEinvCID = Convert.ToString(rdr["EINV_TCLIENTID"]);
                                     model.PubEinvCSID = Convert.ToString(rdr["EINV_TCLIENTSID"]);
-                                    model.PubEinvGSTIN = Convert.ToString(rdr["EINV_LGSTIN"]);
-                                   // model.PubEinvGSTIN = pubCompGSTIN;
+                                    model.PubEinvGSTIN = pubCompGSTIN;
                                 }
 
                                 model.PubEinvJSONPath = Convert.ToString(rdr["EINV_JSONPATH"]);

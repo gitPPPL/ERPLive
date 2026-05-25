@@ -15,8 +15,29 @@
         public string? ip_address { get; set; }
         public string? client_id { get; set; }
         public string? client_secret { get; set; }
-        public string? gstin { get; set; }
+
         public string? auth_access_type { get; set; }
+        public string? gstin { get; set; }
+        public string? CompanyName { get; set; }
+        public string? Address1 { get; set; }
+        public string? Address2 { get; set; }
+        public string? Address3 { get; set; }
+        public string? PAN { get; set; }
+        public string? Phone { get; set; }
+        public string? Fax { get; set; }
+        public string? Email { get; set; }
+        public string? Website { get; set; }
+        public string? Excise { get; set; }
+        public string? ServiceTax { get; set; }
+        public string? RegAdd1 { get; set; }
+        public string? RegAdd2 { get; set; }
+        public string? CINNO { get; set; }
+
+
+    }
+    public class CompanyModel
+    {
+        public string? gstin { get; set; }
         public string? CompanyName { get; set; }
         public string? Address1 { get; set; }
         public string? Address2 { get; set; }
@@ -33,7 +54,6 @@
         public string? CINNO { get; set; }
 
     }
-
     public class GlobalGeneralSettingModel
     {
         public decimal pubCrLimit { get; set; }

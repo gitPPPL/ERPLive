@@ -218,7 +218,7 @@
 
                             } else {
 
-                                toastr.error(response.message || "Save failed.");
+                                toastr.warning(response.message || "Save failed.");
                             }
                         },
 
