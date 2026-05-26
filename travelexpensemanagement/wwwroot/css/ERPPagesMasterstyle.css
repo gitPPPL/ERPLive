@@ -50,7 +50,7 @@
     background: rgba(255,255,255,0.15);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.25);
-    padding: 4px 12px;
+    padding: 4px 8px;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -76,9 +76,9 @@
 }
     .erppage-header-icon i {
         background: rgba(255, 255, 255, 0.15);
-        padding: 6px;
-        border-radius: 6px;
-        font-size: 13px;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 12px;
     }
 /* BASE COPY BUTTON */
 .erppage-btn-copy {
@@ -157,7 +157,7 @@
 .erppage-readonly select {
     pointer-events: none; /* 🚫 no click */
     user-select: none; /* 🚫 no text select */
-    background-color: #f5f5f5; /* optional grey */
+    background-color: #e5e5e5 !important; /* optional grey */
     cursor: not-allowed; /* 🚫 no text cursor */
 }
 
@@ -166,6 +166,7 @@
     pointer-events: none;
     user-select: none;
     cursor: not-allowed;
+    background-color: #e5e5e5 !important; /* optional grey */
 }
 /* For single select */
 .select2-container .select2-selection--single {
@@ -190,7 +191,50 @@
         white-space: normal;
         word-wrap: break-word;
     }
-   
+/* OUTER Select2 container */
+.erppage-readonly .select2-container--default {
+    pointer-events: none !important;
+    opacity: 1 !important; /* keep readable */
+}
+
+/* MAIN selection box */
+.erppage-readonly .select2-selection--single {
+    background-color: #e5e5e5 !important;
+    border-color: #cfcfcf !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+/* rendered text area */
+.erppage-readonly .select2-selection__rendered {
+    background-color: #e5e5e5 !important;
+    color: #6b6b6b !important;
+}
+
+/* dropdown arrow */
+.erppage-readonly .select2-selection__arrow b {
+    border-color: #888 transparent transparent transparent !important;
+    opacity: 0.4;
+}
+
+/* clear (x) button */
+.erppage-readonly .select2-selection__clear {
+    display: none !important;
+}
+
+/* ensure inner spans don't override bg */
+.erppage-readonly .select2-selection,
+.erppage-readonly .select2-selection__rendered,
+.erppage-readonly .selection {
+    background-color: #e5e5e5 !important;
+}
+.erppage-readonly .select2-container--default .select2-selection--single,
+.erppage-readonly .select2-container--default .select2-selection--single .select2-selection__rendered,
+.erppage-readonly .select2-container--default .select2-selection--single .select2-selection__arrow {
+    background-color: #e5e5e5 !important;
+    color: #6b6b6b !important;
+    border-color: #cfcfcf !important;
+}
 #erp-center-toast-container {
     position: fixed;
     top: 20px;
@@ -244,8 +288,8 @@
 }
 /* ===== CONTAINER ===== */
 .erppage-container {
-    margin: 16px auto;
-   /* padding: 0 10px;*/
+    margin: 8px auto;
+    /* padding: 0 10px;*/
 }
 
 /* ===== SECTION (FIELDSET) ===== */
@@ -254,8 +298,8 @@
     border-radius: 14px;
     background: #fff;
     overflow: hidden;
-    margin-bottom: 18px;
-    padding: 10px 10px 10px 10px;
+    margin-bottom: 6px;
+    padding: 8px 6px 8px 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: border-color 0.3s ease;
 }
@@ -268,20 +312,20 @@
    
     /* ===== SECTION HEADER ===== */
 .erppage-section-header {
-    padding: 6px 16px;
+    padding: 4px 8px;
     background: #ebebeb;
     border-left: 4px solid #2f7d32;
     color: #27712b;
     font-weight: 600;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 16px rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
+    border-radius: 6px;
 }
     .erppage-section-header:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.10);
     }
     /* ===== BODY ===== */
 .erppage-body {
-    padding: 10px 12px;
+    padding: 8px 4px;
 }
 
 /* ===== GRID ===== */
@@ -302,8 +346,8 @@
 .erppage-grid2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    column-gap: 35px;
-    row-gap: 18px;
+    column-gap: 8px;
+    row-gap: 14px;
     padding: 6px;
 }
 .erppage-grid3 {
@@ -319,8 +363,13 @@
     column-gap: 10px;
     row-gap: 18px;
     padding: 6px;
+    align-items: start;
 }
-
+.erppage-btn-group-right {
+    justify-self: end;
+    display: flex;
+    gap: 8px;
+}
 /* SUB FIELDSET */
 .erppage-subfieldset {
     border: 1px solid #c3c3c3;
@@ -437,13 +486,13 @@
 
 /* CUSTOM HEADER */
 .erppage-subheader {
-    padding: 6px 16px;
-    background: #ebebeb;
+    padding: 4px 10px;
+    background: #d9d9d9;
     border-left: 4px solid #2f7d32;
     color: #27712b;
     font-weight: 600;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 16px rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
+    border-radius: 6px;
 }
 .erppage-subfieldset.collapsed .erppage-grid {
     display: none;
@@ -457,28 +506,28 @@
 }
 /* BODY */
 .erppage-subfieldset .erppage-grid1 {
-    padding: 6px;
+    padding: 4px 0px;
 }
 .erppage-subfieldset.collapsed .erppage-grid3 {
     display: none;
 }
 /* BODY */
 .erppage-subfieldset .erppage-grid3 {
-    padding: 6px;
+    padding: 4px 0px;
 }
 .erppage-subfieldset.collapsed .erppage-grid2 {
     display: none;
 }
 /* BODY */
 .erppage-subfieldset .erppage-grid2 {
-    padding: 6px;
+    padding: 4px 0px;
 }
 .erppage-subfieldset.collapsed .erppage-grid4 {
     display: none;
 }
 /* BODY */
 .erppage-subfieldset .erppage-grid4 {
-    padding: 6px;
+    padding: 4px 0px;
 }
 /* ===== FIELD ===== */
 .erppage-field {
@@ -506,7 +555,7 @@
 
 /* ===== Selected Box ===== */
 .select2-container--default .select2-selection--single {
-    height: 30px !important;
+    height: 28px !important;
     border: 1px solid #ced4da;
     border-radius: 6px;
     padding: 4px 10px;
@@ -517,9 +566,10 @@
 
     /* ===== Text inside select ===== */
     .select2-container--default .select2-selection--single .select2-selection__rendered {
-        color: #495057;
+        color: #121212 !important;
         line-height: normal !important;
         padding: 4px 8px;
+        word-wrap: break-word;
     }
 
 /* ===== Arrow ===== */
@@ -621,11 +671,11 @@
 }
 /* ===== LABEL ===== */
 .erppage-label {
-    font-size: 13px;
-    color: #374151;
+    font-size: 12px;
+    color: #303548;
     display: inline-block;
     margin: 0;
-    font-weight: 400;
+    font-weight: 600;
 }
 
 /* ===== INPUT ===== */
@@ -633,11 +683,11 @@
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 4px 6px;
     transition: 0.2s;
-    box-sizing: border-box; /* 🔥 IMPORTANT */
+    box-sizing: border-box;
     font-size: 13px;
-    color: #2c2c2c;
+    color: #181818;
 }
 /* ===== TEXTAREA ===== */
 .erppage-textarea {
@@ -898,13 +948,12 @@ input[type="number"] {
 .erppage-tabs {
     display: flex;
     gap: 6px;
-    margin-bottom: 4px;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 2px solid #2f7d32;
 }
 
 .erppage-tab {
     padding: 8px 14px;
-    border: none;
+    border: 1px solid #d9d9d9;
     background: #f3f4f6;
     cursor: pointer;
     border-radius: 6px 6px 0 0;
@@ -1117,9 +1166,9 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 6px 16px;
-    border-radius: 8px;
-    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.25s ease;
 }

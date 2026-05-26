@@ -6,7 +6,7 @@
     align-items: center;
     background: linear-gradient(135deg, #2f7d32, #1b5e20);
     color: #fff;
-    padding: 6px 10px;
+    padding: 6px 8px;
     border-radius: 8px;
     flex-wrap: wrap; /* important */
 }
@@ -85,12 +85,12 @@
     border-radius: 8px;
 }
 .erppagelist-toolbar-end {
-    margin-top: 10px;
+    margin-top: 6px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 10px;
-    padding: 10px;
+    padding: 6px 10px;
     background: #fff;
     border-radius: 8px;
 }
@@ -101,10 +101,10 @@
     align-items: center;
     gap: 8px;
     background: #fff;
-    border: 1px solid #ddd;
-    padding: 6px 10px;
-    border-radius: 8px;
-    width: 320px;
+    border: 1px solid #cdcdcd;
+    padding: 4px 8px;
+    border-radius: 6px;
+    width: 350px;
 }
 
     .erppagelist-search-wrapper i {
@@ -143,7 +143,7 @@
 /* PAGINATION (PREMIUM UI) */
 /* MAIN LAYOUT */
 .erppagelist-pagination {
-    margin-top: 12px;
+    margin-top: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -295,11 +295,7 @@
         max-width: 100%;
         box-sizing: border-box;
     }
-/* ACTION COLUMN */
-.action-col {
-    width: 120px;
-    text-align: center;
-}
+
 /* ONLY THIS TABLE */
 .table-row-layout {
     display: flex;
@@ -388,7 +384,6 @@
         transform: translateY(-1px);
     }
 .action-col {
-    width: 120px; /* fits buttons nicely */
     text-align: center;
 }
 
@@ -425,12 +420,12 @@
 
     /* Header */
     .fixed-grid-table th {
-        padding: 8px !important;
+        padding: 6px 8px !important;
     }
 
     /* Body */
     .fixed-grid-table td {
-        padding: 2px 4px !important;
+        padding: 2px 6px !important;
     }
 
     /* Prevent form controls from stretching columns */
@@ -489,17 +484,25 @@ th {
 }
 
 /* ACTION COLUMN FREEZE (FINAL) */
+.fixed-grid-table td.action-col {
+    white-space: nowrap;
+}
+
 .fixed-grid-table th.action-col,
 .fixed-grid-table td.action-col {
     position: sticky;
     right: 0;
     width: 140px;
-    min-width: 140px;
-    max-width: 165px;
     background: #fff;
     z-index: 10;
-    /*border-left: 1px solid #ddd;*/
     padding: 6px 0px !important;
+    /* CENTER EVERYTHING */
+    text-align: center !important;
+    vertical-align: middle !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
 }
 
 /* HEADER ABOVE EVERYTHING */
@@ -512,8 +515,8 @@ th {
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-    margin-top: 12px;
-    padding: 10px;
+    margin-top: 10px;
+    padding: 8px 6px;
     background: #fff;
     border-radius: 8px;
 }
@@ -610,13 +613,7 @@ th {
     vertical-align: middle !important;
 }
 
-/* Make the TD a flex container so buttons are centered */
-.fixed-grid-table td.action-col {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 4px;
-}
+
 
     /* Remove default button margins */
     .fixed-grid-table td.action-col .act-btn {
