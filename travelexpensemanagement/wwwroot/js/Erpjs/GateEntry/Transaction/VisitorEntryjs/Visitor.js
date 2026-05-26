@@ -11,7 +11,7 @@ let formState = {
     isSaved: false,
     isReadOnlyFromUrl: isReadOnly
 };
-
+let isSaving = false;
 // ============ INIT ============
 function VisitorInit() {
 
@@ -271,6 +271,9 @@ async function onFormSubmit(e) {
 
     e.preventDefault();
 
+    if (isSaving) return;   // block double call
+    isSaving = true;
+
     if ( isMobileLoading) {
         showToast("Please wait, mobile data loading...", { type: "warning" });
         btn.prop('disabled', false);
@@ -368,7 +371,10 @@ async function onFormSubmit(e) {
     })
     .fail(function () {
         showToast("Error while saving", { type: "error" });
-    })
+    }).always(function () {
+        isSaving = false;
+        $('#btn-save').prop('disabled', false);
+    });
     
 }
 

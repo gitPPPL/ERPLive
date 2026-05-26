@@ -102,18 +102,18 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 var result = _repository.SaveMiscConsumption( request.Header, request.Deatils, action );
 
-                _logService.InsertLog("GATE1", "MiscConsumptionEntry", "Transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
-                          request.Header.V_DATE);
+                //_logservice.insertlog("gate1", "miscconsumptionentry", "transaction", action, request.header.v_type, request.header.v_no.tostring(),
+                //          request.header.v_date);
 
-                _logService.InsertLog("GATE2", "MiscConsumptionEntry", "Transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
-                          request.Header.V_DATE);
+                //_logservice.insertlog("gate2", "miscconsumptionentry", "transaction", action, request.header.v_type, request.header.v_no.tostring(),
+                //          request.header.v_date);
 
-                if (action == "UPDATE")
-                {
-                    _globalValidationdate.LogInsertUpdateDelete("GATE1", "GATE1", "Transaction", request.Header.V_NO.ToString(), request.Header.V_TYPE);
+                //if (action == "update")
+                //{
+                //    _globalvalidationdate.loginsertupdatedelete("gate1", "gate1", "transaction", request.header.v_no.tostring(), request.header.v_type);
 
-                    _globalValidationdate.LogInsertUpdateDelete("GATE2", "GATE2", "Transaction", request.Header.V_NO.ToString(), request.Header.V_TYPE);
-                }
+                //    _globalvalidationdate.loginsertupdatedelete("gate2", "gate2", "transaction", request.header.v_no.tostring(), request.header.v_type);
+                //}
 
                 if (result == "Success")
                 {

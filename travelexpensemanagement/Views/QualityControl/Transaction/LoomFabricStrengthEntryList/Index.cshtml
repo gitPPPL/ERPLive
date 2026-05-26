@@ -30,340 +30,375 @@
 
 }
 
-<fieldset>
-	<legend class="legend-field">Loom Fabric Strength Entry List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				@if(canAdd)
-				{
-					<button onclick="window.location.href='@Url.Action("Index", "LoomFabricStrengthEntry")'" type="submit" class="btn btn-add">
-						<i class="fa fa-plus"></i>Add
-					</button>
-				}
-				@if(canPrint)
-				{
-					<button class="btn btn-print" onclick="callGetReportAsPdf()">
-						<i class="fa fa-file-pdf"></i> PDF
-					</button>
-                }
-				@if(canExport)
-				{
-					<button class="btn btn-export" onclick="exportToExcel()">
-						<i class="fas fa-file-excel"></i> Excel
-					</button>
-                }
-				@if (canMail)
-				{
-					<button class="btn btn-mail">
-						<i class="fa fa-envelope"></i> Mail
-					</button>
-				}
- 				@if (canApproval)
-				{
-					<button class="btn btn-approval">
-						<i class="fa fa-thumbs-up"></i> Approval
-					</button>
-                }				
- 
-			</div>
-		</div>
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Loom Fabric Strength Entry List</span>
 	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblLoomFabricStrengthEntryList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Vno</th>
-						<th>Vtype</th>
-						<th>Vdate</th>
-						<th>Employee</th>
-						<th>Place</th>
-						<th>Shift</th>
-						<th>Remarks</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "LoomFabricStrengthEntry")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
 	</div>
-</fieldset>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="PDF Report" onclick="callGetReportAsPdf()">
+				<i class="fa fa-file-pdf"></i>PDF
+			</button>
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" onclick="exportToExcel()" data-tooltip="Export to Excel">
+				<i class="fa fa-file-excel"></i>Export
+			</button>
+		}
+		@if (canMail)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+				<i class="fa fa-envelope"></i>Mail
+			</button>
+		}
+		@if (canApproval)
+		{
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i>Approved
+			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblLoomFabricStrengthEntryList" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" />   <!-- Code (hidden) -->
+				<col style="width:120px;" />    <!-- Voucher Type -->
+				<col style="width:120px;" />    <!-- Voucher Date -->
+				<col style="width:130px;" />    <!-- Employee -->
+				<col style="width:100px;" />    <!-- Place -->
+				<col style="width:90px;" />    <!-- Shift -->
+				<col style="width:100px;" />    <!-- Remarks -->
+				<col style="width:100px;" />    <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Doc No</th>
+					<th style="display:none;">Voucher Type</th>
+					<th>Doc Date</th>
+					<th>Shift</th>
+					<th>Inspection By</th>
+					<th>Place</th>
+					<th>Remarks</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
 
+	</div>
+
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
+
+<script src="~/js/erpjs/qualitycontrol/transaction/loomfabricstrengthentrylist/loomfabricstrengthentrylist.js"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/common/delete.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
 <script>
+	window.permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+</script>
+
+@* <script>
 	var permissions = {
 		canEdit: @canEdit.ToString().ToLower(),
 		canDelete: @canDelete.ToString().ToLower(),
 		canDocDetail: @canDocDetail.ToString().ToLower()
 	};
 
-		let currentPage = 1;
-		let pageSize = 10;
+	let loomFabricPagination;
 
-		$(document).ready(function () {
-			GetMasterDataList();
-			$('#searchBox').on('keyup', function () {
-				currentPage = 1;
-				GetMasterDataList();
-			});
-		});
+	$(document).ready(function () {
 
-		function GetMasterDataList() {
-			const searchTerm = $('#searchBox').val().trim();
-			$.ajax({
-				url: '@Url.Action("GetLoomFabricStrengthList", "LoomFabricStrengthEntryList")',
-				type: 'GET',
-				dataType: 'json',
-				data: {
-					searchTerm: searchTerm,
-					pageNumber: currentPage,
-					pageSize: pageSize
-				},
-				success: function (res) {
-					const mastListData = res.data || [];
-					const totalCount = res.totalCount || 0;
-					let tbody = $('#tblLoomFabricStrengthEntryList tbody');
-					tbody.empty();
-					console.log(mastListData);
-					if (mastListData.length === 0) {
-						tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
-						return;
-					}
-					$.each(mastListData, function (index, item) {
-					let actions = '';
-					if (permissions.canEdit) {
-						actions += `<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.DOC_ID}')"></i>`;
-					}
-					actions += `<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.DOC_ID}')"></i>`;
+	    loomFabricPagination = Pagination.create({
 
-					if (permissions.canDelete) {
-						actions += `<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete"></i>`;
-					}
-					if (permissions.canDocDetail) {
-						actions += `<i class="fa fa-file btn-document btn-details" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showImpExpExpensePopup('${item.DOC_ID}')"></i>`;
-					}
-					tbody.append(`
-							<tr>
-								<td class="d-none code">${item.DOC_ID}</td>								
-								<td>${item.V_NO}</td>
-								<td>${item.V_TYPE}</td>
-								<td>${item.V_DATE}</td>
-								<td>${item.employeename}</td>
-								<td>${item.PlaceName}</td>
-								<td>${item.SHIFT}</td>								 
-								<td>${item.REMARKS}</td>
-							   <td>${actions}</td>
-							</tr>
-						`);
-					});
+			pageSize: 10,
 
-					renderPagination(totalCount, pageSize, currentPage);
-				},
-				error: function (xhr) {
-					toastr.error('Error loading Shift Data list: ' + xhr.responseText);
-				}
-			});
-		}
+			paginationContainer: '#pageNumbers',
 
-		function renderPagination(total, pageSize, currentPage) {
-			const totalPages = Math.ceil(total / pageSize);
-			const paginationContainer = $('#tablePagination');
-			paginationContainer.empty();
+			infoContainer: '#pageInfoText',
 
-			if (total <= 0 || totalPages <= 1) return;
-
-			let paginationHtml = '';
-
-			if (currentPage > 1) {
-				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-			}
-
-			let startPage = Math.max(1, currentPage - 2);
-			let endPage = Math.min(totalPages, currentPage + 2);
-
-			if (currentPage <= 3) endPage = Math.min(5, totalPages);
-			if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-			for (let i = startPage; i <= endPage; i++) {
-				paginationHtml += `
-					<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
-							onclick="goToPage(${i})">${i}</button>`;
-			}
-
-			if (currentPage < totalPages) {
-				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-				paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-			}
-
-			paginationContainer.html(paginationHtml);
-		}
-
-		function goToPage(page) {
-			currentPage = page;
-			GetMasterDataList();
-		}
-
-		function AddOrEditFunction(rowId) {
-			window.location.href = '/LoomFabricStrengthEntry/Index?id=' + encodeURIComponent(rowId);
-		}
-
-		function viewMenuDetails(rowId) {
-			window.location.href = '/LoomFabricStrengthEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
-		}
-
-		$(document).on('click', '.btn-delete', function() {
-			const $row = $(this).closest('tr');
-			const CodeforDel = $row.find('.code').text().trim();
-			confirmAction().then((confirmed) => {
-				if (!confirmed) return;
+			loader: function (params) {
 
 				$.ajax({
-					url: '/LoomFabricStrengthEntryList/DeleteLoomFabricStrengthEntry',
-					type: 'delete',
-					data: { docid: CodeforDel },
-					success: function (res) {
-						if (res.status) {
-							showFlashMessageByKey('delete', 'success');
-							$row.remove();
-							GetMasterDataList();
-						} else {
-							Swal.fire('Error!', 'Error deleting item group: ' + res.message, 'error');
-						}
+					url:'/LoomFabricStrengthEntryList/GetLoomFabricStrengthList',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						searchTerm: $('#searchBox').val().trim(),
+						pageNumber: params.pageNumber,
+						pageSize: params.pageSize
 					},
-					error: function (xhr) {
-						Swal.fire('Error!', 'Error deleting item group: ' + xhr.responseText, 'error');
+					success: function (res) {
+						params.callback(res);
+					},
+					error: function () {
+						toastr.error('Error loading data');
 					}
 				});
-			});
+			},
+			render: renderLoomFabricList
 		});
 
-		function exportToExcel() {
-		  fetch('/LoomFabricStrengthEntryList/ExportAllDocs')
-			.then(response => {
-			  if (!response.ok) throw new Error("Network response was not ok");
-			  return response.json();
-			})
-			.then(responseData => {
-			  if (!responseData.status) {
-				toastr.error("Failed to fetch data.");
-				return;
-			  }
-			  const dataArray = responseData.data;
-			  if (!Array.isArray(dataArray) || dataArray.length === 0) {
-				toastr.warning("No data available to export.");
-				return;
-			  }
+		loomFabricPagination.load();
 
-			  const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) });
-			  const colWidths = Object.keys(dataArray[0]).map(key => {
-				const maxLen = Math.max(
-				  key.length,
-				  ...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
-				);
-				return { wch: maxLen + 2 };
-			  });
-			  worksheet['!cols'] = colWidths;
+		$('#searchBox').on('keyup', function () {
+			loomFabricPagination.load();
+		});
 
+	});
 
-			  const headerRowNumber = 1;
-			  Object.keys(dataArray[0]).forEach((_, idx) => {
-				const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
-				if (!worksheet[cellAddress]) return;
-				worksheet[cellAddress].s = {
-				  font: { bold: true },
-				  fill: { fgColor: { rgb: "FFFF00" } }
-				};
-			  });
+    function renderLoomFabricList(mastListData) {
+		let tbody = $('#tblLoomFabricStrengthEntryList tbody');
+		tbody.empty();
 
-			  const workbook = XLSX.utils.book_new();
-			  XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+		if (!mastListData || mastListData.length === 0) {
 
-			  const pageName = "LoomFS_List";
-			  const now = new Date();
-			  const pad = n => String(n).padStart(2, '0');
-			  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-			  const fileName = `${pageName}_${timestamp}.xlsx`;
+			tbody.append(`
+				<tr>
+					<td colspan="9" class="text-center text-muted">
+						No Record Found
+					</td>
+				</tr>`);
 
-			  XLSX.writeFile(workbook, fileName);
-			})
-			.catch(error => {
-			  console.error("Export failed:", error);
-			  toastr.error("Failed to export data.");
-			});
+			return;
 		}
-		function callGetReportAsPdf() {
-		    var reportName = "rpt_emp_mast";
-			var now = new Date();
-			var day = String(now.getDate()).padStart(2, '0');
-			var month = String(now.getMonth() + 1).padStart(2, '0');
-			var year = String(now.getFullYear()).slice(-2);
-			var hours = String(now.getHours()).padStart(2, '0');
-			var minutes = String(now.getMinutes()).padStart(2, '0');
-			var seconds = String(now.getSeconds()).padStart(2, '0');
-			var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
 
-			 $.ajax({
-				url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
-				type: 'GET',
-				data: { Reportname: reportName },
-				xhrFields: {
-					responseType: 'blob'
-				},
-				success: function (response) {
-					console.log('PDF response:', response);
-					var file = new Blob([response], { type: 'application/pdf' });
-					var fileName = `${reportName}_${timestamp}.pdf`;
+		$.each(mastListData, function (index, item) {
 
-					var link = document.createElement('a');
-					link.href = URL.createObjectURL(file);
-					link.download = fileName;
-					document.body.appendChild(link);
-					link.click();
-					document.body.removeChild(link);
-				},
-				error: function (xhr, status, error) {
-					console.error('Error generating report:', error);
+			let actions = '';
+
+			if (window.permissions.canEdit) {
+				actions += `
+					<i class="fa fa-edit btn-edit"
+					   data-bs-toggle="tooltip"
+					   title="Edit"
+					   onclick="AddOrEditFunction('${item.DOC_ID}')">
+					</i>`;
+			}
+
+			actions += `
+				<i class="fas fa-eye btn-view"
+				   data-bs-toggle="tooltip"
+				   title="View"
+				   onclick="viewMenuDetails('${item.DOC_ID}')">
+				</i>`;
+
+			if (window.permissions.canDelete) {
+				actions += `
+					<i class="fas fa-trash btn-delete"
+					   data-bs-toggle="tooltip"
+					   title="Delete"
+					   onclick="deleteData('${item.DOC_ID}')">
+					</i>`;
+			}
+
+			if (window.permissions.canDocDetail) {
+				actions += `
+					<i class="fa fa-file btn-document btn-details"
+					   data-bs-toggle="tooltip"
+					   data-bs-title="Document Details"
+					   onclick="showImpExpExpensePopup('${item.DOC_ID}')">
+					</i>`;
+			}
+
+			tbody.append(`
+				<tr>
+					<td class="d-none code">${item.DOC_ID}</td>
+					<td>${item.V_NO}</td>
+					<td style="display:none;">${item.V_TYPE}</td>
+					<td>${item.V_DATE}</td>
+					<td>${item.SHIFT}</td>
+					<td>${item.EmployeeName}</td>
+					<td>${item.PlaceName}</td>
+					<td>${item.REMARKS}</td>
+					<td>${actions}</td>
+				</tr>
+			`);
+		});
+	}
+
+    function changeRowsPerPage() {
+		let size = $('#pageSizeSelect').val();
+		loomFabricPagination.setPageSize(size);
+	}
+
+	function AddOrEditFunction(rowId) {
+		window.location.href = '/LoomFabricStrengthEntry/Index?id=' + encodeURIComponent(rowId);
+	}
+
+	function viewMenuDetails(rowId) {
+		window.location.href = '/LoomFabricStrengthEntry/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}
+
+	function deleteData(docId) {
+		deleteRecord('LoomFabricStrengthEntryList', docId, {
+			action: 'DeleteLoomFabricStrengthEntry',
+			title: 'Are you sure?',
+			text: 'This action cannot be undone.',
+			successCallback: function () {
+				loomFabricPagination.load();
+			}
+		});
+	}
+
+	function exportToExcel() {
+		fetch('/LoomFabricStrengthEntryList/ExportAllDocs')
+		.then(response => {
+			if (!response.ok) throw new Error("Network response was not ok");
+			return response.json();
+		})
+		.then(responseData => {
+			if (!responseData.status) {
+			toastr.error("Failed to fetch data.");
+			return;
+			}
+			const dataArray = responseData.data;
+			if (!Array.isArray(dataArray) || dataArray.length === 0) {
+			toastr.warning("No data available to export.");
+			return;
+			}
+
+			const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) });
+			const colWidths = Object.keys(dataArray[0]).map(key => {
+			const maxLen = Math.max(
+				key.length,
+				...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
+			);
+			return { wch: maxLen + 2 };
+			});
+			worksheet['!cols'] = colWidths;
+
+
+			const headerRowNumber = 1;
+			Object.keys(dataArray[0]).forEach((_, idx) => {
+			const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
+			if (!worksheet[cellAddress]) return;
+			worksheet[cellAddress].s = {
+				font: { bold: true },
+				fill: { fgColor: { rgb: "FFFF00" } }
+			};
+			});
+
+			const workbook = XLSX.utils.book_new();
+			XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+
+			const pageName = "LoomFS_List";
+			const now = new Date();
+			const pad = n => String(n).padStart(2, '0');
+			const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+			const fileName = `${pageName}_${timestamp}.xlsx`;
+
+			XLSX.writeFile(workbook, fileName);
+		})
+		.catch(error => {
+			console.error("Export failed:", error);
+			toastr.error("Failed to export data.");
+		});
+	}
+
+	function callGetReportAsPdf() {
+		var reportName = "rpt_emp_mast";
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+			$.ajax({
+			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
+			type: 'GET',
+			data: { Reportname: reportName },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
+
+	function showImpExpExpensePopup(docCode) {
+		$.ajax({
+			url: '/LoomFabricStrengthEntryList/GetLoomFabricStrengthEntryDetails',
+			type: 'Get',
+			dataType: 'json',
+			data: { docid: docCode },
+			success: function(response) {
+					if(response.status) {
+					showDocumentPopupjQuery(response.data, docCode);
+				} else {
+					toastr.error("Failed to get document details.");
 				}
-			});
-		}
+			},
+			error: function() {
+				toastr.error("An error occurred while fetching document details.");
+			}
+		});
+	}
 
-		 function showImpExpExpensePopup(docCode) {
-			 $.ajax({
-				 url: '/LoomFabricStrengthEntryList/GetLoomFabricStrengthEntryDetails',
-				 type: 'Get',
-				 dataType: 'json',
-				 data: { docid: docCode },
-				 success: function(response) {
-						 if(response.status) {
-						 showDocumentPopupjQuery(response.data, docCode);
-					 } else {
-						 toastr.error("Failed to get document details.");
-					 }
-				 },
-				 error: function() {
-					 toastr.error("An error occurred while fetching document details.");
-				 }
-			 });
-		 }
-
-</script>
+</script> *@
 
 
 

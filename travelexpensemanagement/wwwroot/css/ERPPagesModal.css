@@ -181,7 +181,28 @@
         box-shadow: 0 6px 14px rgba(47,125,50,0.25);
     }
 
+/* Top bar spacing */
+.erppagesmodal-topbar {
+    margin-bottom: 10px;
+}
 
+/* Center checkbox vertically */
+.erppagesmodal-checkbox-col {
+    display: flex;
+    align-items: center;
+}
+
+/* Checkbox alignment */
+.erppagesmodal-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Specific column width (instead of inline) */
+.col-item-name {
+    width: 300px;
+}
 
 /* Responsive */
 @media(max-width:768px) {

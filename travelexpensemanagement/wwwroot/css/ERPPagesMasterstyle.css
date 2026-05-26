@@ -1,5 +1,4 @@
-﻿
-/* ===== HEADER UPGRADE ===== */
+﻿/* ===== HEADER UPGRADE ===== */
 .erppage-header {
     background: linear-gradient(135deg, #2f7d32, #1b5e20);
     color: #fff;
@@ -9,7 +8,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
 }
-
 /* LEFT */
 .erppage-header-left {
     display: flex;
@@ -24,25 +22,21 @@
     display: flex;
     justify-content: flex-end;
 }
-
 /* ===== ADD BUTTON (GREEN / SUCCESS STYLE) ===== */
 .erppage-btn-add {
     background: linear-gradient(135deg, #4c6ef5, #364fc7); /* accessible blue */
     color: #ffffff;
     border: 1px solid #2b3a99;
 }
-
     /* Hover */
     .erppage-btn-add:hover {
         background: linear-gradient(135deg, #3b5bdb, #2f44b3);
         transform: translateY(-1px);
     }
-
     /* Click */
     .erppage-btn-add:active {
         transform: scale(0.97);
     }
-
     /* Icon */
     .erppage-btn-add i {
         font-size: 14px;
@@ -62,8 +56,7 @@
     cursor: pointer;
     transition: all 0.25s ease;
 }
-
-    /* HOVER EFFECT */
+/* HOVER EFFECT */
     .erppage-header-back:hover {
         background: rgba(255,255,255,0.25);
         transform: translateY(-1px);
@@ -502,7 +495,6 @@
     .select2-container--default .select2-selection--single .select2-selection__rendered {
         color: #495057;
         line-height: normal !important;
-       
         padding: 4px 8px;
     }
 
@@ -514,8 +506,7 @@
 
 /* ===== Focus Effect ===== */
 .select2-container--default.select2-container--focus .select2-selection--single {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+    box-shadow: 0 0 0 1px rgb(47 125 50 / 95%);
 }
 
 /* ===== Dropdown Panel ===== */
@@ -553,7 +544,8 @@
 
 /* Selected */
 .select2-results__option--selected {
-    background-color: #d7d7d7 !important;
+    background-color: #27712b !important;
+    color: white;
     font-weight: 500;
 }
 
@@ -591,6 +583,13 @@
     font-size: 13px;
     color: #2c2c2c;
     border-left: 3px solid #ff2626;
+}
+
+/* Focus */
+.erppage-redinput:focus {
+    outline: none;
+    border-color: #2f7d32;
+    box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
 }
 .erppage-datebox {
     position: relative;
@@ -996,7 +995,47 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
+/* ===== INPUT + BUTTON GROUP ===== */
+.erppage-inputgroup {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+}
 
+    /* Select/Input inside group */
+    .erppage-inputgroup .erppage-input {
+        flex: 1;
+        height: 30px;
+    }
+
+    /* Button inside group */
+    .erppage-inputgroup .erppage-btn-inline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 12px;
+        height: 30px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #2f7d32, #1b5e20);
+        color: #fff;
+        font-size: 13px;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+        /* Hover */
+        .erppage-inputgroup .erppage-btn-inline:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #256d29, #164a18);
+        }
+
+        /* Icon inside button */
+        .erppage-inputgroup .erppage-btn-inline i {
+            font-size: 13px;
+        }
 /* ===== BUTTON ===== */
 .erppage-btn-common {
     background: linear-gradient(135deg, #2563eb, #1e40af);
@@ -1012,6 +1051,29 @@ input[type="number"] {
         transform: scale(0.97);
     }
 
+
+.erppage-btn-print {
+    background: linear-gradient(135deg, #374151, #111827);
+    color: #fff;
+    border: 1px solid #14532d;
+}
+
+    /* Hover */
+    .erppage-btn-print:hover {
+        background: linear-gradient(135deg, #4b5563, #1f2937);
+        transform: translateY(-1px);
+    }
+
+    /* Click */
+    .erppage-btn-print:active {
+        transform: scale(0.97);
+    }
+
+    /* Icon inside */
+    .erppage-btn-print i {
+        font-size: 14px;
+        color: #fff;
+    }
 /* ACTION BAR */
 .erppage-actions {
     position: sticky;

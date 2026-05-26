@@ -115,12 +115,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     return Json(new { success = false, message = "Save failed" });
 
                 // LOGGING
-                _globalValidationdate.LogInsertUpdateDelete(
-                    "VISITOR", "VISITOR", "Transaction",
-                    model.V_NO.ToString(), model.V_TYPE
-                );
+                //_globalValidationdate.LogInsertUpdateDelete(
+                //    "VISITOR", "VISITOR", "Transaction",
+                //    model.V_NO.ToString(), model.V_TYPE
+                //);
 
-                _logService.InsertLog("VISITOR", "Visitor Entry", "TRANSACTION", action, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
+                //_logService.InsertLog("VISITOR", "Visitor Entry", "TRANSACTION", action, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
 
                 return Json(new
                 {
@@ -146,15 +146,29 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             {
                 bool result = _visitorRepo.DeleteVisitor(docId);
 
+                //if (result)
+                //{
+                //    _logService.InsertLog("VISITOR", "Visitor Entry", "TRANSACTION", "DELETE", VType, VNo, null
+                //);
+
+                //    return Json(new { success = true, message = "Visitor deleted successfully." });
+                //}
+
+                //return Json(new { success = false, message = "Delete failed" });
+
                 if (result)
                 {
-                    _logService.InsertLog("VISITOR","Visitor Entry", "TRANSACTION", "DELETE", VType, VNo, null
-                );
-
-                    return Json(new { success = true, message = "Visitor deleted successfully." });
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Visitor deleted successfully."
+                    });
                 }
-
-                return Json(new { success = false, message = "Delete failed" });
+                return Json(new
+                {
+                    success = false,
+                    message = "Delete failed"
+                });
             }
             catch (Exception ex)
             {
