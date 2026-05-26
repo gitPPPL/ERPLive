@@ -24,6 +24,7 @@ $(document).ready(function () {
 async function initPage() {
     try {
         await handleDocLoad();
+        $('#DtDocDate').focus();
         setEnterKeyFocus(allFieldIds);
         wireEvents();
     } catch (err) {
@@ -48,36 +49,84 @@ function wireEvents() {
         const VNo = parseIntSafe(document.getElementById('NumDocNo')?.value);
         const UpdateVno = docId ? VNo : 0;
 
-        checkExistOrNot(V_DATE, V_TIME, SHIFT, plantCode, UpdateVno)
-            .done(async function (data) {
-                if (data?.status && data?.exists) {
-                    showToast("Duplicate Parameters VDate,VTime,Shift and Plant Name", { type: "warning" });
-                    return;
-                }
-
-                try {
-                    const formData = await collectFormData();
-                    console.log(formData);
-
-                    docId ? UpdateData(formData) : SaveData(formData);
-                } catch (err) {
-                    showToast("Error saving data: " + err.message, { type: "error" });
-                }
-            })
-            .fail(function () {
-                showToast("Error while checking Parameter name.", { type: "error" });
-            });
+        try {
+            const formData = await collectFormData();
+            if (docId) {
+                UpdateData(formData);
+            }
+            else {
+                checkExistOrNot(V_DATE, V_TIME, SHIFT, plantCode, UpdateVno)
+                    .done(async function (data) {
+                        if (data?.status && data?.exists) {
+                            showToast("Duplicate Parameters VDate,VTime,Shift and Plant Name", { type: "warning" });
+                            return;
+                        }
+                        SaveData(formData);
+                    })
+                    .fail(function () {
+                        showToast("Error while checking Parameter name.", { type: "error" });
+                    });
+            }
+        } catch (err) {
+            showToast("Error saving data: " + err.message, { type: "error" });
+        }
     });
 
-
     $('#tblWinder tbody').on('click', '.btn-winderelete-action', function () {
-        const row = $(this).closest('tr');
-        row.remove();
+        const $tbody = $('#tblWinder tbody');
+        // Prevent deleting if only one row exists
+        if ($tbody.find('tr').length === 1) {
+            return;
+        }
+        const $row = $(this).closest('tr');
+        const isLastRow = $row.is(':last-child');
+        $row.remove();
+        if (isLastRow) {
+            const $lastRow = $tbody.find('tr:last');
+            if ($lastRow.length > 0 && $lastRow.find('.btn-add-Winder-action').length === 0) {
+                $lastRow.find('td:last').prepend(
+                    `<button class="act-btn add btn-add-action btn-add-Winder-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
+                );
+            }
+        }
     });
 
     $('#tblMaterial tbody').on('click', '.btn-materialdelete-action', function () {
-        const row = $(this).closest('tr');
-        row.remove();
+        const $tbody = $('#tblMaterial tbody');
+        // Prevent deleting if only one row exists
+        if ($tbody.find('tr').length === 1) {
+            return;
+        }
+        const $row = $(this).closest('tr');
+        const isLastRow = $row.is(':last-child');
+        $row.remove();
+        if (isLastRow) {
+            const $lastRow = $tbody.find('tr:last');
+            if ($lastRow.length > 0 && $lastRow.find('.btn-add-Material-action').length === 0) {
+                $lastRow.find('td:last').prepend(
+                    `<button class="act-btn add btn-add-action btn-add-Material-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
+                );
+            }
+        }
+    });
+
+    $('#tblTestParameter tbody').on('click', '.btn-testParameterdelete-action', function () {
+        const $tbody = $('#tblTestParameter tbody');
+        // Prevent deleting if only one row exists
+        if ($tbody.find('tr').length === 1) {
+            return;
+        }
+        const $row = $(this).closest('tr');
+        const isLastRow = $row.is(':last-child');
+        $row.remove();
+        if (isLastRow) {
+            const $lastRow = $tbody.find('tr:last');
+            if ($lastRow.length > 0 && $lastRow.find('.btn-add-TestParameter-action').length === 0) {
+                $lastRow.find('td:last').prepend(
+                    `<button class="act-btn add btn-add-action btn-add-TestParameter-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
+                );
+            }
+        }
     });
 
     $(document).on('input', '[id^=TxtDenier], [id^=TxtBreakingLoad]', function () {
@@ -114,10 +163,16 @@ async function handleDocLoad() {
             today.getDate().toString().padStart(2, '0');
         $('#DtDocDate').val(todayDate);
         BindHeaderDropDown();
-        fillPlanZoneTable();
+        if (window.compcode === "2" || window.compcode === "5") {
+            fillPlanZoneTable(); 
+        }
+        else {
+            addTestParameterRow();
+        }
         fillScrewTable();
         addWinderRecordRow();
         addMaterialRecordRow();
+        //---------------------------------------------------------------------------------
     }
 }
 //===Save & Update===
@@ -130,9 +185,8 @@ function SaveData(saveDt) {
         success: function (response) {
             if (response?.status) {
                 showToast("Data Insert successfully", { type: "success" });
-                //setTimeout(() => {
-                //    window.location.href = '/QCTemperatureEntryList/Index';
-                //}, 1500);
+                setFormReadOnly();
+                readOnly = true;
             } else {
                 showToast(response?.message || "Save failed. Please try again.", { type: "error" });
             }
@@ -152,9 +206,8 @@ function UpdateData(UpdateDt) {
         success: function (response) {
             if (response?.status) {
                 showToast("Data Update successfully", { type: "success" });
-                //setTimeout(() => {
-                //    window.location.href = '/QCTemperatureEntryList/Index';
-                //}, 1500);
+                setFormReadOnly();
+                readOnly = true;
             } else {
                 showToast("Update failed: " + (response?.message || "Unknown error."), { type: "error" });
             }
@@ -172,7 +225,6 @@ async function fillHeaderData(headdata) {
         return;
     }
     const data = headdata[0];
-    console.log(data);
     $("#TxtDocId").val(data.DOC_ID ?? "");
     $("#NumDocNo").val(data.V_NO ?? "");
     $("#DtDocDate").val(data.V_DATE ? data.V_DATE.substring(0, 10) : "");
@@ -180,8 +232,8 @@ async function fillHeaderData(headdata) {
     $("#TxtRemarks").val(data.REMARK ?? "");
     BindHeaderDropDown({
         inchargeId: data.INCH_CODE ?? 0,
-        supervisorId: data.OPERATORE_CODE ?? 0,
-        operatorId: data.SUP_CODE ?? 0,
+        supervisorId: data.SUP_CODE ?? 0,
+        operatorId: data.OPERATORE_CODE ?? 0,
         shiftId: data.SHIFT ?? "",
         denierId: data.DENIER ?? 0,
         plantId: data.DEPT_CODE ?? 0
@@ -208,11 +260,30 @@ async function fillWinderData(data) {
         });
 
         $(`#ddlWinder${idx}`).val(item.WINDER_CODE).trigger('change');
-        $(`#TxtWidth${idx}`).val(item.WIDTH_MM);
-        $(`#TxtDenier${idx}`).val(item.DENIER);
-        $(`#TxtBreakingLoad${idx}`).val(item.BREAKING_LOAD);
-        $(`#TxtTeracityGpd${idx}`).val(item.TENACITY);
-        $(`#TxtElongation${idx}`).val(item.ELONGATION);
+        //$(`#TxtWidth${idx}`).val(item.WIDTH_MM);
+        //$(`#TxtDenier${idx}`).val(item.DENIER);
+        //$(`#TxtBreakingLoad${idx}`).val(item.BREAKING_LOAD);
+        //$(`#TxtTeracityGpd${idx}`).val(item.TENACITY);
+        //$(`#TxtElongation${idx}`).val(item.ELONGATION);
+        $(`#TxtWidth${idx}`).val(
+            item.WIDTH_MM != null ? parseFloat(item.WIDTH_MM).toFixed(2) : ''
+        );
+
+        $(`#TxtDenier${idx}`).val(
+            item.DENIER != null ? parseFloat(item.DENIER).toFixed(2) : ''
+        );
+
+        $(`#TxtBreakingLoad${idx}`).val(
+            item.BREAKING_LOAD != null ? parseFloat(item.BREAKING_LOAD).toFixed(2) : ''
+        );
+
+        $(`#TxtTeracityGpd${idx}`).val(
+            item.TENACITY != null ? parseFloat(item.TENACITY).toFixed(2) : ''
+        );
+
+        $(`#TxtElongation${idx}`).val(
+            item.ELONGATION != null ? parseFloat(item.ELONGATION).toFixed(2) : ''
+        );
     }
 }
 
@@ -238,7 +309,39 @@ async function fillMaterialData(data) {
         $(`#ddlMaterial${idx}`).val(item.MAT_CODE).trigger('change');
         $(`#TxtLot${idx}`).val(item.GRADE);
         $(`#TxtNoOfBags${idx}`).val(item.NO_OF_BAGS);
-        $(`#TxtPercentage${idx}`).val(item.MAT_PER);
+        $(`#TxtPercentage${idx}`).val(
+            item.MAT_PER != null ? parseFloat(item.MAT_PER).toFixed(2) : ''
+        );
+        //$(`#TxtPercentage${idx}`).val(item.MAT_PER);
+    }
+}
+async function fillTestParameterData(data) {
+    const testParamTable = $('#tblTestParameter tbody');
+    testParamTable.empty();
+
+    const materialItems = data.filter(item => (item.TYPE || item.type) === 'ROOM');
+
+    for (let index = 0; index < materialItems.length; index++) {
+        const item = materialItems[index];
+        const idx = index + 1;
+
+        addTestParameterRow();
+        const ParamSelect = (`#TxtPlantZoneId${idx}`);
+        await loadDropdown({
+            type: 'TestParameter',
+            selectElem: ParamSelect,
+            defaultText: "- Select Parameter -",
+            selectedValue: item.CODE
+        });
+
+        $(`#TxtPlantZoneId${idx}`).val(item.ROOM_CODE || item.rooM_CODE || '').trigger('change');
+        $(`#TxTemperature${idx}`).val(item.temp_READ != null
+            ? item.temp_READ.toFixed(2)
+            : '0.00');
+        $(`#TxtRemark${idx}`).val(item.TEMP_REM || '');
+        $(`#TxtDateTime${idx}`).val(item.TIME_TAKEN
+            ? formatDateToSqlDatetime(item.TIME_TAKEN)
+            : '');
     }
 }
 
@@ -270,7 +373,9 @@ async function collectFormData() {
         INCH_CODE: parseIntSafe(document.getElementById('ddlIncharge')?.value),
         OPERATORE_CODE: parseIntSafe(document.getElementById('ddlOperator')?.value),
         SUP_CODE: parseIntSafe(document.getElementById('ddlSupervisor')?.value),
-        DEPT_CODE: parseIntSafe(document.getElementById('ddlPlantName')?.value),
+        DEPT_CODE: (window.compcode === "2" || window.compcode === "5") ?
+            parseIntSafe(document.getElementById('ddlPlantName')?.value) :
+            parseIntSafe(document.getElementById('ddlLineNo')?.value) ,
         REMARK: toNullableString(document.getElementById('TxtRemarks')?.value),
         SaveOrUpdate: (!DOC_ID || DOC_ID === "") ? "Save" : "Update",
         TapeQualitys: allTapeQualityItems
@@ -281,8 +386,8 @@ async function collectFormData() {
 
 async function collectPlantZodeData() {
     const plantItems = [];
-
-    $('#tblPlantZone tbody tr').each(function () {
+    let tbl = getPlantTblTbody();
+    $(tbl).each(function () {
         const idx = this.id.replace('row', '');
         const $r = $(this);
 
@@ -423,16 +528,17 @@ async function collectMaterialData() {
     });
     return materialItems;
 }
+
 //===Doc Details===
 function GetDocid() {
     $.ajax({
         url: '/QCTemperatureEntry/GetMaxVNo',
         type: 'GET',
-        data: { vType: vType, tableName: 'TAPE_QUALITY1' },
+        data: { vType: vType/*, tableName: 'TAPE_QUALITY1'*/ },
         success: function (response) {
-            if (response.status === true && response.data) {
-                $('#NumDocNo').val(response.data.vNo || '');
-                $('#TxtDocId').val(response.data.docId || '');
+            if (response.status === true && response.vNo) {
+                $('#NumDocNo').val(response.vNo || '');
+                $('#TxtDocId').val(response.docId || '');
             } else {
                 $('#txtDocNo').val('');
                 $('#TxtDocId').val('');
@@ -454,9 +560,14 @@ async function GetDocData(MasterTblId, readOnly) {
             await fillHeaderData(response.header);
             await fillWinderData(response.detail);
             await fillMaterialData(response.detail);
-            fillPlanZoneTable(response.detail);
-            fillScrewTable(response.detail);
-
+            if (window.compcode === "2" || window.compcode === "5") {
+                fillPlanZoneTable(response.detail, false);
+            }
+            else {
+                fillTestParameterData(response.detail);
+            }
+            fillScrewTable(response.detail, false);
+            
             // await fillItemDetailTable(response.detail);
             if (readOnly === 'true') {
                 setFormReadOnly();
@@ -469,6 +580,7 @@ async function GetDocData(MasterTblId, readOnly) {
         console.error(error);
     }
 }
+
 //===Fill Plant Zone and Screw Table====
 function fillPlanZoneTable(data = null, isImported = false) {
     $.ajax({
@@ -497,7 +609,9 @@ function fillPlanZoneTable(data = null, isImported = false) {
                         const match = plantZoneValues.find(p => p.ROOM_CODE === item.CODE);
 
                         if (match) {
-                            temperature = match.TEMP_READ ?? '';
+                            temperature = match.TEMP_READ != null
+                                ? match.TEMP_READ.toFixed(2)
+                                : '';
                             remark = match.TEMP_REM ?? '';
                             datetime = match.TIME_TAKEN
                                 //? new Date(match.TIME_TAKEN).toISOString().slice(0, 16)
@@ -555,7 +669,9 @@ function fillScrewTable(data = null, isImported = false) {
                         const match = screwValues.find(p => p.SPEED_CODE === item.CODE);
 
                         if (match) {
-                            speed = match.SPEED_READ ?? '';
+                            speed = match.SPEED_READ != null
+                                ? match.SPEED_READ.toFixed(2)
+                                : '';
                             remark = match.TEMP_REM ?? '';
                             datetime = match.TIME_TAKEN
                                 //? new Date(match.TIME_TAKEN).toISOString().slice(0, 16)
@@ -588,9 +704,11 @@ function fillScrewTable(data = null, isImported = false) {
         }
     });
 }
+//========================================
+//          Add Rows
+//========================================
 
-//===Add Rows====
-        //===WINDER===
+    //===WINDER===
 function addWinderRecordRow() {
     const tbody = $('#tblWinder tbody');
     tbody.find('.btn-add-action').remove();
@@ -621,13 +739,16 @@ function addWinderRecordRow() {
 
     
 
+    
+
     loadDropdown({
         type: 'Winder',
         selectElem: winderSelect,
         defaultText: "- Select Winder -"
     });
 }
-        //===MATERIAL===
+
+    //===MATERIAL===
 function addMaterialRecordRow() {
     const tbody = $('#tblMaterial tbody');
     tbody.find('.btn-add-action').remove();
@@ -659,6 +780,40 @@ function addMaterialRecordRow() {
         defaultText: "- Select Material -"
     });
 }
+
+    //====TEST PARAMETER===
+function addTestParameterRow() {
+        const tbody = $('#tblTestParameter tbody');
+        tbody.find('.btn-add-action').remove();
+        const rowCount = tbody.find('tr').length + 1;
+
+        const newRow = `
+            <tr class="no-border-input" id="row${rowCount}">
+                <td>
+                    <select class="form-control" style="width:400px;" id="TxtPlantZoneId${rowCount}">
+                        <option value="">- Select Parameter -</option>
+                    </select>
+                </td>
+               <td><input type="text" class="form-control temperature-input" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxTemperature${rowCount}"/></td>
+                                <td><input type="text" class="form-control" maxlength="100" id="TxtRemark${rowCount}"/></td>
+                <td><input type="datetime-local" class="form-control" id="TxtDateTime${rowCount}" disabled/></td>
+                <td class="action-col">   
+                    <button class="act-btn add btn-add-action btn-add-TestParameter-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+                    <button class="act-btn delete btn-delete-action btn-testParameterdelete-action" title="Delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+
+        tbody.append(newRow);
+
+        const testParamSelect = (`#TxtPlantZoneId${rowCount}`);
+        loadDropdown({
+            type: 'TestParameter',
+            selectElem: testParamSelect,
+            defaultText: "- Select Parameter -"
+        });
+    }
+
 //===Add Row
 $(document).on('click', '.btn-add-Winder-action', function () {
     addWinderRecordRow();
@@ -666,17 +821,35 @@ $(document).on('click', '.btn-add-Winder-action', function () {
 $(document).on('click', '.btn-add-Material-action', function () {
     addMaterialRecordRow();
 });
+$(document).on('click', '.btn-add-TestParameter-action', function () {
+    addTestParameterRow();
+});
+//========================================
+//             DROPDOWNS
+//========================================
+
 //===Header Dropdowns===
 async function BindHeaderDropDown(data = {}) {
+    let operatorPlaceholder = '';
+    if (window.compcode === "2" || window.compcode === "5") {
+        operatorPlaceholder = '--Select Operator Name--';
+    }
+    else {
+        operatorPlaceholder = '--Select Chemist Name--';
+    }
     await Promise.all([
         bindDropdown('QCTemperatureEntry', 'Employee', '#ddlIncharge', '-- Select Incharge Name --', data.inchargeId || null, null, false, null, true),
         bindDropdown('QCTemperatureEntry', 'Employee', '#ddlSupervisor', '-- Select Supervisor Name --', data.supervisorId || null, null, false, null, true),
-        bindDropdown('QCTemperatureEntry', 'Employee', '#ddlOperator', '-- Select Operator Name --', data.operatorId || null, null, false, null, true),
+        bindDropdown('QCTemperatureEntry', 'Employee', '#ddlOperator', operatorPlaceholder, data.operatorId || null, null, false, null, true),
         bindDropdown('QCTemperatureEntry', 'Shift', '#ddlShift', '-- Select Shift --', data.shiftId || null, null, true, null, false),
         bindDropdown('QCTemperatureEntry', 'Denier', '#ddlDenier', '-- Select Denier --', data.denierId || null, null, false, null, true),
-        bindDropdown('QCTemperatureEntry', 'Plant', '#ddlPlantName', '-- Select Plant --', data.plantId || null, null, false, null, true)
+        bindDropdown('QCTemperatureEntry', 'Plant', '#ddlPlantName', '-- Select Plant --', data.plantId || null, null, false, null, true),
+        //----------------------------------------------------------------------------------------------------------------------------------
+        bindDropdown('QCTemperatureEntry', 'Line', '#ddlLineNo', '-- Select Line --', data.plantId || null, null, false, null, true),
+        //bindDropdown('QCTemperatureEntry', 'Employee', '#ddlChemist', '-- Select Chemist Name --', data.chemistId || null, null, false, null, true),
     ]);
 }
+
 //===Table dropdowns
 async function loadDropdown({ type, selectElem, defaultText = "- Select -"/*, formatter*/, selectedValue = null }) {
     await bindDropdown('QCTemperatureEntry', type, selectElem, defaultText, selectedValue, null, false, null, true);
@@ -685,13 +858,79 @@ async function loadDropdown({ type, selectElem, defaultText = "- Select -"/*, fo
 //===Set Readonly
 function setFormReadOnly() {
     const form = $('#QCTemperatureEntryForm');
+    form.find('input, textarea, select').prop('disabled', true);
     $('#btn_import').prop('disabled', true).css('pointer-events', 'none');
-    $('#btn-save, #btnWinderRecordRow, #btnMaterialRecordRow').hide();
-    $('.btn-delete-action')
+    $('#btn-save').hide();
+    $('.btn-delete-action, .btn-add-Winder-action, .btn-add-Material-action, .btn-add-TestParameter-action, #btn_fill')
         .addClass('disabled')
         .css('pointer-events', 'none');
     form.addClass('erppage-readonly');
 }
+
+//========================================
+//             VALIDATIONS
+//========================================
+
+async function Validate() {
+    let operatorToast = '';
+    if (window.compcode === "2" || window.compcode === "5") {
+        operatorToast = 'Operator Name';
+    }
+    else {
+        operatorToast = 'Chemist Name';
+    }
+    let isValid = true
+    if (
+        !validateRequiredField('#NumDocNo', 'Doc No') ||
+        !validateRequiredField('#DtDocDate', 'Doc Date') ||
+        !validateRequiredField('#ddlShift', 'Shift Type') ||
+        !validateRequiredField('#TmTime', 'Time') ||
+        // !validateRequiredField('#ddlDenier', 'Denier')
+        !validateRequiredField('#ddlOperator', operatorToast)
+    ) {
+        isValid = false;
+        return isValid;
+    }
+    if (window.compcode === "2" || window.compcode === "5") {
+        if (!validateRequiredField('#ddlPlantName', 'Plant Name')) {
+            isValid = false;
+            return isValid;
+        }
+    }
+    else {
+        if (!validateRequiredField('#ddlLineNo', 'Line Name')) {
+            isValid = false;
+            return isValid;
+        } 
+    }
+    const checkValidation = await checkValidDate();
+    if (checkValidation == false) {
+        isValid = false;
+        return isValid;
+    }
+    const isWinderValid = validateWinderTable();
+    if (!isWinderValid) {
+        isValid = false;
+        return isValid;
+    }
+    const isMaterialValid = validateMaterialTable();
+    if (!isMaterialValid) {
+        isValid = false;
+        return isValid;
+    }
+    const isPlantDuplicate = checkDuplicatePlantZones();
+    if (isPlantDuplicate) {
+        isValid = false;
+        return isValid;
+    }
+    const isSpeedDuplicate = checkDuplicateSpeedItem();
+    if (isSpeedDuplicate) {
+        isValid = false;
+        return isValid;
+    }
+    return isValid;
+}
+
 //===Validate VDate
 async function checkValidDate() {
     const data = {
@@ -760,6 +999,7 @@ async function Validate() {
     }
     return isValid;
 }
+
 //===Validate Tables====
 function validateWinderTable() {
     let isValid = true;
@@ -793,16 +1033,51 @@ function validateMaterialTable() {
 
     return isValid;
 }
-//===Duplicate item 
-function checkDuplicatePlantZones() {
+function validateMaterialTable() {
+    let isValid = true;
+    const tbody = $('#tblMaterial tbody');
+
+    tbody.find('tr').each(function () {
+        // Winder select
+        const winderSelect = $(this).find('select[id^="ddlMaterial"]');
+        const winderValue = winderSelect.val();
+        if (!winderValue) {
+            setInvalid(winderSelect, "Material name empty!");
+            isValid = false;
+        }
+    });
+
+    return isValid;
+}
+function checkDuplicateSpeedItem() {
     const seen = {}; // To track already seen Plant Zone Names
     let hasDuplicate = false;
 
-    $('#tblPlantZone tbody tr').each(function () {
-        const nameInput = $(this).find('input[id^="TxtPlantZoneName"]');
+    $('#tblScrew tbody tr').each(function () {
+        const nameInput = $(this).find('input[id^="TxtScrewName"]');
         const name = nameInput.val()?.trim();
 
         // Skip empty names
+        if (!name) return;
+
+        if (seen[name]) {
+            hasDuplicate = true;
+            setInvalid(nameInput, "Duplicate Speed item!");
+
+//========================================
+//             Duplicate item
+//========================================
+function checkDuplicatePlantZones() {
+    const seen = {}; // To track already seen Plant Zone Names
+    let hasDuplicate = false;
+    let tbl = getPlantTblTbody();
+    $(tbl).each(function () {
+        const nameInput = (window.compcode === "2" || window.compcode === "5") ?
+                            $(this).find('input[id^="TxtPlantZoneName"]') :
+                            $(this).find('select[id^="TxtPlantZoneId"]')                            ;
+        const name = nameInput.val();
+        
+        // Skip empty names 
         if (!name) return;
 
         if (seen[name]) {
@@ -838,6 +1113,7 @@ function checkDuplicateSpeedItem() {
 
     return hasDuplicate; // true if duplicates exist
 }
+
 //===Temp and Speed Column Focus====
 function setFocusInColumn(selector) {
     $(selector).on('keydown', function (e) {
@@ -855,6 +1131,7 @@ function setFocusInColumn(selector) {
         }
     });
 }
+
 //===Import===
 $('#btn_import').on('click', function () {
     let timeInterval = parseIntSafe($('#TxtImportInterval').val());
@@ -865,6 +1142,10 @@ $('#btn_import').on('click', function () {
                (readingCode == 2) ? 'WIND' : '';
     let shift = $('#ddlShift').val() || '';
     let deptCode = parseIntSafe($('#ddlPlantName').val());
+    if (!deptCode) {
+        showToast("Please select Plant!!", { type: "warning" });
+        $('#ddlPlantName').focus();
+    }
     getImportedData(timeInterval, type, shift, deptCode);
 })
 function getImportedData(timeInterval, type, shift, deptCode) {
@@ -886,7 +1167,6 @@ function getImportedData(timeInterval, type, shift, deptCode) {
                         fillWinderData(response.data);
                     }
                 }
-            } else {
             }
         },
         error: function () {
@@ -894,7 +1174,47 @@ function getImportedData(timeInterval, type, shift, deptCode) {
         }
     });
 }
+
+//===Fill===
+function getTestParamDataToFill(deptCode) {
+    $.ajax({
+        url: '/QCTemperatureEntry/FillDataByLineNo',
+        type: 'GET',
+        dataType: 'JSON',
+        data: { deptCode: deptCode },
+        success: function (response) {
+            if (response?.success) {
+                if (response.data && response.data.length > 0) {
+                    console.log(response.data);
+                    fillTestParameterData(response.data)
+                }
+            } 
+        },
+        error: function () {
+            showToast("Error occurred while fetching!", { type: "error" });
+        }
+    })
+}
+$('#btn_fill').on('click', function () {
+    let deptCode = parseIntSafe($('#ddlLineNo').val());
+    if (!deptCode) {
+        showToast("Please select Line No!!", { type: "warning" });
+        $('#ddlLineNo').focus();
+    }
+    getTestParamDataToFill(deptCode);
+})
+
 //========Helpers======
+function getPlantTblTbody() {
+    let tbl = '';
+    if (window.compcode === "2" || window.compcode === "5") {
+        tbl = '#tblPlantZone tbody tr';
+    }
+    else {
+        tbl = '#tblTestParameter tbody tr';
+    }
+    return tbl;
+}
 function allowOnlyDecimal(input) {
     input.value = input.value
         .replace(/[^0-9.]/g, '')

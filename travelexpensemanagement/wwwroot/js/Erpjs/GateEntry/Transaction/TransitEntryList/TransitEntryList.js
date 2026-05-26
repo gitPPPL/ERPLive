@@ -42,6 +42,14 @@ $(document).ready(function () {
 			}
 
 			$.each(docs, function (index, item) {
+				let actions = '';
+				if (window.permissions.canEdit) {
+					actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>`;
+				}
+				actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-eye"></i></button>`;
+				if (window.permissions.canDelete) {
+					actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>`;
+				}
 				tbody.append(`
 					<tr>
 						<td>${item.v_TYPE}</td>
@@ -54,13 +62,7 @@ $(document).ready(function () {
 						<td>${item.bilL_NO}</td>
 						<td>${item.bilL_DATE ? formatDateYMD(item.bilL_DATE) : ''}</td>
 						<td>${item.trucK_NO}</td>
-						<td class="action-col">
-
-							<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
-							<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
-							
-						</td>
+						<td class="action-col">${actions}</td>
 					</tr>
 				`);
 			});
@@ -95,7 +97,7 @@ function viewMenuDetails(code, vtype) {
 	window.location.href = '/TransitEntry/Index?id=' + encodeURIComponent(code) + '&vtype=' + encodeURIComponent(vtype) + '&mode=view';
 }
 function deleteTransit(code, vType) {
-	deleteRecordByType("TransitEntryList", code, vType, {
+	deleteRecordbytype("TransitEntryList", code, vType, {
 		action: "Delete",
 		text: "This will permanently delete the Transit entry.",
 		successCallback: transitPagination.load

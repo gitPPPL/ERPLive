@@ -854,7 +854,3 @@ function Select2TextboxFocus(ddl) {
     });
 }
 
-//===Print
-$('#btn-print').on('click', function () {
-    
-})

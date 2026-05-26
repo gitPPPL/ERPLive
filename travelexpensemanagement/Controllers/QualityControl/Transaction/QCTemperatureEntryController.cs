@@ -203,15 +203,15 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
         //===Check Modification Days
         [HttpGet]
-        //public JsonResult checkModificationDays(DateTime? vDate)
-        //{
-        //    if (!vDate.HasValue)
-        //    {
-        //        return Json(new { success = false, message = "Doc Date is empty!!" });
-        //    }
-        //    var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
-        //    return Json(new { success = true, isAllowed = allowed, message = message });
-        //}
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
+            {
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
         
         [HttpPost]
         public async Task<IActionResult> SaveOrUpdateQcTemperatureEntry([FromBody] QcTemperature model)

@@ -37,7 +37,8 @@ $(document).ready(function () {
 			$.each(docs, function (index, item) {
 				let actions = '';
 				if (window.permissions.canEdit) {
-					actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}')"><i class="fa fa-edit"></i></button>`;
+					//actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}')"><i class="fa fa-edit"></i></button>`;
+					actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="checkModificationAllowed('${item.V_DATE}', '${item.DOC_ID}')"><i class="fa fa-edit"></i></button>`;
 				}
 				actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
@@ -92,6 +93,18 @@ function deleteQCTemperatureEntry(docId) {
 		text: "This will permanently delete the QC Temperature entry.",
 		successCallback: qcTemperaturePagination.load
     });
+}
+
+
+function checkModificationAllowed(vDate, rowId) {
+	checkModificationDays({
+		controller : 'QCTemperatureEntry',
+		vDate: vDate,
+		rowId: rowId,
+		onAllowed: function (rowId) {
+			AddOrEditFunction(rowId);
+		}
+	})
 }
 
 function exportToExcel() {

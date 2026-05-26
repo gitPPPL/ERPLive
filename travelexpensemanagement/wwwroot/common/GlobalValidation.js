@@ -345,3 +345,62 @@ function getCurrentDateYMD() {
     const yyyy = today.getFullYear();
     return `${yyyy}-${mm}-${dd}`;
 };
+
+//===================Check Modification Allowed or Not===================
+function checkModificationDays(options) {
+    const {
+        controller,
+        action = 'checkModificationDays',
+        vDate,
+        rowId = null,
+        onAllowed = null,
+        url = `/${controller}/${action}`
+    } = options;
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        data: { vDate: vDate },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                if (response.isAllowed === 0) {
+                    showToast(response.message, { type: "warning" });
+                }
+                else {
+
+                    // Dynamic callback
+                    if (typeof onAllowed === "function") {
+                        onAllowed(rowId);
+                    }
+
+                }
+
+            } else {
+                showToast(response.message, { type: "error" });
+            }
+        },
+
+        error: function () {
+            showToast("An error occurred!", { type: "error" });
+        }
+    });
+
+    //How to call
+
+    //====Use checkModificationAllowed on click of edit button
+
+    //function checkModificationAllowed(vDate, rowId) {
+    //    checkModificationDays({
+    //        controller: 'QCTemperatureEntry',
+    //        vDate: vDate,
+    //        rowId: rowId,
+    //        onAllowed: function (rowId) {
+    //            AddOrEditFunction(rowId);
+    //        }
+    //    })
+    //}
+}
