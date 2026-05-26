@@ -32,7 +32,7 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
             if (useSelect2) {
                 ddl.select2({
                     placeholder: placeholder,  
-                    allowClear: true            
+                    allowClear: true,            
                 });
                 ddl.on('select2:open', function () {
                     setTimeout(function () {

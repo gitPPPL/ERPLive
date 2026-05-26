@@ -1,23 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Drawing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Dynamic;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using Microsoft.Data.SqlClient;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
+    [SessionAuthorize]
     public class QCTemperatureEntryListController : Controller
     {
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public QCTemperatureEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly IQCTemperatureEntryListRepository _qCTempListRepository;
+        public QCTemperatureEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, 
+            GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IQCTemperatureEntryListRepository qCTempListRepository)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
+            _qCTempListRepository = qCTempListRepository;
         }
         public IActionResult Index()
         {
@@ -36,106 +45,23 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         [HttpGet]
         public async Task<IActionResult> GetQcTempratureList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            try
+            var result = await _qCTempListRepository.GetList(searchTerm, pageNumber, pageSize);
+            if(result.data != null)
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", "TAPE" },
-                    {"@Action", "QcTempratureEntryList" }
-                };
-
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetQcTempratureEntry]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
-                        {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "V_NO" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new { status = true, data = pagedList, totalCount });
-
+                return Json(new { success = result.status, data = result.data, totalCount = result.totalCount });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return Json(new { success = result.status, message = result.message });
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteQcTempratureEntry(string docId)
         {
-            try
+            if (string.IsNullOrEmpty(docId))
             {
-                if (string.IsNullOrEmpty(docId))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-
-                var userSession = _globalValue.GetGlobalVariables();
-                string VType = docId.Substring(0, 4);
-                string VNo = docId.Substring(4);
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
-                    {
-                        try
-                        {
-
-                            string[] deleteQueries = {
-                        "DELETE FROM TAPE_QUALITY1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM TAPE_QUALITY2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-
-                        };
-
-                            foreach (var query in deleteQueries)
-                            {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return Json(new { success = true, data = "Data deleted successfully" });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return Json(new { success = false, message = $"Delete failed: {ex.Message}" });
-                        }
-                    }
-                }
+                return Json(new { status = false, message = "Invalid ID" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            var result = await _qCTempListRepository.Delete(docId);
+            return Json(new { success = result.status, message = result.message });
         }
 
         [HttpGet]
@@ -152,7 +78,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE",  usersession.PubBranchCode},
                     {"@V_TYPE", "TAPE" },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }

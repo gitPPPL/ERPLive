@@ -1,53 +1,56 @@
 ﻿
-	let currentPage = 1;
-	let pageSize = 10;
-	let totalCount = 0;
 
-	$(document).ready(function () { 
-		GetMasterDataList();
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			GetMasterDataList();
-		});
-	});
-
-	function GetMasterDataList() {
-		const searchTerm = $('#searchBox').val().trim();
-		$.ajax({
-			url: '/VehicleInwardEntryList/GetTransportInwardList',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
-			},
-			success: function (res) {
-				const mastListData = res.data || [];
-				const count = res.totalCount || 0;
-				totalCount = count
-				let tbody = $('#tblPurchaseBillPassEntry tbody');
-				tbody.empty();
-				console.log(mastListData);
-				if (mastListData.length === 0) {
-					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
-					return;
+let vehiclePagination;
+$(document).ready(function () {
+	
+	vehiclePagination = Pagination.create({
+		pageSize: 10,
+		paginationContainer: '#pageNumbers',
+		infoContainer: '#pageInfoText',
+		loader: function (params) {
+			$.ajax({
+				url: '/VehicleInwardEntryList/GetTransportInwardList',
+				type: 'GET',
+				dataType: 'json',
+				data: {
+					searchTerm: $('#searchBox').val(),
+					pageNumber: params.pageNumber,
+					pageSize: params.pageSize
+				},
+				success: function (res) {
+					params.callback({
+						data: res.data,
+						totalCount: res.totalCount
+					});
+				},
+				error: function (xhr) {
+					// toastr.error('Error loading data');
+					showToast('Error loading data', { type: "error" });
 				}
-				$.each(mastListData, function (index, item) {
-					let actions = '';
-					if (window.permissions.canEdit) {
-						actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.docid}')"><i class="fa fa-edit"></i></button>`;
-					}
-					actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>`;
-					if (window.permissions.canDelete) {
-						actions += `<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteVehicleEntry('${item.docid}')"><i class="fa fa-trash"></i></button>`;
-					}
-					if (window.permissions.canDocDetail) {
-						actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.docid}')"><i class="fa fa-file-alt"></i></button>`;
-					}
+			});
+		},
+		render: function (docs) {
+			const tbody = $('#tblPurchaseBillPassEntry tbody');
+			tbody.empty();
+			if (!docs.length) {
+				tbody.append(`<tr><td colspan="10" class="text-center text-muted">No list found.</td></tr>'`);
+				return;
+			}
 
-					tbody.append(`
-								<tr>
+			$.each(docs, function (index, item) {
+				let actions = '';
+								if (window.permissions.canEdit) {
+									actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.docid}')"><i class="fa fa-edit"></i></button>`;
+								}
+								actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>`;
+								if (window.permissions.canDelete) {
+									actions += `<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteVehicleEntry('${item.docid}')"><i class="fa fa-trash"></i></button>`;
+								}
+								if (window.permissions.canDocDetail) {
+									actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.docid}')"><i class="fa fa-file-alt"></i></button>`;
+								}
+				tbody.append(`
+					<tr>
 									<td class="d-none code">${item.docid}</td>
 									<td>${item.vno}</td>
 									<td>${Formatddmmyyyy(item.vdate) || ''}</td>
@@ -56,106 +59,27 @@
 									<td>${item.partyname}</td>
 									<td>${item.truckno}</td>
 									<td>${item.transport}</td>
-									<td>${actions}</td>
+									<td class="action-col">${actions}</td>
 								</tr>
-								`);
-				});
+				`);
+			});
 
-				renderNewPagination();
-			},
-			error: function (xhr) {
-				showToast('Error loading Shift Data list: ' + xhr.responseText, { type: "error" });
-			}
-		});
-	}
-	function renderNewPagination() {
-
-			const totalPages = Math.ceil(totalCount / pageSize) || 1;
-
-			let html = '';
-			let maxVisible = 2;
-			let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-			let endPage = startPage + maxVisible - 1;
-
-			if (endPage > totalPages) {
-				endPage = totalPages;
-				startPage = Math.max(1, endPage - maxVisible + 1);
-			}
-
-			// First + dots
-			if (startPage > 1) {
-				html += `<button class="btn btn-sm mx-1 page-number" onclick="goToPage(1)">1</button>`;
-				if (startPage > 2) {
-					html += `<button class="btn btn-sm mx-1 dots">...</button>`;
-				}
-			}
-
-			// Middle pages
-			for (let i = startPage; i <= endPage; i++) {
-				html += `<button class="btn btn-sm mx-1 page-number ${i === currentPage ? 'active' : ''}"
-							onclick="goToPage(${i})">${i}</button>`;
-			}
-
-			// Last + dots
-			if (endPage < totalPages) {
-				if (endPage < totalPages - 1) {
-					html += `<button class="btn btn-sm mx-1 dots">...</button>`;
-				}
-				html += `<button class="btn btn-sm mx-1 page-number" onclick="goToPage(${totalPages})">${totalPages}</button>`;
-			}
-
-			$('#pageNumbers').html(html);
-
-			// Results Text
-			let start = (currentPage - 1) * pageSize + 1;
-			let end = Math.min(currentPage * pageSize, totalCount);
-
-			if (totalCount === 0) {
-				start = 0;
-				end = 0;
-			}
-
-			$('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
-
-			// Button disable
-			$('#prevBtn').prop('disabled', currentPage === 1);
-			$('#nextBtn').prop('disabled', currentPage === totalPages);
-	}
-
-		// Prev / Next
-	function prevPage() {
-		if (currentPage > 1) {
-			currentPage--;
-			GetMasterDataList();
 		}
-	}
-
-	function nextPage() {
-		const totalPages = Math.ceil(totalCount / pageSize);
-		if (currentPage < totalPages) {
-			currentPage++;
-			GetMasterDataList();
-		}
-	}
-
-	// Page click
-	function goToPage(page) {
-		currentPage = page;
-		GetMasterDataList();
-	}
-
-	// Page size change
-	function changeRowsPerPage() {
-		pageSize = parseInt($('#pageSizeSelect').val());
-		currentPage = 1;
-		GetMasterDataList();
-	}
-
-	// Search
-	$('#tableSearch').on('keyup', function () {
-		currentPage = 1;
-		GetMasterDataList();
 	});
+	// First Load
+	vehiclePagination.load();
+	// Search
+	$('#searchBox').keyup(function () {
+		vehiclePagination.load();
+	});
+});
+
+// Page Size Change
+function changeRowsPerPage() {
+	vehiclePagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+	vehiclePagination.load();
+}
+
 	function AddOrEditFunction(rowId) {
 		window.location.href = '/VehicleInwardEntry/Index?id=' + encodeURIComponent(rowId);
 	}
@@ -168,7 +92,7 @@
 		deleteRecord("VehicleInwardEntryList", docId, {
 			action: "DeleteVehicleInwardEntry",
 			text: "This will permanently delete the vehicle inward entry.",
-			successCallback: GetMasterDataList
+			successCallback: vehiclePagination.load
 		});
 	}
 

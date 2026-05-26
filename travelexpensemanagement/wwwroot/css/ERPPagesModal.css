@@ -11,7 +11,7 @@
 .erppagesmodal-header {
     background: linear-gradient(135deg, #2f7d32, #1b5e20);
     color: #fff;
-    padding: 8px 20px;
+    padding: 8px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -24,10 +24,10 @@
 }
 
 .erppagesmodal-header-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.15);
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,17 +35,17 @@
 
 .erppagesmodal-title {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
 }
 
 .erppagesmodal-close {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.12);
     border: none;
     color: #fff;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 18px;
     cursor: pointer;
     transition: 0.2s;
 }
@@ -181,7 +181,28 @@
         box-shadow: 0 6px 14px rgba(47,125,50,0.25);
     }
 
+/* Top bar spacing */
+.erppagesmodal-topbar {
+    margin-bottom: 10px;
+}
 
+/* Center checkbox vertically */
+.erppagesmodal-checkbox-col {
+    display: flex;
+    align-items: center;
+}
+
+/* Checkbox alignment */
+.erppagesmodal-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Specific column width (instead of inline) */
+.col-item-name {
+    width: 300px;
+}
 
 /* Responsive */
 @media(max-width:768px) {
