@@ -25,8 +25,8 @@
     <div class="erppage-container">
         <fieldset class="erppage-fieldset">
             <div class="erppage-grid4">
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Document Type</label>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
                     <Select class="erppage-input" id="ddlDocType">
                         <option>Select Document Type</option>
                     </Select>
@@ -36,11 +36,11 @@
                     <input type="text" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly />
                 </div>
                 <div class="erppage-divfield">
-                    <label class="erppage-label">Document Date</label>
+                    <label class="erppage-label">Doc Date</label>
                     <input type="date" class="erppage-input" id="DtDocDate" />
                     <input type="time" class="erppage-input" id="DtTxtDocDate" />
                 </div>
-                <div class="erppage-divfield erppage-col-span-2">
+                <div class="erppage-divfield">
                     <label class="erppage-label">Type</label>
                     <Select class="erppage-input" id="ddlType">
                         <option> Select Type </option>
@@ -63,17 +63,18 @@
                         <option value="E-Commerce Sale">E-Commerce Sale</option>
                     </Select>
                 </div>
+                <section id="Conditionnaldesignid" style="display:none;">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Exp.Dt of Return</label>
+                        <input type="date" class="erppage-input" id="DtExpectedDateReturn" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Respons. Person</label>
+                        <input type="text" class="erppage-input" id="txtResponsiblePerson" />
+                    </div>
+                </section>
             </div>
-            <div class="erppage-grid4" id="Conditionnaldesignid" style="display:none;">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Expected Date of Return</label>
-                    <input type="date" class="erppage-input" id="DtExpectedDateReturn" />
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Responsible Person</label>
-                    <input type="text" class="erppage-input" id="txtResponsiblePerson" />
-                </div>
-            </div>
+            
             <fieldset class="erppage-subfieldset">
                 <legend>Party Details</legend>
                 <div class="erppage-subheader">Party Details</div>
@@ -84,22 +85,22 @@
                             <option>Select Party Name</option>
                         </Select>
                     </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Party Name By Address</label>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Party Address</label>
                         <Select class="erppage-input" id="ddlPartyNameByAddress">
                             <option>Select Party Name By Address</option>
                         </Select>
                     </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Add Line1</label>
-                        <input type="text" class="erppage-textarea" id="TxtAdd1PD" placeholder="Enter Address Line 1" readonly />
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Address 1</label>
+                        <input type="text" class="erppage-input" id="TxtAdd1PD" placeholder="Enter Address Line 1" readonly />
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label">Add Line2</label>
+                        <label class="erppage-label">Address 2</label>
                         <input type="text" class="erppage-input" id="TxtAdd2PD" placeholder="Enter Address Line 2" readonly />
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label">Add Line3</label>
+                        <label class="erppage-label">Address 3</label>
                         <input type="text" class="erppage-input" id="TxtAdd3PD" placeholder="Enter Address Line 3" readonly />
                     </div>
                     <div class="erppage-divfield">
@@ -128,7 +129,7 @@
                         <label class="erppage-label">WayBill No</label>
                         <input type="text" class="erppage-input" id="TxtWayBillNo" placeholder="Enter WayBill No" />
                     </div>
-                    <div class="erppage-divfield">
+                    <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Remarks</label>
                         <textarea type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
                     </div>
@@ -149,14 +150,14 @@
             <!-- Column Width Control -->
             <colgroup>
                 <col style="display:none;" /> <!-- Code -->
-                <col style="width: 250px;" /> <!-- Item Name -->
-                <col style="width: 150px;" /> <!-- Department -->
-                <col style="width: 120px;" />  <!-- Unit -->
-                <col style="width: 70px;" />  <!-- No -->
-                <col style="width: 100px;" /> <!-- Quantity -->
+                <col style="width: 300px;" /> <!-- Item Name -->
+                <col style="width: 120px;" /> <!-- Department -->
+                <col style="width: 80px;" />  <!-- Unit -->
+                <col style="width: 55px;" />  <!-- No -->
+                <col style="width: 70px;" /> <!-- Quantity -->
                 <col style="width: 180px;" /> <!-- Remarks -->
-                <col style="width: 120px;" /> <!-- Reff Type -->
-                <col style="width: 120px;" /> <!-- Reff No -->
+                <col style="width: 80px;" /> <!-- Reff Type -->
+                <col style="width: 95px;" /> <!-- Reff No -->
                 <col style="width: 140px;" /> <!-- Action -->
             </colgroup>
 
@@ -169,8 +170,8 @@
                     <th>No.</th>
                     <th>Quantity</th>
                     <th>Remarks</th>
-                    <th>Reff. Type</th>
-                    <th>Reff. No</th>
+                    <th>Ref. Type</th>
+                    <th>Ref. No</th>
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -212,7 +213,7 @@
 
 @* Modal Popup New *@
 <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg erppagesmodal">
+    <div class="modal-dialog erppagesmodal">
         <div class="modal-content erppagesmodal-content draggable-modal">
             <div class="erppagesmodal-header">
                 <div class="erppagesmodal-header-left">
@@ -228,28 +229,24 @@
                 </button>
             </div>
             <div class="erppagesmodal-body">
-                <div class="d-flex justify-content-end mb-3">
-                    <button type="button" class="erppage-btn erppage-btn-copy" id="Btn_selectedData">
-                        <i class="fa fa-check"></i> Selected Data
-                    </button>
-                </div>
+                
                 <div class="erppagelist-container">
                     <div class="excel-wrapper fixed-grid-wrapper">
                         <table id="tblpendingordermodal" class="excel-table fixed-grid-table">
 
                             <colgroup>
                                 <col style="width:50px;" />
-                                <col style="width:120px;" />
-                                <col style="width:120px;" />
-                                <col style="width:120px;" />
-                                <col style="width:120px;" />
-                                <col style="width:140px;" />
                                 <col style="width:100px;" />
-                                <col style="width:120px;" />
-                                <col style="width:140px;" />
+                                <col style="width:100px;" />
+                                <col style="width:100px;" />
                                 <col style="width:80px;" />
-                                <col style="width:120px;" />
-                                <col style="width:120px;" />
+                                <col style="width:260px;" />
+                                <col style="width:65px;" />
+                                <col style="width:90px;" />
+                                <col style="width:195px;" />
+                                <col style="width:65px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
                                 <col style="width:80px;" />
                             </colgroup>
 
@@ -275,7 +272,11 @@
                         </table>
                     </div>
                 </div>
-
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="erppage-btn erppage-btn-copy" id="Btn_selectedData">
+                        <i class="fa fa-check"></i> Selected Data
+                    </button>
+                </div>
                 <!-- PAGINATION -->
     @*             <div class="erppagelist-pagination mt-3">
                     <div class="pagination-left">

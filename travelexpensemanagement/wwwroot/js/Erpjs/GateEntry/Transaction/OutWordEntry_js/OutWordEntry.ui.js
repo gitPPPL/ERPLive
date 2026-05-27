@@ -98,7 +98,8 @@ function addRow($tbody, data = {}) {
         return !$(this).find("select.itemName").val();
     }).first();
 
-    $tbody.find(".btn-add-action").remove();
+    //$tbody.find(".btn-add-action").remove();
+    $tbody.find(".act-btn.edit").hide();
 
     const selectItems = generateSelect(itemMap, data.itemName || "");
     const selectDept = generateSelect(DeptMap, data.department || "");
@@ -151,7 +152,7 @@ function addRow($tbody, data = {}) {
                value="${data.refNo || ''}" readonly/>
       </td>
 
-      <td>
+      <td class="action-col">
         <button class="act-btn edit" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus btn-add-action"></i></button>
         <button class="act-btn delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash btn-delete-action"></i></button> 
       </td>

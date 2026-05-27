@@ -333,7 +333,6 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl
                 await con.OpenAsync();
 
                 int rowsAffected = await cmd.ExecuteNonQueryAsync();
-
                 //_globalValidationdate.LogInsertUpdateDelete(
                 //    destinationTable: "PROD1_QC",
                 //    sourceTable: "PROD1_QC",

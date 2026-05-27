@@ -59,7 +59,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "select code,name from EMP_MAST where Resign_Date is NULL and COMP_CODE= " + getdata.PubCompCode + "   ORDER BY name asc";
+                string query = "select code,name from EMP_MAST where Resign_Date is NULL and COMP_CODE= " + getdata.PubCompCode + "  and name <> ''  ORDER BY name asc";
                 var DDLInspBylist = _dropdownService.GetDropdownList(query);
                 return Json(DDLInspBylist);
             }
@@ -84,7 +84,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "select Code,name from ITEMDEPT_MAST where Tran_type='Production' and Place_type='Washline' and COMP_CODE=" + getdata.PubCompCode + "  ";
+                string query = "select Code,name from ITEMDEPT_MAST where Tran_type='Production' and Place_type='Washline' and COMP_CODE=" + getdata.PubCompCode + " and name <> '' order by name  ";
 
                 var DDLPordPlaceList = _dropdownService.GetDropdownList(query);
 
@@ -97,7 +97,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select code,Name from EMP_MAST WHERE Comp_code=" + getdata.PubCompCode + "  and Resign_date is null and Type in ('Staff','Semi Staff') Order by Name ";
+                string query = "Select code,Name from EMP_MAST WHERE Comp_code=" + getdata.PubCompCode + "  and Resign_date is null and Type in ('Staff','Semi Staff') and Name <> '' Order by Name ";
 
                 var DDLChemistList = _dropdownService.GetDropdownList(query);
 
@@ -110,7 +110,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select code,Name from EMP_MAST WHERE Comp_code=" + getdata.PubCompCode + " and Resign_date is null and Type in ('Staff') Order by Name ";
+                string query = "Select code,Name from EMP_MAST WHERE Comp_code=" + getdata.PubCompCode + " and Resign_date is null and Type in ('Staff') and Name <> '' Order by Name ";
 
                 var DDLQCInchargeList = _dropdownService.GetDropdownList(query);
 
@@ -124,7 +124,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 string query = "Select a.Code,a.name from item_mast a left join ITEM_GROUP b on a.GROUP_CODE=b.CODE and b.COMP_CODE= " + getdata.PubCompCode + "     where a.Active=1 and b.SALE_GROUP in ('Flakes') " +
-                    "and a.comp_code=" + getdata.PubCompCode + "  group by a.name,a.CODE order by a.name";
+                    "and a.comp_code=" + getdata.PubCompCode + " and a.name <> ''  group by a.name,a.CODE order by a.name";
 
                 var DDLGridItemList = _dropdownService.GetDropdownList(query);
 

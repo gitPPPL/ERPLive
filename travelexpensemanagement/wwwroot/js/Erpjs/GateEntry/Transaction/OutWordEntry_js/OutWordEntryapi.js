@@ -33,7 +33,7 @@ async function DDLParty() {
     const list = await res.json();
     const ddl = $("#ddlPartyName");
 
-    ddl.empty().append('<option value="">-- Select Party --</option>');
+    ddl.empty().append('<option value="">Select Party Name</option>');
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 
     ddl.select2({
@@ -133,7 +133,7 @@ function LoadFormByID(rowId, vtype) {
             console.log("Data", details);
 
             if (header.v_TYPE === "OURT") {
-                document.getElementById("Conditionnaldesignid").style.display = "flex";
+                document.getElementById("Conditionnaldesignid").style.display = "contents";
             } else {
                 document.getElementById("Conditionnaldesignid").style.display = "none";
             }

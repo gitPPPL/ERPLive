@@ -14,6 +14,9 @@
         <div class="erppage-header-title">Material Inward Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve" data-bs-toggle="modal" data-bs-target="#approvedModal" id="btn_approval" style="display:none;">
+            <i class="fa fa-check-circle"></i>Approved
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -21,13 +24,13 @@
 
     </div>
 </div>
-<div class="erppagelist-toolbar-end" style="display:none;">
+@* <div class="erppagelist-toolbar-end" style="display:none;">
     <div class="erppagelist-actions">
         <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve" data-bs-toggle="modal" data-bs-target="#approvedModal" id="btn_approval" style="display:none;">
             <i class="fa fa-check-circle"></i>Approved
         </button>
     </div>
-</div>
+</div> *@
 @* Modal Popup *@
 <div class="modal fade" id="approvedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg erppagesmodal">
@@ -122,11 +125,12 @@
                     <label for="InTime" class="erppage-label">In Time</label>
                     <input type="time" class="erppage-input" id="InTime">
                 </div>
+                
             </div>
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label for="TxtRptDate" class="erppage-label">
-                        Reporting Date
+                        Report Date
                     </label>
 
                     <div class="erppage-inline-group" style="width:100%;">
@@ -217,19 +221,18 @@
                     <fieldset class="erppage-fieldset">
                         <div class="erppage-section-header">Shipping Info</div>
                         <div class="erppage-body">
-                            <div class="erppage-grid2">
-                                <div class="erppage-field">
+                            <div class="erppage-grid4">
+                                <div class="erppage-field erppage-col-span-2">
                                     <label for="ddlShipFrom" class="erppage-label">Ship From</label>
                                     <select class="erppage-input" id="ddlShipFrom">
                                         <option>Select Ship From</option>
                                     </select>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-field erppage-col-span-2">
                                     <label for="txtShipAddress" class="erppage-label">Ship Address</label>
                                     <input type="text" class="erppage-input" id="txtShipAddress" readonly>
                                 </div>
-                            </div>
-                            <div class="erppage-grid4">
+                            
                                 <div class="erppage-field">
                                     <label for="ShipBillNo" class="erppage-label">Ship. Bill No</label>
                                     <input type="text" class="erppage-input" id="ShipBillNo">
@@ -252,8 +255,7 @@
                                         <option>Returnable</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="erppage-grid4">
+                            
                                 <div class="erppage-field">
                                     <label for="ddlDocStatus" class="erppage-label">Doc Status</label>
                                     <select class="erppage-input" id="ddlDocStatus">
@@ -411,7 +413,7 @@
                         <input type="text" class="erppage-redinput" id="TxtVehicleNo" placeholder="Enter Vehicle No" maxlength="10" />
                     </div>
                     <div class="erppage-divfield">
-                        <label for="TxtTransporter" class="erppage-label">Transport Name</label>
+                        <label for="TxtTransporter" class="erppage-label">Transp. Name</label>
                         <select class="erppage-input" id="TxtTransporter">
                             <option>Select Transport Name</option>
                         </select>
@@ -429,15 +431,15 @@
                 <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label for="TxtDriverName" class="erppage-label">Driver Name</label>
-                        <input type="text" class="erppage-input" id="TxtDriverName" maxlength="50" />
+                        <input type="text" class="erppage-redinput" id="TxtDriverName" maxlength="50" />
                     </div>
                     <div class="erppage-divfield">
-                        <label for="TxtDriverMobile" class="erppage-label">Driver Mobile No</label>
-                        <input type="number" class="erppage-input" id="TxtDriverMobile" maxlength="10" oninput="validateMobile(this)" />
+                        <label for="TxtDriverMobile" class="erppage-label">Driver No</label>
+                        <input type="number" class="erppage-redinput" id="TxtDriverMobile" maxlength="10" oninput="validateMobile(this)" />
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label for="txt_VehicleRemarks" class="erppage-label">Vehicle Remarks</label>
-                        <textarea class="erppage-textarea" id="txt_VehicleRemarks"></textarea>
+                        <input type="text" class="erppage-input" id="txt_VehicleRemarks"/>
                     </div>
                 </div>
                 <!-- Row 3 Buttons -->
@@ -621,7 +623,7 @@
 
                     <div class="erppage-divfield">
                         <label for="DtEWayDate" class="erppage-label">
-                            EWayBill Date
+                            EWBill Date
                             <span id="span_EWayBillDate" style="color:red; display:none;">*</span>
                         </label>
                         <input type="date" class="erppage-input" id="DtEWayDate">
@@ -629,7 +631,7 @@
 
                     <div class="erppage-divfield">
                         <label for="TxtEWayDate" class="erppage-label">
-                            EWayBill Expiry Date
+                            EWBill Exp. Date
                             <span id="span_EWayBillExpiryDate" style="color:red; display:none;">*</span>
                         </label>
                         <input type="date" class="erppage-input" id="TxtEWayDate">
@@ -705,7 +707,7 @@
                     </div>
                 </div>
 
-                <div class="erppage-grid3">
+                <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label for="TxtRemarks" class="erppage-label">Remarks</label>
                         <input class="erppage-input" id="TxtRemarks" rows="1" />
@@ -779,8 +781,8 @@
             </div>
         </div>
         <div class="erppagelist-container">
-            <div class="excel-wrapper">
-                <table id="tblInwardEntry" class="excel-table fixed-grid-table table-width">
+            <div class="excel-wrapper fixed-grid-wrapper">
+                <table id="tblInwardEntry" class="excel-table fixed-grid-table">
                     <thead class="table-head">
                         <tr>
                             <th>Code</th>
@@ -813,5 +815,6 @@
 
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentryapi.js"></script>
 <script src="~/common/globalvalidation.js"></script>
+<script src="~/common/GlobalFunction.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.init.js"></script>

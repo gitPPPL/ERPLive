@@ -266,7 +266,7 @@
                     if (!rowId) GetVNo(this.value, "GATE1");
                     $('#ddlDocType').prop('disabled', true);
                     if (this.value === "OURT") {
-                        document.getElementById("Conditionnaldesignid").style.display = "flex";
+                        document.getElementById("Conditionnaldesignid").style.display = "contents";
                     } else {
                         document.getElementById("Conditionnaldesignid").style.display = "none";
                     }

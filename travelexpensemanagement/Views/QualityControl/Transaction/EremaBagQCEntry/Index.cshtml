@@ -1,0 +1,899 @@
+﻿@{
+    ViewBag.Title = "EremaBag QC Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<fieldset>
+    <legend class="legend-field">EremaBag QC Entry</legend>
+
+    <form id="EremaBagQCEntryForm">
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="NumDocNo">Doc No<span class="required">*</span></label>
+                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="DtDocDate">Doc Date<span class="required">*</span></label>
+                    <input type="date" class="form-control" id="DtDocDate">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlShift">Shift<span class="required">*</span></label>
+                    <select class="form-control" id="ddlShift">
+                        <option value="">Select Shift</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TmTime">Time</label>
+                    <input type="time" class="form-control" id="TmTime">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlQCIncharge">QC Incharge</label>
+                    <select class="form-control" id="ddlQCIncharge">
+                        <option value="">Select QC Incharge</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlChemist">Chemist</label>
+                    <select class="form-control" id="ddlChemist">
+                        <option value="">Select Chemist</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlInspBy">Inspection By</label>
+                    <select class="form-control" id="ddlInspBy">
+                        <option value="">Select Insp. By</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="TxtRemarks">Remarks</label>
+                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="ddlProdPlace">Production Place<span class="required">*</span></label>
+                    <select class="form-control" id="ddlProdPlace">
+                        <option value="">Select Prod. Place</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-mt">
+                    <button type="button" class="btn btn-primary" id="btn_copy">
+                        <i class="fa fa-copy"></i> Copy From
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!--Popup Modal-->
+        <div class="modal fade" id="CopyFromModal" tabindex="-1" aria-labelledby="CopyFromLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content draggable-modal">
+                    <div class="popup-header">
+                        <h5 class="popup-title" id="CopyFromLabel">Copy From</h5>
+                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                <input type="text" id="searchBoxCF" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <input type="checkbox" id="chkAppendFYModal">
+                                    <label class="checkbox-label" for="chkAppendFYModal">Append</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="btn-rightalign">
+                                <button type="button" class="btn btn-primary" id="CopyData"></i>Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table id="tblCopyFrommodal" class="table-width">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllPR" /></th>
+                                            <th> Bag No </th>
+                                            <th>Item Name</th>
+                                            <th>Prod Place</th>
+                                            <th>Lot No</th>
+                                            <th>WB Qty</th>
+                                            <th>Gross Qty</th>
+                                            <th>Qty</th>
+                                            <th>Tare Qty</th>
+                                            <th>V Type</th>
+                                            <th>V No</th>
+                                            <th hidden> Item Code </th>
+                                            <th hidden> Dept code</th>
+                                           </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Popup Modal End-->
+
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="tblEremaBagQCEntry" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">Code</th>
+                            <th>ICode</th>
+                            <th>Item Name</th>
+                            <th width="80px">Dept</th>
+                            <th width="80px">Batch No</th>
+                            <th width="80px">Bag No</th>
+                            <th width="80px">WB. Wt.</th>
+                            <th width ="80px">Gr. Wt.</t>
+                            <th width="80px">Tr. Wt.</th>
+                            <th width="80px">Net Wt.</th>
+                            <th width="80px">IV</th>
+                            <th width="80px">ASH</th>
+                            <th>Melting Point</th>
+                            <th>L Value</th>
+                            <th>B Value</th>
+                            <th>Chips per gram</th> 
+                            <th>Remarks</th>
+                            <th>Ref Type</th>
+                            <th>Ref No</th>
+                            <th hidden>Dept code</th>
+          
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="row">
+         
+            <div class="offset-md-5 col-md-4">
+                <div class="btn-mt button-right">
+                    <button id="btn-saves" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+                    <button id="btn-cancel" onclick="confirmAndGoBack()" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="col-md-3">
+        <div class="btn-mt">
+            <button id="btnbacklist"
+                    onclick="confirmAndGoBack()" type="button" class="btn btn-primary">
+                <i class="fa fa-list"></i>Back to list
+            </button>
+        </div>
+    </div>
+
+
+
+</fieldset>
+
+<script>
+
+    const $tbody = $('#tblEremaBagQCEntry tbody');
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const mode = urlParams.get('mode');
+    const isReadOnly = urlParams.get('readOnly') === 'true';
+    let itemNameOptions = '';
+
+    $(document).ready(function () {
+
+       LoadDropDown().then(() => {
+            if (rowId) {
+             LoadFormByID(rowId);
+              document.getElementById("DtDocDate").disabled = true;
+              document.getElementById("ddlShift").disabled = true;
+              document.getElementById("ddlProdPlace").disabled = true;
+
+            }
+        });
+
+
+       if (!rowId) {
+            GetVNo();
+            document.getElementById('DtDocDate').valueAsDate = new Date();
+            document.getElementById('TmTime').value = ((d=>`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`)(new Date()));
+        }
+
+       if (mode === "view") {
+        setFormReadOnly();
+        $('#EremaBagQCEntryForm').after(
+        '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+        );
+        }
+
+       $('#btn_copy').on('click', function () {
+        const docDate   =  $('#DtDocDate').val();
+        const DeptCode  = $('#ddlProdPlace').val();
+        const ShiftType = $('#ddlShift').val();
+        if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
+        if (!validateRequiredField('#ddlShift', 'SHIFT')) return;
+        if (!validateRequiredField('#ddlProdPlace', 'Prod Place')) return;
+        CheckConditionCpyFrm(DeptCode, ShiftType, docDate);
+        });
+
+       $('#selectAllPR').on('change', function () {
+            const isChecked = $(this).prop('checked');
+            $('#tblCopyFrommodal tbody input[type="checkbox"]').each(function () {
+                $(this).prop('checked', isChecked);
+            });
+        });
+
+       $('#tblCopyFrommodal').on('change', 'tbody input[type="checkbox"]', function () {
+            const totalCheckboxes = $('#tblCopyFrommodal tbody input[type="checkbox"]').length;
+            const checkedCheckboxes = $('#tblCopyFrommodal tbody input[type="checkbox"]:checked').length;
+            $('#selectAllPR').prop('checked', totalCheckboxes === checkedCheckboxes);
+        });
+
+       $tbody.on("change", ".item-name-select", function () {
+            const $select = $(this);
+            const selectedValue = $select.val();
+            const $row = $select.closest("tr");
+            const $iCodeInput = $row.find("td:nth-child(2) input.form-control");
+            $iCodeInput.val(selectedValue);
+        });
+
+       $('#CopyData').on('click', function () {
+            const selectedRows = getSelectedRowsData();
+            if (selectedRows.length > 0) {
+                var modalEl = document.getElementById('CopyFromModal');
+                var modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) {
+                modalInstance.hide();
+                }
+                addSelectedRowsToTable(selectedRows);
+                document.getElementById("DtDocDate").disabled = true;
+                document.getElementById("ddlShift").disabled = true;
+                document.getElementById("ddlProdPlace").disabled = true;
+            } else {
+                 toastr.warning('No rows selected');
+            }
+        });
+
+       $("#btn-saves").click(function (e) {
+            e.preventDefault();
+
+            const DOC_ID = $.trim($('#TxtCode').val());
+            const V_NO = parseFloat($.trim($('#NumDocNo').val())) || 0;
+            const V_DATE = formatDate($("#DtDocDate").val());
+            const SHIFT = $.trim($('#ddlShift option:selected').text()) || "";
+            const QCTIME = $.trim($('#TmTime').val()) || null;
+            const QC_INCHARGE = parseInt($('#ddlQCIncharge').val()) || 0;
+            const QC_INCHARGENAME = $.trim($('#ddlQCIncharge option:selected').text()) || "";
+            const CHEMIST = parseInt($('#ddlChemist').val()) || 0;
+            const CHEMISTNAME = $.trim($('#ddlChemist option:selected').text()) || "";
+            const EMP_CODE = parseInt($('#ddlInspBy').val()) || 0;
+            const PLACE_CODE = parseInt($('#ddlProdPlace').val()) || 0;
+            const REMARKS = $.trim($('#TxtRemarks').val());
+            const action = (!DOC_ID || DOC_ID.trim() === '') ? 'INSERT' : 'UPDATE';
+            const Header = {
+                DOC_ID,
+                V_NO,
+                V_DATE,
+                SHIFT,
+                QCTIME,
+                QC_INCHARGE,
+                QC_INCHARGENAME,
+                CHEMIST,
+                CHEMISTNAME,
+                EMP_CODE,
+                PLACE_CODE,
+                REMARKS,
+                action
+            };
+
+            const Deatils  = collectInsertRows();
+                const payload = {
+                Header,
+                Deatils
+            };
+
+            if (!validateRequiredField('#NumDocNo', 'Doc_No')) return;
+            if (!validateRequiredField('#DtDocDate', 'V_Date')) return;
+            if (!validateRequiredField('#ddlShift', 'SHIFT')) return;
+            if (!validateRequiredField('#TmTime', 'Time')) return;
+            if (!validateRequiredField('#ddlQCIncharge', 'QC Incharge')) return;
+            if (!validateRequiredField('#ddlChemist', 'Chemist')) return;
+            if (!validateRequiredField('#ddlProdPlace', 'ProdPlace')) return;
+
+             const table = document.getElementById("tblEremaBagQCEntry");
+            const tbody = table.querySelector("tbody");
+
+            if (tbody.rows.length === 0) {
+            toastr.warning("Fill data in Details");
+            return ;
+            }
+
+            $("#btn-saves").prop("disabled", true);
+
+            $.ajax({
+                url: '/EremaBagQCEntry/SavedData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Saved successfully!");
+                        setTimeout(() => window.location.href = '/EremaBagQCEntryList/Index', 1000);
+                    } else {
+                        toastr.error(response.message || "Save failed.");
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = "Something went wrong.";
+                    if (xhr.status === 400) {
+                        errorMessage = "Bad Request: " + xhr.responseText;
+                    } else if (xhr.status === 500) {
+                        errorMessage = "Server error: " + xhr.responseText;
+                    } else {
+                        errorMessage = "Unexpected error: " + xhr.statusText;
+                    }
+                    toastr.error("Error: " + errorMessage);
+                },
+                complete: function () {
+                    $("#btn-saves").prop("disabled", false);
+                }
+            });
+        });
+            
+    });
+    
+      function confirmAndGoBack() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You will be redirected to the list page.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, go back',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                 window.location.href = '@Url.Action("Index", "EremaBagQCEntryList")';
+            }
+        });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      if (isNaN(date)) return null;
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function collectInsertRows(tableSelector = '#tblEremaBagQCEntry') {
+      return $(tableSelector).find('tbody tr').map((_, tr) => {
+        const $tr = $(tr);
+            return{
+
+            ITEM_CODE:   parseInt($tr.find('.ITEM_CODE').val()?.trim() || '0'),
+            DEPT_CODE:   parseInt($tr.find('.DEPT_CODE').val()?.trim() || '0'),
+            DEPT_NAME:   $tr.find('.dept').val()?.trim() || '',
+            BatchNo:     $tr.find('.BatchNo').val()?.trim() || '',
+            BagNo:       $tr.find('.bagNo').val()?.trim() || '',
+            WBWt:        parseDecimal($tr.find('.wbWt').val()),
+            GrWt:        parseDecimal($tr.find('.grWt').val()),
+            RESULT2:     parseDecimal($tr.find('.trWt').val()),
+            NET_WT:      parseDecimal($tr.find('.NET_WT').val()),
+            WASTE:       parseDecimal($tr.find('.IV').val()),
+            DNR:         $tr.find('.ash').val()?.trim() || '',
+            PC_LOWMELT:  parseDecimal($tr.find('.meltingPoint').val()),
+            TIME3_WIDTH: parseDecimal($tr.find('.lValue').val()),
+            GLUE_CONTENT:parseDecimal($tr.find('.bValue').val()),
+            OTHERS:      parseDecimal($tr.find('.chipsPerGram').val()),
+            REMARKS:     $tr.find('.REMARKS').val()?.trim() || '',
+            Refcode:     parseInt($tr.find('.REF_NO').val()?.trim() || '0'),
+            REfType:     $tr.find('.Pord_Type').val()?.trim() || ''
+                          
+    };
+      }).get();
+    }
+
+    function addRow(data = {}, itemNameOptions = '') {
+
+        console.log("itemNameOptions:", itemNameOptions);
+
+
+
+       $('#tblEremaBagQCEntry tbody .btn-add-action').remove();
+       const row = `
+        <tr class="no-border-input">
+          <td style="display:none;">${data.code || ''}</td>
+          <td><input type="text" class="form-control ITEM_CODE" value="${data.iCode || ''}"   /></td>
+             <td>
+            <select class="form-control item-name-select" style="width:200px;">
+              <option value="">--Select--</option>
+              ${itemNameOptions}
+            </select>
+          </td>
+           <td><input type="text" class="form-control dept" value="${data.dept || ''}" style="width: 150px;"   /></td>
+          <td><input type="text" class="form-control BatchNo" value="${data.batchNo || ''}" style="width: 150px;"  /></td>
+          <td><input type="text" class="form-control bagNo" value="${data.bagNo || ''}" style="width: 150px;"  /></td>
+          <td><input type="number" class="form-control wbWt" value="${data.wbWt || ''}" style="width: 80px;" /></td>
+          <td><input type="number" class="form-control grWt" value="${data.grWt || ''}" style="width: 80px;"  /></td>
+          <td><input type="number" class="form-control trWt" value="${data.trWt || ''}" style="width: 80px;"  /></td>
+          <td><input type="number" class="form-control NET_WT" value="${data.netWt || ''}" style="width: 80px;"  /></td>
+          <td><input type="number" class="form-control IV" value="${data.iv || ''}" style="width: 80px;"  /></td>
+          <td><input type="text" class="form-control ash" value="${data.ash || ''}" style="width: 80px;" /></td>
+          <td><input type="number" class="form-control meltingPoint" value="${data.meltingPoint || ''}" /></td>
+          <td><input type="number" class="form-control lValue" value="${data.lValue || ''}" /></td>
+          <td><input type="number" class="form-control bValue" value="${data.bValue || ''}" /></td>
+          <td><input type="number" class="form-control chipsPerGram" value="${data.chipsPerGram || ''}" /></td>
+          <td><input type="text" class="form-control remarks" value="${data.remarks || ''}" /></td>
+          <td><input type="text" class="form-control Pord_Type" value="${data.refType || ''}" /></td>
+          <td><input type="text" class="form-control REF_NO" value="${data.refNo || ''}" /></td>
+          <td style="display:none;" ><input type="text" class="form-control DEPT_CODE" value="${data.deptCode || ''}" /></td>
+        </tr>
+      `;
+
+      $('#tblEremaBagQCEntry tbody').append(row);
+
+      if (data.itemCode) {
+        const $lastRow = $('#tblEremaBagQCEntry tbody tr:last');
+        $lastRow.find('.item-name-select').val(data.itemCode);
+      }
+
+      refreshRowActions();
+    }
+
+    function getSelectedRowsData() {
+        const selectedRowsData = [];
+
+        $('#tblCopyFrommodal tbody tr').each(function () {
+            const checkbox = $(this).find('input[type="checkbox"]');
+            if (checkbox.prop('checked')) {
+                const rowData = {
+                    bagNo: $(this).find('td:nth-child(2)').text().trim(),
+                    itemName: $(this).find('td:nth-child(3)').text().trim(),
+                    prodPlace: $(this).find('td:nth-child(4)').text().trim(),
+                    lotNo: $(this).find('td:nth-child(5)').text().trim(),
+                    wbQty: $(this).find('td:nth-child(6)').text().trim(),
+                    grossQty: $(this).find('td:nth-child(7)').text().trim(),
+                    qty: $(this).find('td:nth-child(8)').text().trim(),
+                    tareQty: $(this).find('td:nth-child(9)').text().trim(),
+                    vType: $(this).find('td:nth-child(10)').text().trim(),
+                    vNo: $(this).find('td:nth-child(11)').text().trim(),
+                    itemCode: $(this).find('td:nth-child(12)').text().trim(),
+                    deptCode: $(this).find('td:nth-child(13)').text().trim()
+                 
+                };
+                selectedRowsData.push(rowData);
+            }
+        });
+
+        return selectedRowsData;
+    }
+
+     async function LoadDropDown() {
+      try {
+        await Promise.all([
+          DDlInspBy(),
+          DDLPordPlace(),
+          DDLQCIncharge(),
+          DDLChemist(),
+          loadItemNameDropdown()  
+        ]);
+      } catch (error) {
+        console.error("Error loading dropdowns:", error);
+      }
+    }
+
+    async function GetVNo() {
+      try {
+        const res = await fetch('/EremaBagQCEntry/GetVNo');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.v_NO) throw new Error('Response missing v_NO');
+        $('#NumDocNo').val(data.v_NO);
+      } catch (e) {
+        toastr.warning('Error loading Document Number: ' + e.message);
+      }
+    }
+
+       async function DDlInspBy() {
+      try {
+        const response = await fetch('/EremaBagQCEntry/DDLInspBy');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const ddl = $('#ddlInspBy');
+
+        // Clear existing options
+        ddl.empty();
+
+        // Default option
+        ddl.append('<option value="">-- Select Insp. By --</option>');
+
+        // Add options with Text + Code
+        data.forEach(item => {
+
+          // Example:
+          // item.value = EMP001
+          // item.text  = Rahul
+
+          ddl.append(`
+            <option value="${item.value}">
+              ${item.text} (${item.value})
+            </option>
+          `);
+        });
+
+        // Initialize Select2 Search Box
+        ddl.select2({
+          placeholder: "-- Select Insp. By --",
+          allowClear: true,
+          width: '100%'
+        });
+
+      } catch (error) {
+        console.error("Error loading Insp. By:", error);
+        toastr.error('Error loading Insp. By: ' + error.message);
+      }
+    }
+
+       // QC Incharge
+    async function DDLQCIncharge() {
+        try {
+            const response = await fetch('/EremaBagQCEntry/DDLQCIncharge');
+
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+            const ddl = $('#ddlQCIncharge');
+
+            ddl.empty().append('<option value="">-- Select QC Incharge --</option>');
+
+            data.forEach(item => {
+                ddl.append(`
+                    <option value="${item.value}">
+                        ${item.text} (${item.value})
+                    </option>
+                `);
+            });
+
+            ddl.select2({
+                placeholder: "-- Select QC Incharge --",
+                allowClear: true,
+                width: '100%'
+            });
+
+        } catch (error) {
+            console.error("Error loading QC Incharge:", error);
+            toastr.error('Error loading QC Incharge: ' + error.message);
+        }
+    }
+
+
+    // Production Place
+    async function DDLPordPlace() {
+        try {
+            const response = await fetch('/EremaBagQCEntry/DDLPordPlace');
+
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+            const ddl = $('#ddlProdPlace');
+
+            ddl.empty().append('<option value="">-- Select Prod. Place --</option>');
+
+            data.forEach(item => {
+                ddl.append(`
+                    <option value="${item.value}">
+                        ${item.text} (${item.value})
+                    </option>
+                `);
+            });
+
+            ddl.select2({
+                placeholder: "-- Select Prod. Place --",
+                allowClear: true,
+                width: '100%'
+            });
+
+        } catch (error) {
+            console.error("Error loading Prod. Place:", error);
+            toastr.error('Error loading Prod. Place: ' + error.message);
+        }
+    }
+
+    function loadItemNameDropdown() {
+          $.ajax({
+              url: '/FlakesQCEntry/DDLGridItem',
+              method: 'GET',
+              success: function (data) {
+               itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+              }
+            });
+
+
+      }
+
+    // Chemist
+    async function DDLChemist() {
+        try {
+
+            const response = await fetch('/EremaBagQCEntry/DDLChemist');
+
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+            const ddl = $('#ddlChemist');
+
+            ddl.empty().append('<option value="">-- Select Chemist --</option>');
+
+            data.forEach(item => {
+                ddl.append(`
+                    <option value="${item.value}">
+                        ${item.text} (${item.value})
+                    </option>
+                `);
+            });
+
+            ddl.select2({
+                placeholder: "-- Select Chemist --",
+                allowClear: true,
+                width: '100%'
+            });
+
+        } catch (error) {
+
+            console.error("Error loading Chemist:", error);
+
+            toastr.error('Error loading Chemist: ' + error.message);
+        }
+    }
+
+    function generateSelect(options, selected = "") {
+      return options.map(opt => `<option ${selected === opt ? 'selected' : ''}>${opt}</option>`).join('');
+    }
+
+    function addSelectedRowsToTable(selectedRowsData) {
+         selectedRowsData.forEach(data => {
+        addRow({
+          iCode: data.itemCode || '',
+          itemName: data.itemCode || '',
+          dept:  data.prodPlace || '',
+          batchNo: data.lotNo || '',
+          bagNo: data.bagNo || '',
+          wbWt: data.wbQty || '',
+          grWt: data.grossQty || '',
+          trWt: data.tareQty || '',
+          netWt: data.qty || '',
+          iv: '',
+          ash:  '',
+          meltingPoint: '',
+          lValue: '',
+          bValue: '',
+          chipsPerGram: '',
+          remarks: '',
+          refType: data.vType || '',
+          refNo: data.vNo || '',
+         deptCode: data.deptCode || ''
+        });
+      });
+    }
+
+    function refreshRowActions() {
+      const $rows = $('#tblEremaBagQCEntry tbody tr');
+      if ($rows.length === 1) {
+        $rows.find('.btn-delete-action').hide();
+      } else {
+        $rows.find('.btn-delete-action').show();
+      }
+      $rows.find('.btn-add-action').hide();
+      $rows.last().find('.btn-add-action').show();
+    }
+
+    function CheckConditionCpyFrm(DeptCode, Shifttype, v_date) {
+           const formattedDate = new Date(v_date).toISOString().split('T')[0];
+           $.ajax({
+               type: 'GET',
+               url: '/EremaBagQCEntryList/CheackConditionCpyFrm',
+               data: {
+                   DeptCode: DeptCode,
+                   Shifttype: Shifttype,
+                   v_date: formattedDate
+               },
+               success: function(data) {
+                   if (data.success == true) {
+                    $('#CopyFromModal').modal('show');
+                    $('#tblCopyFrommodal tbody').empty();
+                    fetchData(DeptCode,Shifttype,v_date);
+                   } else if (data.success == false) {
+                       toastr.info("No Bags are Pending for QC of Date: " + v_date + ", Shift: " + Shifttype);
+                   }
+               },
+               error: function(xhr, status, error) {
+                   console.error("Request failed:", error);
+               }
+           });
+       }
+
+    function fetchData(deptCode,shiftType,vDate) {
+           $.ajax({
+               url: '/EremaBagQCEntryList/GetDataCopyForm',
+               type: 'GET',
+               data: {
+                   DeptCode: deptCode,
+                   Shifttype: shiftType,
+                   v_date: vDate
+               },
+
+               success: function (response) {
+                   if (response.success) {
+                    
+                        response.data.forEach(item => {
+                           const row = `
+                               <tr>
+                                    <td><input type="checkbox" class="selectItem" /></td>
+                                    <td>${item.bagNo}</td>
+                                    <td>${item.itemName}</td>
+                                    <td>${item.prodPlace}</td>
+                                    <td>${item.lotNo}</td>
+                                    <td>${item.wbQty}</td>
+                                    <td>${item.grossQty}</td>
+                                    <td>${item.qty}</td>
+                                    <td>${item.tareQty}</td>
+                                    <td>${item.vType}</td>
+                                    <td>${item.vNo}</td>
+                                    <td hidden>${item.itemCode}</td>
+                                    <td hidden>${item.deptCode}</td>
+                     
+                               </tr>
+                           `;
+                           $('#tblCopyFrommodal tbody').append(row);
+                       });
+                   } else {
+                        toastr.info(response.message);
+                   }
+               },
+               error: function (error) {
+                    toastr.Error('Error fetching data: ' + error.responseText);
+               }
+           });
+       }
+
+    function parseDecimal(value) {
+        const parsed = parseFloat(value?.trim() || '0');
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function showTableData(details = []) {
+
+        $('#tblEremaBagQCEntry tbody').empty();
+
+        details.forEach(item => {
+            const rowData = {
+                iCode: item.iteM_CODE || '',
+                dept: item.coloR_NAME || '',
+                batchNo: item.batchNo || '',
+                bagNo: item.bagNo || '',
+                wbWt: item.wbWt || 0,
+                grWt: item.grWt || 0,
+                trWt: item.trWt || 0,
+                netWt: item.neT_WT || 0,
+                iv: item.waste || '',
+                ash: item.dnr || '',
+                meltingPoint: item.pC_LOWMELT || '',
+                lValue: item.timE3_WIDTH,
+                bValue: item.gluE_CONTENT, 
+                chipsPerGram: item.others, 
+                remarks: item.remarks || '',
+                refType: item.rEfType || '',
+                refNo: item.refcode || '',
+                deptCode: item.coloR_CODE || ''
+            };
+
+            addRow(rowData); 
+        });
+    }
+
+    async function LoadFormByID(id) {
+        try {
+            const res = await $.ajax({
+                url: '/EremaBagQCEntryList/GetDataByCode',
+                method: 'GET',
+                data: { code: id }
+            });
+
+            if (res.success) {
+                const header = res.data.header;
+                const details = res.data.deatils;
+
+      
+                $('#TxtCode').val(header.doC_ID || '');
+                $('#NumDocNo').val(header.v_NO || '');
+                 $('#DtDocDate').val(formatDate(header.v_DATE) || '');
+                $('#ddlShift').val(header.shift || '');
+                $('#TmTime').val(header.qctime || '');
+                $('#ddlQCIncharge').val(header.qC_INCHARGE || '');
+                $('#ddlChemist').val(header.chemist || '');
+                $('#ddlInspBy').val(header.emP_CODE || '');
+                $('#ddlProdPlace').val(header.placE_CODE || '');
+                $('#TxtRemarks').val(header.remarks || '');
+
+               showTableData(details);
+
+
+            } else {
+                console.error('Error in API response:', res.message);
+                toastr.error(res.message || "Failed to load data.");
+            }
+        } catch (err) {
+            console.error("Failed to load data:", err);
+            toastr.error("Something went wrong while loading the form.");
+        }
+    }
+
+    function setFormReadOnly() {
+          const form = $('#EremaBagQCEntryForm');
+         form.find(':input').prop('disabled', true);
+         form.find('textarea').css('background-color', '#f0f0f0');
+         form.find('table tbody tr').css('background-color', '#f9f9f9');
+
+           $('#tblEremaBagQCEntry tbody tr').each(function() {
+             $(this).find(':input').prop('disabled', true);
+             $(this).css('background-color', '#f9f9f9');
+          });
+
+         $('#btn-saves').hide();
+          $('#btn-cancel').hide();
+
+     }
+
+</script>

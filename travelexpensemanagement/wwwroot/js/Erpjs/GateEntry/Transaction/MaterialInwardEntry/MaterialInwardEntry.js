@@ -56,7 +56,11 @@
             if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
         }
 
-        if (!validateRequiredField('#TxtBillAmt', 'Please fill Bill Amount.')) return;
+        /*if (!validateRequiredField('#TxtBillAmt', 'Please fill Bill Amount.')) return;*/
+        if ($('#TxtBillAmt').val().trim() === '') {
+            invalidateField("TxtBillAmt", "Please fill Bill Amount", "warning");
+            return;
+        }
         if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
 
 

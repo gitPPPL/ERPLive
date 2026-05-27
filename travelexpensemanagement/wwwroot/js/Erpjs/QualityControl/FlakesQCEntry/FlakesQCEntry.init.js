@@ -5,8 +5,8 @@ const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = urlParams.get('readOnly') === 'true';
 let itemNameOptions = '';
-var PubUserLevel = '@PubUserLevel';
-var LoginDate = '@logindate';
+let PubUserLevel = '@PubUserLevel';
+let LoginDate = '@logindate';
 
 $(document).ready(function () {
     LoadDropDown().then(() => {
