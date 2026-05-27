@@ -35,7 +35,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         public IActionResult Index()
         {
             var compCode = _globalValue.GetGlobalVariables().PubCompCode;
-            ViewBag.CompCode = compCode;
+            ViewBag.CompCode = compCode.ToString();
             return View("~/Views/QualityControl/Transaction/QCTemperatureEntry/Index.cshtml");
         }
 

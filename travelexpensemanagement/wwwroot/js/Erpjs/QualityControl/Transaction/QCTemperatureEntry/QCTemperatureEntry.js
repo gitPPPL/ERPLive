@@ -739,8 +739,6 @@ function addWinderRecordRow() {
 
     
 
-    
-
     loadDropdown({
         type: 'Winder',
         selectElem: winderSelect,
@@ -957,48 +955,6 @@ async function checkValidDate() {
         return false;
     }
 }
-//===Validations===
-async function Validate() {
-    let isValid = true
-    if (
-        !validateRequiredField('#NumDocNo', 'Doc No') ||
-        !validateRequiredField('#DtDocDate', 'Doc Date') ||
-        !validateRequiredField('#ddlShift', 'Shift Type') ||
-        !validateRequiredField('#TmTime', 'Time') ||
-        // !validateRequiredField('#ddlDenier', 'Denier')
-        !validateRequiredField('#ddlOperator', 'Operator Name') ||
-        !validateRequiredField('#ddlPlantName', 'Plant Name')
-    ) {
-        isValid = false;
-        return isValid;
-    }
-    const checkValidation = await checkValidDate();
-    if (checkValidation == false) {
-        isValid = false;
-        return isValid;
-    }
-    const isWinderValid = validateWinderTable();
-    if (!isWinderValid) {
-        isValid = false;
-        return isValid;
-    }
-    const isMaterialValid = validateMaterialTable();
-    if (!isMaterialValid) {
-        isValid = false;
-        return isValid;
-    }
-    const isPlantDuplicate = checkDuplicatePlantZones();
-    if (isPlantDuplicate) {
-        isValid = false;
-        return isValid;
-    }
-    const isSpeedDuplicate = checkDuplicateSpeedItem();
-    if (isSpeedDuplicate) {
-        isValid = false;
-        return isValid;
-    }
-    return isValid;
-}
 
 //===Validate Tables====
 function validateWinderTable() {
@@ -1049,20 +1005,6 @@ function validateMaterialTable() {
 
     return isValid;
 }
-function checkDuplicateSpeedItem() {
-    const seen = {}; // To track already seen Plant Zone Names
-    let hasDuplicate = false;
-
-    $('#tblScrew tbody tr').each(function () {
-        const nameInput = $(this).find('input[id^="TxtScrewName"]');
-        const name = nameInput.val()?.trim();
-
-        // Skip empty names
-        if (!name) return;
-
-        if (seen[name]) {
-            hasDuplicate = true;
-            setInvalid(nameInput, "Duplicate Speed item!");
 
 //========================================
 //             Duplicate item

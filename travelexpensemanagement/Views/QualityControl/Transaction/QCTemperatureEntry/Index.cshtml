@@ -4,45 +4,45 @@
 
     var compcode = ViewBag.CompCode;
 
-<div id="erp-toast-container"></div>
-<div class="erppage-header">
-    <div class="erppage-header-left">
-        <div class="erppage-header-icon">
-            <i class="fa-solid fa-temperature-half"></i>
-        </div>
-        <div class="erppage-header-title">QC Temperature Entry</div>
-    </div>
-    <div class="erppage-header-right">
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCTemperatureEntryList")', readOnly)">
-            <i class="fa-solid fa-arrow-left"></i>Back to list
-        </button>
-    </div>
-</div>
-<div id="QCTemperatureEntryForm">
-    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-    <div class="erppage-container">
-        <fieldset class="erppage-fieldset">
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Document No</label>
-                    <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Doc Date</label>
-                    <input type="date" class="erppage-redinput" id="DtDocDate">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Shift</label>
-                    <select class="erppage-input erppage-required" id="ddlShift">
-                        <option value="">Select Shift</option>
-                    </select>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Time</label>
-                    <input type="time" class="erppage-redinput" id="TmTime">
-                </div>
+    <div id="erp-toast-container"></div>
+    <div class="erppage-header">
+        <div class="erppage-header-left">
+            <div class="erppage-header-icon">
+                <i class="fa-solid fa-temperature-half"></i>
             </div>
-            <div class="erppage-grid4">
+            <div class="erppage-header-title">QC Temperature Entry</div>
+        </div>
+        <div class="erppage-header-right">
+            <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCTemperatureEntryList")', readOnly)">
+                <i class="fa-solid fa-arrow-left"></i>Back to list
+            </button>
+        </div>
+    </div>
+    <div id="QCTemperatureEntryForm">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="erppage-container">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Document No</label>
+                        <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Date</label>
+                        <input type="date" class="erppage-redinput" id="DtDocDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Shift</label>
+                        <select class="erppage-input erppage-required" id="ddlShift">
+                            <option value="">Select Shift</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Time</label>
+                        <input type="time" class="erppage-redinput" id="TmTime">
+                    </div>
+                </div>
+                <div class="erppage-grid4">
                     @if (compcode == "2" || compcode == "5")
                     {
                         <div class="erppage-divfield erppage-col-span-2">
@@ -70,15 +70,15 @@
                             </div>
                         </div>
                     }
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Incharge</label>
-                    <select id="ddlIncharge" class="erppage-input erppage-select">
-                        <option value="">Select Incharge</option>
-                    </select>
-                </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Incharge</label>
+                        <select id="ddlIncharge" class="erppage-input erppage-select">
+                            <option value="">Select Incharge</option>
+                        </select>
+                    </div>
 
-            </div>
-            <div class="erppage-grid4">
+                </div>
+                <div class="erppage-grid4">
                     @if (compcode == "2" || compcode == "5")
                     {
                         <div class="erppage-divfield erppage-col-span-2">
@@ -97,14 +97,15 @@
                             </select>
                         </div>
                     }
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Supervisor</label>
-                    <select id="ddlSupervisor" class="erppage-input erppage-select">
-                        <option value="">Select Supervisor</option>
-                    </select>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Supervisor</label>
+                        <select id="ddlSupervisor" class="erppage-input erppage-select">
+                            <option value="">Select Supervisor</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="erppage-grid4">
+
+                <div class="erppage-grid4">
                     @if (compcode == "2" || compcode == "5")
                     {
                         <div class="erppage-divfield">
@@ -114,42 +115,89 @@
                             </select>
                         </div>
                     }
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Remarks</label>
-                    <textarea typeof="text" class="erppage-textarea" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-                @if (compcode == "2" || compcode == "5")
-                {
-                    <fieldset class="erppage-subfieldset">
-                        <legend>Select Reading Details</legend>
-                        <div class="erppage-subheader">Select Reading Details</div>
-                        <div class="erppage-grid3">
-                            <div class="erppage-divfield">
-                                <label class="erppage-label">Select Reading</label>
-                                <select class="erppage-input" id="ddlSelectReading">
-                                    <option selected disabled>Select Reading</option>
-                                    <option value="0">Temperature</option>
-                                    <option value="1">Speed</option>
-                                    <option value="2">Winder</option>
-                                </select>
-                            </div>
-                            <div class="erppage-divfield">
-                                <label class="erppage-label">Import Interval</label>
-                                <input type="text" class="erppage-input" id="TxtImportInterval" placeholder="Enter Import Interval (in Min)" />
-                            </div>
-                            <div class="erppage-divfield">
-                                <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
-                                    <div class="erppage-internalaction" style="margin: 0;">
-                                        <button type="button" id="btn_import" class="erppage-btn erppage-btn-common">
-                                            <i class="fa fa-download"></i>
-                                            <span>Import</span>
-                                        </button>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Remarks</label>
+                        <input type="text" class="erppage-input" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks" />
+                    </div>
+                    <!-- Button to Open Modal -->
+                    <div class="erppage-col-span-2">
+                        <div class="erppage-actions">
+                            <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" data-bs-target="#readingModal">
+                                <i class="fa fa-download"></i>
+                                <span>Open Reading Details</span>
+                            </button>
+                            <button type="button" class="erppage-btn erppage-btn-print">
+                                <i class="fa fa-print"></i>
+                                <span>Print</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Reading Details Modal -->
+                    <div class="modal fade" id="readingModal" tabindex="-1" aria-labelledby="readingModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content erppagesmodal-content">
+                                <div class="erppagesmodal-header">
+                                    <div class="erppagesmodal-header-left">
+                                        <div class="erppagesmodal-header-icon">
+                                            <i class="fa fa-chart-line"></i>
+                                        </div>
+                                        <h5 class="erppagesmodal-title" id="readingModalLabel">
+                                            Reading Details
+                                        </h5>
                                     </div>
+                                    <button type="button"
+                                            class="erppagesmodal-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="erppagesmodal-body">
+
+                                    <div class="erppagesrow">
+                                        <div class="erppagescol-4">
+                                            <div class="erppagesmodal-group">
+                                                <label for="ddlSelectReading" class="erppagesmodal-label">
+                                                    Select Reading
+                                                </label>
+                                                <select class="erppagesmodal-input" id="ddlSelectReading">
+                                                    <option selected disabled>Select Reading</option>
+                                                    <option value="0">Temperature</option>
+                                                    <option value="1">Speed</option>
+                                                    <option value="2">Winder</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="erppagescol-4">
+                                            <div class="erppagesmodal-group">
+                                                <label for="TxtImportInterval" class="erppagesmodal-label">
+                                                    Import Interval
+                                                </label>
+                                                <input type="text" class="erppagesmodal-input" id="TxtImportInterval" placeholder="Enter Import Interval (in Min)" />
+                                            </div>
+                                        </div>
+                                        <div class="erppagescol-4">
+                                            <div class="erppagesmodal-action" style="height:100%; display:flex; align-items:end;">
+
+                                                <button type="button"
+                                                        id="btn_import"
+                                                        class="erppagesmodal-btn">
+                                                    <i class="fa fa-download"></i>
+                                                    Import
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
+                </div>
+                @if (compcode == "2" || compcode == "5")
+                {
+
                     <div class="table-row-layout">
                         <div class="erppagelist-container" style="margin:0px;">
                             <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
@@ -194,7 +242,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="table-row-layout">
+                    <div class="erp-row">
                         <div class="erppagelist-container" style="margin:0px;">
                             <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
                                 <table id="tblWinder" class="excel-table fixed-grid-table">
@@ -223,15 +271,10 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
-                            @* <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
-                        <div class="erppage-internalaction" style="margin: 0;">
-                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" id="btnWinderRecordRow" onclick="addWinderRecordRow()">
-                                <i class="fa fa-plus"></i>
-                                <span>Add New Row</span>
-                            </button>
+
                         </div>
-                    </div> *@
-                        </div>
+                    </div>
+                    <div class="erp-row">
                         <div class="erppagelist-container" style="margin:0px;">
                             <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
                                 <table id="tblMaterial" class="excel-table fixed-grid-table">
@@ -250,20 +293,13 @@
                                             <th>Lot No.</th>
                                             <th>No.of Bags</th>
                                             <th>Percent(%)</th>
-                                            <th class="action-col" style="width: 75% !important;min-width: 100px;max-width: 101px;">Action</th>
+                                            <th class="action-col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
-                            @* <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
-                        <div class="erppage-internalaction" style="margin: 0;">
-                            <button type="button" class="erppage-btn erppage-btn-add btn-add-row" id="btnMaterialRecordRow" onclick="addMaterialRecordRow()">
-                                <i class="fa fa-plus"></i>
-                                <span>Add New Row</span>
-                            </button>
-                        </div>
-                    </div> *@
+
                         </div>
                     </div>
                 }
@@ -296,15 +332,191 @@
                     </div>
                 }
 
-        </fieldset>
-        <div class="erppage-actions">
-            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save</span>
-            </button>
+            </fieldset>
+            <div class="erppage-actions">
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
+
+    <div id="QCTemperatureEntryForm2">
+        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+        <div class="erppage-container">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Document No</label>
+                        <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Date</label>
+                        <input type="date" class="erppage-redinput" id="DtDocDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Shift</label>
+                        <select class="erppage-input erppage-required" id="ddlShift">
+                            <option value="">Select Shift</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Time</label>
+                        <input type="time" class="erppage-redinput" id="TmTime">
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Line No</label>
+                        <select class="erppage-input erppage-required" id="ddlLineNo">
+                            <option value="">Select Line</option>
+                        </select>
+                        <button type="button" id="btn_fill" class="erppage-btn erppage-btn-common">
+                            <i class="fa fa-fill-drip"></i>
+                            <span>Fill</span>
+                        </button>
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Incharge</label>
+                        <select id="ddlIncharge" class="erppage-input erppage-select">
+                            <option value="">Select Incharge</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Chemist</label>
+                        <select id="ddlOperator" class="erppage-input erppage-select erppage-required">
+                            <option value="">Select Chemist</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Supervisor</label>
+                        <select id="ddlSupervisor" class="erppage-input erppage-select">
+                            <option value="">Select Supervisor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Remarks</label>
+                        <input type="text" class="erppage-input" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks" />
+                    </div>
+                    <!-- Button to Open Modal -->
+                    <div class="erppage-col-span-2">
+                        <div class="erppage-actions">
+                            <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" data-bs-target="#readingModal">
+                                <i class="fa fa-download"></i>
+                                <span>Open Reading Details</span>
+                            </button>
+                            <button type="button" class="erppage-btn erppage-btn-print">
+                                <i class="fa fa-print"></i>
+                                <span>Print</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Reading Details Modal -->
+                    <div class="modal fade" id="readingModal" tabindex="-1" aria-labelledby="readingModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content erppagesmodal-content">
+                                <div class="erppagesmodal-header">
+                                    <div class="erppagesmodal-header-left">
+                                        <div class="erppagesmodal-header-icon">
+                                            <i class="fa fa-chart-line"></i>
+                                        </div>
+                                        <h5 class="erppagesmodal-title" id="readingModalLabel">
+                                            Reading Details
+                                        </h5>
+                                    </div>
+                                    <button type="button"
+                                            class="erppagesmodal-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="erppagesmodal-body">
+
+                                    <div class="erppagesrow">
+                                        <div class="erppagescol-4">
+                                            <div class="erppagesmodal-group">
+                                                <label for="ddlSelectReading" class="erppagesmodal-label">
+                                                    Select Reading
+                                                </label>
+                                                <select class="erppagesmodal-input" id="ddlSelectReading">
+                                                    <option selected disabled>Select Reading</option>
+                                                    <option value="0">Temperature</option>
+                                                    <option value="1">Speed</option>
+                                                    <option value="2">Winder</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="erppagescol-4">
+                                            <div class="erppagesmodal-group">
+                                                <label for="TxtImportInterval" class="erppagesmodal-label">
+                                                    Import Interval
+                                                </label>
+                                                <input type="text" class="erppagesmodal-input" id="TxtImportInterval" placeholder="Enter Import Interval (in Min)" />
+                                            </div>
+                                        </div>
+                                        <div class="erppagescol-4">
+                                            <div class="erppagesmodal-action" style="height:100%; display:flex; align-items:end;">
+
+                                                <button type="button"
+                                                        id="btn_import"
+                                                        class="erppagesmodal-btn">
+                                                    <i class="fa fa-download"></i>
+                                                    Import
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="erppagelist-container" style="margin:0px;">
+                    <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                        <table id="tblTestParameter" class="excel-table fixed-grid-table">
+                            <colgroup>
+                                <col style="display:none;">
+                                <col style="width: 260px;">
+                                <col style="width: 200px;">
+                                <col style="width: 300px;">
+                                <col style="width: 169px;">
+                                <col style="width: 60px;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th style="display:none;">Code</th>
+                                    <th>Test Parameter</th>
+                                    <th>Result</th>
+                                    <th>Remarks</th>
+                                    <th>DateTime</th>
+                                    <th class="action-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </fieldset>
+            <div class="erppage-actions">
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
 }
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>

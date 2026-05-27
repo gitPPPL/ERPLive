@@ -570,6 +570,29 @@ th {
     background: #bdbdbd;
     border-radius: 10px;
 }
+
+.erp-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+.erp-col-6 {
+    width: 50%;
+    padding: 0 8px;
+}
+
+.erp-col-12 {
+    width: 100%;
+    padding: 0 8px;
+}
+
+@media(max-width:768px) {
+    .erp-col-6 {
+        width: 100%;
+    }
+}
+
 /* MOBILE CARD VIEW */
 .erp-card {
     background: #fff;
