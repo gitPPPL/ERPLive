@@ -330,24 +330,13 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = getdata.PubCompCode;
-
-                    cmd.Parameters.Add("@V_Type", SqlDbType.NVarChar, 10).Value =
-                        (object)v_type ?? DBNull.Value;
-
+                    cmd.Parameters.Add("@V_Type", SqlDbType.NVarChar, 10).Value = (object)v_type ?? DBNull.Value;
                     cmd.Parameters.Add("@V_No", SqlDbType.Int).Value = v_no;
-
                     cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partycode;
-
                     cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
-
-                    // ✅ FIXED ACTION (this was your main bug)
                     cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value = "DDlTransitNo";
-
-                    // ❌ removed wrong -1 month adjustment
-                    cmd.Parameters.Add("@EWB_EXPDATE", SqlDbType.Date).Value = ExpiryDate;
-
+                    cmd.Parameters.Add("@EWB_EXPDATE", SqlDbType.Date).Value = Convert.ToDateTime(ExpiryDate).AddMonths(-1);
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -357,7 +346,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     }
                 }
             }
-
             return new RepositoryResponseList<int>  {  status = true, message = "Success",  totalCount = dataList.Count, data = dataList  };
         }
     }

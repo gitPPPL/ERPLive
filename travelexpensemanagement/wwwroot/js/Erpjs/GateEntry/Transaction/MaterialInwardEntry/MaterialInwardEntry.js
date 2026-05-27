@@ -41,43 +41,51 @@
         if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
         if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
         if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
-        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
-  
+        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;          
 
-        if (!R_DATE && !R_TIME) {
+        if (!R_DATE && !R_TIME)
+        {
          if (!validateRequiredField('#TxtRptDate', 'Please select Reporting Date and Time.')) return;               
         }
 
-        if (BILL_NO && !BILL_DATE) {         
+        if (BILL_NO && !BILL_DATE)
+        {         
              if (!validateRequiredField('#DtPartyBillDate', 'Please select Party Bill Date.')) return;
         }
 
-        if (CHALL_NO && !CHALL_DATE) {
+        if (CHALL_NO && !CHALL_DATE)
+        {
             if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
         }
          
-        if ($('#TxtBillAmt').val().trim() === '') {
+        if ($('#TxtBillAmt').val().trim() === '')
+        {
             invalidateField("TxtBillAmt", "Please fill Bill Amount", "warning");
             return;
         }
+
         if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
 
-        if (TRUCK_NO) {
-            var numericPart = TRUCK_NO.replace(/\D/g, '');
-            var lastFour = numericPart.slice(-4);
+        if (TRUCK_NO)
+            {
+                var numericPart = TRUCK_NO.replace(/\D/g, '');
+                var lastFour = numericPart.slice(-4);
 
-        if (lastFour) {
+                if (lastFour)
+                {
         
-            if (!validateRequiredField('#TxtDriverName', 'Please enter Driver Name.')) return;
-            if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) {
-
-        showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
-        $("#TxtDriverMobile").addClass("is-invalid").focus();
-        return;
-        } else {
-        $("#TxtDriverMobile").removeClass("is-invalid");
-        }
-        }
+                if (!validateRequiredField('#TxtDriverName', 'Please enter Driver Name.')) return;
+                    if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) 
+                    {
+                        showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
+                        $("#TxtDriverMobile").addClass("is-invalid").focus();
+                        return;
+                    }
+                    else
+                    {
+                        $("#TxtDriverMobile").removeClass("is-invalid");
+                    }
+            }
         }
 
         if (WAYBILL_NO) {
@@ -254,21 +262,28 @@
 
         $.ajax({
             url: '/InwardEntry/SavedData',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(payload),
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
 
-        success: function (response) {
+            success: function (response) {
+                console.log("Response", response);
             if (response.status === "Success") {   
                 showToast("Saved successfully!", { type: "success" });
                 setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);                                
             }
-            else {
-            showToast(response.message, { type: "info" });
+
+            else if (response.status === "VALIDATION")
+            {
+                showToast(response.message, { type: "warning" });             
+            }
+            else
+            {
+            showToast(response.message, { type: "error" });
             }
         },
 
-        error: function (xhr) {
+            error: function (xhr) {
             let errorMessage = "Something went wrong.";
 
         if (xhr.status === 400) {
@@ -281,10 +296,10 @@
         showToast(errorMessage, {type: "error" });
                     },
 
-        complete: function () {
+             complete: function () {
             $("#btn-save").prop("disabled", false);
                         }
-                    });
+        });
     }
     function focusCell(rowIndex, colIndex) {
      const row = document.querySelectorAll('#tblInwardEntry tbody tr')[rowIndex];
@@ -765,7 +780,10 @@
         if (res.success) {
             const header = res.data.header;
             const Details = res.data.details;
-     
+
+            console.log("header", header)
+
+
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#TxtTransporter').val(header.transporT_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
@@ -800,12 +818,7 @@
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
 
-            await fetchTransitno(
-                header.v_TYPE,
-                header.v_NO,
-                header.partY_CODE,
-                formatDate(header.ewB_DATE) 
-            );
+            await fetchTransitno( header.v_TYPE, header.v_NO, header.partY_CODE, formatDate(header.ewB_DATE) );
 
             $('#ddlTransit').val(header.transiT_NO || '');
             $('#TxtEWayNo').val(header.waybilL_NO || '');

@@ -128,10 +128,10 @@ $(document).ready(async function () {
             return;
         }
 
-        const gateValidation = await GatenoValidation(V_TYPE, V_NO);
-        if (!gateValidation.success) {
-            return;
-        }
+        //const gateValidation = await GatenoValidation(V_TYPE, V_NO);
+        //if (!gateValidation.success) {
+        //    return;
+        //}
         saveInwardEntry();
     });
 
