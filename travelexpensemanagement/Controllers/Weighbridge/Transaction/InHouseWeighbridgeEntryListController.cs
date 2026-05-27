@@ -12,9 +12,6 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 {
     public class InHouseWeighbridgeEntryListController : Controller
     {
-
-
-
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;

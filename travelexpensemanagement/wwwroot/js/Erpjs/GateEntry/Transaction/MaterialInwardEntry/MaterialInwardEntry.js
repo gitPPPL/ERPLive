@@ -41,8 +41,8 @@
         if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
         if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
         if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
-        if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
-        if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
+        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
+  
 
         if (!R_DATE && !R_TIME) {
          if (!validateRequiredField('#TxtRptDate', 'Please select Reporting Date and Time.')) return;               
@@ -55,15 +55,12 @@
         if (CHALL_NO && !CHALL_DATE) {
             if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
         }
-
-        /*if (!validateRequiredField('#TxtBillAmt', 'Please fill Bill Amount.')) return;*/
+         
         if ($('#TxtBillAmt').val().trim() === '') {
             invalidateField("TxtBillAmt", "Please fill Bill Amount", "warning");
             return;
         }
         if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
-
-
 
         if (TRUCK_NO) {
             var numericPart = TRUCK_NO.replace(/\D/g, '');

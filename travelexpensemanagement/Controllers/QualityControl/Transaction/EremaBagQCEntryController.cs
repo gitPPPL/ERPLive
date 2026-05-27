@@ -146,9 +146,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     conn.Open();
 
                     string deletePRequest2Sql = @"
-                    DELETE FROM PROD2_QC 
-                    WHERE COMP_CODE = @CompCode
-                    AND V_NO = @VNo 
+                    DELETE FROM PROD2_QC   WHERE COMP_CODE = @CompCode  AND V_NO = @VNo 
                     AND BRANCH_CODE = @BranchCode 
                     AND YEAR_CODE = @YearCode ;";
                     using (var deletePRequest2Cmd = conn.CreateCommand())
