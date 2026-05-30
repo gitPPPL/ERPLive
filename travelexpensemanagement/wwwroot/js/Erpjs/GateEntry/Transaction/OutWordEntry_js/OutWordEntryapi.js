@@ -137,9 +137,7 @@ function LoadFormByID(rowId, vtype) {
             } else {
                 document.getElementById("Conditionnaldesignid").style.display = "none";
             }
-
-
-
+            document.getElementById("ddlPartyName").disabled = true;
             $('#TxtCode').val(header.doC_ID || '');
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#NumDocNo').val(header.v_NO || '');

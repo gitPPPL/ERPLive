@@ -12,14 +12,20 @@ var unitList = [];
 
 $(document).ready(async function () {
     await LoadDropDown();
+    $('#btn_approval').hide();
     if (rowId) {
         await LoadFormByID(rowId, vtype);
+
+        await Approvalbtn();            
+
         $('#ddlDocType').prop('disabled', true);
         $('#InDate').prop('disabled', true);
         $('#InTime').prop('disabled', true);
         $('.erppagelist-toolbar-end').show();
-        $('#btn_approval').show();
+       // $('#btn_approval').show();
+
         if (mode === "view") {
+            //$('#btn_approval').hide();
             setFormReadOnly();
         }
     }
@@ -98,16 +104,20 @@ $(document).ready(async function () {
     });
 
     $('#TxtWbSlipNo').on('change', function () {
-        if ($(this).val()) {
-            $('#span_PartyWBGrWt').show();
-            $('#span_PartyWBTrWt').show();
-            $('#span_PartyWBTime').show();
+
+        if ($(this).val().trim() !== '') {
+
+            $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                .removeClass('erppage-input')
+                .addClass('erppage-redinput');
+
+        } else {
+
+            $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                .removeClass('erppage-redinput')
+                .addClass('erppage-input');
         }
-        else {
-            $('#span_PartyWBGrWt').hide();
-            $('#span_PartyWBTrWt').hide();
-            $('#span_PartyWBTime').hide();
-        }
+
     });
 
     $("#btn-save").click(async function (e) {
@@ -127,11 +137,7 @@ $(document).ready(async function () {
         if (isValid === false) {
             return;
         }
-
-        //const gateValidation = await GatenoValidation(V_TYPE, V_NO);
-        //if (!gateValidation.success) {
-        //    return;
-        //}
+            
         saveInwardEntry();
     });
 
@@ -331,6 +337,18 @@ $(document).ready(async function () {
         $('#DtPartyBillDate').val(row.supplieR_INVDATE);
         $('#TxtBillAmt').val(row.supplieR_INVAMT);
         $('#TxtContainerNo').val(row.containeR_NO);
+    });
+
+    $("#btn_approval").on('click', function () {       
+        openApprovalModal();
+    });
+
+    $("#btn_Sendapproval").on('click', function () { 
+        openApprovalModal();
+    });
+
+    $('#btn_Sendapp').on('click', function () {
+        SendApproval();
     });
 
 });

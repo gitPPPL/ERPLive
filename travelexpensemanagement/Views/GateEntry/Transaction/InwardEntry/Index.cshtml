@@ -14,9 +14,20 @@
         <div class="erppage-header-title">Material Inward Entry</div>
     </div>
     <div class="erppage-header-right">
-        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve" data-bs-toggle="modal" data-bs-target="#approvedModal" id="btn_approval" style="display:none;">
-            <i class="fa fa-check-circle"></i>Approved
+        <button type="button" class="erppage-btn erppage-btn-print" id="btn_print" style="display:none;">
+            <i class="fa fa-database"></i>Print
         </button>
+
+
+        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" title="Approval" id="btn_approval">
+            <i class="fa fa-check-circle"></i> Approval
+        </button>
+
+        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" title="Send Approval" id="btn_Sendapproval">
+            <i class="fa fa-check-circle"></i> Send Approval
+        </button>
+
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -24,6 +35,7 @@
 
     </div>
 </div>
+
 <div class="modal fade" id="approvedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg erppagesmodal">
         <div class="modal-content erppagesmodal-content">
@@ -41,10 +53,6 @@
                 </button>
             </div>
             <div class="erppagesmodal-body">
-                <fieldset class="erppagesmodal-fieldset">
-                    <legend>
-                        <i class="fa fa-user-check"></i> Approval User
-                    </legend>
                     <div class="erppagesrow">
                         <div class="erppagescol-4">
                             <div class="erppagesmodal-group">
@@ -86,12 +94,75 @@
                             </div>
                         </div>
                     </div>
-                </fieldset>
             </div>
 
         </div>
     </div>
 </div>
+
+
+
+<div class="modal fade" id="SendForapprovedModal" tabindex="-1" aria-labelledby="sendforApprovedLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg erppagesmodal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-file-signature"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="ApprovedLabel">
+                        Send For Approval Window
+                    </h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+                <div class="erppagesrow">
+                    <div class="erppagescol-4">
+                        <div class="erppagesmodal-group">
+                            <label for="ddlApprovalStatus" class="erppagesmodal-label">
+                                Send To
+                            </label>
+                            <select class="erppagesmodal-input" id="ddlsendto">
+                                <option value="">Select Send To</option>
+                            </select>
+                        </div>
+                    </div>
+
+            
+                    <div class="erppagescol-4">
+                        <div class="erppagesmodal-group">
+                            <label for="ddlRemarks" class="erppagesmodal-label">
+                                Remarks
+                            </label>
+                            <select class="erppagesmodal-input" id="ddlsendRemarks">
+                                <option value="">Select Remarks</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="erppagesrow">
+                    <div class="erppagescol-12">
+                        <div class="erppagesmodal-action">
+                            <button type="button" class="erppagesmodal-btn" id="btn_Sendapp">
+                                <i class="fa fa-paper-plane"></i> Send Approval
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
 <div id="InwardEntryForm">
     <input type="hidden" class="form-control" id="TxtCode" name="CODE">
     <div class="erppage-container">
@@ -117,7 +188,7 @@
                     <label for="InTime" class="erppage-label">In Time</label>
                     <input type="time" class="erppage-input" id="InTime">
                 </div>
-                
+
             </div>
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
@@ -144,64 +215,60 @@
                     <fieldset class="erppage-fieldset">
                         <div class="erppage-section-header">Party Details</div>
                         <div class="erppage-body">
-                            <div class="erppage-grid2">
-                                <div class="erppage-field">
+                            <div class="erppage-grid4">
+                                <div class="erppage-field erppage-col-span-2">
                                     <label for="ddlPartyName" class="erppage-label">Party Name</label>
                                     <select class="erppage-input erppage-required" id="ddlPartyName">
                                         <option value="">Select Party Name</option>
                                     </select>
+                                    <select id="ddladdressline1" style="width:94%" class="erppage-input">
+                                        <option value="" id="SelectAddress">Select address</option>
+                                    </select>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-field erppage-col-span-2">
                                     <label for="TxtAddLine1" class="erppage-label">Address Line 1</label>
                                     <div class="erppage-inline-group" style="width:100%;">
                                         <input type="text" class="erppage-input" id="TxtAddLine1" placeholder="Enter Address" readonly>
-                                        <select id="ddladdressline1" style="width:50%" class="erppage-input">
-                                            <option value="" id="SelectAddress">Select address</option>
-                                        </select>
+
                                     </div>
                                 </div>
                             </div>
                             <div class="erppage-grid4">
+                                
                                 <div class="erppage-field">
                                     <label for="TxtAddLine2" class="erppage-label">Address Line 2</label>
                                     <input type="text" class="erppage-input" id="TxtAddLine2" readonly>
                                 </div>
-
                                 <div class="erppage-field">
                                     <label for="TxtAddLine3" class="erppage-label">Address Line 3</label>
                                     <input type="text" class="erppage-input" id="TxtAddLine3" readonly>
                                 </div>
-
                                 <div class="erppage-field">
                                     <label for="ddlcity" class="erppage-label">City</label>
                                     <select class="erppage-input" id="ddlcity" disabled>
                                         <option>Select City</option>
                                     </select>
                                 </div>
-
-                                <div class="erppage-field">
-                                    <label for="TxtPincode" class="erppage-label">Pincode</label>
-                                    <input type="text" class="erppage-input" id="TxtPincode" readonly>
-                                </div>
-                            </div>
-                            <div class="erppage-grid4">
                                 <div class="erppage-field">
                                     <label for="TxtState" class="erppage-label">State</label>
                                     <select class="erppage-input" id="TxtState" disabled>
                                         <option>Select State</option>
                                     </select>
                                 </div>
-
+                            </div>
+                            <div class="erppage-grid4">
+                                <div class="erppage-field">
+                                    <label for="TxtPincode" class="erppage-label">Pincode</label>
+                                    <input type="text" class="erppage-input" id="TxtPincode" readonly>
+                                </div>
                                 <div class="erppage-field">
                                     <label for="TxtGSTNo" class="erppage-label">GST No</label>
                                     <input type="text" class="erppage-input" id="TxtGSTNo" readonly>
                                 </div>
-
                                 <div class="erppage-field">
                                     <label for="TxtPAN" class="erppage-label">PAN</label>
                                     <input type="text" class="erppage-input" id="TxtPAN" readonly>
                                 </div>
-
                             </div>
                         </div>
                     </fieldset>
@@ -224,7 +291,7 @@
                                     <label for="txtShipAddress" class="erppage-label">Ship Address</label>
                                     <input type="text" class="erppage-input" id="txtShipAddress" readonly>
                                 </div>
-                            
+
                                 <div class="erppage-field">
                                     <label for="ShipBillNo" class="erppage-label">Ship. Bill No</label>
                                     <input type="text" class="erppage-input" id="ShipBillNo">
@@ -247,7 +314,7 @@
                                         <option>Returnable</option>
                                     </select>
                                 </div>
-                            
+
                                 <div class="erppage-field">
                                     <label for="ddlDocStatus" class="erppage-label">Doc Status</label>
                                     <select class="erppage-input" id="ddlDocStatus">
@@ -431,7 +498,7 @@
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label for="txt_VehicleRemarks" class="erppage-label">Vehicle Remarks</label>
-                        <input type="text" class="erppage-input" id="txt_VehicleRemarks"/>
+                        <input type="text" class="erppage-input" id="txt_VehicleRemarks" />
                     </div>
                 </div>
                 <!-- Row 3 Buttons -->
@@ -655,7 +722,7 @@
                     <div class="erppage-divfield">
                         <label for="TxtGrWt" class="erppage-label">
                             Party WB GrWt
-                            <span id="span_PartyWBGrWt" style="color:red; display:none;">*</span>
+                            @* <span id="span_PartyWBGrWt" style="display:none;"></span> *@
                         </label>
                         <input type="text" class="erppage-input" id="TxtGrWt">
                     </div>
@@ -665,7 +732,6 @@
                     <div class="erppage-divfield">
                         <label for="TxtTrWt" class="erppage-label">
                             Party WB TrWt
-                            <span id="span_PartyWBTrWt" style="color:red; display:none;">*</span>
                         </label>
                         <input type="text" class="erppage-input" id="TxtTrWt">
                     </div>
@@ -673,7 +739,6 @@
                     <div class="erppage-divfield">
                         <label for="TxtWbTime" class="erppage-label">
                             Party WB Time
-                            <span id="span_PartyWBTime" style="color:red; display:none;">*</span>
                         </label>
                         <div class="erppage-inline-group">
                             <input type="date" class="erppage-input" id="DtWBTime">
@@ -775,6 +840,20 @@
         <div class="erppagelist-container">
             <div class="excel-wrapper fixed-grid-wrapper">
                 <table id="tblInwardEntry" class="excel-table fixed-grid-table">
+                    <colgroup>
+                        <col style="width:80px;">   <!-- Code -->
+                        <col style="width:220px;">  <!-- Item Name -->
+                        <col style="width:180px;">  <!-- Department -->
+                        <col style="width:100px;">  <!-- Unit -->
+                        <col style="width:80px;">   <!-- Nos -->
+                        <col style="width:120px;">  <!-- Quantity -->
+                        <col style="width:120px;">  <!-- Ship Rate -->
+                        <col style="width:100px;">  <!-- Empty -->
+                        <col style="width:200px;">  <!-- Remarks -->
+                        <col style="width:160px;">  <!-- Reference Type -->
+                        <col style="width:160px;">  <!-- Reference No -->
+                        <col style="width:100px;">  <!-- Action -->
+                    </colgroup>
                     <thead class="table-head">
                         <tr>
                             <th>Code</th>
@@ -804,9 +883,6 @@
         </div>
     </div>
 </div>
-
-<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentryapi.js"></script>
-<script src="~/common/globalvalidation.js"></script>
-<script src="~/common/GlobalFunction.js"></script>
-<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.init.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.js"></script>
+<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentryapi.js"></script>

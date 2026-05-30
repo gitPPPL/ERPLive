@@ -546,8 +546,8 @@
         return selectedRows;
     }
    function populateInwardEntryTable(selectedData) {
-                const $tbody = $('#tblInwardEntry tbody');
-    $tbody.empty();
+        const $tbody = $('#tblInwardEntry tbody');
+        $tbody.empty();
 
      $.each(selectedData, function (idx, item) {
             addRow($tbody, {
@@ -701,7 +701,7 @@
 
                 if (isINMS) {
                     $row.find('input').prop('readonly', true).attr('style', normalStyle);
-                    $row.find('select').prop('disabled', true).attr('style', normalStyle);
+                    $row.find('select').prop('readonly', true).attr('style', normalStyle);
                     $tbody.find('.btn-add-row').hide();
                 } else {
                     $tbody.find('.btn-add-row').show();
@@ -784,6 +784,20 @@
             console.log("header", header)
 
 
+            if (header.partY_WBSLIPNO !== '') {
+
+                $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                    .removeClass('erppage-input')
+                    .addClass('erppage-redinput');
+
+            } else {
+
+                $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                    .removeClass('erppage-redinput')
+                    .addClass('erppage-input');
+            }
+           await DDlPartyAdd(header.partY_CODE);
+            $('#ddladdressline1').val(header.partY_ADDRESSID || '');
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#TxtTransporter').val(header.transporT_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
@@ -818,7 +832,12 @@
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
 
-            await fetchTransitno( header.v_TYPE, header.v_NO, header.partY_CODE, formatDate(header.ewB_DATE) );
+            await fetchTransitno(
+                header.v_TYPE,
+                header.v_NO,
+                header.partY_CODE,
+                formatDate(header.ewB_DATE)
+            );
 
             $('#ddlTransit').val(header.transiT_NO || '');
             $('#TxtEWayNo').val(header.waybilL_NO || '');

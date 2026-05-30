@@ -571,7 +571,18 @@
         padding: 4px 8px;
         word-wrap: break-word;
     }
+.select2-container--default.select2-container--disabled
+.select2-selection--single {
+    background-color: #fff !important;
+    color: #000 !important;
+    opacity: 1 !important;
+}
 
+    .select2-container--default.select2-container--disabled
+    .select2-selection--single
+    .select2-selection__rendered {
+        color: #000 !important;
+    }
 /* ===== Arrow ===== */
 .select2-container--default .select2-selection__arrow {
     height: 100%;
@@ -1162,7 +1173,7 @@ input[type="number"] {
 
 /* BASE BUTTON */
 .erppage-btn {
-    display: inline-flex;
+    display: block;
     align-items: center;
     gap: 8px;
     border: none;

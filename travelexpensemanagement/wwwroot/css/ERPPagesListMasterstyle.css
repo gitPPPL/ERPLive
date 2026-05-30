@@ -139,7 +139,9 @@
     .erppagelist-action.delete {
         color: #dc2626;
     }
-
+.hidden-col {
+    display: none;
+}
 /* PAGINATION (PREMIUM UI) */
 /* MAIN LAYOUT */
 .erppagelist-pagination {
@@ -247,7 +249,8 @@
     border-radius: 8px;
     /* IMPORTANT FIX */
     overflow: visible; /* 🔥 change this */
-    min-width: 100%;
+    width: 100%; /* FIX */
+    table-layout: fixed;
 }
 /* ACTION BAR */
 .erppage-actions {
@@ -399,11 +402,9 @@
 }
 /* ================= FIXED GRID TABLE ================= */
 .fixed-grid-table {
-    table-layout: fixed !important;
-    /* REMOVE HARD WIDTH */
-    width: max-content !important; /* 🔥 change this */
-
-    border-collapse: collapse !important;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
     border-spacing: 0;
 }
 
@@ -440,6 +441,7 @@
 
 /* Wrapper scroll */
 .fixed-grid-wrapper {
+    overflow-x: auto;
     position: relative;
 }
 /* TOASTER ITEM */
@@ -487,7 +489,13 @@ th {
 .fixed-grid-table td.action-col {
     white-space: nowrap;
 }
-
+.fixed-grid-table thead th.action-col {
+    z-index: 10;
+   
+}
+.fixed-grid-table tbody tr:hover td.action-col {
+    background: #f2f2f2;
+}
 .fixed-grid-table th.action-col,
 .fixed-grid-table td.action-col {
     position: sticky;
@@ -515,7 +523,7 @@ th {
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-    margin-top: 10px;
+   /* margin-top: 10px;*/
     padding: 8px 6px;
     background: #fff;
     border-radius: 8px;
@@ -523,8 +531,8 @@ th {
 
 /* Excel wrapper safety */
 .excel-wrapper {
+    display:block;
     width: 100%;
-    min-width: 100%;
     overflow-x: auto;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -570,6 +578,29 @@ th {
     background: #bdbdbd;
     border-radius: 10px;
 }
+
+.erp-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+.erp-col-6 {
+    width: 50%;
+    padding: 0 8px;
+}
+
+.erp-col-12 {
+    width: 100%;
+    padding: 0 8px;
+}
+
+@media(max-width:768px) {
+    .erp-col-6 {
+        width: 100%;
+    }
+}
+
 /* MOBILE CARD VIEW */
 .erp-card {
     background: #fff;

@@ -20,53 +20,26 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
-        }
+        }       
 
-        public RepositoryResponse SaveOutwardEntry(
-         OutWordEntry_Header header,
-         List<DetailsOutwardEntry> details,
-         string action)
+        public RepositoryResponse SaveOutwardEntry( OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
         {
             try
             {
                 var validation = Validdata(header, details);
 
-                if (!validation.status)
+                if (!validation.status == true)
                 {
-                    return new RepositoryResponse
-                    {
-                        status = false,
-                        message = validation.message
-                    };
+                    return new RepositoryResponse  {  status = true,  message = validation.message };
                 }
-
                 var g = _globalVariableService.GetGlobalVariables();
-
                 using var conn = _dbConnection.GetErpConnection();
+
                 conn.Open();
-
                 using var transaction = conn.BeginTransaction();
-
                 try
-                {
-                    // DELETE OLD DATA
-                    string deleteSql = @"DELETE FROM GATE2
-                                 WHERE COMP_CODE = @CompCode
-                                 AND V_NO = @VNo
-                                 AND BRANCH_CODE = @BranchCode
-                                 AND YEAR_CODE = @YearCode";
-
-                    using (var deleteCmd = new SqlCommand(deleteSql, conn, transaction))
-                    {
-                        deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
-                        deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                        deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-
-                        deleteCmd.ExecuteNonQuery();
-                    }
-
-                    // HEADER SAVE
+                {               
+            
                     using (var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -115,15 +88,29 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                         cmd.ExecuteNonQuery();
                     }
+               
+                    string deleteSql = @"DELETE FROM GATE2
+                                 WHERE COMP_CODE = @CompCode
+                                 AND V_NO = @VNo
+                                 AND BRANCH_CODE = @BranchCode
+                                 AND YEAR_CODE = @YearCode";
 
-                    // DETAILS SAVE
+                    using (var deleteCmd = new SqlCommand(deleteSql, conn, transaction))
+                    {
+                        deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                        deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
+                        deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                        deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+
+                        deleteCmd.ExecuteNonQuery();
+                    }
+
                     foreach (var d in details)
                     {
                         if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
                             continue;
 
                         using var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction);
-
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "INSERT");
                         cmd.Parameters.AddWithValue("@SaveAction", "Details");
@@ -165,14 +152,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse
-                {
-                    status = false,
-                    message = ex.Message
-                };
+                return new RepositoryResponse { status = false, message = ex.Message };
             }
         }
-        public RepositoryResponse Validdata(  OutWordEntry_Header header,  List<DetailsOutwardEntry> details)
+        public RepositoryResponse Validdata(OutWordEntry_Header header,  List<DetailsOutwardEntry> details)
         {
             try
             {
@@ -201,29 +184,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 string bill_gst = Convert.ToString(reader["bill_gst"]);
                                 string einvoice_flg = Convert.ToString(reader["einvoice_flg"]);
                                 decimal namount = Convert.ToDecimal(reader["namount"]);
-
                                 decimal billGstValue = 0;
                                 decimal.TryParse(bill_gst, out billGstValue);
 
-                                if (namount >= 100000 &&
-                                    billGstValue > 16 &&
-                                    namount != 0 &&
-                                    einvoice_flg != "Y")
+                                if (namount >= 100000 && billGstValue > 16 && namount != 0 &&  einvoice_flg != "Y")
                                 {
-                                    return new RepositoryResponse
-                                    {
-                                        status = false,
-                                        message = "Please Generate GST E Invoice Before Creating GatePass."
-                                    };
+                                    return new RepositoryResponse { status = true, message = "Please Generate GST E Invoice Before Creating GatePass." };
                                 }
                             }
                         }
-
-                        // =====================================================
-                        // GST TAX VALIDATION
-                        // =====================================================
-
-                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))                        {
+                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))          
+                        {
                             cmd.CommandType = CommandType.StoredProcedure;
                             cmd.Parameters.AddWithValue("@Action", "Validdata");
                             cmd.Parameters.AddWithValue("@ShowActionOption", "GSTVALID");
@@ -235,13 +206,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                return new RepositoryResponse { status = false, message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"  };
+                                return new RepositoryResponse { status = true, message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"  };
                             }
                         }
                     }
 
-                    if (d.REF_TYPE == "DCHL" &&
-                        string.IsNullOrWhiteSpace(header.WAYBILL_NO))
+                    if (d.REF_TYPE == "DCHL" && string.IsNullOrWhiteSpace(header.WAYBILL_NO))
                     {
                         using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                         {
@@ -255,11 +225,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 string state_type =  Convert.ToString(reader["state_type"]);
                                 if (state_type != "Local")
                                 {
-                                    return new RepositoryResponse
-                                    {
-                                        status = false,
-                                        message = "EWayBill is mandatory for Interstate Material Movement."
-                                    };
+                                    return new RepositoryResponse { status = true, message = "EWayBill is mandatory for Interstate Material Movement."  };
                                 }
                             }
                         }
@@ -299,29 +265,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 mainQty - (gateQty - (d.QTY ?? 0));
 
                             return new RepositoryResponse
-                            {
-                                status = false,
-                                message =
-                                    $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
-                                    $"& Your Quantity is = {(d.QTY ?? 0)}, " +
+                            { status = true,  message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +  $"& Your Quantity is = {(d.QTY ?? 0)}, " +
                                     $"Please Check Item Name {d.ITEM_NAME}"
                             };
                         }
                     }
                 }
-                return new RepositoryResponse
-                {
-                    status = true,
-                    message = "Success"
-                };
+                return new RepositoryResponse { status = false, message = "Success" };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse
-                {
-                    status = false,
-                    message = ex.Message
-                };
+                return new RepositoryResponse  { status = false,  message = ex.Message };
             }
         }
         public string GetText(string query)

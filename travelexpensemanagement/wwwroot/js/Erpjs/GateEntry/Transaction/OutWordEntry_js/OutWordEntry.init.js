@@ -13,14 +13,13 @@
     const rowId = urlParams.get('id');
     const vtype = urlParams.get('VType');
     const $tbody = $("#tblOutwardEntry tbody");
+    const form = $('#OutwardEntryForm');
     const mode = urlParams.get('mode');
     $(document).ready(function () {
-
         (async () => {
             try {
                 await LoadDropDowns();
                 addRow($tbody);
-
                 if (rowId) {
                     $('#ddlDocType').prop('disabled', true);
                     $('#DtDocDate').prop('disabled', true);
@@ -28,6 +27,8 @@
                     await LoadFormByID(rowId, vtype);
                     if (mode == 'view') {
                         setFormReadOnly();
+                        form.addClass('erppage-readonly');
+
                     }
                 }
                 else {
@@ -62,10 +63,8 @@
                     const DocType = $.trim($('#ddlDocType').val());
                     const ITEM_TYPE = $.trim($('#ddlType option:selected').text());
                     const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
-
                     if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type.')) return;
-                    if (!validateRequiredField('#DtDocDate', 'Please select a Voucher Date.')) return;
-                               
+                    if (!validateRequiredField('#DtDocDate', 'Please select a Voucher Date.')) return;                              
 
                     if (DocType === "OURT") {
 
@@ -75,9 +74,7 @@
                         
                     }
 
-
                     if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
-
 
                     if (CompCode == 2) {
                         if (DocType === "DocType" || ITEM_TYPE === "Sale") {
@@ -200,6 +197,8 @@
 
                     $("#btn-save").prop("disabled", true);
 
+                    $("#btn-save").prop("disabled", true);
+
                     $.ajax({
                         url: '/OutwardEntry/SavedData',
                         type: 'POST',
@@ -208,35 +207,53 @@
 
                         success: function (response) {
 
-                            if (response.success) {
+                            console.log("Response:", response);
 
-                                toastr.success("Saved successfully!");
+                            if (response.success === true || response.success === "true") {
 
-                                setTimeout(() => {
-                                    window.location.href = '/OutwardEntryList/Index';
-                                }, 1000);
+                                if (response.message === "Save Successfully") {
+
+                                    showToast("Saved successfully!", { type: "success" });
+
+                                    setTimeout(function () {
+                                        window.location.href =
+                                            '/OutwardEntry/Index?id=' + V_NO +
+                                            '&VType=' + encodeURIComponent(DocType) +
+                                            '&mode=view';
+                                    }, 3000);
+
+                                } else {
+
+                                    showToast(response.message || "Operation completed.", {
+                                        type: "warning"
+                                    });
+                                }
 
                             } else {
 
-                                toastr.warning(response.message || "Save failed.");
+                                showToast(response.message || "Failed to save data.", {
+                                    type: "error"
+                                });
                             }
                         },
 
-                        error: function (xhr) {
+                        error: function (xhr, status, error) {
 
                             let errorMessage = "Something went wrong.";
 
                             if (xhr.status === 400) {
-                                errorMessage = "Bad Request: " + xhr.responseText;
-                            }
-                            else if (xhr.status === 500) {
-                                errorMessage = "Server error: " + xhr.responseText;
-                            }
-                            else {
-                                errorMessage = "Unexpected error: " + xhr.statusText;
+                                errorMessage = "Bad Request: " + (xhr.responseText || error);
+
+                            } else if (xhr.status === 500) {
+                                errorMessage = "Server Error: " + (xhr.responseText || error);
+
+                            } else {
+                                errorMessage = "Unexpected Error: " + (error || xhr.statusText);
                             }
 
-                            toastr.error(errorMessage);
+                            console.error("AJAX Error:", xhr);
+
+                            showToast(errorMessage, { type: "error" });
                         },
 
                         complete: function () {
@@ -326,6 +343,15 @@
                     pendingData.forEach(row => row.selected = isChecked);
                     renderPendingTable();
                 });
+
+                $("#btn_approval").on('click', function () {
+
+                    alert("hello");
+
+
+                });
+
+
 
             } catch (err) {
                 console.error("Error initializing page:", err);

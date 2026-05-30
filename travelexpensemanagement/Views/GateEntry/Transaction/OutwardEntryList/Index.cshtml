@@ -134,7 +134,6 @@
     });
     // ================= LOAD DATA =================
      function loadAlloutward() {
-
         $.ajax({
             url: '/OutwardEntryList/GetList',
             type: 'GET',
@@ -231,7 +230,6 @@
         $('#prevBtn').prop('disabled', currentPage === 1);
         $('#nextBtn').prop('disabled', currentPage === totalPages);
     }
-
     // ================= NAVIGATION =================
     function goToPage(p) {
         currentPage = p;
@@ -255,23 +253,18 @@
 
     // ================= UTIL =================
     function formatDate(dateStr) {
-
         // Handle null, undefined, empty
         if (!dateStr || dateStr === "0001-01-01T00:00:00") {
             return '';
         }
-
         const d = new Date(dateStr);
-
         // Invalid date
         if (isNaN(d.getTime())) {
             return '';
         }
-
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
-
         return `${day}-${month}-${year}`;
     }
     // ================= ACTIONS =================
@@ -293,7 +286,7 @@
             if (r.isConfirmed) {
                 $.post('/OutwardEntryList/Delete', { docId : docId }, function (res) {
                     if (res.success) {
-                        toastr.success("Deleted");
+                        toastr.success("Deleted Successfully ");
                         loadAlloutward();
                     } else {
                         toastr.error("Failed");
@@ -304,31 +297,22 @@
     }
 
     function showDocumentPopup(docCode) {
-
         $.ajax({
             url: '/OutwardEntryList/DocDetailsCode',
             type: 'GET',
             dataType: 'json',
             data: { docCode: docCode },
-
             success: function (response) {
-
-                console.log(response);
-
                 if (response.success) {
                     showDocumentPopupjQuery(response.data, docCode);
                 } else {
                     toastr.error(response.message || "Failed to get document details.");
                 }
             },
-
             error: function (xhr, status, error) {
-
                 console.log(xhr.responseText);
-
                 toastr.error("Error fetching document details.");
             }
         });
     }
-
 </script>

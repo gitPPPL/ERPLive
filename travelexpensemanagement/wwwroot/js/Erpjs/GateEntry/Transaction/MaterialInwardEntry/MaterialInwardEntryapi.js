@@ -267,19 +267,34 @@ async function fetchShipFromAdd(ShipFromID) {
     }
 }
 
-async function fetchTransitno(v_type, v_no, partycode, ExpiryDate) {
+async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit) {
     try {
-        const queryParams = new URLSearchParams({ v_type, v_no, partycode, ExpiryDate });
+
+        const queryParams = new URLSearchParams({
+            v_type,
+            v_no,
+            partycode,
+            ExpiryDate
+        });
+
         const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        if (!response.ok)
+            throw new Error(`HTTP error! Status: ${response.status}`);
+
         const result = await response.json();
+
         const ddl = $('#ddlTransit');
+
         ddl.empty().append('<option value="">-- Select Transit No --</option>');
 
         if (result.status && Array.isArray(result.data)) {
+
             result.data.forEach(item => {
                 ddl.append(`<option value="${item}">${item}</option>`);
             });
+
+            ddl.val(selectedTransit).trigger('change');
         }
 
     } catch (error) {
@@ -366,8 +381,6 @@ async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
     }
 }
 
-
-
 async function GetFasttagVehicledetail() {
     try {
         const rcNumber = $('#TxtVehicleNo').val();
@@ -440,13 +453,11 @@ async function GetVehicledetail() {
             type: 'GET',
             dataType: 'json',
         });
-
-        if (res && res.success) {
+        console.log("res", res);
+        if (res.value.success == true) {
             showToast("Vehicle Info Saved Successfully", { type: "success" });
         } else {
             const apiError = JSON.parse(res.value.message);
-            console.log("apiError", apiError);
-
             showToast(apiError.message, { type: "info" });
         }
     } catch (err) {
@@ -644,3 +655,147 @@ async function GetEwaybillno() {
         });
     }
 }
+
+async function openApprovalModal() {
+    const v_type = $('#ddlDocType').val();
+    const v_no = $('#TxtDocNo').val();
+    await Promise.all([
+        DDlSendTo(),
+        DDlApprovalRemark()
+    ]);
+    try {
+        const res = await $.ajax({
+            url: '/InwardEntry/Approval',
+            data: {
+                v_type: v_type,
+                v_no: v_no
+            },
+            type: 'GET',
+            dataType: 'json'
+        });
+
+        if (res.success == false) {
+            showToast(res.message, { type: "info" });
+            console.log("res", res);
+            return;
+        }
+        else
+        {
+           // $("#approvedModal").modal('show');
+            $("#SendForapprovedModal").modal('show');
+        }
+   
+    } catch (error) {
+        console.error("Approval request failed:", error);
+    }
+}
+
+async function Approvalbtn() {
+    const v_type = $('#ddlDocType').val();
+    const v_no = $('#TxtDocNo').val();
+
+    try {
+        const res = await $.ajax({
+            url: '/InwardEntry/Approvalbtn',
+            data: { v_type: v_type, v_no: v_no },
+            type: 'GET',
+            dataType: 'json'
+        });
+
+        if (res.message == "SendForApproval") {
+
+            $('#btn_approval').hide();
+            $('#btn_Sendapproval').show();
+            return;
+        }
+        else {
+            $('#btn_approval').show();
+            $('#btn_Sendapproval').hide();
+            return;
+        }
+   
+    } catch (error) {
+        console.error("Approval request failed:", error);
+    }
+}
+
+async function DDlApprovalRemark() {
+    try {
+        const res = await fetch('/InwardEntry/DDlApprovalRemark');
+        const data = await res.json();
+        const ddl = $('#ddlsendRemarks');
+        ddl.empty().append('<option value="">-- Select Remark --</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        showToast("Error loading Remark:", { type: "error" });
+
+    }
+}
+
+async function DDlSendTo() {
+    try {     
+        const v_type = $('#ddlDocType').val();
+        const res = await fetch(`/InwardEntry/DDlSendTo?v_type=${encodeURIComponent(v_type)}`);
+
+        const data = await res.json();
+
+        const ddl = $('#ddlsendto');
+
+        ddl.empty().append('<option value="">-- Select Send To --</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+
+    } catch (error) {
+        showToast("Error loading SendTo:", { type: "error" });
+        console.error(error);
+    }
+}
+
+async function SendApproval() {
+
+    try {
+
+        const res = await $.ajax({
+            url: '/InwardEntry/SendApproval',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                vtype: $('#ddlDocType').val(),
+                vno: $('#TxtDocNo').val(),
+                vDate: $('#InDate').val(),
+                appStatus: "OPEN",
+                appRemark: $('#ddlsendRemarks option:selected').text(),
+                SendTo: $('#ddlsendto').val(),
+                menuCode: "112",
+                formName: "frmInwardEntry",
+                deptName: "",
+                STATUS: "OPEN",
+                TableName = "GATE1"
+            }
+        });
+
+        console.log(res);
+
+        if (res.status === "Success") {
+            showToast(res.message, { type: "success" });
+            return;
+        }
+        else {
+            showToast(res.message, { type: "error" });
+        }    
+
+    }
+    catch (error) {
+
+        console.log(error);
+
+        showToast("Server Error", { type: "error" });
+    }
+}
+
+
+

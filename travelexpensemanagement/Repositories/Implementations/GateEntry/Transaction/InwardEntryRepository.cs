@@ -113,7 +113,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             var dataList = new List<object>();
             var globalData = _globalVariableService.GetGlobalVariables();
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 await con.OpenAsync();
@@ -122,7 +121,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@COMP_CODE", globalData.PubCompCode);
                     cmd.Parameters.AddWithValue("@SHIP_PARTY", shipFromId);
                     cmd.Parameters.AddWithValue("@Action", "FetchShipFromAddressAsync");
-
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -144,74 +142,34 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             {
                 if (partyCode <= 0 || string.IsNullOrWhiteSpace(billNo))
                 {
-                    return new RepositoryResponse
-                    {
-                        status = false,
-                        message = "Invalid input"
-                    };
+                    return new RepositoryResponse { status = false, message = "Invalid input" };
                 }
-
                 var g = _globalVariableService.GetGlobalVariables();
-
                 using var conn = _dbConnection.GetErpConnection();
                 await conn.OpenAsync();
-
                 using SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn);
 
                 // IMPORTANT
                 cmd.CommandType = CommandType.StoredProcedure;
-
                 cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partyCode;
-
-                cmd.Parameters.Add("@BILL_NO", SqlDbType.NVarChar, 30).Value =
-                    billNo;
-
+                cmd.Parameters.Add("@BILL_NO", SqlDbType.NVarChar, 30).Value = billNo;
                 cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNo;
-
-                cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value =
-                    g.PubCompCode;
-
-                cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value =
-                    g.PubBranchCode;
-
-                cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value =
-                    g.PubFYearCode;
-
-                // EXACT ACTION NAME FROM SP
-                cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value =
-                    "ValidateBillNoAsync";
-
+                cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value =  g.PubCompCode;
+                cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = g.PubBranchCode;
+                cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = g.PubFYearCode;  
+                cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value ="ValidateBillNoAsync";
                 using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                if (await reader.ReadAsync())
-                {
+                if (await reader.ReadAsync())                {
                     string docId = reader["doc_id"]?.ToString() ?? "";
+                    string vDate = reader["V_date"] != DBNull.Value ? Convert.ToDateTime(reader["V_date"]) .ToString("dd-MMM-yyyy") : "";
 
-                    string vDate = reader["V_date"] != DBNull.Value
-                        ? Convert.ToDateTime(reader["V_date"])
-                            .ToString("dd-MMM-yyyy")
-                        : "";
-
-                    return new RepositoryResponse
-                    {
-                        status = false,
-                        message = $"Bill No '{billNo}' already exists at Serial No: {docId} dated: {vDate}"
-                    };
+                    return new RepositoryResponse  { status = false,  message = $"Bill No '{billNo}' already exists at Serial No: {docId} dated: {vDate}" };
                 }
-
-                return new RepositoryResponse
-                {
-                    status = true,
-                    message = ""
-                };
+                return new RepositoryResponse { status = true, message = "" };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse
-                {
-                    status = false,
-                    message = ex.Message
-                };
+                return new RepositoryResponse { status = false, message = ex.Message };
             }
         }
         public async Task<RepositoryResponse> ValidateGateNoAsync( string vType,  int vNo)
