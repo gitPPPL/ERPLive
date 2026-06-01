@@ -12,21 +12,15 @@ var unitList = [];
 
 $(document).ready(async function () {
     await LoadDropDown();
-    $('#btn_approval').hide();
     if (rowId) {
         await LoadFormByID(rowId, vtype);
-
-        await Approvalbtn();            
-
+        await Approvalbtn();
         $('#ddlDocType').prop('disabled', true);
         $('#InDate').prop('disabled', true);
         $('#InTime').prop('disabled', true);
         $('.erppagelist-toolbar-end').show();
-       // $('#btn_approval').show();
-
         if (mode === "view") {
-            //$('#btn_approval').hide();
-            setFormReadOnly();
+            setFormReadOnly();    
         }
     }
     else {
@@ -126,6 +120,7 @@ $(document).ready(async function () {
         const V_NO = parseInt($('#TxtDocNo').val()) || null;
         const BILL_NO = $('#TxtBillNo').val().trim();
         const V_TYPE = $('#ddlDocType').val();
+
         if (BILL_NO) {
             const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
             if (!validation.success) {
@@ -137,7 +132,6 @@ $(document).ready(async function () {
         if (isValid === false) {
             return;
         }
-            
         saveInwardEntry();
     });
 
@@ -339,16 +333,19 @@ $(document).ready(async function () {
         $('#TxtContainerNo').val(row.containeR_NO);
     });
 
-    $("#btn_approval").on('click', function () {       
+    $("#btn_approval").on('click', function () {
         openApprovalModal();
     });
 
-    $("#btn_Sendapproval").on('click', function () { 
-        openApprovalModal();
+    $("#btn_Sendapproval").on('click', function () {
+        sendopenApprovalModal();
     });
 
     $('#btn_Sendapp').on('click', function () {
         SendApproval();
     });
 
+    $('#btn_approvalok').on('click', function () {
+        SendWindowApproval();
+    });
 });

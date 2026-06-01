@@ -18,12 +18,18 @@
             <i class="fa fa-database"></i>Print
         </button>
 
+        <span class="approval-status" id="span_approved" hidden>
+            <i class="fa fa-check-circle"></i>
+            Approved
+        </span>
 
-        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" title="Approval" id="btn_approval">
+
+
+        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" title="Approval" id="btn_approval" hidden>
             <i class="fa fa-check-circle"></i> Approval
         </button>
 
-        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" title="Send Approval" id="btn_Sendapproval">
+        <button type="button" class="erppagelist-btn erppagelist-btn-approve tooltip-btn" title="Send Approval" id="btn_Sendapproval" hidden>
             <i class="fa fa-check-circle"></i> Send Approval
         </button>
 
@@ -32,12 +38,11 @@
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
 
-
     </div>
 </div>
 
 <div class="modal fade" id="approvedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg erppagesmodal">
+    <div class="modal-dialog modal-lg erppagesmodal small-modal">
         <div class="modal-content erppagesmodal-content">
             <div class="erppagesmodal-header">
                 <div class="erppagesmodal-header-left">
@@ -79,16 +84,26 @@
                                 <label for="ddlRemarks" class="erppagesmodal-label">
                                     Remarks
                                 </label>
-                                <select class="erppagesmodal-input" id="ddlRemarks">
+                         @*        <select class="erppagesmodal-input" id="ddlRemarks">
                                     <option value="">Select Remarks</option>
-                                </select>
+                                </select> *@
+
+                                <input type="text"
+                                       id="ddlRemarks"
+                                       class="erppagesmodal-input"
+                                   list="appremarksList"
+                                       placeholder="Select or type remark" />
+
+                               <datalist id="appremarksList"></datalist>
+
+
                             </div>
                         </div>
                     </div>
                     <div class="erppagesrow">
                         <div class="erppagescol-12">
                             <div class="erppagesmodal-action">
-                                <button type="button" class="erppagesmodal-btn" id="btn_sendapproval">
+                                <button type="button" class="erppagesmodal-btn" id="btn_approvalok">
                                     <i class="fa fa-paper-plane"></i> Send Approval
                                 </button>
                             </div>
@@ -103,7 +118,7 @@
 
 
 <div class="modal fade" id="SendForapprovedModal" tabindex="-1" aria-labelledby="sendforApprovedLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg erppagesmodal">
+    <div class="modal-dialog modal-lg erppagesmodal small-modal">
         <div class="modal-content erppagesmodal-content">
             <div class="erppagesmodal-header">
                 <div class="erppagesmodal-header-left">
@@ -134,12 +149,22 @@
             
                     <div class="erppagescol-4">
                         <div class="erppagesmodal-group">
-                            <label for="ddlRemarks" class="erppagesmodal-label">
+                            <label for="ddlsendRemarks" class="erppagesmodal-label">
                                 Remarks
                             </label>
-                            <select class="erppagesmodal-input" id="ddlsendRemarks">
+                     @*        <select class="erppagesmodal-input" id="ddlsendRemarks">
                                 <option value="">Select Remarks</option>
-                            </select>
+                            </select> *@
+
+                            <input type="text"
+                                   id="ddlsendRemarks"
+                                   class="erppagesmodal-input"
+                                   list="remarksList"
+                                   placeholder="Select or type remark" />
+
+                            <datalist id="remarksList">
+                            </datalist>
+
                         </div>
                     </div>
                 </div>
@@ -157,11 +182,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
 
 <div id="InwardEntryForm">
     <input type="hidden" class="form-control" id="TxtCode" name="CODE">
@@ -883,6 +903,10 @@
         </div>
     </div>
 </div>
-<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.init.js"></script>
-<script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentry.js"></script>
+
+
+
+
+<script src="~/js/Erpjs/GateEntry/Transaction/MaterialInwardEntry/MaterialInwardEntry.js"></script>
+<script src="~/js/Erpjs/GateEntry/Transaction/MaterialInwardEntry/MaterialInwardEntryinit.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/materialinwardentry/materialinwardentryapi.js"></script>

@@ -1,12 +1,23 @@
 ﻿/* ===== HEADER UPGRADE ===== */
 .erppage-header {
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #2d7b46, #1C5E31);
     color: #fff;
     padding: 6px 10px;
     display: flex;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
+}
+.approval-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
 }
 /* LEFT */
 .erppage-header-left {
@@ -16,7 +27,10 @@
 }
 /* RIGHT SIDE PUSH */
 .erppage-header-right {
-    margin-left: auto; /* 🔥 pushes to right */
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between buttons and span */
 }
 .btn-add-row-last {
     display: flex;
@@ -543,7 +557,7 @@
     display: grid;
     grid-template-columns: 80px 1fr auto;
     align-items: center;
-    gap: 12px;
+    gap: 4px;
     flex-direction: column; /* 🔥 stack label + input always */
 }
 
@@ -571,18 +585,7 @@
         padding: 4px 8px;
         word-wrap: break-word;
     }
-.select2-container--default.select2-container--disabled
-.select2-selection--single {
-    background-color: #fff !important;
-    color: #000 !important;
-    opacity: 1 !important;
-}
 
-    .select2-container--default.select2-container--disabled
-    .select2-selection--single
-    .select2-selection__rendered {
-        color: #000 !important;
-    }
 /* ===== Arrow ===== */
 .select2-container--default .select2-selection__arrow {
     height: 100%;
@@ -683,7 +686,7 @@
 /* ===== LABEL ===== */
 .erppage-label {
     font-size: 12px;
-    color: #303548;
+    color: #1a1a1a;
     display: inline-block;
     margin: 0;
     font-weight: 600;
@@ -912,25 +915,25 @@ input[type="number"] {
 /* Icon */
 .erppageinputicon {
     position: absolute;
-    right: 0px;
-    border-radius: 5px;
+    right: 3px;
     top: 50%;
-    background-color: #2f7d32;
-    padding: 7px;
     transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(135deg,#2f7d32,#1b5e20);
+    color: #fff;
     cursor: pointer;
-    color: #ffffff;
-    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.2s ease;
 }
 
     /* Hover */
     .erppageinputicon:hover {
-        color: #fff;
-        transform: translateY(-50%) scale(1.1);
+        background: linear-gradient(135deg,#256d29,#164a18);
+        transform: translateY(-50%) scale(1.05);
     }
 
 /* Mobile responsive */

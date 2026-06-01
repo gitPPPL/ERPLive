@@ -659,6 +659,39 @@ async function GetEwaybillno() {
 async function openApprovalModal() {
     const v_type = $('#ddlDocType').val();
     const v_no = $('#TxtDocNo').val();
+
+    await Promise.all([
+        DDlForwordTo(),
+        DDlAPPStatus(),
+        DDlAPPRemark()
+    ]);
+    try {
+        const res = await $.ajax({
+            url: '/InwardEntry/Approval',
+            data: {
+                v_type: v_type,
+                v_no: v_no
+            },
+            type: 'GET',
+            dataType: 'json'
+        });
+        console.log("res", res);
+        if (res.success == false) {
+            showToast(res.message, { type: "info" });
+            return;
+        }
+        else
+        {         
+            $("#approvedModal").modal('show');
+        }   
+    } catch (error) {
+        console.error("Approval request failed:", error);
+    }
+}
+
+async function sendopenApprovalModal() {
+    const v_type = $('#ddlDocType').val();
+    const v_no = $('#TxtDocNo').val();
     await Promise.all([
         DDlSendTo(),
         DDlApprovalRemark()
@@ -675,16 +708,14 @@ async function openApprovalModal() {
         });
 
         if (res.success == false) {
-            showToast(res.message, { type: "info" });
+            showToast(res.message, { type: "info" });           
             console.log("res", res);
             return;
         }
-        else
-        {
-           // $("#approvedModal").modal('show');
+        else {
             $("#SendForapprovedModal").modal('show');
         }
-   
+
     } catch (error) {
         console.error("Approval request failed:", error);
     }
@@ -693,7 +724,6 @@ async function openApprovalModal() {
 async function Approvalbtn() {
     const v_type = $('#ddlDocType').val();
     const v_no = $('#TxtDocNo').val();
-
     try {
         const res = await $.ajax({
             url: '/InwardEntry/Approvalbtn',
@@ -701,19 +731,40 @@ async function Approvalbtn() {
             type: 'GET',
             dataType: 'json'
         });
+        console.log("Approvalbtn", res);
+        if (res.message === "SendForApproval") {
 
-        if (res.message == "SendForApproval") {
+            $('#btn_Sendapproval')
+                .prop('disabled', false)
+                .removeAttr('hidden');
 
-            $('#btn_approval').hide();
-            $('#btn_Sendapproval').show();
             return;
         }
-        else {
-            $('#btn_approval').show();
-            $('#btn_Sendapproval').hide();
+
+        if (res.message == "DocumentSend")
+        {
+            $('#span_approved').prop('hidden', false); 
+            
             return;
         }
-   
+
+        if (res.message === "ApprovalWindow") {
+
+            $('#btn_approval')
+                .prop('disabled', false)
+                .removeAttr('hidden');
+
+            return;
+        }
+
+
+
+
+
+
+
+
+       
     } catch (error) {
         console.error("Approval request failed:", error);
     }
@@ -723,14 +774,16 @@ async function DDlApprovalRemark() {
     try {
         const res = await fetch('/InwardEntry/DDlApprovalRemark');
         const data = await res.json();
-        const ddl = $('#ddlsendRemarks');
-        ddl.empty().append('<option value="">-- Select Remark --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        showToast("Error loading Remark:", { type: "error" });
 
+        const list = $('#remarksList');
+        list.empty();
+
+        data.forEach(item => {
+            list.append(`<option value="${item.text}"></option>`);
+        });
+    }
+    catch (error) {
+        showToast("Error loading Remark:", { type: "error" });
     }
 }
 
@@ -768,20 +821,22 @@ async function SendApproval() {
                 vno: $('#TxtDocNo').val(),
                 vDate: $('#InDate').val(),
                 appStatus: "OPEN",
-                appRemark: $('#ddlsendRemarks option:selected').text(),
+                appRemark: $('#ddlsendRemarks').val(),
                 SendTo: $('#ddlsendto').val(),
                 menuCode: "112",
                 formName: "frmInwardEntry",
                 deptName: "",
                 STATUS: "OPEN",
-                TableName = "GATE1"
+                sendName: $('#ddlsendto option:selected').text(),
+                TableName : "GATE1"
             }
         });
 
         console.log(res);
-
         if (res.status === "Success") {
-            showToast(res.message, { type: "success" });
+            $("#SendForapprovedModal").modal('hide');
+            setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) ; }, 100);                                
+            showToast(res.message, { type: "success" });        
             return;
         }
         else {
@@ -797,5 +852,125 @@ async function SendApproval() {
     }
 }
 
+async function DDlForwordTo() {
+    try {
+        const v_type = $('#ddlDocType').val();
+        const v_no = $('#TxtDocNo').val();
 
+        const res = await fetch(
+            `/InwardEntry/DDlForwordTo?v_type=${encodeURIComponent(v_type)}&v_no=${encodeURIComponent(v_no)}`
+        );
 
+        const data = await res.json();
+        console.log('data', data);
+        const ddl = $('#ddlForwardTo');
+
+        ddl.empty().append('<option value="">-- Select Send To --</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+
+    } catch (error) {
+        showToast("Error loading SendTo:", { type: "error" });
+        console.error(error);
+    }
+}
+
+async function DDlAPPStatus() {
+    try {
+        const res = await fetch('/InwardEntry/DDlAPPStatus');
+        const data = await res.json();
+        const ddl = $('#ddlApprovalStatus');
+        ddl.empty().append('<option value="">-- Select Approval Status --</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        showToast("Error loading Approval Status:", { type: "error" });
+
+    }
+}
+
+async function DDlAPPRemark() {
+    try {
+        const res = await fetch('/InwardEntry/DDlAPPRemark');
+        const data = await res.json();
+
+        const datalist = $('#appremarksList');
+        datalist.empty();
+
+        data.forEach(item => {
+            datalist.append(`<option value="${item.text}"></option>`);
+        });
+
+    } catch (error) {
+        showToast("Error loading Remarks", { type: "error" });
+        console.error(error);
+    }
+}
+
+async function SendWindowApproval() {
+    try {
+
+        const AppStatus = parseInt($('#ddlApprovalStatus').val());
+        const ForwardTo = parseInt($('#ddlForwardTo').val() || 0);
+        const AppRemark = $('#ddlRemarks').val().trim();
+        const AppStatusText = $('#ddlApprovalStatus option:selected').text();
+
+        if (!validateRequiredField('#ddlApprovalStatus', 'Please select Approval Status'))
+            return;
+
+        // Forward user required for status 7 or 8
+        if ((AppStatus === 7 || AppStatus === 8) && ForwardTo === 0) {
+            showToast("Please select Forward User.", { type: "warning" });
+            return;
+        }
+
+        // Remarks required
+        if (!AppRemark && (AppStatus === 4 || AppStatus === 5 || AppStatus === 7)) {
+            showToast(`Remarks required for ${AppStatusText}`, { type: "warning" });
+            return;
+        }
+
+        let Status = (AppStatus === 5 || AppStatus === 8)
+            ? "CLOSE"
+            : "OPEN";
+
+        const res = await $.ajax({
+            url: '/InwardEntry/SendApproval',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                vtype: $('#ddlDocType').val(),
+                vno: $('#TxtDocNo').val(),
+                vDate: $('#InDate').val(),
+                appStatus: AppStatusText,
+                appRemark: AppRemark,
+                SendTo: ForwardTo,
+                menuCode: "112",
+                formName: "frmInwardEntry",
+                deptName: "",
+                STATUS: Status,
+                sendName: $('#ddlForwardTo option:selected').text(),
+                TableName: "GATE1"
+            }
+        });
+        console.log(res);
+
+        if (res.status === "Success") {
+            $("#approvedModal").modal('hide');
+            showToast(res.message, { type: "success" });
+            setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) ; }, 100);                                
+       
+           
+            return;
+        } else {
+            showToast(res.message, { type: "error" });
+        }
+
+    } catch (error) {
+        console.error(error);
+        showToast("Server Error", { type: "error" });
+    }
+}

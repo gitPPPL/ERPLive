@@ -2499,16 +2499,6 @@ textarea.form-height {
 
 
 
-a {
-    font-size: 13px;
-    color: #007bff;
-    text-decoration: none;
-}
-
-/* a:hover {
-        text-decoration: underline;
-    }*/
-
 .breadcrumb {
     background: #f8f9fa;
     padding: 8px 0px;

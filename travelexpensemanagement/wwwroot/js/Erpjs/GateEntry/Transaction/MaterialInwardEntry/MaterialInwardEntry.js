@@ -315,108 +315,118 @@
         input.focus();
                 }
             }
-    function setFormReadOnly() {
-                    const form = document.getElementById("InwardEntryForm");
+function setFormReadOnly() {
+
+    const form = document.getElementById("InwardEntryForm");
     if (!form) return;
-    // add readonly class
-    form.classList.add('erppage-readonly');
-    // Hide approval button
-    $('.erppagelist-toolbar-end').hide();
-    $('#btn_approval').hide();
+
+    // Readonly styling
+    form.classList.add("erppage-readonly");
+    form.classList.add("readonly-mode");
+
+    // Hide approval buttons initially
+    $("#btn_approval").hide();
+    $("#btn_Sendapproval").hide();
 
     // Disable all inputs except hidden
-    const inputs = form.querySelectorAll("input");
-                    inputs.forEach(el => {
-                        if (el.type !== "hidden") {
-                            if (
-    el.type === "text" ||
-    el.type === "date" ||
-    el.type === "time" ||
-    el.type === "number"
-    ) {
-        el.setAttribute("readonly", true);
-                            } else {
-        el.setAttribute("disabled", true);
-                            }
-                        }
-                    });
+    form.querySelectorAll("input").forEach(el => {
 
-    // Disable all textareas
-    const textareas = form.querySelectorAll("textarea");
-                    textareas.forEach(el => {
-        el.setAttribute("readonly", true);
-                    });
+        if (el.type === "hidden")
+            return;
 
-    // Disable all selects
-    const selects = form.querySelectorAll("select");
-                    selects.forEach(el => {
-        el.setAttribute("disabled", true);
-                    });
+        if (
+            el.type === "text" ||
+            el.type === "date" ||
+            el.type === "time" ||
+            el.type === "number"
+        ) {
+            el.readOnly = true;
+        }
+        else {
+            el.disabled = true;
+        }
+    });
 
-    // Disable all buttons except Back/List buttons if needed
-    const buttons = form.querySelectorAll("button");
-                    buttons.forEach(btn => {
-                        const txt = btn.innerText.trim().toLowerCase();
+    // Disable textareas
+    form.querySelectorAll("textarea").forEach(el => {
+        el.readOnly = true;
+    });
 
-    if (
-    !txt.includes("back") &&
-    !txt.includes("close")
-    ) {
-        btn.setAttribute("disabled", true);
-                        }
-                    });
+    // Disable selects
+    form.querySelectorAll("select").forEach(el => {
+        el.disabled = true;
+    });
 
-    // Disable clickable icons/spans
-    const clickableIcons = form.querySelectorAll(`
-    .input-icon,
-    .fa-search,
-    .fa-cog,
-    .fa-database,
-    .fa-ellipsis-h
-    `);
+    // Disable buttons except approval/back/close
+    form.querySelectorAll("button").forEach(btn => {
 
-                    clickableIcons.forEach(icon => {
+        if (
+            btn.id === "btn_approval" ||
+            btn.id === "btn_Sendapproval"
+        ) {
+            return;
+        }
+
+        const txt = (btn.innerText || "").trim().toLowerCase();
+
+        if (
+            !txt.includes("back") &&
+            !txt.includes("close")
+        ) {
+            btn.disabled = true;
+        }
+    });
+
+    // Disable icons
+    form.querySelectorAll(`
+        .input-icon,
+        .fa-search,
+        .fa-cog,
+        .fa-database,
+        .fa-ellipsis-h
+    `).forEach(icon => {
+
         icon.style.pointerEvents = "none";
-    icon.style.opacity = "0.5";
-    icon.style.cursor = "not-allowed";
-                    });
+        icon.style.opacity = "0.5";
+        icon.style.cursor = "not-allowed";
+    });
 
-    // Disable modal triggers
-    const modalTriggers = form.querySelectorAll("[data-bs-toggle='modal']");
-                    modalTriggers.forEach(el => {
+    // Disable modal launchers
+    form.querySelectorAll("[data-bs-toggle='modal']").forEach(el => {
+
         el.removeAttribute("data-bs-toggle");
-    el.removeAttribute("data-bs-target");
-    el.style.pointerEvents = "none";
-    el.style.opacity = "0.5";
-    el.style.cursor = "not-allowed";
-                    });
+        el.removeAttribute("data-bs-target");
+
+        el.style.pointerEvents = "none";
+        el.style.opacity = "0.5";
+        el.style.cursor = "not-allowed";
+    });
 
     // Disable table controls
-    const tableControls = form.querySelectorAll(`
-    table input,
-    table select,
-    table textarea,
-    table button,
-    table .fa,
-    table span
-    `);
+    form.querySelectorAll(`
+        table input,
+        table select,
+        table textarea,
+        table button,
+        table .fa
+    `).forEach(el => {
 
-                    tableControls.forEach(el => {
-                        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-        el.setAttribute("readonly", true);
-                        } else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
-        el.setAttribute("disabled", true);
-                        }
+        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+            el.readOnly = true;
+        }
+        else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
+            el.disabled = true;
+        }
 
-    el.style.pointerEvents = "none";
-    el.style.opacity = "0.5";
-                    });
+        el.style.pointerEvents = "none";
+        el.style.opacity = "0.5";
+    });
+
+    // Keep specific tabs accessible
     $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
     $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
     $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
-    // Add readonly class for CSS styling
-    form.classList.add("readonly-mode");
-                }
+}
     function collectTableRowData() {
             const table = document.getElementById('tblInwardEntry');
     if (!table) return [];

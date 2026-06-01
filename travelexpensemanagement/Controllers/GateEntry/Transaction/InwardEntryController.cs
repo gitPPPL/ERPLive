@@ -1222,9 +1222,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 using var conn = _dbConnection.GetErpConnection();
                 await conn.OpenAsync();
 
-                // First Check 
                 using SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn);
-
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Action", "ApprovalbtnShow");
                 cmd.Parameters.AddWithValue("@v_type", v_type);
@@ -1234,21 +1232,50 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 cmd.Parameters.AddWithValue("@year_code", globalvariable.PubFYearCode);
                 cmd.Parameters.AddWithValue("@UUSER", globalvariable.PubUserId);
 
-                object result = await cmd.ExecuteScalarAsync();
+                string userCode = string.Empty;
+                string approvalRemark = string.Empty;
 
-                bool isApproved = result != null;
+                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                       
 
-                if (isApproved)
+                // Second result set (Approval_remark)
+                if (await reader.NextResultAsync())
                 {
-                    return new JsonResult(new { success = false, approved = true ,message = "SendForApproval" });
+                    if (await reader.ReadAsync())
+                    {
+                        approvalRemark = reader["Approval_remark"]?.ToString() ?? string.Empty;         
+                        return new JsonResult(new { success = false,  approved = true,  message = "DocumentSend",  approvalRemark });           
+                    }
                 }
 
-                return new JsonResult(new { success = true, approved = false , message = "ApprovalWindow" });
+
+                // First result set (USER_CODE)
+                if (await reader.ReadAsync())
+                {
+                    userCode = reader["USER_CODE"]?.ToString() ?? string.Empty;
+                }
+
+
+                // Continue with USER_CODE logic
+                if (!string.IsNullOrEmpty(userCode))
+                {
+                    return new JsonResult(new
+                    {
+                        success = false,
+                        approved = true,
+                        message = "SendForApproval"
+                    });
+                }
+                else
+                {
+                    return new JsonResult(new { success = true, approved = false, message = "ApprovalWindow" });
+                }
+                 
             }
-            catch (Exception ex)
-            {
-                return new JsonResult(new { success = false, message = ex.Message });
-            }
+                catch (Exception ex)
+                {
+                    return new JsonResult(new { success = false,  message = ex.Message });
+                }
         }
         public async Task<JsonResult> Approval(string v_type, int v_no)
         {
@@ -1324,7 +1351,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(DDlApprovalRemark);
             }
         }
-        public JsonResult DDlSendTo(string v_type)
+        public JsonResult DDlSendTo(string v_type )
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -1338,13 +1365,86 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(DDlSendTo);
             }
         }
+        public JsonResult DDlForwordTo(string v_type, int v_no)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
 
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                    string query = @"
+                    SELECT a.USER_CODE AS Value, b.FULL_NAME AS Text
+                    FROM DOC_APPROSTAGE a
+                    LEFT JOIN CONDATABASE.dbo.USER_MAST b
+                    ON a.USER_CODE = b.CODE
+                    LEFT JOIN CONDATABASE.dbo.SUBUSER_MAST c
+                    ON b.CODE = c.USER_CODE
+                    AND c.COMP_CODE = @CompCode
+                    WHERE a.USER_CODE <> @UserCode
+                    AND a.DOC_CODE = @VType
+                    AND a.COMP_CODE = @CompCode and  b.FULL_NAME <> ''
 
+                    UNION ALL
 
+                    SELECT SEND_CODE AS Value, SEND_NAME AS Text
+                    FROM APPROVAL_STATUS
+                    WHERE COMP_CODE = @CompCode
+                    AND BRANCH_CODE = @BranchCode
+                    AND YEAR_CODE = @FYearCode
+                    AND V_NO = @VNo
+                    AND V_TYPE = @VType  and SEND_NAME <> ''  ";
 
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@UserCode", getdata.PubUserId); 
+                    cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@FYearCode", getdata.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@VNo", v_no);
+                    cmd.Parameters.AddWithValue("@VType", v_type);
+
+                    con.Open();
+
+                    var list = new List<object>();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            list.Add(new
+                            {
+                                value = dr["Value"].ToString(),
+                                text = dr["Text"].ToString()
+                            });
+                        }
+                    }
+                    return Json(list);
+                }
+            }
+        }
+         public JsonResult DDlAPPStatus()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select code,name from DOCSTATUS_MAST where V_TYPE='Approval' order by code";
+                var DDlAPPStatus = _dropdownService.GetDropdownList(query);
+                return Json(DDlAPPStatus);
+            }
+        }
+
+        public JsonResult DDlAPPRemark()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select code,name from DOCSTATUS_MAST where V_TYPE='Approval' and code<>7 and code<>8 order by code";
+                var DDlAPPRemark = _dropdownService.GetDropdownList(query);
+                return Json(DDlAPPRemark);
+            }
+        }
         [HttpPost]
-        public async Task<JsonResult> SendApproval( string vtype, int vno, DateTime vDate, string appStatus, string appRemark,
-           int SendTo,  string menuCode, string formName, string deptName , string STATUS , String TableName)
+        public async Task<JsonResult> SendApproval( string vtype, int vno,  DateTime vDate, string appStatus,  string appRemark, int SendTo,
+            string menuCode, string formName, string deptName,  string STATUS,  string TableName, string sendName, string tabletype = "ENTRY")
         {
             try
             {
@@ -1354,29 +1454,25 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 using var cmd = new SqlCommand("USP_SEND_APPROVAL", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 int approvalCode = 0;
-                switch ((appStatus ?? "").ToUpper())
-                {
-                    case "APPROVED":
-                        approvalCode = 8;
-                        break;
 
-                    case "REJECT":
-                        approvalCode = 9;
-                        break;
+                string origicode = GetText(
+                    $"SELECT UUSER FROM GATE1 " +
+                    $"WHERE COMP_CODE={globalvariable.PubCompCode} " +
+                    $"AND BRANCH_CODE={globalvariable.PubBranchCode} " +
+                    $"AND YEAR_CODE={globalvariable.PubFYearCode} " +
+                    $"AND DOC_ID='{vtype}{vno}'");
 
-                    case "HOLD":
-                        approvalCode = 7;
-                        break;
-
-                    default:
-                        approvalCode = 0;
-                        break;
-                }
-
-                //string origicode = GetText("SELECT UUSER  FROM GATE1 WHERE COMP_CODE="+ globalvariable.PubCompCode + "  AND BRANCH_CODE="+ globalvariable.PubBranchCode + "    AND YEAR_CODE="+ globalvariable.PubFYearCode +"   and DOC_ID = '"+ vtype + vno +"'");
-                //string origidate = GetText("SELECT UDATE  FROM GATE1 WHERE COMP_CODE=@COMP_CODEAND BRANCH_CODE=@BRANCH_CODE  AND YEAR_CODE=@YEAR_CODE  and DOC_ID = @DOC_ID");
+                string origidate = GetText(
+                    $"SELECT UDATE FROM GATE1 " +
+                    $"WHERE COMP_CODE={globalvariable.PubCompCode} " +
+                    $"AND BRANCH_CODE={globalvariable.PubBranchCode} " +
+                    $"AND YEAR_CODE={globalvariable.PubFYearCode} " +
+                    $"AND DOC_ID='{vtype}{vno}'");
                 
-                cmd.Parameters.AddWithValue("@SEND_CODE", SendTo);
+                cmd.Parameters.AddWithValue("@SEND_CODE", globalvariable.PubUserId ?? "");
+                cmd.Parameters.AddWithValue("@SEND_NAME", globalvariable.PubUserName ?? "");
+                cmd.Parameters.AddWithValue("@USER_CODE", SendTo);
+                cmd.Parameters.AddWithValue("@USER_NAME", sendName);
                 cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
                 cmd.Parameters.AddWithValue("@BRANCH_CODE", globalvariable.PubBranchCode);
                 cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
@@ -1385,35 +1481,39 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 cmd.Parameters.AddWithValue("@DOC_NAME", vtype ?? "");
                 cmd.Parameters.AddWithValue("@FORM_NAME", formName ?? "");
                 cmd.Parameters.AddWithValue("@V_TYPE", vtype ?? "");
-                cmd.Parameters.AddWithValue("@V_NO", vno);               
-                        
-                cmd.Parameters.AddWithValue("@V_DATE", SqlDbType.SmallDateTime).Value = vDate == null ? DBNull.Value : Convert.ToDateTime(vDate);
-                //cmd.Parameters.AddWithValue("@ORIGIN_CODE", origicode);
-                //cmd.Parameters.AddWithValue("@ORIGIN_DATE", SqlDbType.SmallDateTime).Value = origidate == null ? DBNull.Value : Convert.ToDateTime(origidate);
+                cmd.Parameters.AddWithValue("@V_NO", vno);
+                cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value =  vDate == DateTime.MinValue ? DBNull.Value : Convert.ToDateTime(vDate);
+                cmd.Parameters.Add("@ORIGIN_DATE", SqlDbType.SmallDateTime).Value =  string.IsNullOrWhiteSpace(origidate) ? DBNull.Value : Convert.ToDateTime(origidate);
+                cmd.Parameters.AddWithValue("@ORIGIN_CODE", string.IsNullOrWhiteSpace(origicode)  ? DBNull.Value : Convert.ToInt32(origicode));
                 cmd.Parameters.AddWithValue("@DEPARTMENT", deptName ?? "");
-                cmd.Parameters.AddWithValue("@SEND_NAME", globalvariable.PubUserName ?? "");
-                cmd.Parameters.AddWithValue("@USER_CODE", globalvariable.PubUserId);
-                cmd.Parameters.AddWithValue("@USER_NAME", globalvariable.PubUserName ?? "");
                 cmd.Parameters.AddWithValue("@APPROVAL_CODE", approvalCode);
                 cmd.Parameters.AddWithValue("@APPROVAL_REMARK", appRemark ?? "");
                 cmd.Parameters.AddWithValue("@REMARKS", appRemark ?? "");
-                cmd.Parameters.AddWithValue("@UPDATE_SRNO", DBNull.Value);
-                cmd.Parameters.AddWithValue("@TABLE_NAME", TableName);
-                cmd.Parameters.AddWithValue("@TABLE_TYPE", "ENTRY");
+                cmd.Parameters.AddWithValue("@TABLE_NAME", TableName ?? "");
+                cmd.Parameters.AddWithValue("@TABLE_TYPE", tabletype ?? "ENTRY");
                 cmd.Parameters.AddWithValue("@WSID", globalvariable.PubWorkStationID ?? "");
                 cmd.Parameters.AddWithValue("@LIP", globalvariable.PubLocalId ?? "");
                 cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                 cmd.Parameters.AddWithValue("@APP_REMARKS", appRemark ?? "");
                 cmd.Parameters.AddWithValue("@STATUS", STATUS ?? "");
+                // OUTPUT PARAMETER
+                SqlParameter returnMessage = new SqlParameter( "@ReturnMessage",  SqlDbType.NVarChar, 500)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(returnMessage);
                 await cmd.ExecuteNonQueryAsync();
-                return Json(new { Status = "Success", Message = "Approval Send Successfully" });
+                string message = Convert.ToString(returnMessage.Value);
+                return Json(new { Status = "Success", Message = string.IsNullOrWhiteSpace(message) ? "Approval Sent Successfully." : message });
+            }
+            catch (SqlException ex)
+            {
+                return Json(new {  Status = "Error", Message = ex.Message });
             }
             catch (Exception ex)
             {
                 return Json(new  { Status = "Error", Message = ex.Message });
             }
         }
-
-
     }
 }
