@@ -1,81 +1,172 @@
 ﻿@{
-    ViewBag.Title = "Incomming QC List";
+    ViewBag.Title = "Incomming QC RM List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
 }
+<div id="erp-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Incomming QC RM List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "IncommingQCRM")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i>Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i>Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblIncommingQCRMList" class="excel-table fixed-grid-table resizable-table sortable-table">
+            <colgroup>
+                <col style="display:none;" /> 
+                <col style="width:120px;" />  
+                <col style="width:150px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+                <col style="width:80px;" />   
+                <col style="width:120px;" />  
+                <col style="width:180px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+                <col style="width:150px;" />  
+                <col style="width:120px;" />  
+                <col style="width:140px;" />  
+                <col style="width:140px;" />  
+                <col style="width:140px;" />  
+                <col style="width:180px;" />  
+                <col style="width:140px;" />  
+                <col style="width:180px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+                <col style="width:120px;" />  
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col" data-column="0">
+                        Code <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="1">
+                        Doc Type <span class="sort-icon"></span>
+                    </th>
+                    @* <th data-column="2">
+                        Name <span class="sort-icon"></span>
+                    </th> *@
+                    <th data-column="3">
+                        Doc No <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="4">
+                        Doc Date <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="5">
+                        Mrn No <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="6">
+                        Mrn Type <span class="sort-icon"></span>
+                    </th>
+                    @* <th data-column="7">
+                        Mrn Date <span class="sort-icon"></span>
+                    </th> *@
+                    @* <th data-column="8">
+                        Bales <span class="sort-icon"></span>
+                    </th> *@
+                    @* <th data-column="9">
+                        Party Code <span class="sort-icon"></span>
+                    </th> *@
+                    <th data-column="10">
+                        Party Name <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="11">
+                        Bill No <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="12">
+                        Bill Date <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="13">
+                        Transport <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="14">
+                        Truck No <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="15">
+                        Invoice Quantity <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="16">
+                        Received Quantity <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="17">
+                        Short Quantity <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="18">
+                        Remarks <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="19">
+                        Deduction Amount <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="20">
+                        Deduction Narration <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="21">
+                        Pur_Type <span class="sort-icon"></span>
+                    </th>
+                    <th data-column="22">
+                        Waste Weight <span class="sort-icon"></span>
+                    </th>
+                    <th class="action-col">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-<fieldset>
-    <legend class="legend-field">Incomming QC RM List</legend>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-            </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
         </div>
-        <div class="col-lg-6">
-            <div class="btn-rightalign">
-                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "IncommingQCRM")'" type="submit" class="btn btn-add">
-                    <i class="fa fa-plus"></i>Add
-                </button>
-                <button class="btn btn-print" onclick="printCityMasterReport()">
-                    <i class="fa fa-print"></i> Print
-                </button>
-                <button class="btn btn-export">
-                    <i class="fas fa-file-export"></i> Export
-                </button>
-                <button class="btn btn-mail">
-                    <i class="fa fa-envelope"></i> Mail
-                </button>
-                <button class="btn btn-approved">
-                    <i class="fa fa-check"></i> Approved
-                </button>
-            </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
         </div>
     </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table id="tblIncommingQCRMList" class="table-width">
-                <thead class="table-head">
-                    <tr>
-                        <th style="display:none;">Code</th>
-                        <th>V_Type</th>
-                        <th>Name</th>
-                        <th>V_No</th>
-                        <th>V_Date</th>
-                        <th>Mrn_No</th>
-                        <th>Mrn_Type</th>
-                        <th>Mrn_Date</th>
-                        <th>Bales</th>
-                        <th>Party_Code</th>
-                        <th>Party Name</th>
-                        <th>Bill_No</th>
-                        <th>Bill_Date</th>
-                        <th>Transport</th>
-                        <th>Truck_No</th>
-                        <th>Inv_Qty</th>
-                        <th>Recd_Qty</th>
-                        <th>Short_Qty</th>
-                        <th>Remarks</th>
-                        <th>Deduct_Amt</th>
-                        <th>Deduct_Narr</th>
-                        <th>Pur_Type</th>
-                        <th>Waste_Wgt</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <!-- Pagination container -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="pagination-end">
-                    <div class="custom-pagination" id="tablePagination"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</fieldset>
+</div>
+
 <script>
     let currentPage = 1;
     let pageSize = 10;
@@ -137,7 +228,7 @@
                             <td>${doc.deducT_NARR || ''}</td>
                             <td>${doc.puR_TYPE || ''}</td>
                             <td>${doc.wastE_WGT || ''}</td>
-                            <td>
+                            <td class="action-col">
                                 <div class="action-icons">
                                     <i class="fa fa-edit btn-edit"
                                         data-vtype="${doc.v_TYPE}"

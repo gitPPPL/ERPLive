@@ -34,10 +34,8 @@ namespace travelexpensemanagement.Controllers.Dashboard
             {
                 return RedirectToAction("Index", "Login");
             }
-            //if (HttpContext.Session.GetString("USER_NAME") == null)
-            //{
-            //    return RedirectToAction("Index", "Login");
-            //}
+            // Load Dynamic Menu
+            ViewBag.ModuleMenus = _moduleService.BuildModuleMenus();
             return View("Index");
         }
 

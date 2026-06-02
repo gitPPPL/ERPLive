@@ -15,342 +15,288 @@
         display: none !important;
     }
 </style>
-
-<fieldset>
-    <legend class="legend-field">Incomming QC RM</legend>
-
-    <form id="PreIncommingQCRMForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-7">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="ddlDocType">Doc Type</label>
-                            <select class="form-control" id="ddlDocType">
-                                <option value="">Select Doc Type</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="NumDocNo">Doc No</label>
-                            <input type="text" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="DtDate">Date</label>
-                            <input type="date" class="form-control" id="DtDate" />
-                        </div>
-                    </div>
-
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-clipboard-check"></i>
+        </div>
+        <div class="erppage-header-title">Incomming QC RM</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" data-bs-target="#pendingQCModal" id="btn_PendingQC">
+            <i class="fa fa-hourglass-half"></i>
+            <span>Pending QC</span>
+        </button>
+        <button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "IncommingQCRMList")'">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PreIncommingQCRMForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="ddlQCIncharge">QC Incharge</label>
-                            <select class="form-control" id="ddlQCIncharge">
-                                <option value="">Select QC Incharge</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="ddlChem">Chemist</label>
-                            <select class="form-control" id="ddlChem">
-                                <option value="">Select Chem.</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="ddlPartyName">Party Name</label>
-                            @*  <select class="form-control" id="ddlPartyName">
-                                <option value="">Select Party Name</option>
-                            </select> *@
-                            <input type="text" class="form-control" id="TxtPartyName" placeholder="Enter Party Name" />
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group" style="display:none;">
-                            <label for="ddlTransport">Transport</label>
-
-                            <input type="text" class="form-control" id="TxtTransport" placeholder="Enter Transport" />
-                        </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDate">
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">MRN No</label>
+                    <select class="erppage-input" id="ddlGateNo">
+                        <option value="0">Select MRN No</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield erppage-datefield">
+                    <label class="erppage-label">MRN Date</label>
+                    <div class="erppage-datebox">
+                        <input type="date" class="erppage-input erppage-dateinput" id="MRNDate">
+                        <label class="erppage-checkbox-inside">
+                            <input type="checkbox" id="chkBillDate">
+                        </label>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="NumBillNo">Bill No</label>
-                            <input type="number" class="form-control" id="NumBillNo" placeholder="Enter Bill No" />
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group position-relative">
-                            <label for="DtBillDate">Bill Date</label>
-                            <div class="calender-check">
-                                <input type="date" class="form-control" id="DtBillDate" style="padding-left: 30px;">
-                                <input type="checkbox" id="chkBillDate" class="checkbox-inside">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="TxtTruckNo">Truck No</label>
-                            <input type="text" class="form-control" id="TxtTruckNo" placeholder="Enter Truck No" />
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="TxtContainerNo">Container No</label>
-                            <input type="text" class="form-control" id="TxtContainerNo" placeholder="Enter Container No">
-                        </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party Name</label>
+                    <input type="text" class="erppage-input" id="TxtPartyName" placeholder="Enter Party Name">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Bill No</label>
+                    <input type="number" class="erppage-input" id="NumBillNo" placeholder="Enter Bill No" />
+                </div>
+                <div class="erppage-divfield erppage-datefield">
+                    <label class="erppage-label">Bill Date</label>
+                    <div class="erppage-datebox">
+                        <input type="date" class="erppage-input erppage-dateinput" id="DtBillDate">
+                        <label class="erppage-checkbox-inside">
+                            <input type="checkbox" id="chkBillDate">
+                        </label>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="TxtBales">Bales</label>
-                            <input type="text" class="form-control" id="TxtBales" placeholder="Enter Bales" />
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="TxtInvoiceQty">Invoice Qty</label>
-                            <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="TxtRecordedQty">Received Qty</label>
-                            <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label for="TxtShortage">Shortage</label>
-                            <input type="text" class="form-control" id="TxtShortage" placeholder="Enter Shortage" />
-                        </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Truck No</label>
+                    <input type="text" class="erppage-input" id="TxtTruckNo" placeholder="Enter Truck No" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Container No</label>
+                    <input type="text" class="erppage-input" id="TxtContainerNo" placeholder="Enter Container No" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Bales</label>
+                    <input type="text" class="erppage-input" id="TxtBales" placeholder="Enter Bales" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Inv. Quantity</label>
+                    <input type="text" class="erppage-input" id="TxtInvoiceQty" placeholder="Enter Invoice Qty" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Received Qty</label>
+                    <input type="text" class="erppage-input" id="TxtRecordedQty" placeholder="Enter Received Qty" />
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shortage /Excess</label>
+                    <input type="text" class="erppage-input" id="TxtShortage" placeholder="Enter Shortage" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Incharge</label>
+                    <select class="erppage-input" id="ddlQCIncharge">
+                        <option value="">Select QC Incharge</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Chemist</label>
+                    <select class="erppage-input" id="ddlChem">
+                        <option value="">Select Chemist</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4" style="display:none;">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Transport</label>
+                    <input type="text" class="erppage-input" id="TxtTransport" placeholder="Enter Transport">
+                </div>
+            </div>
+           
+           
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group" style="display:none;">
+                        <label for="TxtInvoiceQty">Invoice Qty</label>
+                        <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group" style="display:none;">
-                            <label for="TxtInvoiceQty">Invoice Qty</label>
-                            <input type="text" class="form-control" id="TxtInvoiceQty" placeholder="Enter Invoice Qty">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group" style="display:none;">
-                            <label for="TxtRecordedQty">Recorded Qty</label>
-                            <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
-                        </div>
+                <div class="col-md-3">
+                    <div class="form-group" style="display:none;">
+                        <label for="TxtRecordedQty">Recorded Qty</label>
+                        <input type="text" class="form-control" id="TxtRecordedQty" placeholder="Enter Recorded Qty">
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="ddlPurType">Purchase Type</label>
-                            @*  <select class="form-control" id="ddlPurType">
-                                <option value="">Select Pur Type</option>
-                            </select> *@
-                            <input type="text" class="form-control" id="TxtPurType" placeholder="Enter PurType">
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label for="TxtRemarksT">Remarks</label>
-                            <textarea typeof="text" class="form-control" id="TxtRemarks1" placeholder="Enter Remarks"></textarea>
-                        </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2" style="display:none;">
+                    <label class="erppage-label">Purch Type</label>
+                    <input type="text" class="erppage-input" id="TxtPurType" placeholder="Enter PurType" />
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <input type="text" class="erppage-input" id="TxtRemarks1" placeholder="Enter Remarks" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group" style="display:none;">
+                        <label for="TxtWastage">Wastage</label>
+                        <input type="text" class="form-control" id="TxtWastage" placeholder="Enter Wastage" />
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group" style="display:none;">
-                            <label for="TxtWastage">Wastage</label>
-                            <input type="text" class="form-control" id="TxtWastage" placeholder="Enter Wastage" />
+                <div class="col-md-6">
+                    <div class="form-group position-relative" style="display:none;">
+                        <label for="DtGateDate">Gate Date</label>
+                        <div class="calender-check">
+                            <input type="date" class="form-control" id="DtGateDate" style="padding-left: 30px;">
+                            <input type="checkbox" id="chkGateDate" class="checkbox-inside">
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group position-relative" style="display:none;">
-                            <label for="DtGateDate">Gate Date</label>
-                            <div class="calender-check">
-                                <input type="date" class="form-control" id="DtGateDate" style="padding-left: 30px;">
-                                <input type="checkbox" id="chkGateDate" class="checkbox-inside">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>MRN No</label>
-                            <div class="input-icon-wrapper">
-                                <select class="form-control" id="ddlGateNo">
-                                    <option value="0">--Select--</option>
-                                </select>
-                                <span class="input-icon" id="btn_ok">ok</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group position-relative">
-                            <label for="DtBillDate">MRN Date</label>
-                            <div class="calender-check">
-                                <input type="date" class="form-control" id="MRNDate" style="padding-left: 30px;">
-                                <input type="checkbox" id="chkBillDate" class="checkbox-inside">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="ddlItemName">Item Name</label>
-                            <select class="form-control" id="ddlItemName">
+            <fieldset class="erppage-fieldset">
+                <div class="erppage-section-header">MRN Details</div>
+                <div class="erppage-body">
+                    <div class="erppage-grid4">
+
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Item Name</label>
+                            <select class="erppage-input" id="ddlItemName">
                                 <option value="">Select Item Name</option>
                             </select>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="table-bg" style="height:100px;">
-                            <table id="itemTable" class="table-prewidth">
+                    <div class="erppagelist-container" style="margin:0px;">
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="itemTable" class="excel-table fixed-grid-table">
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="btn-mt button-right">
-                            <button type="button" class="btn btn-success" id="btn_fill"><i class="fa fa-fill"></i>Fill</button>
+                    <div class="erppage-col-span-2">
+                        <div class="erppage-actions" style="margin: 0px;padding: 4px 0px;">
+                            <button type="button" class="erppage-btn erppage-btn-save" id="btn_fill">
+                                <i class="fa fa-fill"></i>
+                                <span>Fill</span>
+                            </button>
+                            <button type="button" class="erppage-btn erppage-btn-common" id="btn_calculate">
+                                <i class="fa fa-calculator"></i>
+                                <span>Calculate</span>
+                            </button>
                         </div>
                     </div>
+                </div>
+            </fieldset>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Deduc Amt</label>
+                    <input type="number" class="erppage-input" id="NumDeductAmount" placeholder="Enter Deduction Amount" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Narration</label>
+                    <input type="text" class="erppage-input" id="TxtNarration" placeholder="Enter Narration" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks1</label>
+                    <input type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks" />
+                </div>
+                <div class="erppage-internalaction" style="margin:0px;">
+                   
                 </div>
             </div>
-            <div class="col-md-2">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="btn-mt button-right">
-                            <button type="button" class="btn btn-success" id="btn_calculate" style="width:100%;"><i class="fa fa-calculator"></i>Calculate</button>
+            <!-- Pending QC Modal -->
+            <div class="modal fade" id="pendingQCModal" tabindex="-1" aria-labelledby="pendingQCLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-clipboard-check"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="pendingQCLabel">
+                                    Pending Gate Data for Pre QC
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
                         </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="NumDeductAmount">Deduct Amount</label>
-                            <input type="number" class="form-control" id="NumDeductAmount" placeholder="Enter Deduct Amount" />
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="TxtNarration">Narration</label>
-                            <textarea typeof="text" class="form-control" id="TxtNarration" placeholder="Enter Narration"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="TxtRemarks">Remarks1</label>
-                            <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks" style="height:80px;"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="btn-mt button-right">
-                            <button type="button" class="btn btn-danger" id="btn_PendingQC" data-bs-toggle="modal" data-bs-target="#pendingQCModal"><i class="fa fa-hourglass-half"></i>Pending QC</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-            </div>
-            <div class="col-md-4">
-            </div>
-            <div class="col-md-2">
-            </div>
-        </div>
-
-        <!--Pending QC Modal-->
-        <div class="modal fade" id="pendingQCModal" tabindex="-1" aria-labelledby="pendingQCLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="pendingQCLabel">Pending Gate Data for Pre QC</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="modal-body">
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblpendingQC" class="table-width">
-                                    <thead class="table-head">
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblpendingQC" class="excel-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col style="display:none;" />
+                                        <col style="width:120px;" />
+                                        <col style="width:120px;" />
+                                        <col style="width:250px;" />
+                                        <col style="width:150px;" />
+                                        <col style="width:120px;" />
+                                    </colgroup>
+                                    <thead>
                                         <tr>
-                                            <th style="display:none;"><input type="checkbox" id="selectAllPR" /></th>
+                                            <th class="hidden-col">Select</th>
                                             <th>Gate No</th>
                                             <th>Gate Date</th>
                                             <th>Party Name</th>
                                             <th>Vehicle No</th>
-                                            <th style="display:none;">Action</th>
+                                            <th class="action-col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
                         </div>
+
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblPreIncomming" class="table-width">
-                    @* <tbody></tbody> *@
-                    <thead>
-                        <tr id="tblPreIncommingHeader" class="table-head"></tr>
-                    </thead>
-                    <tbody id="tblPreIncommingBody"></tbody>
-                </table>
-            </div>
 
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="btn-mt">
-                    <button id=""
-                            onclick="window.location.href='@Url.Action("Index", "PreIncommingQCRMList")'" type="button" class="btn btn-draft">
-                        <i class="fa fa-list"></i>Back to list
-                    </button>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblPreIncomming" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup id="tblPreIncommingColGroup">
+                        </colgroup>
+                        <thead>
+                            <tr id="tblPreIncommingHeader" class="table-head"></tr>
+                        </thead>
+                        <tbody id="tblPreIncommingBody"></tbody>
+                    </table>
                 </div>
             </div>
-            <div class="offset-md-5 col-md-4">
-                <div class="button-right btn-mt">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
+        </fieldset>
+
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
 
 <script>
          $(document).ready(function () {
@@ -525,10 +471,21 @@
              }
 
              const hasItems = itemList.length > 0;
+                 let colgroupHTML = `
+                    <col style="display:none">
+                    <col style="width:80px">
+                    <col style="width:80px">
+                    <col style="width:250px">
+                    <col style="width:100px">
+                    <col style="width:100px">
+                    <col style="width:120px">
+                    <col style="width:120px">
+                    <col style="width:220px">
+                    `;
              // --- Header HTML ---
              let theadHTML = `
-                 <tr class="table-head">
-                     <th style="display:none;">Code</th>
+                 <tr>
+                     <th class="hidden-col">Code</th>
                      <th>Qcid</th>
                      <th>Qcpid</th>
                      <th>Parameter</th>
@@ -538,15 +495,32 @@
                      <th>Deduction Amount</th>
                      <th>Deduction Narration</th>`;
 
-             if (hasItems) {
-                 itemList.forEach(item => {
-                     theadHTML += `<th id="${item.itemCode}">${item.itemName}</th>`;
-                 });
-             }
+                 if (hasItems) {
+
+                    itemList.forEach(item => {
+
+                        theadHTML += `
+                            <th id="${item.itemCode}">
+                                ${item.itemName}
+                            </th>
+                        `;
+
+                        colgroupHTML += `
+                            <col style="width:120px">
+                        `;
+                    });
+
+                }
 
              theadHTML += `</tr>`;
 
-             $('#tblPreIncomming thead').html(theadHTML);
+            $('#tblPreIncommingColGroup').html(colgroupHTML);
+
+            $('#tblPreIncomming thead').html(theadHTML);
+
+            setTimeout(() => {
+            makeColumnsResizable('#tblPreIncomming');
+            }, 100);
 
              // if (Array.isArray(response) && response.length > 0) {
              if (Array.isArray(response.data) && response.data.length > 0) {
@@ -565,7 +539,7 @@
 
                      let newRow = `
                          <tr>
-                             <td style="display:none;">${item.qC_CODE || ''}</td>
+                             <td class="hidden-col">${item.qC_CODE || ''}</td>
                              <td>${item.qC_CODE || ''}</td>
                              <td>${item.qcP_CODE || ''}</td>
                              <td>${item.parameter || ''}</td>
@@ -719,7 +693,7 @@
                    dataType: 'json',
                    success: function (data) {
                        const ddl = $('#ddlDocType');
-                       ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                       ddl.empty().append('<option value="">Select Doc Type</option>');
                        $.each(data, function (index, item) {
                            ddl.append(`<option value="${item.value}">${item.text}</option>`);
                        });
@@ -765,12 +739,12 @@
                        if (ddl.hasClass("select2-hidden-accessible")) {
                            ddl.select2('destroy');
                        }
-                       ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
+                       ddl.empty().append('<option value="" disabled selected hidden>Select Party</option>');
                        data.forEach(item => {
                            ddl.append(new Option(item.text, item.value));
                        });
                        ddl.select2({
-                           placeholder: "-- Select Party --",
+                           placeholder: "Select Party",
                            allowClear: true,
                            width: '100%',
                            minimumResultsForSearch: data.length >= 5 ? 0 : Infinity,
@@ -802,7 +776,7 @@
                 dataType: 'json',
                 success: function (data) {
                       const ddl = $('#ddlQCIncharge');
-                    ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                    ddl.empty().append('<option value="">Select Doc Type</option>');
                     $.each(data, function (index, item) {
                         ddl.append(`<option value="${item.value}">${item.text}</option>`);
                     });
@@ -820,7 +794,7 @@
                 dataType: 'json',
                 success: function (data) {
                         const ddl = $('#ddlChem');
-                    ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                    ddl.empty().append('<option value="">Select Doc Type</option>');
                     $.each(data, function (index, item) {
                         ddl.append(`<option value="${item.value}">${item.text}</option>`);
                     });
@@ -838,7 +812,7 @@
                   dataType: 'json',
                   success: function (data) {
                         const ddl = $('#ddlItemName');
-                      ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                      ddl.empty().append('<option value="">Select Doc Type</option>');
                       $.each(data, function (index, item) {
                           ddl.append(`<option value="${item.value}">${item.text}</option>`);
                       });

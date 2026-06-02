@@ -43,60 +43,39 @@
                     </div>
                 </div>
                 <div class="erppage-grid4">
-                    @if (compcode == "2" || compcode == "5")
-                    {
-                        <div class="erppage-divfield erppage-col-span-2">
-                            <label class="erppage-label">Denier</label>
-                            <select class="erppage-input" id="ddlDenier">
-                                <option value="">Select Denier</option>
-                            </select>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="erppage-divfield erppage-col-span-2">
-                            <label class="erppage-label">Line No</label>
-                            <select class="erppage-input erppage-required" id="ddlLineNo">
-                                <option value="">Select Line</option>
-                            </select>
-                        </div>
-                        <div class="erppage-divfield">
-                            <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
-                                <div class="erppage-internalaction" style="margin: 0;">
-                                    <button type="button" id="btn_fill" class="erppage-btn erppage-btn-common">
-                                        <i class="fa fa-fill-drip"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    }
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Denier</label>
+                        <select class="erppage-input" id="ddlDenier">
+                            <option value="">Select Denier</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Line No</label>
+                        <select class="erppage-input erppage-required" id="ddlLineNo">
+                            <option value="">Select Line</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Incharge</label>
                         <select id="ddlIncharge" class="erppage-input erppage-select">
                             <option value="">Select Incharge</option>
                         </select>
                     </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Operator</label>
+                        <select id="ddlOperator" class="erppage-input erppage-select erppage-required">
+                            <option value="">Select Operator</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Chemist</label>
+                        <select id="ddlOperator" class="erppage-input erppage-select erppage-required">
+                            <option value="">Select Chemist</option>
+                        </select>
+                    </div>
 
-                </div>
-                <div class="erppage-grid4">
-                    @if (compcode == "2" || compcode == "5")
-                    {
-                        <div class="erppage-divfield erppage-col-span-2">
-                            <label class="erppage-label">Operator</label>
-                            <select id="ddlOperator" class="erppage-input erppage-select erppage-required">
-                                <option value="">Select Operator</option>
-                            </select>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="erppage-divfield erppage-col-span-2">
-                            <label class="erppage-label">Chemist</label>
-                            <select id="ddlOperator" class="erppage-input erppage-select erppage-required">
-                                <option value="">Select Chemist</option>
-                            </select>
-                        </div>
-                    }
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Supervisor</label>
                         <select id="ddlSupervisor" class="erppage-input erppage-select">
@@ -106,15 +85,14 @@
                 </div>
 
                 <div class="erppage-grid4">
-                    @if (compcode == "2" || compcode == "5")
-                    {
-                        <div class="erppage-divfield">
-                            <label class="erppage-label">Plant Name</label>
-                            <select class="erppage-input erppage-required" id="ddlPlantName">
-                                <option value="">Select Plant Name</option>
-                            </select>
-                        </div>
-                    }
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Plant Name</label>
+                        <select class="erppage-input erppage-required" id="ddlPlantName">
+                            <option value="">Select Plant Name</option>
+                        </select>
+                    </div>
+
                     <div class="erppage-divfield">
                         <label class="erppage-label">Remarks</label>
                         <input type="text" class="erppage-input" id="TxtRemarks" maxlength="500" placeholder="Enter Remarks" />
@@ -195,142 +173,110 @@
                         </div>
                     </div>
                 </div>
-                @if (compcode == "2" || compcode == "5")
-                {
 
-                    <div class="table-row-layout">
-                        <div class="erppagelist-container" style="margin:0px;">
-                            <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
-                                <table id="tblPlantZone" class="excel-table fixed-grid-table">
-                                    <colgroup>
-                                        <col style="width: 115px;">
-                                        <col style="width: 100px;">
-                                        <col style="width: 100px;">
-                                        <col style="width: 120px;">
-                                    </colgroup>
-                                    <thead>
-                                        <tr>
-                                            <th>Plant Zone</th>
-                                            <th>Temperature('C)</th>
-                                            <th>Remarks</th>
-                                            <th>Date Time</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="erppagelist-container" style="margin:0px;">
-                            <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
-                                <table id="tblScrew" class="excel-table fixed-grid-table">
-                                    <colgroup>
-                                        <col style="width: 100px;">
-                                        <col style="width: 80px;">
-                                        <col style="width: 155px;">
-                                        <col style="width: 60px;">
-                                    </colgroup>
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th>Screw</th>
-                                            <th>Speed</th>
-                                            <th>Remarks</th>
-                                            <th>Date Time</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="erp-row">
-                        <div class="erppagelist-container" style="margin:0px;">
-                            <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
-                                <table id="tblWinder" class="excel-table fixed-grid-table">
-                                    <colgroup>
-                                        <col style="display:none;">
-                                        <col style="width: 80px;">
-                                        <col style="width: 60px;">
-                                        <col style="width: 70px;">
-                                        <col style="width: 30px;">
-                                        <col style="width: 60px;">
-                                        <col style="width: 60px;">
-                                        <col style="width: 60px;">
-                                    </colgroup>
-                                    <thead>
-                                        <tr>
-                                            <th style="display:none;">Code</th>
-                                            <th>Winder No.</th>
-                                            <th>Width(Mm)</th>
-                                            <th>Denier</th>
-                                            <th>B Load(Kgf)</th>
-                                            <th>Tenacity(Gpd.)</th>
-                                            <th>Elongation</th>
-                                            <th class="action-col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="erp-row">
-                        <div class="erppagelist-container" style="margin:0px;">
-                            <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
-                                <table id="tblMaterial" class="excel-table fixed-grid-table">
-                                    <colgroup>
-                                        <col style="display:none;">
-                                        <col style="width: 150px;">
-                                        <col style="width: 40px;">
-                                        <col style="width: 40px;">
-                                        <col style="width: 40px;">
-                                        <col style="width: 70px;">
-                                    </colgroup>
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th style="display:none;">Code</th>
-                                            <th>Material</th>
-                                            <th>Lot No.</th>
-                                            <th>No.of Bags</th>
-                                            <th>Percent(%)</th>
-                                            <th class="action-col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-
-                        </div>
-                    </div>
-                }
-                else
-                {
+                <div class="table-row-layout">
                     <div class="erppagelist-container" style="margin:0px;">
                         <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
-                            <table id="tblTestParameter" class="excel-table fixed-grid-table">
+                            <table id="tblPlantZone" class="excel-table fixed-grid-table resizable-table">
                                 <colgroup>
-                                    <col style="display:none;">
-                                    <col style="width: 260px;">
-                                    <col style="width: 200px;">
-                                    <col style="width: 300px;">
-                                    <col style="width: 169px;">
-                                    <col style="width: 60px;">
+                                    <col style="width: 115px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 120px;">
                                 </colgroup>
                                 <thead>
                                     <tr>
-                                        <th style="display:none;">Code</th>
-                                        <th>Test Parameter</th>
-                                        <th>Result</th>
+                                        <th>Plant Zone</th>
+                                        <th>Temperature('C)</th>
                                         <th>Remarks</th>
-                                        <th>DateTime</th>
-                                        <th class="action-col">Action</th>
+                                        <th>Date Time</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
-                }
+                    <div class="erppagelist-container" style="margin:0px;">
+                        <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                            <table id="tblScrew" class="excel-table fixed-grid-table resizable-table">
+                                <colgroup>
+                                    <col style="width: 100px;">
+                                    <col style="width: 80px;">
+                                    <col style="width: 155px;">
+                                    <col style="width: 60px;">
+                                </colgroup>
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>Screw</th>
+                                        <th>Speed</th>
+                                        <th>Remarks</th>
+                                        <th>Date Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+               
+                    <div class="erppagelist-container" style="margin:0px;">
+                        <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                            <table id="tblWinder" class="excel-table fixed-grid-table resizable-table">
+                                <colgroup>
+                                    <col style="display:none;">
+                                    <col style="width: 80px;">
+                                    <col style="width: 60px;">
+                                    <col style="width: 70px;">
+                                    <col style="width: 30px;">
+                                    <col style="width: 60px;">
+                                    <col style="width: 60px;">
+                                    <col style="width: 60px;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th class="hidden-col">Code</th>
+                                        <th>Winder No.</th>
+                                        <th>Width(Mm)</th>
+                                        <th>Denier</th>
+                                        <th>B Load(Kgf)</th>
+                                        <th>Tenacity(Gpd.)</th>
+                                        <th>Elongation</th>
+                                        <th class="action-col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+               
+                    <div class="erppagelist-container" style="margin:0px;">
+                        <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
+                            <table id="tblMaterial" class="excel-table fixed-grid-table resizable-table">
+                                <colgroup>
+                                    <col style="display:none;">
+                                    <col style="width: 150px;">
+                                    <col style="width: 40px;">
+                                    <col style="width: 40px;">
+                                    <col style="width: 40px;">
+                                    <col style="width: 70px;">
+                                </colgroup>
+                                <thead class="table-head">
+                                    <tr>
+                                        <th class="hidden-col">Code</th>
+                                        <th>Material</th>
+                                        <th>Lot No.</th>
+                                        <th>No.of Bags</th>
+                                        <th>Percent(%)</th>
+                                        <th class="action-col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                
 
             </fieldset>
             <div class="erppage-actions">
@@ -483,7 +429,7 @@
 
                 <div class="erppagelist-container" style="margin:0px;">
                     <div class="excel-wrapper fixed-grid-wrapper special-6x6-table">
-                        <table id="tblTestParameter" class="excel-table fixed-grid-table">
+                        <table id="tblTestParameter" class="excel-table fixed-grid-table resizable-table">
                             <colgroup>
                                 <col style="display:none;">
                                 <col style="width: 260px;">
@@ -494,7 +440,7 @@
                             </colgroup>
                             <thead>
                                 <tr>
-                                    <th style="display:none;">Code</th>
+                                    <th class="hidden-col">Code</th>
                                     <th>Test Parameter</th>
                                     <th>Result</th>
                                     <th>Remarks</th>

@@ -4,7 +4,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #2d7b46, #1C5E31);
     color: #fff;
     padding: 6px 8px;
     border-radius: 8px;
@@ -139,7 +139,9 @@
     .erppagelist-action.delete {
         color: #dc2626;
     }
-
+.hidden-col {
+    display: none;
+}
 /* PAGINATION (PREMIUM UI) */
 /* MAIN LAYOUT */
 .erppagelist-pagination {
@@ -247,7 +249,8 @@
     border-radius: 8px;
     /* IMPORTANT FIX */
     overflow: visible; /* 🔥 change this */
-    min-width: 100%;
+    width: 100%; /* FIX */
+    table-layout: fixed;
 }
 /* ACTION BAR */
 .erppage-actions {
@@ -361,8 +364,8 @@
             transform: translateY(-1px);
         }
     .act-btn.add {
-        background: #bed2ff;
-        color: #2563eb;
+        background: #bbedca;
+        color: #27723f;
         border-radius: 4px;
         padding: 4px 6px;
     }
@@ -399,11 +402,9 @@
 }
 /* ================= FIXED GRID TABLE ================= */
 .fixed-grid-table {
-    table-layout: fixed !important;
-    /* REMOVE HARD WIDTH */
-    width: max-content !important; /* 🔥 change this */
-
-    border-collapse: collapse !important;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
     border-spacing: 0;
 }
 
@@ -440,6 +441,7 @@
 
 /* Wrapper scroll */
 .fixed-grid-wrapper {
+    overflow-x: auto;
     position: relative;
 }
 /* TOASTER ITEM */
@@ -483,16 +485,38 @@ th {
     position: relative;
 }
 
+/* Zebra striping for all excel-table rows with light grey shades */
+.excel-table tbody tr:nth-child(even) td,
+.excel-table tbody tr:nth-child(even) th {
+    background-color: #f9f9f9; /* very light grey */
+}
+
+.excel-table tbody tr:nth-child(odd) td,
+.excel-table tbody tr:nth-child(odd) th {
+    background-color: #f0f0f0; /* white */
+}
+
+/* Hover effect for full row including action column */
+.excel-table tbody tr:hover td,
+.excel-table tbody tr:hover th {
+    background-color: #e6e6e6; /* slightly darker grey on hover */
+}
 /* ACTION COLUMN FREEZE (FINAL) */
 .fixed-grid-table td.action-col {
     white-space: nowrap;
 }
-
+.fixed-grid-table thead th.action-col {
+    z-index: 999;
+   
+}
+.fixed-grid-table tbody tr:hover td.action-col {
+    background: #f2f2f2;
+}
 .fixed-grid-table th.action-col,
 .fixed-grid-table td.action-col {
     position: sticky;
     right: 0;
-    width: 140px;
+   /* width: 140px;*/
     background: #fff;
     z-index: 10;
     padding: 6px 0px !important;
@@ -511,11 +535,20 @@ th {
     background: linear-gradient(135deg, #232323, #0f0f0f);
 }
 
+.sortable-table th {
+    cursor: pointer;
+    user-select: none;
+}
 
+.sort-icon {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #999;
+}
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-    margin-top: 10px;
+   /* margin-top: 10px;*/
     padding: 8px 6px;
     background: #fff;
     border-radius: 8px;
@@ -523,8 +556,8 @@ th {
 
 /* Excel wrapper safety */
 .excel-wrapper {
+    display:block;
     width: 100%;
-    min-width: 100%;
     overflow-x: auto;
     border: 1px solid #ddd;
     border-radius: 8px;

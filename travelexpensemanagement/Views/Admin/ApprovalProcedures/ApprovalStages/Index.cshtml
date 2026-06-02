@@ -2,106 +2,135 @@
     ViewBag.Title = "Approval Stages";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Approval Stages</legend>
-    <form id="ApprovalStagesForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocumentType">Document Type</label>
-                    <select class="form-control" id="ddlDocumentType">
-                        <option value="">Select Document Type</option>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-tasks"></i>
+        </div>
+        <div class="erppage-header-title">Approval Stages</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ApprovalStagesList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="ApprovalStagesForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocumentType">
+                        <option>Select Document Type</option>
                     </select>
                 </div>
+
             </div>
-        </div>
-		<div class="card">
-			<div class="table-responsive">
-				<table id="tblApprovalStages" class="table-width">
-					<thead class="table-head">
-						<tr>
-                            <th>Code</th>
-                            <th>Full Name</th>
-                            <th>Designation</th>
-                            <th>Department</th>
-                            <th>Approval User</th>
-                            <th>Flag_A</th>
-                            <th>Flag_B</th>
-                            <th>Flag_C</th>
-                            <th>Flag_D</th>
-                            <th>Flag_E</th>
-							<th>Action</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
-			</div>
-			<!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblApprovalStages" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:100px;">  <!-- Code -->
+                            <col style="width:160px;">  <!-- Full Name -->
+                            <col style="width:140px;">  <!-- Designation -->
+                            <col style="width:140px;">  <!-- Department -->
+                            <col style="width:220px;">  <!-- Approval User -->
+                            <col style="width:90px;">   <!-- Flag_A -->
+                            <col style="width:90px;">   <!-- Flag_B -->
+                            <col style="width:90px;">   <!-- Flag_C -->
+                            <col style="width:90px;">   <!-- Flag_D -->
+                            <col style="width:90px;">   <!-- Flag_E -->
+                            <col style="width:110px;">  <!-- Action -->
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Full Name</th>
+                                <th>Designation</th>
+                                <th>Department</th>
+                                <th>Approval User</th>
+                                <th>Flag_A</th>
+                                <th>Flag_B</th>
+                                <th>Flag_C</th>
+                                <th>Flag_D</th>
+                                <th>Flag_E</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
                     </div>
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
                     </div>
                 </div>
             </div>
-		</div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="btn-mt">
-                    <button onclick="window.location.href='@Url.Action("Index", "ApprovalStagesList")'" type="button" class="btn btn-draft">
-                        <i class="fa fa-list"></i>Back to list
-                    </button>
-                </div>
-            </div>
-            <div class="offset-md-5 col-md-4">
-                <div class="button-right btn-mt">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                    <button id="btn_cancel" type="button" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
+
+
 <script>
 
     let fullNameList = [];
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('id'); 
+    const code = urlParams.get('id');
     const mode = urlParams.get('mode');
     const vtype = urlParams.get('vtype');
 
     $(document).ready(function () {
         const $tbody = $('#tblApprovalStages tbody');
-    
+
         Promise.all([
             DDLDocumentType(),
             LoadFullNameList()
         ])
         .then(() => {
             if (code) {
-                LoadDocumentData(code); 
+                LoadDocumentData(code);
             } else {
-                addRow($tbody); 
+                addRow($tbody);
             }
         })
         .catch(err => {
             console.error('Initialization error:', err);
             toastr.error('Initialization error: ' + err.message);
         });
-             
+
         if (mode === 'view') {
-            setFormReadOnly('#ApprovalStagesForm'); 
+            setFormReadOnly('#ApprovalStagesForm');
+            form.addclass('erppage-readonly');
         }
-             
+
         $(document).on('click', '.btn-add-row, .btn-add-action', function () {
             addRow($tbody);
         });
-              
+
         $(document).on('click', '.btn-delete-action', function () {
             const $row = $(this).closest('tr');
             const isLast = $row.is(':last-child');
@@ -111,12 +140,12 @@
                 const $lastRow = $tbody.find('tr:last');
                 if ($lastRow.length && !$lastRow.find('.btn-add-action').length) {
                     $lastRow.find('td:last').prepend(
-                        `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
+                        `<button class="act-btn add btn-add-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus"></i></button>`
                     );
                 }
             }
         });
-              
+
         $(document).on('change', '.ddlFullName', function () {
             const $row = $(this).closest('tr');
             const selectedCode = $(this).val();
@@ -148,7 +177,7 @@
                     toastr.error('Error loading user details: ' + err.message);
                 });
         });
-              
+
         $("#btn-save").click(function (e) {
             e.preventDefault();
 
@@ -193,7 +222,7 @@
             });
         });
 
-    }); 
+    });
 
     // ---------------- Helper Functions ----------------
 
@@ -222,7 +251,7 @@
     }
 
     function addRow($tbody, data = {}) {
-     
+
         $tbody.find('.btn-add-action').remove();
 
         const row = `
@@ -237,9 +266,9 @@
                 <td><input type="text" class="form-control" value="${data.flagC || ''}" /></td>
                 <td><input type="text" class="form-control" value="${data.flagD || ''}" /></td>
                 <td><input type="text" class="form-control" value="${data.flagE || ''}" /></td>
-                <td>
-                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
-                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                <td class="action-col">
+                    <button class="act-btn add btn-add-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+                    <button class="act-btn delete btn-delete-action" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
                 </td>
             </tr>
         `;
@@ -293,7 +322,7 @@
             .then(data => {
                 fullNameList = data;
 
-               
+
                 $('#tblApprovalStages tbody tr').each(function () {
                     const selected = $(this).find('.ddlFullName').val() || "";
                     $(this).find('td:eq(1)').html(getFullNameDropdown(selected));
@@ -310,7 +339,7 @@
             url: `/ApprovalStagesList/GetdatabyCode?code=${code}`,
             method: 'GET',
             success: function (res) {
-      
+
                 if (res.success) {
                     if (res.header && res.header.length > 0) {
                         const header = res.header[0];
@@ -318,7 +347,7 @@
                             $('#ddlDocumentType').val(header.doC_CODE);
                         }
                     }
-                                   
+
                     const $tbody = $('#tblApprovalStages tbody');
                     $tbody.empty();
 

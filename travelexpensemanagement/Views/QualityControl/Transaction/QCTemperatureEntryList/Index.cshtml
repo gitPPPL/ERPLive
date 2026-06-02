@@ -65,7 +65,7 @@
 </div>
 <div class="erppagelist-container">
 	<div class="excel-wrapper fixed-grid-wrapper">
-		<table id="tblQCTemperatureList" class="excel-table fixed-grid-table">
+		<table id="tblQCTemperatureList" class="excel-table fixed-grid-table resizable-table sortable-table">
 			<colgroup>
 				<col style="display:none;" /> <!-- Code -->
 				<col style="width: 120px;" /> <!-- Voucher No -->
@@ -73,19 +73,42 @@
 				<col style="width: 80px;" />  <!-- Shift -->
 				<col style="width: 120px;" /> <!-- Voucher Time -->
 				<col style="width: 140px;" /> <!-- Denier Name -->
-				<col style="width: 140px;" /> <!-- Plant Name -->
+				<col style="width: 365px;" /> <!-- Plant Name -->
 				<col style="width: 140px;" /> <!-- Action -->
 			</colgroup>
 			<thead>
 				<tr>
-					<th style="display:none;">Code</th>
-					<th>Doc No</th>
-					<th>Doc Date</th>
-					<th>Shift</th>
-					<th>Voucher Time</th>
-					<th>Denier Name</th>
-					<th>Plant Name</th>
-					<th class="action-col">Action</th>
+					<th class="hidden-col" data-column="0">
+						Code <span class="sort-icon"></span>
+					</th>
+
+					<th data-column="1">
+						Doc No <span class="sort-icon"></span>
+					</th>
+
+					<th data-column="2">
+						Doc Date <span class="sort-icon"></span>
+					</th>
+
+					<th data-column="3">
+						Shift <span class="sort-icon"></span>
+					</th>
+
+					<th data-column="4">
+						Voucher Time <span class="sort-icon"></span>
+					</th>
+
+					<th data-column="5">
+						Denier Name <span class="sort-icon"></span>
+					</th>
+
+					<th data-column="6">
+						Plant Name <span class="sort-icon"></span>
+					</th>
+
+					<th class="action-col">
+						Action
+					</th>
 				</tr>
 			</thead>
 			<tbody></tbody>

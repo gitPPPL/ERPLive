@@ -20,7 +20,9 @@
     justify-content: space-between;
     align-items: center;
 }
-
+.small-modal {
+    max-width: 650px;
+}
 .erppagesmodal-header-left {
     display: flex;
     align-items: center;
