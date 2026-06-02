@@ -314,7 +314,7 @@
 
                                 <div class="erppage-field">
                                     <label for="ShipBillNo" class="erppage-label">Ship. Bill No</label>
-                                    <input type="text" class="erppage-input" id="ShipBillNo">
+                                    <input type="text" class="erppage-input" id="ShipBillNo" maxlength="30">
                                 </div>
                                 <div class="erppage-field">
                                     <label for="ShipBillDate" class="erppage-label">Ship. Bill Date</label>
@@ -355,12 +355,12 @@
                             <div class="erppage-grid4">
                                 <div class="erppage-field">
                                     <label for="TxtPONo" class="erppage-label">PO No</label>
-                                    <input type="text" class="erppage-input" id="TxtPONo">
+                                    <input type="text" class="erppage-input" id="TxtPONo" maxlength="9">
                                 </div>
                                 <div class="erppage-field">
                                     <label for="TxtBillNo" class="erppage-label">Party Bill No</label>
                                     <div class="erppageinputicon-wrapper">
-                                        <input type="text" class="erppage-input" id="TxtBillNo">
+                                        <input type="text" class="erppage-input" id="TxtBillNo" maxlength="10">
                                         <span class="erppageinputicon" id="BtnPartyBillno" data-bs-toggle="modal" data-bs-target="#ellipsisIcon">
                                             <i class="fa fa-ellipsis-h"></i>
                                         </span>
@@ -372,7 +372,7 @@
                                 </div>
                                 <div class="erppage-field">
                                     <label for="TxtChallanNo" class="erppage-label">Challan No</label>
-                                    <input type="text" class="erppage-input" id="TxtChallanNo">
+                                    <input type="text" class="erppage-input" id="TxtChallanNo" maxlength="10">
                                 </div>
                             </div>
                             <div class="erppage-grid4">
@@ -382,7 +382,7 @@
                                 </div>
                                 <div class="erppage-field">
                                     <label for="TxtBillAmt" class="erppage-label">Bill Amount</label>
-                                    <input type="text" class="erppage-redinput numeric-only" id="TxtBillAmt">
+                                    <input type="text" class="erppage-redinput numeric-only" id="TxtBillAmt" maxlength="14">
                                 </div>
 
                             </div>
@@ -559,8 +559,69 @@
                         </div>
                         <!-- Body -->
                         <div class="erppagelist-container">
-                            <div class="excel-wrapper">
-                                <table id="tblRCDetaillist" class="excel-table fixed-grid-table table-width">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblRCDetaillist" class="excel-table fixed-grid-table">
+                                    <colgroup>
+                                        <col style="width:120px"> <!-- Client ID -->
+                                        <col style="width:130px"> <!-- RC Number -->
+                                        <col style="width:120px"> <!-- Registration Date -->
+                                        <col style="width:180px"> <!-- Owner Name -->
+                                        <col style="width:180px"> <!-- Father Name -->
+                                        <col style="width:250px"> <!-- Present Address -->
+                                        <col style="width:250px"> <!-- Permanent Address -->
+                                        <col style="width:130px"> <!-- Mobile Number -->
+                                        <col style="width:150px"> <!-- Vehicle Category -->
+                                        <col style="width:180px"> <!-- Chassis Number -->
+                                        <col style="width:180px"> <!-- Engine Number -->
+                                        <col style="width:180px"> <!-- Manufacturer -->
+                                        <col style="width:180px"> <!-- Model Name -->
+                                        <col style="width:120px"> <!-- Body Type -->
+                                        <col style="width:120px"> <!-- Fuel Type -->
+                                        <col style="width:120px"> <!-- Vehicle Color -->
+                                        <col style="width:140px"> <!-- Emission Norms -->
+                                        <col style="width:130px"> <!-- Fitness Valid Upto -->
+                                        <col style="width:200px"> <!-- Financer Name -->
+                                        <col style="width:100px"> <!-- Is Financed -->
+                                        <col style="width:200px"> <!-- Insurance Company -->
+                                        <col style="width:180px"> <!-- Insurance Policy No -->
+                                        <col style="width:130px"> <!-- Insurance Valid Upto -->
+                                        <col style="width:130px"> <!-- Manufacturing Date -->
+                                        <col style="width:180px"> <!-- Manufacturing Date Formatted -->
+                                        <col style="width:180px"> <!-- Registered RTO -->
+                                        <col style="width:150px"> <!-- Data Updated By -->
+                                        <col style="width:120px"> <!-- Less Information Flag -->
+                                        <col style="width:130px"> <!-- Tax Valid Upto -->
+                                        <col style="width:130px"> <!-- Tax Paid Upto -->
+                                        <col style="width:120px"> <!-- Cubic Capacity -->
+                                        <col style="width:140px"> <!-- Gross Vehicle Weight -->
+                                        <col style="width:120px"> <!-- No Of Cylinders -->
+                                        <col style="width:120px"> <!-- Seat Capacity -->
+                                        <col style="width:120px"> <!-- Sleeper Capacity -->
+                                        <col style="width:120px"> <!-- Standing Capacity -->
+                                        <col style="width:120px"> <!-- Wheel Base -->
+                                        <col style="width:140px"> <!-- Unladen Weight -->
+                                        <col style="width:220px"> <!-- Vehicle Category Description -->
+                                        <col style="width:140px"> <!-- PUCC Number -->
+                                        <col style="width:130px"> <!-- PUCC Valid Upto -->
+                                        <col style="width:140px"> <!-- Permit Number -->
+                                        <col style="width:130px"> <!-- Permit Issue Date -->
+                                        <col style="width:130px"> <!-- Permit Valid From -->
+                                        <col style="width:130px"> <!-- Permit Valid Upto -->
+                                        <col style="width:150px"> <!-- Permit Type -->
+                                        <col style="width:180px"> <!-- National Permit Number -->
+                                        <col style="width:150px"> <!-- National Permit Valid Upto -->
+                                        <col style="width:180px"> <!-- National Permit Issued By -->
+                                        <col style="width:120px"> <!-- Non Use Status -->
+                                        <col style="width:130px"> <!-- Non Use From Date -->
+                                        <col style="width:130px"> <!-- Non Use To Date -->
+                                        <col style="width:120px"> <!-- Blacklist Status -->
+                                        <col style="width:180px"> <!-- NOC Details -->
+                                        <col style="width:120px"> <!-- Owner Number -->
+                                        <col style="width:120px"> <!-- RC Status -->
+                                        <col style="width:180px"> <!-- Masked Owner Name -->
+                                        <col style="width:200px"> <!-- Challan Details -->
+                                    </colgroup>
+
                                     <thead class="table-head">
                                         <tr>
                                             <th>Client ID</th>
@@ -723,7 +784,7 @@
                             EWB Party Inv No
                             <span id="span_EWBPartyInvNo" style="color:red; display:none;">*</span>
                         </label>
-                        <input type="text" class="erppage-input" id="TxtEWBInvNo" placeholder="Enter EWB Party Inv No">
+                        <input type="text" class="erppage-input" id="TxtEWBInvNo" placeholder="Enter EWB Party Inv No" maxlength="20">
                     </div>
 
                     <div class="erppage-divfield">
@@ -731,12 +792,16 @@
                             EWB Party Inv Amt
                             <span id="span_EWBPartyInvAm" style="color:red; display:none;">*</span>
                         </label>
-                        <input type="number" class="erppage-input" id="TxtEWBInvAmt">
+                        @* <input type="number" class="erppage-input" id="TxtEWBInvAmt" maxlength="18">  *@
+                        <input type="number"
+                               class="erppage-input"
+                               id="TxtEWBInvAmt"
+                               oninput="if(this.value.length > 18) this.value = this.value.slice(0,18)">
                     </div>
 
                     <div class="erppage-divfield">
                         <label for="TxtWbSlipNo" class="erppage-label">Party WB Slip No</label>
-                        <input type="text" class="erppage-input" id="TxtWbSlipNo">
+                        <input type="text" class="erppage-input" id="TxtWbSlipNo" maxlength="20">
                     </div>
 
                     <div class="erppage-divfield">
@@ -744,7 +809,7 @@
                             Party WB GrWt
                             @* <span id="span_PartyWBGrWt" style="display:none;"></span> *@
                         </label>
-                        <input type="text" class="erppage-input" id="TxtGrWt">
+                        <input type="text" class="erppage-input" id="TxtGrWt" maxlength="16">
                     </div>
                 </div>
 
@@ -753,7 +818,7 @@
                         <label for="TxtTrWt" class="erppage-label">
                             Party WB TrWt
                         </label>
-                        <input type="text" class="erppage-input" id="TxtTrWt">
+                        <input type="text" class="erppage-input" id="TxtTrWt" maxlength="16">
                     </div>
 
                     <div class="erppage-divfield">
@@ -776,7 +841,7 @@
                     <div class="erppage-divfield">
                         <label for="TxtContainerNo" class="erppage-label">Container No</label>
                         <div class="erppageinputicon-wrapper">
-                            <input type="text" class="erppage-input" id="TxtContainerNo">
+                            <input type="text" class="erppage-input" id="TxtContainerNo" maxlength="30">
                             <span class="erppageinputicon" id="SEARCHCONTAINER">
                                 <i class="fa fa-search"></i>
                             </span>

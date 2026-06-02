@@ -12,6 +12,7 @@ var deptList = [];
 var unitList = [];
 
 $(document).ready(async function () {
+
     await LoadDropDown();
     if (rowId) {
         await LoadFormByID(rowId, vtype);
@@ -122,6 +123,12 @@ $(document).ready(async function () {
         const V_NO = parseInt($('#TxtDocNo').val()) || null;
         const BILL_NO = $('#TxtBillNo').val().trim();
         const V_TYPE = $('#ddlDocType').val();
+        
+        if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
+        if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
+        if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
+        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;  
+
 
         if (BILL_NO) {
             const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
@@ -238,12 +245,10 @@ $(document).ready(async function () {
             return;
         }
 
-        // Use Bootstrap 5 modal API to hide the modal
         const modalElement = document.getElementById('pendingorders');
         const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
         modalInstance.hide();
-
-        // Perform other actions after modal is hidden
+       
         populateInwardEntryTable(selectedData);
     });
 

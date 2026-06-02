@@ -1,6 +1,6 @@
 ﻿
 
-function isItemInMainTable(itemCode) {
+    function isItemInMainTable(itemCode) {
         let exists = false;
         $('#tblInwardEntry tbody tr').each(function () {
         const code = $(this).find('td:eq(0)').text().trim();
@@ -39,11 +39,6 @@ function isItemInMainTable(itemCode) {
         const SHIP_PARTY    = parseInt($('#ddlShipFrom').val()) || null;
         const SHIP_BILLNO   = $.trim($('#ShipBillNo').val()) || null;
         const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
-
-        if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
-        if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
-        if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
-        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;          
 
         if (!R_DATE && !R_TIME)
         {
@@ -107,25 +102,7 @@ function isItemInMainTable(itemCode) {
         if (SHIP_BILLNO && !SHIP_PARTY) {
         if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
         }
-
-        if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
-            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) { 
-               // if (!validateRequiredField('#TxtBillAmt', `Bill Amount compulsory for ${PARTY_NAME}`)) return;
-                invalidateField(
-                    "TxtBillAmt",
-                    `Bill Amount compulsory for ${PubDefEWaybillAmt}`,
-                    "warning"
-                );
-                return;
-            }
-
-            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-                showToast(`Transit No./Ewaybill compulsory if Bill Amount > ${PubDefEWaybillAmt}`, { type: "info" });
-            }
-
-        }
-
-     
+              
 
         if (TRANSIT_NO && EWB_EXPDATE) {
             const expDate = new Date(EWB_EXPDATE);
@@ -134,6 +111,18 @@ function isItemInMainTable(itemCode) {
                 showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
         }
+
+        if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
+            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
+
+                invalidateField("TxtBillAmt", `Bill Amount compulsory for ${PubDefEWaybillAmt}`, "warning");
+                return;
+            }
+
+            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
+                showToast(`Transit No./Ewaybill compulsory if Bill Amount > ${PubDefEWaybillAmt}`, { type: "info" });
+            }
+        }       
 
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
@@ -163,7 +152,6 @@ function isItemInMainTable(itemCode) {
         EWB_INVNO: EWB_INVNO,
         EWB_INVAMT: EWB_INVAMT,
         PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
-        TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
         PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
         PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
         PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
@@ -193,7 +181,7 @@ function isItemInMainTable(itemCode) {
         const Deatils = collectTableRowData();
 
         if (!Deatils || Deatils.length === 0) {
-        showToast("Please fill at least one row in Detail", { type: "info" });
+        showToast("Please fill at least one row in Detail", { type: "Warning" });
         return;
         }
 
@@ -268,6 +256,7 @@ function isItemInMainTable(itemCode) {
             if (response.status === "Success") {   
                 showToast("Saved successfully!", { type: "success" });
                 setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);                                
+               // setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) ; }, 3000);                                
             }
 
             else if (response.status === "VALIDATION")
@@ -285,17 +274,17 @@ function isItemInMainTable(itemCode) {
 
         if (xhr.status === 400) {
             errorMessage = "Bad Request: " + xhr.responseText;
-                        } else if (xhr.status === 500) {
+            } else if (xhr.status === 500) {
             errorMessage = "Server error: " + xhr.responseText;
-                        } else {
+            } else {
             errorMessage = "Unexpected error: " + xhr.statusText;
-                        }
-        showToast(errorMessage, {type: "error" });
-                    },
+            }
+            showToast(errorMessage, {type: "error" });
+            },
 
-             complete: function () {
+            complete: function () {
             $("#btn-save").prop("disabled", false);
-                        }
+            }
         });
     }
     function focusCell(rowIndex, colIndex) {
@@ -311,8 +300,8 @@ function isItemInMainTable(itemCode) {
     if (input) {
         input.focus();
                 }
-            }
-     function setFormReadOnly() {
+}
+    function setFormReadOnly() {
 
     const form = document.getElementById("InwardEntryForm");
     if (!form) return;
@@ -433,7 +422,6 @@ function isItemInMainTable(itemCode) {
     $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
     $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
 }
-
     function collectTableRowData() {
             const table = document.getElementById('tblInwardEntry');
     if (!table) return [];
@@ -620,9 +608,9 @@ function isItemInMainTable(itemCode) {
 
     let itemOptions = `<option value="">Select</option>`;
     $.each(itemList, function (i, item) {
-                const selected = item.value == data.itemId ? "selected" : "";
-    itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
-            });
+        const selected = item.value == data.itemId ? "selected" : "";
+        itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
+    });
 
     // DEPARTMENT
     let deptOptions = `<option value="">Select</option>`;
@@ -656,12 +644,12 @@ function isItemInMainTable(itemCode) {
     </td>
 
     <td>
-        <input type="text" class="form-control nos numeric-only" style="${normalStyle}" value="${data.nos ?? ''}" />   </td>
+        <input type="text" class="form-control nos numeric-only"  maxlength="4" style="${normalStyle}" value="${data.nos ?? ''}" />   </td>
     <td>
-        <input type="text" class="form-control quantity numeric-only" style="${normalStyle}" value="${data.qty ?? ''}" />
+        <input type="text" class="form-control quantity numeric-only" maxlength="10" style="${normalStyle}" value="${data.qty ?? ''}" />
     </td>
     <td>
-        <input type="text" class="form-control shiprate numeric-only" style="${normalStyle}" value="${data.shipRate ?? ''}" />
+        <input type="text" class="form-control shiprate numeric-only" maxlength="13" style="${normalStyle}" value="${data.shipRate ?? ''}" />
     </td>
 
     <td>
@@ -673,15 +661,15 @@ function isItemInMainTable(itemCode) {
     </td>
 
     <td>
-        <input type="text" class="form-control remarks" style="${normalStyle}" value="${data.remarks ?? ''}" />
+        <input type="text" class="form-control remarks" style="${normalStyle}" maxlength="225" value="${data.remarks ?? ''}" />
     </td>
 
     <td>
-        <input type="text" class="form-control refType" style="${normalStyle}" value="${data.refType ?? ''}" />
+        <input type="text" class="form-control refType" style="${normalStyle}" maxlength="4" value="${data.refType ?? ''}" />
     </td>
 
     <td>
-        <input type="text" class="form-control refNo" style="${normalStyle}" value="${data.refNo ?? ''}" />
+        <input type="text" class="form-control refNo" style="${normalStyle}" maxlength="9" value="${data.refNo ?? ''}" />
     </td>
 
     <td>
@@ -848,14 +836,7 @@ function isItemInMainTable(itemCode) {
             $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
-
-            await fetchTransitno(
-                header.v_TYPE,
-                header.v_NO,
-                header.partY_CODE,
-                formatDate(header.ewB_DATE)
-            );
-
+            await fetchTransitno(  header.v_TYPE, header.v_NO, header.partY_CODE,  formatDate(header.ewB_DATE));
             $('#ddlTransit').val(header.transiT_NO || '');
             $('#TxtEWayNo').val(header.waybilL_NO || '');
             $('#DtEWayDate').val(formatDate(header.ewB_DATE) || '');
@@ -863,7 +844,7 @@ function isItemInMainTable(itemCode) {
             $('#TxtEWBInvNo').val(header.ewB_INVNO || '');
             $('#TxtEWBInvAmt').val(header.ewB_INVAMT || '');
             $('#TxtWbSlipNo').val(header.partY_WBSLIPNO || '');
-            $('#TxtGrWt').val(header.gR_NO || '');
+            $('#TxtGrWt').val(header.partY_WBGRWT || '');
             $('#TxtTrWt').val(header.partY_WBTRWT || '');
             $('#DtWBTime').val(formatDate(header.partY_WBTIME) || '');
             $('#TxtWbTime').val(header.partY_WBTIME || '');
@@ -879,7 +860,7 @@ function isItemInMainTable(itemCode) {
 
             Details.forEach(item => {
                 addRow($('#tblInwardEntry tbody'), {
-                    itemCode: "345",
+                    itemCode: item.iteM_CODE,
                     itemId: item.iteM_CODE,
                     DepttName: item.depT_CODE,
                     unit: item.uoM_CODE,
@@ -897,5 +878,4 @@ function isItemInMainTable(itemCode) {
         showToast("Something went wrong while loading the form.", { type: "error" });
     }
 }
-
 

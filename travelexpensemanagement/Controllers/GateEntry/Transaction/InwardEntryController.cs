@@ -488,15 +488,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 {
                     using var cmd = new SqlCommand("sp_InwardEntry", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@WAYBILL_NO",  SqlDbType.BigInt)
-                        .Value = string.IsNullOrEmpty(header.WAYBILL_NO)
-                        ? DBNull.Value
-                        : Convert.ToInt64(header.WAYBILL_NO);
+                    cmd.Parameters.AddWithValue("@WAYBILL_NO", SqlDbType.BigInt) .Value = string.IsNullOrEmpty(header.WAYBILL_NO)
+                    ? DBNull.Value : Convert.ToInt64(header.WAYBILL_NO);
                     cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                     cmd.Parameters.AddWithValue("@Action", "WAYBILL_NO");
-
                     using var reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
@@ -533,7 +529,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 }
 
                 // ================= 5. BILL + CHALLAN VALIDATION =================
-                if (!string.IsNullOrEmpty(header.changwes))
+                if (!string.IsNullOrEmpty(header.WAYBILL_NO))
                 {
                     string billNoDate = GetText(
                         "SELECT LTRIM(RTRIM(BILL_NO)) + '|' + FORMAT(BILL_DATE, 'dd/MM/yyyy') " +
