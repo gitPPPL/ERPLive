@@ -152,8 +152,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     var DeptCode = rdr["DEPT_CODE"]?.ToString();
                                     var EMPTY_YN = "";
                                     var UOM_CODE = rdr["UNIT_CODE"]?.ToString();
-
-
                                     if (!string.IsNullOrEmpty(ITEM_CODE) && !string.IsNullOrEmpty(ITEM_CODE))
                                     {
                                         // Add anonymous object to the list
@@ -207,7 +205,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     using (var cmdCheck = new SqlCommand(sql, con))
                     {
-
                         cmdCheck.Parameters.AddWithValue("@code", code);
                         cmdCheck.Parameters.AddWithValue("@VType", VType);
                         cmdCheck.Parameters.AddWithValue("@pubCompCode", getGlobalCode.PubCompCode);

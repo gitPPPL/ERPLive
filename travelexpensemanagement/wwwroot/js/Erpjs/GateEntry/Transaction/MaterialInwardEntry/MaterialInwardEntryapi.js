@@ -321,8 +321,17 @@ async function GetVNo(Vtype) {
 
 async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
     try {
-        if (!PartyCode || !V_TYPE || !V_DATE) {
-            showToast("Invalid parameters passed", { type: "error" });
+        if (!PartyCode) {
+            showToast("Please Select Party Name", { type: "error" });
+            return;
+        }
+        if (!V_TYPE) {
+            showToast("Please select Voucher Type", { type: "error" });
+            return;
+        }
+
+        if (!V_DATE) {
+            showToast("Please Select voucher Date", { type: "error" });
             return;
         }
 
@@ -342,39 +351,40 @@ async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
             showToast(`Data Not Found For this party: ${PartyName}`, { type: "info" });
             return;
         }
+        else {
 
-        // Show modal
-        const modalElement = document.getElementById('pendingorders');
-        const myModal = new bootstrap.Modal(modalElement);
-        myModal.show();
+            $('#ddlPartyName').prop('disabled', true);
+            const modalElement = document.getElementById('pendingorders');
+            const myModal = new bootstrap.Modal(modalElement);
+            myModal.show();
 
-        // Table rendering
-        const tableBody = document.querySelector('#tblpendingordermodal tbody');
-        tableBody.innerHTML = '';
+            const tableBody = document.querySelector('#tblpendingordermodal tbody');
+            tableBody.innerHTML = '';
 
-        result.data.forEach(item => {
-            const row = `
-    <tr>
-        <td><input type="checkbox" class="rowCheckbox" /></td>
-        <td>${item.iteM_CODE ?? ''}</td>
-        <td>${item.itemName ?? ''}</td>
-        <td>${item.uniT_NAME ?? ''}</td>
-        <td>${item.packinG_NOS ?? ''}</td>
-        <td>${item.qty ?? ''}</td>
-        <td>${item.balqty ?? ''}</td>
-        <td>${item.docType ?? ''}</td>
-        <td>${item.docNo ?? ''}</td>
-        <td>${item.docDate ?? ''}</td>
-        <td>${item.rate ?? ''}</td>
-        <td>${item.remark ?? ''}</td>
-        <td>${item.department ?? ''}</td>
-        <td style="display:none;">${item.deptCode ?? ''}</td>
-        <td>${item.emptY_YN ?? ''}</td>
-        <td style="display:none;">${item.uoM_CODE ?? ''}</td>
-    </tr>
-    `;
-            tableBody.insertAdjacentHTML('beforeend', row);
-        });
+            result.data.forEach(item => {
+                const row = `
+                <tr>
+                    <td><input type="checkbox" class="rowCheckbox" /></td>
+                    <td>${item.iteM_CODE ?? ''}</td>
+                    <td>${item.itemName ?? ''}</td>
+                    <td>${item.uniT_NAME ?? ''}</td>
+                    <td>${item.packinG_NOS ?? ''}</td>
+                    <td>${item.qty ?? ''}</td>
+                    <td>${item.balqty ?? ''}</td>
+                    <td>${item.docType ?? ''}</td>
+                    <td>${item.docNo ?? ''}</td>
+                    <td>${item.docDate ?? ''}</td>
+                    <td>${item.rate ?? ''}</td>
+                    <td>${item.remark ?? ''}</td>
+                    <td>${item.department ?? ''}</td>
+                    <td style="display:none;">${item.deptCode ?? ''}</td>
+                    <td>${item.emptY_YN ?? ''}</td>
+                    <td style="display:none;">${item.uoM_CODE ?? ''}</td>
+                </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }    
 
     } catch (error) {
         showToast("Failed to load pending orders", { type: "error" });
@@ -722,50 +732,60 @@ async function sendopenApprovalModal() {
 }
 
 async function Approvalbtn() {
+
     const v_type = $('#ddlDocType').val();
     const v_no = $('#TxtDocNo').val();
+
     try {
+
         const res = await $.ajax({
             url: '/InwardEntry/Approvalbtn',
-            data: { v_type: v_type, v_no: v_no },
+            data: { v_type, v_no },
             type: 'GET',
             dataType: 'json'
         });
-        console.log("Approvalbtn", res);
-        if (res.message === "SendForApproval") {
 
-            $('#btn_Sendapproval')
-                .prop('disabled', false)
-                .removeAttr('hidden');
+        console.log("Response =", res);
 
-            return;
-        }
+        const message = (res.message || '').trim();
 
-        if (res.message == "DocumentSend")
-        {
-            $('#span_approved').prop('hidden', false); 
-            
-            return;
-        }
+        // Reset UI
+        $('#btn_approval').hide().prop('disabled', true);
+        $('#btn_Sendapproval').hide().prop('disabled', true);
+        $('#span_approved').hide();
 
-        if (res.message === "ApprovalWindow") {
+        if (message === "ApprovalWindow") {
 
             $('#btn_approval')
-                .prop('disabled', false)
-                .removeAttr('hidden');
+            .removeAttr('hidden')
+            .show()
+            .prop('disabled', false);
 
             return;
         }
 
+        if (message === "SendForApproval") {
 
+            $('#btn_Sendapproval')
+                .removeAttr('hidden')
+                .show()
+                .prop('disabled', false);
 
+            return;
+        }
 
+        if (message === "DocumentSend") {
 
+            $('#span_approved')
+                .removeAttr('hidden')
+                .show();
 
+            return;
+        }
 
+    }
+    catch (error) {
 
-       
-    } catch (error) {
         console.error("Approval request failed:", error);
     }
 }
@@ -835,7 +855,7 @@ async function SendApproval() {
         console.log(res);
         if (res.status === "Success") {
             $("#SendForapprovedModal").modal('hide');
-            setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) ; }, 100);                                
+            setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) + '&mode=view' ; }, 100);                                
             showToast(res.message, { type: "success" });        
             return;
         }
@@ -961,7 +981,7 @@ async function SendWindowApproval() {
         if (res.status === "Success") {
             $("#approvedModal").modal('hide');
             showToast(res.message, { type: "success" });
-            setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) ; }, 100);                                
+            setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) + '&mode=view' ; }, 100);                                
        
            
             return;

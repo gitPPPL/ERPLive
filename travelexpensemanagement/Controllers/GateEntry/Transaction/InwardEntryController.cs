@@ -2,7 +2,9 @@
 using DocumentFormat.OpenXml.Office.Word;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using StackExchange.Redis;
@@ -105,12 +107,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             var action = request.Header.action == "INSERT" ? "INSERT"  : "UPDATE";
 
-            //    var action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
-            //    //var validation = Validation(  request.Header, request.Deatils);
-            //    //if (validation.Status == "VALIDATION" || validation.Status == "Error")
-            //    //{
-            //    //    return Json(new { success = validation.Status == "VALIDATION", status = validation.Status, message = validation.Message });
-            //    //}     
+            var validation = Validation(request.Header, request.Deatils);
+            if (validation.Status == "VALIDATION" || validation.Status == "Error")
+            {
+                return Json(new { success = validation.Status == "VALIDATION", status = validation.Status, message = validation.Message });
+            }
 
             var result = await SubmitRequest( request.Header, request.Deatils, action);
 
@@ -118,7 +119,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
         private async Task<ApiResponse> SubmitRequest(InwardEntry_Header header, List<Details> details, string action)
-        { try
+        { 
+            try
             {
                 string sql = "";
                 var g = _globalVariableService.GetGlobalVariables();
@@ -126,7 +128,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 using var conn = _dbConnection.GetErpConnection();
                 var SUPPLIER_INVNOs = 0;
                 int CountryCode = 0;
-
                 Boolean isApprovalBody = false;
                 Boolean isFinalApprovalBody = false;
                 string DOC_APPROSTAGE = "";
@@ -134,7 +135,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 string fappstatus = "";
                 string fappRemark = "";
                 string gstExmptflg = "0";
-
                 DOC_APPROSTAGE = GetText("select 1 from DOC_APPROSTAGE where USER_CODE= " + g.PubUserId + " and DOC_CODE= '" + header.V_TYPE + "' and comp_code= " + g.PubCompCode + " ");
 
                 if (DOC_APPROSTAGE == "1")
@@ -223,6 +223,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
                     cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                     cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
+                    cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.V_DATE);
                     cmd.Parameters.Add("@RETURN_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.V_DATE);
                     cmd.Parameters.AddWithValue("@V_TIME", header.V_TIME);
                     cmd.Parameters.Add("@R_DATE", SqlDbType.SmallDateTime).Value = header.R_DATE == null  ? DBNull.Value : Convert.ToDateTime(header.R_DATE);
@@ -241,8 +242,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@DRIVER_NAME", header.DRIVER_NAME);
                     cmd.Parameters.AddWithValue("@DRIVER_NO", header.DRIVER_NO);
                     cmd.Parameters.Add("@EWB_DATE", SqlDbType.SmallDateTime).Value =
-                    header.EWB_EXPDATE == null ? DBNull.Value : Convert.ToDateTime(header.EWB_EXPDATE);                    
-        
+                    header.EWB_EXPDATE == null ? DBNull.Value : Convert.ToDateTime(header.EWB_EXPDATE);                   
                     cmd.Parameters.AddWithValue("@EWB_INVNO", header.EWB_INVNO);
                     cmd.Parameters.AddWithValue("@EWB_INVAMT", header.EWB_INVAMT);
                     cmd.Parameters.AddWithValue("@PARTY_WBSLIPNO", header.PARTY_WBSLIPNO);
@@ -346,6 +346,43 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd3.ExecuteNonQuery();
                 }
 
+
+
+                if(details.Count > 0)
+                {
+                    string approval = GetText("SELECT Approval_remark  FROM approval_status WHERE user_Code = " + g.PubUserId + " AND " +
+                    "V_Type = '" + header.V_TYPE + "' AND V_No = " + header.V_NO + "      AND  " +
+                    "  COMP_CODE = " + g.PubCompCode + "  AND Branch_Code = " + g.PubBranchCode + "  AND Year_Code = " + g.PubFYearCode + ";");
+
+                    if (approval != "")
+                    {
+                        string UpdateSql = @"UPDATE approval_status
+                        SET
+                        STATUS = 'CLOSE',
+                        CLOSE_DATE = GETDATE(),
+                        Approval_code = 8,
+                        Approval_remark = 'Approved',
+                        remarks = 'Document Approved'
+                        WHERE
+                        V_Type = @V_Type
+                        AND V_No = @V_No
+                        AND COMP_CODE = @COMP_CODE
+                        AND Branch_Code = @Branch_Code
+                        AND Year_Code = @Year_Code;";
+
+                        using (var updateCmd = new SqlCommand(deleteSql, conn))
+                        {
+                            updateCmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                            updateCmd.Parameters.AddWithValue("@V_No", header.V_NO);
+                            updateCmd.Parameters.AddWithValue("@V_Type", header.V_TYPE);
+                            updateCmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                            updateCmd.Parameters.AddWithValue("@Year_Code", g.PubFYearCode);
+                            updateCmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+                    
+
                 //if (action == "UPDATE")
                 //{
                 //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
@@ -396,459 +433,260 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             try
             {
-                string sql = "";
                 var g = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
-                var SUPPLIER_INVNOs = 0;
-                int CountryCode = 0;
                 conn.Open();
+
                 string Message = "";
 
-                using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
+                // ================= 1. GATE NO MODIFICATION CHECK =================
+                using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
-                    cmd1.CommandType = CommandType.StoredProcedure;
-                    cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
-                    cmd1.Parameters.AddWithValue("@V_No", header.V_NO);
-                    cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
-                    cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
-                    cmd1.Parameters.AddWithValue("@Action", "GatenoModifica");
-                    using var reader1 = cmd1.ExecuteReader();
-                    var response = new ApiResponse();
-                    if (reader1.Read())
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Party_Code", (object?)header.PARTY_CODE ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@V_No", (object?)header.V_NO ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Action", "GatenoModifica");
+
+                    using var reader = cmd.ExecuteReader();
+                    if (reader.Read())
                     {
-                        var V_NO = reader1["V_No"].ToString();
+                        var vno = reader["V_No"].ToString();
+
                         if (g.PubUserId != "1" && g.PubUserId != "53")
                         {
-                            Message = $"Gate no. {V_NO} exist in MRN No. {header.V_NO} Modification not allowed.";
-                            return new ApiResponse { Status = "VALIDATION", Message = Message };
-                        }
-                    }
-                }
-
-                if (header.TRANSIT_NO != null)
-                {
-                    using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
-                    {
-                        cmd1.CommandType = CommandType.StoredProcedure;
-                        cmd1.Parameters.AddWithValue("@V_NO", header.TRANSIT_NO);
-                        cmd1.Parameters.AddWithValue("@Party_Code", header.PARTY_CODE);
-                        cmd1.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
-                        cmd1.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
-                        cmd1.Parameters.AddWithValue("@Action", "TRANSIT_NO");
-                        using var reader1 = cmd1.ExecuteReader();
-                        var response = new ApiResponse();
-                        if (reader1.Read())
-                        {
-                            var V_NO = reader1["V_NO"];
-                            Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}";
-                            return new ApiResponse { Status = "VALIDATION", Message = Message };
-                        }
-                    }
-                }
-
-                if (header.WAYBILL_NO != null)
-                {
-                    using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
-                    {
-                        cmd1.CommandType = CommandType.StoredProcedure;
-
-                        cmd1.Parameters.AddWithValue("@WAYBILL_NO", header.TRANSIT_NO);
-                        cmd1.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
-                        cmd1.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                        cmd1.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
-                        cmd1.Parameters.AddWithValue("@Action", "WAYBILL_NO");
-                        using var reader1 = cmd1.ExecuteReader();
-                        var response = new ApiResponse();
-                        if (reader1.Read())
-                        {
-                            Message = $"Waybill no. not valid for Party=>{header.PARTY_NAME}, Please check in Transit Entry.";
-                            return new ApiResponse { Status = "VALIDATION", Message = Message };
-                        }
-                    }
-                }
-
-                if (header.TRANSIT_NO != null)
-                {
-
-                    using (var cmd1 = new SqlCommand("sp_InwardEntry", conn))
-                    {
-                        cmd1.CommandType = CommandType.StoredProcedure;
-
-                        cmd1.Parameters.AddWithValue("@TRANSIT_NO", header.TRANSIT_NO);
-                        cmd1.Parameters.AddWithValue("COMP_CODE", g.PubCompCode);
-                        cmd1.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
-                        cmd1.Parameters.AddWithValue("@Action", "Trnsitnowaybillno");
-                        using var reader1 = cmd1.ExecuteReader();
-                        var response = new ApiResponse();
-                        if (reader1.Read())
-                        {
-                            var V_NO = reader1["V_NO"];
-                            Message = $"Transit no. {header.TRANSIT_NO} exist in MRN No.= {V_NO}";
-                            return new ApiResponse { Status = "VALIDATION", Message = Message };
-                        }
-                    }
-                }
-
-                if (header.WAYBILL_NO != null)
-                {
-                    string BillNoDate = "";
-                    string BILL_NO = "";
-                    DateTime? BILL_DATE = null;
-
-                    using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@WAYBILL_NO", header.WAYBILL_NO);
-                        cmd.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
-                        cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@Action", "GETWAYBILL_NOData");
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
+                            return new ApiResponse
                             {
-                                BillNoDate = reader["BillNoDate"]?.ToString();
-                                BILL_NO = reader["BILL_NO"]?.ToString();
-                                if (reader["BILL_DATE"] != DBNull.Value)
-                                BILL_DATE = Convert.ToDateTime(reader["BILL_DATE"]);
-                            }
+                                Status = "VALIDATION",
+                                Message = $"Gate no. {vno} exist in MRN No. {header.V_NO} Modification not allowed."
+                            };
                         }
                     }
+                }
 
-                    // Bill Validation
-                    if (!string.IsNullOrEmpty(BillNoDate))
+                // ================= 2. TRANSIT NO VALIDATION =================
+                if (header.TRANSIT_NO.HasValue)
+                {
+                    using var cmd = new SqlCommand("sp_InwardEntry", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@V_NO", (object?)header.TRANSIT_NO ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Party_Code", (object?)header.PARTY_CODE ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@comp_Code", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Action", "TRANSIT_NO");
+                    using var reader = cmd.ExecuteReader();
+                    if (reader.Read())
                     {
+                        return new ApiResponse {  Status = "VALIDATION", Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}" };
+                    }
+                }
+
+                // ================= 3. WAYBILL VALIDATION =================
+                if (!string.IsNullOrEmpty(header.WAYBILL_NO))
+                {
+                    using var cmd = new SqlCommand("sp_InwardEntry", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@WAYBILL_NO",  SqlDbType.BigInt)
+                        .Value = string.IsNullOrEmpty(header.WAYBILL_NO)
+                        ? DBNull.Value
+                        : Convert.ToInt64(header.WAYBILL_NO);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Action", "WAYBILL_NO");
+
+                    using var reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        return new ApiResponse
+                        {
+                            Status = "VALIDATION",
+                            Message = $"Waybill no. not valid for Party=>{header.PARTY_NAME}, Please check in Transit Entry."
+                        };
+                    }
+                }
+
+
+                // ================= 4. TRANSIT DUPLICATE CHECK =================
+                if (header.TRANSIT_NO.HasValue)
+                {
+                    using var cmd = new SqlCommand("sp_InwardEntry", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@TRANSIT_NO", (object?)header.TRANSIT_NO ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Action", "Trnsitnowaybillno");
+
+                    using var reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        var vno = reader["V_NO"];
+                        return new ApiResponse
+                        {
+                            Status = "VALIDATION",
+                            Message = $"Transit no. {header.TRANSIT_NO} exist in MRN No.= {vno}"
+                        };
+                    }
+                }
+
+                // ================= 5. BILL + CHALLAN VALIDATION =================
+                if (!string.IsNullOrEmpty(header.changwes))
+                {
+                    string billNoDate = GetText(
+                        "SELECT LTRIM(RTRIM(BILL_NO)) + '|' + FORMAT(BILL_DATE, 'dd/MM/yyyy') " +
+                        "FROM waybill1 WHERE FORM_NO='" + header.WAYBILL_NO +
+                        "' AND V_Type='TRIN' AND comp_Code=" + g.PubCompCode +
+                        " AND Branch_Code=" + g.PubBranchCode
+                    );
+
+                    if (!string.IsNullOrEmpty(billNoDate) && billNoDate.Contains("|"))
+                    {
+                        var parts = billNoDate.Split('|');
+
+                        string dbBillNo = parts[0].Trim();
+                        DateTime.TryParse(parts[1], out DateTime dbBillDate);
+
+                        // BILL CHECK
                         if (!string.IsNullOrEmpty(header.BILL_NO))
                         {
-                            if (!string.IsNullOrEmpty(BILL_NO) &&
-                                header.BILL_NO.Trim() != BILL_NO.Trim())
+                            if (header.BILL_NO.Trim() != dbBillNo)
                             {
-                                Message = $"Bill No. {header.BILL_NO} not matched with Bill No. {BILL_NO} in Transit Entry No => {header.TRANSIT_NO}";
-
                                 return new ApiResponse
                                 {
                                     Status = "VALIDATION",
-                                    Message = Message
+                                    Message = $"Bill No. {header.BILL_NO} not matched with Bill No. {dbBillNo} in Transit Entry No => {header.TRANSIT_NO}"
                                 };
                             }
 
-                            if (BILL_DATE.HasValue &&
-                                header.BILL_DATE?.Date != BILL_DATE.Value.Date)
+                            if (dbBillDate != DateTime.MinValue &&
+                                header.BILL_DATE?.Date != dbBillDate.Date)
                             {
-                                Message = $"Bill Date {header.BILL_DATE:dd/MM/yyyy} not matched with Bill Date {BILL_DATE:dd/MM/yyyy} in Transit Entry No => {header.TRANSIT_NO}";
-
                                 return new ApiResponse
                                 {
                                     Status = "VALIDATION",
-                                    Message = Message
+                                    Message = $"Bill Date {header.BILL_DATE:dd/MM/yyyy} not matched with Bill date {dbBillDate:dd/MM/yyyy} in Transit Entry No => {header.TRANSIT_NO}"
                                 };
                             }
                         }
 
-                        // Challan Validation
+                        // CHALLAN CHECK
                         if (!string.IsNullOrEmpty(header.CHALL_NO))
                         {
-                            if (!string.IsNullOrEmpty(BILL_NO) &&
-                                header.CHALL_NO.Trim() != BILL_NO.Trim())
+                            if (header.CHALL_NO.Trim() != dbBillNo)
                             {
-                                Message = $"Challan No. {header.CHALL_NO} not matched with Challan No. {BILL_NO} in Transit Entry No => {header.TRANSIT_NO}";
-
                                 return new ApiResponse
                                 {
                                     Status = "VALIDATION",
-                                    Message = Message
+                                    Message = $"Challan No. {header.CHALL_NO} not matched with Challan No. {dbBillNo} in Transit Entry No => {header.TRANSIT_NO}"
                                 };
                             }
 
-                            if (BILL_DATE.HasValue &&
-                                header.CHALL_DATE?.Date != BILL_DATE.Value.Date)
+                            if (dbBillDate != DateTime.MinValue &&
+                                header.CHALL_DATE?.Date != dbBillDate.Date)
                             {
-                                Message = $"Challan Date {header.CHALL_DATE:dd/MM/yyyy} not matched with Challan Date {BILL_DATE:dd/MM/yyyy} in Transit Entry No => {header.TRANSIT_NO}";
-
                                 return new ApiResponse
                                 {
                                     Status = "VALIDATION",
-                                    Message = Message
+                                    Message = $"Challan Date {header.CHALL_DATE:dd/MM/yyyy} not matched with {dbBillDate:dd/MM/yyyy} in Transit Entry No => {header.TRANSIT_NO}"
                                 };
                             }
                         }
                     }
                 }
 
-                if (header.V_TYPE == "INRM")
+                // ================= 6. DETAIL VALIDATIONS =================
+                foreach (var d in details)
                 {
-                    sql = @"SELECT COUNTRY_CODE  FROM SUBGROUP_MAST  WHERE CODE = @FORM_NO   AND Comp_Code = @CompCode  AND ACTIVE = 1;";
-
-                    using (var cmd = new SqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.Add("@FORM_NO", SqlDbType.BigInt)
-                        .Value = Convert.ToInt64(header.WAYBILL_NO);
-                        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-
-                        using var READERS = cmd.ExecuteReader();
-
-                        var response = new ApiResponse();
-
-                        if (READERS.Read())
-                        {
-                            CountryCode = Convert.ToInt32(READERS["COUNTRY_CODE"]);
-
-                        }
-                    }
-
-                    var INV_NO = 0;
-                    if (CountryCode != 1)
-                    {
-                        sql = @"SELECT  INV_NO FROM ORDER4  WHERE INV_NO =@INV_NO AND PARTY_CODE = @PARTY_CODE  AND COMP_CODE = @COMP_CODE;";
-
-                        using (var cmd = new SqlCommand(sql, conn))
-                        {
-                            cmd.Parameters.AddWithValue("@INV_NO", header.BILL_NO);
-                            cmd.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
-                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                            using var READERS = cmd.ExecuteReader();
-                            var response = new ApiResponse();
-                            if (READERS.Read())
-                            {
-                                INV_NO = Convert.ToInt32(READERS["INV_NO"]);
-                            }
-                        }
-                    }
-
-                    if (INV_NO != null)
-                    {
-                        sql = @"SELECT SUPPLIER_INVNO  FROM EXIM1 WHERE SUPPLIER_INVNO = @SUPPLIER_INVNO   AND  SUPPLIER = @SUPPLIER AND COMP_CODE = @COMP_CODE;";
-                        using (var cmd = new SqlCommand(sql, conn))
-                        {
-                            cmd.Parameters.AddWithValue("@SUPPLIER_INVNO", header.BILL_NO);
-                            cmd.Parameters.AddWithValue("@SUPPLIER", header.PARTY_CODE);
-                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                            using var READERS = cmd.ExecuteReader();
-                            var response = new ApiResponse();
-                            if (READERS.Read())
-                            {
-                                Message = $"Bill No.  {header.BILL_NO} not matched with Bill No in Container Tracking Record.";
-                                return new ApiResponse { Status = "VALIDATION", Message = Message };
-                            }
-                        }
-                    }
-                }
-
-                foreach (var Details in details)
-                {
-                    if (string.IsNullOrWhiteSpace(Details.ITEM_NAME))
+                    if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
                         continue;
 
-                    if (header.V_TYPE == "INFU" && header.V_TYPE == "INST" && header.V_TYPE == "INRM")
+                    // INRM COUNTRY CHECK
+                    if (header.V_TYPE == "INRM")
                     {
-                        sql = @"SELECT Party_Code FROM Order1  WHERE Party_Code = @PartyCode  AND V_TYPE = @V_TYPE
-                        AND V_NO = @V_NO   AND COMP_CODE = @CompCode AND Branch_Code = @BranchCode;";
-                        using (var cmd = new SqlCommand(sql, conn))
+                        string sql = @"SELECT COUNTRY_CODE FROM SUBGROUP_MAST 
+                               WHERE CODE = @CODE AND Comp_Code = @Comp AND ACTIVE = 1";
+
+                        using var cmd = new SqlCommand(sql, conn);
+                        cmd.Parameters.Add("@CODE", SqlDbType.BigInt)
+                        .Value = string.IsNullOrEmpty(header.WAYBILL_NO)
+                        ? DBNull.Value
+                        : Convert.ToInt64(header.WAYBILL_NO);
+                        cmd.Parameters.AddWithValue("@Comp", g.PubCompCode);
+
+                        var country = cmd.ExecuteScalar();
+                        int countryCode = country != null ? Convert.ToInt32(country) : 0;
+
+                        if (countryCode != 1)
                         {
-                            cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
-                            cmd.Parameters.AddWithValue("@V_TYPE", Details.REF_TYPE);
-                            cmd.Parameters.AddWithValue("@V_NO", Details.REF_NO);
-                            cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                            using var READERS = cmd.ExecuteReader();
-                            var response = new ApiResponse();
-                            if (READERS.Read())
+                            string sql2 = @"SELECT INV_NO FROM ORDER4 
+                                    WHERE INV_NO=@INV AND PARTY_CODE=@PARTY AND COMP_CODE=@COMP";
+
+                            using var cmd2 = new SqlCommand(sql2, conn);
+                            cmd2.Parameters.AddWithValue("@INV", (object?)header.BILL_NO ?? DBNull.Value);
+                            cmd2.Parameters.AddWithValue("@PARTY", (object?)header.PARTY_CODE ?? DBNull.Value);
+                            cmd2.Parameters.AddWithValue("@COMP", g.PubCompCode);
+
+                            var inv = cmd2.ExecuteScalar();
+
+                            if (inv != null)
                             {
-                                var Party_Code = READERS["Party_Code"].ToString();
-                                Message = $"Party Name not matched with Order Party Name";
-                                return new ApiResponse { Status = "VALIDATION", Message = Message };
+                                return new ApiResponse
+                                {
+                                    Status = "VALIDATION",
+                                    Message = $"Bill No. {header.BILL_NO} already exists in order system."
+                                };
                             }
                         }
                     }
-                    if (header.V_TYPE == "INRT")
+
+                    // ITEM BASED CHECK (example simplified)
+                    if (header.V_TYPE == "INSR" || header.V_TYPE == "INRT" || header.V_TYPE == "INFU" || header.V_TYPE == "INST")
                     {
-                        sql = @"SELECT Party_Code FROM GATE1 WHERE Party_Code = @PartyCode  AND V_TYPE = @V_TYPE AND V_NO = @V_NO 
-                        AND COMP_CODE = @CompCode AND Branch_Code = @BranchCode;";
-
-                        using (var cmd = new SqlCommand(sql, conn))
+                        string table = header.V_TYPE switch
                         {
-                            cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
-                            cmd.Parameters.AddWithValue("@V_TYPE", Details.REF_TYPE);
-                            cmd.Parameters.AddWithValue("@V_NO", Details.REF_NO);
-                            cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                            "INSR" => "SALE1",
+                            "INRT" => "GATE1",
+                            _ => "ORDER1"
+                        };
 
-                            using var READERS = cmd.ExecuteReader();
+                        string sql = $"SELECT Party_Code FROM {table} WHERE Party_Code=@Party AND V_NO=@VNO";
 
-                            var response = new ApiResponse();
+                        using var cmd = new SqlCommand(sql, conn);
+                        cmd.Parameters.AddWithValue("@Party", (object?)header.PARTY_CODE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@VNO", d.REF_NO);
 
-                            if (READERS.Read())
+                        using var reader = cmd.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            return new ApiResponse
                             {
-                                var Party_Code = READERS["Party_Code"].ToString();
-                                Message = $"Party Name not matched with Gate Out Entry Party Name.";
-                                return new ApiResponse { Status = "VALIDATION", Message = Message };
-
-                            }
+                                Status = "VALIDATION",
+                                Message = $"Party mismatch in {table}."
+                            };
                         }
                     }
-                    if (header.V_TYPE == "INSR")
-                    {
-                        sql = @"SELECT Party_Code  FROM SALE1  WHERE Party_Code = @PartyCode   AND V_TYPE =@V_TYPE  AND V_NO = @V_NO 
-                        AND COMP_CODE = @CompCode AND Branch_Code = @BranchCode;";
-
-                        using (var cmd = new SqlCommand(sql, conn))
-                        {
-                            cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
-                            cmd.Parameters.AddWithValue("@V_TYPE", Details.REF_TYPE);
-                            cmd.Parameters.AddWithValue("@V_NO", Details.REF_NO);
-                            cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-
-                            using var READERS = cmd.ExecuteReader();
-
-                            var response = new ApiResponse();
-
-                            if (READERS.Read())
-                            {
-                                var Party_Code = READERS["Party_Code"].ToString();
-                                Message = $"Party Name not matched with Sale Return Entry Party Name..";
-                                return new ApiResponse { Status = "VALIDATION", Message = Message };
-
-                            }
-                        }
-
-                    }
-                    if (header.V_TYPE == "INFU" || header.V_TYPE == "INST" || header.V_TYPE == "INRM")
-                    {
-                        if (Details.REF_TYPE == "PAUD")
-                        {
-                            if (!string.IsNullOrEmpty(Details.ITEM_NAME) && Details.REF_NO > 0)
-                            {
-                                string gateNosQuery = @"  DECLARE @cols AS VARCHAR(200) SELECT @cols = STUFF((
-                                SELECT ',' + CAST(V_No AS VARCHAR(20))   FROM gate2   WHERE ref_TYPE = @RefType 
-                                AND ref_NO = @RefNo   AND COMP_CODE = @CompCode   AND BRANCH_CODE = @BranchCode    AND v_type = @VType
-                                FOR XML PATH(''), TYPE).value('.', 'VARCHAR(MAX)'), 1, 1, '') SELECT @cols";
-
-                                string gateNos = "";
-                                using (var cmd = new SqlCommand(gateNosQuery, conn))
-                                {
-                                    cmd.Parameters.AddWithValue("@RefType", Details.REF_TYPE);
-                                    cmd.Parameters.AddWithValue("@RefNo", Details.REF_NO);
-                                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                                    cmd.Parameters.AddWithValue("@VType", header.V_TYPE);
-
-                                    var result = cmd.ExecuteScalar();
-                                    gateNos = result?.ToString();
-                                }
-
-                                double pubRes1Dbl = 0;
-                                string sql1 = @"SELECT ISNULL(SUM(qty),0)  FROM SAUDA   WHERE V_TYPE = @RefType  AND V_NO = @RefNo 
-                                AND COMP_CODE = @CompCode   AND BRANCH_CODE = @BranchCode";
-
-                                using (var cmd = new SqlCommand(sql1, conn))
-                                {
-                                    cmd.Parameters.AddWithValue("@RefType", Details.REF_TYPE);
-                                    cmd.Parameters.AddWithValue("@RefNo", Details.REF_NO);
-                                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-
-                                    pubRes1Dbl = Convert.ToDouble(cmd.ExecuteScalar());
-                                }
-
-                                double pubRes2Dbl = 0;
-                                string sql2 = @"SELECT ISNULL(SUM(qty),0) FROM gate2 WHERE ref_TYPE = @RefType  AND ref_NO = @RefNo  
-                                 AND COMP_CODE = @CompCode 
-                                AND BRANCH_CODE = @BranchCode  AND v_type = @VType   AND v_no <> @VNo";
-
-                                using (var cmd = new SqlCommand(sql2, conn))
-                                {
-                                    cmd.Parameters.AddWithValue("@RefType", Details.REF_TYPE);
-                                    cmd.Parameters.AddWithValue("@RefNo", Details.REF_NO);
-                                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                                    cmd.Parameters.AddWithValue("@VType", header.V_TYPE);
-                                    cmd.Parameters.AddWithValue("@VNo", header.V_NO);
-
-                                    pubRes2Dbl = Convert.ToDouble(cmd.ExecuteScalar());
-                                }
-
-                                pubRes2Dbl += Convert.ToDouble(Details.QTY);
-
-                                if (pubRes2Dbl > pubRes1Dbl + pubBPPurchTolQty)
-                                {
-                                    double pendingQty = pubRes1Dbl - pubRes2Dbl + Convert.ToDouble(Details.QTY) + pubBPPurchTolQty;
-
-                                    Message = $"Pending Sauda Quantity is {pendingQty} (including tolerance) " +
-                                              $"and Gate Quantity is {Details.QTY}\n" +
-                                              $"Sauda already exists in Gate No => {gateNos}";
-
-                                    return new ApiResponse { Status = "VALIDATION", Message = Message };
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (!string.IsNullOrEmpty(Details.ITEM_NAME) && Details.REF_NO > 0)
-                            {
-                                double pubRes1Dbl = 0;
-                                string sql1 = @"SELECT ISNULL(SUM(qty),0) 
-                                FROM order2  
-                                WHERE V_TYPE = @RefType 
-                                AND V_NO = @RefNo 
-                                AND COMP_CODE = @CompCode 
-                                AND BRANCH_CODE = @BranchCode 
-                                AND item_code = @ItemCode";
-
-                                using (var cmd = new SqlCommand(sql1, conn))
-                                {
-                                    cmd.Parameters.AddWithValue("@RefType", Details.REF_TYPE);
-                                    cmd.Parameters.AddWithValue("@RefNo", Details.REF_NO);
-                                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                                    cmd.Parameters.AddWithValue("@ItemCode", Details.ITEM_CODE);
-
-                                    pubRes1Dbl = Convert.ToDouble(cmd.ExecuteScalar());
-                                }
-
-                                double pubRes2Dbl = 0;
-                                string sql2 = @"SELECT ISNULL(SUM(qty),0)   FROM gate2   WHERE ref_TYPE = @RefType  AND ref_NO = @RefNo 
-                                AND COMP_CODE = @CompCode  AND BRANCH_CODE = @BranchCode   AND item_code = @ItemCode   AND v_type <> @VType 
-                                AND v_no <> @VNo";
-
-                                using (var cmd = new SqlCommand(sql2, conn))
-                                {
-                                    cmd.Parameters.AddWithValue("@RefType", Details.REF_TYPE);
-                                    cmd.Parameters.AddWithValue("@RefNo", Details.REF_NO);
-                                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                                    cmd.Parameters.AddWithValue("@ItemCode", Details.ITEM_CODE);
-                                    cmd.Parameters.AddWithValue("@VType", header.V_TYPE);
-                                    cmd.Parameters.AddWithValue("@VNo", header.V_NO);
-
-                                    pubRes2Dbl = Convert.ToDouble(cmd.ExecuteScalar());
-                                }
-
-                                pubRes2Dbl += Convert.ToDouble(Details.QTY);
-
-                                if (pubRes2Dbl > pubRes1Dbl)
-                                {
-
-                                    double pendingQty = pubRes1Dbl - pubRes2Dbl + Convert.ToDouble(Details.QTY);
-
-                                    Message = $"Pending Order Quantity is {pendingQty} " +
-                                              $"and Gate Quantity is {Details.QTY}. (Item Name: {Details.ITEM_NAME})";
-
-                                    return new ApiResponse { Status = "VALIDATION", Message = Message };
-                                }
-                            }
-                        }
-                    }
-                                 
                 }
 
-                return new ApiResponse { Status = "Success", Message = Message };
+                // ================= FINAL SUCCESS RETURN =================
+                return new ApiResponse
+                {
+                    Status = "Success",
+                    Message = "Validation Passed"
+                };
             }
             catch (Exception ex)
             {
-                return new ApiResponse { Status = "Error", Message = ex.Message };
+                return new ApiResponse
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                };
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> BillNoValidation(int PARTY_CODE, string BILL_NO, int V_NO)
         {
@@ -1234,25 +1072,48 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 string userCode = string.Empty;
                 string approvalRemark = string.Empty;
+                string FAPROV_STATUS = string.Empty;
 
                 using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-                       
 
-                // Second result set (Approval_remark)
+  
+
+                // Result Set 1 : USER_CODE
+                if (await reader.ReadAsync())
+                {
+                    userCode = reader["USER_CODE"]?.ToString() ?? "";
+                }
+
+                // Result Set 2 : Approval_remark
                 if (await reader.NextResultAsync())
                 {
                     if (await reader.ReadAsync())
                     {
-                        approvalRemark = reader["Approval_remark"]?.ToString() ?? string.Empty;         
-                        return new JsonResult(new { success = false,  approved = true,  message = "DocumentSend",  approvalRemark });           
+                        approvalRemark = reader["Approval_remark"]?.ToString() ?? "";
+
+                        return new JsonResult(new
+                        {
+                            success = false,
+                            approved = true,
+                            message = "DocumentSend"
+                        });
+
                     }
                 }
 
-
-                // First result set (USER_CODE)
-                if (await reader.ReadAsync())
+                // Result Set 3 : FAPROV_STATUS
+                if (await reader.NextResultAsync())
                 {
-                    userCode = reader["USER_CODE"]?.ToString() ?? string.Empty;
+                    if (await reader.ReadAsync())
+                    {
+                        FAPROV_STATUS = reader["FAPROV_STATUS"]?.ToString() ?? "";
+                        return new JsonResult(new
+                        {
+                            success = false,
+                            approved = true,
+                            message = "DocumentSend"
+                        });
+                    }
                 }
 
 
@@ -1263,12 +1124,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     {
                         success = false,
                         approved = true,
-                        message = "SendForApproval"
+                        message = "ApprovalWindow"
                     });
                 }
                 else
                 {
-                    return new JsonResult(new { success = true, approved = false, message = "ApprovalWindow" });
+                    return new JsonResult(new { success = true, approved = false, message = "SendForApproval" }); 
                 }
                  
             }
@@ -1360,7 +1221,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 "   ON a.USER_CODE = b.CODE LEFT JOIN CONDATABASE.dbo.SUBUSER_MAST c     ON b.CODE = c.USER_CODE  " +
                 " AND c.COMP_CODE = "+  getdata.PubCompCode +"  WHERE b.Active = 1  AND a.User_Code <> "+  getdata.PubUserId +" " +
                 " AND a.DOC_CODE = '" +  v_type + "'    AND a.comp_code = "+  getdata.PubCompCode +"  " +
-                "GROUP BY      a.USER_CODE, b.FULL_NAME,  a.SRNO  ORDER BY a.SRNO;";
+                " GROUP BY      a.USER_CODE, b.FULL_NAME,  a.SRNO  ORDER BY a.SRNO;";
                 var DDlSendTo = _dropdownService.GetDropdownList(query);
                 return Json(DDlSendTo);
             }

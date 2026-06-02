@@ -1,4 +1,5 @@
-﻿const urlParams = new URLSearchParams(window.location.search);
+﻿
+const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
@@ -20,7 +21,8 @@ $(document).ready(async function () {
         $('#InTime').prop('disabled', true);
         $('.erppagelist-toolbar-end').show();
         if (mode === "view") {
-            setFormReadOnly();    
+            setFormReadOnly();  
+            await Approvalbtn();
         }
     }
     else {
@@ -159,7 +161,6 @@ $(document).ready(async function () {
         const selectedValue = $('#ddlPartyName').val();
         const V_TYPE = $('#ddlDocType').val();
         const V_DATE = $('#TxtRptDate').val();
-        $('#ddlPartyName').prop('disabled', true);
         if (!selectedValue) {
             invalidateField('ddlPartyName', 'Please Select Party Name!', 'info');
             return;
@@ -239,8 +240,8 @@ $(document).ready(async function () {
 
         // Use Bootstrap 5 modal API to hide the modal
         const modalElement = document.getElementById('pendingorders');
-        const myModal = new bootstrap.Modal(modalElement);
-        myModal.hide();  // Correct way to hide modal in Bootstrap 5
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modalInstance.hide();
 
         // Perform other actions after modal is hidden
         populateInwardEntryTable(selectedData);

@@ -5,10 +5,8 @@
     ========================== */
     $('.erppage-tab').on('click', function () {
         var tabId = $(this).data('tab');
-
         $('.erppage-tab').removeClass('active');
         $(this).addClass('active');
-
         $('.erppage-tab-content').removeClass('active');
         $('#' + tabId).addClass('active');
     });
@@ -19,7 +17,6 @@
     ========================== */
     $('.erppage-accordion-header').on('click', function () {
         var parentTab = $(this).closest('.erppage-tab-content');
-
         // if already open then close
         if (parentTab.hasClass('active')) {
             parentTab.removeClass('active');
@@ -31,7 +28,6 @@
             parentTab.addClass('active');
         }
     });
-
 
     /* =========================
        AUTO DEFAULT ACTIVE TAB

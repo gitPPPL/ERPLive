@@ -1,4 +1,6 @@
-﻿    function isItemInMainTable(itemCode) {
+﻿
+
+function isItemInMainTable(itemCode) {
         let exists = false;
         $('#tblInwardEntry tbody tr').each(function () {
         const code = $(this).find('td:eq(0)').text().trim();
@@ -56,13 +58,7 @@
         if (CHALL_NO && !CHALL_DATE)
         {
             if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
-        }
-         
-        if ($('#TxtBillAmt').val().trim() === '')
-        {
-            invalidateField("TxtBillAmt", "Please fill Bill Amount", "warning");
-            return;
-        }
+        }         
 
         if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
 
@@ -92,7 +88,7 @@
         if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
         if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
         if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
-        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                       
+        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                      
 
         }
 
@@ -113,28 +109,29 @@
         }
 
         if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
-        if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {        
-        if (!validateRequiredField('#TxtBillAmt', 'Bill Amount compulsory for')) return;                      
-        }
+            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) { 
+               // if (!validateRequiredField('#TxtBillAmt', `Bill Amount compulsory for ${PARTY_NAME}`)) return;
+                invalidateField(
+                    "TxtBillAmt",
+                    `Bill Amount compulsory for ${PubDefEWaybillAmt}`,
+                    "warning"
+                );
+                return;
+            }
+
+            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
+                showToast(`Transit No./Ewaybill compulsory if Bill Amount > ${PubDefEWaybillAmt}`, { type: "info" });
+            }
+
         }
 
-        if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-        showToast("Transit No. and E-Way Bill required.", { type: "info" });
-            if (!TRANSIT_NO) {
-             $("#ddlTransit").addClass("is-invalid").focus();
-            } else {
-             $("#TxtEWayNo").addClass("is-invalid").focus();
-            }
-             return;
-            }
+     
 
         if (TRANSIT_NO && EWB_EXPDATE) {
             const expDate = new Date(EWB_EXPDATE);
             const inDate = new Date(V_DATE);
-
             if (expDate < inDate) {
-                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });
-                return;
+                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
         }
 
@@ -254,8 +251,8 @@
     }
 
         const payload = {
-        Header: Header,
-        Deatils: Deatils
+            Header: Header,
+            Deatils: Deatils
         };
 
         $("#btn-save").prop("disabled", true);
@@ -315,24 +312,23 @@
         input.focus();
                 }
             }
-function setFormReadOnly() {
+     function setFormReadOnly() {
 
     const form = document.getElementById("InwardEntryForm");
     if (!form) return;
 
-    // Readonly styling
     form.classList.add("erppage-readonly");
     form.classList.add("readonly-mode");
 
-    // Hide approval buttons initially
+    // Hide approval controls initially
     $("#btn_approval").hide();
     $("#btn_Sendapproval").hide();
+    $("#span_approved").hide();
 
-    // Disable all inputs except hidden
+    // Inputs
     form.querySelectorAll("input").forEach(el => {
 
-        if (el.type === "hidden")
-            return;
+        if (el.type === "hidden") return;
 
         if (
             el.type === "text" ||
@@ -347,23 +343,25 @@ function setFormReadOnly() {
         }
     });
 
-    // Disable textareas
+    // Textareas
     form.querySelectorAll("textarea").forEach(el => {
         el.readOnly = true;
     });
 
-    // Disable selects
+    // Selects
     form.querySelectorAll("select").forEach(el => {
         el.disabled = true;
     });
 
-    // Disable buttons except approval/back/close
+    // Buttons
     form.querySelectorAll("button").forEach(btn => {
 
+        // Skip approval buttons
         if (
             btn.id === "btn_approval" ||
             btn.id === "btn_Sendapproval"
         ) {
+            btn.disabled = false;
             return;
         }
 
@@ -377,7 +375,7 @@ function setFormReadOnly() {
         }
     });
 
-    // Disable icons
+    // Icons
     form.querySelectorAll(`
         .input-icon,
         .fa-search,
@@ -391,7 +389,7 @@ function setFormReadOnly() {
         icon.style.cursor = "not-allowed";
     });
 
-    // Disable modal launchers
+    // Modal triggers
     form.querySelectorAll("[data-bs-toggle='modal']").forEach(el => {
 
         el.removeAttribute("data-bs-toggle");
@@ -402,19 +400,27 @@ function setFormReadOnly() {
         el.style.cursor = "not-allowed";
     });
 
-    // Disable table controls
+    // Table controls
     form.querySelectorAll(`
         table input,
         table select,
         table textarea,
         table button,
-        table .fa
+        table .fa,
+        table span
     `).forEach(el => {
+
+        // Skip approval status
+        if (el.id === "span_approved")
+            return;
 
         if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
             el.readOnly = true;
         }
-        else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
+        else if (
+            el.tagName === "SELECT" ||
+            el.tagName === "BUTTON"
+        ) {
             el.disabled = true;
         }
 
@@ -422,11 +428,12 @@ function setFormReadOnly() {
         el.style.opacity = "0.5";
     });
 
-    // Keep specific tabs accessible
+    // Allow tabs
     $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
     $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
     $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
 }
+
     function collectTableRowData() {
             const table = document.getElementById('tblInwardEntry');
     if (!table) return [];
@@ -890,3 +897,5 @@ function setFormReadOnly() {
         showToast("Something went wrong while loading the form.", { type: "error" });
     }
 }
+
+

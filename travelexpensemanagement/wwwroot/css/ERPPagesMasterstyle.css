@@ -14,9 +14,9 @@
     gap: 6px;
     padding: 4px 10px;
     border-radius: 6px;
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    font-size: 12px;
+    background: #fdfdfde8;
+    color: #dd8200;
+    font-size: 13px;
     font-weight: 600;
 }
 /* LEFT */
