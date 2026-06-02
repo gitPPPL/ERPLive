@@ -1,163 +1,190 @@
 ﻿@{
     ViewBag.Title = "Lamination QC Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
-<fieldset>
-    <legend class="legend-field">Lamination QC Entry</legend>
-    <form id="LaminationQCEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-check-circle"></i>
+        </div>
+        <div class="erppage-header-title">Lamination QC Entry</div>
+    </div>
+</div>
+<div id="LaminationQCEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPlace">Place</label>
-                    <select class="form-control" id="ddlPlace">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-select" id="ddlPlace">
                         <option value="">Select Place</option>
                     </select>
                 </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Plant</label>
+                    <select class="erppage-input erppage-select" id="ddlPlant">
+                        <option value="">Select Plant</option>
+                    </select>
+                </div>
             </div>
-            @* <div class="col-md-2">
-                <div class="form-group btn-mt">
-                    <label class="radio-label" id="RDPendingQC">
-                        <input type="radio" value="Pending" checked>
-                        Pending QC
+            <div class="erppage-grid4">
+                <div class="erppage-radio-group">
+                    <label class="erppage-radio">
+                        <input type="radio" id="RDPendingQC" name="qcFilter" value="Pending" checked>
+                        <span>Pending QC</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="RDAll" name="qcFilter" value="All">
+                        <span>All</span>
                     </label>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group btn-mt">
-                    <label class="radio-label" id="RDAll">
-                        <input type="radio" value="All">
-                        All
-                    </label>
+                <div class="erppagelist-actions">
+                    <button type="button" id="btn_show_data" class="erppage-btn erppage-btn-save">
+                        <i class="fa fa-eye"></i>
+                        <span>Show Data</span>
+                    </button>
+                    <button type="button" id="btn_update" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-refresh"></i>
+                        <span>Update</span>
+                    </button>
                 </div>
-            </div> *@
-            <div class="col-md-2">
-                <div class="form-group btn-mt">
-                    <label class="radio-label">
-                        <input type="radio" name="qcFilter" value="Pending" id="RDPendingQC" checked>
-                        Pending QC
-                    </label>
+
+            </div>
+            <fieldset class="erppage-subfieldset">
+                <legend>Print Details</legend>
+                <div class="erppage-subheader">Print Details</div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From Date</label>
+                        <input type="date" class="erppage-input" id="dtFromDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To Date</label>
+                        <input type="date" class="erppage-input" id="dtToDate">
+                    </div>
+                    <button type="button" id="btn_print" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-print"></i>
+                        <span>Print</span>
+                    </button>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group btn-mt">
-                    <label class="radio-label">
-                        <input type="radio" name="qcFilter" value="All" id="RDAll">
-                        All
-                    </label>
+            </fieldset>
+
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLaminationQCEntry" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="display: none;"> <!-- Code -->
+                            <col style="width: 80px;">   <!-- V_NO -->
+                            <col style="width: 100px;">   <!-- Shift -->
+                            <col style="width: 100px;">  <!-- Lamination -->
+                            <col style="width: 120px;">  <!-- Supervisor -->
+                            <col style="width: 120px;">  <!-- Operator -->
+                            <col style="width: 150px;">  <!-- Item Name -->
+                            <col style="width: 80px;">   <!-- Meter -->
+                            <col style="width: 80px;">   <!-- Net Wt. -->
+                            <col style="width: 100px;">  <!-- Fabric Size -->
+                            <col style="width: 100px;">  <!-- UnLam Gram. -->
+                            <col style="width: 80px;">   <!-- Coating -->
+                            <col style="width: 100px;">  <!-- Lam Gram. -->
+                            <col style="width: 100px;">  <!-- LAM GSM -->
+                            <col style="width: 80px;">   <!-- Roll No -->
+                            <col style="width: 100px;">  <!-- NWarp Way -->
+                            <col style="width: 100px;">  <!-- Warp Way -->
+                            <col style="width: 100px;">  <!-- NWeft Way -->
+                            <col style="width: 100px;">  <!-- Weft Way -->
+                            <col style="width: 120px;">   <!-- Strength -->
+                            <col style="width: 120px;">   <!-- Status -->
+                            <col style="width: 100px;">  <!-- Elong Warp -->
+                            <col style="width: 100px;">  <!-- Elong Weft -->
+                            <col style="width: 150px;">  <!-- Remarks -->
+                            <col style="width: 100px;">  <!-- SupCode -->
+                            <col style="width: 100px;">  <!-- OpeCode -->
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="hidden-col">Code</th>
+                                <th>Doc NO</th>
+                                <th>Shift</th>
+                                <th>Lamination</th>
+                                <th>Supervisor</th>
+                                <th>Operator</th>
+                                <th>Item Name</th>
+                                <th>Meter</th>
+                                <th>Net Wt.</th>
+                                <th>Fabric Size</th>
+                                <th>UnLam Gram.</th>
+                                <th>Coating</th>
+                                <th>Lam Gram.</th>
+                                <th>LAM GSM</th>
+                                <th>Roll No</th>
+                                <th>NWarp Way</th>
+                                <th>Warp Way</th>
+                                <th>NWeft Way</th>
+                                <th>Weft Way</th>
+                                <th>Strength</th>
+                                <th>Status</th>
+                                <th>Elong Warp</th>
+                                <th>Elong Weft</th>
+                                <th>Remarks</th>
+                                <th>SupCode</th>
+                                <th>OpeCode</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                    <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-                </div>
-            </div>
-            <div class="offset-md-2 col-md-4">
-                <div class="button-right">
-                    <button type="button" class="btn btn-primary" id="btn_show_data"><i class="fa fa-eye"></i>Show Data</button>
-                    <button type="submit" class="btn btn-success" id="btn_update"><i class="fa fa-refresh"></i>Update</button>
-                    <button type="button" class="btn btn-print" id="btn_print"><i class="fa fa-print"></i>Print</button>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblLaminationQCEntry" class="table-width">
-                    <colgroup>
-                        <col style="display: none;"> <!-- Code -->
-                        <col style="width: 80px;">   <!-- V_NO -->
-                        <col style="width: 100px;">   <!-- Shift -->
-                        <col style="width: 100px;">  <!-- Lamination -->
-                        <col style="width: 120px;">  <!-- Supervisor -->
-                        <col style="width: 120px;">  <!-- Operator -->
-                        <col style="width: 150px;">  <!-- Item Name -->
-                        <col style="width: 80px;">   <!-- Meter -->
-                        <col style="width: 80px;">   <!-- Net Wt. -->
-                        <col style="width: 100px;">  <!-- Fabric Size -->
-                        <col style="width: 100px;">  <!-- UnLam Gram. -->
-                        <col style="width: 80px;">   <!-- Coating -->
-                        <col style="width: 100px;">  <!-- Lam Gram. -->
-                        <col style="width: 100px;">  <!-- LAM GSM -->
-                        <col style="width: 80px;">   <!-- Roll No -->
-                        <col style="width: 100px;">  <!-- NWarp Way -->
-                        <col style="width: 100px;">  <!-- Warp Way -->
-                        <col style="width: 100px;">  <!-- NWeft Way -->
-                        <col style="width: 100px;">  <!-- Weft Way -->
-                        <col style="width: 100px;">  <!-- Supervisor -->
-                        <col style="width: 100px;">  <!-- Operator -->
-                        <col style="width: 120px;">   <!-- Strength -->
-                        <col style="width: 120px;">   <!-- Status -->
-                        <col style="width: 100px;">  <!-- Elong Warp -->
-                        <col style="width: 100px;">  <!-- Elong Weft -->
-                        <col style="width: 150px;">  <!-- Remarks -->
-                        <col style="width: 100px;">  <!-- SupCode -->
-                        <col style="width: 100px;">  <!-- OpeCode -->
-                    </colgroup>
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;">Code</th>
-                            <th>V_NO</th>
-                            <th>Shift</th>
-                            <th>Lamination</th>
-                            <th>Supervisor</th>
-                            <th>Operator</th>
-                            <th>Item Name</th>
-                            <th>Meter</th>
-                            <th>Net Wt.</th>
-                            <th>Fabric Size</th>
-                            <th>UnLam Gram.</th>
-                            <th>Coating</th>
-                            <th>Lam Gram.</th>
-                            <th>LAM GSM</th>
-                            <th>Roll No</th>
-                            <th>NWarp Way</th>
-                            <th>Warp Way</th>
-                            <th>NWeft Way</th>
-                            <th>Weft Way</th>
-                            <th>Supervisor</th>
-                            <th>Operator</th>
-                            <th>Strength</th>
-                            <th>Status</th>
-                            <th>Elong Warp</th>
-                            <th>Elong Weft</th>
-                            <th>Remarks</th>
-                            <th>SupCode</th>
-                            <th>OpeCode</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            @*  <div class="offset-md-8 col-md-4">
-                <div class="button-right">
-                    <button id="btn_Cancel" type="button" class="btn btn-draft"><i class="fa fa-close"></i>Cancel</button>
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div> *@
-        </div>
-    </form>
-</fieldset>
-<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+        </fieldset>
 
+    </div>
+</div>
+
+
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+<script src="~/js/erpjs/qualitycontrol/transaction/laminationqcentry/laminationqcentry.js"></script>
 <script>
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2"
+    };
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>
+
+@* <script>
 
     const allFieldIds = [
       "DtDocDate",
@@ -195,8 +222,6 @@
     //     'TxtOpeCode'
     // ];
 
-    
-
     let docId = "", readOnly;
     let lastChecked = 'RDPendingQC';
     let IsChanges=false;
@@ -208,20 +233,21 @@
     }
 
     $(document).ready(function () {
-      initPage();
+        initPage();
     });
 
+    //=====Page Load
     async function initPage() {
-      try {
-        await handleDocLoad();
-        setEnterKeyFocus(allFieldIds);
-        // loadDocumentStages();
-        wireEvents();
-    } catch (err) {
-        toastr.error('Initialization failed: ' + err);
-    }
+        try {
+            await handleDocLoad();
+            setEnterKeyFocus(allFieldIds);
+            wireEvents();
+        } catch (err) {
+            showToast('Initialization failed: ' + err, {type:"error"});
+        }
     }
 
+    //=====Events
     function wireEvents() {
 
         $('#btn_update').on('click', async (e) => {
@@ -230,46 +256,36 @@
             if (!validateRequiredField('#DtDocDate', 'Doc Date') ||
                 !validateRequiredField('#ddlPlace', 'Place Type')) return;
 
-            try {
-              const data = await collectFormData();  
-              console.log(data,data.LaminationDetails.length);
-              if (data.LaminationDetails && data.LaminationDetails.length > 0) {
-                  UpdateData(data);
-              }else{
-                  toastr.warning("Please fill weftWay and warpWay");
-                  return;
-              }
-
-            
-            } catch (err) {
-              toastr.error("Error saving data: " + err);
-            }
-        });
-
-        $('#searchBox').on('keyup', function () {
-            var selectedQC = $('input[name="qcFilter"]:checked').val();
-            var placeCode=$('#ddlPlace').val();
-            if(!placeCode){
-                toastr.warning("Please select Place");
+            const isvalid = validate();
+            if(!isvalid){
                 return;
             }
-            currentPage = 1;
-            loadDocumentStages(selectedQC,placeCode);
-        });
-      // $('#ddlDocType').on('change', () => {
-      //   const val = $('#ddlDocType').val();
-      //   if (val) GetDocid(val);
-      // });
+            await processTenacityData();
+            try {
+                const data = await collectFormData();
+                if (data.LaminationDetails && data.LaminationDetails.length > 0) {
+                    UpdateData(data);
+                }else{
+                    showToast("Please fill weftWay and warpWay", {type:"warning"});
+                    return;
+                }
 
-        $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
-            const tbody = $(this).closest('tbody');
-            if (tbody.find('tr').length > 1) {
-              $(this).closest('tr').remove();
-            } else {
-              alert('Cannot delete the first row.');
 
+            } catch (err) {
+                showToast("Error saving data: " + err, {type: "error"});
             }
         });
+
+        // $('#searchBox').on('keyup', function () {
+        //     var selectedQC = $('input[name="qcFilter"]:checked').val();
+        //     var placeCode=$('#ddlPlace').val();
+        //     if(!placeCode){
+        //         showToast("Please select place!", { type: "warning" });
+        //         return;
+        //     }
+        //     currentPage = 1;
+        //     loadDocumentStages(selectedQC,placeCode);
+        // });
 
         $('#RDPendingQC').on('click', function () {
             if (lastChecked === 'RDPendingQC') {
@@ -293,109 +309,125 @@
             var selectedQC = $('input[name="qcFilter"]:checked').val();
             var placeCode=$('#ddlPlace').val();
             var date=$('#DtDocDate').val();
+            var plantCode = $('#ddlPlant').val();
 
             if(!placeCode){
-                toastr.warning("Please select Place");
+                showToast("Please select place!", {type:"warning"});
                 return;
             }
-            // loadDocumentStages(selectedQC, placeCode, date);
-           await GetdataBasedOnQC(selectedQC, placeCode, date);
+           await GetdataBasedOnQC(selectedQC, placeCode, date, plantCode);
         });
 
+        //=====Supervisor change
         $(document).on('change', 'select[id^=ddlSupervisor]', function(){
-          const supervisorId=$(this).val();
-          var rowId= $(this).closest('tr');
-          var laminationName = rowId.find("input[id^='TxtLamination']").val();   
-          fillSupervisorForSameLamination(laminationName,supervisorId);
+            const supervisorId=$(this).val();
+            var rowId= $(this).closest('tr');
+            var laminationName = rowId.find("input[id^='TxtLamination']").val();
+            var shift = rowId.find("select[id^='ddlShift']").val();
+            fillSupervisorForSameLamination(laminationName,supervisorId, shift);
         });
 
+        //=====Operator change
         $(document).on('change', 'select[id^=ddlOperator]', function(){
-          const supervisorId=$(this).val();
-          var rowId= $(this).closest('tr');
-          var laminationName = rowId.find("input[id^='TxtLamination']").val();
-          fillOperatorForSameLamination(laminationName,supervisorId);
+            const supervisorId=$(this).val();
+            var rowId= $(this).closest('tr');
+            var laminationName = rowId.find("input[id^='TxtLamination']").val();
+            var shift = rowId.find("select[id^='ddlShift']").val();
+            fillOperatorForSameLamination(laminationName,supervisorId, shift);
         });
 
-        $(document).on('change', 'select[id^=ddlShift]', function(){
-          const shiftId=$(this).val();
-          var rowId= $(this).closest('tr');
-          var laminationName = rowId.find("input[id^='TxtLamination']").val();
-          fillShiftForSameLamination(laminationName,shiftId);
-        });
+        //=====Warp way and weft way calculation
+        $(document).on('change', 'input[id^="TxtNWarpWay"], input[id^="TxtWarpWay"], input[id^="TxtNWeftWay"], input[id^="TxtWeftWay"]', function () {
 
+            const id = this.id;
+            const rowNum = id.match(/\d+$/)?.[0];
+
+            if (!rowNum) return;
+
+            const nWarpWay = $(`#TxtNWarpWay${rowNum}`);
+            const warpWay = $(`#TxtWarpWay${rowNum}`);
+            const nWeftWay = $(`#TxtNWeftWay${rowNum}`);
+            const weftWay = $(`#TxtWeftWay${rowNum}`);
+
+            if (id.startsWith('TxtNWarpWay')) {
+                warpWay.val(
+                    ((parseFloat(nWarpWay.val()) || 0) / 9.8).toFixed(2)
+                );
+            }
+
+            if (id.startsWith('TxtWarpWay')) {
+                nWarpWay.val(
+                    ((parseFloat(warpWay.val()) || 0) * 9.8).toFixed(2)
+                );
+            }
+
+            if (id.startsWith('TxtNWeftWay')) {
+                weftWay.val(
+                    ((parseFloat(nWeftWay.val()) || 0) / 9.8).toFixed(2)
+                );
+            }
+
+            if (id.startsWith('TxtWeftWay')) {
+                nWeftWay.val(
+                    ((parseFloat(weftWay.val()) || 0) * 9.8).toFixed(2)
+                );
+            }
+        });
     }
 
 </script>
 
 <script>
 
-    function fillShiftForSameLamination(laminationName, shiftId) {
-         if (laminationName !== "" && shiftId != "") {
-             const $rows = $('#tblLaminationQCEntry tbody tr');
-             $rows.each(function () {
-                 const $row = $(this); 
-                 const rowLaminationName = $row.find("input[id^='TxtLamination']").val();
-
-                 if (rowLaminationName === laminationName) {
-                     $row.find("select[id^='ddlShift']").val(shiftId);
-                     // $row.find("input[id^='TxtSupervisor']").val(supervisorId);
-                 }
-             });
-         } else {
-             toastr.info("No data found.");
-         }
-     }
-
-     function fillSupervisorForSameLamination(laminationName, supervisorId) {
-         if (laminationName !== "" && supervisorId > 0) {
+    //=====Fill Supervisor For Same Lam
+    function fillSupervisorForSameLamination(laminationName, supervisorId, shift) {
+         if (laminationName !== "" && supervisorId > 0 && shift != "") {
              const $rows = $('#tblLaminationQCEntry tbody tr');
              $rows.each(function () {
                  const $row = $(this);
-
-                 // const rowLaminationName = $row.find("input[id^='TxtLamination']").val()
-                 //     || $row.find(".TxtLamination").val()
-                 //     || $row.find("td.TxtLamination").text().trim();
                  const rowLaminationName = $row.find("input[id^='TxtLamination']").val();
-
-                 if (rowLaminationName === laminationName) {                     
-                     $row.find("select[id^='ddlSupervisor']").val(supervisorId);
-                     $row.find("input[id^='TxtSupervisor']").val(supervisorId);
+                 const rowshift = $row.find("select[id^='ddlShift']").val();
+                 if (rowLaminationName === laminationName  && rowshift === shift) {
+                     // $row.find("select[id^='ddlSupervisor']").val(supervisorId);
+                     bindDropdown('LaminationQCEntry', 'Supervisor', $row.find("select[id^='ddlSupervisor']"), 'Select Supervisor', supervisorId, null, false, null, true),
+                     $row.find("input[id^='TxtSupCode']").val(supervisorId);
                  }
              });
-         } else {        
-             toastr.info("No data found.");
+         } else {
+             showToast("No data found.", { type: "info" });
          }
      }
 
-
-     function fillOperatorForSameLamination(laminationName, operatorId) {
-         if (laminationName !== "" && operatorId > 0) {
+    //=====Fill Operator For Same Lam
+    function fillOperatorForSameLamination(laminationName, operatorId, shift) {
+         if (laminationName !== "" && operatorId > 0 && shift != "") {
              const $rows = $('#tblLaminationQCEntry tbody tr');
 
              $rows.each(function() {
                  const $row = $(this);
-                 const rowLaminationName = $row.find("input[id^='TxtLamination']").val()
-                     || $row.find(".TxtLamination").val()
-                     || $row.find("td.TxtLamination").text().trim();
-
-                 if (rowLaminationName === laminationName) {                   
-                     $row.find("select[id^='ddlOperator']").val(operatorId);
-                     $row.find("select[id^='TxtOperator'], input[id^='TxtOperator']").val(operatorId);
+                 const rowLaminationName = $row.find("input[id^='TxtLamination']").val();
+                 const rowshift = $row.find("select[id^='ddlShift']").val();
+                 if (rowLaminationName === laminationName && rowshift === shift) {
+                     // $row.find("select[id^='ddlOperator']").val(operatorId);
+                     bindDropdown('LaminationQCEntry', 'Operator', $row.find("select[id^='ddlOperator']"), 'Select Operator', operatorId, null, false, null, true),
+                     $row.find("input[id^='TxtOpeCode']").val(operatorId);
                  }
              });
          } else {
-             toastr.info("No data found.");
+             showToast("No data found.", { type: "info" });
          }
      }
 
-     async function GetdataBasedOnQC(selectedValue, placeCode, date) {
+    //=====Get QC Data
+    async function GetdataBasedOnQC(selectedValue, placeCode, date, plantCode) {
          $.ajax({
              url: '/LaminationQCEntry/GetQCDataList',
              type: 'GET',
              data: {
                  QcAllOrPending: selectedValue,
                  PlaceCode: placeCode,
-                 date:date
+                 date:date,
+                 plantCode:plantCode
              },
              success: async function (response) {
                  if (response.status && response.data.length > 0) {
@@ -411,36 +443,47 @@
                          $tbody.append(html);
                      }
                      for (let i = 0; i < data.length; i++) {
-                         await bindDropdownData(i + 1);                        
+                        const selectedValues = {
+                            supervisor: data[i].LAMSUP_CODE || null,
+                            operator: data[i].LAMOP_CODE || null,
+                            strength: data[i].TENA_CODE_A || null,
+                            status: data[i].StatusCode || null,
+                            shift: data[i].Shift || null
+                        };
+                         await bindDropdownData(i + 1, selectedValues);
                      }
+                     setTimeout(() => {
+                         $('#TxtNWarpWay1').focus();   // first row input
+                     }, 0);
                      // for(let i=0; i < data.length; i++){
                      //  setEnterKeyFocusOnTable?.(i + 1);
                      // }
-                     
+
                  } else {
                      $('#tblLaminationQCEntry tbody').empty();
-                     toastr.info("No data found.");
+                     showToast("No data found.", { type: "info" });
                  }
              },
              error: function (xhr, status, error) {
-                 toastr.error("Failed to load data.");
+                 showToast("Failed to load data.", { type: "error" });
              }
          });
      }
 
+    //=====Add row
     function buildRowHTML(rowNum, item) {
          return `
-             <tr id="row${rowNum}">
+             <tr class="no-border-input" id="row${rowNum}">
                  <td style="display:none;">
-                     <input type="hidden" id="TxtCode${rowNum}" name="TxtCode${rowNum}" value="${item.CODE || ''}" />
+                     <input type="hidden" id="TxtCode${rowNum}" name="TxtCode${rowNum}" value="${item.DOC_ID || ''}" />
                  </td>
-                 <td><input type="text" class="form-control" id="TxtVNo${rowNum}" name="TxtVNo${rowNum}" value="${item.RefNo || ''}" /></td>
+                 <td><input type="text" class="form-control" id="TxtVNo${rowNum}" name="TxtVNo${rowNum}" value="${item.RefNo || ''}" readonly/></td>
                  <td>
-                     <select class="form-control" id="ddlShift${rowNum}" name="ddlShift${rowNum}">
+                     <select class="form-control" id="ddlShift${rowNum}" name="ddlShift${rowNum}" disabled>
                          <option value=""></option>
                      </select>
                  </td>
-                 <td><input type="text" class="form-control" id="TxtLamination${rowNum}" name="TxtLamination${rowNum}" value="${item.LamName || ''}" /></td>
+                 <td><input type="text" class="form-control" id="TxtLamination${rowNum}" name="TxtLamination${rowNum}" value="${item.LamName || ''}" readonly/></td>
                  <td>
                      <select class="form-control" id="ddlSupervisor${rowNum}" name="ddlSupervisor${rowNum}">
                          <option value=""></option>
@@ -451,21 +494,19 @@
                          <option value=""></option>
                      </select>
                  </td>
-                 <td><input type="text" class="form-control" id="TxtItemName${rowNum}" name="TxtItemName${rowNum}" value="${item.ItemName || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtMeter${rowNum}" name="TxtMeter${rowNum}" value="${item.Meter || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtNetWt${rowNum}" name="TxtNetWt${rowNum}" value="${item.NetWt || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtFabricSize${rowNum}" name="TxtFabricSize${rowNum}" value="${item.UnlamSize || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtUnLamGram${rowNum}" name="TxtUnLamGram${rowNum}" value="${item['Unlam Gram.'] || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtCoating${rowNum}" name="TxtCoating${rowNum}" value="${item.Coating || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtLamGram${rowNum}" name="TxtLamGram${rowNum}" value="${item['Gram.'] || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtLAMGSM${rowNum}" name="TxtLAMGSM${rowNum}" value="${item.GSM || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtRollNo${rowNum}" name="TxtRollNo${rowNum}" value="${item.RollNo || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtNWarpWay${rowNum}" name="TxtNWarpWay${rowNum}" value="${item.NWarpWay || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtWarpWay${rowNum}" name="TxtWarpWay${rowNum}" value="${item.WarpWay || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtNWeftWay${rowNum}" name="TxtNWeftWay${rowNum}" value="${item.NWeftWay || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtWeftWay${rowNum}" name="TxtWeftWay${rowNum}" value="${item.WeftWay || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtSupervisor${rowNum}" name="TxtSupervisor${rowNum}" value="${item.LAMSUP_NAME || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtOperator${rowNum}" name="TxtOperator${rowNum}" value="${item.LAMOP_NAME || ''}" /></td>
+                 <td><input type="text" class="form-control" id="TxtItemName${rowNum}" name="TxtItemName${rowNum}" value="${item.ItemName || ''}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtMeter${rowNum}" name="TxtMeter${rowNum}" value="${item.Meter || '0'}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtNetWt${rowNum}" name="TxtNetWt${rowNum}" value="${parseFloat(item.NetWt || 0).toFixed(3)}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtFabricSize${rowNum}" name="TxtFabricSize${rowNum}" value="${parseFloat(item.UnlamSize || 0).toFixed(2)}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtUnLamGram${rowNum}" name="TxtUnLamGram${rowNum}" value="${parseFloat(item['Unlam Gram.'] || 0).toFixed(3)}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtCoating${rowNum}" name="TxtCoating${rowNum}" value="${item.Coating || '0'}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtLamGram${rowNum}" name="TxtLamGram${rowNum}" value="${parseFloat(item['Gram.'] || 0).toFixed(3)}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtLAMGSM${rowNum}" name="TxtLAMGSM${rowNum}" value="${item.GSM || '0'}" readonly/></td>
+                 <td><input type="text" class="form-control" id="TxtRollNo${rowNum}" name="TxtRollNo${rowNum}" value="${item.RollNo || ''}" readonly/></td>
+                 <td><input type="number" class="form-control" id="TxtNWarpWay${rowNum}" name="TxtNWarpWay${rowNum}" value="${parseFloat(item.NWarpWay).toFixed(2)}" /></td>
+                 <td><input type="number" class="form-control" id="TxtWarpWay${rowNum}" name="TxtWarpWay${rowNum}" value="${parseFloat(item.WarpWay).toFixed(2)}" /></td>
+                 <td><input type="number" class="form-control" id="TxtNWeftWay${rowNum}" name="TxtNWeftWay${rowNum}" value="${parseFloat(item.NWeftWay).toFixed(2)}" /></td>
+                 <td><input type="number" class="form-control" id="TxtWeftWay${rowNum}" name="TxtWeftWay${rowNum}" value="${parseFloat(item.WeftWay).toFixed(2)}" /></td>
                  <td>
                      <select class="form-control" id="ddlStrength${rowNum}" name="ddlStrength${rowNum}">
                          <option value=""></option>
@@ -476,142 +517,71 @@
                          <option value=""></option>
                      </select>
                  </td>
-                 <td><input type="number" class="form-control" id="TxtElongWarp${rowNum}" name="TxtElongWarp${rowNum}" value="${item.Elong_Warp || ''}" /></td>
-                 <td><input type="number" class="form-control" id="TxtElongWeft${rowNum}" name="TxtElongWeft${rowNum}" value="${item.Elong_Weft || ''}" /></td>
+                 <td><input type="number" class="form-control" id="TxtElongWarp${rowNum}" name="TxtElongWarp${rowNum}" value="${parseFloat(item.Elong_Warp || 0).toFixed(2)}" /></td>
+                 <td><input type="number" class="form-control" id="TxtElongWeft${rowNum}" name="TxtElongWeft${rowNum}" value="${parseFloat(item.Elong_Weft || 0).toFixed(2)}" /></td>
                  <td><input type="text" class="form-control" id="TxtRemarks${rowNum}" name="TxtRemarks${rowNum}" value="${item.Remarks || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtSupCode${rowNum}" name="TxtSupCode${rowNum}" value="${item.LAMSUP_CODE || ''}" /></td>
-                 <td><input type="text" class="form-control" id="TxtOpeCode${rowNum}" name="TxtOpeCode${rowNum}" value="${item.LAMOP_CODE || ''}" /></td>
+                 <td><input type="text" class="form-control" id="TxtSupCode${rowNum}" name="TxtSupCode${rowNum}" value="${item.LAMSUP_CODE || ''}" readonly/></td>
+                 <td><input type="text" class="form-control" id="TxtOpeCode${rowNum}" name="TxtOpeCode${rowNum}" value="${item.LAMOP_CODE || ''}" readonly/></td>
                </tr>
                `;
     }
 
-    function bindDropdownData(rowCount) {
-        const supervisorSelect = $(`#ddlSupervisor${rowCount}`);
-        const operatorSelect = $(`#ddlOperator${rowCount}`);
-        const strengthSelect = $(`#ddlStrength${rowCount}`);
-        const statusSelect= $(`#ddlStatus${rowCount}`);
-        const shiftSelect = $(`#ddlShift${rowCount}`);
-
-        const loadDropdown = (url, selectElem, defaultText, formatter) => {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        if (response.status) {
-                            // Destroy previous select2 if exists
-                            if (selectElem.hasClass("select2-hidden-accessible")) {
-                                selectElem.select2('destroy');
-                            }
-                            selectElem.empty().append(
-                                $('<option>', {
-                                    value: '',
-                                    text: defaultText,
-                                    disabled: true,
-                                    selected: true
-                                })
-                            );
-
-                            $.each(response.data, function (i, item) {
-                                selectElem.append(formatter(item));
-                            });
-
-                            // selectElem.select2({
-                            //     width: '100%',
-                            //     placeholder: defaultText,
-                            //     allowClear: true,
-                            //     minimumResultsForSearch: 0
-                            // });
-
-                            resolve();
-                        } else {
-                            toastr.error(`${defaultText} load failed`);
-                            resolve();
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.error(`Error loading ${defaultText}: ${error}`);
-                        reject(error);
-                    }
-                });
-            });
-        };
+    //=====Dropdowns
+    function bindDropdownData(rowCount, selectedValues = {}) {
+        const supervisorSelect = `#ddlSupervisor${rowCount}`;
+        const operatorSelect = `#ddlOperator${rowCount}`;
+        const strengthSelect = `#ddlStrength${rowCount}`;
+        const statusSelect= `#ddlStatus${rowCount}`;
+        const shiftSelect = `#ddlShift${rowCount}`;
 
         return Promise.all([
-            loadDropdown(
-                '@Url.Action("GetUserList", "LaminationQCEntry")',
-                supervisorSelect,
-                "- Select Supervisor -",
-                item => `<option value="${item.CODE}">${item.NAME}</option>`
-            ),
-            loadDropdown(
-                '@Url.Action("GetUserList", "LaminationQCEntry")',
-                operatorSelect,
-                "- Select Operator -",
-                item => `<option value="${item.CODE}">${item.NAME}</option>`
-            ),
-            loadDropdown(
-                '@Url.Action("GetStrengthList", "LaminationQCEntry")',
-                strengthSelect,
-                "- Select Strength -",
-                item => `<option value="${item.CODE}">${item.NAME}</option>`
-            ),
-             loadDropdown(
-                  '@Url.Action("GetStatusMast", "LaminationQCEntry")',
-                  statusSelect,
-                 "- Select Status -",
-                 item => `<option value="${item.CODE}">${item.NAME}</option>`
-             ),
-            loadDropdown(
-                    '@Url.Action("GetShiftList", "LaminationQCEntry")',
-                    shiftSelect,
-                  "- Select Shift -",
-                   item => `<option value="${item.NAME}">${item.NAME}</option>`
-            )
+            bindDropdown('LaminationQCEntry', 'Supervisor', supervisorSelect, 'Select Supervisor', selectedValues.supervisor, null, false, null, true),
+            bindDropdown('LaminationQCEntry', 'Operator', operatorSelect, 'Select Operator', selectedValues.operator, null, false, null, true),
+            bindDropdown('LaminationQCEntry', 'Strength', strengthSelect, 'Select Strength', selectedValues.strength, null, false, null, true),
+            bindDropdown('LaminationQCEntry', 'Status', statusSelect, 'Select Status', selectedValues.status || 1, null, false, null, true),
+            bindDropdown('LaminationQCEntry', 'Shift', shiftSelect, 'Select Shift', selectedValues.shift, null, false, null, true),
         ]);
     }
 
-     async function handleDocLoad() {
-                  const today = new Date();
-                  const todayDate = today.getFullYear() + '-' +
-                      (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                      today.getDate().toString().padStart(2, '0');
-                      $('#DtDocDate').val(todayDate);
-                     GetPlaceList();
+    //=====Doc Load
+    async function handleDocLoad(){
+        const today = new Date();
+        const todayDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
+        $('#DtDocDate').val(todayDate);
+        bindDropdown('LaminationQCEntry', 'Place', '#ddlPlace', 'Select Place', null, null, false, null, true);
+        bindDropdown('LaminationQCEntry', 'Plant', '#ddlPlant', 'Select Plant', null, null, false, null, true);
+    }
+
+    //=====Update
+    function UpdateData(UpdateDt) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '@Url.Action("UpdateLamination", "LaminationQCEntry")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(UpdateDt),
+                dataType: 'json',
+                success: function (response) {
+                    if (response?.status) {
+                        showToast(response.message || "Data updated successfully", { type: "success" });
+                        resolve(response);
+                    } else {
+                        showToast("Update failed: " + (response?.message || "Unknown error."), { type: "error" });
+                        reject(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showToast("Data not updated: " + error, { type: "error" });
+                    reject(error);
+                }
+            });
+        });
      }
 
-     function UpdateData(UpdateDt) {
-       return new Promise((resolve, reject) => {
-         $.ajax({
-           url: '@Url.Action("UpdateLamination", "LaminationQCEntry")',
-           type: 'POST',
-           contentType: 'application/json',
-           data: JSON.stringify(UpdateDt),
-           dataType: 'json',
-           success: function (response) {
-             if (response?.status) {
-               toastr.success(response.message || "Data updated successfully");
-               setTimeout(() => {
-                 window.location.href = '/LoomFabricStrengthEntryList/Index';
-               }, 1500);
-               resolve(response);
-             } else {
-               toastr.error("Update failed: " + (response?.message || "Unknown error."));
-               reject(response.message);
-             }
-           },
-           error: function (xhr, status, error) {
-             toastr.error("Data not updated: " + error);
-             reject(error);
-           }
-         });
-       });
-     }
-
-     async function collectFormData() {
+    //=====Collect Data For Update
+    async function collectFormData() {
          const items = [];
-         const docid = $('#TxtDocId').val() || "0"; 
+         // const docid = $('#TxtDocId').val() || "0";
          $('#tblLaminationQCEntry tbody tr').each(function () {
              const idx = this.id.replace('row', '');
              const $r = $(this);
@@ -619,6 +589,7 @@
              const warpWay = parseFloatSafe($r.find(`#TxtWarpWay${idx}`).val());
              const weftWay = parseFloatSafe($r.find(`#TxtWeftWay${idx}`).val());
              const nWarpWay = parseFloatSafe($r.find(`#TxtNWarpWay${idx}`).val());
+             const docid = $r.find(`#TxtCode${idx}`).val();
 
              if((warpWay > 0) && (weftWay > 0)) {
                  const item = {
@@ -637,12 +608,12 @@
                      TENA_CODE_A: parseIntSafe($r.find(`#ddlStrength${idx}`).val()),
 
                      LAMSUP_CODE: parseIntSafe($r.find(`#TxtSupCode${idx}`).val()),
-                     LAMSUP_NAME: $r.find(`#TxtSupervisor${idx}`).val() || null,
+                     LAMSUP_NAME: $r.find(`#ddlSupervisor${idx} option:selected`).text() || null,
 
                      LAMOP_CODE: parseIntSafe($r.find(`#TxtOpeCode${idx}`).val()),
-                     LAMOP_NAME: $r.find(`#TxtOperator${idx}`).val() || null,
+                     LAMOP_NAME: $r.find(`#ddlOperator${idx} option:selected`).text() || null,
 
-                     QCUSER: null // Set this if needed
+                     // QCUSER: null 
                  };
 
                  items.push(item);
@@ -652,110 +623,75 @@
          return { LaminationDetails: items };
      }
 
-     function GetPlaceList(selectedValue=null) {
-         $.ajax({
-             url: '@Url.Action("GetPlaceList", "LaminationQCEntry")',
-             type: 'GET',
-             dataType: 'json',
-             success: function (response) {
-                 if (response.status) {
-                     const $DropdownId = $('#ddlPlace');
-                     $DropdownId.empty();
-                     $DropdownId.append('<option value="">- Select Place Name -</option>');
-                     $.each(response.data, function (index, item) {
-                         $DropdownId.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                     });
-                     $DropdownId.select2({
-                         placeholder: "- Select -",
-                         allowClear: true
-                     });
+    //=====Validation
+    function validate() {
+        let isValid = true;
+        const tbody = $('#tblLaminationQCEntry tbody');
+        if (tbody.find('tr').length === 0) {
+             showToast('No records to save.', {type:"warning"});
+             isValid = false
+             return isvalid;
+        }
+        tbody.find('tr').each(function () {
+            const $row = $(this);
+            const supervisorVal = $row.find('select[id^="ddlSupervisor"]');
+            const operatorVal = $row.find('select[id^="ddlOperator"]');
 
-                     if (selectedValue && $DropdownId.find(`option[value="${selectedValue}"]`).length > 0) {
-                         $DropdownId.val(selectedValue).trigger('change');
-                     }
-                     else {
-                         $DropdownId.val('').trigger('change');
-                     }
+            if (!validateRequiredField(supervisorVal, 'Supervisor Name') ||
+                !validateRequiredField(operatorVal, 'Operator Name')){
+                    isValid = false;
+                    return isValid;
+                }
+        });
 
-                 } else {
-                     toastr.error("Place Name Load failed");
-                 }
-             },
-             error: function (xhr, status, error) {
-                 toastr.error("Place Name Load failed", error);
-             }
-         });
-     }
+        return isValid;
+    }
 
+    //=====Tenacity Check
+    async function processTenacityData() {
+        debugger;
+        const rows = $('#tblLaminationQCEntry tbody tr');
 
+        for (let i = 0; i < rows.length; i++) {
+            const $row = $(rows[i]);
+            const warpWay = Math.round(parseFloat($row.find(`#TxtWarpWay${i + 1}`).val()) || 0);
+            const weftWay = Math.round(parseFloat($row.find(`#TxtWeftWay${i + 1}`).val()) || 0);
+            const strName = `${warpWay}-${weftWay}`;
 
-     function formatDate(dateStr) {
-       if (!dateStr) return '';
-       const d = new Date(dateStr);
-       return d.toISOString().split('T')[0];
-     }
+            try {
+                const response = await $.ajax({
+                    url: '/LaminationQCEntry/ProcessTenacityData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        strName,
+                        warpWay,
+                        weftWay
+                    })
+                });
 
-     function parseIntSafe(value) {
-         const parsed = parseInt(value, 10);
-         return isNaN(parsed) ? null : parsed;
-     }
+                if (response.success) {
+                    // $row.find(`#ddlStrength${i + 1}`).val(response.tenaMaxcode);
+                    // $row.find(`#TxtTenacityCode${i + 1}`).val(response.tenaMaxcode);
+                    const ddl = $row.find(`#ddlStrength${i + 1}`);
 
-     function parseFloatSafe(value) {
-         const parsed = parseFloat(value);
-         return isNaN(parsed) ? null : parsed;
-     }
+                    if (ddl.find(`option[value="${response.tenaMaxcode}"]`).length === 0) {
+                        ddl.append(
+                            new Option(strName, response.tenaMaxcode)
+                        );
+                    }
+                    ddl.val(response.tenaMaxcode).trigger('change');
+                } else {
+                    showToast(response.message, { type: "error" });
+                }
+            } catch (error) {
+                showToast("Error processing tenacity data: " + error, { type: "error" });
+            }
+        }
+    }
 
-      function parseDate(dateStr) {
-         if (!dateStr) return null;
-         const parts = dateStr.split(/[-\/]/);
-         if (parts.length === 3) {
-             let [day, month, year] = parts.map(p => parseInt(p, 10));
-             if (year < 1000) year += 2000;
-             return new Date(year, month - 1, day);
-         }
-         return null;
-      }
-
-     function toNullableInt(val) {
-         const parsed = parseInt(val);
-         return isNaN(parsed) ? null : parsed;
-     }
-
-     function toNullableDate(val) {
-         const date = new Date(val);
-         return isNaN(date.getTime()) ? null : val;
-     }
-
-     function toNullableString(val) {
-       return val?.trim() || null;
-     }
-
-     function allowOnlyDecimal(input) {
-       input.value = input.value
-         .replace(/[^0-9.]/g, '')
-         .replace(/(\..*)\./g, '$1');
-     }
-
-     function allowOnlyNumbers(input) {
-       input.value = input.value.replace(/[^0-9]/g, '');
-     }
-
-     function setFieldsEnabled(enabled) {
-       allFieldIds.forEach(id => {
-         const el = document.getElementById(id);
-         if (el) {
-           el.disabled = !enabled;
-         }
-       });
-     }
-
-
-     function parseDecimalSafe(val) {
-         const num = parseFloat(val);
-         return isNaN(num) ? null : num;
-     }
-
-     function setEnterKeyFocus(sequence) {
+    //=====Enter Key Focus
+    function setEnterKeyFocus(sequence) {
                 sequence.forEach((id, index) => {
                     $(`#${id}`).on('keypress', function (e) {
                         if (e.key === 'Enter') {
@@ -768,389 +704,5 @@
                 });
      }
 
-     function enableAllFields() {
-       allFieldIds.forEach(id => {
-         const el = document.getElementById(id);
-         if (el) el.disabled = false;
-       });
-     }
-
-     function disableAllFields() {
-       allFieldIds.forEach(id => {
-         const el = document.getElementById(id);
-         if (el) el.disabled = true;
-       });
-     }
-
-
-     function convertTo24HourFormat(timeStr) {
-         if (!timeStr) return '';
-
-         if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
-             return timeStr.substring(0, 5);
-         }
-
-         const [time, modifier] = timeStr.split(' ');
-         if (!time || !modifier) return '';
-
-         let [hours, minutes] = time.split(':');
-
-         if (modifier.toUpperCase() === 'PM' && hours !== '12') {
-             hours = String(Number(hours) + 12);
-         } else if (modifier.toUpperCase() === 'AM' && hours === '12') {
-             hours = '00';
-         }
-
-         return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-     }
-
-
-      // function addItemRecordRow() {
-      //     const tbody = $('#tblLaminationQCEntry tbody');
-      //     const rowCount = tbody.find('tr').length + 1;
-
-      //     const newRow = `
-      //     <tr id="row${rowCount}">
-      //         <td style="display:none;">
-      //             <input type="hidden" id="TxtCode${rowCount}" name="TxtCode${rowCount}" />
-      //         </td>
-      //         <td><input type="text" class="form-control" id="TxtVNo${rowCount}" name="TxtVNo${rowCount}" /></td>
-      //         <td>
-      //             <select class="form-control" id="ddlShift${rowCount}" name="ddlShift${rowCount}">
-      //                 <option value="">- Shift -</option>
-      //                 <option value="A">A</option>
-      //                 <option value="B">B</option>
-      //                 <option value="C">C</option>
-      //             </select>
-      //         </td>
-      //         <td><input type="text" class="form-control" id="TxtLamination${rowCount}" name="TxtLamination${rowCount}" /></td>
-      //         <td>
-      //             <select class="form-control" id="ddlSupervisor${rowCount}" name="ddlSupervisor${rowCount}">
-      //                 <option value="">- Select Supervisor -</option>
-      //             </select>
-      //         </td>
-      //         <td>
-      //             <select class="form-control" id="ddlOperator${rowCount}" name="ddlOperator${rowCount}">
-      //                 <option value="">- Select Operator -</option>
-      //             </select>
-      //         </td>
-      //         <td><input type="text" class="form-control" id="TxtItemName${rowCount}" name="TxtItemName${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtMeter${rowCount}" name="TxtMeter${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtNetWt${rowCount}" name="TxtNetWt${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtFabricSize${rowCount}" name="TxtFabricSize${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtUnLamGram${rowCount}" name="TxtUnLamGram${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtCoating${rowCount}" name="TxtCoating${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtLamGram${rowCount}" name="TxtLamGram${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtLAMGSM${rowCount}" name="TxtLAMGSM${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtRollNo${rowCount}" name="TxtRollNo${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtNWarpWay${rowCount}" name="TxtNWarpWay${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtWarpWay${rowCount}" name="TxtWarpWay${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtNWeftWay${rowCount}" name="TxtNWeftWay${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtWeftWay${rowCount}" name="TxtWeftWay${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtSupervisor${rowCount}" name="TxtSupervisor${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtOperator${rowCount}" name="TxtOperator${rowCount}" /></td>
-      //         <td>
-      //             <select class="form-control" id="ddlStrength${rowCount}" name="ddlStrength${rowCount}">
-      //                 <option value="">- Select Strength -</option>
-      //             </select>
-      //         </td>
-      //         <td>
-      //             <select class="form-control" id="ddlStatus${rowCount}" name="ddlStatus${rowCount}">
-      //                 <option value="">- Status -</option>
-      //                 <option value="Fail">Fail</option>
-      //             </select>
-      //         </td>
-      //         <td><input type="number" class="form-control" id="TxtElongWarp${rowCount}" name="TxtElongWarp${rowCount}" /></td>
-      //         <td><input type="number" class="form-control" id="TxtElongWeft${rowCount}" name="TxtElongWeft${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" name="TxtRemarks${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtSupCode${rowCount}" name="TxtSupCode${rowCount}" /></td>
-      //         <td><input type="text" class="form-control" id="TxtOpeCode${rowCount}" name="TxtOpeCode${rowCount}" /></td>
-      //     </tr>
-      //     `;
-
-      //     tbody.append(newRow);
-      //     bindDropdownData(rowCount);
-      //     setEnterKeyFocusOnTable?.(itemRecords, rowCount);
-      // }
-
-
-
-      // function setEnterKeyFocusOnTable(sequence, rowCount) {
-      //     sequence.forEach((id, index) => {
-      //         let elementId = `#${id}${rowCount}`;
-      //         $(document).on('keydown', elementId, function (e) {
-      //             if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
-      //                 e.preventDefault();
-
-      //                 let nextIndex = index + 1;
-      //                 if (nextIndex < sequence.length) {
-      //                     let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
-      //                     if ($(nextElementId).length) {
-      //                         $(nextElementId).focus();
-      //                     }
-      //                 } else {
-
-      //                     addItemRecordRow();
-      //                     setEnterKeyFocus(sequence, rowCount + 1);
-      //                     $(`#${sequence[0]}${rowCount + 1}`).focus();
-      //                 }
-      //             }
-      //         });
-      //     });
-      // }
-
-     //  function loadDocumentStages(selectedQC, placeCode, date) {
-     //     const searchTerm = $('#searchBox').val();
-
-     //     $.ajax({
-     //         url: '/LaminationQCEntry/GetQCDataListOnSearch',
-     //         type: 'GET',
-     //         dataType: 'json',
-     //         data: {
-     //             searchTerm,
-     //             pageNumber: currentPage,
-     //             pageSize: pageSize,
-     //             QcAllOrPending: selectedQC,
-     //             PlaceCode: placeCode,
-     //             date:date
-     //         },
-     //         success: function (res) {
-     //             console.log(res);
-     //             const docs = res.items || res.data || [];
-     //             const totalCount = res.totalCount || 0;
-     //             const tbody = $('#tblLaminationQCEntry tbody');
-     //             tbody.empty();
-
-     //             if (docs.length === 0) {
-     //                 tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
-     //                 renderPagination(0, pageSize, currentPage);
-     //                 return;
-     //             }
-
-     //             let rowCount = 0;
-
-     //             docs.forEach(doc => {
-     //                 rowCount++;
-
-     //                 const newRow = `
-     //                 <tr id="row${rowCount}">
-     //                     <td style="display:none;">
-     //                         <input type="hidden" id="TxtCode${rowCount}" name="TxtCode${rowCount}" value="${doc.DOC_ID || ''}" />
-     //                     </td>
-     //                     <td><input type="text" class="form-control" id="TxtVNo${rowCount}" name="TxtVNo${rowCount}" value="${doc.RefNo || ''}" /></td>
-     //                     <td>
-     //                         <select class="form-control" id="ddlShift${rowCount}" name="ddlShift${rowCount}">
-     //                             <option value="">- Shift -</option>
-     //                             <option value="A" ${doc.Shift === 'A' ? 'selected' : ''}>A</option>
-     //                             <option value="B" ${doc.Shift === 'B' ? 'selected' : ''}>B</option>
-     //                             <option value="C" ${doc.Shift === 'C' ? 'selected' : ''}>C</option>
-     //                         </select>
-     //                     </td>
-     //                     <td><input type="text" class="form-control" id="TxtLamination${rowCount}" name="TxtLamination${rowCount}" value="${doc.LamName || ''}" /></td>
-     //                     <td>
-     //                         <select class="form-control" id="ddlSupervisor${rowCount}" name="ddlSupervisor${rowCount}">
-     //                             <option value="">- Select Supervisor -</option>
-     //                         </select>
-     //                     </td>
-     //                     <td>
-     //                         <select class="form-control" id="ddlOperator${rowCount}" name="ddlOperator${rowCount}">
-     //                             <option value="">- Select Operator -</option>
-     //                         </select>
-     //                     </td>
-     //                     <td><input type="text" class="form-control" id="TxtItemName${rowCount}" name="TxtItemName${rowCount}" value="${doc.ItemName || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtMeter${rowCount}" name="TxtMeter${rowCount}" value="${doc.Meter || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtNetWt${rowCount}" name="TxtNetWt${rowCount}" value="${doc.NetWt || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtFabricSize${rowCount}" name="TxtFabricSize${rowCount}" value="${doc.UnlamSize || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtUnLamGram${rowCount}" name="TxtUnLamGram${rowCount}" value="${doc['Unlam Gram.'] || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtCoating${rowCount}" name="TxtCoating${rowCount}" value="${doc.Coating || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtLamGram${rowCount}" name="TxtLamGram${rowCount}" value="${doc['Gram.'] || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtLAMGSM${rowCount}" name="TxtLAMGSM${rowCount}" value="${doc.GSM || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtRollNo${rowCount}" name="TxtRollNo${rowCount}" value="${doc.RollNo || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtNWarpWay${rowCount}" name="TxtNWarpWay${rowCount}" value="${doc.NWarpWay || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtWarpWay${rowCount}" name="TxtWarpWay${rowCount}" value="${doc.WarpWay || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtNWeftWay${rowCount}" name="TxtNWeftWay${rowCount}" value="${doc.NWeftWay || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtWeftWay${rowCount}" name="TxtWeftWay${rowCount}" value="${doc.WeftWay || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtSupervisor${rowCount}" name="TxtSupervisor${rowCount}" value="${doc.LAMSUP_NAME || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtOperator${rowCount}" name="TxtOperator${rowCount}" value="${doc.LAMOP_NAME || ''}" /></td>
-     //                     <td>
-     //                         <select class="form-control" id="ddlStrength${rowCount}" name="ddlStrength${rowCount}">
-     //                             <option value="">- Select Strength -</option>
-     //                         </select>
-     //                     </td>
-     //                     <td>
-     //                         <select class="form-control" id="ddlStatus${rowCount}" name="ddlStatus${rowCount}">
-     //                             <option value="">- Status -</option>
-     //                             <option value="Fail" ${doc.StatusCode === 1 ? 'selected' : ''}>Fail</option>
-     //                         </select>
-     //                     </td>
-     //                     <td><input type="number" class="form-control" id="TxtElongWarp${rowCount}" name="TxtElongWarp${rowCount}" value="${doc.Elong_Warp || ''}" /></td>
-     //                     <td><input type="number" class="form-control" id="TxtElongWeft${rowCount}" name="TxtElongWeft${rowCount}" value="${doc.Elong_Weft || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtRemarks${rowCount}" name="TxtRemarks${rowCount}" value="${doc.Remarks || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtSupCode${rowCount}" name="TxtSupCode${rowCount}" value="${doc.LAMSUP_CODE || ''}" /></td>
-     //                     <td><input type="text" class="form-control" id="TxtOpeCode${rowCount}" name="TxtOpeCode${rowCount}" value="${doc.LAMOP_CODE || ''}" /></td>
-     //                 </tr>
-     //                 `;
-
-     //                 tbody.append(newRow);
-     //             });
-
-     //              renderPagination(totalCount, pageSize, currentPage);
-     //         },
-     //         error: function (xhr) {
-     //             toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
-     //         }
-     //     });
-     // }
-
-     // function renderPagination(total, pageSize, currentPage) {
-     //      const totalPages = Math.ceil(total / pageSize);
-     //      const pagination = $('#tablePagination');
-     //      pagination.empty();
-
-     //      if (totalPages <= 1) return;
-
-     //      let html = '';
-
-     //      if (currentPage > 1) {
-     //          html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-     //          html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-     //      }
-
-     //      const startPage = Math.max(1, currentPage - 2);
-     //      const endPage = Math.min(totalPages, currentPage + 2);
-
-     //      for (let i = startPage; i <= endPage; i++) {
-     //          html += `
-     //              <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-     //      }
-
-     //      if (currentPage < totalPages) {
-     //          html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-     //          html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-     //      }
-
-     //      pagination.html(html);
-     // }
-
-     // function goToPage(page) {
-     //      var selectedQC = $('input[name="qcFilter"]:checked').val();
-     //      var placeCode=$('#ddlPlace').val();
-     //      if(!placeCode){
-     //          toastr.warning("Please select Place");
-     //          return;
-     //      }
-     //      currentPage = page;
-     //      loadDocumentStages(selectedQC,placeCode);
-     //  }
-
-
-
-</script>
-
-@* <script>
-    let currentPage = 1;
-    let pageSize = 10;
-
-    $(document).ready(function () {
-        loadDocumentStages();
-
-        $('#searchBox').on('keyup', function () {
-            currentPage = 1;
-            loadDocumentStages();
-        });
-    });
-
-    function loadDocumentStages() {
-        const searchTerm = $('#searchBox').val();
-
-        $.ajax({
-            url: '/ApprovalStageMasterList/GetAllDocs',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
-            },
-            success: function (res) {
-                console.log(res);
-                const docs = res.items || res.data || [];
-                const totalCount = res.totalCount || 0;
-
-                const tbody = $('#tblApprovalStageMaster tbody');
-                tbody.empty();
-
-                if (docs.length === 0) {
-                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
-                    renderPagination(0, pageSize, currentPage);
-                    return;
-                }
-
-                docs.forEach(doc => {
-                    tbody.append(`
-                        <tr>
-                            <td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
-                            <td>${doc.doC_CODE || ''}</td>
-                            <td>${doc.doC_NAME || ''}</td>
-                            <td>${doc.useR_NO || '0'}</td>
-                            <td>
-                              <div class="action-icons">
-                              <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
-                              <i class="fa fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
-                              <i class="fa fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
-                              <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
-                              </div>
-
-                            </td>
-                        </tr>
-                    `);
-                });
-
-                renderPagination(totalCount, pageSize, currentPage);
-            },
-            error: function (xhr) {
-                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
-            }
-        });
-    }
-
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const pagination = $('#tablePagination');
-        pagination.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-        }
-
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `
-                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-        }
-
-        pagination.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadDocumentStages();
-    }
-
-
-
-</script>
- *@
+</script> *@
 

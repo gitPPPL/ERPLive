@@ -53,7 +53,7 @@ builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListReposito
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryRepository, QCTemperatureEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryListRepository, QCTemperatureEntryListRepository>();
-
+builder.Services.AddScoped<ILaminationQCEntryRepository, LaminationQCEntryRepository>();
 // Gete Entry Transaction repositories
 
 
@@ -61,7 +61,7 @@ builder.Services.AddScoped<IQCTemperatureEntryListRepository, QCTemperatureEntry
 
 
 builder.Services.Configure<EncryptionSettings>(
-    builder.Configuration.GetSection("EncryptionSettings"));
+builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();
 
 builder.Services.AddDistributedMemoryCache();
