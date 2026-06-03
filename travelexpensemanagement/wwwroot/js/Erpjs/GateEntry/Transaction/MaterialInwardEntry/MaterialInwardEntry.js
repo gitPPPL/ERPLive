@@ -602,8 +602,11 @@
     return false;
         }
     } 
-   function addRow($tbody, data = { }) {
-                const isINMS = $('#ddlDocType').val() !== 'INMS';
+function addRow($tbody, data = {}) {
+
+    // FIXED: correct condition
+    const isINMS = $('#ddlDocType').val() === 'INMS';
+
     const isNewRow = !data || Object.keys(data).length === 0;
 
     const normalStyle = "background-color:#fff;opacity:1;color:#000;";
@@ -611,109 +614,189 @@
     let itemOptions = `<option value="">Select</option>`;
     $.each(itemList, function (i, item) {
         const selected = item.value == data.itemId ? "selected" : "";
-        itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
+        itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}>${item.text}</option>`;
     });
 
-                // DEPARTMENT
-                let deptOptions = `<option value="">Select</option>`;
-                $.each(deptList, function (i, item) {
-                                const selected = item.value == data.DepttName ? "selected" : "";
-                deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
-                            });
+    let deptOptions = `<option value="">Select</option>`;
+    $.each(deptList, function (i, item) {
+        const selected = item.value == data.DepttName ? "selected" : "";
+        deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+    });
 
-                // UNIT
-                let unitOptions = `<option value="">Select</option>`;
-                $.each(unitList, function (i, item) {
-                                const selected = item.value == data.unit ? "selected" : "";
-                unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
-                            });
+    let unitOptions = `<option value="">Select</option>`;
+    $.each(unitList, function (i, item) {
+        const selected = item.value == data.unit ? "selected" : "";
+        unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+    });
 
-                const row = `
+    const row = `
     <tr class="no-border-input">
+
         <td>
-            <input type="text" class="form-control itemCode numeric-only" style="${normalStyle}" value="${data.itemCode ?? ''}" readonly />   </td>
-    </td>
+            <input type="text" class="form-control itemCode numeric-only"
+                   style="${normalStyle}"
+                   value="${data.itemCode ?? ''}" readonly />
+        </td>
 
-    <td> <select class="form-control ItemName searchable-item" style="${normalStyle}; width: 350px;">  ${itemOptions} </select>
-    </td>
+        <td>
+            <select class="form-control ItemName searchable-item"
+                    style="${normalStyle}; width:350px;">
+                ${itemOptions}
+            </select>
+        </td>
 
-    <td>
-        <select class="form-control DeptName" style="${normalStyle}"> ${deptOptions}  </select>
-    </td>
+        <td>
+            <select class="form-control DeptName" style="${normalStyle}">
+                ${deptOptions}
+            </select>
+        </td>
 
-    <td>
-        <select class="form-control unit" style="${normalStyle}">  ${unitOptions} </select>
-    </td>
+        <td>
+            <select class="form-control unit" style="${normalStyle}">
+                ${unitOptions}
+            </select>
+        </td>
 
-    <td>
-        <input type="text" class="form-control nos numeric-only"  maxlength="4" style="${normalStyle}" value="${data.nos ?? ''}" />   </td>
-    <td>
-        <input type="text" class="form-control quantity numeric-only" maxlength="10" style="${normalStyle}" value="${data.qty ?? ''}" />
-    </td>
-    <td>
-        <input type="text" class="form-control shiprate numeric-only" maxlength="13" style="${normalStyle}" value="${data.shipRate ?? ''}" />
-    </td>
+        <td>
+            <input type="text" class="form-control nos numeric-only"
+                   maxlength="4"
+                   style="${normalStyle}"
+                   value="${data.nos ?? ''}" />
+        </td>
 
-    <td>
-        <select class="form-control Empty">
-            <option value="" ${(data.empty ?? '') === '' ? 'selected' : ''}>Select</option>
-            <option value="Yes" ${data.empty === 'Yes' ? 'selected' : ''}>Yes</option>
-            <option value="No" ${data.empty === 'No' ? 'selected' : ''}>No</option>
-        </select>
-    </td>
+        <td>
+            <input type="text" class="form-control quantity numeric-only"
+                   maxlength="10"
+                   style="${normalStyle}"
+                   value="${data.qty ?? ''}" />
+        </td>
 
-    <td>
-        <input type="text" class="form-control remarks" style="${normalStyle}" maxlength="225" value="${data.remarks ?? ''}" />
-    </td>
+        <td>
+            <input type="text" class="form-control shiprate numeric-only"
+                   maxlength="13"
+                   style="${normalStyle}"
+                   value="${data.shipRate ?? ''}" />
+        </td>
 
-    <td>
-        <input type="text" class="form-control refType" style="${normalStyle}" maxlength="4" value="${data.refType ?? ''}" />
-    </td>
+        <td>
+            <select class="form-control Empty">
+                <option value="">Select</option>
+                <option value="Yes" ${data.empty === 'Yes' ? 'selected' : ''}>Yes</option>
+                <option value="No" ${data.empty === 'No' ? 'selected' : ''}>No</option>
+            </select>
+        </td>
 
-    <td>
-        <input type="text" class="form-control refNo" style="${normalStyle}" maxlength="9" value="${data.refNo ?? ''}" />
-    </td>
+        <td>
+            <input type="text" class="form-control remarks"
+                   maxlength="225"
+                   style="${normalStyle}"
+                   value="${data.remarks ?? ''}" />
+        </td>
 
-    <td>
-        <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
-        <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
-    </td>
-</tr>
-`;
+        <td>
+            <input type="text" class="form-control refType"
+                   maxlength="4"
+                   style="${normalStyle}"
+                   value="${data.refType ?? ''}" readonly />
+        </td>
 
-                $tbody.append(row);
-                const $row = $tbody.find('tr:last');
+        <td>
+            <input type="text" class="form-control refNo"
+                   maxlength="9"
+                   style="${normalStyle}"
+                   value="${data.refNo ?? ''}" readonly />
+        </td>
 
-                $row.find('.searchable-item').select2({
-                    placeholder: "Search Item",
-                    width: '100%'
-                });
+        <td>
+            <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
+            <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+        </td>
 
-                $row.find('.btn-add-row').on('click', function () {
-                    addRow($('#tblInwardEntry tbody'));
-                });
+    </tr>`;
 
-                $row.find('.btn-delete-action').on('click', function () {
-                    $(this).closest('tr').remove();
-                });
+    $tbody.append(row);
 
-                $row.find('.numeric-only').on('input', function () {
-                    this.value = this.value.replace(/[^0-9.]/g, '');
-                });
+    const $row = $tbody.find('tr:last');
 
-                if (isNewRow) {
-                    $row.find('.itemCode').val('');
-                }
+    // Select2 init
+    $row.find('.searchable-item').select2({
+        placeholder: "Search Item",
+        width: '100%'
+    });
 
+    // =========================
+    // CONDITION LOGIC
+    // =========================
+    function applyRules() {
 
-                if (isINMS) {
-                    $row.find('input').prop('readonly', true).attr('style', normalStyle);
-                    $row.find('select').prop('readonly', true).attr('style', normalStyle);
-                    $tbody.find('.btn-add-row').hide();
-                } else {
-                    $tbody.find('.btn-add-row').show();
-                }
+        const refType = $.trim($row.find('.refType').val());
+        const refNo = $.trim($row.find('.refNo').val());
+
+        const hasRefData = refType !== '' && refNo !== '';
+
+        // Always readonly
+        $row.find('.refType, .refNo').prop('readonly', true);
+
+        if (isINMS) {
+
+            // FULL LOCK
+            $row.find('input').prop('readonly', true);
+            $row.find('select').prop('disabled', true);
+
+        } else {
+
+            if (hasRefData) {
+
+                // LOCK MASTER FIELDS ONLY
+                $row.find('.ItemName').prop('disabled', true);
+                $row.find('.DeptName').prop('disabled', true);
+                $row.find('.unit').prop('disabled', true);
+
+            } else {
+
+                // ENABLE MASTER FIELDS
+                $row.find('.ItemName').prop('disabled', false);
+                $row.find('.DeptName').prop('disabled', false);
+                $row.find('.unit').prop('disabled', false);
             }
+
+            // ALWAYS editable fields
+            $row.find('.nos').prop('readonly', false);
+            $row.find('.quantity').prop('readonly', false);
+            $row.find('.shiprate').prop('readonly', false);
+            $row.find('.remarks').prop('readonly', false);
+            $row.find('.Empty').prop('disabled', false);
+        }
+
+        // refresh select2 UI
+        $row.find('.ItemName').trigger('change.select2');
+    }
+
+    applyRules();
+
+    // =========================
+    // EVENTS
+    // =========================
+
+    $row.find('.btn-add-row').on('click', function () {
+        addRow($('#tblInwardEntry tbody'));
+    });
+
+    $row.find('.btn-delete-action').on('click', function () {
+        $(this).closest('tr').remove();
+    });
+
+    $row.find('.numeric-only').on('input', function () {
+        this.value = this.value.replace(/[^0-9.]/g, '');
+    });
+
+    if (isNewRow) {
+        $row.find('.itemCode').val('');
+    }
+
+    $tbody.find('.btn-add-row').show();
+}
+
 
    async function getcontainerdata(Container_No) {
           try {
