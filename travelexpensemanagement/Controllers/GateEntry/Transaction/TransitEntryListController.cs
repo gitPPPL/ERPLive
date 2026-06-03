@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
@@ -6,13 +7,24 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
     public class TransitEntryListController : Controller
     {
         private readonly ITransitEntryListRepository _iTransitEntryListRepository;
-        public TransitEntryListController(ITransitEntryListRepository iTransitEntryListRepository)
+        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        public TransitEntryListController(ITransitEntryListRepository iTransitEntryListRepository, ModuleService.ModuleService moduleService)
         {
+            _moduleService = moduleService;
             _iTransitEntryListRepository = iTransitEntryListRepository;
         } 
         public IActionResult Index()
         {
-            return View("~/Views/GateEntry/Transaction/TransitEntryList/Index.cshtml");
+            ViewBag.CurrentMenu = "Vehicle Inward";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel
+            };
+            return View("~/Views/GateEntry/Transaction/TransitEntryList/Index.cshtml", model);
         }
 
         [HttpGet]
@@ -27,10 +39,10 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = result.status, data = result.data, message = result.message });
         }
         [HttpPost]
-        public async Task<JsonResult> Delete(int docId, string docType)
+        public async Task<JsonResult> Delete(int vNo, string docType)
         {
-            var result = await _iTransitEntryListRepository.DeleteById(docId, docType);
-            return Json(new { success = result.status, message = result.message });
+            var result = await _iTransitEntryListRepository.DeleteById(vNo, docType);
+            return Json(new { status = result.status, message = result.message });
         }
     }
 }

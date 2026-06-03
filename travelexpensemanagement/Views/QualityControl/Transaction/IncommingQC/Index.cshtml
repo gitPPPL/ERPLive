@@ -1,6 +1,8 @@
 ﻿@{
     ViewBag.Title = "Incomming QC";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -36,12 +38,75 @@
                     <input type="date" class="erppage-input" id="DtDocDate">
                 </div>
                 <div class="erppage-internalaction">
-                    <button type="button" id="btn-pending" class="erppage-btn erppage-btn-danger">
+                    <button type="button" id="btn-pending" onclick="PendingQCReport()" class="erppage-btn erppage-btn-danger">
                         <i class="fa fa-hourglass-half"></i>
-                        <span>Pending QC</span>
+                        <span>Pending QC Report</span>
                     </button>
                 </div>
             </div>
+            @* modal Popup *@
+            @* <div class="modal fade" id="pendingQCModal" tabindex="-1" aria-labelledby="pendingQCModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl erppagesmodal">
+                    <div class="modal-content erppagesmodal-content draggable-modal">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">         
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-hourglass-half"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="pendingQCModalLabel">Pending QC Report</h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppagelist-container">
+                                <div class="excel-wrapper fixed-grid-wrapper">
+                                    <table id="tblPendingQC" class="excel-table fixed-grid-table">
+                                        <colgroup>
+                                            <col style="width:80px;" />   <!-- Serial No -->
+                                            <col style="width:120px;" />  <!-- Date -->
+                                            <col style="width:220px;" />  <!-- Supplier Name -->
+                                            <col style="width:140px;" />  <!-- Bill No -->
+                                            <col style="width:120px;" />  <!-- Bill Date -->
+                                            <col style="width:250px;" />  <!-- Item Name -->
+                                            <col style="width:140px;" />  <!-- Invoice Quantity -->
+                                            <col style="width:140px;" />  <!-- Received Quantity -->
+                                            <col style="width:130px;" />  <!-- Diff. Quantity -->
+                                            <col style="width:140px;" />  <!-- Vehicle No -->
+                                            <col style="width:160px;" />  <!-- Container No -->
+                                            <col style="width:100px;" />  <!-- Gate No -->
+                                            <col style="width:100px;" />  <!-- WB No -->
+                                            <col style="width:100px;" />  <!-- QC No -->
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th>Serial No</th>
+                                                <th>Date</th>
+                                                <th>Supplier Name</th>
+                                                <th>Bill No</th>
+                                                <th>Bill Date</th>
+                                                <th>Item Name</th>
+                                                <th>Invoice Quantity</th>
+                                                <th>Received Quantity</th>
+                                                <th>Diff. Quantity</th>
+                                                <th>Vehicle No</th>
+                                                <th>Container No</th>
+                                                <th>Gate No.</th>
+                                                <th>WB No.</th>
+                                                <th>QC No.</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> *@
+           
+            
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">MRN No</label>
@@ -73,7 +138,7 @@
                 <div class="erppage-divfield erppage-datefield">
                     <label class="erppage-label">Bill Date</label>
                     <div class="erppage-datebox">
-                        <input type="date" class="erppage-input erppage-dateinput" id="DtBillDate">
+                        <input type="date" class="erppage-input" id="DtBillDate">
                         <label class="erppage-checkbox-inside">
                             <input type="checkbox" id="chkBillDate">
                         </label>
@@ -160,17 +225,17 @@
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblIncommingQC" class="excel-table fixed-grid-table">
                         <colgroup>
-                            <col style="display:none;">      <!-- Code (hidden) -->
-                            <col style="width:300px;">       <!-- Item Name -->
-                            <col style="width:180px;">       <!-- Particulars -->
-                            <col style="width:100px;">       <!-- Unit -->
-                            <col style="width:100px;">       <!-- Level -->
-                            <col style="width:120px;">       <!-- Result -->
-                            <col style="width:200px;">       <!-- Remarks -->
-                            <col style="width:140px;">       <!-- Deduction Amount -->
-                            <col style="width:140px;">       <!-- Allow Amount -->
-                            <col style="width:220px;">       <!-- Deduction Narration -->
-                            <col style="width:120px;">       <!-- Action -->
+                            <col style="display:none;">
+                            <col style="width:300px;">
+                            <col style="width:180px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:200px;">
+                            <col style="width:140px;">
+                            <col style="width:140px;">
+                            <col style="width:220px;">
+                            @* <col style="width:120px;">        *@
                         </colgroup>
                         <thead class="table-head">
                             <tr>
@@ -190,25 +255,6 @@
                         <tbody></tbody>
                     </table>
                 </div>
-                <div class="erppagelist-pagination">
-                    <div class="pagination-left">
-                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
-                            <option value="5">5</option>
-                            <option value="10" selected>10</option>
-                            <option value="20">20</option>
-                            <option value="50">50</option>
-                        </select>
-                    </div>
-                    <div class="pagination-center">
-                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
-                        <div id="pageNumbers" class="page-numbers"></div>
-
-                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
-                    </div>
-                    <div class="pagination-right" id="pageInfoText">
-                        Results: 0 - 0 of 0
-                    </div>
-                </div>
             </div>
         </fieldset>
         <div class="erppage-actions">
@@ -219,613 +265,193 @@
         </div>
     </div>
 </div>
+<script src="~/js/erpjs/qualitycontrol/transaction/incommingqc/incommingqc.js"></script>
 
 <script>
-    $(document).ready(function () {
-        function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
-    const vType = getQueryParam('vType');
-    const vNo = getQueryParam('vNo');
-    if (vNo) {
-        $.ajax({
-            url: '/IncommingQC/GetAllDatadetails',
-            type: 'POST',
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify({ vNo: vNo, vType: vType }),
-            success: function (response) {
-                 GetallDataIncommingQC(response);
-            },
-            error: function (xhr) {
-                toastr.error('Error: ' + xhr.responseText);
-            }
-        });
-    }
-    const $tbody = $('#tblIncommingQC tbody');
-    function ddlItemMaster($ddl, selectedValue = '') {
-        $.ajax({
-            url: '/IncommingQC/GetItemMaster',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                $ddl.empty().append('<option value="">-- Select Item --</option>');
-                $.each(data, function (index, item) {
-                    $ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                // ✅ set selected AFTER options are loaded
-                if (selectedValue !== '' && selectedValue !== null) {
-                    $ddl.val(selectedValue);
-                }
-            }
-        });
-    }
-    function Particulars($ddl, selectedValue = '') {
-        $.ajax({
-            url: '/IncommingQC/GetParticulars',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                $ddl.empty().append('<option value="">-- Select Particular --</option>');
-                $.each(data, function (index, item) {
-                    $ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (selectedValue !== '' && selectedValue !== null) {
-                    $ddl.val(selectedValue);
-                }
-            }
-        });
-    }
-    function Units($ddl, selectedValue = '') {
-        $.ajax({
-            url: '/IncommingQC/GetUnits',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                $ddl.empty().append('<option value="">-- Select Unit --</option>');
-                $.each(data, function (index, item) {
-                    $ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (selectedValue !== '' && selectedValue !== null) {
-                    $ddl.val(selectedValue);
-                }
-            }
-        });
-    }
-    function addRow(data = {}) {
-        // remove previous "+" buttons
-        $tbody.find('.btn-add-action').remove();
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        comp_add1: "@globalVariables?.Address1",
+        comp_add2: "@globalVariables?.Address2",
 
-        const row = `
-            <tr>
-                <td style="display:none;">${data.code || ''}</td>
-                <td><select class="form-control ddlItemName"></select></td>
-                <td><select class="form-control ddlParticulars"></select></td>
-                <td><select class="form-control ddlUnits"></select></td>
-                <td><input type="number" class="form-control" value="${data.level || ''}" /></td>
-                <td><input type="text" class="form-control" value="${data.result || ''}" /></td>
-                <td><input type="text" class="form-control" value="${data.remarks || ''}" /></td>
-                <td><input type="number" class="form-control" value="${data.deductionAmount || ''}" /></td>
-                <td><input type="number" class="form-control" value="${data.allowAmount || ''}" /></td>
-                <td><input type="text" class="form-control" value="${data.deductionNarration || ''}" /></td>
-                <td>
-                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
-                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
-                </td>
-            </tr>
-        `;
-
-        $tbody.append(row);
-
-        // Bind dropdowns for this row
-        const $lastRow = $tbody.find('tr:last');
-        ddlItemMaster($lastRow.find('.ddlItemName'));
-        Particulars($lastRow.find('.ddlParticulars'));
-        Units($lastRow.find('.ddlUnits'));
-    }
-    addRow();
-    $(document).on('click', '.btn-add-row', function () {
-        addRow();
-    });
-    $(document).on('click', '.btn-delete-action', function () {
-        const $row = $(this).closest('tr');
-        const isLastRow = $row.is(':last-child');
-        $row.remove();
-
-        if (isLastRow) {
-            const $lastRow = $tbody.find('tr:last');
-            if ($lastRow.length && !$lastRow.find('.btn-add-action').length) {
-                $lastRow.find('td:last').prepend(
-                    `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
-                );
-            }
+    };
+    function PendingQCReport() {
+    var requestData = {
+        Reportname: "RAW24",
+        Database: "ERPDB",
+        selectionFormula:
+            "{PURCHASE1.comp_code} = " + window.globalVariables.compCode +
+            " AND {PURCHASE1.YEAR_CODE} = " + window.globalVariables.yearCode +
+            " AND {PURCHASE1.BRANCH_CODE} = " + window.globalVariables.branchCode +
+             " AND {PURCHASE2.QC_No} = 0" +
+            " AND {ITEM_MAST.QC_YN} = 'Yes'" +
+            " AND {DOCTYPE_MAST.CODE} = 'SRPU'",
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.comp_add1,
+            comp_add2: window.globalVariables.comp_add2
         }
-    });
-    $('#btnAddRow').on('click', function () {
-        addRow();
-    });
-    ddlDocType();
-    ddlQCIncharge();
-    ddlCheme();
-    ddlPartyName();
-    const now = new Date();
-    const formattedDate = now.toISOString().split('T')[0];
-    $("#DtDocDate").val(formattedDate);
-    $('#ddlDocType').on('change', function () {
-            const selectedValue = $(this).val();
-            const selectedText = $(this).find("option:selected").text();
-            $('#NumDocNo').prop('readonly', true);
-
-            if (selectedValue !== "") {
-                sendDocType(selectedValue, selectedText);
-            } else {
-                $('#NumDocNo').val('');
-            }
-        });
-    $('#ddlMRNNo').on('change', function () {
-            var selectedNo = $(this).val();
-            const selectedText = $(this).find('option:selected').text();
-
-            if (selectedNo !== "0" && selectedNo !== "") {
-                $.ajax({
-                    url: '/IncommingQC/GetGatDetailsList',
-                    type: 'POST',
-                    data: {
-                        StrVNo: selectedNo,
-                        StrV_type: selectedText
-                    },
-                    success: function (response) {
-                        GetalldatafetchGatonchange(response);
-                    },
-                    error: function (xhr) {
-                        console.error("Error:", xhr.responseText);
-                    }
-                });
-            }
-        });
-    $('#Btn-fill').on('click', function () {
-
-        $("#field_hide").hide();
-        var DocType = $('#ddlDocType').val();
-        var mrnText = $('#ddlMRNNo option:selected').text();
-        var VNo = $('#ddlMRNNo').val();
-
+    };
         $.ajax({
-            url: '/IncommingQC/SendDropdownData',
-            type: 'POST',
-            data: {
-                DocType: DocType,
-                MRNText: mrnText,
-                VNo: VNo
+            url: "http://localhost:34087/Report/PendingQCReport",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(requestData),
+            xhrFields: {
+                responseType: "blob"
             },
             success: function (response) {
-                if (response.success === false) {
-                    toastr.warning(response.message);
-                }
-                console.log('response Btn-fill', response);
-                if (response.headerData && response.headerData.length > 0) {
-                    const header = response.headerData[0];
 
-                    // Fill header fields
-                    $('#ddlPartyName').append(`<option value="${header.partY_CODE}" selected>${header.name}</option>`);
-                    $('#TxtTransport').val(safeValue(header.transporT_NAME));
-                    $('#TxtInvoiceQty').val(safeValue(header.bilL_QTY));
-                    $('#TxtRecordedQty').val(safeValue(header.recD_QTY));
-                    $('#TxtPurchaseType').val(safeValue(header.documenT_NAME));
-                    $('#DtMRNDate').val(convertToISODate(header.v_DATE));
-                    $('#TxtBillNo').val(safeValue(header.bilL_NO));
-                    $('#DtBillDate').val(convertToISODate(header.bilL_DATE));
-                    $('#TxtTruckNo').val(safeValue(header.trucK_NO));
-                }
+                var file = new Blob(
+                    [response],
+                    { type: "application/pdf" });
 
-                // Clear previous table rows
-                $tbody.empty();
+                var link = document.createElement("a");
 
-                // Fill table rows using itemData
-                if (response.itemData && response.itemData.length > 0) {
-                    response.itemData.forEach(item => {
-                        addRow({
-                            code: item.iteM_CODE,
-                            itemName: item.iteM_NAME,
-                            particulars: item.particulaR_NAME,
-                            unit: item.uniT_NAME || '',
-                            level: item.stD_LEVEL,
-                            deductionAmount: item.deduction_amt,
-                            allowAmount: item.allow_amt,
-                            deductionNarration: item.deduction_narration
-                        });
-                    });
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error:', error);
-                toastr.error('Error sending data.');
-            }
-        });
+                link.href = URL.createObjectURL(file);
+                link.download = "RAW24.pdf";
 
-        function safeValue(value) {
-            if (value === null || value === undefined) return '';
-            if (typeof value === 'object') return '';
-            return value;
-        }
-
-        function convertToISODate(dateStr) {
-            if (!dateStr) return '';
-            const parts = dateStr.split('/');
-            if (parts.length === 3) {
-                return `${parts[2]}-${parts[1]}-${parts[0]}`;
-            }
-            return '';
-        }
-    });
-    function addRow(data = {}) {
-        $tbody.find('.btn-add-action').remove();
-        const row = `
-            <tr>
-                <td style="display:none;">${data.code || ''}</td>
-                <td><select class="form-control ddlItemName"></select></td>
-                <td><select class="form-control ddlParticulars"></select></td>
-                <td><select class="form-control ddlUnits"></select></td>
-                <td><input type="number" class="form-control" value="${data.level || '0.0000'}" /></td>
-                <td><input type="text" class="form-control" value="${data.result || ''}" /></td>
-                <td><input type="text" class="form-control" value="${data.remarks || ''}" /></td>
-                <td><input type="number" class="form-control" value="${data.deductionAmount || '0.00'}" /></td>
-                <td><input type="number" class="form-control" value="${data.allowAmount || '0.00'}" /></td>
-                <td><input type="text" class="form-control" value="${data.deductionNarration || ''}" /></td>
-                <td>
-                    <i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>
-                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
-                </td>
-            </tr>
-        `;
-
-        $tbody.append(row);
-
-        const $lastRow = $tbody.find('tr:last');
-
-        // Bind dropdowns
-        ddlItemMaster($lastRow.find('.ddlItemName'), data.itemName);
-        Particulars($lastRow.find('.ddlParticulars'), data.particulars);
-        Units($lastRow.find('.ddlUnits'), data.unit);
-    }
-
-     function GetalldatafetchGatonchange(response) {
-               if (!response || response.length === 0) return;
-
-               const data = response[0];
-
-               // Format date function (optional reuse)
-               const formatDate = (dateStr) => {
-                   if (!dateStr) return "";
-                   const parts = dateStr.split('/');
-                   if (parts.length !== 3) return "";
-                   return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-               };
-                $('#DtGateDate').val(formatDate(data.v_DATE)).prop('readonly', true);
-                $('#TxtPartyName').val(data.partyName || '').prop('readonly', true);
-                $('#TxtTruckNo').val(data.trucK_NO || '').prop('readonly', true);
-                $('#NumBillNo').val(data.bilL_NO || '').prop('readonly', true);
-                $('#DtBillDate').val(formatDate(data.bilL_DATE)).prop('readonly', true);
-                $('#TxtInvoiceQty').val(data.qty || '').prop('readonly', true);
-                $('#TxtRecordedQty').val(data.qty || '').prop('readonly', true);
-                $('#TxtShortage').val('0');
-                $('#TxtWastage').val('0');
-                $('#TxtTransport').val('');
-                $('#TxtContainerNo').val('');
-
-               // ✅ Populate itemTable
-               const itemCode = data.iteM_CODE || '';
-               const itemName = data.iteM_NAME || '';
-
-               $('#itemTable thead tr').empty();
-               $('#itemTable tbody').empty();
-               // Add table row
-               $('#itemTable tbody').append(`
-                   <tr class="text-left">
-                       <td>${itemCode}</td>
-                       <td>${itemName}</td>
-                   </tr>
-               `);
-         }
-
-    $('#btn-save').on('click', function (e) {
-        e.preventDefault();
-
-        // 1️⃣ Collect table items
-        let tableData = [];
-        $('#tblIncommingQC tbody tr').each(function () {
-            const $row = $(this);
-
-            tableData.push({
-                iteM_CODE: parseInt($row.find('.ddlItemName').val()) || 0,
-                particulaR_NAME: $row.find('.ddlParticulars').val(),
-                uniT_NAME: $row.find('.ddlUnits').val() || "",
-                stD_LEVEL: parseFloat($row.find('input[type="number"]').eq(0).val()) || 0,
-                result: $row.find('input[type="text"]').eq(0).val() || "",
-                remarks: $row.find('input[type="text"]').eq(1).val() || "",
-                deduction_amt: parseFloat($row.find('input[type="number"]').eq(1).val()) || 0,
-                allow_amt: parseFloat($row.find('input[type="number"]').eq(2).val()) || 0,
-                deduction_narration: $row.find('input[type="text"]').eq(2).val() || "",
-                qcP_CODE: parseInt($row.find('.ddlQCPCode').val()) || 0,
-                nos: parseInt($row.find('.txtNos').val()) || 0
-            });
-        });
-
-        console.log('item',tableData)
-        // 2️⃣ Collect header
-        const headerData = {
-            DocType: $('#ddlDocType').val(),
-            MRNNo: $('#ddlMRNNo option:selected').text(),
-            V_TYPE: $('#ddlVType').val(),
-            v_NO:  $('#ddlMRNNo').val(),
-            DocNo: $('#NumDocNo').val(),
-            DocDate: new Date($('#DtDocDate').val()).toISOString(),
-            QCIncharge: $('#ddlQCIncharge').val(),
-            Chemist: $('#ddlChem').val(),
-            PartyCode: parseInt($('#ddlPartyName').val()) || 0,
-            Transport: $('#TxtTransport').val(),
-            InvoiceQty: parseFloat($('#TxtInvoiceQty').val()) || 0,
-            RecordedQty: parseFloat($('#TxtRecordedQty').val()) || 0,
-            PurchaseType: $('#TxtPurchaseType').val(),
-            Wastage: parseFloat($('#TxtWastage').val()) || 0,
-            MRNDate: new Date($('#DtMRNDate').val()).toISOString(),
-            Bales: parseFloat($('#TxtBales').val()) || 0,
-            BillNo: $('#TxtBillNo').val(),
-            BillDate: new Date($('#DtBillDate').val()).toISOString(),
-            TruckNo: $('#TxtTruckNo').val(),
-            Shortage: parseFloat($('#TxtShortage').val()) || 0,
-            DeductionAmount: parseFloat($('#TxtDeductionAmount').val()) || 0,
-            DeductionNarration: $('#TxtDeductionNarration').val(),
-            Remarks: $('#TxtRemarks').val(),
-             ACTION: vNo > 0 ? "UPDATE" : "INSERT",
-        };
-        console.log('headerData',headerData)
-
-        // 3️⃣ Send via AJAX
-        $.ajax({
-            url: '/IncommingQC/SaveQCData',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ header: headerData, items: tableData }),
-            success: function (response) {
-                if (response.success) {
-                    toastr.success('Data saved successfully!');
-                } else {
-                    toastr.error(response.message || 'Something went wrong.');
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error saving data.');
-                console.error(error);
-            }
-        });
-    });
-    function GetallDataIncommingQC(response) {
-        console.log('response', response);
-        if (!response || !response.header || response.header.length === 0) {
-            toastr.warning('No record found.');
-            return;
-        }
-        const header = response.header[0];
-        const items = response.items || [];
-        $('#ddlDocType').val(header.DocType);
-        $('#NumDocNo').val(header.DocNo);
-        $('#DtDocDate').val(header.DocDate ? header.DocDate.split('T')[0] : '');
-        $('#ddlQCIncharge').val(header.QC_INCHARGE);
-        $('#ddlChem').val(header.CHEMIST);
-        $('#ddlPartyName').val(header.PARTY_CODE);
-        $('#TxtTransport').val(header.TRANSPORT);
-        $('#TxtInvoiceQty').val(header.INV_QTY);
-        $('#TxtRecordedQty').val(header.RECD_QTY);
-        $('#TxtPurchaseType').val(header.PUR_TYPE);
-        $('#TxtWastage').val(header.WASTE_WGT);
-        $('#DtMRNDate').val(header.MRN_DATE ? header.MRN_DATE.split('T')[0] : '');
-        $('#TxtBales').val(header.BALES);
-        $('#TxtBillNo').val(header.BILL_NO);
-        $('#DtBillDate').val(header.BILL_DATE ? header.BILL_DATE.split('T')[0] : '');
-        $('#TxtTruckNo').val(header.TRUCK_NO);
-        $('#TxtShortage').val(header.SHORT_QTY);
-        $('#TxtDeductionAmount').val(header.DEDUCT_AMT);
-        $('#TxtDeductionNarration').val(header.DEDUCT_NARR);
-        $('#TxtRemarks').val(header.REMARKS);
-        ddlMRNNo(header.DocNo, header.DocType, header.DocNo);
-        const tbody = $('#tblIncommingQC tbody');
-    tbody.empty();
-
-    if (items.length === 0) {
-        tbody.append(`<tr><td colspan="11" class="text-center">No items found</td></tr>`);
-    } else {
-        $.each(items, function (index, item) {
-            const row = `
-                <tr>
-                    <td style="display:none;">${item.ITEM_CODE || ''}</td>
-                    <td>
-                        <select class="form-control ddlItemName"></select>
-                    </td>
-                    <td>
-                        <select class="form-control ddlParticulars"></select>
-                    </td>
-                    <td>
-                        <select class="form-control ddlUnits"></select>
-                    </td>
-                    <td>
-                        <input type="number" class="form-control txtLevel" value="${item.ACCEPTANCE || 0}" />
-                    </td>
-                    <td>
-                        <input type="text" class="form-control txtResult" value="${item.RESULT || ''}" />
-                    </td>
-                    <td>
-                        <input type="text" class="form-control txtRemark" value="${item.REMARK || ''}" />
-                    </td>
-                    <td>
-                        <input type="number" class="form-control txtDeduction" value="${item.DEDU_AMT || 0}" />
-                    </td>
-                    <td>
-                        <input type="number" class="form-control txtAllow" value="${item.ALLOW_AMT || 0}" />
-                    </td>
-                    <td>
-                        <input type="text" class="form-control txtDeductionNarr" value="${item.DEDU_NARR || ''}" />
-                    </td>
-                    <td>
-                        <i class="fa fa-plus text-success btn-add-row" title="Add Row" style="cursor:pointer;"></i>
-                        <i class="fa fa-trash text-danger btn-delete-row" title="Delete Row" style="cursor:pointer;"></i>
-                    </td>
-                </tr>
-            `;
-            tbody.append(row);
-            const $lastRow = tbody.find('tr:last');
-            ddlItemMaster($lastRow.find('.ddlItemName'), item.ITEM_CODE);
-            Particulars($lastRow.find('.ddlParticulars'), item.QCP_CODE);
-            Units($lastRow.find('.ddlUnits'), item.UNIT);
-        });
-    }
-        toastr.success('Data loaded successfully!');
-    }
-    });
-    function ddlDocType(callback) {
-        $.ajax({
-            url: '/IncommingQC/GetddlDocType',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlDocType');
-                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             },
             error: function (xhr) {
-                console.error("Error loading ddlDocType:", xhr.responseText);
-            }
-        });
-    }
-    function sendDocType(docType, docName) {
-        $.ajax({
-            url: '/IncommingQC/GetDocNo',
-            type: 'POST',
-            data: {
-                docType: docType,
-                docName: docName
-            },
-            success: function (response) {
-                if (response.success) {
-                    const vNo = response.nextVNo;
-                    const vType = response.docType;
 
-                    $('#NumDocNo').val(vNo);
-                    ddlMRNNo(vNo, vType);
-                }
-            },
-            error: function (xhr) {
-                console.error("Error:", xhr.responseText);
-            }
-        });
-    }
-    function ddlQCIncharge(callback) {
-        $.ajax({
-            url: '/IncommingQC/GetddlQCIncharge',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlQCIncharge');
-                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlQCIncharge:", xhr.responseText);
-            }
-        });
-    }
-    function ddlCheme(callback) {
-        $.ajax({
-            url: '/IncommingQC/GetddlChem',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlChem');
-                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlChem:", xhr.responseText);
-            }
-        });
-    }
-    function ddlPartyName(callback) {
-        $.ajax({
-            url: '/IncommingQC/GetPartyName',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                const ddl = $('#ddlPartyName');
-                ddl.empty().append('<option value="">-- Select Party Name --</option>');
-                $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr) {
-                console.error("Error loading ddlPartyName:", xhr.responseText);
-            }
-        });
-    }
-    function ddlMRNNo(vNo, vType1, selectedValue = null) {
-        const ddl = $('#ddlMRNNo');
-        return $.ajax({
-            url: '/IncommingQC/GetddlMRNNo',
-            type: 'GET',
-            dataType: 'json',
-            data: { VNo: vNo, Vtype: vType1 },
-            success: function (data) {
-                console.log('MRN dropdown data:', data, 'Selected Value:', selectedValue);
+                var reader = new FileReader();
 
-                // Destroy old select2 if exists
-                if (ddl.hasClass("select2-hidden-accessible")) {
-                    ddl.select2('destroy');
-                }
+                reader.onload = function () {
+                    console.log(reader.result);
+                    alert(reader.result);
+                };
 
-                // Clear and add default option
-                ddl.empty().append('<option value="">-- Select MRN No --</option>');
-
-                // Append new options
-                data.forEach(item => {
-                    const value = item.value || item.Value;
-                    const text = item.text || item.Text;
-                    ddl.append(new Option(text, value));
-                });
-
-                // ✅ Initialize select2
-                ddl.select2({
-                    placeholder: "-- Select MRN No --",
-                    allowClear: true,
-                    width: '100%',
-                    minimumResultsForSearch: data.length >= 5 ? 0 : Infinity,
-                    language: {
-                        inputTooShort: () => 'Type to search...',
-                        searchInputPlaceholder: "Search MRN..."
-                    }
-                });
-
-                // ✅ Set preselected value AFTER select2 initialized
-                if (selectedValue) {
-                    setTimeout(() => {
-                        ddl.val(selectedValue).trigger('change');
-                        console.log('MRN dropdown preselected:', selectedValue);
-                    }, 200);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error loading MRN list:", xhr.responseText);
-                toastr.error('Error loading MRN list: ' + error);
+                reader.readAsText(xhr.response);
             }
         });
     }
 </script>
+
+@* <script>
+    function PendingQCReport() {
+
+        var reportName = "RAW24";
+
+        // DATABASE DETAILS
+
+        var server = "192.168.20.51";
+        var database = "ERPDB";
+        var user = "sa";
+        var password = "Pass@123";
+
+        // TIMESTAMP
+
+        var now = new Date();
+
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+
+        var timestamp =
+            `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://localhost:34087/Report/PendingQCReport',
+
+            type: 'GET',
+
+            data: {
+                Reportname: reportName,
+                server: server,
+                database: database,
+                user: user,
+                password: password
+            },
+
+            xhrFields: {
+                responseType: 'blob'
+            },
+
+            success: function (response) {
+
+                var file =
+                    new Blob([response],
+                    { type: 'application/pdf' });
+
+                var fileName =
+                    `${reportName}_${timestamp}.pdf`;
+
+                var link =
+                    document.createElement('a');
+
+                link.href =
+                    URL.createObjectURL(file);
+
+                link.download =
+                    fileName;
+
+                document.body.appendChild(link);
+
+                link.click();
+
+                document.body.removeChild(link);
+            },
+
+            error: function (xhr, status, error) {
+
+                console.log(xhr.responseText);
+
+                alert("Error : " + xhr.responseText);
+            }
+        });
+    }
+</script> *@
+
+
+
+
+
+
+@* <script>
+   function PendingQCReport() {
+
+        // var reportName = "rpt_city_master";
+        var reportName = "RAW24";
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+             url: 'http://localhost:34087/Report/PendingQCReport',
+            type: 'GET',
+            data: { Reportname: reportName },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    }
+</script>    *@

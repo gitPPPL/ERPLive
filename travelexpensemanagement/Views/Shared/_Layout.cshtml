@@ -57,7 +57,6 @@
 	 .search-results a:hover {
 	 	background-color: #f0f0f0;
 	 }
-
 	#lottie-overlay {
 		position: fixed;
 		top: 0;
@@ -70,7 +69,6 @@
 		align-items: center;
 		z-index: 9999;
 	}
-
 	#lottie-animation {
 		width: 120px;
 		height: 120px;
@@ -175,7 +173,6 @@
 					</li>
 				}
 			</ul>
-
 		</nav>
 		<div class="main-content">
 			<nav class="top-navbar">
@@ -186,7 +183,6 @@
 				<div class="search-section">
 					<div class="search-wrapper">
 					<i class="fa fa-search search-icon"></i>
-					@* <input type="text" class="search-input" placeholder="Search..."> *@
 					<input type="text" class="search-input" id="menuSearch" placeholder="Search Menu...">
 					<div id="searchResults" class="search-results"></div>
 				</div>
@@ -241,11 +237,9 @@
 			loaderStartTime = Date.now();
 			document.getElementById('lottie-overlay').style.display = 'flex';
 		}
-
 		function hideLoader() {
 			const elapsed = Date.now() - loaderStartTime;
-			const minTime = 400; // 👈 smooth delay (300–500ms best)
-
+			const minTime = 400; 
 			if (elapsed < minTime) {
 				clearTimeout(loaderTimeout);
 				loaderTimeout = setTimeout(() => {
@@ -255,10 +249,8 @@
 				document.getElementById('lottie-overlay').style.display = 'none';
 			}
 		}
-
-		// ✅ ADD HERE 👇 (GLOBAL FETCH WRAPPER)
+		// ADD HERE (GLOBAL FETCH WRAPPER)
 		const originalFetch = window.fetch;
-
 		window.fetch = async function (...args) {
 			showLoader();
 			try {
@@ -268,12 +260,10 @@
 				hideLoader();
 			}
 		};
-
 	</script>
 	<script>
 		// Initialize Lottie animation
-					document.addEventListener("DOMContentLoaded", function () {
-
+		document.addEventListener("DOMContentLoaded", function () {
 			var animation = lottie.loadAnimation({
 				container: document.getElementById('lottie-animation'),
 				renderer: 'svg',
@@ -281,7 +271,6 @@
 				autoplay: true,
 				path: 'https://lottie.host/30e1c7d5-22ca-41c7-b0a2-f2b0a7ce94e2/ysJGEsOTl6.json'
 			});
-
 		});
 	</script>
 	<script>
@@ -299,7 +288,7 @@
 				if (isSmallScreen) {
 					// Toggle sidebar for small screens
 					sidebar.classList.toggle('open');
-					mainContent.classList.toggle('shifted'); // <-- Move main content & top-navbar
+					mainContent.classList.toggle('shifted');
 
 					if (sidebar.classList.contains('open')) {
 						hamburgerIcon.style.display = 'none';
@@ -342,30 +331,13 @@
 		</script>
 	<!-- Your existing local scripts, no duplicate jQuery here -->
 	
-	@* <script src="~/js/GlobalFunction.js"></script>
-	<script src="~/js/GlobalToaster.js"></script> *@
-	@* <script src="~/js/GlobalValidation.js"></script> *@
 	<script src="~/common/globalfunction.js"></script>
 	<script src="~/common/dropdown.js"></script>
-    @* <script src="~/common/globaltoaster.js"></script> *@
 	<script src="~/common/globalvalidation.js"></script>
 	<script src="~/common/GlobalToaster.js"></script>
-    
-
-	@* <script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script> *@
 	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
 	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
-	@* <script type="text/javascript" src="~/js/jquery-slimscroll/jquery.slimscroll.js"></script> *@
-	@* <script type="text/javascript" src="~/js/modernizr/modernizr.js"></script> *@
-	@* <script src="~/pages/widget/amchart/amcharts.min.js"></script> *@
-	@* <script src="~/pages/widget/amchart/serial.min.js"></script> *@
-	@* <script type="text/javascript" src="pages/todo/todo.js"></script> *@
-	@* <script type="text/javascript" src="~/pages/dashboard/custom-dashboard.js"></script> *@
 	<script type="text/javascript" src="~/js/script.js"></script>
-	@* <script type="text/javascript" src="~/js/SmoothScroll.js"></script> *@
-	@* <script src="~/js/pcoded.min.js"></script> *@
-	@* <script src="~/js/demo-12.js"></script> *@
-	@* <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script> *@
 	<script>
 		var $window = $(window);
 		var nav = $('.fixed-button');
@@ -508,7 +480,6 @@
 			});
 		});
 	</script>
-
 	<script>
 		$(document).ajaxComplete(function (event, xhr) {
 			if (xhr.status === 401 && xhr.responseText === "SessionExpired") {
@@ -516,7 +487,6 @@
 			}
 		});
 	</script>
-
 
 </body>
 

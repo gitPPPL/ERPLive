@@ -215,8 +215,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         else
                         {
                             mode = "Update";
-                            _globalValidationdate.LogInsertUpdateDelete(destinationTable: "WAYBILL1", sourceTable: "WAYBILL1", transactionType: "Transaction",
-                                    codeVNo: data.V_NO.ToString(), vtype: data.V_TYPE);
+                            //_globalValidationdate.LogInsertUpdateDelete(destinationTable: "WAYBILL1", sourceTable: "WAYBILL1", transactionType: "Transaction",
+                            //        codeVNo: data.V_NO.ToString(), vtype: data.V_TYPE);
                         }
                         _logService.InsertLog("WAYBILL1", "Transit Entry", "Transaction", mode, data.V_TYPE, data.V_NO.ToString(), null);
                         return "Success";

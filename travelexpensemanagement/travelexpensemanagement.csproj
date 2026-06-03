@@ -27,6 +27,7 @@
 	  <Compile Remove="Controllers\LiveRFQ\**" />
 	  <Compile Remove="Views\QualityControl\Transaction\IncommingQCRMC\**" />
 	  <Compile Remove="wwwroot\css\animate.css\**" />
+	  <Compile Remove="wwwroot\css\css\**" />
 	  <Compile Remove="wwwroot\js\classie\**" />
 	  <Compile Remove="wwwroot\js\common\**" />
 	  <Compile Remove="wwwroot\js\jquery-slimscroll\**" />
@@ -38,6 +39,7 @@
 	  <Content Remove="Controllers\LiveRFQ\**" />
 	  <Content Remove="Views\QualityControl\Transaction\IncommingQCRMC\**" />
 	  <Content Remove="wwwroot\css\animate.css\**" />
+	  <Content Remove="wwwroot\css\css\**" />
 	  <Content Remove="wwwroot\js\classie\**" />
 	  <Content Remove="wwwroot\js\common\**" />
 	  <Content Remove="wwwroot\js\jquery-slimscroll\**" />
@@ -49,6 +51,7 @@
 	  <EmbeddedResource Remove="Controllers\LiveRFQ\**" />
 	  <EmbeddedResource Remove="Views\QualityControl\Transaction\IncommingQCRMC\**" />
 	  <EmbeddedResource Remove="wwwroot\css\animate.css\**" />
+	  <EmbeddedResource Remove="wwwroot\css\css\**" />
 	  <EmbeddedResource Remove="wwwroot\js\classie\**" />
 	  <EmbeddedResource Remove="wwwroot\js\common\**" />
 	  <EmbeddedResource Remove="wwwroot\js\jquery-slimscroll\**" />
@@ -60,6 +63,7 @@
 	  <None Remove="Controllers\LiveRFQ\**" />
 	  <None Remove="Views\QualityControl\Transaction\IncommingQCRMC\**" />
 	  <None Remove="wwwroot\css\animate.css\**" />
+	  <None Remove="wwwroot\css\css\**" />
 	  <None Remove="wwwroot\js\classie\**" />
 	  <None Remove="wwwroot\js\common\**" />
 	  <None Remove="wwwroot\js\jquery-slimscroll\**" />
@@ -85,12 +89,17 @@
 	  <Content Remove="wwwroot\js\classie.js" />
 	  <Content Remove="wwwroot\js\common-pages.js" />
 	  <Content Remove="wwwroot\js\demo-12.js" />
+	  <Content Remove="wwwroot\js\GlobalFunction.js" />
 	  <Content Remove="wwwroot\js\GlobalToaster.js" />
 	  <Content Remove="wwwroot\js\GlobalValidation.js" />
 	  <Content Remove="wwwroot\js\jquery.mCustomScrollbar.concat.min.js" />
 	  <Content Remove="wwwroot\js\jquery.mousewheel.min.js" />
 	  <Content Remove="wwwroot\js\Main.js" />
 	  <Content Remove="wwwroot\js\pcoded.min.js" />
+	  <Content Remove="wwwroot\js\portfoliopinsession.js" />
+	  <Content Remove="wwwroot\js\script.js" />
+	  <Content Remove="wwwroot\js\script.min.js" />
+	  <Content Remove="wwwroot\js\site.js" />
 	  <Content Remove="wwwroot\js\SmoothScroll.js" />
 	</ItemGroup>
 
@@ -128,10 +137,6 @@
   <ItemGroup>
     <Folder Include="Controllers\FinancialAccounting\Accounting\" />
     <Folder Include="wwwroot\attachments\Purchase\" />
-  
-    <Folder Include="wwwroot\css\css\bootstrap\css\" />
-    <Folder Include="wwwroot\css\css\images\" />
-    <Folder Include="wwwroot\css\css\morris.js\css\" />
   </ItemGroup>
 
 </Project>

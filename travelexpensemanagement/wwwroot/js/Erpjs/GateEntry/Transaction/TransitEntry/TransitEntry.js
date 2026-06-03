@@ -57,9 +57,9 @@ $(document).ready(async function () {
     if (mode === "view") {
         setFormReadOnly();
 
-        $('#TransitEntryForm').after(
-            '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
-        );
+        //$('#TransitEntryForm').after(
+        //    '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+        //);
     }
     // Event handlers
     $("#ddlDocType").on('change', function () {
@@ -246,9 +246,9 @@ async function GetVNo(Vtype) {
 //==Dropdowns
 async function LoadDropDown(VTypeId) {
     try {
-        await bindDropdown('TransitEntry', 'DocType', '#ddlDocType', '-- Select VType --', null, null, false, null);
-        await bindDropdown('TransitEntry', 'DocStatus', '#ddlStatus', '-- Select Status --', null, null, true, null);
-        await bindDropdown('TransitEntry', 'PartyName', '#ddlPartyName', '-- Select Party Name --', null, null, false, "", true);
+        await bindDropdown('TransitEntry', 'DocType', '#ddlDocType', 'Select Doc Type', null, null, false, null);
+        await bindDropdown('TransitEntry', 'DocStatus', '#ddlStatus', 'Select Status', null, null, true, null);
+        await bindDropdown('TransitEntry', 'PartyName', '#ddlPartyName', 'Select Party Name', null, null, false, "", true);
     } catch (error) {
         console.error("Error loading dropdowns:", error);
     }
@@ -334,20 +334,30 @@ function populateForm(data) {
     
 }
 //==Readonly
+//function setFormReadOnly() {
+//    const form = $('#TransitEntryForm');
+//    form.find('input').prop('disabled', true);
+//    form.find('textarea').css('background-color', '#f0f0f0');
+//    const ddlParty = $('#ddlPartyName');
+//    //ddlParty.prop('disabled', false);
+//    ddlParty.prop('disabled', true).trigger('change.select2');
+//    ddlParty.on('mousedown', function (e) {
+//        e.preventDefault();
+//        this.blur();
+//    });
+//    ddlParty.css({
+//        'pointer-events': 'none',
+//        'background-color': '#e9ecef'
+//    });
+//    $('#btn-save').hide();
+//    form.addClass('erppage-readonly');
+//}
 function setFormReadOnly() {
     const form = $('#TransitEntryForm');
-    form.find('input').prop('disabled', true);
-    form.find('textarea').css('background-color', '#f0f0f0');
+    form.find('input, textarea, select').prop('disabled', true);
     const ddlParty = $('#ddlPartyName');
-    ddlParty.prop('disabled', false);
-    ddlParty.on('mousedown', function (e) {
-        e.preventDefault();
-        this.blur();
-    });
-    ddlParty.css({
-        'pointer-events': 'none',
-        'background-color': '#e9ecef'
-    });
+    ddlParty.prop('disabled', true).trigger('change.select2');
+
     $('#btn-save').hide();
     form.addClass('erppage-readonly');
 }

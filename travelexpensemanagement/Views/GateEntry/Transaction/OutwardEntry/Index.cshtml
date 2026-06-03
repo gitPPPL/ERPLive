@@ -15,17 +15,9 @@
         <div class="erppage-header-title">Outward Entry</div>
     </div>
     <div class="erppage-header-right">
-        @* <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
+        <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
- *@
-        <button id="btnbacklist"
-                onclick="handleBack('@Url.Action("Index", "OutwardEntryList")', isReadOnly)" type="button" class="btn btn-primary">
-            <i class="fa fa-list"></i>Back to list
-        </button>
-
-
-
     </div>
 </div>
 <div id="OutwardEntryForm">
@@ -186,7 +178,7 @@
             <tbody></tbody>
         </table>
     </div>
-
+@* 
     <!-- Pagination (Same as First Table) -->
     <div class="erppagelist-pagination">
         <div class="pagination-left">
@@ -207,7 +199,9 @@
         <div class="pagination-right" id="pageInfoTextOutward">
             Results: 0 - 0 of 0
         </div>
-    </div>
+    </div> *@
+
+
 </div>
 <div class="erppage-actions">
     <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
@@ -283,7 +277,7 @@
                 </div>
 
                 <!-- PAGINATION -->
-                <div class="erppagelist-pagination mt-3">
+    @*             <div class="erppagelist-pagination mt-3">
                     <div class="pagination-left">
                         <select id="pageSizeSelect" onchange="changeRowsPerPage()">
                             <option value="5">5</option>
@@ -302,7 +296,7 @@
                     <div class="pagination-right" id="pageInfoText">
                         Results: 0 - 0 of 0
                     </div>
-                </div>
+                </div> *@
 
             </div>
         </div>

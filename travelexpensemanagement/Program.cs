@@ -24,6 +24,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<DataBaseConnection>();
 builder.Services.AddScoped<GlobalValidationdate>();
+
 builder.Services.AddScoped<DbHelper>();
 builder.Services.AddScoped<DropdownService>();
 builder.Services.AddScoped<LogService>();
@@ -44,21 +45,21 @@ builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
 builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
 builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
 builder.Services.AddScoped<IMiscConsumptionListRepository, MiscConsumptionListRepository>();
-builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
-builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
 builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
+// Gete Entry Transaction repositories
+//Weighbridge Transaction repositories
 builder.Services.AddScoped<IBigWeighbridgeListRepository, BigWeighbridgeListRepository>();
 builder.Services.AddScoped<IBigWeighbridgeRepository, BigWeighbridgeRepository>();
+builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
+builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
+//Weighbridge Transaction repositories
 
 
-// Gete Entry Transaction repositories
 
 
-
-builder.Services.Configure<EncryptionSettings>(
-    builder.Configuration.GetSection("EncryptionSettings"));
+builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();
 
 builder.Services.AddDistributedMemoryCache();

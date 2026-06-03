@@ -129,16 +129,26 @@ function LoadFormByID(rowId, vtype) {
             const header = result.data.header;
             const details = result.data.details;
 
+            console.log("header", header);
+            console.log("Data", details);
+
+            if (header.v_TYPE === "OURT") {
+                document.getElementById("Conditionnaldesignid").style.display = "flex";
+            } else {
+                document.getElementById("Conditionnaldesignid").style.display = "none";
+            }
+
+
+
             $('#TxtCode').val(header.doC_ID || '');
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#NumDocNo').val(header.v_NO || '');
             $('#DtDocDate').val(formatDate(header.v_DATE));
-            DDLParty().then(() => {
-                $('#ddlPartyName')
-                    .val(header.partY_CODE || '')
-                    .trigger('change');
+            $('#DtExpectedDateReturn').val(formatDate(header.returN_DATE));
+            DDLParty().then(() => { $('#ddlPartyName') .val(header.partY_CODE || '') .trigger('change');
             });
             $('#TxtVehicleNo').val(header.trucK_NO || '');
+            $('#txtResponsiblePerson').val(header.responsiblE_PERSONB || '');
             $('#TxtWayBillNo').val(header.waybilL_NO || '');
             $('#TxtRemarks').val(header.remarks || '');
             $('#TxtAdd1PD').val(header.add1 || '');

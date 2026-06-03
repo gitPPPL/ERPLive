@@ -59,7 +59,6 @@ namespace travelexpensemanagement.Common.DropdownService
             }
             return dropdownItems;
         }
-
         public List<object> GetDropdownListERP(string query)
         {
             List<object> dropdownItems = new List<object>();
@@ -81,7 +80,6 @@ namespace travelexpensemanagement.Common.DropdownService
             }
             return dropdownItems;
         }
-
         public List<object> GetEmpdataList(string query)
         {
             List<object> dropdownItems = new List<object>();
@@ -106,7 +104,6 @@ namespace travelexpensemanagement.Common.DropdownService
             return dropdownItems;
 
         }
-
         public List<object> GetEmpReasonList(string query)
         {
             List<object> dropdownItems = new List<object>();
@@ -129,7 +126,6 @@ namespace travelexpensemanagement.Common.DropdownService
             return dropdownItems;
 
         }
-
         public List<DropdownModel> GetMultipleDropdownList(string commandText, CommandType commandType, Dictionary<string, object> parameters = null)
         {
             List<DropdownModel> dropdownItems = new List<DropdownModel>();
@@ -164,13 +160,11 @@ namespace travelexpensemanagement.Common.DropdownService
             }
             return dropdownItems;
         }
-
         public class DropdownModel
         {
             public string Value { get; set; }
             public string Text { get; set; }
         }
-
         private List<DropdownModel> ExecuteDropdown(string query, SqlParameter[] parameters = null)
         {
             var list = new List<DropdownModel>();
@@ -247,7 +241,6 @@ namespace travelexpensemanagement.Common.DropdownService
 
             return ExecuteDropdown(query);
         }
-
         // Purpose
         public List<DropdownModel> GetPurpose()
         {
@@ -256,7 +249,6 @@ namespace travelexpensemanagement.Common.DropdownService
 
             return ExecuteDropdown(query);
         }
-
         // Employee
         public List<DropdownModel> GetEmployee(string compCode)
         {
@@ -328,7 +320,84 @@ namespace travelexpensemanagement.Common.DropdownService
                 new SqlParameter("@CompCode", compCode)
             });
         }
-        
+        public List<DropdownModel> GetQCIncharg(string compCode)
+        {
+            string query = @"
+        SELECT 
+            code AS Value,
+            CONCAT(Name,'(',code,')') AS Text
+        FROM EMP_MAST
+        WHERE Comp_code = @CompCode
+        AND Resign_date IS NULL
+        AND Type IN ('Staff')
+        ORDER BY Name
+    ";
+
+            return ExecuteDropdown(query, new[]
+            {
+        new SqlParameter("@CompCode", compCode)
+    });
+        }
+        public List<DropdownModel> GetChem(string compCode)
+        {
+            string query = @"
+        SELECT 
+            code AS Value,
+            CONCAT(Name,'(',code,')') AS Text
+        FROM EMP_MAST
+        WHERE Comp_code = @CompCode
+        AND Resign_date IS NULL
+        AND Type IN ('Staff','Semi Staff')
+        ORDER BY Name
+    ";
+
+            return ExecuteDropdown(query, new[]
+            {
+        new SqlParameter("@CompCode", compCode)
+    });
+        }
+        public List<DropdownModel> GetPartyName(string compCode)
+        {
+            string query = @" SELECT CODE AS Value, NAME AS Text FROM SUBGROUP_MAST  WHERE COMP_CODE = @CompCode ORDER BY NAME  ";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)    
+            });
+        }
+        public List<DropdownModel> GetItemName(string compCode)
+        {
+            string query = @" SELECT a.CODE AS Value,a.NAME AS Text FROM ITEM_MAST a LEFT JOIN ITEM_MGROUP b ON a.MGROUP_CODE = b.CODE
+                AND a.COMP_CODE = b.COMP_CODE WHERE a.COMP_CODE = @CompCode AND b.MGROUP_TYPE = 'Raw' AND a.ACTIVE = 1 ORDER BY a.NAME";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetItemMaster(string compCode)
+        {
+            string query = @"
+            SELECT Code AS Value, NAME AS Text FROM ITEM_MAST WHERE COMP_CODE = @CompCode AND ACTIVE = 1 AND NAME <> '' ORDER BY NAME ";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetParticulars(string compCode)
+        {
+            string query = @"
+                SELECT Code AS Value, NAME AS Text FROM QCP_MAST WHERE COMP_CODE = @CompCode AND ACTIVE = 1 AND NAME <> '' ORDER BY NAME ";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetUnits()
+        {
+            string query = @"
+                SELECT Code AS Value, NAME AS Text FROM QCPUNIT_MAST WHERE ACTIVE = 1 AND NAME <> '' ORDER BY NAME ";
+            return ExecuteDropdown(query);
+        }
+
     }
 }
 

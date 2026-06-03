@@ -14,7 +14,6 @@
     const vtype = urlParams.get('VType');
     const $tbody = $("#tblOutwardEntry tbody");
     const mode = urlParams.get('mode');
-    const isReadOnly = (mode === 'view');
     $(document).ready(function () {
 
         (async () => {
@@ -172,7 +171,7 @@
 
                     const header = {
                         RETURN_DATE: RETURN_DATE,
-                        RESPONSIBLE_PERSON: RESPONSIBLE_PERSON,
+                        RESPONSIBLE_PERSONB: RESPONSIBLE_PERSON,
                         DOC_ID: $.trim($('#TxtCode').val()) || null,
                         V_TYPE: $('#ddlDocType').val() || null,
                         V_NO: parseInt($('#NumDocNo').val()) || null,
@@ -219,7 +218,7 @@
 
                             } else {
 
-                                toastr.error(response.message || "Save failed.");
+                                toastr.warning(response.message || "Save failed.");
                             }
                         },
 

@@ -1,7 +1,6 @@
 ﻿using Azure;
 using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Reflection.PortableExecutable;
@@ -9,6 +8,7 @@ using System.Text.RegularExpressions;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.QualityControl.Transaction;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -35,6 +35,9 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         }
         public IActionResult Index()
         {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            ViewBag.GlobalVariables = globalVariables;
+ 
             return View("~/Views/QualityControl/Transaction/IncommingQC/Index.cshtml");
         }
         public JsonResult GetddlDocType()
@@ -94,57 +97,21 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
-        public JsonResult GetddlQCIncharge()
+        public JsonResult GetDropdown(string type)
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"SELECT code, CONCAT(Name, '(', code, ')') AS Name FROM EMP_MAST WHERE Comp_code = '{globalVar.PubCompCode}' 
-            AND Resign_date IS NULL AND Type IN ('Staff') ORDER BY Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlChem()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" SELECT code, CONCAT(Name, '(', code, ')') AS Name FROM EMP_MAST WHERE Comp_code = '{globalVar.PubCompCode}' 
-            AND Resign_date IS NULL AND Type IN ('Staff', 'Semi Staff') ORDER BY Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlItemName()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"SELECT a.CODE, a.NAME FROM ITEM_MAST a LEFT JOIN ITEM_MGROUP b  ON a.MGROUP_CODE = b.CODE AND a.COMP_CODE = b.COMP_CODE 
-            WHERE a.COMP_CODE = '{globalVar.PubCompCode}' AND b.MGROUP_TYPE = 'Raw' AND a.ACTIVE = 1 ORDER BY a.NAME";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetPartyName()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"select CODE,NAME from SUBGROUP_MAST WHERE COMP_CODE='"+ globalVar.PubCompCode +"'  order by NAME";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetItemMaster()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"select Code, NAME from ITEM_MAST where COMP_CODE='" + globalVar.PubCompCode + "' and ACTIVE=1 and name<>''";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetParticulars()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"select Code, NAME from QCP_MAST where COMP_CODE='" + globalVar.PubCompCode + "' and ACTIVE=1 and name<>''";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetUnits()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"select Code, NAME from QCPUNIT_MAST where ACTIVE=1 and name<>''";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
+            var gv = _globalVariableService.GetGlobalVariables();
+            var data = type switch
+            {
+                "QCIncharg" => _dropdownService.GetQCIncharg(gv.PubCompCode),
+                "Chem" => _dropdownService.GetChem(gv.PubCompCode),
+                "PartyName" => _dropdownService.GetPartyName(gv.PubCompCode),
+                "ItemName" => _dropdownService.GetItemName(gv.PubCompCode),
+                "ItemMaster" => _dropdownService.GetItemMaster(gv.PubCompCode),
+                "Units" => _dropdownService.GetUnits(),
+                "Particulars" => _dropdownService.GetParticulars(gv.PubCompCode),
+                _ => new List<DropdownService.DropdownModel>()
+            };
+            return Json(data);
         }
         [HttpPost]
         public IActionResult SendDropdownData(string DocType, string MRNText, string VNo)
@@ -170,11 +137,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         {
                             // Step 1: QC Status
                             bool isQCComplete = false;
-                            //if (reader.Read())
-                            //{
-                            //    isQCComplete = Convert.ToBoolean(reader["IsQCComplete"]);
-                            //}
-                            // Step 2: Header Data
                             reader.NextResult();
                             var headerData = new List<object>();
                             while (reader.Read())
@@ -254,7 +216,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     {
                         if (header.ACTION == "INSERT")
                         {
-                            // ================= Insert Header =================
                             string qryHeader = @"INSERT INTO QC1 
                         (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DOC_ID, MRN_NO, MRN_TYPE, MRN_DATE, BALES, PARTY_CODE,
                          QC_INCHARGE, QC_INCHARGENAME, CHEMIST, CHEMISTNAME, BILL_NO, BILL_DATE, TRANSPORT, TRUCK_NO, INV_QTY, RECD_QTY,
@@ -299,12 +260,11 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
                                 cmd.ExecuteNonQuery();
-                            }
+                            }   
                         }
                         else if (header.ACTION == "UPDATE")
                         {
-                            // ================= Update Header =================
-                            string qryHeaderUpdate = @"UPDATE QC1 SET 
+                        string qryHeaderUpdate = @"UPDATE QC1 SET 
                         V_TYPE=@V_TYPE, V_NO=@V_NO, V_DATE=@V_DATE, MRN_NO=@MRN_NO, MRN_TYPE=@MRN_TYPE, MRN_DATE=@MRN_DATE, BALES=@BALES, PARTY_CODE=@PARTY_CODE,
                         QC_INCHARGE=@QC_INCHARGE, CHEMIST=@CHEMIST, BILL_NO=@BILL_NO, BILL_DATE=@BILL_DATE, TRANSPORT=@TRANSPORT,
                         TRUCK_NO=@TRUCK_NO, INV_QTY=@INV_QTY, RECD_QTY=@RECD_QTY, SHORT_QTY=@SHORT_QTY, REMARKS=@REMARKS,
@@ -351,11 +311,11 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         }
                         // ================= Insert Items (both insert & update) =================
                         string qryItem = @"INSERT INTO QC2
-                    (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DOC_ID, ITEM_CODE, QC_CODE, QCP_CODE, UNIT, ACCEPTANCE, RESULT,
-                     REMARK, DEDU_AMT, ALLOW_AMT, DEDU_NARR, EUSER, EDATE, AED, WSID, LIP, LID, SNO)
-                    VALUES
-                    (@YEAR_CODE, @COMP_CODE, @BRANCH_CODE, @V_TYPE, @V_NO, @V_DATE, @DOC_ID, @ITEM_CODE, @QC_CODE, @QCP_CODE, @UNIT,
-                     @ACCEPTANCE, @RESULT, @REMARK, @DEDU_AMT, @ALLOW_AMT, @DEDU_NARR, @EUSER, GETDATE(), 'E', @WSID, @LIP, @LID, @SNO)";
+                            (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DOC_ID, ITEM_CODE, QC_CODE, QCP_CODE, UNIT, ACCEPTANCE, RESULT,
+                             REMARK, DEDU_AMT, ALLOW_AMT, DEDU_NARR, EUSER, EDATE, AED, WSID, LIP, LID, SNO)
+                            VALUES
+                            (@YEAR_CODE, @COMP_CODE, @BRANCH_CODE, @V_TYPE, @V_NO, @V_DATE, @DOC_ID, @ITEM_CODE, @QC_CODE, @QCP_CODE, @UNIT,
+                             @ACCEPTANCE, @RESULT, @REMARK, @DEDU_AMT, @ALLOW_AMT, @DEDU_NARR, @EUSER, GETDATE(), 'E', @WSID, @LIP, @LID, @SNO)";
 
                         int sno = 1;
                         foreach (var item in items)
@@ -387,7 +347,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 cmd.ExecuteNonQuery();
                             }
                         }
-
                         transaction.Commit();
                     }
                 }
@@ -452,7 +411,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         }
                     }
                 }
-
                 return Json(response);
             }
             catch (Exception ex)

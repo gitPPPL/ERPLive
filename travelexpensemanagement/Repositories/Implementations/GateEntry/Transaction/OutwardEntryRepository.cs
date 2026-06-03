@@ -22,24 +22,39 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _globalValidationdate = globalValidationdate;
         }
 
-        public RepositoryResponse SaveOutwardEntry(OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
+        public RepositoryResponse SaveOutwardEntry(
+         OutWordEntry_Header header,
+         List<DetailsOutwardEntry> details,
+         string action)
         {
             try
             {
                 var validation = Validdata(header, details);
-                if (validation.status== false)
+
+                if (!validation.status)
                 {
-                    return new RepositoryResponse {  status = false,  message = validation.message  };
+                    return new RepositoryResponse
+                    {
+                        status = false,
+                        message = validation.message
+                    };
                 }
+
                 var g = _globalVariableService.GetGlobalVariables();
+
                 using var conn = _dbConnection.GetErpConnection();
-                conn.Open();         
+                conn.Open();
+
                 using var transaction = conn.BeginTransaction();
+
                 try
                 {
-                    // 🔴 DELETE OLD DATA
-                    string deleteSql = @" DELETE FROM GATE2   WHERE COMP_CODE = @CompCode   AND V_NO = @VNo 
-                    AND BRANCH_CODE = @BranchCode   AND YEAR_CODE = @YearCode;";
+                    // DELETE OLD DATA
+                    string deleteSql = @"DELETE FROM GATE2
+                                 WHERE COMP_CODE = @CompCode
+                                 AND V_NO = @VNo
+                                 AND BRANCH_CODE = @BranchCode
+                                 AND YEAR_CODE = @YearCode";
 
                     using (var deleteCmd = new SqlCommand(deleteSql, conn, transaction))
                     {
@@ -47,97 +62,100 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
                         deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
                         deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+
                         deleteCmd.ExecuteNonQuery();
                     }
-                    // 🔵 HEADER SAVE
+
+                    // HEADER SAVE
                     using (var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
+
                         cmd.Parameters.AddWithValue("@Action", action);
                         cmd.Parameters.AddWithValue("@SaveAction", "Header");
                         cmd.Parameters.AddWithValue("@DOC_ID", (header.V_TYPE ?? "") + header.V_NO);
                         cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
-                        cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
-                        cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
-                        cmd.Parameters.AddWithValue("@V_TIME", header.V_TIME);
-                        cmd.Parameters.AddWithValue("@RETURN_DATE", header.RETURN_DATE);
-                        cmd.Parameters.AddWithValue("@RESPONSIBLE_PERSON", header.RESPONSIBLE_PERSONB);
+                        cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE ?? "");
+                        cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                        // DATE PARAMETERS
+                        cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value =
+                            header.V_DATE == null
+                            ? DBNull.Value
+                            : Convert.ToDateTime(header.V_DATE);
+
+                        cmd.Parameters.Add("@RETURN_DATE", SqlDbType.SmallDateTime).Value =
+                            header.RETURN_DATE == null
+                            ? DBNull.Value
+                            : Convert.ToDateTime(header.RETURN_DATE);
+
+                        cmd.Parameters.AddWithValue("@V_TIME", header.V_TIME ?? "");                
+                        cmd.Parameters.AddWithValue("@RESPONSIBLE_PERSON", header.RESPONSIBLE_PERSONB ?? "");
                         cmd.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
-                        cmd.Parameters.AddWithValue("@PARTY_NAME", header.PARTY_NAME);
-                        cmd.Parameters.AddWithValue("@TRUCK_NO", header.TRUCK_NO);
-                        cmd.Parameters.AddWithValue("@WAYBILL_NO", header.WAYBILL_NO);
-                        cmd.Parameters.AddWithValue("@REMARKS", header.REMARKS);
-                        cmd.Parameters.AddWithValue("@ADD1", header.Add1);
-                        cmd.Parameters.AddWithValue("@ADD2", header.Add2);
-                        cmd.Parameters.AddWithValue("@ADD3", header.Add3);
+                        cmd.Parameters.AddWithValue("@PARTY_NAME", header.PARTY_NAME ?? "");
+                        cmd.Parameters.AddWithValue("@TRUCK_NO", header.TRUCK_NO ?? "");
+                        cmd.Parameters.AddWithValue("@WAYBILL_NO", header.WAYBILL_NO ?? "");
+                        cmd.Parameters.AddWithValue("@REMARKS", header.REMARKS ?? "");
+                        cmd.Parameters.AddWithValue("@ADD1", header.Add1 ?? "");
+                        cmd.Parameters.AddWithValue("@ADD2", header.Add2 ?? "");
+                        cmd.Parameters.AddWithValue("@ADD3", header.Add3 ?? "");
                         cmd.Parameters.AddWithValue("@PARTY_CITY", header.PARTY_CITY);
-                        cmd.Parameters.AddWithValue("@PARTY_GST", header.PARTY_GST);
-                        cmd.Parameters.AddWithValue("@PARTY_PINCODE", header.PARTY_PINCODE);
+                        cmd.Parameters.AddWithValue("@PARTY_GST", header.PARTY_GST ?? "");
+                        cmd.Parameters.AddWithValue("@PARTY_PINCODE", header.PARTY_PINCODE ?? "");
                         cmd.Parameters.AddWithValue("@PARTY_ADDRESSID", header.PARTY_ADDRESSID);
-                        cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE);
+                        cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE ?? "");
                         cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+                        cmd.Parameters.Add("@UDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;
                         cmd.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                        cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
+                        cmd.Parameters.Add("@EDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;
                         cmd.Parameters.AddWithValue("@AED", "A");
-                        cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
+                        cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID ?? "");
+                        cmd.Parameters.AddWithValue("@LIP", g.PubLocalId ?? "");
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                         cmd.ExecuteNonQuery();
                     }
 
-                    // 🟢 DETAILS SAVE
+                    // DETAILS SAVE
                     foreach (var d in details)
                     {
                         if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
                             continue;
+
                         using var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction);
+
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "INSERT");
                         cmd.Parameters.AddWithValue("@SaveAction", "Details");
                         cmd.Parameters.AddWithValue("@DOC_ID", (header.V_TYPE ?? "") + header.V_NO);
                         cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
-                        cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
-                        cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                        cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE ?? "");
+                        cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE == null ? DBNull.Value : Convert.ToDateTime(header.V_DATE);
                         cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
                         cmd.Parameters.AddWithValue("@ITEM_CODE", d.ITEM_CODE);
-                        cmd.Parameters.AddWithValue("@ITEM_NAME", d.ITEM_NAME);
+                        cmd.Parameters.AddWithValue("@ITEM_NAME", d.ITEM_NAME ?? "");
                         cmd.Parameters.AddWithValue("@DEPT_CODE", d.DEPT_CODE);
                         cmd.Parameters.AddWithValue("@UOM_CODE", d.UOM_CODE);
-                        cmd.Parameters.AddWithValue("@UOM_NAME", d.UOM_NAME);
+                        cmd.Parameters.AddWithValue("@UOM_NAME", d.UOM_NAME ?? "");
                         cmd.Parameters.AddWithValue("@NOS", d.NOS);
                         cmd.Parameters.AddWithValue("@QTY", d.QTY);
-                        cmd.Parameters.AddWithValue("@REMARKS", d.REMARKS);
-                        cmd.Parameters.AddWithValue("@REF_TYPE", d.REF_TYPE);
+                        cmd.Parameters.AddWithValue("@REMARKS", d.REMARKS ?? "");
+                        cmd.Parameters.AddWithValue("@REF_TYPE", d.REF_TYPE ?? "");
                         cmd.Parameters.AddWithValue("@REF_NO", d.REF_NO);
                         cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+                        cmd.Parameters.Add("@UDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;
                         cmd.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                        cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
+                        cmd.Parameters.Add("@EDATE", SqlDbType.SmallDateTime).Value = DateTime.Now;
                         cmd.Parameters.AddWithValue("@AED", "A");
-                        cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
+                        cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID ?? "");
+                        cmd.Parameters.AddWithValue("@LIP", g.PubLocalId ?? "");
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                         cmd.ExecuteNonQuery();
                     }
                     transaction.Commit();
-
-                    if (action == "UPDATE")
-                    {
-                        _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
-                        codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
-                    }
-
-                    return new RepositoryResponse
-                    {
-                        status = true,
-                        message = validation.message
-                    };
+                    return new RepositoryResponse { status = true, message = "Save Successfully" };
                 }
                 catch (Exception)
                 {
@@ -151,7 +169,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 {
                     status = false,
                     message = ex.Message
-                }; ;
+                };
             }
         }
         public RepositoryResponse Validdata(  OutWordEntry_Header header,  List<DetailsOutwardEntry> details)
@@ -180,16 +198,20 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                decimal bill_gst = Convert.ToDecimal(reader["bill_gst"]);
+                                string bill_gst = Convert.ToString(reader["bill_gst"]);
                                 string einvoice_flg = Convert.ToString(reader["einvoice_flg"]);
                                 decimal namount = Convert.ToDecimal(reader["namount"]);
 
+                                decimal billGstValue = 0;
+                                decimal.TryParse(bill_gst, out billGstValue);
+
                                 if (namount >= 100000 &&
-                                    bill_gst > 16 &&
+                                    billGstValue > 16 &&
                                     namount != 0 &&
                                     einvoice_flg != "Y")
                                 {
-                                    return new RepositoryResponse  {
+                                    return new RepositoryResponse
+                                    {
                                         status = false,
                                         message = "Please Generate GST E Invoice Before Creating GatePass."
                                     };
@@ -213,11 +235,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                return new RepositoryResponse
-                                {
-                                    status = false,
-                                    message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"
-                                };
+                                return new RepositoryResponse { status = false, message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"  };
                             }
                         }
                     }
@@ -286,7 +304,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 message =
                                     $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
                                     $"& Your Quantity is = {(d.QTY ?? 0)}, " +
-                                    $"Please Check Item Code {d.ITEM_CODE}"
+                                    $"Please Check Item Name {d.ITEM_NAME}"
                             };
                         }
                     }

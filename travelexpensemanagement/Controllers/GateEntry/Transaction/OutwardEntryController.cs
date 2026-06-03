@@ -97,7 +97,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "SELECT  a.CODE, a.NAME AS Shortname, b.mgroup_type FROM  ITEM_MAST a\r\nLEFT JOIN  ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE\r\nWHERE  a.Active = 1  AND a.comp_code = 1 group by a.NAME ,a.code,b.mgroup_type order by a.NAME asc";
+                string query = "SELECT  a.CODE, a.NAME AS Shortname, b.mgroup_type FROM  ITEM_MAST a  LEFT JOIN  ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE  WHERE  a.Active = 1  AND a.comp_code = "+ getdata.PubCompCode  +" group by a.NAME ,a.code,b.mgroup_type order by a.NAME asc";
                 var ItemList = _dropdownService.GetDropdownList(query);
                 return Json(ItemList);
             }

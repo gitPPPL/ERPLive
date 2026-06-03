@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
@@ -86,7 +87,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 WASTE_WGT = reader["WASTE_WGT"]?.ToString(),
                                 STATUS = reader["STATUS"]?.ToString()
                             });
-                        }               
+                        }
                         if (reader.NextResult() && reader.Read())
                         {
                             totalCount = reader.GetInt32(0);
@@ -102,6 +103,42 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     success = false,
                     message = "An error occurred while fetching the QC Incoming Entry List.",
                     error = ex.Message
+                });
+            }
+        }
+        [HttpPost]
+        public JsonResult Delete(int vNo, string docType)
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("usp_InsertIncommingQC", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "DELETE");
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@V_NO", vNo);
+                        cmd.Parameters.AddWithValue("@V_TYPE", docType);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new
+                {
+                    status = true,
+                    message = "Record deleted successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
                 });
             }
         }

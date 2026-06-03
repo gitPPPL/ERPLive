@@ -89,26 +89,29 @@
 	<div class="excel-wrapper fixed-grid-wrapper">
 		<table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table">
 			<colgroup>
-				<col style="display:none;" /> <!-- FIXED -->
-				<col style="width: 80px;" />  <!-- VN No -->
-				<col style="width: 110px;" /> <!-- V Date -->
-				<col style="width: 150px;" /> <!-- Do No -->
-				<col style="width: 180px;" /> <!-- Party Name -->
-				<col style="width: 65px;" />  <!-- Truck No -->
-				<col style="width: 75px;" />  <!-- Transport -->
-				<col style="width: 140px;" /> <!-- Action -->
+				<col style="display:none;" />  <!-- Code (hidden) -->
+
+				<col style="width: 80px;" />   <!-- VNo -->
+				<col style="width: 110px;" />  <!-- VDate -->
+				<col style="width: 90px;" />   <!-- VTime -->
+				<col style="width: 90px;" />   <!-- Do No -->
+				<col style="width: 200px;" />  <!-- Party Name -->
+				<col style="width: 150px;" />  <!-- Truck No -->
+				<col style="width: 120px;" />  <!-- Transport -->
+
+				<col style="width: 120px;" />  <!-- Action -->
 			</colgroup>
 			<thead>
 				<tr>
 					<th style="display:none;">Code</th>
-					<th>Vno</th>
-					<th>Vdate</th>
-					<th>Vtime</th>
+					<th>Doc No</th>
+					<th>Doc Date</th>
+					<th>Doc Time</th>
 					<th>Do No</th>
 					<th>Party Name</th>
 					<th>Truck No</th>
 					<th>Transport</th>
-					<th>Action</th>
+					<th class="action-col">Action</th>
 				</tr>
 			</thead>
 			<tbody></tbody>
@@ -125,10 +128,10 @@
 			</select>
 		</div>
 		<div class="pagination-center">
-			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
 			<div id="pageNumbers" class="page-numbers"></div>
 
-			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
 		</div>
 		<div class="pagination-right" id="pageInfoText">
 			Results: 0 - 0 of 0
@@ -144,4 +147,5 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/vehicleinwardentrylist/vehicleinwardentrylist.js"></script>

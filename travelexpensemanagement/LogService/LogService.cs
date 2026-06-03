@@ -16,7 +16,7 @@ namespace travelexpensemanagement.LogService
             _globalVariableService = globalVariableService;
         }
         public void InsertLog(string tableName, string formName, string tableType, string mode, string vType, string vNo, DateTime? vDate)
-        {
+        {   
             var sessionData = _globalVariableService.GetGlobalVariables();
             if (sessionData == null)
             {
@@ -25,7 +25,7 @@ namespace travelexpensemanagement.LogService
             }
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                SqlCommand cmd = new SqlCommand(@" INSERT INTO LOG_TABLE
+                SqlCommand cmd = new SqlCommand(@" INSERT INTO LOGTABLE
                     (COMP_CODE, V_TYPE, V_NO, V_DATE, TABLE_NAME, FORM_NAME, TABLE_TYPE, MODE, USERID, LOG_DATE, WSID, LIP, LID) VALUES
                     (@COMP_CODE, @V_TYPE, @V_NO, @V_DATE, @TABLE_NAME, @FORM_NAME, @TABLE_TYPE, @MODE, @USERID, @LOG_DATE, @WSID, @LIP, @LID)", con);
 

@@ -20,6 +20,5 @@ namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
         Task<RepositoryResponseData<int>> GetSEARCHCONTAINERAsync(string Container_No);
         Task<RepositoryResponseList<int>>  DDlTransitNoAsync(string v_type, int v_no, int partycode, DateTime ExpiryDate);
 
-
     }
 }
