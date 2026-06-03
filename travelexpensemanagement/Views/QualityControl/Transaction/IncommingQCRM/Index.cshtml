@@ -193,8 +193,8 @@
                         </div>
                     </div>
                     <div class="erppagelist-container" style="margin:0px;">
-                        <div class="excel-wrapper fixed-grid-wrapper">
-                            <table id="itemTable" class="excel-table fixed-grid-table">
+                        <div class="erppagetabledynamic-wrapper">
+                            <table id="itemTable" class="erppagetabledynamic-table">
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -377,20 +377,53 @@
                }
            });
         // ===========================================================================================
-           $('#ddlItemName').on('change', function () {
-             var selectedNo = $(this).val(); // item code
-             var selectedText = $(this).find('option:selected').text(); // item name
+        //Commented by sumesh
+         //   $('#ddlItemName').on('change', function () {
+         //     var selectedNo = $(this).val(); // item code
+         //     var selectedText = $(this).find('option:selected').text(); // item name
 
 
-             if (selectedNo) {
-                 $('#itemTable tbody').append(
-                     '<tr class="text-left"><td>' + selectedNo + '</td><td>' + selectedText + '</td></tr>'
-                 );
-             }
-             $(this).val('');
-             console.log('Selected Item Code:', selectedNo);
-             console.log('Selected Item Name:', selectedText);
-         });
+         //     if (selectedNo) {
+         //         $('#itemTable tbody').append(
+         //             '<tr class="text-left"><td>' + selectedNo + '</td><td>' + selectedText + '</td></tr>'
+         //         );
+         //     }
+         //     $(this).val('');
+         //     console.log('Selected Item Code:', selectedNo);
+         //     console.log('Selected Item Name:', selectedText);
+         // });
+          $('#ddlItemName').on('change', function () {
+
+        var selectedNo = $(this).val(); 
+        var selectedText = $(this).find('option:selected').text(); 
+
+       
+
+        if (selectedNo) {
+
+            $('#itemTable tbody').append(
+                '<tr class="text-left">' +
+                    '<td>' + selectedNo + '</td>' +
+                    '<td>' + selectedText + '</td>' +
+                   
+                    '<td>' +
+                        '<button class="act-btn delete" ' +
+                                'title="Delete" ' +
+                                'style="cursor:pointer;" ' +
+                                'onclick="$(this).closest(\'tr\').remove();">' +
+                            '<i class="fa fa-trash"></i>' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>'
+            );
+        }
+
+        $(this).val('');
+
+        console.log('Selected Item Code:', selectedNo);
+        console.log('Selected Item Name:', selectedText);
+    });
+
            $('#btn_fill').on('click', function () {
         const rows = $('#itemTable tbody tr');
         if (rows.length === 0) {
@@ -871,6 +904,7 @@
         // Item Grid
 
         $('#itemTable tbody').empty();
+        
 
         $.each(response.items, function (index, item) {
 
@@ -878,7 +912,9 @@
                 <tr class="text-left">
                     <td>${item.iteM_CODE}</td>
                     <td>${item.iteM_NAME}</td>
-                    <td>${item.qty}</td>
+                    <td><button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="$(this).closest('tr').remove();">
+                        <i class="fa fa-trash"></i></button>
+                    </td>
                 </tr>
             `);
         });

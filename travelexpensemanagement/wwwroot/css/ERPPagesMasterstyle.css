@@ -341,7 +341,71 @@
 .erppage-body {
     padding: 8px 4px;
 }
+/* ===== Dynamic Item Table ===== */
+.erppagetabledynamic-wrapper {
+    width:50%;
+    /*display: inline-block;*/ /* wrapper shrinks to content */
+    max-height: 180px; /* Fixed height */
+    overflow-y: auto; /* Vertical scrollbar */
+    overflow-x: auto; /* Horizontal scrollbar if needed */
+    border: 1px solid #c9c9c9;
+    border-radius: 10px;
+   /* overflow: hidden;*/
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
 
+.erppagetabledynamic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+    .erppagetabledynamic-table thead th {
+        background: linear-gradient(135deg, #2f7d32, #1b5e20);
+        color: #fff;
+        padding: 8px 12px;
+        font-weight: 600;
+        text-align: left;
+        border: 1px solid #256329;
+        white-space: nowrap;
+    }
+
+    .erppagetabledynamic-table tbody td {
+        padding: 8px 12px;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        background: #fff;
+        vertical-align: middle;
+    }
+
+    .erppagetabledynamic-table tbody tr:nth-child(even) td {
+        background: #f8faf8;
+    }
+
+    .erppagetabledynamic-table tbody tr:hover td {
+        background: #edf7ee;
+        transition: all 0.2s ease;
+    }
+
+    .erppagetabledynamic-table tbody td:first-child {
+        font-weight: 600;
+        color: #1b5e20;
+        font-size: 12px;
+    }
+
+    .erppagetabledynamic-table tbody td:last-child {
+        width: 100%;
+        font-size: 12px;
+    }
+
+/* Empty table message */
+.erppagetabledynamic-empty {
+    text-align: center;
+    padding: 15px;
+    color: #6b7280;
+    font-style: italic;
+}
 /* ===== GRID ===== */
 .erppage-grid {
     display: grid;
