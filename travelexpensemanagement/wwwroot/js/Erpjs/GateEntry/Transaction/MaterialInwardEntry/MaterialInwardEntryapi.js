@@ -398,11 +398,8 @@ async function GetFasttagVehicledetail() {
         const VNo = $('#TxtDocNo').val();
 
         if (!rcNumber) {
-            showToast("Vehicle No Not Found", { type: "info" });
-            $('#TxtVehicleNo').addClass('is-invalid').focus();
+            showToast("Please Fill Vehicle No.", { type: "info" });
             return;
-        } else {
-            $('#TxtVehicleNo').removeClass('is-invalid');
         }
 
         const res = await $.ajax({
@@ -449,14 +446,9 @@ async function GetVehicledetail() {
         const VType = $('#ddlDocType').val();
         const VNo = $('#TxtDocNo').val();
         if (!rcNumber) {
-            showToast("Vehicle No Not Found", { type: "info" });
-            $('#TxtVehicleNo').addClass('is-invalid').focus();
+            showToast("Please Fill Vehicle No.", { type: "info" });           
             return;
-        }
-        else {
-            $('#TxtVehicleNo').removeClass('is-invalid');
-        }
-
+        }     
         const res = await $.ajax({
             url: `/InwardEntry/GetVehcleinfo`,
             data: { rc_number: rcNumber, VType: VType, VNo: VNo },
@@ -653,7 +645,7 @@ async function GetEwaybillno() {
         if (res.success) {
             showToast("Successfully", { type: "success" });
         } else {
-            showToast(res.message || "Failed", { type: "error" });
+            showToast(res.message || "Failed", { type: "info" });
         }
 
     } catch (error) {
@@ -774,7 +766,7 @@ async function Approvalbtn() {
             return;
         }
 
-        if (message === "DocumentSend") {
+        if (message === "DocumentApproved") {
 
             $('#span_approved')
                 .removeAttr('hidden')
@@ -994,3 +986,40 @@ async function SendWindowApproval() {
         showToast("Server Error", { type: "error" });
     }
 }
+
+async function GetTransitnodata(TransitNo) {
+    try {
+        const url = `/InwardEntry/GetTransitData?VoucherNo=${encodeURIComponent(TransitNo)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const d = (Array.isArray(data) && data.length > 0) ? data[0] : {};
+
+        console.log("Transit Data:", d);
+
+        $('#TxtEWayNo').val(d.forM_NO || '');
+        $('#TxtBillAmt').val(d.totaL_AMT || '');
+        $('#TxtEWBInvAmt').val(d.totaL_AMT || '');
+        $('#TxtEWBInvNo').val(d.bilL_NO || '');
+        $('#DtEWayDate').val(
+            d.forM_DATE
+                ? d.forM_DATE.split(' ')[0].split('-').reverse().join('-')
+                : ''
+        );
+
+        $('#TxtEWayDate').val(
+            d.expirY_DATE
+                ? d.expirY_DATE.split(' ')[0].split('-').reverse().join('-')
+                : ''
+        );
+    } catch (error) {
+        console.error("Error fetching Transit Data:", error);
+        showToast("Error fetching Transit Data", { type: "error" });
+    }
+}
+

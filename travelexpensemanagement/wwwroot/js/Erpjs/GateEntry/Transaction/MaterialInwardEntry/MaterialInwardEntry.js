@@ -102,15 +102,8 @@
         if (SHIP_BILLNO && !SHIP_PARTY) {
         if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
         }
-              
 
-        if (TRANSIT_NO && EWB_EXPDATE) {
-            const expDate = new Date(EWB_EXPDATE);
-            const inDate = new Date(V_DATE);
-            if (expDate < inDate) {
-                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
-            }
-        }
+
 
         if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
             if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
@@ -122,7 +115,16 @@
             if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
                 showToast(`Transit No./Ewaybill compulsory if Bill Amount > ${PubDefEWaybillAmt}`, { type: "info" });
             }
-        }       
+        }     
+
+
+        if (TRANSIT_NO && EWB_EXPDATE) {
+            const expDate = new Date(EWB_EXPDATE);
+            const inDate = new Date(V_DATE);
+            if (expDate < inDate) {
+                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
+            }
+        }        
 
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
@@ -612,21 +614,21 @@
         itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
     });
 
-    // DEPARTMENT
-    let deptOptions = `<option value="">Select</option>`;
-    $.each(deptList, function (i, item) {
-                    const selected = item.value == data.DepttName ? "selected" : "";
-    deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
-                });
+                // DEPARTMENT
+                let deptOptions = `<option value="">Select</option>`;
+                $.each(deptList, function (i, item) {
+                                const selected = item.value == data.DepttName ? "selected" : "";
+                deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+                            });
 
-    // UNIT
-    let unitOptions = `<option value="">Select</option>`;
-    $.each(unitList, function (i, item) {
-                    const selected = item.value == data.unit ? "selected" : "";
-    unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
-                });
+                // UNIT
+                let unitOptions = `<option value="">Select</option>`;
+                $.each(unitList, function (i, item) {
+                                const selected = item.value == data.unit ? "selected" : "";
+                unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+                            });
 
-    const row = `
+                const row = `
     <tr class="no-border-input">
         <td>
             <input type="text" class="form-control itemCode numeric-only" style="${normalStyle}" value="${data.itemCode ?? ''}" readonly />   </td>

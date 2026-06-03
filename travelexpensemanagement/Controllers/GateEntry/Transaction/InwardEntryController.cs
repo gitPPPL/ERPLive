@@ -12,6 +12,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using travelexpensemanagement.Authorize;
@@ -106,10 +107,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
 
             var action = request.Header.action == "INSERT" ? "INSERT"  : "UPDATE";
+     
 
             var validation = Validation(request.Header, request.Deatils);
+
             if (validation.Status == "VALIDATION" || validation.Status == "Error")
-            {
+            {         
                 return Json(new { success = validation.Status == "VALIDATION", status = validation.Status, message = validation.Message });
             }
 
@@ -142,7 +145,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                  isApprovalBody = true;
                 }
 
-                APPROV_USER = GetText("select APPROV_USER from DOC_APPROSTAGE where USER_CODE = " + g.PubCompCode + " and DOC_CODE = '" + header.V_TYPE + "' and comp_code = " + g.PubCompCode + "");
+                APPROV_USER = GetText("select APPROV_USER from DOC_APPROSTAGE where USER_CODE = " + g.PubUserId + " and DOC_CODE = '" + header.V_TYPE + "' and comp_code = " + g.PubCompCode + "");
 
                 conn.Open(); 
 
@@ -191,7 +194,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     fappRemark = "Document Approved.";
                 }
 
-                else if (header.WAYBILL_NO  !=  "")
+                else if (header.WAYBILL_NO  !=  null)
                 {
                     fappstatus = "Approved";
                     fappRemark = "Document Approved.";
@@ -208,8 +211,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     var jsonResult = GetVNo(header.V_TYPE) as JsonResult;
                     dynamic data = jsonResult.Value;
                     header.V_NO = Convert.ToInt32(data.V_NO);
-                }     
-                
+                }                     
                  
                 using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {
@@ -398,8 +400,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         public string GetText(string query)
         {
-
-
             try
             {
                 using var con = _dbConnection.GetErpConnection();
@@ -433,7 +433,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             try
             {
-                var g = _globalVariableService.GetGlobalVariables();
+                var g = _globalVariableService.GetGlobalVariables();               
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
 
@@ -456,10 +456,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                         if (g.PubUserId != "1" && g.PubUserId != "53")
                         {
-                            return new ApiResponse
-                            {
-                                Status = "VALIDATION",
-                                Message = $"Gate no. {vno} exist in MRN No. {header.V_NO} Modification not allowed."
+                            return new ApiResponse  { Status = "VALIDATION",  Message = $"Gate no. {vno} exist in MRN No. {header.V_NO} Modification not allowed."
                             };
                         }
                     }
@@ -479,7 +476,10 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     using var reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
-                        return new ApiResponse {  Status = "VALIDATION", Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}" };
+                        if(g.PubUserId != "1")
+                        {                     
+                            return new ApiResponse { Status = "VALIDATION", Message = $"Transit no. not valid for Party=> {header.PARTY_NAME}" };
+                        }
                     }
                 }
 
@@ -518,13 +518,13 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     using var reader = cmd.ExecuteReader();
                     if (reader.Read())
-                    {
-                        var vno = reader["V_NO"];
-                        return new ApiResponse
+                    { 
+                        if(g.PubUserId != "1")
                         {
-                            Status = "VALIDATION",
-                            Message = $"Transit no. {header.TRANSIT_NO} exist in MRN No.= {vno}"
-                        };
+                            var vno = reader["V_NO"];
+                            return new ApiResponse { Status = "VALIDATION", Message = $"Transit no. {header.TRANSIT_NO} exist in MRN No.= {vno}" };
+
+                        }
                     }
                 }
 
@@ -557,8 +557,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                 };
                             }
 
-                            if (dbBillDate != DateTime.MinValue &&
-                                header.BILL_DATE?.Date != dbBillDate.Date)
+                            if (dbBillDate != DateTime.MinValue && header.BILL_DATE?.Date != dbBillDate.Date)
                             {
                                 return new ApiResponse
                                 {
@@ -593,7 +592,256 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
                 }
 
-                // ================= 6. DETAIL VALIDATIONS =================
+
+                //foreach (var d in details)
+                //{
+                //    if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
+                //        continue;
+
+                //    #region Party Validation
+
+                //    if (header.V_TYPE == "INFU" || header.V_TYPE == "INST" ||  header.V_TYPE == "INRM")
+                //    {
+                //        string sql = @"
+                //            SELECT 1
+                //            FROM ORDER1
+                //            WHERE PARTY_CODE = @PartyCode
+                //            AND V_TYPE = @RefType
+                //            AND V_NO = @RefNo
+                //            AND COMP_CODE = @CompCode
+                //            AND BRANCH_CODE = @BranchCode";
+
+                //        using var cmd = new SqlCommand(sql, conn);
+                //        cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
+                //        cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //        cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //        cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+
+                //        var exists = cmd.ExecuteScalar();
+
+                //        if (exists == null)
+                //        {
+                //            return new ApiResponse
+                //            {
+                //                Status = "VALIDATION",
+                //                Message = "Party Name not matched with Order Party Name."
+                //            };
+                //        }
+                //    }
+                //    else if (header.V_TYPE == "INRT")
+                //    {
+                //        string sql = @"
+                //            SELECT 1
+                //            FROM GATE1
+                //            WHERE PARTY_CODE = @PartyCode
+                //            AND V_TYPE = @RefType
+                //            AND V_NO = @RefNo
+                //            AND COMP_CODE = @CompCode
+                //            AND BRANCH_CODE = @BranchCode";
+
+                //        using var cmd = new SqlCommand(sql, conn);
+                //        cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
+                //        cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //        cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //        cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+
+                //        var exists = cmd.ExecuteScalar();
+
+                //        if (exists == null)
+                //        {
+                //            return new ApiResponse
+                //            {
+                //                Status = "",
+                //                Message = "Party Name not matched with Gate Out Entry Party Name."
+                //            };
+                //        }
+                //    }
+                //    else if (header.V_TYPE == "INSR")
+                //    {
+                //        string sql = @"
+                //            SELECT 1
+                //            FROM SALE1
+                //            WHERE PARTY_CODE = @PartyCode
+                //            AND V_TYPE = @RefType
+                //            AND V_NO = @RefNo
+                //            AND COMP_CODE = @CompCode
+                //            AND BRANCH_CODE = @BranchCode";
+
+                //        using var cmd = new SqlCommand(sql, conn);
+                //        cmd.Parameters.AddWithValue("@PartyCode", header.PARTY_CODE);
+                //        cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //        cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //        cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //        cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+
+                //        var exists = cmd.ExecuteScalar();
+
+                //        if (exists == null)
+                //        {
+                //            return new ApiResponse
+                //            {
+                //                Status = "",
+                //                Message = "Party Name not matched with Sale Return Entry Party Name."
+                //            };
+                //        }
+                //    }
+
+                //    #endregion
+
+                //    #region Mandatory Reference Validation
+
+                //    if (header.V_TYPE != "INJB" && header.V_TYPE != "INMS")
+                //    {
+                //        if (!string.IsNullOrWhiteSpace(d.ITEM_NAME) &&
+                //            (d.REF_NO == null || d.REF_NO == 0))
+                //        {
+                //            return new ApiResponse
+                //            {
+                //                Status = "VALIDATION",
+                //                Message = "Reference Type and No is compulsory."
+                //            };
+                //        }
+                //    }
+
+                //    #endregion
+
+                //    #region Quantity Validation
+
+                //    if (header.V_TYPE == "INFU" ||  header.V_TYPE == "INST" || header.V_TYPE == "INRM")
+                //    {
+                //        if (!string.IsNullOrWhiteSpace(d.REF_TYPE) &&
+                //            d.REF_NO > 0)
+                //        {
+                //            if (d.REF_TYPE == "PAUD")
+                //            {
+                //                decimal saudaQty;
+                //                decimal gateQty;
+
+                //                string sql1 = @"
+                //                    SELECT ISNULL(SUM(QTY),0)
+                //                    FROM SAUDA
+                //                    WHERE V_TYPE = @RefType
+                //                    AND V_NO = @RefNo
+                //                    AND COMP_CODE = @CompCode
+                //                    AND BRANCH_CODE = @BranchCode";
+
+                //                using (var cmd = new SqlCommand(sql1, conn))
+                //                {
+                //                    cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //                    cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+
+                //                    saudaQty = Convert.ToDecimal(cmd.ExecuteScalar());
+                //                }
+
+                //                string sql2 = @"
+                //                    SELECT ISNULL(SUM(QTY),0)
+                //                    FROM GATE2
+                //                    WHERE REF_TYPE = @RefType
+                //                    AND REF_NO = @RefNo
+                //                    AND COMP_CODE = @CompCode
+                //                    AND BRANCH_CODE = @BranchCode
+                //                    AND V_TYPE = @VType
+                //                    AND V_NO <> @CurrentVNo";
+
+                //                using (var cmd = new SqlCommand(sql2, conn))
+                //                {
+                //                    cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //                    cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                //                    cmd.Parameters.AddWithValue("@VType", header.V_TYPE);
+                //                    cmd.Parameters.AddWithValue("@CurrentVNo", header.V_NO);
+
+                //                    gateQty = Convert.ToDecimal(cmd.ExecuteScalar());
+                //                }
+
+                //                gateQty += (decimal)d.QTY;
+
+                //                if (gateQty > saudaQty + pubBPPurchTolQty)
+                //                {
+                //                    return new ApiResponse
+                //                    {
+                //                        Status = "VALIDATION",
+                //                        Message =
+                //                            $"Pending Sauda Quantity is {saudaQty - gateQty + d.QTY + pubBPPurchTolQty} " +
+                //                            $"and Gate Quantity is {d.QTY}"
+                //                    };
+                //                }
+                //            }
+                //            else
+                //            {
+                //                decimal orderQty;
+                //                decimal gateQty;
+
+                //                string sql1 = @"
+                //                    SELECT ISNULL(SUM(QTY),0)
+                //                    FROM ORDER2
+                //                    WHERE V_TYPE = @RefType
+                //                    AND V_NO = @RefNo
+                //                    AND ITEM_CODE = @ItemCode
+                //                    AND COMP_CODE = @CompCode
+                //                    AND BRANCH_CODE = @BranchCode";
+
+                //                using (var cmd = new SqlCommand(sql1, conn))
+                //                {
+                //                    cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //                    cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //                    cmd.Parameters.AddWithValue("@ItemCode", d.ITEM_CODE);
+                //                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+
+                //                    orderQty = Convert.ToDecimal(cmd.ExecuteScalar());
+                //                }
+
+                //                string sql2 = @"
+                //                    SELECT ISNULL(SUM(QTY),0)
+                //                    FROM GATE2
+                //                    WHERE REF_TYPE = @RefType
+                //                    AND REF_NO = @RefNo
+                //                    AND ITEM_CODE = @ItemCode
+                //                    AND COMP_CODE = @CompCode
+                //                    AND BRANCH_CODE = @BranchCode
+                //                    AND V_TYPE <> @VType
+                //                    AND V_NO <> @CurrentVNo";
+
+                //                using (var cmd = new SqlCommand(sql2, conn))
+                //                {
+                //                    cmd.Parameters.AddWithValue("@RefType", d.REF_TYPE);
+                //                    cmd.Parameters.AddWithValue("@RefNo", d.REF_NO);
+                //                    cmd.Parameters.AddWithValue("@ItemCode", d.ITEM_CODE);
+                //                    cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                //                    cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                //                    cmd.Parameters.AddWithValue("@VType", header.V_TYPE);
+                //                    cmd.Parameters.AddWithValue("@CurrentVNo", header.V_NO);
+
+                //                    gateQty = Convert.ToDecimal(cmd.ExecuteScalar());
+                //                }
+
+                //                gateQty += (decimal)d.QTY;
+
+                //                if (gateQty > orderQty)
+                //                {
+                //                    return new ApiResponse
+                //                    {
+                //                        Status = "VALIDATION",
+                //                        Message =
+                //                            $"Pending Order Quantity is {orderQty - gateQty + d.QTY} " +
+                //                            $"and Gate Quantity is {d.QTY}. (Item Name : '{d.ITEM_NAME}')"
+                //                    };
+                //                }
+                //            }
+                //        }
+                //    }
+
+                //    #endregion
+                //}
+
+
+                // ================= 6.DETAIL VALIDATIONS =================
                 foreach (var d in details)
                 {
                     if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
@@ -659,7 +907,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         {
                             return new ApiResponse
                             {
-                                Status = "VALIDATION",
+                                Status = "",
                                 Message = $"Party mismatch in {table}."
                             };
                         }
@@ -1056,83 +1304,125 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 using var conn = _dbConnection.GetErpConnection();
                 await conn.OpenAsync();
 
-                using SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@Action", "ApprovalbtnShow");
-                cmd.Parameters.AddWithValue("@v_type", v_type);
-                cmd.Parameters.AddWithValue("@v_no", v_no);
-                cmd.Parameters.AddWithValue("@comp_code", globalvariable.PubCompCode);
-                cmd.Parameters.AddWithValue("@branch_code", globalvariable.PubBranchCode);
-                cmd.Parameters.AddWithValue("@year_code", globalvariable.PubFYearCode);
-                cmd.Parameters.AddWithValue("@UUSER", globalvariable.PubUserId);
-
                 string userCode = string.Empty;
                 string approvalRemark = string.Empty;
-                string FAPROV_STATUS = string.Empty;
+                string faProvStatus = string.Empty;
 
-                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                // Query 1 : USER_CODE
+                    string userQuery = @"
+                    SELECT TOP 1 a.USER_CODE
+                    FROM DOC_APPROSTAGE a
+                    LEFT JOIN CONDATABASE.dbo.USER_MAST b
+                    ON a.USER_CODE = b.CODE
+                    LEFT JOIN CONDATABASE.dbo.SUBUSER_MAST c
+                    ON b.CODE = c.USER_CODE
+                    AND c.COMP_CODE = @COMP_CODE
+                    WHERE a.USER_CODE = @UUSER
+                    AND a.DOC_CODE = @V_TYPE
+                    AND a.COMP_CODE = @COMP_CODE";
 
-  
-
-                // Result Set 1 : USER_CODE
-                if (await reader.ReadAsync())
+                using (SqlCommand cmd = new SqlCommand(userQuery, conn))
                 {
-                    userCode = reader["USER_CODE"]?.ToString() ?? "";
+                    cmd.Parameters.AddWithValue("@UUSER", globalvariable.PubUserId);
+                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
+
+                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    if (await reader.ReadAsync())
+                    {
+                        userCode = reader["USER_CODE"]?.ToString() ?? "";
+                    }
                 }
 
-                // Result Set 2 : Approval_remark
-                if (await reader.NextResultAsync())
+                // Query 2 : Approval Remark
+                string approvalQuery = @"
+                SELECT TOP 1 Approval_remark
+                FROM APPROVAL_STATUS
+                WHERE V_TYPE = @V_TYPE
+                AND V_NO = @V_NO
+                AND COMP_CODE = @COMP_CODE
+                AND YEAR_CODE = @YEAR_CODE";
+
+                using (SqlCommand cmd = new SqlCommand(approvalQuery, conn))
                 {
+                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                    cmd.Parameters.AddWithValue("@V_NO", v_no);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
+
+                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
                     if (await reader.ReadAsync())
                     {
                         approvalRemark = reader["Approval_remark"]?.ToString() ?? "";
-
-                        return new JsonResult(new
-                        {
-                            success = false,
-                            approved = true,
-                            message = "DocumentSend"
-                        });
-
                     }
                 }
 
-                // Result Set 3 : FAPROV_STATUS
-                if (await reader.NextResultAsync())
+                // Query 3 : FAPROV_STATUS
+                string statusQuery = @"
+                SELECT TOP 1 FAPROV_STATUS
+                FROM GATE1
+                WHERE V_TYPE = @V_TYPE
+                AND V_NO = @V_NO
+                AND COMP_CODE = @COMP_CODE
+                AND YEAR_CODE = @YEAR_CODE
+                AND FAPROV_STATUS = 'Approved'";
+
+                using (SqlCommand cmd = new SqlCommand(statusQuery, conn))
                 {
+                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                    cmd.Parameters.AddWithValue("@V_NO", v_no);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
+
+                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
                     if (await reader.ReadAsync())
                     {
-                        FAPROV_STATUS = reader["FAPROV_STATUS"]?.ToString() ?? "";
-                        return new JsonResult(new
-                        {
-                            success = false,
-                            approved = true,
-                            message = "DocumentSend"
-                        });
+                        faProvStatus = reader["FAPROV_STATUS"]?.ToString() ?? "";
                     }
                 }
 
-
-                // Continue with USER_CODE logic
-                if (!string.IsNullOrEmpty(userCode))
+                // Document already approved
+                if (!string.IsNullOrWhiteSpace(approvalRemark) ||
+                    !string.IsNullOrWhiteSpace(faProvStatus))
                 {
                     return new JsonResult(new
                     {
-                        success = false,
+                        success = true,
                         approved = true,
+                        message = "DocumentApproved"
+                    });
+                }
+
+                // User is in approval stage
+                if (!string.IsNullOrWhiteSpace(userCode))
+                {
+                    return new JsonResult(new
+                    {
+                        success = true,
+                        approved = false,
                         message = "ApprovalWindow"
                     });
                 }
-                else
+
+                return new JsonResult(new
                 {
-                    return new JsonResult(new { success = true, approved = false, message = "SendForApproval" }); 
-                }
-                 
+                    success = true,
+                    approved = false,
+                    message = "SendForApproval"
+                });
             }
-                catch (Exception ex)
+            catch (Exception ex)
+            {
+                return new JsonResult(new
                 {
-                    return new JsonResult(new { success = false,  message = ex.Message });
-                }
+                    success = false,
+                    approved = false,
+                    message = ex.Message
+                });
+            }
         }
         public async Task<JsonResult> Approval(string v_type, int v_no)
         {
@@ -1288,7 +1578,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(DDlAPPStatus);
             }
         }
-
         public JsonResult DDlAPPRemark()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -1372,5 +1661,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new  { Status = "Error", Message = ex.Message });
             }
         }
+
+
+
+
+        public async Task<JsonResult> GetTransitData(int VoucherNo)
+        {
+            var data = await _inwardEntryRepository.GetGetTransitDataCode(VoucherNo);
+            return Json(data);
+        }
+
+
+
+
+
+
+
     }
 }

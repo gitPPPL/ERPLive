@@ -306,5 +306,49 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             return new RepositoryResponseList<int>  {  status = true, message = "Success",  totalCount = dataList.Count, data = dataList  };
         }
+
+
+
+        public async Task<List<object>> GetGetTransitDataCode(int TransitNo)
+        {
+            var dataList = new List<object>();
+            var globalData = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                await con.OpenAsync();
+                using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalData.PubCompCode);
+                    cmd.Parameters.AddWithValue("@V_NO", TransitNo);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalData.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Action", "TransitNoData");
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            dataList.Add(new
+                            {
+                                FORM_NO = reader["FORM_NO"]?.ToString(),
+                                BILL_NO = reader["BILL_NO"]?.ToString(),
+                                FORM_DATE = reader["FORM_DATE"]?.ToString(),
+                                TOTAL_AMT = reader["TOTAL_AMT"]?.ToString(),
+                                EXPIRY_DATE = reader["EXPIRY_DATE"]?.ToString()
+                             
+                            });
+                        }
+                    }
+                }
+            }
+
+            return dataList;
+        }
+
+
+
+
+
+
     }
 }

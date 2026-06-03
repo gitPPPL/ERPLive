@@ -132,7 +132,8 @@ $(document).ready(async function () {
 
         if (BILL_NO) {
             const validation = await BillNoValidation(PARTY_CODE, BILL_NO, V_NO);
-            if (!validation.success) {
+            if (!validation.success)
+            {
                 return;
             }
         }
@@ -354,4 +355,20 @@ $(document).ready(async function () {
     $('#btn_approvalok').on('click', function () {
         SendWindowApproval();
     });
+
+
+    $(document).on('change', '#ddlTransit', function () {
+        const transitNo = $(this).val();
+
+        if (!transitNo) return;
+
+        GetTransitnodata(transitNo);
+    });
+    //$('#ddlTransit').on('select2:select', function (e) {
+    //    const TransitNo = e.params.data.id;
+    //    GetTransitnodata(TransitNo);
+    //});
+
+
+
 });
