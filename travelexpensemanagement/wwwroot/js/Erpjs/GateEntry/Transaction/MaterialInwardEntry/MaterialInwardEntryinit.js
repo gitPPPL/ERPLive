@@ -233,7 +233,7 @@ $(document).ready(async function () {
         const v_type = document.getElementById('ddlDocType')?.value || '';
         const indate = document.getElementById('InDate')?.value || '';
         $('#ddlDocType').prop('disabled', true);
-        fetchTransitno(v_type, Vno, PartyId, indate);
+        fetchTransitno(v_type, Vno, PartyId, indate,"", "PARTYSELECT");
         GetPartyAdress(PartyId);
         DDlPartyAdd(PartyId);
         $('#ddlDocStatus').prop('disabled', true);
@@ -359,16 +359,14 @@ $(document).ready(async function () {
 
     $(document).on('change', '#ddlTransit', function () {
         const transitNo = $(this).val();
-
+        $('#TxtEWayNo').val('');
+        $('#TxtBillAmt').val('');
+        $('#TxtEWBInvAmt').val('');
+        $('#TxtEWBInvNo').val('');
+        $('#DtEWayDate').val('');
+        $('#TxtEWayDate').val('');
         if (!transitNo) return;
-
         GetTransitnodata(transitNo);
     });
-    //$('#ddlTransit').on('select2:select', function (e) {
-    //    const TransitNo = e.params.data.id;
-    //    GetTransitnodata(TransitNo);
-    //});
-
-
 
 });

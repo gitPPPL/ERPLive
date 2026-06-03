@@ -231,8 +231,8 @@
             }
 
             if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
-            if (!row.REF_TYPE) {
-            showToast(`Reference Type required (Row ${i + 1})`, { type: "warning" });
+            if (!row.REF_TYPE && !row.reF_NO) {
+                showToast(`Reference Type and Reference No. required (Row ${i + 1})`, { type: "warning" });
             focusCell(i, 9);
             return;
             }
@@ -499,7 +499,7 @@
         }
     }
     function populateTable(data) {
-                  const tbody = $("#tblellipsisIconmodal tbody");
+      const tbody = $("#tblellipsisIconmodal tbody");
     tbody.empty();
 
     data.forEach(function (row) {
@@ -555,7 +555,7 @@
    function populateInwardEntryTable(selectedData) {
         const $tbody = $('#tblInwardEntry tbody');
         $tbody.empty();
-
+       console.log("Selected Row Data", selectedData);
      $.each(selectedData, function (idx, item) {
             addRow($tbody, {
                 itemCode: item.itemCode,
@@ -563,7 +563,7 @@
                 DepttName: item.deptCode,
                 unit: item.UOM_CODE,
                 nos: item.nos,
-                qty: item.qty,
+                qty: item.balQty,
                 shipRate: item.rate,
                 empty: item.emptY_YN,
                 remarks: item.remarks,
@@ -602,33 +602,35 @@
     return false;
         }
     } 
-function addRow($tbody, data = {}) {
+   function addRow($tbody, data = {}) {
 
-    // FIXED: correct condition
     const isINMS = $('#ddlDocType').val() === 'INMS';
-
     const isNewRow = !data || Object.keys(data).length === 0;
 
     const normalStyle = "background-color:#fff;opacity:1;color:#000;";
 
+    // ================= ITEM =================
     let itemOptions = `<option value="">Select</option>`;
     $.each(itemList, function (i, item) {
         const selected = item.value == data.itemId ? "selected" : "";
         itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}>${item.text}</option>`;
     });
 
+    // ================= DEPARTMENT =================
     let deptOptions = `<option value="">Select</option>`;
     $.each(deptList, function (i, item) {
         const selected = item.value == data.DepttName ? "selected" : "";
         deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
     });
 
+    // ================= UNIT =================
     let unitOptions = `<option value="">Select</option>`;
     $.each(unitList, function (i, item) {
         const selected = item.value == data.unit ? "selected" : "";
         unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
     });
 
+    // ================= ROW HTML =================
     const row = `
     <tr class="no-border-input">
 
@@ -714,53 +716,47 @@ function addRow($tbody, data = {}) {
 
     </tr>`;
 
+    // ================= APPEND ROW =================
     $tbody.append(row);
 
     const $row = $tbody.find('tr:last');
 
-    // Select2 init
+    // ================= SELECT2 =================
     $row.find('.searchable-item').select2({
         placeholder: "Search Item",
         width: '100%'
     });
 
-    // =========================
-    // CONDITION LOGIC
-    // =========================
+    // ================= RULE ENGINE =================
     function applyRules() {
 
         const refType = $.trim($row.find('.refType').val());
         const refNo = $.trim($row.find('.refNo').val());
 
-        const hasRefData = refType !== '' && refNo !== '';
+        const isINMS = $('#ddlDocType').val() === 'INMS';
 
         // Always readonly
         $row.find('.refType, .refNo').prop('readonly', true);
 
         if (isINMS) {
+            $row.find('.ItemName').prop('disabled', false);
+            $row.find('.DeptName').prop('disabled', false);
+            $row.find('.unit').prop('disabled', false);
+            // ENTRY FIELDS ENABLED
+            $row.find('.nos').prop('readonly', false);
+            $row.find('.quantity').prop('readonly', false);
+            $row.find('.shiprate').prop('readonly', false);
+            $row.find('.remarks').prop('readonly', false);
+            $row.find('.Empty').prop('disabled', false);
 
-            // FULL LOCK
-            $row.find('input').prop('readonly', true);
-            $row.find('select').prop('disabled', true);
-
-        } else {
-
-            if (hasRefData) {
-
-                // LOCK MASTER FIELDS ONLY
-                $row.find('.ItemName').prop('disabled', true);
-                $row.find('.DeptName').prop('disabled', true);
-                $row.find('.unit').prop('disabled', true);
-
-            } else {
-
-                // ENABLE MASTER FIELDS
-                $row.find('.ItemName').prop('disabled', false);
-                $row.find('.DeptName').prop('disabled', false);
-                $row.find('.unit').prop('disabled', false);
-            }
-
-            // ALWAYS editable fields
+        }
+        else
+        {
+            // NON INMS → MASTER ALWAYS DISABLED
+            $row.find('.ItemName').prop('disabled', true);
+            $row.find('.DeptName').prop('disabled', false);
+            $row.find('.unit').prop('disabled', false);
+            // ENTRY FIELDS ENABLED
             $row.find('.nos').prop('readonly', false);
             $row.find('.quantity').prop('readonly', false);
             $row.find('.shiprate').prop('readonly', false);
@@ -768,16 +764,12 @@ function addRow($tbody, data = {}) {
             $row.find('.Empty').prop('disabled', false);
         }
 
-        // refresh select2 UI
         $row.find('.ItemName').trigger('change.select2');
     }
 
     applyRules();
 
-    // =========================
-    // EVENTS
-    // =========================
-
+    // ================= EVENTS =================
     $row.find('.btn-add-row').on('click', function () {
         addRow($('#tblInwardEntry tbody'));
     });

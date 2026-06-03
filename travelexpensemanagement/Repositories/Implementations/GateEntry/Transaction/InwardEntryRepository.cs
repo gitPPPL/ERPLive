@@ -11,6 +11,7 @@ using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using UglyToad.PdfPig.DocumentLayoutAnalysis;
 using static travelexpensemanagement.Controllers.GateEntry.Transaction.InwardEntryController;
 namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 {
@@ -276,7 +277,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return response;
         }
-        public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate)
+        public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate, string mode = "")
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             var dataList = new List<int>();
@@ -294,7 +295,9 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partycode;
                     cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
                     cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value = "DDlTransitNo";
+                    cmd.Parameters.Add("@SaveAction", SqlDbType.NVarChar, 50).Value = mode;
                     cmd.Parameters.Add("@EWB_EXPDATE", SqlDbType.Date).Value = Convert.ToDateTime(ExpiryDate).AddMonths(-1);
+
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())

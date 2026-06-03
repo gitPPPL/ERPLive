@@ -1146,9 +1146,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new {  StatusCode = res.status, message = res.message,  supplier = res.data });
         }
         [HttpGet]
-        public async Task<JsonResult> DDlTransitNo(string v_type, int v_no, int partycode, DateTime ExpiryDate)
+        public async Task<JsonResult> DDlTransitNo(string v_type, int v_no, int partycode, DateTime ExpiryDate , string mode = "")
         {
-            var res = await _inwardEntryRepository.DDlTransitNoAsync(v_type, v_no, partycode, ExpiryDate);
+            var res = await _inwardEntryRepository.DDlTransitNoAsync(v_type, v_no, partycode, ExpiryDate , mode);
             return Json(res);
         }
         [HttpGet]

@@ -267,14 +267,15 @@ async function fetchShipFromAdd(ShipFromID) {
     }
 }
 
-async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit) {
+async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit, mode) {
     try {
 
         const queryParams = new URLSearchParams({
             v_type,
             v_no,
             partycode,
-            ExpiryDate
+            ExpiryDate,
+            mode
         });
 
         const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
@@ -998,28 +999,38 @@ async function GetTransitnodata(TransitNo) {
 
         const data = await response.json();
 
-        const d = (Array.isArray(data) && data.length > 0) ? data[0] : {};
+        const d = (Array.isArray(data) && data.length > 0) ? data[0] : null;
 
-        console.log("Transit Data:", d);
+        if (d) {
+            console.log("Transit Data:", d);
 
-        $('#TxtEWayNo').val(d.forM_NO || '');
-        $('#TxtBillAmt').val(d.totaL_AMT || '');
-        $('#TxtEWBInvAmt').val(d.totaL_AMT || '');
-        $('#TxtEWBInvNo').val(d.bilL_NO || '');
-        $('#DtEWayDate').val(
-            d.forM_DATE
-                ? d.forM_DATE.split(' ')[0].split('-').reverse().join('-')
-                : ''
-        );
+            $('#TxtEWayNo').val(d.forM_NO || '');
+            $('#TxtBillAmt').val(d.totaL_AMT || '');
+            $('#TxtEWBInvAmt').val(d.totaL_AMT || '');
+            $('#TxtEWBInvNo').val(d.bilL_NO || '');
+            $('#DtEWayDate').val(
+                d.forM_DATE
+                    ? d.forM_DATE.split(' ')[0].split('-').reverse().join('-')
+                    : ''
+            );
 
-        $('#TxtEWayDate').val(
-            d.expirY_DATE
-                ? d.expirY_DATE.split(' ')[0].split('-').reverse().join('-')
-                : ''
-        );
+            $('#TxtEWayDate').val(
+                d.expirY_DATE
+                    ? d.expirY_DATE.split(' ')[0].split('-').reverse().join('-')
+                    : ''
+            );
+        } else {
+            console.log("No Transit Data found");
+            $('#TxtEWayNo').val('');
+            $('#TxtBillAmt').val('');
+            $('#TxtEWBInvAmt').val('');
+            $('#TxtEWBInvNo').val('');
+            $('#DtEWayDate').val('');
+            $('#TxtEWayDate').val('');
+        }
+
     } catch (error) {
         console.error("Error fetching Transit Data:", error);
         showToast("Error fetching Transit Data", { type: "error" });
     }
 }
-
