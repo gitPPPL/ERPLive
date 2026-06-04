@@ -2,56 +2,86 @@
 	ViewBag.Title = "QC Group Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>QC Group Master List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "QCGroupMaster")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i>Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i>Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblQCGroupMaster" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="display:none;" />      
+                <col style="width:250px;" />       
+                <col style="width:180px;" />       
+                <col style="width:120px;" />       
+                <col style="width:120px;" />       
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">Code</th>
+                    <th>QC Group</th>
+                    <th>QC Type</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-<fieldset>
-	<legend class="legend-field">QC Group Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "QCGroupMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add QC Group
-			</button>
-			<button class="btn btn-print">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export"> 
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblQCGroupMaster" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>QC Group</th>
-						<th>QC Type</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-	<div class="pagination-wrapper">
-		<ul class="pagination" id="tablePagination"></ul>
-	</div>
-</fieldset>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+
+
+
 <script>
     let currentPage = 1;
     let pageSize = 10;

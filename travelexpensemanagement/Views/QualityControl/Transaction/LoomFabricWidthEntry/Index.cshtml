@@ -2,139 +2,137 @@
     ViewBag.Title = "Loom Fabric Width Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Loom Fabric Width Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button onclick="window.location.href='@Url.Action("Index", "LoomFabricWidthEntryList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-scissors"></i>
         </div>
+        <div class="erppage-header-title">Loom Fabric Width Entry</div>
     </div>
-    <form id="LoomFabricWidthEntryForm">
-        <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "LoomFabricWidthEntryList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="LoomFabricWidthEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="ddlShift">Shift</label>
-                    <select class="form-control" id="ddlShift">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shift</label>
+                    <select class="erppage-input erppage-select" id="ddlShift">
                         <option value="">Select Shift</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="ddlInspectBy">Inspected By</label>
-                    <select class="form-control" id="ddlInspectBy">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Inspected By</label>
+                    <select class="erppage-input erppage-select" id="ddlInspectBy">
                         <option value="">Select Inspected By</option>
                     </select>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="ddlPlace">Place</label>
-                    <select class="form-control" id="ddlPlace">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-select" id="ddlPlace">
                         <option value="">Select Place</option>
                     </select>
                 </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Time</label>
+                    <input type="time" class="erppage-input" id="DtTime">
+                </div>
+                <button id="btn-import" type="button" class="erppage-btn erppage-btn-save">
+                    <i class="fa fa-refresh"></i>
+                    Import Obtained Width
+                </button>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Total Rec.</label>
+                    <input type="text" class="erppage-input" id="TxtTotalRec" placeholder="Enter Total Rec">
+                </div>
             </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="DtTime">Time</label>
-                    <div class="input-divide">
-                        <input type="time" class="form-control" id="DtTime">
-                        <button type="button" class="btn btn-success" id="btn-import" style="width:100%;"><i class="fa fa-refresh"></i>Import Obtained Width</button>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-textarea" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLoomFabricWidthEntry" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:80px;">    
+                            <col style="width:150px;">   
+                            <col style="width:250px;">   
+                            <col style="width:120px;">   
+                            <col style="width:120px;">   
+                            <col style="width:100px;">   
+                            <col style="width:120px;">   
+                            <col style="width:100px;">   
+                            <col style="width:120px;">   
+                            <col style="width:150px;">   
+                            <col style="width:250px;">   
+                            <col style="width:100px;">   
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th>LID</th>
+                                <th>Loom</th>
+                                <th>Item Name</th>
+                                <th>Type</th>
+                                <th>Width (MM)</th>
+                                <th>Gram</th>
+                                <th>Color</th>
+                                <th>DNR</th>
+                                <th>Obt. Width</th>
+                                <th>Bobbin Marking</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
                     </div>
                 </div>
             </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="TxtTotalRec">Total Rec.</label>
-                    <input type="text" class="form-control" id="TxtTotalRec" placeholder="Enter Total Rec">
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="TxtRemarks">Remarks</label>
-                    <textarea typeof="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblLoomFabricWidthEntry" class="table-width" style="overflow-y: clip;">
-                    <colgroup>
-                        <col style="width: 80px;">
-                        <col style="width: 200px;">
-                        <col style="width: 300px;">
-                        <col style="width: 120px;">
-                        <col style="width: 100px;">
-                        <col style="width: 80px;">
-                        <col style="width: 150px;">
-                        <col style="width: 120px;">
-                        <col style="width: 120px;">
-                        <col style="width: 150px;">
-                        <col style="width: 200px;">
-                        <col style="width: 100px;">
-                    </colgroup>
-                    <thead class="table-head">
-                        <tr>                            
-                            <th>LID</th>
-                            <th>Loom</th>
-                            <th>Item Name</th>
-                            <th>Type</th>
-                            <th>Width (MM)</th>
-                            <th>Gram</th>
-                            <th>Color</th>
-                            <th>DNR</th>
-                            <th>Obt. Width</th>
-                            <th>Bobbin Marking</th>
-                            <th>Remarks</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                    </div>
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+    </div>
+</div>
 
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
 
@@ -246,7 +244,7 @@
                 fetchAndFillRowDataByItem(selectedItemId, row);
             }
     });
-       
+
 
     $(document).on('change', '#ddlPlace', function () {
         let tbody = $('#tblLoomFabricWidthEntry tbody');
@@ -366,7 +364,7 @@
             dataType: 'json',
             success: function (response) {
                 if (response?.status) {
-                   toastr.success("Data Update successfully");                   
+                   toastr.success("Data Update successfully");
                     setTimeout(() => {
                         window.location.href = '/LoomFabricWidthEntryList/Index';
                     }, 1500);
@@ -443,7 +441,7 @@
             SHIFT: getVal("ddlShift"),
             PLACE_CODE: parseIntOrNull(getVal("ddlPlace")),
             EMP_CODE: parseIntOrNull(getVal("ddlInspectBy")),
-            REMARKS: getVal("TxtRemarks"),            
+            REMARKS: getVal("TxtRemarks"),
             QCTIME: getTimeAsDateTimeForSql("DtTime"),
             QC_INCHARGE: parseIntOrNull(getVal("ddlQcIncharge")),
             CHEMIST: parseIntOrNull(getVal("ddlChemist")),
@@ -553,7 +551,7 @@
             $(`#TxtWidth${idx}`).val(item.WIDTH ?? '');
             $(`#TxtGram${idx}`).val(item.GRAM ?? '');
             $(`#TxtDNR${idx}`).val(item.DNR ?? '');
-           
+
             $(`#TxtObtWidth${idx}`).val(0);
             $(`#TxtBobMark${idx}`).val(0);
             $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
@@ -568,7 +566,7 @@
             safeSetDropdown('#ddlLoom', item.LOOM_CODE);
             safeSetDropdown('#ddlItemName', item.ITEM_CODE);
             safeSetDropdown('#ddlType', item.PTYPE_CODE);
-            safeSetDropdown('#ddlColor', item.COLOR_CODE);           
+            safeSetDropdown('#ddlColor', item.COLOR_CODE);
         }
     }
 
@@ -803,7 +801,7 @@
         bindDropdownData(rowCount);
         setEnterKeyFocusOnTable?.(itemRecords, rowCount);
     }
-       
+
     function bindDropdownData(rowCount) {
         const loomSelect = $(`#ddlLoom${rowCount}`);
         const itemSelect = $(`#ddlItemName${rowCount}`);
@@ -880,7 +878,7 @@
             )
         ]);
     }
-       
+
     function formatDate(dateStr) {
       if (!dateStr) return '';
       const d = new Date(dateStr);
