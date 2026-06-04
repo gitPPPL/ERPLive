@@ -524,9 +524,9 @@
               });
         }
    function getSelectedPendingOrderRows() {
-                  const selectedRows = [];
-    $('#tblpendingordermodal tbody tr').each(function () {
-                    const checkbox = $(this).find('.rowCheckbox');
+        const selectedRows = [];
+        $('#tblpendingordermodal tbody tr').each(function () {
+        const checkbox = $(this).find('.rowCheckbox');
     if (checkbox.is(':checked')) {
         const row = $(this).children('td');
         const rowData = {
@@ -548,60 +548,66 @@
         };
         selectedRows.push(rowData);
     }
-                      });
+   });
 
         return selectedRows;
     }
-   function populateInwardEntryTable(selectedData) {
-        const $tbody = $('#tblInwardEntry tbody');
-        $tbody.empty();
-       console.log("Selected Row Data", selectedData);
-     $.each(selectedData, function (idx, item) {
-            addRow($tbody, {
-                itemCode: item.itemCode,
-                itemId: item.itemCode,
-                DepttName: item.deptCode,
-                unit: item.UOM_CODE,
-                nos: item.nos,
-                qty: item.balQty,
-                shipRate: item.rate,
-                empty: item.emptY_YN,
-                remarks: item.remarks,
-                refType: item.docType,
-                refNo: item.docNo
-            });
-      });
-    }
+function populateInwardEntryTable(selectedData) {
+
+    const $tbody = $('#tblInwardEntry tbody');
+    $tbody.empty();
+
+    console.log("Selected Row Data:", selectedData);
+
+    $.each(selectedData, function (idx, item) {
+
+        addRow($tbody, {
+            itemCode: item.itemCode,
+            itemId: item.itemCode,
+            DeptCode: item.deptCode,      // 138       
+            DepttName: item.deptCode,
+            unit: item.uoM_CODE, // use code not text
+            nos: item.nos,
+            qty: item.balQty,
+            shipRate: item.rate,
+            empty: item.emptY_YN,
+            remarks: item.remarks,
+            refType: item.docType,
+            refNo: item.docNo
+        });
+
+    });
+}
 
    async function checkValidDate() {
-            const data = {
-        vdate: $("#InDate").val(),
-    vtype: $("#ddlDocType").val(),
-    vno: $("#TxtDocNo").val()
-            };
-    try {
-                    const response = await fetch('/InwardEntry/CheckValidDate', {
-        method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-                    },
-    body: JSON.stringify(data)
-                });
+        const data = {
+            vdate: $("#InDate").val(),
+            vtype: $("#ddlDocType").val(),
+            vno: $("#TxtDocNo").val()
+        };
+        try {
+            const response = await fetch('/InwardEntry/CheckValidDate', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 
-    const result = await response.json();
+            const result = await response.json();
 
-    if (result.status === false) {
-        showToast("result.message", { type: "warning" });
-    return false;
+            if (result.status === false) {
+            showToast("result.message", { type: "warning" });
+            return false;
             }
 
-    return true;
+            return true;
 
         } catch (error) {
         showToast("result.message", { type: "warning" });
-    return false;
+        return false;
         }
-    } 
+   } 
    function addRow($tbody, data = {}) {
 
     const isINMS = $('#ddlDocType').val() === 'INMS';

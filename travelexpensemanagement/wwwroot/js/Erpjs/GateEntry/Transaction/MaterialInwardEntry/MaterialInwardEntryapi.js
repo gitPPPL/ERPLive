@@ -306,42 +306,6 @@ async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTrans
     }
 }
 
-//async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit, mode) {
-//    try {
-
-//        const queryParams = new URLSearchParams({
-//            v_type,
-//            v_no,
-//            partycode,
-//            ExpiryDate,
-//            mode
-//        });
-
-//        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
-
-//        if (!response.ok)
-//            throw new Error(`HTTP error! Status: ${response.status}`);
-
-//        const result = await response.json();
-
-//        const ddl = $('#ddlTransit');
-
-//        ddl.empty().append('<option value="">-- Select Transit No --</option>');
-
-//        if (result.status && Array.isArray(result.data)) {
-
-//            result.data.forEach(item => {
-//                ddl.append(`<option value="${item}">${item}</option>`);
-//            });
-
-//            ddl.val(selectedTransit).trigger('change');
-//        }
-
-//    } catch (error) {
-//        showToast("Error loading Transit Numbers", { type: "error" });
-//    }
-//}
-
 async function GetVNo(Vtype) {
     try {
         const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
@@ -669,7 +633,6 @@ async function LoadDeptMaster() {
 }
 
 async function GetEwaybillno() {
-
     try {
 
         const res = await $.ajax({
@@ -678,8 +641,7 @@ async function GetEwaybillno() {
             data: {
                 edate: $('#InDate').val(),
                 inoutdata: "OUT"
-            }
-            // remove dataType temporarily
+            }        
         });
 
         console.log("Response:", res);

@@ -64,6 +64,46 @@ $(document).ready(async function () {
         }
     });
 
+    $('#TxtBillNo').on('focusout', function () {
+
+        var partyBillNo = $.trim($(this).val());
+
+        if (partyBillNo === '') {
+            return;
+        }
+
+        if (!validateRequiredField('#ddlPartyName', 'Please select Party Name')) {
+            return;
+        }
+
+        var partyCode = $('#ddlPartyName').val();
+
+        $.ajax({
+            url: '/InwardEntry/GetPasrtyBillNo',
+            type: 'GET',
+            data: {
+                partyCode: partyCode,
+                PartyBillNo: partyBillNo
+            },
+            success: function (response) {        
+
+                if (!response.success == false) {     
+                    showToast('Bill No. "' + partyBillNo + '" already exists in Container Tracking Record at Sauda No => ' + response.refSaudaNo, { type: 'warning' });
+                    $('#TxtBillNo').focus();
+                }
+            },
+            error: function (xhr, status, error) {
+
+                console.error(error);
+
+                showToast(
+                    'Error while checking Bill No.',
+                    { type: 'error' }
+                );
+            }
+        });
+    });
+
     $('#TxtChallanNo').on('change', function () {
         if ($(this).val()) {
             $('#span_ChallanDatedate').show();
@@ -100,6 +140,75 @@ $(document).ready(async function () {
         }
     });
 
+
+    $('#TxtEWayNo').on('focusout', function () {
+
+        var waybillNo = $.trim($(this).val());
+
+        if (waybillNo === '') {
+            return;
+        }
+
+        if (!validateRequiredField('#ddlPartyName', 'Please select Party Name')) {
+            return;
+        }
+
+        var partyCode = $('#ddlPartyName').val();
+        var partyName = $('#ddlPartyName option:selected').text();
+
+        $.ajax({
+            url: '/InwardEntry/GetTransitNoLeaveEwayBill',
+            type: 'GET',
+            data: {
+                partyCode: partyCode,
+                waybillNo: waybillNo
+            },
+            success: function (response) {
+
+                console.log('Response:', response);
+                if (response.success) {
+                    $('#ddlTransit').val(response.v_NO || '');  
+                } else {
+                    showToast( 'Incorrect E-Way Bill No. for Party: ' + partyName, { type: 'warning' } );
+                    $('#TxtEWayNo').focus();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+                showToast('Error while checking E-Way Bill.', { type: 'error' });
+            }
+        });
+    });
+
+    //$('#TxtVehicleNo').on('focusout', function () {
+
+    //    var VehicleNo = $.trim($(this).val());
+
+    //    if (VehicleNo === '') {
+    //        return;
+    //    }
+
+    //    $.ajax({
+    //        url: '/InwardEntry/Getvehicleno',
+    //        type: 'GET',
+    //        data: {
+    //            TruckNo: VehicleNo              
+    //        },
+    //        success: function (response) {
+    //            console.log('Response:', response);
+    //            if (response.success) {
+               
+    //            } 
+    //        },
+    //        error: function (xhr, status, error) {
+    //            console.error(error);
+    //            showToast('Error while Vehicle No data.', { type: 'error' });
+    //        }
+    //    });
+    //});
+
+
+
     $('#TxtWbSlipNo').on('change', function () {
 
         if ($(this).val().trim() !== '') {
@@ -116,6 +225,33 @@ $(document).ready(async function () {
         }
 
     });
+
+
+
+
+
+
+    $('#TxtWbSlipNo').on('change', function () {
+
+        if ($(this).val().trim() !== '') {
+
+            $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                .removeClass('erppage-input')
+                .addClass('erppage-redinput');
+
+        } else {
+
+            $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                .removeClass('erppage-redinput')
+                .addClass('erppage-input');
+        }
+
+    });
+
+
+
+
+
 
     $("#btn-save").click(async function (e) {
         e.preventDefault();
@@ -229,6 +365,7 @@ $(document).ready(async function () {
 
     $('#ddlPartyName').on('change', function () {
         const PartyId = this.value;
+    
         const Vno = document.getElementById('TxtDocNo')?.value || '';
         const v_type = document.getElementById('ddlDocType')?.value || '';
         const indate = document.getElementById('InDate')?.value || '';
@@ -240,17 +377,54 @@ $(document).ready(async function () {
     });
 
     $('#Btn_selectedData').on('click', function () {
+
         const selectedData = getSelectedPendingOrderRows();
-        if (selectedData.length === 0) {
+
+        if (!selectedData || selectedData.length === 0) {
             showToast("Please select at least one row.", { type: "warning" });
             return;
         }
 
         const modalElement = document.getElementById('pendingorders');
         const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-        modalInstance.hide();
-       
-        populateInwardEntryTable(selectedData);
+
+        $.ajax({
+            url: '/InwardEntryList/SaveSelectedRows',
+            type: 'POST',
+            traditional: true,
+            data: {
+                selectedRows: selectedData.map(x => JSON.stringify(x)),
+                partycode: $('#ddlPartyName').val(),
+                v_type: $('#ddlDocType').val(),
+                v_no: $('#TxtDocNo').val()
+            },
+            success: function (response) {
+
+                console.log("Response:", response);
+
+                if (response.success) {
+
+                    modalInstance.hide();
+
+                    $('#TxtTransporter').val(response.transportCode || '');
+                    $('#TxtVehicleNo').val(response.truckNo || '');
+
+                    populateInwardEntryTable(response.rows);
+
+                    showToast(
+                        response.count + " row(s) loaded successfully.",
+                        { type: "success" }
+                    );
+                }
+                else {
+                    showToast(response.message, { type: "warning" });
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                showToast("Error while processing request.", { type: "danger" });
+            }
+        });
     });
 
     $('#btn_setting').on('click', function () {

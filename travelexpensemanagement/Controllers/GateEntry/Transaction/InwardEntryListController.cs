@@ -1,10 +1,12 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office.Word;
 using DocumentFormat.OpenXml.Spreadsheet;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
 using System.Data.Common;
@@ -188,6 +190,222 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader[0].ToString();
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+
+        [HttpPost]
+        public JsonResult SaveSelectedRows(List<string> selectedRows, int partycode, string v_type, int v_no)
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+
+            string stateType = GetText(
+                $"SELECT STATE_TYPE " +
+                $"FROM SUBGROUP_MAST a " +
+                $"LEFT JOIN STATE_MAST b ON a.STATE_CODE = b.CODE " +
+                $"WHERE a.CODE = {partycode} " +
+                $"AND a.COMP_CODE = {global.PubCompCode} " +
+                $"AND a.ACTIVE = 1");
+
+            var updatedRows = new List<object>();
+
+            foreach (string rowJson in selectedRows)
+            {
+                JObject row = JObject.Parse(rowJson);
+
+                string refType = row["docType"]?.ToString() ?? "";
+                int refNo = Convert.ToInt32(row["docNo"]?.ToString() ?? "0");
+
+                #region Import Validation
+
+                if (v_type == "INRM" && stateType == "Import")
+                {
+                    string saudaType = "";
+                    int saudaNo = 0;
+
+                    if (refType == "RORD" || refType == "PAUD")
+                    {
+                        if (refType == "RORD")
+                        {
+                            saudaType = "PAUD";
+
+                            string saudaNoText = GetText(
+                                $"SELECT ISNULL(SAUDA_NO,0) " +
+                                $"FROM ORDER1 " +
+                                $"WHERE V_TYPE='{refType}' " +
+                                $"AND V_NO={refNo} " +
+                                $"AND COMP_CODE={global.PubCompCode} " +
+                                $"AND BRANCH_CODE={global.PubBranchCode}");
+
+                            saudaNo = Convert.ToInt32(saudaNoText);
+                        }
+                        else
+                        {
+                            saudaType = refType;
+                            saudaNo = refNo;
+                        }
+
+                        if (saudaNo == 0)
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = "Sauda not found for selected order."
+                            });
+                        }
+
+                        string rowCount = GetText(
+                            $"SELECT COUNT(*) " +
+                            $"FROM EXIM1 a " +
+                            $"LEFT JOIN EXIM2 b ON a.V_TYPE=b.V_TYPE " +
+                            $"AND a.V_NO=b.V_NO " +
+                            $"AND a.COMP_CODE=b.COMP_CODE " +
+                            $"AND a.BRANCH_CODE=b.BRANCH_CODE " +
+                            $"AND a.YEAR_CODE=b.YEAR_CODE " +
+                            $"WHERE a.SAUDA_TYPE='{saudaType}' " +
+                            $"AND a.SAUDA_NO={saudaNo} " +
+                            $"AND a.COMP_CODE={global.PubCompCode}");
+
+                        if (Convert.ToInt32(rowCount) == 0)
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = $"Container Tracking not updated in Sauda No. => {saudaNo}"
+                            });
+                        }
+                    }
+                }
+
+                #endregion
+
+                string deptName;
+                int deptCode;
+                string unit = "No";
+
+                switch (v_type)
+                {
+                    case "INRM":
+                        deptName = "RAW MATERIAL";
+                        deptCode = 145;
+                        break;
+
+                    case "INFU":
+                        deptName = "BOILER";
+                        deptCode = 138;
+                        break;
+
+                    default:
+                        deptName = "STORE";
+                        deptCode = 110;
+                        break;
+                }
+
+                updatedRows.Add(new
+                {
+                    itemCode = row["itemCode"]?.ToString(),
+                    itemName = row["itemName"]?.ToString(),
+                    unit = row["unit"]?.ToString(),
+                    nos = row["nos"]?.ToString(),
+                    qty = row["qty"]?.ToString(),
+                    balQty = row["balQty"]?.ToString(),
+                    docType = row["docType"]?.ToString(),
+                    docNo = row["docNo"]?.ToString(),
+                    docDate = row["docDate"]?.ToString(),
+                    rate = row["rate"]?.ToString(),
+                    remarks = row["remarks"]?.ToString(),
+                    department = deptName,
+                    deptCode = deptCode,
+                    emptY_YN = unit,
+                    UOM_CODE = row["UOM_CODE"]?.ToString()
+                });              
+
+            }
+
+            string transportCode = "";
+            string transportName = "";
+            string truckNo = "";
+
+            if (v_type == "TRGI")
+            {
+
+                using var con = _dbConnection.GetErpConnection();
+                con.Open();
+
+                string sql = @"SELECT TOP 1
+                b.TRANSPORT_CODE,
+                b.TRANSPORT_NAME,
+                b.TRUCK_NO
+                FROM TRANSPORT_QT1 a
+                LEFT JOIN TRANSPORT_QT2 b
+                ON a.V_TYPE=b.V_TYPE
+                AND a.V_NO=b.V_NO
+                AND a.COMP_CODE=b.COMP_CODE
+                AND a.BRANCH_CODE=b.BRANCH_CODE
+                AND a.YEAR_CODE=b.YEAR_CODE
+                WHERE ISNULL(b.OUR_RATE,0) > 0
+                AND a.BILL_CODE=@PartyCode
+                AND a.COMP_CODE=@CompCode
+                AND a.BRANCH_CODE=@BranchCode";            
+
+                using var cmd = new SqlCommand(sql, con);
+
+                cmd.Parameters.AddWithValue("@PartyCode", partycode);
+                cmd.Parameters.AddWithValue("@CompCode", global.PubCompCode);
+                cmd.Parameters.AddWithValue("@BranchCode", global.PubBranchCode);
+
+                using var reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    transportCode = reader["TRANSPORT_CODE"]?.ToString() ?? "";
+                    transportName = reader["TRANSPORT_NAME"]?.ToString() ?? "";
+                    truckNo = reader["TRUCK_NO"]?.ToString() ?? "";
+                }
+
+            }
+
+
+
+            return Json(new
+            {
+                success = true,
+                count = updatedRows.Count,
+                rows = updatedRows,
+                transportCode =transportCode,
+                transportName = transportName,
+                truckNo = truckNo
+            });
+        }
+
         [HttpPost]
         public JsonResult Delete(int code, string VType)
         {
@@ -367,8 +585,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                     GR_NO = rdr["GR_NO"]?.ToString(),
                                     GR_DATE = rdr["GR_Date"] != DBNull.Value ? Convert.ToDateTime(rdr["GR_Date"]) : DateTime.MinValue,
                                     STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0
-
-
 
                                 };
                             }

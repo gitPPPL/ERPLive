@@ -1,5 +1,8 @@
 ﻿
+using Dapper;
 using DocumentFormat.OpenXml.Office.Word;
+using iText.StyledXmlParser.Jsoup.Select;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
@@ -1669,6 +1672,133 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             var data = await _inwardEntryRepository.GetGetTransitDataCode(VoucherNo);
             return Json(data);
+        }
+
+
+        public JsonResult GetTransitNoLeaveEwayBill(int partyCode, long waybillNo)
+        {
+            var Globaldata = _globalVariableService.GetGlobalVariables();
+
+            string waybill = GetText(
+                $"SELECT TOP 1 Form_No " +
+                $"FROM waybill1 " +
+                $"WHERE Form_No = '{waybillNo}' " +
+                $"AND PARTY_CODE = {partyCode} " +
+                $"AND V_Type = 'TRIN' " +
+                $"AND Status = 1 " +
+                $"AND comp_Code = {Globaldata.PubCompCode} " +
+                $"AND Branch_Code = {Globaldata.PubBranchCode} " +
+                $"AND Year_Code = {Globaldata.PubFYearCode}");
+
+            string vNo = string.Empty;
+
+            if (!string.IsNullOrEmpty(waybill))
+            {
+                vNo = GetText(
+                    $"SELECT V_NO " +
+                    $"FROM waybill1 " +
+                    $"WHERE Form_No = '{waybillNo}' " +
+                    $"AND V_Type = 'TRIN' " +
+                    $"AND comp_Code = {Globaldata.PubCompCode} " +
+                    $"AND Branch_Code = {Globaldata.PubBranchCode} " +
+                    $"AND Year_Code = {Globaldata.PubFYearCode}");
+            }          
+
+            if(vNo == "")
+            {
+                return Json(new { Success = false});
+
+            }
+            return Json(new {  Success = true , V_NO = vNo });
+        }
+
+
+
+
+
+
+        public JsonResult GetPasrtyBillNo(int partyCode, string PartyBillNo)
+        {
+            var globalData = _globalVariableService.GetGlobalVariables();
+
+            string refSaudaNo = GetText(
+                "SELECT CONCAT(SAUDA_TYPE, SAUDA_NO) AS RefSaudaNo " +
+                "FROM ORDER4 " +
+                "WHERE INV_NO = '" + PartyBillNo + " '" +
+                " AND PARTY_CODE = " + partyCode +
+                " AND COMP_CODE = " + globalData.PubCompCode);
+
+            if (!string.IsNullOrEmpty(refSaudaNo))
+            {
+                return Json(new {  success = false,   refSaudaNo = refSaudaNo });
+            }
+
+            return Json(new
+            {
+                success = true,
+                refSaudaNo = string.Empty
+            });
+        }
+        public JsonResult Getvehicleno( string TruckNo)
+        {
+            using var conn = _dbConnection.GetErpConnection();
+            var globalData = _globalVariableService.GetGlobalVariables();
+
+            string sql = @"
+                SELECT TOP 1
+                RC_NO,
+                INSU_NO
+                FROM GATE1
+                WHERE LTRIM(RTRIM(TRUCK_NO)) = @VehicleNo
+                AND (
+                ISNULL(RC_NO, '') <> ''
+                OR ISNULL(INSU_NO, '') <> ''
+                )
+                AND COMP_CODE = @CompCode
+                ORDER BY V_DATE DESC;";
+
+            var result = conn.QueryFirstOrDefault(sql, new
+            {
+                @VehicleNo = TruckNo,
+                @CompCode = globalData.PubCompCode
+            });
+
+            string rcNo = result?.RC_NO ?? string.Empty;
+            string insuNo = result?.INSU_NO ?? string.Empty;
+
+            return Json(new { success = true, rcNo = rcNo, insuNo = insuNo });
+        }
+
+
+
+        public JsonResult GetMobilenodata(string mobileno)
+        {
+            using var conn = _dbConnection.GetErpConnection();
+            var globalData = _globalVariableService.GetGlobalVariables();
+
+            string sql = @"
+                    SELECT TOP 1
+                    DL_NO,
+                    PAN_NO
+                    FROM GATE1
+                    WHERE LTRIM(RTRIM(DRIVER_NO)) = 'MobileNumberHere'
+                    AND (
+                    ISNULL(DL_NO, '') <> ''
+                    OR ISNULL(PAN_NO, '') <> ''
+                    )
+                    AND COMP_CODE = CompCodeValue
+                    ORDER BY V;";
+
+            var result = conn.QueryFirstOrDefault(sql, new
+            {
+                @VehicleNo = mobileno,
+                @CompCode = globalData.PubCompCode
+            });
+
+            string DL_NO = result?.DL_NO ?? string.Empty;
+            string PAN_NO = result?.PAN_NO ?? string.Empty;
+
+            return Json(new { success = true, DL_NO = DL_NO, PAN_NO = PAN_NO });
         }
 
 
