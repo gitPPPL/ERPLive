@@ -287,21 +287,60 @@ async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTrans
 
         const ddl = $('#ddlTransit');
 
-        ddl.empty().append('<option value="">-- Select Transit No --</option>');
+        // ✅ build HTML once (FAST)
+        let options = '<option value="">-- Select Transit No --</option>';
 
         if (result.status && Array.isArray(result.data)) {
-
-            result.data.forEach(item => {
-                ddl.append(`<option value="${item}">${item}</option>`);
-            });
-
-            ddl.val(selectedTransit).trigger('change');
+            options += result.data
+                .map(x => `<option value="${x}">${x}</option>`)
+                .join('');
         }
+
+        ddl.html(options);
+
+        // ✅ set value WITHOUT triggering change (IMPORTANT)
+        ddl.val(selectedTransit || '');
 
     } catch (error) {
         showToast("Error loading Transit Numbers", { type: "error" });
     }
 }
+
+//async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit, mode) {
+//    try {
+
+//        const queryParams = new URLSearchParams({
+//            v_type,
+//            v_no,
+//            partycode,
+//            ExpiryDate,
+//            mode
+//        });
+
+//        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
+
+//        if (!response.ok)
+//            throw new Error(`HTTP error! Status: ${response.status}`);
+
+//        const result = await response.json();
+
+//        const ddl = $('#ddlTransit');
+
+//        ddl.empty().append('<option value="">-- Select Transit No --</option>');
+
+//        if (result.status && Array.isArray(result.data)) {
+
+//            result.data.forEach(item => {
+//                ddl.append(`<option value="${item}">${item}</option>`);
+//            });
+
+//            ddl.val(selectedTransit).trigger('change');
+//        }
+
+//    } catch (error) {
+//        showToast("Error loading Transit Numbers", { type: "error" });
+//    }
+//}
 
 async function GetVNo(Vtype) {
     try {

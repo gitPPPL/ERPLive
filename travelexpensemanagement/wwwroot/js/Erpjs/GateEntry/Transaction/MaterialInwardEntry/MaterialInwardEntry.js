@@ -878,8 +878,7 @@
                     .removeClass('erppage-redinput')
                     .addClass('erppage-input');
             }
-           await DDlPartyAdd(header.partY_CODE);
-            $('#ddladdressline1').val(header.partY_ADDRESSID || '');
+
             $('#ddlDocType').val(header.v_TYPE || '');
             $('#TxtTransporter').val(header.transporT_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
@@ -913,8 +912,7 @@
             $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
-            await fetchTransitno(  header.v_TYPE, header.v_NO, header.partY_CODE,  formatDate(header.ewB_DATE));
-            $('#ddlTransit').val(header.transiT_NO || '');
+
             $('#TxtEWayNo').val(header.waybilL_NO || '');
             $('#DtEWayDate').val(formatDate(header.ewB_DATE) || '');
             $('#TxtEWayDate').val(formatDate(header.ewB_DATE) || '');
@@ -935,6 +933,7 @@
             $('#TxtDriverMobile').val(header.driveR_NO || '');
             $('#txt_VehicleRemarks').val(header.remarks2 || '');
 
+
             Details.forEach(item => {
                 addRow($('#tblInwardEntry tbody'), {
                     itemCode: item.iteM_CODE,
@@ -950,6 +949,14 @@
                     refNo: item.reF_NO
                 });
             });
+
+
+            await DDlPartyAdd(header.partY_CODE);
+            $('#ddladdressline1').val(header.partY_ADDRESSID || '');
+
+            await fetchTransitno(header.v_TYPE, header.v_NO, header.partY_CODE, formatDate(header.ewB_DATE));
+            $('#ddlTransit').val(header.transiT_NO || '');
+
         }
     } catch (err) {
         showToast("Something went wrong while loading the form.", { type: "error" });
