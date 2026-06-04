@@ -555,7 +555,7 @@
 function populateInwardEntryTable(selectedData) {
 
     const $tbody = $('#tblInwardEntry tbody');
-    $tbody.empty();
+    //$tbody.empty();
 
     console.log("Selected Row Data:", selectedData);
 

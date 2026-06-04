@@ -305,7 +305,31 @@
     margin: 8px auto;
     /* padding: 0 10px;*/
 }
+.erppage-input-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
 
+    .erppage-input-with-icon .erppage-input {
+        flex: 1;
+    }
+
+    /* Override old icon style */
+    .erppage-input-with-icon .erppageinputicon {
+        position: static;
+        transform: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: linear-gradient(135deg,#2f7d32,#1b5e20);
+        color: #fff;
+        cursor: pointer;
+    }
 /* ===== SECTION (FIELDSET) ===== */
 .erppage-fieldset {
     border: 1px solid #e5e7eb;

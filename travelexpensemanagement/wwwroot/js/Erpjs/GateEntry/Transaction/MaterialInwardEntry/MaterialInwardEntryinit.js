@@ -140,7 +140,6 @@ $(document).ready(async function () {
         }
     });
 
-
     $('#TxtEWayNo').on('focusout', function () {
 
         var waybillNo = $.trim($(this).val());
@@ -208,7 +207,6 @@ $(document).ready(async function () {
     //});
 
 
-
     $('#TxtWbSlipNo').on('change', function () {
 
         if ($(this).val().trim() !== '') {
@@ -226,11 +224,6 @@ $(document).ready(async function () {
 
     });
 
-
-
-
-
-
     $('#TxtWbSlipNo').on('change', function () {
 
         if ($(this).val().trim() !== '') {
@@ -247,11 +240,6 @@ $(document).ready(async function () {
         }
 
     });
-
-
-
-
-
 
     $("#btn-save").click(async function (e) {
         e.preventDefault();
