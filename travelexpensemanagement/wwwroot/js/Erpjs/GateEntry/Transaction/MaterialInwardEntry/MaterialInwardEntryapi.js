@@ -424,6 +424,8 @@ async function FetchPendingOrderNo(PartyCode, V_TYPE, V_DATE) {
                 `;
                 tableBody.insertAdjacentHTML('beforeend', row);
             });
+
+
         }    
 
     } catch (error) {
