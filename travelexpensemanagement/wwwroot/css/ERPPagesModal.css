@@ -23,6 +23,9 @@
 .small-modal {
     max-width: 650px;
 }
+.medium-modal {
+    max-width: 750px;
+}
 .erppagesmodal-header-left {
     display: flex;
     align-items: center;

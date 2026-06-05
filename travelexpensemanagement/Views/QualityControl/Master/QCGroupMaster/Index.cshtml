@@ -2,11 +2,12 @@
     ViewBag.Title = "QC Group Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
-            <i class="fa fa-check-square"></i>
+            <i class="fa fa-shield"></i>
         </div>
         <div class="erppage-header-title">QC Group Master</div>
     </div>
@@ -23,11 +24,11 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">QCG Name</label>
-                    <input type="text" class="erppage-input" id="TxtQCGName" placeholder="Enter QCG Name">
+                    <input type="text" class="erppage-input" id="TxtQCGName" name="QCGName" placeholder="Enter QCG Name">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">QC Type</label>
-                    <select class="erppage-input erppage-select" id="ddlQCType">
+                    <select class="erppage-input erppage-select" id="ddlQCType" name="QCType">
                         <option value="">Select QC Type</option>
                         <option value="RMG">RMG</option>
                         <option value="STORE">STORE</option>
@@ -44,7 +45,7 @@
                     <div class="erppage-toggle-container">
                         <span class="erppage-toggle-text active" id="statusText">Active</span>
                         <label class="erppage-toggle">
-                            <input type="checkbox" id="ACTIVE" checked>
+                            <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
                             <span class="erppage-toggle-slider"></span>
                         </label>
                     </div>
@@ -52,37 +53,22 @@
             </div>
         </fieldset>
         <div class="erppage-actions">
-            <button id="btnSave" type="submit" class="erppage-btn erppage-btn-save">
+            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
             </button>
         </div>
     </div>
 </div>
-
 <script>
-        $('#ChkActive').on('change', function () {
-        if ($(this).is(':checked')) {
-            $('#lblStatus')
-                .text('Active')
-                .removeClass('inactive')
-                .addClass('active');
-        } else {
-            $('#lblStatus')
-                .text('Inactive')
-                .removeClass('active')
-                .addClass('inactive');
-        }
-    });
-    </script>
-
-
-
-<script>
+    let isReadOnly;
+    //=========Page Load===========
     $(document).ready(function () {
         const urlParams = new URLSearchParams(location.search);
         const rowId = parseInt(urlParams.get('id'));
-        const isReadOnly = urlParams.get('readOnly') === 'true';
+        isReadOnly = urlParams.get('readOnly') === 'true';
+
+        $('#TxtQCGName').focus();
 
         if (!isNaN(rowId) && rowId > 0) {
             loadQCGroupById(rowId);
@@ -92,9 +78,9 @@
             }
         }
 
-        $('#cancelBtn').on('click', function () {
-            window.location.href = '/QCGroupMasterList/Index';
-        });
+        // $('#cancelBtn').on('click', function () {
+        //     window.location.href = '/QCGroupMasterList/Index';
+        // });
 
         $('#ACTIVE').on('change', function () {
             let status = $(this).is(':checked') ? 'Active' : 'Inactive';
@@ -102,7 +88,8 @@
         });
     });
 
-    $('#QCGroupMasterform').on('submit', function (e) {
+    //========Save & Update=========
+    $('#btnSave').on('click', function (e) {
         e.preventDefault();
 
         const code = parseInt($('#CODE').val()) || 0;
@@ -110,30 +97,15 @@
         const qcType = $('#ddlQCType').val();
         const isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
 
-        if (!name) {
-            toastr.warning('Please enter QCG Name.');
-            $('#TxtQCGName').focus();
-            return;
-        }
-
-        if (!qcType) {
-            toastr.warning('Please select QC Type.');
-            $('#ddlQCType').focus();
-            return;
-        }
+        if (!validateRequiredField('#TxtQCGName','QCG Name')) return;
+        if (!validateRequiredField('#ddlQCType','QC Type')) return;
 
         const payload = {
             CODE: code,
             NAME: name,
             QC_TYPE: qcType,
             ACTIVE: isActive,
-            UDATE: new Date().toISOString(),
-            EDATE: new Date().toISOString(),
-            AED: code > 0 ? 'U' : 'A',
             ACTION: code > 0 ? 'UPDATE' : 'INSERT',
-            WSID: 'WEB',
-            UUSER: 1,
-            EUSER: 1
         };
 
         $.ajax({
@@ -143,22 +115,23 @@
             data: JSON.stringify(payload),
             success: function (response) {
                 if (response.success) {
-                    toastr.success("QC Group saved successfully!");
-                    $('#QCGroupMasterform')[0].reset();
+                    showToast("QC Group saved successfully!", { type: "success" });
                     setTimeout(function () {
                         window.location.href = '/QCGroupMasterList/Index';
                     }, 1000);
+                    $('#QCGroupMasterform')[0].reset();
                 } else {
-                    toastr.warning(response.message || "Something went wrong while saving.");
+                    showToast(response.message || "Something went wrong while saving.", { type: "warning" });
                 }
             },
             error: function (xhr) {
                 const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
-                toastr.error("Error: " + errorMsg);
+                showToast("Error: " + errorMsg, { type: "error" });
             }
         });
     });
 
+    //=========Get By Id=========
     function loadQCGroupById(code) {
         $.ajax({
             url: '/QCGroupMasterList/GetQCGroupByCode',
@@ -167,7 +140,7 @@
             success: function (response) {
                 const data = response.data;
                 if (!data) {
-                    toastr.warning("No data found.");
+                    showToast("No data found.", { type: "warning" });
                     return;
                 }
 
@@ -179,17 +152,22 @@
             },
             error: function (xhr) {
                 console.error("Error loading QC Group by ID:", xhr);
-                toastr.error('Error: ' + xhr.responseText);
+                showToast('Error: ' + xhr.responseText, { type: "error" });
             }
         });
     }
 
+    //=======Readonly============
     function setQCGroupFormReadOnly() {
         const form = $('#QCGroupMasterform');
         form.find('input, select, textarea, button').prop('disabled', true);
         $('#ACTIVE').prop('disabled', true);
         $('#statusText').addClass('text-muted');
+
+         $('#btnSave').hide();
+        form.addClass('erppage-readonly');
     }
 
 </script>
+
 

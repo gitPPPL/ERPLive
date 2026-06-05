@@ -1,8 +1,35 @@
 ﻿@{
 	ViewBag.Title = "Parameter Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+	var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+}
+<div id="erp-toast-container"></div>
 <fieldset>
 	<legend class="legend-field">Parameter Master List</legend>
 	<div class="row">
@@ -12,24 +39,35 @@
 			</div>
 		</div>
 		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "ParameterMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add Parameter
-			</button>
-			<button class="btn btn-print">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export">
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
+			@if (canAdd)
+			{
+				<button id="btnAdd" onclick="window.location.href='@Url.Action("Index", "ParameterMaster")'" type="submit" class="btn btn-primary">
+					<i class="fa fa-plus"></i>Add Parameter
+				</button>
+			}
+			@if (canPrint)
+			{
+				<button class="btn btn-print" onclick="QCParameterReport()">
+					<i class="fa fa-print"></i> Print
+				</button>
+			}
+			@if (canExport)
+			{
+				<button class="btn btn-export" id="btn-Export-Excel">
+					<i class="fas fa-file-export"></i> Export
+				</button>
+			}
+			@if (canMail)
+			{
+				<button class="btn btn-mail">
+					<i class="fa fa-envelope"></i> Mail
+				</button>
+			}
+			@if (canApproval)
+			{
+				<button class="btn btn-send"><i class="fa fa-paper-plane"></i> Approval Send</button>
+				<button class="btn btn-approved"><i class="fa fa-check"></i> Approved</button>
+			}
 		</div>
 	</div>
 	<div class="card">
@@ -49,168 +87,204 @@
 			</table>
 		</div>
 	</div>
-	<div class="pagination-wrapper">
+	@* <div class="pagination-wrapper">
 		<ul class="pagination" id="tablePagination"></ul>
+	</div> *@
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
 	</div>
 </fieldset>
-
-
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
 
 <script>
+	var permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower()
+	};
+	window.globalVariables = {
+		compCode: "@globalVariables?.PubCompCode",
+		yearCode: "@globalVariables?.PubFYearCode",
+		branchCode: "@globalVariables?.PubBranchCode",
+		companyName: "@globalVariables?.CompanyName",
+		add1: "@globalVariables?.Address1",
+		add2: "@globalVariables?.Address2",
+
+	};
+	window.database = {
+		 db: "@ViewBag.DatabaseName"
+	}
+
 	let currentPage = 1;
 	let pageSize = 10;
-
+	//=============Page Load=========
+	let QCParameterPagination;
 	$(document).ready(function () {
-		GetMasterDataList();
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			GetMasterDataList();
-		});
-	});
-
-	function GetMasterDataList() {
-		const searchTerm = $('#searchBox').val().trim();
-		$.ajax({
-			url: '@Url.Action("GetQualityParamList", "ParameterMasterList")',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
+		QCParameterPagination = Pagination.create({
+			pageSize: 10,
+			paginationContainer: '#pageNumbers',
+			infoContainer: '#pageInfoText',
+			loader: function (params) {
+				$.ajax({
+					url: '/ParameterMasterList/GetQualityParamList',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						searchTerm: $('#searchBox').val(),
+						pageNumber: params.pageNumber,
+						pageSize: params.pageSize
+					},
+					success: function (res) {
+						params.callback({
+							data: res.data,
+							totalCount: res.totalCount
+						});
+					},
+					error: function (xhr) {
+						showToast('Error loading data', { type: "error" });
+					}
+				});
 			},
-			success: function (res) {
-				const mastListData = res.data || [];
-				const totalCount = res.totalCount || 0;
-				let tbody = $('#tblParameterMaster tbody');
+			render: function (docs) {
+				console.log(docs);
+				const tbody = $('#tblParameterMaster tbody');
 				tbody.empty();
-				console.log(mastListData);
-				if (mastListData.length === 0) {
-					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+				if (!docs.length) {
+					tbody.append(`<tr><td colspan="6" class="text-center text-muted">No records found.</td></tr>'`);
 					return;
 				}
-				$.each(mastListData, function (index, item) {
+
+				$.each(docs, function (index, item) {
+					let actions = '';
+					if (permissions.canEdit) {
+						actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.code}')"><i class="fa fa-edit"></i></button>`;
+					}
+					actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.code}')"><i class="fa fa-eye"></i></button>`;
+					if (permissions.canDelete) {
+						actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteQCParameter('${item.code}')"><i class="fa fa-trash"></i></button>`;
+					}
 					tbody.append(`
-						<tr>
-							<td class="code d-none">${item.CODE}</td>						 
-							<td>${item.NAME}</td>
-							<td>${item.SHORTNAME}</td>
-							<td>${item.QUNIT_CODE}</td>
-							<td>${item.ACTIVE === 1 ? 'Yes' : 'No'}</td>
-							<td>
-								<button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.CODE}')" title="Edit">
-									<i class="fas fa-edit"></i>
-								</button>
-								<button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.CODE}')" title="View Detail">
-									<i class="fas fa-eye"></i>
-								</button>
-								<button class="btn btn-sm btn-light btn-delete" title="Delete">
-									<i class="fas fa-trash text-danger"></i>
-								</button>
-							</td>
+						 <tr>
+							<td class="code d-none">${item.code}</td>
+							<td>${item.name}</td>
+							<td>${item.shortname}</td>
+							<td>${item.qunit}</td>
+							<td>${item.active === 1 ? 'Yes' : 'No'}</td>
+							<td class="action-col">${actions}</td>
 						</tr>
 					`);
 				});
 
-				renderPagination(totalCount, pageSize, currentPage);
-			},
-			error: function (xhr) {
-				toastr.error('Error loading PO list: ' + xhr.responseText);
 			}
 		});
+		// First Load
+		QCParameterPagination.load();
+		// Search
+		$('#searchBox').keyup(function () {
+			QCParameterPagination.load();
+		});
+	});
+
+	// Page Size Change
+	function changeRowsPerPage() {
+		QCParameterPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+		QCParameterPagination.load();
 	}
-
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const paginationContainer = $('#tablePagination');
-		paginationContainer.empty();
-
-		if (total <= 0 || totalPages <= 1) return;
-
-		let paginationHtml = '';
-
-		if (currentPage > 1) {
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, currentPage + 2);
-
-		if (currentPage <= 3) endPage = Math.min(5, totalPages);
-		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-		for (let i = startPage; i <= endPage; i++) {
-			paginationHtml += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
-						onclick="goToPage(${i})">${i}</button>`;
-		}
-
-		if (currentPage < totalPages) {
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-
-		paginationContainer.html(paginationHtml);
-	}
-
-	function goToPage(page) {
-		currentPage = page;
-		GetMasterDataList();
-	}
-
+	
+	//==============Edit==============
 	function AddOrEditFunction(rowId) {
 		window.location.href = '/ParameterMaster/Index?id=' + encodeURIComponent(rowId);
 	}
 
+	//==============View==============
 	function viewMenuDetails(rowId) {
 		window.location.href = '/ParameterMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 	}
 
-	 $(document).on('click', '.btn-delete', function() {
-				const $row = $(this).closest('tr');
-				const CodeforDel = $row.find('.code').text().trim();
-				Swal.fire({
-					title: 'Are you sure you want to delete?',
-					text: "This action cannot be undone.",
-					icon: 'warning',
-					showCancelButton: true,
-					confirmButtonText: 'Yes, delete it!',
-					cancelButtonText: 'No, cancel!',
-					reverseButtons: true
-				}).then((result) => {
-					if (result.isConfirmed) {
-						$.ajax({
-							url: '/ParameterMasterList/DelQParamMast',
-							type: 'DELETE',
-							data: { Code: CodeforDel },
-							success: function(data) {
-								if (data.status === true) {
-									Swal.fire(
-										'Deleted!',
-										'Your data has been deleted.',
-										'success'
-									);
-									$row.remove();
-									GetMasterDataList();
-								} else {
-									Swal.fire(
-										'Error!',
-										'There was an issue deleting the data.',
-										'error'
-									);
-								}
-							},
-							error: function(xhr, status, error) {
-								Swal.fire(
-									'Error!',
-									'Data could not be deleted: ' + error,
-									'error'
-								);
-							}
-						});
-					}
-				});
+	//=================Delete================
+	function deleteQCParameter(docId) {
+	   deleteRecord("ParameterMasterList", docId, {
+		   action: "DelQParamMast",
+		   text: "This will permanently delete the QC parameter.",
+		   successCallback: QCParameterPagination.load
+	   });
+	}
+	// ================= Download Excel =================
+	document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+		e.preventDefault();
+		window.location.href = "/ParameterMasterList/ExportAllDocs";
 	});
 
+	// ================= Download Pdf =================
+	function QCParameterReport() {
+
+		var reportName = "rptQCPMaster";
+
+		// Crystal Report Formula
+		var formula =
+			"{QCP_MAST.COMP_CODE} = " + window.globalVariables.compCode;
+			
+
+		var formulaFields = {
+			Reportname: reportName,
+			selectionFormula: formula,
+			Database: window.database.db,
+			Parameters: {
+				comp_name: window.globalVariables.companyName,
+				comp_add1: window.globalVariables.add1,
+				comp_add2: window.globalVariables.add2,
+				RPTNAME: "QC Parameter Report"
+			}
+		};
+
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://localhost:34088/Report/PendingQCReport',
+			type: 'POST',
+			data: JSON.stringify(formulaFields),
+			contentType: "application/json",
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
 </script>

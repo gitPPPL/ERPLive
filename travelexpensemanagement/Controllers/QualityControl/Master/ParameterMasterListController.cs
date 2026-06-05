@@ -1,28 +1,61 @@
-﻿using System.Data;
+﻿using DocumentFormat.OpenXml.Drawing;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using travelexpensemanagement.Dbconnection;
 using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Data.Common;
+using System.Dynamic;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
+using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
+using travelexpensemanagement.ModuleService;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
+    [SessionAuthorize]
     public class ParameterMasterListController : Controller
     {
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
-        string yearPrefix, VNO;
-        public ParameterMasterListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue)
+        private readonly ModuleService.ModuleService _moduleService;
+        private readonly GlobalValidationdate _globalValidationdate;
+        private readonly LogService.LogService _logService;
+
+        public ParameterMasterListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, 
+            GlobalValidationdate globalValidationdate, LogService.LogService logService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
+            _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
+            _logService = logService;
         }
         public IActionResult Index()
         {
-            return View("~/Views/QualityControl/Master/ParameterMasterList/Index.cshtml");
+            ViewBag.CurrentMenu = "QC Parameter Master";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel,
+            };
+            var globalVariables = _globalValue.GetGlobalVariables();
+
+            string databaseName;
+            using (var connection = _dbcontext.GetErpConnection())
+            {
+                databaseName = connection.Database; // Get the database name
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+            return View("~/Views/QualityControl/Master/ParameterMasterList/Index.cshtml", model);
         }
 
         [HttpGet]
@@ -31,31 +64,47 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             try
             {
                 var UsersessionDt = _globalValue.GetGlobalVariables();
-                string strqry = $@"
-                select distinct  CODE,NAME,SHORTNAME,QUNIT_CODE,QTY,ACTIVE from QCP_MAST
-                WHERE COMP_CODE = '{UsersessionDt.PubCompCode}' order by NAME ";
-                var fullList = await _dbHelper.GetJsonDataAsync(strqry);
-                if (!string.IsNullOrEmpty(searchTerm))
+                var pagedList = new List<QCprameterDto>();
+                int totalCount = 0;
+                
+                using (SqlConnection con = _dbcontext.GetErpConnection())
                 {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
-                        {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "NAME" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
+                    using(SqlCommand cmd = new SqlCommand("sp_QualityParameterMast_AED", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AED", "GET");
+                        cmd.Parameters.AddWithValue("@companyCd", UsersessionDt.PubCompCode);
+                        cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
+                        await con.OpenAsync();
 
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            // --- RESULT SET 1: QCTempEntryList ---
+                            while (await reader.ReadAsync())
+                            {
+                                pagedList.Add(new QCprameterDto
+                                {
+                                    CODE = reader["Code"] != DBNull.Value ? Convert.ToInt32(reader["Code"]) : null,
+                                    NAME = reader["Name"]?.ToString(),
+                                    SHORTNAME = reader["ShortName"]?.ToString(),
+                                    QUNIT = reader["Unit"]?.ToString(),
+                                    ACTIVE = reader["Active"] != DBNull.Value ? Convert.ToInt32(reader["Active"]) : null,
+                                });
+                            }
+
+                            // --- RESULT SET 2: TotalCount ---
+                            if (await reader.NextResultAsync())
+                            {
+                                if (await reader.ReadAsync())
+                                {
+                                    totalCount = (int)reader["TotalCount"];
+                                }
+                            }
+                        }
+                    }
+                }
 
                 return Json(new { status = true, data = pagedList, totalCount });
             }
@@ -65,8 +114,8 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DelQParamMast(int Code)
+        [HttpPost]
+        public async Task<IActionResult> DelQParamMast(int docId)
         {
             try
             {
@@ -78,7 +127,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@AED", "D");
                         cmd.Parameters.AddWithValue("@companyCd", _globalValue.GetGlobalVariables().PubCompCode);
-                        cmd.Parameters.AddWithValue("@Code", _dbHelper.Xnull(Code));
+                        cmd.Parameters.AddWithValue("@Code", _dbHelper.Xnull(docId));
                         var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.ReturnValue
@@ -90,16 +139,58 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     }
                 }
                 if (x > 0)
-                    return Json(new { status = true, message = "Data delete successfully" });
-                return Json(new { status = false, message = "data delete failed" });
+                {
+                    //===========log insert
+                    _logService.InsertLog("QCP_MAST", "QC Parameter Master", "Master", "DELETE", "", docId.ToString(), null);
+                    return Json(new { success = true, message = "Data delete successfully" });
+                }
+                return Json(new { success = false, message = "data delete failed" });
 
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = "data delete failed" });
+                return Json(new { success = false, message = "data delete failed" });
             }
         }
 
+        public class QCprameterDto
+        {
+            public int? CODE { get; set; }
+            public string? NAME { get; set; }
+            public string? SHORTNAME { get; set; }
+            public string? QUNIT { get; set; }
+            public int? ACTIVE { get; set; }
+        }
 
+        [HttpGet]
+        public IActionResult ExportAllDocs()
+        {
+            try
+            {
+                var gv = _globalValue.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@companyCd", gv.PubCompCode },
+                    { "@AED", "Excel" }
+                };
+
+                var fileBytes = _globalValidationdate.ExportToExcel("sp_QualityParameterMast_AED", "Qc Parameter Master", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"QcParameterMaster_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

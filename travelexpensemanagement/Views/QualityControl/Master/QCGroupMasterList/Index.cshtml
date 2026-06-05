@@ -1,6 +1,34 @@
 ﻿@{
 	ViewBag.Title = "QC Group Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+
 }
 <div id="erp-toast-container"></div>
 <div class="erppagelist-header">
@@ -9,9 +37,12 @@
         <span>QC Group Master List</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "QCGroupMaster")'">
-            <i class="fa fa-plus"></i>Add New
-        </button>
+        @if (canAdd)
+        {
+            <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "QCGroupMaster")'">
+                <i class="fa fa-plus"></i>Add New
+            </button>
+        }
     </div>
 </div>
 <!-- TOOLBAR -->
@@ -21,29 +52,41 @@
         <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
     </div>
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
-            <i class="fa fa-print"></i> Print
-        </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
-            <i class="fa fa-file-excel"></i> Export
-        </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
-            <i class="fa fa-envelope"></i>Mail
-        </button>
-        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
-            <i class="fa fa-check-circle"></i>Approved
-        </button>
+        @if (canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="QCGMasterReport()">
+                <i class="fa fa-print"></i> Print
+            </button>
+        }
+        @if (canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+                <i class="fa fa-file-excel"></i> Export
+            </button>
+        }
+        @if (canMail)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+                <i class="fa fa-envelope"></i>Mail
+            </button>
+        }
+        @if (canApproval)
+        {
+            <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+                <i class="fa fa-check-circle"></i>Approved
+            </button>
+        }
     </div>
 </div>
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblQCGroupMaster" class="excel-table fixed-grid-table resizable-table">
             <colgroup>
-                <col style="display:none;" />      
-                <col style="width:250px;" />       
-                <col style="width:180px;" />       
-                <col style="width:120px;" />       
-                <col style="width:120px;" />       
+                <col style="display:none;" />
+                <col style="width:250px;" />
+                <col style="width:180px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
             </colgroup>
             <thead>
                 <tr>
@@ -80,145 +123,172 @@
 </div>
 
 
-
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
 
 <script>
-    let currentPage = 1;
-    let pageSize = 10;
+    var permissions = {
+        canEdit: @canEdit.ToString().ToLower(),
+        canDelete: @canDelete.ToString().ToLower()
+    };
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+    };
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
 
+    //=============Page Load=========
+    let QCGMasterPagination;
     $(document).ready(function () {
-        loadAllQCGroups();
-    });
-
-    function loadAllQCGroups() {
-        const searchTerm = $('#searchBox').val();
-
-        $.ajax({
-            url: '/QCGroupMasterList/GetAllQCGroups',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm: searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
+        QCGMasterPagination = Pagination.create({
+            pageSize: 10,
+            paginationContainer: '#pageNumbers',
+            infoContainer: '#pageInfoText',
+            loader: function (params) {
+                $.ajax({
+                    url: '/QCGroupMasterList/GetAllQCGroups',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        searchTerm: $('#searchBox').val(),
+                        pageNumber: params.pageNumber,
+                        pageSize: params.pageSize
+                    },
+                    success: function (res) {
+                        params.callback({
+                            data: res.lists,
+                            totalCount: res.totalCount
+                        });
+                    },
+                    error: function (xhr) {
+                        // toastr.error('Error loading data');
+                        showToast('Error loading data', { type: "error" });
+                    }
+                });
             },
-            success: function (res) {
-                console.log(res);
-                const lists = res.lists;
-                const totalCount = res.totalCount;
-
-                let tbody = $('#tblQCGroupMaster tbody');
+            render: function (docs) {
+                const tbody = $('#tblQCGroupMaster tbody');
                 tbody.empty();
-
-                if (!lists || lists.length === 0) {
-                    tbody.append('<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>');
-                    renderPagination(0, pageSize, currentPage);
+                if (!docs.length) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
                     return;
                 }
 
-                $.each(lists, function (index, item) {
+                $.each(docs, function (index, item) {
+                    let actions = '';
+                    if (permissions.canEdit) {
+                        actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="editQCGroup(${item.code})"><i class="fa fa-edit"></i></button>`;
+                    }
+                    actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewQCGroup(${item.code})"><i class="fa fa-eye"></i></button>`;
+                    if (permissions.canDelete) {
+                        actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteQCGroup(${item.code})"><i class="fa fa-trash"></i></button>`;
+                    }
                     tbody.append(`
-                        <tr>
+                         <tr>
                             <td style="display:none;">${item.code}</td>
                             <td>${item.name || ''}</td>
                             <td>${item.qC_TYPE || ''}</td>
-                            <td>${item.active === 1 ? 'Active' : 'Inactive'}</td>
                             <td>
-                                <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editQCGroup(${item.code})"></i>
-                                <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewQCGroup(${item.code})"></i>
-                                <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteQCGroup(${item.code})"></i>
+                                ${item.active === 1
+                                    ? '<span class="erppagestatus-badge erppagestatus-active"><i class="fa fa-check-circle"></i>&nbsp;Active</span>'
+                                    : '<span class="erppagestatus-badge erppagestatus-inactive"><i class="fa fa-times-circle"></i>&nbsp;Inactive</span>'
+                                }
                             </td>
+                            <td class="action-col">${actions}</td>
                         </tr>
                     `);
                 });
 
-                renderPagination(totalCount, pageSize, currentPage);
-            },
-            error: function (xhr) {
-                alert('Error loading QC group data: ' + xhr.responseText);
             }
         });
-    }
-
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const paginationContainer = $('#tablePagination');
-        paginationContainer.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button></li>`;
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button></li>`;
-        }
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (currentPage <= 3) endPage = Math.min(5, totalPages);
-        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<li><button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button></li>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button></li>`;
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button></li>`;
-        }
-
-        paginationContainer.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadAllQCGroups();
-    }
-
-    $('#searchBox').on('keyup', function () {
-        currentPage = 1;
-        loadAllQCGroups();
+        // First Load
+        QCGMasterPagination.load();
+        // Search
+        $('#searchBox').keyup(function () {
+            QCGMasterPagination.load();
+        });
     });
 
+    // Page Size Change
+    function changeRowsPerPage() {
+        QCGMasterPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+        QCGMasterPagination.load();
+    }
+    //==============Edit==============
     function editQCGroup(code) {
         window.location.href = '/QCGroupMaster/Index?id=' + encodeURIComponent(code);
     }
-
+    //==============View==============
     function viewQCGroup(code) {
         window.location.href = '/QCGroupMaster/Index?id=' + encodeURIComponent(code) + '&readOnly=true';
     }
+    //=================Delete================
+    function deleteQCGroup(docId) {
+       deleteRecord("QCGroupMaster", docId, {
+           action: "DeleteQCGroupByCode",
+           text: "This will permanently delete the QC group.",
+           successCallback: QCGMasterPagination.load
+       });
+    }
+    // ================= Download Excel =================
+    document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+        e.preventDefault();
+        window.location.href = "/QCGroupMasterList/ExportAllDocs";
+    });
+    // ================= Download Pdf =================
+    function QCGMasterReport() {
 
-    function deleteQCGroup(code) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This will permanently delete the QC group.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/QCGroupMaster/DeleteQCGroupByCode',
-                    type: 'POST',
-                    data: { code: code },
-                    success: function (response) {
-                        if (response.success) {
-                            Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                loadAllQCGroups();
-                            });
-                        } else {
-                            Swal.fire('Failed', response.message, 'warning');
-                        }
-                    },
-                    error: function () {
-                        Swal.fire('Error!', 'An error occurred while deleting the QC group.', 'error');
-                    }
-                });
+        var reportName = "rptQCGMaster";
+        
+        var formulaFields = {
+            Reportname: reportName,
+            selectionFormula: "",
+            Database: window.database.db,
+            Parameters: {
+                comp_name: window.globalVariables.companyName,
+                comp_add1: window.globalVariables.add1,
+                comp_add2: window.globalVariables.add2,
+                RPTNAME: "QC Group Report"
+            }
+        };
+
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://localhost:34088/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(formulaFields),
+            contentType: "application/json",
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
             }
         });
     }

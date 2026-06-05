@@ -506,7 +506,7 @@ th {
     white-space: nowrap;
 }
 .fixed-grid-table thead th.action-col {
-    z-index: 999;
+    z-index: 99;
    
 }
 .fixed-grid-table tbody tr:hover td.action-col {

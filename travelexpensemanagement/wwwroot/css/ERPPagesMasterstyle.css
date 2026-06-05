@@ -303,8 +303,33 @@
 /* ===== CONTAINER ===== */
 .erppage-container {
     margin: 8px auto;
-    /* padding: 0 10px;*/
 }
+.erppage-input-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+    .erppage-input-with-icon .erppage-input {
+        flex: 1;
+    }
+
+    /* Override old icon style */
+    .erppage-input-with-icon .erppageinputicon {
+        position: static;
+        transform: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: linear-gradient(135deg,#2f7d32,#1b5e20);
+        color: #fff;
+        cursor: pointer;
+    }
+
 /* Status Container */
 .erppage-toggle-container {
     display: flex;
@@ -412,7 +437,7 @@
 }
 /* ===== Dynamic Item Table ===== */
 .erppagetabledynamic-wrapper {
-    width:50%;
+    width:100%;
     /*display: inline-block;*/ /* wrapper shrinks to content */
     max-height: 180px; /* Fixed height */
     overflow-y: auto; /* Vertical scrollbar */
@@ -1215,6 +1240,12 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
+.erppage-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px;
+    align-items: start;
+}
 /* ===== INPUT + BUTTON GROUP ===== */
 .erppage-inputgroup {
     display: flex;
@@ -1294,11 +1325,31 @@ input[type="number"] {
         font-size: 14px;
         color: #fff;
     }
+
+.erppagestatus-badge {
+    display: inline-flex;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 8px;
+   /* text-transform: uppercase;*/
+}
+
+.erppagestatus-active {
+    background-color: rgba(40, 167, 69, 0.12);
+    color: #28a745;
+}
+
+.erppagestatus-inactive {
+    background-color: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}
 /* ACTION BAR */
 .erppage-actions {
     position: sticky;
     bottom: 0;
-    z-index: 1000;
+    z-index: 998;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -1310,7 +1361,7 @@ input[type="number"] {
 
 /* BASE BUTTON */
 .erppage-btn {
-    display: block;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     border: none;

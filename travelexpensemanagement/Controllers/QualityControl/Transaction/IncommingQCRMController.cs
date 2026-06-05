@@ -103,6 +103,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
 
+
         public JsonResult GetddlQCIncharge()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -127,57 +128,183 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var moduleList = _dropdownService.GetDropdownList(query);
             return Json(moduleList);
         }
+
         [HttpPost]
         public async Task<IActionResult> GetGatDetailsList(string StrVNo, string StrV_type)
         {
-            var gv = _globalVariableService.GetGlobalVariables();
-            string strVType = "";
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
 
-            if (!string.IsNullOrWhiteSpace(StrV_type))
-            {
-                string firstPart = StrV_type.Split('|')[0].Trim();
-                strVType = Regex.Match(firstPart, @"^[A-Za-z]+").Value;
-            }
-            if (!int.TryParse(StrVNo, out int vNo))
-            {
-                return BadRequest("Invalid V_NO");
-            }
-            var results = new List<object>();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (var command = new SqlCommand("usp_GetGateIncommingQCRMDetails", con))
-            {
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@V_TYPE", strVType);
-                command.Parameters.AddWithValue("@V_NO", vNo);
-                command.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-                command.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                command.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
-                await con.OpenAsync();
+                string strVType = "";
 
-                using (var reader = await command.ExecuteReaderAsync())
+                if (!string.IsNullOrWhiteSpace(StrV_type))
                 {
-                    while (await reader.ReadAsync())
+                    string firstPart = StrV_type.Split('|')[0].Trim();
+                    strVType = Regex.Match(firstPart, @"^[A-Za-z]+").Value;
+                }
+
+                if (!int.TryParse(StrVNo, out int vNo))
+                {
+                    return Json(new
                     {
-                        var record = new
+                        success = false,
+                        message = "Invalid MRN No."
+                    });
+                }
+
+                object header = null;
+                var items = new List<object>();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                using (SqlCommand cmd = new SqlCommand("usp_GetGateIncommingQCRMDetails", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@V_TYPE", strVType);
+                    cmd.Parameters.AddWithValue("@V_NO", vNo);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                    await con.OpenAsync();
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        // ===========================
+                        // First Result Set (Header)
+                        // ===========================
+                        if (await reader.ReadAsync())
                         {
-                            V_TYPE = reader["V_TYPE"]?.ToString(),
-                            V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
-                            V_DATE = reader["V_DATE"]?.ToString(),
-                            PARTY_CODE = reader["PARTY_CODE"]?.ToString(),
-                            PartyName = reader["PartyName"]?.ToString(),
-                            BILL_NO = reader["BILL_NO"]?.ToString(),
-                            BILL_DATE = reader["BILL_DATE"]?.ToString(),
-                            QTY = reader["RECD_QTY"] != DBNull.Value ? Convert.ToDecimal(reader["RECD_QTY"]) : 0,
-                            TRUCK_NO = reader["TRUCK_NO"]?.ToString(),
-                            ITEM_CODE = reader["ITEM_CODE"]?.ToString(),
-                            ITEM_NAME = reader["ITEM_NAME"]?.ToString()
-                        };
-                        results.Add(record);
+                            int isQCExists = reader["IsQCExists"] != DBNull.Value
+                                ? Convert.ToInt32(reader["IsQCExists"])
+                                : 0;
+
+                            if (isQCExists == 1)
+                            {
+                                return Json(new
+                                {
+                                    success = false,
+                                    message = reader["Message"]?.ToString()
+                                });
+                            }
+
+                            header = new
+                            {
+                                V_TYPE = reader["V_TYPE"]?.ToString(),
+                                V_NO = Convert.ToInt32(reader["V_NO"]),
+                                V_DATE = reader["V_DATE"]?.ToString(),
+                                PARTY_CODE = reader["PARTY_CODE"]?.ToString(),
+                                PartyName = reader["PartyName"]?.ToString(),
+                                TRANSPORT_NAME = reader["TRANSPORT_NAME"]?.ToString(),
+                                BILL_NO = reader["BILL_NO"]?.ToString(),
+                                BILL_DATE = reader["BILL_DATE"]?.ToString(),
+                                TRUCK_NO = reader["TRUCK_NO"]?.ToString(),
+                                CONTAINER_NO = reader["CONTAINER_NO"]?.ToString(),
+                                InvoiceQty = reader["InvoiceQty"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["InvoiceQty"])
+                                                : 0,
+                                ReceivedQty = reader["ReceivedQty"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["ReceivedQty"])
+                                                : 0,
+                                ShortageQty = reader["ShortageQty"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["ShortageQty"])
+                                                : 0,
+                                Bales = reader["Bales"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["Bales"])
+                                                : 0
+                            };
+                        }
+
+                        // ===========================
+                        // Second Result Set (Items)
+                        // ===========================
+                        if (await reader.NextResultAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                items.Add(new
+                                {
+                                    ITEM_CODE = reader["ITEM_CODE"]?.ToString(),
+                                    ITEM_NAME = reader["ITEM_NAME"]?.ToString(),
+                                    QTY = reader["QTY"] != DBNull.Value
+                                            ? Convert.ToDecimal(reader["QTY"])
+                                            : 0
+                                });
+                            }
+                        }
                     }
                 }
+
+                return Json(new
+                {
+                    success = true,
+                    header,
+                    items
+                });
             }
-            return Json(results);
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> GetGatDetailsList(string StrVNo, string StrV_type)
+        //{
+        //    var gv = _globalVariableService.GetGlobalVariables();
+        //    string strVType = "";
+
+        //    if (!string.IsNullOrWhiteSpace(StrV_type))
+        //    {
+        //        string firstPart = StrV_type.Split('|')[0].Trim();
+        //        strVType = Regex.Match(firstPart, @"^[A-Za-z]+").Value;
+        //    }
+        //    if (!int.TryParse(StrVNo, out int vNo))
+        //    {
+        //        return BadRequest("Invalid V_NO");
+        //    }
+        //    var results = new List<object>();
+        //    using (SqlConnection con = _dbConnection.GetErpConnection())
+        //    using (var command = new SqlCommand("usp_GetGateIncommingQCRMDetails", con))
+        //    {
+        //        command.CommandType = CommandType.StoredProcedure;
+        //        command.Parameters.AddWithValue("@V_TYPE", strVType);
+        //        command.Parameters.AddWithValue("@V_NO", vNo);
+        //        command.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+        //        command.Parameters.AddWithValue("@BRANCH_CODE", 1);
+        //        command.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+        //        await con.OpenAsync();
+
+        //        using (var reader = await command.ExecuteReaderAsync())
+        //        {
+        //            while (await reader.ReadAsync())
+        //            {
+        //                var record = new
+        //                {
+        //                    V_TYPE = reader["V_TYPE"]?.ToString(),
+        //                    V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
+        //                    V_DATE = reader["V_DATE"]?.ToString(),
+        //                    PARTY_CODE = reader["PARTY_CODE"]?.ToString(),
+        //                    PartyName = reader["PartyName"]?.ToString(),
+        //                    BILL_NO = reader["BILL_NO"]?.ToString(),
+        //                    BILL_DATE = reader["BILL_DATE"]?.ToString(),
+        //                    QTY = reader["RECD_QTY"] != DBNull.Value ? Convert.ToDecimal(reader["RECD_QTY"]) : 0,
+        //                    TRUCK_NO = reader["TRUCK_NO"]?.ToString(),
+        //                    ITEM_CODE = reader["ITEM_CODE"]?.ToString(),
+        //                    ITEM_NAME = reader["ITEM_NAME"]?.ToString()
+        //                };
+        //                results.Add(record);
+        //            }
+        //        }
+        //    }
+        //    return Json(results);
+        //}
 
         [HttpPost]
         public async Task<IActionResult> GetItemDetails([FromBody] List<ItemRequest> items)
@@ -675,7 +802,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                             {
                                 var itemCode = reader["ITEM_CODE"]?.ToString();
                                 if (!string.IsNullOrEmpty(itemCode))
-                                    response.ItemCodes.Add(itemCode); 
+                                    response.ItemCodes.Add(itemCode);
                             }
                         }
                     }

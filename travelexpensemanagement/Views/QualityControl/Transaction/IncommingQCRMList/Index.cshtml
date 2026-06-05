@@ -41,30 +41,26 @@
     <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblIncommingQCRMList" class="excel-table fixed-grid-table resizable-table sortable-table">
             <colgroup>
-                <col style="display:none;" /> 
-                <col style="width:120px;" />  
-                <col style="width:150px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
-                <col style="width:80px;" />   
-                <col style="width:120px;" />  
-                <col style="width:180px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
-                <col style="width:150px;" />  
-                <col style="width:120px;" />  
-                <col style="width:140px;" />  
-                <col style="width:140px;" />  
-                <col style="width:140px;" />  
-                <col style="width:180px;" />  
-                <col style="width:140px;" />  
-                <col style="width:180px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
-                <col style="width:120px;" />  
+                <col style="display:none;" />
+                <col style="width:120px;" />
+                <col style="width:100px;" />
+                <col style="width:120px;" />
+                <col style="width:100px;" />
+                <col style="width:120px;" />
+                <col style="width:250px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
+                <col style="width:180px;" />
+                <col style="width:150px;" />
+                <col style="width:140px;" />
+                <col style="width:140px;" />
+                <col style="width:140px;" />
+                <col style="width:250px;" />
+                <col style="width:140px;" />
+                <col style="width:250px;" />
+                <col style="width:120px;" />
+                <col style="width:140px;" />
+                <col style="width:120px;" />
             </colgroup>
             <thead>
                 <tr>
@@ -74,9 +70,6 @@
                     <th data-column="1">
                         Doc Type <span class="sort-icon"></span>
                     </th>
-                    @* <th data-column="2">
-                        Name <span class="sort-icon"></span>
-                    </th> *@
                     <th data-column="3">
                         Doc No <span class="sort-icon"></span>
                     </th>
@@ -89,15 +82,6 @@
                     <th data-column="6">
                         Mrn Type <span class="sort-icon"></span>
                     </th>
-                    @* <th data-column="7">
-                        Mrn Date <span class="sort-icon"></span>
-                    </th> *@
-                    @* <th data-column="8">
-                        Bales <span class="sort-icon"></span>
-                    </th> *@
-                    @* <th data-column="9">
-                        Party Code <span class="sort-icon"></span>
-                    </th> *@
                     <th data-column="10">
                         Party Name <span class="sort-icon"></span>
                     </th>
@@ -166,7 +150,286 @@
         </div>
     </div>
 </div>
+<script src="/common/pagination.js"></script>
+<script src="/common/delete.js"></script>
 
+<script>
+    let qcPagination;
+
+    $(document).ready(function () {
+
+        qcPagination = Pagination.create({
+
+            pageSize: parseInt($('#pageSizeSelect').val()) || 10,
+            paginationContainer: '#pageNumbers',
+            infoContainer: '#pageInfoText',
+
+            loader: function (params) {
+
+                $.ajax({
+                    url: '/IncommingQCRMList/GetQCIncommingQCEntryList',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        searchTerm: $('#searchBox').val(),
+                        pageNumber: params.pageNumber,
+                        pageSize: params.pageSize
+                    },
+                    success: function (res) {
+
+                        params.callback({
+                            data: res.items || [],
+                            totalCount: res.totalCount || 0
+                        });
+                    },
+                    error: function () {
+                        toastr.error('Error loading data');
+                    }
+                });
+            },
+
+            render: function (docs) {
+
+                const tbody = $('#tblIncommingQCRMList tbody');
+                tbody.empty();
+
+                if (!docs || docs.length === 0) {
+
+                    tbody.append(`
+                        <tr>
+                            <td colspan="20" class="text-center">
+                                No records found
+                            </td>
+                        </tr>
+                    `);
+
+                    return;
+                }
+
+                docs.forEach(doc => {
+
+                    tbody.append(`
+                        <tr>
+                            <td style="display:none;">${doc.searchCode || ''}</td>
+                            <td>${doc.v_TYPE || ''}</td>
+                            <td>${doc.v_NO || ''}</td>
+                            <td>${doc.v_DATE || ''}</td>
+                            <td>${doc.mrN_NO || ''}</td>
+                            <td>${doc.mrN_TYPE || ''}</td>
+                            <td>${doc.partyName || ''}</td>
+                            <td>${doc.billNo || ''}</td>
+                            <td>${doc.billDate || ''}</td>
+                            <td>${doc.transportName || ''}</td>
+                            <td>${doc.truckNo || ''}</td>
+                            <td>${doc.inV_QTY || ''}</td>
+                            <td>${doc.recD_QTY || ''}</td>
+                            <td>${doc.shorT_QTY || ''}</td>
+                            <td>${doc.remarks || ''}</td>
+                            <td>${doc.deducT_AMT || ''}</td>
+                            <td>${doc.deducT_NARR || ''}</td>
+                            <td>${doc.puR_TYPE || ''}</td>
+                            <td>${doc.wastE_WGT || ''}</td>
+
+                            <td class="action-col">
+
+                                <button class="act-btn edit btn-edit"
+                                        title="Edit"
+                                        style="cursor:pointer;"
+                                        data-vtype="${doc.v_TYPE}"
+                                        data-vno="${doc.v_NO}"
+                                        onclick="editEntry(this)">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+
+                                <button class="act-btn view btn-view"
+                                        title="View"
+                                        style="cursor:pointer;"
+                                        onclick="viewEntry('${doc.searchCode}')">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+
+                                <button class="act-btn delete btn-delete"
+                                        title="Delete"
+                                        style="cursor:pointer;"
+                                        data-vtype="${doc.v_TYPE}"
+                                        data-vno="${doc.v_NO}"
+                                        onclick="deleteDocStage(this)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+
+                            </td>
+                        </tr>
+                    `);
+
+                });
+            }
+        });
+
+        // Initial Load
+        qcPagination.load();
+
+        // Search
+        $('#searchBox').on('keyup', function () {
+            qcPagination.load();
+        });
+
+        // Page Size Change
+        $('#pageSizeSelect').on('change', function () {
+
+            qcPagination.setPageSize(
+                parseInt($(this).val())
+            );
+
+            qcPagination.load();
+        });
+
+    });
+
+    // Edit
+    function editEntry(el) {
+        const vType = $(el).data("vtype");
+        const vNo = $(el).data("vno");
+        window.location.href = `/IncommingQCRM/Index?vType=${encodeURIComponent(vType)}&vNo=${encodeURIComponent(vNo)}`;
+    }
+
+    // View
+    function viewEntry(docCode) {
+
+        window.location.href =
+            `/IncommingQCRM/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
+    }
+
+    // Delete
+    function deleteDocStage(el) {
+
+        const vType = $(el).data("vtype");
+        const vNo = $(el).data("vno");
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This record will be permanently deleted!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/IncommingQCRMList/Delete',
+                    type: 'POST',
+                    data: {
+                        vNo: vNo,
+                        docType: vType
+                    },
+
+                    success: function (response) {
+
+                        if (response.status) {
+
+                            toastr.success(response.message);
+
+                            if (qcPagination) {
+                                qcPagination.load();
+                            }
+
+                        } else {
+
+                            toastr.error(response.message);
+                        }
+                    },
+
+                    error: function () {
+
+                        toastr.error('Error while deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+
+@* @{
+    ViewBag.Title = "Incomming QC List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<fieldset>
+    <legend class="legend-field">Incomming QC RM List</legend>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "IncommingQCRM")'" type="submit" class="btn btn-add">
+                    <i class="fa fa-plus"></i>Add
+                </button>
+                <button class="btn btn-print" onclick="printCityMasterReport()">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <button class="btn btn-export">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+                <button class="btn btn-mail">
+                    <i class="fa fa-envelope"></i> Mail
+                </button>
+                <button class="btn btn-approved">
+                    <i class="fa fa-check"></i> Approved
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblIncommingQCRMList" class="table-width">
+                <thead class="table-head">
+                    <tr>
+                        <th style="display:none;">Code</th>
+                        <th>V_Type</th>
+                        <th>Name</th>
+                        <th>V_No</th>
+                        <th>V_Date</th>
+                        <th>Mrn_No</th>
+                        <th>Mrn_Type</th>
+                        <th>Mrn_Date</th>
+                        <th>Bales</th>
+                        <th>Party_Code</th>
+                        <th>Party Name</th>
+                        <th>Bill_No</th>
+                        <th>Bill_Date</th>
+                        <th>Transport</th>
+                        <th>Truck_No</th>
+                        <th>Inv_Qty</th>
+                        <th>Recd_Qty</th>
+                        <th>Short_Qty</th>
+                        <th>Remarks</th>
+                        <th>Deduct_Amt</th>
+                        <th>Deduct_Narr</th>
+                        <th>Pur_Type</th>
+                        <th>Waste_Wgt</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- Pagination container -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pagination-end">
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
 <script>
     let currentPage = 1;
     let pageSize = 10;
@@ -228,7 +491,7 @@
                             <td>${doc.deducT_NARR || ''}</td>
                             <td>${doc.puR_TYPE || ''}</td>
                             <td>${doc.wastE_WGT || ''}</td>
-                            <td class="action-col">
+                            <td>
                                 <div class="action-icons">
                                     <i class="fa fa-edit btn-edit"
                                         data-vtype="${doc.v_TYPE}"
@@ -323,3 +586,4 @@
         });
     }
 </script>
+ *@

@@ -1,32 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Data.Common;
-using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.QualityControl.Master;
+using static travelexpensemanagement.Controllers.Payroll.Master.HODMasterController;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
+    [SessionAuthorize]
     public class QCGroupMasterController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService _dropdownService;
-        private readonly DbHelper _dbHelper;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly LogService.LogService _logService;
 
-        private int? userLevel;
-        public QCGroupMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService)
+
+        public QCGroupMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _dropdownService = dropdownService;
-            _dbHelper = dbHelper;
-            _moduleService = moduleService;
+            _logService = logService;
         }
         public IActionResult Index()
         {
@@ -47,7 +43,8 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
 
             string action = model.ACTION == "INSERT" ? "INSERT" : "UPDATE";
 
-            if (action == "INSERT" && IsDuplicateQCGroup(model.NAME))
+            //if (action == "INSERT" && IsDuplicateQCGroup(model.NAME))
+            if (IsDuplicateQCGroup(model.NAME, model.CODE))
             {
                 return Json(new { success = false, message = "QC Group name already exists." });
             }
@@ -89,7 +86,22 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? "WEB");
 
                         con.Open();
-                        cmd.ExecuteNonQuery();
+                        string mode = action == "INSERT" ? "INSERT" : "UPDATE";
+                        int code = 0;
+                        if (action == "INSERT")
+                        {
+                            code = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+                        else
+                        {
+                            cmd.ExecuteNonQuery();
+                            code = model.CODE;
+                        }
+
+
+                        //===========log insert
+                        _logService.InsertLog("QCG_MAST", "QC Group Master", "Master", mode, "", code.ToString(), null);
+
                         return "Success";
                     }
                 }
@@ -99,25 +111,28 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 return "Error: " + ex.Message;
             }
         }
-        private bool IsDuplicateQCGroup(string name)
+        private bool IsDuplicateQCGroup(string name, int code)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return false;
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM QCG_MAST WHERE NAME = @Name", con))
+                using (SqlCommand cmd = new SqlCommand("sp_QCG_MAST", con))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "Exist");
                     cmd.Parameters.AddWithValue("@Name", name.Trim());
+                    cmd.Parameters.AddWithValue("@CODE", code);
 
                     con.Open();
-                    int count = (int)cmd.ExecuteScalar();
-                    return count > 0;
+                    object result = cmd.ExecuteScalar();
+                    return result != null; // true if duplicate exist
                 }
             }
         }
         [HttpPost]
-        public JsonResult DeleteQCGroupByCode(int code)
+        public JsonResult DeleteQCGroupByCode(int docId)
         {
             try
             {
@@ -127,12 +142,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@CODE", code);
+                        cmd.Parameters.AddWithValue("@CODE", docId);
 
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
                 }
+                //===========log insert
+                _logService.InsertLog("QCG_MAST", "QC Group Master", "Master", "Delete", "", docId.ToString(), null);
 
                 return Json(new { success = true, message = "QC Group deleted successfully." });
             }

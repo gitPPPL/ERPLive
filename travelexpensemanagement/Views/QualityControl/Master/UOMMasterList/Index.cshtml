@@ -1,197 +1,300 @@
 ﻿@{
 	ViewBag.Title = "UOM Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>UOM Master List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        @if (canAdd)
+        {
+            <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "UOMMaster")'">
+                <i class="fa fa-plus"></i>Add New
+            </button>
+        }
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        @if (canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="QCUOMMasterReport()">
+                <i class="fa fa-print"></i> Print
+            </button>
+        }
+        @if (canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+                <i class="fa fa-file-excel"></i> Export
+            </button>
+        }
+        @if (canMail)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+                <i class="fa fa-envelope"></i>Mail
+            </button>
+        }
+        @if (canApproval)
+        {
+            <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+                <i class="fa fa-check-circle"></i>Approved
+            </button>
+        }
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblUOMMaster" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="display:none;" />
+                <col style="width:250px;" />
+                <col style="width:180px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">Code</th>
+                    <th>QC Unit Name</th>
+                    <th>Short Name</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-<fieldset>
-	<legend class="legend-field">UOM Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "UOMMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add UOM
-			</button>
-			<button class="btn btn-print">
-				<i class="fa fa-print"></i> Print 
-			</button>
-			<button class="btn btn-export">
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblUOMMaster" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>QC Unit Name</th>
-						<th>Short Name</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-	<div class="pagination-wrapper">
-		<ul class="pagination" id="tablePagination"></ul>
-	</div>
-</fieldset>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
+
 <script>
-    let currentPage = 1;
-    let pageSize = 10;
+    var permissions = {
+        canEdit: @canEdit.ToString().ToLower(),
+        canDelete: @canDelete.ToString().ToLower()
+    };
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+    };
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
 
+    //=============Page Load=========
+    let QCPUOMMasterPagination;
     $(document).ready(function () {
-        loadAllUOMs();
-    });
-
-    function loadAllUOMs() {
-        const searchTerm = $('#searchBox').val();
-
-        $.ajax({
-            url: '/UOMMasterList/GetAllUOMs',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm: searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
+        QCPUOMMasterPagination = Pagination.create({
+            pageSize: 10,
+            paginationContainer: '#pageNumbers',
+            infoContainer: '#pageInfoText',
+            loader: function (params) {
+                $.ajax({
+                    url: '/UOMMasterList/GetAllUOMs',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        searchTerm: $('#searchBox').val(),
+                        pageNumber: params.pageNumber,
+                        pageSize: params.pageSize
+                    },
+                    success: function (res) {
+                        params.callback({
+                            data: res.lists,
+                            totalCount: res.totalCount
+                        });
+                    },
+                    error: function (xhr) {
+                        // toastr.error('Error loading data');
+                        showToast('Error loading data', { type: "error" });
+                    }
+                });
             },
-            success: function (res) {
-                console.log(res);
-                const lists = res.lists;
-                const totalCount = res.totalCount;
-
-                let tbody = $('#tblUOMMaster tbody');
+            render: function (docs) {
+                const tbody = $('#tblUOMMaster tbody');
                 tbody.empty();
-
-                if (!lists || lists.length === 0) {
-                    tbody.append('<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>');
-                    renderPagination(0, pageSize, currentPage);
+                if (!docs.length) {
+                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
                     return;
                 }
 
-                $.each(lists, function (index, item) {
+                $.each(docs, function (index, item) {
+                    let actions = '';
+                    if (permissions.canEdit) {
+                        actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="editUOM(${item.code})"><i class="fa fa-edit"></i></button>`;
+                    }
+                    actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewUOM(${item.code})"><i class="fa fa-eye"></i></button>`;
+                    if (permissions.canDelete) {
+                        actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteUOM(${item.code})"><i class="fa fa-trash"></i></button>`;
+                    }
                     tbody.append(`
-                        <tr>
+                         <tr>
                             <td style="display:none;">${item.code}</td>
                             <td>${item.name || ''}</td>
                             <td>${item.shortname || ''}</td>
-                            <td>${item.active === 1 ? 'Active' : 'Inactive'}</td>
                             <td>
-                                <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editUOM(${item.code})"></i>
-                                <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewUOM(${item.code})"></i>
-                                <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteUOM(${item.code})"></i>
+                                ${item.active === 1
+                                    ? '<span class="erppagestatus-badge erppagestatus-active"><i class="fa fa-check-circle"></i>&nbsp;Active</span>'
+                                    : '<span class="erppagestatus-badge erppagestatus-inactive"><i class="fa fa-times-circle"></i>&nbsp;Inactive</span>'
+                                }
                             </td>
+                            <td class="action-col">${actions}</td>
                         </tr>
                     `);
                 });
 
-                renderPagination(totalCount, pageSize, currentPage);
-            },
-            error: function (xhr) {
-                alert('Error loading UOM data: ' + xhr.responseText);
             }
         });
-    }
-
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const paginationContainer = $('#tablePagination');
-        paginationContainer.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button></li>`;
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button></li>`;
-        }
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (currentPage <= 3) endPage = Math.min(5, totalPages);
-        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<li><button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button></li>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button></li>`;
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button></li>`;
-        }
-
-        paginationContainer.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadAllUOMs();
-    }
-
-    $('#searchBox').on('keyup', function () {
-        currentPage = 1;
-        loadAllUOMs();
+        // First Load
+        QCPUOMMasterPagination.load();
+        // Search
+        $('#searchBox').keyup(function () {
+            QCPUOMMasterPagination.load();
+        });
     });
 
+    // Page Size Change
+    function changeRowsPerPage() {
+        QCPUOMMasterPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+        QCPUOMMasterPagination.load();
+    }
+
+    //==============Edit==============
     function editUOM(code) {
         window.location.href = '/UOMMaster/Index?id=' + encodeURIComponent(code);
     }
 
+    //==============View==============
     function viewUOM(code) {
         window.location.href = '/UOMMaster/Index?id=' + encodeURIComponent(code) + '&readOnly=true';
     }
 
-    function deleteUOM(code) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This will permanently delete the QC Unit.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/UOMMaster/DeleteUOMByCode', // Update this to match your controller
-                    type: 'POST',
-                    data: { code: code },
-                    success: function (response) {
-                        if (response.success) {
-                            Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                loadAllUOMs();
-                            });
-                        } else {
-                            Swal.fire('Failed', response.message, 'warning');
-                        }
-                    },
-                    error: function () {
-                        Swal.fire('Error!', 'An error occurred while deleting the QC Unit.', 'error');
-                    }
-                });
+    //=================Delete================
+    function deleteUOM(docId) {
+       deleteRecord("UOMMaster", docId, {
+           action: "DeleteUOMByCode",
+           text: "This will permanently delete the QC Unit.",
+           successCallback: QCPUOMMasterPagination.load
+       });
+    }
+
+    // ================= Download Excel =================
+    document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+        e.preventDefault();
+        window.location.href = "/UOMMasterList/ExportAllDocs";
+    });
+
+    // ================= Download Pdf =================
+    function QCUOMMasterReport() {
+
+        var reportName = "rptQCUOM";
+
+        var formulaFields = {
+            Reportname: reportName,
+            selectionFormula: "",
+            Database: window.database.db,
+            Parameters: {
+                comp_name: window.globalVariables.companyName,
+                comp_add1: window.globalVariables.add1,
+                comp_add2: window.globalVariables.add2,
+                RPTNAME: "QC UOM Report"
+            }
+        };
+
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://localhost:34088/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(formulaFields),
+            contentType: "application/json",
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
             }
         });
     }
-
-
 </script>
