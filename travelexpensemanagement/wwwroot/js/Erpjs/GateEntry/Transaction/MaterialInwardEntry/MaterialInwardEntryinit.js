@@ -545,7 +545,7 @@ $(document).ready(async function () {
         const PARTY_CODE = $('#ddlPartyName').val() ? parseInt($('#ddlPartyName').val(), 10)  : null;
         const V_TYPE = $('#ddlDocType').val();
         const V_NO = parseInt($('#TxtDocNo').val()) || null;
-        if (!Pono || !PARTY_CODE) {
+        if (!Pono ) {
             return;
         }
 
@@ -563,9 +563,41 @@ $(document).ready(async function () {
             });
 
             if (response.success) {
-                console.log("Data:", response.data);
-            } else {
-                showToast(response.message || 'Failed to load data.', { type: 'error' });
+                $('#ddlPartyName').val(response.partY_CODE).trigger('change');
+                const $tbody = $('#tblInwardEntry tbody');
+                // Clear existing rows
+                $tbody.empty();
+                // Add rows from response.data
+                $.each(response.data, function (i, item) {
+                    let deptcode = 0;             
+                    if (V_TYPE === "INRM") {
+                        deptcode = 145;         
+                    }
+                    else if (V_TYPE == "INFU") {
+                        deptcode = 138;  
+                    }
+                    else {
+                        deptcode = 110; 
+                    }
+                    addRow($tbody, {
+                        itemCode: item.item_code,
+                        itemId: item.item_code,      // must match itemList.value
+                        unit: item.uniT_CODE,
+                        DepttName: deptcode,
+                        nos: item.nos,
+                        qty: item.qty,
+                        empty: 'No',
+                        remarks: '',
+                        shipRate: '',
+                        refType: PonoText,
+                        refNo: Pono
+                    });
+                });
+                showToast(response.message || 'Data Fetch Successfully', { type: 'Success' });
+            }
+
+            else {
+                showToast(response.message || '', { type: 'info' });
             }
 
         } catch (error) {

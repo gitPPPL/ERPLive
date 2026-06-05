@@ -233,7 +233,7 @@
             if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
             if (!row.REF_TYPE && !row.reF_NO) {
                 showToast(`Reference Type and Reference No. required (Row ${i + 1})`, { type: "warning" });
-            focusCell(i, 9);
+                focusCell(i, 9);
             return;
             }
             }
@@ -552,7 +552,7 @@
 
         return selectedRows;
     }
-function populateInwardEntryTable(selectedData) {
+   function populateInwardEntryTable(selectedData) {
 
     const $tbody = $('#tblInwardEntry tbody');
 
@@ -605,7 +605,6 @@ function populateInwardEntryTable(selectedData) {
         }
     });
 }
-
 
    async function checkValidDate() {
         const data = {
@@ -823,7 +822,6 @@ function populateInwardEntryTable(selectedData) {
     $tbody.find('.btn-add-row').show();
 }
 
-
    async function getcontainerdata(Container_No) {
           try {
             const res = await $.ajax({
@@ -896,9 +894,7 @@ function populateInwardEntryTable(selectedData) {
         if (res.success) {
             const header = res.data.header;
             const Details = res.data.details;
-
-            console.log("header", header)
-
+            
 
             if (header.partY_WBSLIPNO !== '') {
 
@@ -914,6 +910,11 @@ function populateInwardEntryTable(selectedData) {
             }
 
             $('#ddlDocType').val(header.v_TYPE || '');
+
+       /*     $('#TxtPONo').val(header.disP_PLAN_NO || '');*/
+
+            $('#TxtPONo').val(header.disP_PLAN_NO || '').trigger('change');
+
             $('#TxtTransporter').val(header.transporT_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
             $('#TxtDocNo').val(header.v_NO || '');
@@ -937,7 +938,7 @@ function populateInwardEntryTable(selectedData) {
             $('#DtVehicleOutTime').val(formatDate(header.ouT_DATE) || '');
             $('#TiVehicleOutTime').val(header.ouT_TIME || '');
             $('#VehicleReturn').val(header.returN_TYPE || '');
-            $('#TxtPONo').val(header.disP_PLAN_NO || '');
+         
             $('#TxtRptDate').val(formatDate(header.r_DATE) || '');
             $('#TiRptDate').val(header.r_TIME || '');
             $('#TxtBillNo').val(header.bilL_NO || '');
@@ -996,4 +997,3 @@ function populateInwardEntryTable(selectedData) {
         showToast("Something went wrong while loading the form.", { type: "error" });
     }
 }
-

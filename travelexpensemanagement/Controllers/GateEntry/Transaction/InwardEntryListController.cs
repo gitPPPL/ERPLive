@@ -7,6 +7,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
@@ -981,7 +982,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     "AND Branch_code = " + GetGlobalCode.PubBranchCode
                 );
 
-                    string partycode = GetText(@"
+                string partycode = GetText(@"
                     SELECT DISTINCT 
                     c.code AS Pcode
                     FROM Order1 a
@@ -1002,18 +1003,49 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     AND a.V_NO = " + Pono);
 
 
-
                 // Optional country check
                 if (V_TYPE == "INRM")
                 {
-                    int countrycount = Convert.ToInt32(
-                        GetText(
-                            "SELECT COUNTRY_CODE FROM SUBGROUP_MAST " +
-                            "WHERE CODE = " + PARTY_CODE + " " +
-                            "AND Comp_Code = " + GetGlobalCode.PubCompCode + " " +
-                            "AND ACTIVE = 1"
-                        )
-                    );
+                    string statetype =  GetText("SELECT b.STATE_TYPE FROM SUBGROUP_MAST a  left join STATE_MAST b on  a.STATE_CODE = b.CODE " +
+                    "WHERE a.CODE = "+ partycode + " AND a.Comp_Code = "+  GetGlobalCode.PubCompCode +" AND a.ACTIVE = 1" );
+
+                    if (statetype == "Import")
+                    {
+                        string eximSql = @"
+                        SELECT TOP 1 1
+                        FROM EXIM1 a
+                        LEFT JOIN EXIM2 b
+                        ON a.V_TYPE = b.V_TYPE
+                        AND a.V_NO = b.V_NO
+                        AND a.COMP_CODE = b.COMP_CODE
+                        AND a.BRANCH_CODE = b.BRANCH_CODE
+                        AND a.YEAR_CODE = b.YEAR_CODE
+                        WHERE a.SAUDA_TYPE = 'PAUD'
+                        AND a.SAUDA_NO = @SAUDA_NO
+                        AND a.COMP_CODE = @COMP_CODE";
+
+                        using (SqlConnection con = _dbConnection.GetErpConnection())
+                        {
+                            con.Open();
+
+                            using (SqlCommand cmd = new SqlCommand(eximSql, con))
+                            {
+                                cmd.Parameters.AddWithValue("@SAUDA_NO", saudano);
+                                cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+
+                                var result = cmd.ExecuteScalar();
+
+                                if (result == null)
+                                {
+                                    return Json(new  {
+                                        success = false,
+                                        message = "Container Tracking not found for Selected Sauda."
+                                    });
+                                }
+                            }
+                        }
+                    }
+
                 }
 
                 string sql = "SELECT a.*, b.NAME AS Item_name,b.UNIT_CODE, b.UNIT_NAME FROM Order2 a " +
