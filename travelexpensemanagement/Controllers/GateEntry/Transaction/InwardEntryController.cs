@@ -1665,15 +1665,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
-
-
         public async Task<JsonResult> GetTransitData(int VoucherNo)
         {
             var data = await _inwardEntryRepository.GetGetTransitDataCode(VoucherNo);
             return Json(data);
         }
-
 
         public JsonResult GetTransitNoLeaveEwayBill(int partyCode, long waybillNo)
         {
@@ -1711,11 +1707,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
             return Json(new {  Success = true , V_NO = vNo });
         }
-
-
-
-
-
 
         public JsonResult GetPasrtyBillNo(int partyCode, string PartyBillNo)
         {
@@ -1769,8 +1760,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = true, rcNo = rcNo, insuNo = insuNo });
         }
 
-
-
         public JsonResult GetMobilenodata(string mobileno)
         {
             using var conn = _dbConnection.GetErpConnection();
@@ -1801,11 +1790,24 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(new { success = true, DL_NO = DL_NO, PAN_NO = PAN_NO });
         }
 
+        public JsonResult DDlpono()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "   SELECT DISTINCT  a.V_NO , a.V_TYPE " +
+                "  FROM Order1 a LEFT JOIN Order2 b    " +
+                " ON a.V_TYPE = b.V_TYPE AND a.V_NO = b.V_NO  AND a.COMP_CODE = b.COMP_CODE AND " +
+                "a.BRANCH_CODE = b.BRANCH_CODE  AND a.YEAR_CODE = b.YEAR_CODE   " +
+                " LEFT JOIN Subgroup_Mast c ON a.PARTY_CODE = c.CODE AND a.COMP_CODE = c.COMP_CODE  " +
+                " WHERE a.V_TYPE IN ('RORD', 'PORD', 'JORD')    AND a.STATUS = 1  " +
+                "  AND a.COMP_CODE = "+ getdata.PubCompCode + "  AND a.YEAR_CODE = "+ getdata.PubFYearCode + " " +
+                "  AND a.BRANCH_CODE = "+ getdata.PubBranchCode + ";";
 
-
-
-
-
+                var DDlpono = _dropdownService.GetDropdownList(query);
+                return Json(DDlpono);
+            }
+        }
 
     }
 }

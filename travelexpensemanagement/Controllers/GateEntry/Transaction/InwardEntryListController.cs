@@ -2,20 +2,24 @@
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office.Word;
 using DocumentFormat.OpenXml.Spreadsheet;
+using iText.StyledXmlParser.Jsoup.Select;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System.Data;
 using System.Data.Common;
+using System.Reflection.Metadata;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
+using travelexpensemanagement.Models.Purchase.Transaction;
 
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
@@ -23,18 +27,15 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
     [SessionAuthorize]
     public class InwardEntryListController : Controller
     {
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
-
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
          travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
         }
-
         public IActionResult Index()
         {
             return View("~/Views/GateEntry/Transaction/InwardEntryList/Index.cshtml");
@@ -649,7 +650,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
-
         public JsonResult DocDetailsCode(string docCode)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -687,7 +687,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(new { success = true, data = docDetails });
         }
-
         public class InwardEntryDetailDto
         {
             public string? Code { get; set; }
@@ -699,7 +698,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             public string? LIP { get; set; }
             public string? LID { get; set; }
         }
-
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
         {
@@ -790,7 +788,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> ExportToPdf(string searchTerm = null)
         {
@@ -964,6 +961,129 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new { success = false, message = "Error fetching attachment data", error = ex.Message });
             }
         }
+
+
+        [HttpGet]
+        public IActionResult GetDataPono(int Pono, string Ponotext, int PARTY_CODE, string V_TYPE, int V_NO)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+
+            var list = new List<object>();
+
+            try
+            {
+                // Get SAUDA_NO
+                string saudano = GetText(
+                    "SELECT ISNULL(SAUDA_NO, '') FROM Order2 " +
+                    "WHERE V_Type = '" + Ponotext + "' " +
+                    "AND V_no = " + Pono + " " +
+                    "AND Comp_code = " + GetGlobalCode.PubCompCode + " " +
+                    "AND Branch_code = " + GetGlobalCode.PubBranchCode
+                );
+
+                    string partycode = GetText(@"
+                    SELECT DISTINCT 
+                    c.code AS Pcode
+                    FROM Order1 a
+                    LEFT JOIN Order2 b 
+                    ON a.V_type = b.V_type
+                    AND a.V_no = b.V_no
+                    AND a.Comp_code = b.Comp_code
+                    AND a.Branch_code = b.Branch_code
+                    AND a.Year_code = b.Year_Code
+                    LEFT JOIN Subgroup_mast c 
+                    ON a.Party_code = c.code
+                    AND a.comp_code = c.comp_code
+                    WHERE a.V_type IN ('RORD', 'PORD', 'JORD')
+                    AND a.status = 1
+                    AND a.COMP_CODE = " + GetGlobalCode.PubCompCode + @"
+                    AND a.YEAR_CODE = " + GetGlobalCode.PubFYearCode + @"
+                    AND a.BRANCH_CODE = " + GetGlobalCode.PubBranchCode + @"
+                    AND a.V_NO = " + Pono);
+
+
+
+                // Optional country check
+                if (V_TYPE == "INRM")
+                {
+                    int countrycount = Convert.ToInt32(
+                        GetText(
+                            "SELECT COUNTRY_CODE FROM SUBGROUP_MAST " +
+                            "WHERE CODE = " + PARTY_CODE + " " +
+                            "AND Comp_Code = " + GetGlobalCode.PubCompCode + " " +
+                            "AND ACTIVE = 1"
+                        )
+                    );
+                }
+
+                string sql = "SELECT a.*, b.NAME AS Item_name,b.UNIT_CODE, b.UNIT_NAME FROM Order2 a " +
+                    "LEFT JOIN ITEM_MAST b  ON a.ITEM_CODE = b.CODE   AND a.COMP_CODE = b.COMP_CODE" +
+                    " WHERE a.V_TYPE = @V_TYPE   AND a.V_NO = @V_NO   AND a.COMP_CODE = @COMP_CODE " +
+                    "  AND a.BRANCH_CODE = @BRANCH_CODE  ; ";
+
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.Add("@V_TYPE", SqlDbType.VarChar).Value = Ponotext;
+                        cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = Pono;
+                        cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = GetGlobalCode.PubCompCode;
+                        cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = GetGlobalCode.PubBranchCode;
+
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                decimal qty = dr["QTY"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["QTY"]);
+                                decimal adjQty = dr["ADJ_QTY"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["ADJ_QTY"]);
+                                decimal nos = dr["NOS"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["NOS"]);
+
+                                list.Add(new
+                                {
+                                    Item_code = dr["ITEM_CODE"].ToString(),
+                                    Item_name = dr["Item_name"].ToString(),
+                                    UNIT_NAME = dr["UNIT_NAME"].ToString(),
+                                    UNIT_CODE = dr["UNIT_CODE"].ToString(),
+                                    Nos = nos,
+                                    Qty = qty,
+                                    Adj_Qty = adjQty,
+                                    balanceQty = qty - adjQty,
+                                    quantity = qty - adjQty
+                                });
+                            }
+                        }
+                    }
+
+                    con.Close();
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    saudano = saudano,
+                    data = list,
+                    PARTY_CODE = partycode
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error fetching data",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+
+
+
+
 
     }
 }

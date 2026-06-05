@@ -1,4 +1,5 @@
 ﻿
+
 const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
@@ -247,7 +248,7 @@ $(document).ready(async function () {
         const V_NO = parseInt($('#TxtDocNo').val()) || null;
         const BILL_NO = $('#TxtBillNo').val().trim();
         const V_TYPE = $('#ddlDocType').val();
-        
+
         if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
         if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
         if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
@@ -529,6 +530,48 @@ $(document).ready(async function () {
         $('#TxtEWayDate').val('');
         if (!transitNo) return;
         GetTransitnodata(transitNo);
+    });
+
+    $('#TxtPONo').on('change', async function () {
+        const Pono = parseInt($('#TxtPONo').val()) || null;
+        const PonoText = $('#TxtPONo option:selected')
+            .text()
+            .replace(/\s*\(\d+\)$/, '');
+
+        console.log("Pono", Pono);
+        console.log("PonoText", PonoText);
+
+
+        const PARTY_CODE = $('#ddlPartyName').val() ? parseInt($('#ddlPartyName').val(), 10)  : null;
+        const V_TYPE = $('#ddlDocType').val();
+        const V_NO = parseInt($('#TxtDocNo').val()) || null;
+        if (!Pono || !PARTY_CODE) {
+            return;
+        }
+
+        try {
+            const response = await $.ajax({
+                url: '/InwardEntryList/GetDataPono',   
+                type: 'GET',
+                data: {
+                    Pono: Pono,
+                    Ponotext: PonoText,
+                    PARTY_CODE: PARTY_CODE,
+                    V_TYPE: V_TYPE,
+                    V_NO: V_NO
+                }
+            });
+
+            if (response.success) {
+                console.log("Data:", response.data);
+            } else {
+                showToast(response.message || 'Failed to load data.', { type: 'error' });
+            }
+
+        } catch (error) {
+            console.error('GetDataPono Error:', error);
+            showToast('Error loading data.', { type: 'error' });
+        }
     });
 
 });

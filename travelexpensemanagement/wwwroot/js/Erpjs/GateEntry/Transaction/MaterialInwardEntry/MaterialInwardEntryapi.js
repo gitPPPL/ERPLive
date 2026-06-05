@@ -138,6 +138,38 @@ async function DDlState() {
 
     }
 }
+
+async function DDlpono() {
+    try {
+        const res = await fetch('/InwardEntry/DDlpono');
+        const data = await res.json();
+
+        const ddl = $('#TxtPONo');
+
+        ddl.empty().append('<option value="">Select Po No</option>');
+
+        data.forEach(item => {
+            ddl.append(
+                `<option value="${item.value}">${item.text} (${item.value})</option>`
+            );
+        });
+
+        // Destroy existing Select2 if already initialized
+        if (ddl.hasClass("select2-hidden-accessible")) {
+            ddl.select2('destroy');
+        }
+
+        ddl.select2({
+            placeholder: "Search PO No",
+            allowClear: true,
+            width: '100%'
+        });
+
+    } catch (error) {
+        showToast("Error loading PO No", { type: "error" });
+        console.error(error);
+    }
+}
 function DDlPartyAdd(PartyId) {
     return $.ajax({
         url: '/InwardEntry/fetchSelectedAddress',

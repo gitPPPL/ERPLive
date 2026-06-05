@@ -479,18 +479,18 @@
     async function LoadDropDown() {
     try {
         await Promise.all([
-             DDLVtype(),
-             DDLParty(),
-             DDLShipFrom(),
-             DDDocStatus(),
-             DDlPartyCity(),
-             LoadItemMaster(),
-             LoadUnitMaster(),
-             LoadDeptMaster(),
-             DDlTransportname(),
-             DDlCity(),
-             DDlState()
-            
+            DDLVtype(),
+            DDLParty(),
+            DDLShipFrom(),
+            DDDocStatus(),
+            DDlPartyCity(),
+            LoadItemMaster(),
+            LoadUnitMaster(),
+            LoadDeptMaster(),
+            DDlTransportname(),
+            DDlCity(),
+            DDlState(),
+            DDlpono()           
 
         ]);
         } catch (error) {
@@ -555,29 +555,57 @@
 function populateInwardEntryTable(selectedData) {
 
     const $tbody = $('#tblInwardEntry tbody');
-    //$tbody.empty();
-
-    console.log("Selected Row Data:", selectedData);
 
     $.each(selectedData, function (idx, item) {
 
-        addRow($tbody, {
-            itemCode: item.itemCode,
-            itemId: item.itemCode,
-            DeptCode: item.deptCode,      // 138       
-            DepttName: item.deptCode,
-            unit: item.uoM_CODE, // use code not text
-            nos: item.nos,
-            qty: item.balQty,
-            shipRate: item.rate,
-            empty: item.emptY_YN,
-            remarks: item.remarks,
-            refType: item.docType,
-            refNo: item.docNo
-        });
+        // Find first empty row
+        let $emptyRow = $tbody.find('tr').filter(function () {
 
+            const itemCode = $.trim($(this).find('.itemCode').val());
+            const itemName = $(this).find('.ItemName').val();
+
+            return (!itemCode && !itemName);
+        }).first();
+
+        if ($emptyRow.length) {
+
+            // Populate existing empty row
+            $emptyRow.find('.itemCode').val(item.itemCode);
+            $emptyRow.find('.ItemName').val(item.itemCode).trigger('change');
+            $emptyRow.find('.DeptName').val(item.deptCode).trigger('change');
+            $emptyRow.find('.unit').val(item.uoM_CODE).trigger('change');
+
+            $emptyRow.find('.nos').val(item.nos);
+            $emptyRow.find('.quantity').val(item.balQty);
+            $emptyRow.find('.shiprate').val(item.rate);
+            $emptyRow.find('.Empty').val(item.emptY_YN);
+
+            $emptyRow.find('.remarks').val(item.remarks);
+            $emptyRow.find('.refType').val(item.docType);
+            $emptyRow.find('.refNo').val(item.docNo);
+
+        } else {
+
+            // No empty row found → add new row
+            addRow($tbody, {
+                itemCode: item.itemCode,
+                itemId: item.itemCode,
+                DeptCode: item.deptCode,
+                DepttName: item.deptCode,
+                unit: item.uoM_CODE,
+                nos: item.nos,
+                qty: item.balQty,
+                shipRate: item.rate,
+                empty: item.emptY_YN,
+                remarks: item.remarks,
+                refType: item.docType,
+                refNo: item.docNo
+            });
+
+        }
     });
 }
+
 
    async function checkValidDate() {
         const data = {
