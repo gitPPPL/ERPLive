@@ -1,6 +1,33 @@
 ﻿@{
     ViewBag.Title = " Material Inward Entry List";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
 }
 
 <!-- HEADER -->
@@ -9,12 +36,13 @@
         <i class="fa fa-list"></i>
         <span>Material Inward Entry List</span>
     </div>
-    <div class="erppagelist-header-right">
-        <button type="button" class="erppage-header-back"
-                onclick="location.href='@Url.Action("Index", "InwardEntry")'">
-            <i class="fa fa-plus"></i>Add New
-        </button>
-    </div>
+
+    @if (canAdd == true)
+    {
+        <div class="erppagelist-header-right">
+            <button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "InwardEntry")'">  <i class="fa fa-plus"></i> Add New  </button>
+        </div>
+    }
 </div>
 
 <!-- TOOLBAR -->
@@ -25,13 +53,21 @@
     </div>
 
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_Report">
-            <i class="fa fa-print"></i>Print
-        </button>
 
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_exportPdf">
+        @if(canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_Report">
+                <i class="fa fa-print"></i>Print
+            </button>
+        }
+
+        @if(canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_exportPdf">
             <i class="fa fa-file-excel"></i>Export
-        </button>
+            </button>
+        }
+    
     </div>
 </div>
 
@@ -193,9 +229,19 @@
                     <td>${item.status || ''}</td>
 
                     <td class="action-col">
-                        <button class="act-btn edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-edit"></i></button>
-                        <button class="act-btn view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
-                        <button class="act-btn delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+
+                    @if (canEdit)
+                    {
+                     <button class="act-btn edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-edit"></i></button>
+                    }        
+                                          
+                  <button class="act-btn view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+
+                   @if (canDelete)
+                    {
+                    <button class="act-btn delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                    }              
+                
                         <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
                     </td>
                 </tr>

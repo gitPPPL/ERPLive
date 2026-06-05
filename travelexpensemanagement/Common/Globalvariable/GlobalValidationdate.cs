@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Globalization;
@@ -18,7 +19,7 @@ namespace travelexpensemanagement.Common.Globalvariable
         private readonly GlobalVariableService _globalVariableService;
         private readonly ModuleService.ModuleService _moduleService;
         private readonly IConfiguration _configuration;
-        public GlobalValidationdate(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, 
+        public GlobalValidationdate(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
             ModuleService.ModuleService moduleService, IConfiguration configuration)
         {
             _dbConnection = dbConnection;
@@ -26,7 +27,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             _moduleService = moduleService;
             _configuration = configuration;
         }
-        public async Task<ValidationResult> CheckValidDate( string tablename, DateTime vdate, string vtype, string vno)
+        public async Task<ValidationResult> CheckValidDate(string tablename, DateTime vdate, string vtype, string vno)
         {
             try
             {
@@ -77,7 +78,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             }
         }
 
-        public void LogInsertUpdateDelete(string destinationTable, string sourceTable, string transactionType, 
+        public void LogInsertUpdateDelete(string destinationTable, string sourceTable, string transactionType,
             string codeVNo, string vtype = "", string condition1 = "", string condition2 = "", string condition3 = "")
         {
             var global = _globalVariableService.GetGlobalVariables();
@@ -87,7 +88,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             using (var connMain = _dbConnection.GetConDbConnection())
             {
                 connMain.Open();
-                string imgQuery = "SELECT IMGDATABASE_NAME FROM COMP_MAST WHERE CODE = "+ global.PubCompCode +"";
+                string imgQuery = "SELECT IMGDATABASE_NAME FROM COMP_MAST WHERE CODE = " + global.PubCompCode + "";
 
                 using (var cmd = new SqlCommand(imgQuery, connMain))
                 {
@@ -228,7 +229,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 string unm = LoadGeneralSetting.PubEinvUName;
                 string pas = Uri.EscapeDataString(password);
                 using var client = new HttpClient();
-                string url =  "https://api.mastergst.com/ewaybillapi/v1.03/authenticate" + "?email=it%40pashupatigrp.com" +  $"&username={unm}&password={pas}";
+                string url = "https://api.mastergst.com/ewaybillapi/v1.03/authenticate" + "?email=it%40pashupatigrp.com" + $"&username={unm}&password={pas}";
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("ip_address", LoadGeneralSetting.PubEinvIP);
                 request.Headers.Add("client_id", LoadGeneralSetting.PubEWayBillCID);
@@ -283,7 +284,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 request.Headers.Add("ip_address", LoadGeneralSetting.PubEinvIP);
                 request.Headers.Add("client_id", LoadGeneralSetting.PubEWayBillCID);
                 request.Headers.Add("client_secret", LoadGeneralSetting.PubEWayBillCSID);
-                request.Headers.Add("gstin", LoadGeneralSetting.PubEinvGSTIN );
+                request.Headers.Add("gstin", LoadGeneralSetting.PubEinvGSTIN);
                 request.Headers.Add("auth_access_type", GlobalVaraible.auth_access_type);
                 request.Headers.Add("authtoken", token);
                 var response = await client.SendAsync(request);
@@ -307,11 +308,11 @@ namespace travelexpensemanagement.Common.Globalvariable
                 if (inoutdata != "IN")
                     return new JsonResult(new { success = true, message = "No IN data" });
 
-                 dataArray = root.GetProperty("data");
+                dataArray = root.GetProperty("data");
 
                 List<EwayBillData> list = new List<EwayBillData>();
 
-                // ✅ LOAD PARTY DATA ONCE (NO LOOP DB CALL)
+                // ? LOAD PARTY DATA ONCE (NO LOOP DB CALL)
                 Dictionary<string, int> partyLookup = new();
 
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -339,9 +340,11 @@ namespace travelexpensemanagement.Common.Globalvariable
                     {
                         PARTY_CODE = partyCode,
                         FORM_NO = item.GetProperty("ewbNo").ToString(),
-                        FORM_DATE = DateTime.TryParse(item.GetProperty("ewayBillDate").GetString(), out var fd) ? fd : null,
+                        //FORM_DATE = DateTime.TryParse(item.GetProperty("ewayBillDate").GetString(), out var fd) ? fd : null,
+                        FORM_DATE = item.GetProperty("ewayBillDate").GetString(),
                         BILL_NO = item.GetProperty("docNo").GetString(),
-                        BILL_DATE = DateTime.TryParse(item.GetProperty("docDate").GetString(), out var bd) ? bd : null,
+                        //BILL_DATE = DateTime.TryParse(item.GetProperty("docDate").GetString(), out var bd) ? bd : null,
+                        BILL_DATE = item.GetProperty("docDate").GetString(),
                         PARTY_GSTIN = gst,
                         OTHER_GSTIN = item.GetProperty("toGstin").GetString(),
                         ITEM_DESC = item.GetProperty("hsnDesc").GetString(),
@@ -366,6 +369,12 @@ namespace travelexpensemanagement.Common.Globalvariable
 
         public async Task<string> EwayBillInsertData(List<EwayBillData> list, DateTime edate)
         {
+            string[] formats =
+            {
+                "dd/MM/yyyy",
+                "dd/MM/yyyy hh:mm tt",
+                "dd/MM/yyyy hh:mm:ss tt"
+            };
             try
             {
                 var GlobalVaraible = _globalVariableService.GetGlobalVariables();
@@ -395,7 +404,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                         string gst = obj.PARTY_GSTIN ?? "";
                         int party_code = 0;
 
-                        // 🔹 Get party_code from PURCHASE1
+                        // ?? Get party_code from PURCHASE1
                         string purchaseQuery = @"SELECT TOP 1 ISNULL(party_code,0) 
                         FROM PURCHASE1 
                         WHERE BILL_GST=@gst AND comp_code=@comp 
@@ -411,7 +420,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                                 party_code = Convert.ToInt32(result);
                         }
 
-                        // 🔹 If not found, get from SUBGROUP_MAST
+                        // ?? If not found, get from SUBGROUP_MAST
                         if (party_code == 0)
                         {
                             string subQuery = @"SELECT ISNULL(a.code,0)
@@ -434,15 +443,45 @@ namespace travelexpensemanagement.Common.Globalvariable
                             }
                         }
 
-                        // 🔹 Skip if still not found
+                        // ?? Skip if still not found
                         if (party_code == 0)
                             continue;
 
-                        // 🔹 Generate voucher number
+                        // ?? Generate voucher number
                         string vno = GetVNo("TRIN", "WAYBILL1");
                         int srvno = Convert.ToInt32(vno);
 
-                        // 🔹 Insert into waybill1
+
+
+                        DateTime? formDate = null;
+                        if (!string.IsNullOrWhiteSpace(obj.FORM_DATE))
+                        {
+                            if (DateTime.TryParseExact(
+                                obj.FORM_DATE,
+                                formats,
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out var fd))
+                            {
+                                formDate = fd;
+                            }
+                        }
+
+                        DateTime? billDate = null;
+                        if (!string.IsNullOrWhiteSpace(obj.BILL_DATE))
+                        {
+                            if (DateTime.TryParseExact(
+                                obj.BILL_DATE,
+                                formats,
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out var bd))
+                            {
+                                billDate = bd;
+                            }
+                        }
+
+                        // ?? Insert into waybill1
                         string sql = @"INSERT INTO waybill1
                         (COMP_CODE,BRANCH_CODE,YEAR_CODE,V_TYPE,V_NO,DOC_ID,FORM_NO,FORM_DATE,PARTY_CODE,PARTY_GSTIN,
                         OTHER_GSTIN,BILL_NO,BILL_DATE,ITEM_DESC,STATUS,UUSER,UDATE,GATE_TYPE)
@@ -459,12 +498,14 @@ namespace travelexpensemanagement.Common.Globalvariable
                             cmd.Parameters.AddWithValue("@V_NO", srvno);
                             cmd.Parameters.AddWithValue("@DOC_ID", "TRIN" + srvno);
                             cmd.Parameters.AddWithValue("@FORM_NO", eWaybillNo);
-                            cmd.Parameters.AddWithValue("@FORM_DATE", (object)obj.FORM_DATE ?? DBNull.Value);
+                            //cmd.Parameters.AddWithValue("@FORM_DATE", (object)obj.FORM_DATE ?? DBNull.Value);
+                            cmd.Parameters.Add("@FORM_DATE", SqlDbType.SmallDateTime).Value = formDate ?? (object)DBNull.Value;
                             cmd.Parameters.AddWithValue("@PARTY_CODE", party_code);
                             cmd.Parameters.AddWithValue("@PARTY_GSTIN", gst);
                             cmd.Parameters.AddWithValue("@OTHER_GSTIN", obj.OTHER_GSTIN ?? "");
                             cmd.Parameters.AddWithValue("@BILL_NO", obj.BILL_NO ?? "");
-                            cmd.Parameters.AddWithValue("@BILL_DATE", (object)obj.BILL_DATE ?? DBNull.Value);
+                            //cmd.Parameters.AddWithValue("@BILL_DATE", (object)obj.BILL_DATE ?? DBNull.Value);
+                            cmd.Parameters.Add("@BILL_DATE", SqlDbType.SmallDateTime).Value = billDate ?? (object)DBNull.Value;
                             cmd.Parameters.AddWithValue("@ITEM_DESC", obj.ITEM_DESC ?? "");
                             cmd.Parameters.AddWithValue("@STATUS", obj.STATUS ?? 0);
                             cmd.Parameters.AddWithValue("@UUSER", GlobalVaraible.PubUserId);
@@ -475,7 +516,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                     }
                 }
 
-                // 🔹 Controlled parallel API calls (avoid overload)
+                // ?? Controlled parallel API calls (avoid overload)
                 var semaphore = new SemaphoreSlim(5);
 
                 var tasks = list.Select(async x =>
@@ -518,7 +559,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 request.Headers.Add("client_id", LoadGeneralSetting.PubEWayBillCID);
                 request.Headers.Add("client_secret", LoadGeneralSetting.PubEWayBillCSID);
                 request.Headers.Add("gstin", LoadGeneralSetting.PubEinvGSTIN);
-                request.Headers.Add("auth_access_type", GlobalVaraible.auth_access_type);            
+                request.Headers.Add("auth_access_type", GlobalVaraible.auth_access_type);
 
                 var response = await client.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
@@ -530,7 +571,7 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                 var data = doc.RootElement.GetProperty("data");
 
-                // ✅ Extract values (replacement of VB substring logic)
+                // ? Extract values (replacement of VB substring logic)
                 string expiryDate = data.GetProperty("validUpto").GetString();
                 decimal billAmt = data.GetProperty("totalValue").GetDecimal();
                 decimal totalAmt = data.GetProperty("totInvValue").GetDecimal();
@@ -571,7 +612,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                     using SqlCommand cmd = new SqlCommand(sql, con);
 
 
-                    // ✅ EXPIRY DATE
+                    // ? EXPIRY DATE
                     cmd.Parameters.Add("@EXPIRY_DATE", SqlDbType.SmallDateTime).Value = DateTime.TryParseExact(data.GetProperty("validUpto").GetString(),
                         "dd/MM/yyyy hh:mm:ss tt",
                         CultureInfo.InvariantCulture,
@@ -580,26 +621,26 @@ namespace travelexpensemanagement.Common.Globalvariable
                         ? expDate
                         : (object)DBNull.Value;
 
-                    // ✅ AMOUNTS
+                    // ? AMOUNTS
                     cmd.Parameters.AddWithValue("@BILL_AMT", billAmt);
                     cmd.Parameters.AddWithValue("@TOTAL_AMT", totalAmt);
                     cmd.Parameters.AddWithValue("@CGST_AMT", cgst);
                     cmd.Parameters.AddWithValue("@SGST_AMT", sgst);
                     cmd.Parameters.AddWithValue("@IGST_AMT", igst);
 
-                    // ✅ STRINGS
+                    // ? STRINGS
                     cmd.Parameters.AddWithValue("@TRUCK_NO", truckNo ?? "");
                     cmd.Parameters.AddWithValue("@TRANSPORT", transport ?? "");
                     cmd.Parameters.AddWithValue("@GR_NO", grNo ?? "");
 
-                    // ✅ GR DATE (FIXED — was wrong earlier)
+                    // ? GR DATE (FIXED — was wrong earlier)
                     cmd.Parameters.Add("@GR_DATE", SqlDbType.SmallDateTime).Value = DateTime.TryParseExact(grDate, "dd/MM/yyyy", CultureInfo.InvariantCulture,
                     DateTimeStyles.None,
                     out DateTime grd)
                     ? grd
                     : (object)DBNull.Value;
 
-                    // ✅ OTHER PARAMS
+                    // ? OTHER PARAMS
                     cmd.Parameters.AddWithValue("@ewaybno", ewaybno);
                     cmd.Parameters.AddWithValue("@Comp_code", GlobalVaraible.PubCompCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalVaraible.PubBranchCode);
@@ -617,12 +658,14 @@ namespace travelexpensemanagement.Common.Globalvariable
         public class EwayBillData
         {
             public string FORM_NO { get; set; }
-            public DateTime? FORM_DATE { get; set; }
+            //public DateTime? FORM_DATE { get; set; }
+            public string FORM_DATE { get; set; }
             public DateTime? EXPIRY_DATE { get; set; }
             public int? PARTY_CODE { get; set; }
             public string PARTY_GSTIN { get; set; }
             public string BILL_NO { get; set; }
-            public DateTime? BILL_DATE { get; set; }
+            //public DateTime? BILL_DATE { get; set; }
+            public string BILL_DATE { get; set; }
             public string GR_NO { get; set; }
             public DateTime? GR_DATE { get; set; }
             public string TRUCK_NO { get; set; }
@@ -675,8 +718,8 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                 string url = _configuration["VehicleApiKey:Url"];
                 string token = _configuration["VehicleApiKey:Token"];
-                
-           
+
+
                 if (!string.IsNullOrEmpty(token))
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -888,7 +931,7 @@ namespace travelexpensemanagement.Common.Globalvariable
 
 
 
-             
+
             }
             catch (Exception ex)
             {
@@ -915,8 +958,8 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                 if (!string.IsNullOrEmpty(token))
                 {
-                client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 }
 
                 var payload = new JObject
@@ -936,7 +979,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                         error = "API request failed",
                         status = (int)response.StatusCode,
                         details = responseData
-                       
+
                     });
                 }
 
@@ -945,7 +988,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
 
-                // ✅ DELETE OLD DATA
+                // ? DELETE OLD DATA
                 string deletequery = @"DELETE FROM GATE_FASTAG WHERE V_TYPE = @Vtype AND V_NO = @V_no  AND COMP_CODE = @Compcode  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YEAR_CODE";
 
                 using (var cmd1 = new SqlCommand(deletequery, conn))
@@ -958,7 +1001,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                     cmd1.ExecuteNonQuery();
                 }
 
-                // ✅ INSERT QUERY
+                // ? INSERT QUERY
                 string sql = @"INSERT INTO GATE_FASTAG
                 (YEAR_CODE,COMP_CODE,BRANCH_CODE,V_TYPE,V_NO,ClientId,RcNumber,BankName,TagId,Status,FastagId,
                 LaneDirection,TransactionDateTime,SeqNo,TollPlazaGeoCode,TollPlazaName,VehicleType,UUSER,UDATE,AED,WSID,LIP,LID,TransactionId)
@@ -966,7 +1009,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                 (@YEAR_CODE,@COMP_CODE,@BRANCH_CODE,@V_TYPE,@V_NO,@ClientId,@RcNumber,@BankName,@TagId,@Status,@FastagId,
                 @LaneDirection,@TransactionDateTime,@SeqNo,@TollPlazaGeoCode,@TollPlazaName,@VehicleType,@UUSER,GETDATE(),@AED,@WSID,@LIP,@LID,@TRANSACTIONID)";
 
-                // ✅ PARSE JSON
+                // ? PARSE JSON
                 var json = JObject.Parse(responseData);
                 var data = json["data"];
                 var transactions = data["transactions"];
@@ -1043,5 +1086,103 @@ namespace travelexpensemanagement.Common.Globalvariable
         // How to call any page 
         //_globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1",  transactionType: "Transaction",
         //        codeVNo: "262700001", vtype: "INFU");
+
+        //======================Check Modification Days For Edit==================
+        public (int isAllowed, string message) CheckModificationDays(DateTime vDate)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            int allowed = 1;
+            string? message = "";
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_checkModificationDays", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@vdate", vDate);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@userCode", gv.PubUserId);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                allowed = reader["Not_allowed"] != DBNull.Value ? Convert.ToInt32(reader["Not_allowed"]) : 1;
+                                message = reader["Message"]?.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                allowed = 1;
+                message = ex.Message;
+            }
+            return (allowed, message ?? "");
+        }
+        //How to call
+        //[HttpGet]
+        //public JsonResult checkModificationDays(DateTime? vDate)
+        //{
+        //    if (!vDate.HasValue)
+        //    {
+        //        return Json(new { success = false, message = "Doc Date is empty!!" });
+        //    }
+        //    var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+        //    return Json(new { success = true, isAllowed = allowed, message = message });
+        //}
+
+        //==================Export Excel===================
+        public byte[] ExportToExcel(string spName, string sheetName, Dictionary<string, object> parameters = null)
+        {
+            DataTable dt = new DataTable();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand(spName, con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            cmd.Parameters.AddWithValue(
+                                param.Key,
+                                param.Value ?? DBNull.Value
+                            );
+                        }
+                    }
+
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+
+            var worksheet = workbook.Worksheets.Add(sheetName);
+
+            worksheet.Cell(1, 1).InsertTable(dt);
+
+            worksheet.Row(1).Style.Font.Bold = true;
+
+            worksheet.Row(1).Style.Fill.BackgroundColor =
+                ClosedXML.Excel.XLColor.LightBlue;
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+
+            workbook.SaveAs(stream);
+
+            return stream.ToArray();
+        }
     }
 }
+
+

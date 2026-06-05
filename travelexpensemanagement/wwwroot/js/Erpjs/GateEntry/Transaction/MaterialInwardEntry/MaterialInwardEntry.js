@@ -498,31 +498,44 @@
 
         }
     }
-    function populateTable(data) {
-      const tbody = $("#tblellipsisIconmodal tbody");
+function populateTable(data) {
+
+    const tbody = $("#tblellipsisIconmodal tbody");
     tbody.empty();
 
+    const uniqueRows = new Set();
+
     data.forEach(function (row) {
-        let tr = `<tr>
-        <td><input type="checkbox" class="rowCheckbox" /></td>
-        <td>${row.saudA_NO}</td>
-        <td>${row.saudaDate}</td>
-        <td>${row.itemName}</td>
-        <td>${row.iteM_CODE}</td>
-        <td>${row.qty}</td>
-        <td>${row.rate}</td>
-        <td>${row.supplieR_INVNO}</td>
-        <td>${row.supplieR_INVDATE}</td>
-        <td>${row.supplieR_INVAMT}</td>
-        <td>${row.containeR_NO}</td>
-        <td>${row.grS_WEIGHT}</td>
-        <td>${row.conT_SIZE}</td>
-        <td>${row.v_no}</td>
-        <td style="display:none;"></td>
-    </tr>`;
-    tbody.append(tr);
-              });
+
+        const key = `${row.saudA_NO}_${row.iteM_CODE}`;
+
+        if (uniqueRows.has(key)) {
+            return; // Skip duplicate row
         }
+
+        uniqueRows.add(key);
+
+        let tr = `<tr>
+            <td><input type="checkbox" class="rowCheckbox" /></td>
+            <td>${row.saudA_NO}</td>
+            <td>${row.saudaDate}</td>
+            <td>${row.itemName}</td>
+            <td>${row.iteM_CODE}</td>
+            <td>${row.qty}</td>
+            <td>${row.rate}</td>
+            <td>${row.supplieR_INVNO}</td>
+            <td>${row.supplieR_INVDATE}</td>
+            <td>${row.supplieR_INVAMT}</td>
+            <td>${row.containeR_NO}</td>
+            <td>${row.grS_WEIGHT}</td>
+            <td>${row.conT_SIZE}</td>
+            <td>${row.v_no}</td>
+            <td style="display:none;"></td>
+        </tr>`;
+
+        tbody.append(tr);
+    });
+}
    function getSelectedPendingOrderRows() {
         const selectedRows = [];
         $('#tblpendingordermodal tbody tr').each(function () {

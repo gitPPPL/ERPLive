@@ -17,10 +17,12 @@ using System.Reflection.Metadata;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
 using travelexpensemanagement.Models.Purchase.Transaction;
+using travelexpensemanagement.ModuleService;
 
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
@@ -31,15 +33,26 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
+        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         public InwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
          travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _moduleService = moduleService;
+
         }
         public IActionResult Index()
         {
-            return View("~/Views/GateEntry/Transaction/InwardEntryList/Index.cshtml");
+            ViewBag.CurrentMenu = "Material Inward";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel,
+            };
+            return View("~/Views/GateEntry/Transaction/InwardEntryList/Index.cshtml", model);
         }
 
         [HttpGet]
@@ -963,7 +976,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
         [HttpGet]
         public IActionResult GetDataPono(int Pono, string Ponotext, int PARTY_CODE, string V_TYPE, int V_NO)
         {
@@ -1112,6 +1124,34 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
 
+
+        public JsonResult CheackEdit(string v_type , int v_no)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+
+            string status = GetText("select status from APPROVAL_STATUS where v_type= '"+  v_type +"' and v_NO= "+ v_no  +" and  " +
+            " comp_code= " + GetGlobalCode.PubCompCode + "  and branch_code= " + GetGlobalCode.PubBranchCode + " and year_code= " + GetGlobalCode.PubFYearCode +" and status='OPEN' and USER_CODE<> "+ GetGlobalCode.PubUserId +" ");
+
+            if(status != "")
+            {
+                string LASTUSER = GetText("select top 1 user_name from APPROVAL_STATUS where v_type= '" + v_type + "' and v_NO= " + v_no + " and comp_code=" + GetGlobalCode.PubBranchCode + "  " +
+                "  and branch_code= " + GetGlobalCode.PubBranchCode + " and year_code=" + GetGlobalCode.PubFYearCode + " and status='OPEN' and user_code<> " + GetGlobalCode.PubUserId + " order by srno desc");
+                return Json(new { status = false, message = "This Document Approval is in process at User:\" & lastuser & \", Edit not allowed." });
+
+            }
+
+            int  pubModifyDays = GetText("Select a.ALLOW_DAYS from Condatabase.dbo.USER_MAST a left join Condatabase.dbo.SUBUSER_MAST b on a.CODE=b.USER_CODE where a.CODE=" + GetGlobalCode.PubUserId + " and a.ACTIVE=1 and b.COMP_CODE=" + GetGlobalCode.PubCompCode + " ");
+
+
+
+
+
+
+            return Json(new { status = true });
+
+
+
+        }
 
 
 

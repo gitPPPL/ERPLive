@@ -432,8 +432,10 @@ $(document).ready(async function () {
         loadFastagDetails();
     });
 
-    $(document).on('click', '.delete-btn', function () {
-        if (confirm('Are you sure you want to delete this row?')) {
+    $(document).on('click', '.delete-btn', function (e) {
+        e.preventDefault();
+
+        if (confirm('Do you want to delete this row?')) {
             $(this).closest('tr').remove();
         }
     });
