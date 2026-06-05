@@ -27,8 +27,9 @@
 			break;
 		}
 	}
+	var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
-
+<div id="erp-toast-container"></div>
 <!-- HEADER -->
 <div class="erppagelist-header">
 	<div class="erppagelist-title">
@@ -56,14 +57,14 @@
 
 		@if (canPrint)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="callGetReportAsPdf()">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="VehicleReport()">
 				<i class="fa fa-print"></i> Print
 			</button>
 		}
 
 		@if (canExport)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" onclick="exportToExcel()">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel" @* onclick="exportToExcel() *@">
 				<i class="fa fa-file-excel"></i> Export
 			</button>
 		}
@@ -149,3 +150,16 @@
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/vehicleinwardentrylist/vehicleinwardentrylist.js"></script>
+<script>
+	window.globalVariables = {
+		compCode: "@globalVariables?.PubCompCode",
+		yearCode: "@globalVariables?.PubFYearCode",
+		branchCode: "@globalVariables?.PubBranchCode",
+		companyName: "@globalVariables?.CompanyName",
+		add1: "@globalVariables?.Address1",
+		add2: "@globalVariables?.Address2",
+	};
+	window.database = {
+		db: "@ViewBag.DatabaseName"
+	}
+</script>

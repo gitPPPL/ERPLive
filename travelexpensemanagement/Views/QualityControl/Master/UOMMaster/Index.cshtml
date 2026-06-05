@@ -2,14 +2,14 @@
     ViewBag.Title = "UOM Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<div id="erp-toast-container"></div>
 <fieldset>
     <legend class="legend-field">UOM Master</legend>
     <div class="row">
         <div class="offset-md-10 col-md-2">
             <div class="btn-right">
                 <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "UOMMasterList")'" type="button" class="btn btn-primary">
+                        onclick="handleBack('@Url.Action("Index", "UOMMasterList")', isReadOnly)" type="button" class="btn btn-primary">
                     <i class="fa fa-list"></i>Back to list
                 </button>
             </div>
@@ -56,10 +56,16 @@
     </form>
 </fieldset>
 <script>
+    let isReadOnly;
+
+    //=========Page Load=======
     $(document).ready(function () {
         const urlParams = new URLSearchParams(location.search);
         const rowId = parseInt(urlParams.get('id'));
-        const isReadOnly = urlParams.get('readOnly') === 'true';
+        isReadOnly = urlParams.get('readOnly') === 'true';
+
+        $('#TxtQCUnitName').focus();
+
 
         if (!isNaN(rowId) && rowId > 0) {
             loadUOMById(rowId);
@@ -78,7 +84,7 @@
             $('#statusText').text(status);
         });
     });
-
+    //==========Save & Update=======
     $('#UOMMasterForm').on('submit', function (e) {
         e.preventDefault();
 
@@ -87,30 +93,25 @@
         const shortName = $('#TxtShortName').val().trim();
         const isActive = $('#ACTIVE').is(':checked') ? 1 : 0;
 
-        if (!name) {
-            toastr.warning('Please enter QC Unit Name.');
-            $('#TxtQCUnitName').focus();
-            return;
-        }
+        // if (!name) {
+        //     toastr.warning('Please enter QC Unit Name.');
+        //     $('#TxtQCUnitName').focus();
+        //     return;
+        // }
 
-        if (!shortName) {
-            toastr.warning('Please enter Short Name.');
-            $('#TxtShortName').focus();
-            return;
-        }
+        // if (!shortName) {
+        //     toastr.warning('Please enter Short Name.');
+        //     $('#TxtShortName').focus();
+        //     return;
+        // }
+        if (!validateRequiredField('#TxtQCUnitName','Unit Name')) return;
 
         const payload = {
             CODE: code,
             NAME: name,
             SHORTNAME: shortName,
             ACTIVE: isActive,
-            UDATE: new Date().toISOString(),
-            EDATE: new Date().toISOString(),
-            AED: code > 0 ? 'U' : 'A',
             ACTION: code > 0 ? 'UPDATE' : 'INSERT',
-            WSID: 'WEB',
-            UUSER: 1,
-            EUSER: 1
         };
 
         $.ajax({
@@ -120,22 +121,23 @@
             data: JSON.stringify(payload),
             success: function (response) {
                 if (response.success) {
-                    toastr.success("UOM saved successfully!");
-                    $('#UOMMasterForm')[0].reset();
+                    showToast("UOM saved successfully!", { type: "success" });
                     setTimeout(function () {
                         window.location.href = '/UOMMasterList/Index';
                     }, 1000);
+                    $('#UOMMasterForm')[0].reset();
                 } else {
-                    toastr.warning(response.message || "Something went wrong while saving.");
+                    showToast(response.message || "Something went wrong while saving.", { type: "warning" });
                 }
             },
             error: function (xhr) {
                 const errorMsg = xhr.responseJSON?.message || xhr.responseText || "An error occurred.";
-                toastr.error("Error: " + errorMsg);
+                showToast("Error: " + errorMsg, { type: "error" });
             }
         });
     });
 
+    //==========Get By Id=========
     function loadUOMById(code) {
         $.ajax({
             url: '/UOMMasterList/GetUOMByCode',
@@ -144,7 +146,7 @@
             success: function (response) {
                 const data = response.data;
                 if (!data) {
-                    toastr.warning("No data found.");
+                    showToast("No data found.", { type: "warning" });
                     return;
                 }
 
@@ -156,16 +158,20 @@
             },
             error: function (xhr) {
                 console.error("Error loading UOM by ID:", xhr);
-                toastr.error('Error: ' + xhr.responseText);
+                showToast('Error: ' + xhr.responseText, { type: "error" });
             }
         });
     }
 
+    //=======Set Readonly====
     function setUOMFormReadOnly() {
         const form = $('#UOMMasterForm');
         form.find('input, select, textarea, button').prop('disabled', true);
         $('#ACTIVE').prop('disabled', true);
         $('#statusText').addClass('text-muted');
+        $('#btnSave, #cancelBtn').hide();
+
+        form.addClass('erppage-readonly');
     }
 
 </script>

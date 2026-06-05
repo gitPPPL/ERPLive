@@ -101,33 +101,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Weighbridge.Trans
             }
         }
 
-        public async Task<RepositoryResponseList<ExpandoObject>> ExportAllDocs()
-        {
-            var response = new RepositoryResponseList<ExpandoObject>();
-            try
-            {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", usersession.PubBranchCode},
-                    {"@DOCTYPE",  "KantaStore"},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetWBEntry]", parameter);
-
-                response.status = true;
-                response.data = dataList.ToList();
-                return response;
-            }
-            catch (Exception ex)
-            {
-                response.status = false;
-                response.message = ex.Message;
-                return response;
-            }
-        }
 
         public async Task<RepositoryResponseList<dynamic>> GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {

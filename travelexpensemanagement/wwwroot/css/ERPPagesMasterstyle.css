@@ -1,12 +1,23 @@
 ﻿/* ===== HEADER UPGRADE ===== */
 .erppage-header {
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #2d7b46, #1C5E31);
     color: #fff;
     padding: 6px 10px;
     display: flex;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
+}
+.approval-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
 }
 /* LEFT */
 .erppage-header-left {
@@ -16,7 +27,10 @@
 }
 /* RIGHT SIDE PUSH */
 .erppage-header-right {
-    margin-left: auto; /* 🔥 pushes to right */
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between buttons and span */
 }
 .btn-add-row-last {
     display: flex;
@@ -170,16 +184,14 @@
 }
 /* For single select */
 .select2-container .select2-selection--single {
-    min-width: 100px; /* minimum width */
-    width: auto; /* allows it to grow if needed */
+    width: 100% !important;
 }
 
-    /* Make text wrap inside the selection */
     .select2-container .select2-selection--single .select2-selection__rendered {
-        white-space: normal; /* allow wrapping */
-        word-wrap: break-word; /* break long words */
+        white-space: nowrap !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-
 /* For multiple select */
 .select2-container .select2-selection--multiple {
     min-width: 100px;
@@ -188,7 +200,7 @@
 
     /* Wrap text for choices in multiple select */
     .select2-container .select2-selection--multiple .select2-selection__rendered {
-        white-space: normal;
+       
         word-wrap: break-word;
     }
 /* OUTER Select2 container */
@@ -289,15 +301,109 @@
 /* ===== CONTAINER ===== */
 .erppage-container {
     margin: 8px auto;
-    /* padding: 0 10px;*/
+}
+.erppage-input-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
 }
 
+    .erppage-input-with-icon .erppage-input {
+        flex: 1;
+    }
+
+    /* Override old icon style */
+    .erppage-input-with-icon .erppageinputicon {
+        position: static;
+        transform: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: linear-gradient(135deg,#2f7d32,#1b5e20);
+        color: #fff;
+        cursor: pointer;
+    }
+
+/* Status Container */
+.erppage-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Status Text */
+.erppage-toggle-text {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 55px;
+    text-align: right;
+}
+
+    .erppage-toggle-text.active {
+        color: #2f7d32;
+    }
+
+    .erppage-toggle-text.inactive {
+        color: #6b7280;
+    }
+
+/* Toggle Switch */
+.erppage-toggle {
+    position: relative;
+    width: 52px;
+    height: 23px;
+    display: inline-block;
+    cursor: pointer;
+    margin: 0px;
+}
+
+    .erppage-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.erppage-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #9ca3af; /* OFF = Grey */
+    border-radius: 30px;
+    transition: .3s;
+}
+
+    .erppage-toggle-slider:before {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 7px;
+        top: 2px;
+        background: #fff;
+        border-radius: 50%;
+        transition: .3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    }
+
+/* ON State */
+.erppage-toggle input:checked + .erppage-toggle-slider {
+    background: linear-gradient(135deg,#2f7d32,#1b5e20);
+}
+
+    .erppage-toggle input:checked + .erppage-toggle-slider:before {
+        transform: translateX(24px);
+    }
 /* ===== SECTION (FIELDSET) ===== */
 .erppage-fieldset {
     border: 1px solid #e5e7eb;
     border-radius: 14px;
     background: #fff;
-    overflow: hidden;
+    overflow: visible;
     margin-bottom: 6px;
     padding: 8px 6px 8px 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -327,7 +433,71 @@
 .erppage-body {
     padding: 8px 4px;
 }
+/* ===== Dynamic Item Table ===== */
+.erppagetabledynamic-wrapper {
+    width:100%;
+    /*display: inline-block;*/ /* wrapper shrinks to content */
+    max-height: 180px; /* Fixed height */
+    overflow-y: auto; /* Vertical scrollbar */
+    overflow-x: auto; /* Horizontal scrollbar if needed */
+    border: 1px solid #c9c9c9;
+    border-radius: 10px;
+   /* overflow: hidden;*/
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
 
+.erppagetabledynamic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+    .erppagetabledynamic-table thead th {
+        background: linear-gradient(135deg, #2f7d32, #1b5e20);
+        color: #fff;
+        padding: 8px 12px;
+        font-weight: 600;
+        text-align: left;
+        border: 1px solid #256329;
+        white-space: nowrap;
+    }
+
+    .erppagetabledynamic-table tbody td {
+        padding: 8px 12px;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        background: #fff;
+        vertical-align: middle;
+    }
+
+    .erppagetabledynamic-table tbody tr:nth-child(even) td {
+        background: #f8faf8;
+    }
+
+    .erppagetabledynamic-table tbody tr:hover td {
+        background: #edf7ee;
+        transition: all 0.2s ease;
+    }
+
+    .erppagetabledynamic-table tbody td:first-child {
+        font-weight: 600;
+        color: #1b5e20;
+        font-size: 12px;
+    }
+
+    .erppagetabledynamic-table tbody td:last-child {
+        width: 100%;
+        font-size: 12px;
+    }
+
+/* Empty table message */
+.erppagetabledynamic-empty {
+    text-align: center;
+    padding: 15px;
+    color: #6b7280;
+    font-style: italic;
+}
 /* ===== GRID ===== */
 .erppage-grid {
     display: grid;
@@ -376,7 +546,7 @@
     border-radius: 10px;
     margin: 10px 0px 10px 0px;
     background: #fff;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
@@ -487,7 +657,7 @@
 /* CUSTOM HEADER */
 .erppage-subheader {
     padding: 4px 10px;
-    background: #ebebeb;
+    background: #d9d9d9;
     border-left: 4px solid #2f7d32;
     color: #27712b;
     font-weight: 600;
@@ -539,23 +709,49 @@
 }
 
 /* ===== FIELD ===== */
-.erppage-divfield {
+/*.erppage-divfield {
     display: grid;
     grid-template-columns: 80px 1fr auto;
     align-items: center;
-    gap: 12px;
-    flex-direction: column; /* 🔥 stack label + input always */
+    gap: 4px;
+    flex-direction: column;*/ /* 🔥 stack label + input always */
+    /*min-width: 0;
+}*/
+.erppage-divfield {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.erppage-label {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.erppage-input,
+.select2-container {
+    flex: 1;
+    min-width: 0;
 }
 
 /* ===== Select2 Container ===== */
 .erppage-select + .select2-container {
     width: 100% !important;
-    font-size: 13px;
+    max-width: 100% !important;
 }
 
+.select2-container {
+    min-width: 0 !important;
+}
+.erppage-select + .select2-container {
+    max-width: 100%;
+}
 /* ===== Selected Box ===== */
 .select2-container--default .select2-selection--single {
     height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    overflow: hidden;
     border: 1px solid #ced4da;
     border-radius: 6px;
     padding: 4px 10px;
@@ -566,9 +762,13 @@
 
     /* ===== Text inside select ===== */
     .select2-container--default .select2-selection--single .select2-selection__rendered {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 20px !important;
         color: #121212 !important;
-        line-height: normal !important;
         padding: 4px 8px;
+        padding-right:0px;
         word-wrap: break-word;
     }
 
@@ -672,7 +872,7 @@
 /* ===== LABEL ===== */
 .erppage-label {
     font-size: 12px;
-    color: #303548;
+    color: #1a1a1a;
     display: inline-block;
     margin: 0;
     font-weight: 600;
@@ -736,7 +936,31 @@ select.erppage-input {
     box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
 }
 /* wrapper for date + checkbox */
+/* ERP Checkbox */
+.erppage-checkbox-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+}
 
+.erppage-checkbox-input {
+    width: 16px;
+    height: 16px;
+    accent-color: #2f7d32; /* ERP Green Theme */
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.erppage-checkbox-label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    user-select: none;
+}
 
 /* date input takes full space */
 .erppage-dateinput {
@@ -902,24 +1126,24 @@ input[type="number"] {
 .erppageinputicon {
     position: absolute;
     right: 0px;
-    border-radius: 5px;
     top: 50%;
-    background-color: #2f7d32;
-    padding: 7px;
     transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(135deg,#2f7d32,#1b5e20);
+    color: #fff;
     cursor: pointer;
-    color: #ffffff;
-    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.2s ease;
 }
 
     /* Hover */
     .erppageinputicon:hover {
-        color: #fff;
-        transform: translateY(-50%) scale(1.1);
+        background: linear-gradient(135deg,#256d29,#164a18);
+        transform: translateY(-50%) scale(1.05);
     }
 
 /* Mobile responsive */
@@ -953,7 +1177,7 @@ input[type="number"] {
 
 .erppage-tab {
     padding: 8px 14px;
-    border: none;
+    border: 1px solid #d9d9d9;
     background: #f3f4f6;
     cursor: pointer;
     border-radius: 6px 6px 0 0;
@@ -1068,6 +1292,12 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
+.erppage-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px;
+    align-items: start;
+}
 /* ===== INPUT + BUTTON GROUP ===== */
 .erppage-inputgroup {
     display: flex;
@@ -1147,17 +1377,38 @@ input[type="number"] {
         font-size: 14px;
         color: #fff;
     }
+
+.erppagestatus-badge {
+    display: inline-flex;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 8px;
+   /* text-transform: uppercase;*/
+}
+
+.erppagestatus-active {
+    background-color: rgba(40, 167, 69, 0.12);
+    color: #28a745;
+}
+
+.erppagestatus-inactive {
+    background-color: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}
 /* ACTION BAR */
 .erppage-actions {
     position: sticky;
     bottom: 0;
-    display: flex; /* 🔥 MISSING */
-    justify-content: flex-end; /* now works */
-    gap:10px;
+    z-index: 998;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
     background: #fff;
-    padding: 6px 12px; /* better spacing */
-    border-top: 1px solid #eee;
-    z-index: 999;
+    padding: 10px 15px;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 8px rgba(0,0,0,.08);
 }
 
 /* BASE BUTTON */
@@ -1166,11 +1417,12 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.25s ease;
+    width: fit-content;
 }
 /* SAVE */
 .erppage-btn-primary {

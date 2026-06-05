@@ -6,9 +6,10 @@
     .btn-plus {
         padding: 5px !important;
     }
-    .btn-plus i {
-        margin: 0px !important;
-    }
+
+        .btn-plus i {
+            margin: 0px !important;
+        }
 </style>
 <fieldset>
     <legend class="legend-field">QC Master</legend>
@@ -176,7 +177,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                       
                     </tbody>
                 </table>
             </div>
@@ -287,7 +287,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Parameter: <span id="lblParameterText" class="fw-bold text-primary"></span></label>
-                                
+
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -350,62 +350,62 @@
 </div>
 
 <script>
- $(document).ready(function () {
-   $("#btnUpdate").hide();
-   function getQueryParam(param) {
-             const urlParams = new URLSearchParams(window.location.search);
-             return urlParams.get(param);
-         }
-   const code = getQueryParam('id');
-   const mode = getQueryParam("mode");
-   if (code) {
-             $("#btnSave").hide();
-             $("#btnUpdate").show();
-             $.ajax({
-                    url: '/QCMaster/GetQCMasterListByCode',
-                 type: 'POST',
-                 contentType: 'application/json',
-                 data: JSON.stringify({ code: parseInt(code) }),
-                 success: function (response) {
-                      bindItemDeptForm(response);
-                 },
-                 error: function (xhr) {
-                     alert('Error: ' + xhr.responseText);
-                 }
-             });
-         }
-   var currentCode = 0;
-   var nextQcpCode = 0;
-   GetLastCode().done(function(response) {
-            if (response && response.lastCode !== undefined) {
-                currentCode = response.lastCode;
-                if (currentCode < 0) currentCode = 0; // safety
-
-               initializeQcpCode(currentCode).then(function(nextCode) {
-                nextQcpCode = nextCode.lastQCPCODE;
+    $(document).ready(function () {
+        $("#btnUpdate").hide();
+        function getQueryParam(param) {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  return urlParams.get(param);
+        }
+        const code = getQueryParam('id');
+        const mode = getQueryParam("mode");
+        if (code) {
+            $("#btnSave").hide();
+            $("#btnUpdate").show();
+            $.ajax({
+                   url: '/QCMaster/GetQCMasterListByCode',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ code: parseInt(code) }),
+                success: function (response) {
+                     bindItemDeptForm(response);
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr.responseText);
+                }
             });
+        }
+        var currentCode = 0;
+        var nextQcpCode = 0;
+        GetLastCode().done(function(response) {
+             if (response && response.lastCode !== undefined) {
+                 currentCode = response.lastCode;
+                 if (currentCode < 0) currentCode = 0; // safety
 
-            } else {
-                currentCode = 0;
-                nextQcpCode = 1;
-            }
+                initializeQcpCode(currentCode).then(function(nextCode) {
+                 nextQcpCode = nextCode.lastQCPCODE;
+             });
+
+             } else {
+                 currentCode = 0;
+                 nextQcpCode = 1;
+             }
         }).fail(function() {
-       currentCode = 0;
-       nextQcpCode = 1;
-       alert('Failed to fetch last code from server.');
-   });
-   if (mode === "view") {
-     setFormReadOnly();
-     $('#QCMasterform').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
-    }
+            currentCode = 0;
+            nextQcpCode = 1;
+            alert('Failed to fetch last code from server.');
+        });
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#QCMasterform').after('<span class="badge bg-secondary ms-2">Read-Only Mode</span>');
+        }
 
-   $('#ACTIVE').on('change', function () {
-             let status = $(this).is(':checked') ? 'Active' : 'Inactive';
-             $('#statusText').text(status);
-         });
+        $('#ACTIVE').on('change', function () {
+            let status = $(this).is(':checked') ? 'Active' : 'Inactive';
+            $('#statusText').text(status);
+        });
 
-   // Add row button click
-   $('.btn-success').on('click', function() {
+        // Add row button click
+        $('.btn-success').on('click', function() {
             // Increment codes locally
             currentCode++;
             nextQcpCode++;
@@ -457,13 +457,13 @@
             $('#TxtRemarks').val('');
         });
 
-   // Delete row button click
-   $('#tblQCMasteradd tbody').on('click', '.btn-delete', function() {
+        // Delete row button click
+        $('#tblQCMasteradd tbody').on('click', '.btn-delete', function() {
             $(this).closest('tr').remove();
         });
 
-   // Add row in Master2 table
-   $(document).on('click', '.btn-add-row', function () {
+        // Add row in Master2 table
+        $(document).on('click', '.btn-add-row', function () {
             const newRow = `
                 <tr>
                     <td><input type="number" class="form-control form-control-sm" value=""></td>
@@ -485,8 +485,8 @@
             $('#tblParameterDR tbody').append(newRow);
         });
 
-   // Popup open from plus button click
-   $('#tblQCMasteradd').on('click', '.btn-plus', function () {
+        // Popup open from plus button click
+        $('#tblQCMasteradd').on('click', '.btn-plus', function () {
             const $row = $(this).closest('tr');
             //const nextQcpCode = $row.find('td:eq(0)').text().trim();
             const code = $row.find('td:eq(0)').text().trim();
@@ -500,7 +500,7 @@
             $('#hdnnextQcpCode').val(parameterId);
              Checkdata(code, parameterId);
         });
-   $('#btnSaveQCDeductRate').on('click', function(e) {
+        $('#btnSaveQCDeductRate').on('click', function(e) {
             e.preventDefault();
             const code = $('#hdnCode').val();
             const nextQcpCode = $('#hdnnextQcpCode').val();
@@ -532,8 +532,8 @@
                 }
             });
         });
-   // Submit main form
-   $('#QCMasterform').on('submit', function(e) {
+        // Submit main form
+        $('#QCMasterform').on('submit', function(e) {
             e.preventDefault();
 
             const formData = {
@@ -575,10 +575,10 @@
             });
 
         });
-   // Load dropdowns
+        // Load dropdowns
 
-   // Update on Click start Block
-   $('#btnUpdate').on('click', function(e) {
+        // Update on Click start Block
+        $('#btnUpdate').on('click', function(e) {
             e.preventDefault();
 
             const formData = {
@@ -591,42 +591,42 @@
             };
 
             $('#tblQCMasteradd tbody tr').each(function () {
-        const $tds = $(this).find('td');
+                const $tds = $(this).find('td');
 
-        formData.Details.push({
-            Code: $tds.eq(0).text().trim(),                            
-            CurrentCode: $tds.eq(1).text().trim() || null,            
-            Parameter: $tds.eq(2).data('id')?.toString().trim() || '',
-            Unit: $tds.eq(3).text().trim(),
-            StdResult: $tds.eq(4).text().trim(),
-            DeductQty: $tds.eq(5).text().trim(),
-            DeductType: $tds.eq(6).text().trim(),
-            Ppm: $tds.eq(7).text().trim(),
-            BasePrice: $tds.eq(8).text().trim(),
-            Remarks: $tds.eq(9).text().trim()
-        });
-    });
-            console.log('Collected form data Update:', formData);
-            $.ajax({
-                url: '/QCMaster/UpdateDataQcMaster',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    alert('Update successfully!');
-                },
-                error: function(xhr, status, error) {
-                    alert('Error: ' + error);
-                }
+                formData.Details.push({
+                    Code: $tds.eq(0).text().trim(),
+                    CurrentCode: $tds.eq(1).text().trim() || null,
+                    Parameter: $tds.eq(2).data('id')?.toString().trim() || '',
+                    Unit: $tds.eq(3).text().trim(),
+                    StdResult: $tds.eq(4).text().trim(),
+                    DeductQty: $tds.eq(5).text().trim(),
+                    DeductType: $tds.eq(6).text().trim(),
+                    Ppm: $tds.eq(7).text().trim(),
+                    BasePrice: $tds.eq(8).text().trim(),
+                    Remarks: $tds.eq(9).text().trim()
+                });
             });
+             console.log('Collected form data Update:', formData);
+             $.ajax({
+                 url: '/QCMaster/UpdateDataQcMaster',
+                 type: 'POST',
+                 contentType: 'application/json',
+                 data: JSON.stringify(formData),
+                 success: function(response) {
+                     alert('Update successfully!');
+                 },
+                 error: function(xhr, status, error) {
+                     alert('Error: ' + error);
+                 }
+             });
 
-        });
-   // Update on Click End Block
-   ddlQCGroup();
-   ddlParameter();
- });
- // Functions
- function GetLastCode() {
+         });
+        // Update on Click End Block
+        ddlQCGroup();
+        ddlParameter();
+    });
+    // Functions
+    function GetLastCode() {
         return $.ajax({
             url: '/QCMaster/GetLastCode',
             type: 'POST',  // or 'GET'
@@ -635,7 +635,7 @@
             dataType: 'json'
         });
     }
- function initializeQcpCode(code) {
+    function initializeQcpCode(code) {
         return $.ajax({
             url: '/QCMaster/GetLastQCPCODE',
             type: 'POST',
@@ -657,7 +657,7 @@
             nextQcpCode = 1;
         });
     }
- function ddlQCGroup(callback) {
+    function ddlQCGroup(callback) {
         $.ajax({
             url: '/QCMaster/GetddlQCGroup',
             type: 'GET',
@@ -680,7 +680,7 @@
             }
         });
     }
- function ddlParameter() {
+    function ddlParameter() {
         $.ajax({
             url: '/QCMaster/GetddlParameter',
             type: 'GET',
@@ -697,7 +697,7 @@
             }
         });
     }
- function bindItemDeptForm(response) {
+    function bindItemDeptForm(response) {
         if (!response.success || !response.data || !response.data.details) {
             toastr.warning('No details found to bind.');
             return;
@@ -746,7 +746,7 @@
             tbody.append(newRow);
         });
     }
- function Checkdata(code, parameterId) {
+    function Checkdata(code, parameterId) {
         $.ajax({
             url: '/QCMaster/CheckDeductRates',
             type: 'POST',
@@ -765,10 +765,10 @@
             }
         });
     }
- function showDeductRateListPopup(deductRates) {
+    function showDeductRateListPopup(deductRates) {
         console.log('deductRates', deductRates);
         const $tbody = $('#tblParameterDR tbody');
-        $tbody.empty(); 
+        $tbody.empty();
         if (!Array.isArray(deductRates) || deductRates.length === 0) {
             // Agar data empty hai to blank input row dikhana
             const emptyRow = `
@@ -814,12 +814,12 @@
             $tbody.append(rowHtml);
         });
     }
- function setFormReadOnly() {
-   $('#QCMasterform input, #QCMasterform select').prop('disabled', true);
-   $('#customToggle').css('pointer-events', 'none');
-   $('#btnSubmit, #btnUpdate, ').hide();
-   $('.btn-delete').hide();
-  }
+    function setFormReadOnly() {
+        $('#QCMasterform input, #QCMasterform select').prop('disabled', true);
+        $('#customToggle').css('pointer-events', 'none');
+        $('#btnSubmit, #btnUpdate, ').hide();
+        $('.btn-delete').hide();
+    }
 
 
 </script>

@@ -335,8 +335,8 @@ async function fillTestParameterData(data) {
         });
 
         $(`#TxtPlantZoneId${idx}`).val(item.ROOM_CODE || item.rooM_CODE || '').trigger('change');
-        $(`#TxTemperature${idx}`).val(item.temp_READ != null
-            ? item.temp_READ.toFixed(2)
+        $(`#TxTemperature${idx}`).val(item.TEMP_READ != null
+            ? item.TEMP_READ.toFixed(2)
             : '0.00');
         $(`#TxtRemark${idx}`).val(item.TEMP_REM || '');
         $(`#TxtDateTime${idx}`).val(item.TIME_TAKEN
@@ -792,8 +792,8 @@ function addTestParameterRow() {
                         <option value="">- Select Parameter -</option>
                     </select>
                 </td>
-               <td><input type="text" class="form-control temperature-input" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxTemperature${rowCount}"/></td>
-                                <td><input type="text" class="form-control" maxlength="100" id="TxtRemark${rowCount}"/></td>
+                <td><input type="text" class="form-control temperature-input" maxlength="9" oninput="allowOnlyDecimal(this)" id="TxTemperature${rowCount}"/></td>
+                <td><input type="text" class="form-control" maxlength="100" id="TxtRemark${rowCount}"/></td>
                 <td><input type="datetime-local" class="form-control" id="TxtDateTime${rowCount}" disabled/></td>
                 <td class="action-col">   
                     <button class="act-btn add btn-add-action btn-add-TestParameter-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
@@ -855,10 +855,10 @@ async function loadDropdown({ type, selectElem, defaultText = "- Select -"/*, fo
 
 //===Set Readonly
 function setFormReadOnly() {
-    const form = $('#QCTemperatureEntryForm');
+    const form = $('#QCTemperatureEntryForm, #QCTemperatureEntryForm2');
     form.find('input, textarea, select').prop('disabled', true);
     $('#btn_import').prop('disabled', true).css('pointer-events', 'none');
-    $('#btn-save').hide();
+    $('#btn-save, #btn-Open-Reading').hide();
     $('.btn-delete-action, .btn-add-Winder-action, .btn-add-Material-action, .btn-add-TestParameter-action, #btn_fill')
         .addClass('disabled')
         .css('pointer-events', 'none');
@@ -1076,12 +1076,13 @@ function setFocusInColumn(selector) {
 
 //===Import===
 $('#btn_import').on('click', function () {
+    $('#readingModal').modal('hide');
     let timeInterval = parseIntSafe($('#TxtImportInterval').val());
     if (timeInterval <= 0) timeInterval = 180;
     let readingCode = parseIntSafe($('#ddlSelectReading').val());
     let type = (readingCode == 0) ? 'ROOM' :
-               (readingCode == 1) ? 'SPED' :
-               (readingCode == 2) ? 'WIND' : '';
+        (readingCode == 1) ? 'SPED' :
+            (readingCode == 2) ? 'WIND' : '';
     let shift = $('#ddlShift').val() || '';
     let deptCode = parseIntSafe($('#ddlPlantName').val());
     if (!deptCode) {

@@ -40,7 +40,7 @@ $(document).ready(function () {
 			$.each(docs, function (index, item) {
 				let actions = '';
 								if (window.permissions.canEdit) {
-									actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.docid}')"><i class="fa fa-edit"></i></button>`;
+									actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="checkModificationAllowed('${item.vdate}', '${item.docid}')"><i class="fa fa-edit"></i></button>`;
 								}
 								actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>`;
 								if (window.permissions.canDelete) {
@@ -96,99 +96,83 @@ function changeRowsPerPage() {
 		});
 	}
 
-	function exportToExcel() {
-		fetch('/VehicleInwardEntryList/ExportAllDocs')
-			.then(response => {
-				if (!response.ok) throw new Error("Network response was not ok");
-				return response.json();
-			})
-			.then(responseData => {
-				if (!responseData.status) {
-					// toastr.error("Failed to fetch data.");
-					showToast("Failed to fetch data.", { type: "error" });
-					return;
-				}
-				const dataArray = responseData.data;
-				if (!Array.isArray(dataArray) || dataArray.length === 0) {
-					// toastr.warning("No data available to export.");
-					showToast("No data available to export.", { type: "warning" });
-					return;
-				}
-
-				const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) });
-				const colWidths = Object.keys(dataArray[0]).map(key => {
-					const maxLen = Math.max(
-						key.length,
-						...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
-					);
-					return { wch: maxLen + 2 };
-				});
-				worksheet['!cols'] = colWidths;
+function checkModificationAllowed(vDate, rowId) {
+	checkModificationDays({
+		controller: 'VehicleInwardEntry',
+		vDate: vDate,
+		rowId: rowId,
+		onAllowed: function (rowId) {
+			AddOrEditFunction(rowId);
+		}
+	})
+}
 
 
-				const headerRowNumber = 1;
-				Object.keys(dataArray[0]).forEach((_, idx) => {
-					const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
-					if (!worksheet[cellAddress]) return;
-					worksheet[cellAddress].s = {
-						font: { bold: true },
-						fill: { fgColor: { rgb: "FFFF00" } }
-					};
-				});
+// ================= Download Excel =================
+document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+	e.preventDefault();
+	window.location.href = "/VehicleInwardEntryList/ExportAllDocs";
+});
 
-				const workbook = XLSX.utils.book_new();
-				XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
+	//=======================Commented as per Tiwari Sir===================
+//function VehicleReport() {
 
-				const pageName = "TransportInward_List";
-				const now = new Date();
-				const pad = n => String(n).padStart(2, '0');
-				const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-				const fileName = `${pageName}_${timestamp}.xlsx`;
+//	var reportName = "Rpt_Transport_Inward";
 
-				XLSX.writeFile(workbook, fileName);
-			})
-			.catch(error => {
-				console.error("Export failed:", error);
-				// toastr.error("Failed to export data.");
-				showToast("Failed to export data.", { type: "error" });
-			});
-	}
+//	var formula =
+//		"{Gatepass1.comp_code} = " + window.globalVariables.compCode +
+//		" and {GATEPASS1.YEAR_CODE}=" + window.globalVariables.yearCode +
+//		" AND {GATEPASS1.BRANCH_CODE}=" + window.globalVariables.branchCode;
+//		" AND {GATEPASS1.V_TYPE}= '" + vtype +
+//		"' AND {GATEPASS1.V_NO}=" + vNo;
 
-	function callGetReportAsPdf() {
-		var reportName = "rpt_Vehicle_Inward_Entry";
-		var now = new Date();
-		var day = String(now.getDate()).padStart(2, '0');
-		var month = String(now.getMonth() + 1).padStart(2, '0');
-		var year = String(now.getFullYear()).slice(-2);
-		var hours = String(now.getHours()).padStart(2, '0');
-		var minutes = String(now.getMinutes()).padStart(2, '0');
-		var seconds = String(now.getSeconds()).padStart(2, '0');
-		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+//	var formulaFields = {
+//		Reportname: reportName,
+//		selectionFormula: formula,
+//		Database: window.database.db,
+//		Parameters: {
+//			comp_name: window.globalVariables.companyName,
+//			comp_add1: window.globalVariables.add1,
+//			comp_add2: window.globalVariables.add2,
+//			RPTNAME: vtype
+//		}
+//	};
 
-		$.ajax({
-			url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
-			type: 'GET',
-			data: {Reportname: reportName },
-			xhrFields: {
-				responseType: 'blob'
-			},
-			success: function (response) {
-				console.log('PDF response:', response);
-				var file = new Blob([response], {type: 'application/pdf' });
-				var fileName = `${reportName}_${timestamp}.pdf`;
+//	var now = new Date();
+//	var day = String(now.getDate()).padStart(2, '0');
+//	var month = String(now.getMonth() + 1).padStart(2, '0');
+//	var year = String(now.getFullYear()).slice(-2);
+//	var hours = String(now.getHours()).padStart(2, '0');
+//	var minutes = String(now.getMinutes()).padStart(2, '0');
+//	var seconds = String(now.getSeconds()).padStart(2, '0');
+//	var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
 
-				var link = document.createElement('a');
-				link.href = URL.createObjectURL(file);
-				link.download = fileName;
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-			},
-			error: function (xhr, status, error) {
-				console.error('Error generating report:', error);
-			}
-		});
-	}
+//	$.ajax({
+//		url: 'http://localhost:34088/Report/PendingQCReport',
+//		type: 'POST',
+//		data: JSON.stringify(formulaFields),
+//		contentType: "application/json",
+//		xhrFields: {
+//			responseType: 'blob'
+//		},
+//		success: function (response) {
+//			console.log('PDF response:', response);
+//			var file = new Blob([response], { type: 'application/pdf' });
+//			var fileName = `${reportName}_${timestamp}.pdf`;
+
+//			var link = document.createElement('a');
+//			link.href = URL.createObjectURL(file);
+//			link.download = fileName;
+//			document.body.appendChild(link);
+//			link.click();
+//			document.body.removeChild(link);
+//		},
+//		error: function (xhr, status, error) {
+//			console.error('Error generating report:', error);
+//		}
+//	});
+//}
+	
 
 	function showImpExpExpensePopup(docCode) {
 		$.ajax({

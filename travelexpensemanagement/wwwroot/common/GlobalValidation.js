@@ -342,6 +342,14 @@ function getCurrentDateYMD() {
     const yyyy = today.getFullYear();
     return `${yyyy}-${mm}-${dd}`;
 };
+//===============Format Date dd/mm/yyyy=========
+function formatDateddmmyyyy(d) {
+    const date = new Date(d);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+}
 
 //===================Check Modification Allowed or Not===================
 function checkModificationDays(options) {
@@ -350,6 +358,7 @@ function checkModificationDays(options) {
         action = 'checkModificationDays',
         vDate,
         rowId = null,
+        vType = null,
         onAllowed = null,
         url = `/${controller}/${action}`
     } = options;
@@ -371,7 +380,12 @@ function checkModificationDays(options) {
 
                     // Dynamic callback
                     if (typeof onAllowed === "function") {
-                        onAllowed(rowId);
+                        //onAllowed(rowId);
+                        if (vType !== null) {
+                            onAllowed(rowId, vType);
+                        } else {
+                            onAllowed(rowId);
+                        }
                     }
 
                 }
@@ -385,7 +399,7 @@ function checkModificationDays(options) {
             showToast("An error occurred!", { type: "error" });
         }
     });
-
+}
     //How to call
 
     //====Use checkModificationAllowed on click of edit button
@@ -400,4 +414,3 @@ function checkModificationDays(options) {
     //        }
     //    })
     //}
-}

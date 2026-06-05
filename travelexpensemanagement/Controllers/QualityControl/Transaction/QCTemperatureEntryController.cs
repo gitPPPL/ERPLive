@@ -35,7 +35,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         public IActionResult Index()
         {
             var compCode = _globalValue.GetGlobalVariables().PubCompCode;
-            ViewBag.CompCode = compCode;
+            ViewBag.CompCode = compCode.ToString();
             return View("~/Views/QualityControl/Transaction/QCTemperatureEntry/Index.cshtml");
         }
 
@@ -114,7 +114,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                       order by NAME
                      ";
                     break;
-                    //-----------------------------------------------------------------------------------------------------------------------
                 case "Line":
                     query = $@"
                       select code,name from ITEMDEPT_MAST where comp_code={gv.PubCompCode} and TRAN_TYPE='Production' and PLACE_TYPE='Fibreline' order by name

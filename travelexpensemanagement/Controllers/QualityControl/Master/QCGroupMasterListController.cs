@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.QualityControl.Master;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
+    [SessionAuthorize]
     public class QCGroupMasterListController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -16,20 +19,40 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly GlobalValidationdate _globalValidationdate;
 
-        private int? userLevel;
         public QCGroupMasterListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService)
+    DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
-            return View("~/Views/QualityControl/Master/QCGroupMasterList/Index.cshtml");
+            ViewBag.CurrentMenu = "QC Group Master";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel,
+            };
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database; // Get the database name
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
+            return View("~/Views/QualityControl/Master/QCGroupMasterList/Index.cshtml", model);
         }
         [HttpGet]
         public IActionResult GetAllQCGroups(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -64,15 +87,15 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                                     NAME = reader["NAME"]?.ToString(),
                                     QC_TYPE = reader["QC_TYPE"]?.ToString(),
                                     ACTIVE = reader["ACTIVE"] != DBNull.Value ? Convert.ToInt32(reader["ACTIVE"]) : 0,
-                                    UUSER = reader["UUSER"] != DBNull.Value ? Convert.ToInt32(reader["UUSER"]) : 0,
-                                    UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : DateTime.MinValue,
-                                    EUSER = reader["EUSER"] != DBNull.Value ? Convert.ToInt32(reader["EUSER"]) : 0,
-                                    EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : DateTime.MinValue,
-                                    AED = reader["AED"]?.ToString(),
-                                    WSID = reader["WSID"]?.ToString(),
-                                    LIP = reader["LIP"]?.ToString(),
-                                    LID = reader["LID"]?.ToString(),
-                                    SRNO = reader["SRNO"] != DBNull.Value ? Convert.ToInt32(reader["SRNO"]) : 0
+                                    //UUSER = reader["UUSER"] != DBNull.Value ? Convert.ToInt32(reader["UUSER"]) : 0,
+                                    //UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : DateTime.MinValue,
+                                    //EUSER = reader["EUSER"] != DBNull.Value ? Convert.ToInt32(reader["EUSER"]) : 0,
+                                    //EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : DateTime.MinValue,
+                                    //AED = reader["AED"]?.ToString(),
+                                    //WSID = reader["WSID"]?.ToString(),
+                                    //LIP = reader["LIP"]?.ToString(),
+                                    //LID = reader["LID"]?.ToString(),
+                                    //SRNO = reader["SRNO"] != DBNull.Value ? Convert.ToInt32(reader["SRNO"]) : 0
                                 });
                             }
 
@@ -120,14 +143,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                                     NAME = reader["NAME"]?.ToString(),
                                     QC_TYPE = reader["QC_TYPE"]?.ToString(),
                                     ACTIVE = reader["ACTIVE"] != DBNull.Value ? Convert.ToInt32(reader["ACTIVE"]) : 0,
-                                    UUSER = reader["UUSER"] != DBNull.Value ? Convert.ToInt32(reader["UUSER"]) : 0,
-                                    UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : DateTime.MinValue,
-                                    EUSER = reader["EUSER"] != DBNull.Value ? Convert.ToInt32(reader["EUSER"]) : 0,
-                                    EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : DateTime.MinValue,
-                                    AED = reader["AED"]?.ToString(),
-                                    WSID = reader["WSID"]?.ToString(),
-                                    LIP = reader["LIP"]?.ToString(),
-                                    LID = reader["LID"]?.ToString(),
+                                    //UUSER = reader["UUSER"] != DBNull.Value ? Convert.ToInt32(reader["UUSER"]) : 0,
+                                    //UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : DateTime.MinValue,
+                                    //EUSER = reader["EUSER"] != DBNull.Value ? Convert.ToInt32(reader["EUSER"]) : 0,
+                                    //EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : DateTime.MinValue,
+                                    //AED = reader["AED"]?.ToString(),
+                                    //WSID = reader["WSID"]?.ToString(),
+                                    //LIP = reader["LIP"]?.ToString(),
+                                    //LID = reader["LID"]?.ToString(),
                                     SRNO = reader["SRNO"] != DBNull.Value ? Convert.ToInt32(reader["SRNO"]) : 0
                                 };
                             }
@@ -140,6 +163,35 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error fetching QC group data", error = ex.Message });
+            }
+        }
+        [HttpGet]
+        public IActionResult ExportAllDocs()
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
+        {
+            { "@Action", "Excel" }
+        };
+
+                var fileBytes = _globalValidationdate.ExportToExcel("sp_QCG_MAST", "QC Group Master", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"QCGroupMaster_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
 

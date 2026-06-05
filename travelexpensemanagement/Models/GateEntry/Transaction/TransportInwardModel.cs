@@ -82,6 +82,7 @@
         public string? SaveOrUpdate { get; set; }
         //==================Correction===============
         public IFormFile Attachment { get; set; }
+        public bool RemoveAttachment { get; set; }
     }
     public class RcRequest
     {

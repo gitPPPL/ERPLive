@@ -1,32 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models.Admin.SystemInitilization;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.QualityControl.Master;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
+    [SessionAuthorize]
     public class UOMMasterController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService _dropdownService;
-        private readonly DbHelper _dbHelper;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly LogService.LogService _logService;
 
         private int? userLevel;
-        public UOMMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService)
+        public UOMMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _dropdownService = dropdownService;
-            _dbHelper = dbHelper;
-            _moduleService = moduleService;
+            _logService = logService;
         }
         public IActionResult Index()
         {
@@ -40,14 +35,15 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 return Json(new { success = false, message = "QC Unit name cannot be blank." });
             }
 
-            if (string.IsNullOrWhiteSpace(model.SHORTNAME))
-            {
-                return Json(new { success = false, message = "Short name cannot be blank." });
-            }
+            //if (string.IsNullOrWhiteSpace(model.SHORTNAME))
+            //{
+            //    return Json(new { success = false, message = "Short name cannot be blank." });
+            //}
 
             string action = model.ACTION == "INSERT" ? "INSERT" : "UPDATE";
 
-            if (action == "INSERT" && IsDuplicateUOM(model.NAME))
+            //if (action == "INSERT" && IsDuplicateUOM(model.NAME))
+            if (IsDuplicateUOM(model.NAME, model.CODE))
             {
                 return Json(new { success = false, message = "QC Unit name already exists." });
             }
@@ -89,7 +85,20 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? "WEB");
 
                         con.Open();
-                        cmd.ExecuteNonQuery();
+                        string mode = action == "INSERT" ? "INSERT" : "UPDATE";
+                        int code = 0;
+                        if (action == "INSERT")
+                        {
+                            code = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+                        else
+                        {
+                            cmd.ExecuteNonQuery();
+                            code = model.CODE;
+                        }
+
+                        //===========log insert
+                        _logService.InsertLog("QCPUNIT_MAST", "QC UOM Master", "Master", mode, "", code.ToString(), null);
                         return "Success";
                     }
                 }
@@ -99,27 +108,29 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 return "Error: " + ex.Message;
             }
         }
-        private bool IsDuplicateUOM(string name)
+        private bool IsDuplicateUOM(string name, int code)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return false;
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM QCPUNIT_MAST WHERE NAME = @Name", con))
+                using (SqlCommand cmd = new SqlCommand("sp_QCPUNIT_MAST", con))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "Exist");
                     cmd.Parameters.AddWithValue("@Name", name.Trim());
+                    cmd.Parameters.AddWithValue("@CODE", code);
+
                     con.Open();
-                    int count = (int)cmd.ExecuteScalar();
-                    return count > 0;
+                    object result = cmd.ExecuteScalar();
+                    return result != null; // true if duplicate exist
                 }
             }
         }
         [HttpPost]
-        public JsonResult DeleteUOMByCode(int code)
+        public JsonResult DeleteUOMByCode(int docId)
         {
-            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -128,10 +139,12 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@CODE", code);
+                        cmd.Parameters.AddWithValue("@CODE", docId);
 
                         con.Open();
                         cmd.ExecuteNonQuery();
+                        //===========log insert
+                        _logService.InsertLog("QCPUNIT_MAST", "QC UOM Master", "Master", "Delete", "", docId.ToString(), null);
                     }
                 }
 

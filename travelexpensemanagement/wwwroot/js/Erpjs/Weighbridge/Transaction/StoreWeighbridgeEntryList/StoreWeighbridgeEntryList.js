@@ -160,59 +160,6 @@ function deleteStoreWBEntry(docId) {
 		}
 	});
 }
-function exportToExcel() {
-	fetch('/StoreWeighbridgeEntryList/ExportAllDocs')
-		.then(response => {
-			if (!response.ok) throw new Error("Network response was not ok");
-			return response.json();
-		})
-		.then(responseData => {
-			if (!responseData.status) {
-				toastr.error("Failed to fetch data.");
-				return;
-			}
-			const dataArray = responseData.data;
-			if (!Array.isArray(dataArray) || dataArray.length === 0) {
-				toastr.warning("No data available to export.");
-				return;
-			}
-
-			const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) });
-			const colWidths = Object.keys(dataArray[0]).map(key => {
-				const maxLen = Math.max(
-					key.length,
-					...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
-				);
-				return { wch: maxLen + 2 };
-			});
-			worksheet['!cols'] = colWidths;
-
-
-			const headerRowNumber = 1;
-			Object.keys(dataArray[0]).forEach((_, idx) => {
-				const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
-				if (!worksheet[cellAddress]) return;
-				worksheet[cellAddress].s = {
-					font: { bold: true },
-					fill: { fgColor: { rgb: "FFFF00" } }
-				};
-			});
-
-			const workbook = XLSX.utils.book_new();
-			XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
-			const pageName = "StoreWeighBridge";
-			const now = new Date();
-			const pad = n => String(n).padStart(2, '0');
-			const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-			const fileName = `${pageName}_${timestamp}.xlsx`;
-
-			XLSX.writeFile(workbook, fileName);
-		})
-		.catch(error => {
-			console.error("Export failed:", error);
-			toastr.error("Failed to export data.");
-		});
-}
 function callGetReportAsPdf() {
 	var reportName = "rpt_emp_mast";
 	var now = new Date();
@@ -258,11 +205,19 @@ function showStoreWbDetailsPopup(docCode) {
 			if (response.status) {
 				showDocumentPopupjQuery(response.data, docCode);
 			} else {
-				toastr.error("Failed to get document details.");
+				//toastr.error("Failed to get document details.");
+				showToast("Failed to get document details.", { type: "error" })
 			}
 		},
 		error: function () {
-			toastr.error("An error occurred while fetching document details.");
+			//toastr.error("An error occurred while fetching document details.");
+			showToast("An error occurred while fetching document details.", { type: "error" })
 		}
 	});
 }
+
+// ================= Download Excel =================
+document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+	e.preventDefault();
+	window.location.href = "/StoreWeighbridgeEntryList/ExportAllDocs";
+});

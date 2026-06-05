@@ -1,6 +1,4 @@
-﻿/* ================================
-   ERP PAGE LAYOUT
-================================ */
+﻿/*
 
 :root {
     --erp-sidebar-bg: #0b1120;
@@ -14,16 +12,12 @@
     --erp-radius: 14px;
 }
 
-/* wrapper */
 .erppagelayout-wrapper {
     display: flex;
     min-height: 100vh;
     background: #f3f4f6;
 }
 
-/* =========================
-   SIDEBAR
-========================= */
 .erppagelayout-sidebar {
     width: 260px;
     height: 100vh;
@@ -79,7 +73,7 @@
         margin-right: 8px;
     }
 
-/* menu */
+
 .erppagelayout-menu {
     list-style: none;
     margin: 0;
@@ -127,7 +121,6 @@
     transform: rotate(180deg);
 }
 
-/* submenu */
 .erppagelayout-submenu {
     list-style: none;
     margin-top: 8px;
@@ -162,9 +155,6 @@
     font-weight: 600;
 }
 
-/* =========================
-   TOPBAR
-========================= */
 .erppagelayout-topbar {
     position: fixed;
     top: 0;
@@ -245,9 +235,7 @@
     font-weight: 600;
 }
 
-/* =========================
-   CONTENT
-========================= */
+
 .erppagelayout-main {
     margin-left: 260px;
     width: calc(100% - 260px);
@@ -259,9 +247,7 @@
     padding: 20px;
 }
 
-/* =========================
-   SEARCH RESULT
-========================= */
+
 .search-results {
     position: absolute;
     top: 55px;
@@ -287,9 +273,7 @@
             background: #f3f4f6;
         }
 
-/* =========================
-   RESPONSIVE
-========================= */
+
 @media (max-width: 992px) {
     .erppagelayout-sidebar {
         transform: translateX(-100%);
@@ -330,5 +314,520 @@
 
     .erppagelayout-content-body {
         padding: 12px;
+    }
+}
+*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins',sans-serif;
+    background: #E4E9E1;
+    overflow-x: hidden;
+}
+/* =========================================
+   OVERLAY
+========================================= */
+
+.ERPPageLayout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 998;
+    display: none;
+}
+
+    .ERPPageLayout-overlay.active {
+        display: block;
+    }
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.ERPPageLayout-sidebar {
+    width: 280px;
+    height: 100vh;
+    background: #0f0f0f;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    border-right: 1px solid #dce5d8;
+    transition: 0.3s ease;
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+    /* SCROLLBAR */
+
+    .ERPPageLayout-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .ERPPageLayout-sidebar::-webkit-scrollbar-thumb {
+        background: #ccd8c7;
+        border-radius: 10px;
+    }
+
+/* LOGO */
+
+.ERPPageLayout-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef2ec;
+    width: 100%;
+    overflow: hidden;
+    background-color: #ededed;
+}
+
+    .ERPPageLayout-logo img {
+        width: 150px;
+        height: auto;
+        object-fit: contain;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+.ERPPageLayout-logo-text h2 {
+    font-size: 16px;
+    color: #1C5E31;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    margin:0px;
+}
+
+.ERPPageLayout-logo-text {
+    flex: 1;
+    overflow: hidden;
+}
+
+    
+
+/* COMPANY INFO */
+
+.ERPPageLayout-company-info {
+    margin: 14px 16px 8px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg,#1f1f1f,#262626);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+.ERPPageLayout-company-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8dd9a2;
+    font-size: 18px;
+}
+
+.ERPPageLayout-company-details {
+    overflow: hidden;
+}
+
+    .ERPPageLayout-company-details h3 {
+        font-size: 14px;
+        color: #ffffff;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+    }
+
+    .ERPPageLayout-company-details span {
+        font-size: 11px;
+        color: #b7c4b2;
+        letter-spacing: 0.3px;
+    }
+
+/* SEARCH */
+
+.ERPPageLayout-search {
+    padding: 15px 20px;
+    position: relative;
+}
+.ERPPageLayout-search-results {
+    position: absolute;
+    top: 58px;
+    left: 20px;
+    right: 20px;
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+    display: none;
+    z-index: 9999;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+}
+
+    .ERPPageLayout-search-results a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        text-decoration: none;
+        color: #1C5E31;
+        font-size: 14px;
+        border-bottom: 1px solid #f1f1f1;
+        transition: 0.25s;
+    }
+
+        .ERPPageLayout-search-results a:last-child {
+            border-bottom: none;
+        }
+
+        .ERPPageLayout-search-results a:hover {
+            background: #edf4ea;
+            padding-left: 18px;
+        }
+    .ERPPageLayout-search input {
+        width: 100%;
+        height: 35px;
+        border: 1px solid #ccd8c7;
+        border-radius: 12px;
+        padding: 0 15px 0 42px;
+        outline: none;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+        .ERPPageLayout-search input:focus {
+            border-color: #1C5E31;
+            box-shadow: 0 0 0 3px rgba(28,94,49,0.08);
+        }
+
+    .ERPPageLayout-search i {
+        position: absolute;
+        left: 32px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #1C5E31;
+    }
+
+/* MENU */
+
+.ERPPageLayout-menu {
+    list-style: none;
+    padding: 12px 14px;
+}
+
+    .ERPPageLayout-menu li {
+        position: relative;
+        margin-bottom: 2px;
+    }
+
+        /* ACTIVE BAR */
+
+        .ERPPageLayout-menu li.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 8px;
+            width: 4px;
+            height: calc(100% - 16px);
+            background: #1C5E31;
+            border-radius: 10px;
+        }
+
+/* MENU LINK */
+
+.ERPPageLayout-menu-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-decoration: none;
+    color: #edf4ea;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: 0.25s;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+    .ERPPageLayout-menu-link span {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ERPPageLayout-menu-link:hover {
+        background: #edf4ea;
+        transform: translateX(3px);
+        text-decoration: none;
+        color: #1c5e31;
+    }
+
+/* ACTIVE */
+
+.ERPPageLayout-menu li.active > .ERPPageLayout-menu-link {
+    background: linear-gradient(135deg,#1C5E31,#2d7b46);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(28,94,49,0.18);
+}
+
+    .ERPPageLayout-menu li.active > .ERPPageLayout-menu-link i {
+        color: #fff;
+    }
+
+/* SUBMENU */
+/* SUBMENU */
+
+.ERPPageLayout-submenu {
+    list-style: none;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s ease;
+    padding-left: 18px;
+    border-left: 1px dashed #c7d5c2;
+    margin-top: 5px;
+}
+
+    .ERPPageLayout-submenu.open {
+        max-height: 5000px;
+    }
+
+    /* THIRD LEVEL */
+
+    .ERPPageLayout-submenu .ERPPageLayout-submenu {
+        margin-left: 12px;
+        padding-left: 14px;
+        border-left: 1px dashed rgba(255,255,255,0.15);
+    }
+
+    /* SUBMENU LINKS */
+
+    .ERPPageLayout-submenu li {
+        margin-top: 2px;
+    }
+
+        .ERPPageLayout-submenu li a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 8px 10px;
+            border-radius: 10px;
+            color: #edf4ea;
+            font-size: 13px;
+            transition: 0.25s;
+        }
+
+          /*  .ERPPageLayout-submenu li a::before {
+                content: '';
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #edf4ea;
+                margin-right: 10px;
+            }*/
+
+            .ERPPageLayout-submenu li a:hover {
+                background: #edf4ea;
+                color: #1C5E31;
+                transform: translateX(4px);
+            }
+
+        .ERPPageLayout-submenu li.active > a {
+            background: rgb(233 255 240 / 12%);
+            color: #ebfff2;
+            font-weight: 600;
+        }
+
+/* ARROW */
+
+.ERPPageLayout-arrow {
+    transition: 0.3s;
+    font-size: 13px;
+}
+
+.ERPPageLayout-menu-link.open .ERPPageLayout-arrow {
+    transform: rotate(180deg);
+}
+
+/* CURRENT ACTIVE PAGE */
+
+.ERPPageLayout-menu-link.active-page,
+.ERPPageLayout-submenu li a.active-page {
+    background: linear-gradient(135deg,#1C5E31,#2d7b46);
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(28,94,49,0.2);
+}
+
+/* KEEP PARENT ACTIVE */
+
+.ERPPageLayout-menu li.active > .ERPPageLayout-menu-link {
+    background: linear-gradient(135deg,#1C5E31,#2d7b46);
+    color: #fff;
+}
+
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.ERPPageLayout-main {
+    margin-left: 280px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* TOPBAR */
+
+.ERPPageLayout-topbar {
+    height: 55px;
+    background: #fff;
+    border-bottom: 1px solid #dce5d8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.ERPPageLayout-topbar-left,
+.ERPPageLayout-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* ICON BUTTON */
+
+.ERPPageLayout-icon-btn {
+    width: 42px;
+    height: 42px;
+    border: none;
+    background: #edf4ea;
+    border-radius: 12px;
+    color: #1C5E31;
+    cursor: pointer;
+    transition: 0.25s;
+    font-size: 15px;
+}
+
+    .ERPPageLayout-icon-btn:hover {
+        background: #1C5E31;
+        color: #fff;
+    }
+
+/* USER */
+
+.ERPPageLayout-user {
+    position: relative;
+}
+
+.ERPPageLayout-user-btn {
+    border: none;
+    background: #edf4ea;
+    padding: 4px 10px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: #1C5E31;
+    font-weight: 500;
+}
+
+    .ERPPageLayout-user-btn img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+    }
+
+.ERPPageLayout-user-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 220px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    display: none;
+    z-index:999;
+}
+
+    .ERPPageLayout-user-menu.show {
+        display: block;
+    }
+
+    .ERPPageLayout-user-menu a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        padding: 12px;
+        border-radius: 10px;
+        color: #1C5E31;
+        transition: 0.25s;
+        font-size: 14px;
+    }
+
+        .ERPPageLayout-user-menu a:hover {
+            background: #edf4ea;
+        }
+
+.ERPPageLayout-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:992px) {
+
+    .ERPPageLayout-sidebar {
+        transform: translateX(-100%);
+    }
+
+        .ERPPageLayout-sidebar.active {
+            transform: translateX(0);
+        }
+
+    .ERPPageLayout-main {
+        margin-left: 0;
+    }
+}
+
+@media(max-width:576px) {
+
+    .ERPPageLayout-topbar {
+        padding: 0 15px;
+    }
+
+    .ERPPageLayout-user-btn span {
+        display: none;
+    }
+
+    .ERPPageLayout-sidebar {
+        width: 260px;
     }
 }

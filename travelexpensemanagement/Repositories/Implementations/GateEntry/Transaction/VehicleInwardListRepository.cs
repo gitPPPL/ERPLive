@@ -108,7 +108,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             //==========Delete img file
                             if (!string.IsNullOrEmpty(oldFile))
                             {
-                                string folder = System.IO.Path.Combine(_env.WebRootPath, "Attachments\\TransportInward");
+                                string folder = System.IO.Path.Combine(_env.WebRootPath, "Uploads\\VehicleInward");
                                 string fullPath = System.IO.Path.Combine(folder, oldFile);
 
                                 if (System.IO.File.Exists(fullPath))
@@ -138,31 +138,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 response.message = ex.Message;
                 return response;
                 //return Json(new { status = false, message = ex.Message });
-            }
-        }
-        public async Task<RepositoryResponseList<ExpandoObject>> ExportVehicleInwardAsExcel()
-        {
-            var res = new RepositoryResponseList<ExpandoObject>();
-            try
-            {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", usersession.PubBranchCode},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetTransportInwardEntry]", parameter);
-                res.status = true;
-                res.data = dataList.ToList();
-                return res;
-            }
-            catch (Exception ex)
-            {
-                res.status = false;
-                res.message = ex.Message;
-                return res;
             }
         }
         public async Task<RepositoryResponseList<TransportInwardListModel>> GetTransportInwardList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)

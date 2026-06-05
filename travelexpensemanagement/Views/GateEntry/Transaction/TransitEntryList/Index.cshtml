@@ -28,6 +28,9 @@
 		}
 	}
 
+	var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+	// var dbName = ViewBag.DatabaseName;
+
 }
 <div id="erp-toast-container"></div>
 <!-- HEADER -->
@@ -37,9 +40,12 @@
 		<span>Transit Entry List</span>
 	</div>
 	<div class="erppagelist-header-right">
-		<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "TransitEntry")'">
-			<i class="fa fa-plus"></i>Add New
-		</button>
+		@if (canAdd)
+		{
+			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "TransitEntry")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
 	</div>
 </div>
 <!-- TOOLBAR -->
@@ -59,13 +65,13 @@
 		</button>
 		@if (canPrint)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="TransitReport()">
 				<i class="fa fa-print"></i> Print
 			</button>
 		}
 		@if (canExport)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
 				<i class="fa fa-file-excel"></i> Export
 			</button>
 		}
@@ -139,4 +145,15 @@
 		canDelete: @canDelete.ToString().ToLower(),
 		canDocDetail: @canDocDetail.ToString().ToLower()
 	};
+	window.globalVariables = {
+		compCode: "@globalVariables?.PubCompCode",
+		yearCode: "@globalVariables?.PubFYearCode",
+		branchCode: "@globalVariables?.PubBranchCode",
+		companyName: "@globalVariables?.CompanyName",
+		add1: "@globalVariables?.Address1",
+		add2: "@globalVariables?.Address2"
+	};
+	window.database = {
+		db: "@ViewBag.DatabaseName"
+	}
 </script>

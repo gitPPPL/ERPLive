@@ -1,6 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Office.Word;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
@@ -84,10 +86,13 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         }
         public async Task<RepositoryResponse> SaveOrUpdate(TransportInwardModel POmodel)
         {
-            string path = @"Attachments\TransportInward";
+            string path = @"Uploads\VehicleInward";
             string? attachmentFilePath = null;
             string? fileName = null;
             string? oldFile = null;
+
+            string? tempFilePath = null;
+
             var response = new RepositoryResponse();
             try
             {
@@ -111,7 +116,33 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             }
                         }
 
-                        if (POmodel.Attachment != null && POmodel.Attachment.Length > 0)
+                        if (POmodel.SaveOrUpdate == "Update")
+                        {
+                            using (SqlCommand cmdOld = new SqlCommand(@"
+                            SELECT IMAGEPATH
+                            FROM GATE1
+                            WHERE DOC_ID = @DOC_ID
+                            AND COMP_CODE = @COMP_CODE
+                            AND YEAR_CODE = @YEAR_CODE
+                            AND BRANCH_CODE = @BRANCH_CODE",
+                                con, transaction))
+                            {
+                                cmdOld.Parameters.AddWithValue("@DOC_ID", POmodel.DOC_ID);
+                                cmdOld.Parameters.AddWithValue("@YEAR_CODE",
+                                    usersessionDt.PubFYearCode ?? (object)DBNull.Value);
+
+                                cmdOld.Parameters.AddWithValue("@COMP_CODE",
+                                    usersessionDt.PubCompCode ?? (object)DBNull.Value);
+
+                                cmdOld.Parameters.AddWithValue("@BRANCH_CODE",
+                                    usersessionDt.PubBranchCode);
+
+                                oldFile = (await cmdOld.ExecuteScalarAsync())?.ToString();
+                            }
+                        }
+
+                        if (POmodel.Attachment != null &&
+                            POmodel.Attachment.Length > 0)
                         {
                             if (!POmodel.Attachment.ContentType.StartsWith("image/"))
                             {
@@ -119,19 +150,54 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 response.message = "Only image allowed!";
                                 return response;
                             }
+
                             string folder = Path.Combine(_env.WebRootPath, path);
 
                             if (!Directory.Exists(folder))
                                 Directory.CreateDirectory(folder);
 
+                            fileName = POmodel.Attachment.FileName;
 
-                            fileName = Guid.NewGuid().ToString() + "_" + POmodel.Attachment.FileName;
+                            //fileName = $"{Guid.NewGuid()}{ext}";
+
                             attachmentFilePath = Path.Combine(folder, fileName);
 
-                            using (var stream = new FileStream(attachmentFilePath, FileMode.Create))
+                            await using (var stream = new FileStream(
+                                attachmentFilePath,
+                                FileMode.Create,
+                                FileAccess.Write,
+                                FileShare.None,
+                                8192,
+                                true))
                             {
-                                POmodel.Attachment.CopyTo(stream);
+                                await POmodel.Attachment.CopyToAsync(stream);
+                                await stream.FlushAsync();
                             }
+
+                            if (!System.IO.File.Exists(attachmentFilePath))
+                            {
+                                throw new Exception("File upload failed.");
+                            }
+                        }
+
+                        string? imagePath = null;
+
+                        // CASE 1 : REMOVE IMAGE
+                        if (POmodel.RemoveAttachment)
+                        {
+                            imagePath = null;
+                        }
+
+                        // CASE 2 : NEW IMAGE UPLOADED
+                        else if (!string.IsNullOrWhiteSpace(fileName))
+                        {
+                            imagePath = fileName;
+                        }
+
+                        // CASE 3 : KEEP OLD IMAGE
+                        else
+                        {
+                            imagePath = oldFile;
                         }
 
                         try
@@ -197,7 +263,13 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 cmd.Parameters.AddWithValue("@INSU_NO", _dbHelper.Xnull(POmodel.INSU_NO));
                                 cmd.Parameters.AddWithValue("@PAN_NO", _dbHelper.Xnull(POmodel.PAN_NO));
                                 cmd.Parameters.AddWithValue("@PURPOSE", _dbHelper.Xnull(POmodel.PURPOSE));
-                                cmd.Parameters.AddWithValue("@IMAGEPATH", _dbHelper.Xnull(fileName));
+                                //cmd.Parameters.AddWithValue("@IMAGEPATH", _dbHelper.Xnull(imagePath));
+                                cmd.Parameters.Add("@IMAGEPATH",
+                                    SqlDbType.NVarChar,
+                                    255).Value =
+                                    string.IsNullOrWhiteSpace(imagePath)
+                                        ? DBNull.Value
+                                        : imagePath;
                                 cmd.Parameters.AddWithValue("@R_TIME", _dbHelper.Xnull(POmodel.R_TIME));
                                 cmd.Parameters.AddWithValue("@OUT_TIME", _dbHelper.Xnull(POmodel.OUT_TIME));
                                 cmd.Parameters.AddWithValue("@R_DATE", _dbHelper.Xnull(POmodel.R_DATE));
@@ -247,90 +319,217 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                             if (success)
                             {
-                                if (POmodel.Attachment != null && POmodel.Attachment.Length > 0)
-                                {
-                                    bool isExist = false;
-                                    using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
-                                    {
-                                        cmd.CommandType = CommandType.StoredProcedure;
-                                        cmd.Parameters.AddWithValue("@Action", "IsExist");
-                                        cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
-                                        cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
-                                        cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
-                                        cmd.Parameters.AddWithValue("@V_TYPE", POmodel.V_TYPE);
-                                        cmd.Parameters.AddWithValue("@V_NO", POmodel.V_NO);
-                                        var result = await cmd.ExecuteScalarAsync();
-                                        isExist = Convert.ToInt32(result) == 1;
-                                    }
-                                    using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
-                                    {
-                                        cmd.CommandType = CommandType.StoredProcedure;
+                                //if (POmodel.Attachment != null && POmodel.Attachment.Length > 0)
+                                //{
+                                //    bool isExist = false;
+                                //    using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
+                                //    {
+                                //        cmd.CommandType = CommandType.StoredProcedure;
+                                //        cmd.Parameters.AddWithValue("@Action", "IsExist");
+                                //        cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
+                                //        cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
+                                //        cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
+                                //        cmd.Parameters.AddWithValue("@V_TYPE", POmodel.V_TYPE);
+                                //        cmd.Parameters.AddWithValue("@V_NO", POmodel.V_NO);
+                                //        var result = await cmd.ExecuteScalarAsync();
+                                //        isExist = Convert.ToInt32(result) == 1;
+                                //    }
+                                //    using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
+                                //    {
+                                //        cmd.CommandType = CommandType.StoredProcedure;
 
-                                        if (POmodel.SaveOrUpdate == "Save")
+                                //        if (POmodel.SaveOrUpdate == "Save")
+                                //        {
+                                //            cmd.Parameters.AddWithValue("@Action", "Save");
+                                //            cmd.Parameters.AddWithValue("@AED", "A");
+                                //        }
+                                //        else
+                                //        {
+                                //            if (isExist)
+                                //            {
+                                //                cmd.Parameters.AddWithValue("@Action", "Update");
+                                //                cmd.Parameters.AddWithValue("@AED", "E");
+                                //            }
+                                //            else
+                                //            {
+                                //                cmd.Parameters.AddWithValue("@Action", "Save");
+                                //                cmd.Parameters.AddWithValue("@AED", "A");
+                                //            }
+                                //        }
+                                //        cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
+                                //        cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
+                                //        cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
+                                //        cmd.Parameters.AddWithValue("@DOC_ID", _dbHelper.Xnull(POmodel.DOC_ID));
+                                //        cmd.Parameters.AddWithValue("@V_NO", _dbHelper.Xnull(POmodel.V_NO));
+                                //        cmd.Parameters.AddWithValue("@V_TYPE", _dbHelper.Xnull(POmodel.V_TYPE));
+                                //        cmd.Parameters.AddWithValue("@V_DATE", _dbHelper.Xnull(POmodel.V_DATE));
+                                //        cmd.Parameters.AddWithValue("@ROWID", 1);
+
+                                //        cmd.Parameters.Add("@IMG_FILE", SqlDbType.VarBinary).Value = DBNull.Value;
+
+                                //        cmd.Parameters.AddWithValue("@FILE_NAME", fileName);
+                                //        cmd.Parameters.AddWithValue("@SRNO", 1);
+                                //        cmd.Parameters.AddWithValue("@UUSER", usersessionDt.PubUserId);
+                                //        cmd.Parameters.AddWithValue("@EUSER", usersessionDt.PubUserId);
+
+                                //        cmd.Parameters.AddWithValue("@WSID", usersessionDt.PubWorkStationID);
+                                //        cmd.Parameters.AddWithValue("@LIP", usersessionDt.PubLocalId);
+                                //        cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
+                                //        cmd.Parameters.AddWithValue("@FILE_TYPE", "Vehicle Inward");
+                                //        cmd.Parameters.AddWithValue("@FILE_DESC", DBNull.Value);
+                                //        cmd.Parameters.AddWithValue("@FILE_PATH", Path.Combine(path, fileName));
+
+                                //        await cmd.ExecuteNonQueryAsync();
+                                //    }
+                                //}
+                                //if ((!string.IsNullOrEmpty(oldFile) && POmodel.Attachment == null))
+                                //{
+                                //    using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
+                                //    {
+                                //        cmd.CommandType = CommandType.StoredProcedure;
+                                //        cmd.Parameters.AddWithValue("@Action", "Delete");
+                                //        cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
+                                //        cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
+                                //        cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
+                                //        cmd.Parameters.AddWithValue("@V_TYPE", POmodel.V_TYPE);
+                                //        cmd.Parameters.AddWithValue("@V_NO", POmodel.V_NO);
+                                //        await cmd.ExecuteNonQueryAsync();
+                                //    }
+                                //}
+                                // REMOVE IMAGE
+                                if (POmodel.RemoveAttachment)
+                                    {
+                                        using (SqlCommand cmd =
+                                            new SqlCommand("sp_TransportInwardEntry_Img",
+                                            con,
+                                            transaction))
                                         {
-                                            cmd.Parameters.AddWithValue("@Action", "Save");
-                                            cmd.Parameters.AddWithValue("@AED", "A");
+                                            cmd.CommandType = CommandType.StoredProcedure;
+
+                                            cmd.Parameters.AddWithValue("@Action", "Delete");
+
+                                            cmd.Parameters.AddWithValue("@COMP_CODE",
+                                                usersessionDt.PubCompCode);
+
+                                            cmd.Parameters.AddWithValue("@YEAR_CODE",
+                                                usersessionDt.PubFYearCode);
+
+                                            cmd.Parameters.AddWithValue("@BRANCH_CODE",
+                                                usersessionDt.PubBranchCode);
+
+                                            cmd.Parameters.AddWithValue("@V_TYPE",
+                                                POmodel.V_TYPE);
+
+                                            cmd.Parameters.AddWithValue("@V_NO",
+                                                POmodel.V_NO);
+
+                                            await cmd.ExecuteNonQueryAsync();
                                         }
-                                        else
+                                    }
+
+                                // SAVE / UPDATE NEW IMAGE
+                                else if (!string.IsNullOrWhiteSpace(fileName))
+                                    {
+                                        bool isExist = false;
+
+                                        using (SqlCommand cmd =
+                                            new SqlCommand("sp_TransportInwardEntry_Img",
+                                            con,
+                                            transaction))
                                         {
-                                            if (isExist)
-                                            {
-                                                cmd.Parameters.AddWithValue("@Action", "Update");
-                                                cmd.Parameters.AddWithValue("@AED", "E");
-                                            }
-                                            else
+                                            cmd.CommandType = CommandType.StoredProcedure;
+
+                                            cmd.Parameters.AddWithValue("@Action", "IsExist");
+
+                                            cmd.Parameters.AddWithValue("@COMP_CODE",
+                                                usersessionDt.PubCompCode);
+
+                                            cmd.Parameters.AddWithValue("@YEAR_CODE",
+                                                usersessionDt.PubFYearCode);
+
+                                            cmd.Parameters.AddWithValue("@BRANCH_CODE",
+                                                usersessionDt.PubBranchCode);
+
+                                            cmd.Parameters.AddWithValue("@V_TYPE",
+                                                POmodel.V_TYPE);
+
+                                            cmd.Parameters.AddWithValue("@V_NO",
+                                                POmodel.V_NO);
+
+                                            var result = await cmd.ExecuteScalarAsync();
+
+                                            isExist = Convert.ToInt32(result) == 1;
+                                        }
+
+                                        using (SqlCommand cmd =
+                                            new SqlCommand("sp_TransportInwardEntry_Img",
+                                            con,
+                                            transaction))
+                                        {
+                                            cmd.CommandType = CommandType.StoredProcedure;
+
+                                            if (POmodel.SaveOrUpdate == "Save")
                                             {
                                                 cmd.Parameters.AddWithValue("@Action", "Save");
                                                 cmd.Parameters.AddWithValue("@AED", "A");
                                             }
+                                            else
+                                            {
+                                                cmd.Parameters.AddWithValue("@Action",
+                                                    isExist ? "Update" : "Save");
+
+                                                cmd.Parameters.AddWithValue("@AED",
+                                                    isExist ? "E" : "A");
+                                            }
+
+                                            cmd.Parameters.AddWithValue("@COMP_CODE",
+                                                usersessionDt.PubCompCode);
+
+                                            cmd.Parameters.AddWithValue("@BRANCH_CODE",
+                                                usersessionDt.PubBranchCode);
+
+                                            cmd.Parameters.AddWithValue("@YEAR_CODE",
+                                                usersessionDt.PubFYearCode);
+
+                                            cmd.Parameters.AddWithValue("@DOC_ID",
+                                                _dbHelper.Xnull(POmodel.DOC_ID));
+
+                                            cmd.Parameters.AddWithValue("@V_NO",
+                                                _dbHelper.Xnull(POmodel.V_NO));
+
+                                            cmd.Parameters.AddWithValue("@V_TYPE",
+                                                _dbHelper.Xnull(POmodel.V_TYPE));
+
+                                            cmd.Parameters.AddWithValue("@FILE_NAME",
+                                                fileName);
+
+                                            cmd.Parameters.AddWithValue("@FILE_PATH",
+                                                Path.Combine(path, fileName));
+
+                                            await cmd.ExecuteNonQueryAsync();
                                         }
-                                        cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
-                                        cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
-                                        cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
-                                        cmd.Parameters.AddWithValue("@DOC_ID", _dbHelper.Xnull(POmodel.DOC_ID));
-                                        cmd.Parameters.AddWithValue("@V_NO", _dbHelper.Xnull(POmodel.V_NO));
-                                        cmd.Parameters.AddWithValue("@V_TYPE", _dbHelper.Xnull(POmodel.V_TYPE));
-                                        cmd.Parameters.AddWithValue("@V_DATE", _dbHelper.Xnull(POmodel.V_DATE));
-                                        cmd.Parameters.AddWithValue("@ROWID", 1);
-
-                                        cmd.Parameters.Add("@IMG_FILE", SqlDbType.VarBinary).Value = DBNull.Value;
-
-                                        cmd.Parameters.AddWithValue("@FILE_NAME", fileName);
-                                        cmd.Parameters.AddWithValue("@SRNO", 1);
-                                        cmd.Parameters.AddWithValue("@UUSER", usersessionDt.PubUserId);
-                                        cmd.Parameters.AddWithValue("@EUSER", usersessionDt.PubUserId);
-
-                                        cmd.Parameters.AddWithValue("@WSID", usersessionDt.PubWorkStationID);
-                                        cmd.Parameters.AddWithValue("@LIP", usersessionDt.PubLocalId);
-                                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-                                        cmd.Parameters.AddWithValue("@FILE_TYPE", "Vehicle Inward");
-                                        cmd.Parameters.AddWithValue("@FILE_DESC", DBNull.Value);
-                                        cmd.Parameters.AddWithValue("@FILE_PATH", Path.Combine(path, fileName));
-
-                                        await cmd.ExecuteNonQueryAsync();
                                     }
-                                }
-                                if ((!string.IsNullOrEmpty(oldFile) && POmodel.Attachment == null))
-                                {
-                                    using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
-                                    {
-                                        cmd.CommandType = CommandType.StoredProcedure;
-                                        cmd.Parameters.AddWithValue("@Action", "Delete");
-                                        cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
-                                        cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
-                                        cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
-                                        cmd.Parameters.AddWithValue("@V_TYPE", POmodel.V_TYPE);
-                                        cmd.Parameters.AddWithValue("@V_NO", POmodel.V_NO);
-                                        await cmd.ExecuteNonQueryAsync();
-                                    }
-                                }
                                 transaction.Commit();
-                                if ((POmodel.Attachment != null && !string.IsNullOrEmpty(oldFile)) || (!string.IsNullOrEmpty(oldFile) && POmodel.Attachment == null))
+                                //if ((POmodel.Attachment != null && !string.IsNullOrEmpty(oldFile)) || (!string.IsNullOrEmpty(oldFile) && POmodel.Attachment == null))
+                                //{
+                                //    string oldPath = Path.Combine(_env.WebRootPath, @"Uploads\VehicleInward", oldFile);
+
+                                //    if (System.IO.File.Exists(oldPath))
+                                //        System.IO.File.Delete(oldPath);
+                                //}
+                                if (!string.IsNullOrWhiteSpace(oldFile) &&
+                                    (POmodel.RemoveAttachment ||
+                                     !string.IsNullOrWhiteSpace(fileName)))
                                 {
-                                    string oldPath = Path.Combine(_env.WebRootPath, @"Attachments\TransportInward", oldFile);
+                                    string oldPath = Path.Combine(
+                                        _env.WebRootPath,
+                                        @"Uploads\VehicleInward",
+                                        oldFile);
 
                                     if (System.IO.File.Exists(oldPath))
+                                    {
                                         System.IO.File.Delete(oldPath);
+                                    }
                                 }
                                 //=================Log Insert
                                 string mode = "";
@@ -341,15 +540,16 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 else
                                 {
                                     mode = "Update";
-                                    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
-                                            codeVNo: POmodel.V_NO.ToString(), vtype: POmodel.V_TYPE);
+                                    //_globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
+                                    //        codeVNo: POmodel.V_NO.ToString(), vtype: POmodel.V_TYPE);
                                 }
-                                _logService.InsertLog("GATE1", "Vehicle Inward", "Transaction", mode, POmodel.V_TYPE, POmodel.V_NO.ToString(), POmodel.V_DATE.Value);
+                                //_logService.InsertLog("GATE1", "Vehicle Inward", "Transaction", mode, POmodel.V_TYPE, POmodel.V_NO.ToString(), POmodel.V_DATE.Value);
                             }
                             else
                             {
                                 transaction.Rollback();
-                                if (attachmentFilePath != null && System.IO.File.Exists(attachmentFilePath))
+                                if (!string.IsNullOrWhiteSpace(attachmentFilePath) &&
+                                    System.IO.File.Exists(attachmentFilePath))
                                 {
                                     System.IO.File.Delete(attachmentFilePath);
                                 }
@@ -362,6 +562,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         catch (Exception ex)
                         {
                             transaction?.Rollback();
+                            if (!string.IsNullOrWhiteSpace(attachmentFilePath) &&
+                                    System.IO.File.Exists(attachmentFilePath))
+                            {
+                                System.IO.File.Delete(attachmentFilePath);
+                            }
                             response.status = false;
                             response.message = "Transaction failed: " + ex.Message;
                             return response;

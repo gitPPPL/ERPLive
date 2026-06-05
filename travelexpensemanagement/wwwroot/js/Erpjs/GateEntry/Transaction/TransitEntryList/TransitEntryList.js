@@ -104,6 +104,7 @@ function deleteTransit(code, vType) {
 	});
 }
 
+
 //===Import and save EwayBill Data
 $('#btnEWayBillImportData').on('click', function () {
 	GetEwaybillno();
@@ -129,3 +130,100 @@ async function GetEwaybillno() {
 		showToast(error, { type: "error" });
 	}
 }
+
+function crystalDate(dateStr) {
+
+	if (!dateStr) return "";
+
+	// handle ISO format: yyyy-MM-dd
+	var parts = dateStr.includes('-')
+		? dateStr.split('-')
+		: dateStr.split('/');
+
+	if (parts.length !== 3) return "";
+
+	// detect format
+	var year, month, day;
+
+	if (dateStr.includes('-') && parts[0].length === 4) {
+		// yyyy-MM-dd
+		year = parts[0];
+		month = parts[1];
+		day = parts[2];
+	} else {
+		// dd/MM/yyyy
+		day = parts[0];
+		month = parts[1];
+		year = parts[2];
+	}
+
+	return `Date(${year},${parseInt(month)},${parseInt(day)})`;
+}
+function TransitReport() {
+
+	var reportName = "TRANSIT";
+	var d1 = $('#DtEWaybillDate').val();
+	var d2 = $('#DtEWaybillDate').val();
+
+
+	// Crystal Report Formula
+	var formula =
+		"{waybill1.comp_code} = " + window.globalVariables.compCode +
+		" and {waybill1.year_code} = " + window.globalVariables.yearCode +
+		" and {waybill1.branch_code} = " + window.globalVariables.branchCode +
+		" and {WAYBILL1.FORM_DATE} in " +
+		crystalDate(d1) + " to " + crystalDate(d2);
+
+	var formulaFields = {
+		Reportname: reportName,
+		selectionFormula: formula,
+		Database: window.database.db,
+		Parameters: {
+			comp_name: window.globalVariables.companyName,
+			comp_add1: window.globalVariables.add1,
+			comp_add2: window.globalVariables.add2,
+			RPTNAME: "TRANSIT REPORT",
+			F1: `From Date ${formatDateddmmyyyy(d1)} to ${formatDateddmmyyyy(d2)}`
+		}
+	};
+
+	var now = new Date();
+	var day = String(now.getDate()).padStart(2, '0');
+	var month = String(now.getMonth() + 1).padStart(2, '0');
+	var year = String(now.getFullYear()).slice(-2);
+	var hours = String(now.getHours()).padStart(2, '0');
+	var minutes = String(now.getMinutes()).padStart(2, '0');
+	var seconds = String(now.getSeconds()).padStart(2, '0');
+	var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+	$.ajax({
+		url: 'http://localhost:34088/Report/PendingQCReport',
+		type: 'POST',
+		data: JSON.stringify(formulaFields),
+		contentType: "application/json",
+		xhrFields: {
+			responseType: 'blob'
+		},
+		success: function (response) {
+			console.log('PDF response:', response);
+			var file = new Blob([response], { type: 'application/pdf' });
+			var fileName = `${reportName}_${timestamp}.pdf`;
+
+			var link = document.createElement('a');
+			link.href = URL.createObjectURL(file);
+			link.download = fileName;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		},
+		error: function (xhr, status, error) {
+			console.error('Error generating report:', error);
+		}
+	});
+}
+
+// ================= Download Excel =================
+document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+	e.preventDefault();
+	window.location.href = "/TransitEntryList/ExportAllDocs";
+});

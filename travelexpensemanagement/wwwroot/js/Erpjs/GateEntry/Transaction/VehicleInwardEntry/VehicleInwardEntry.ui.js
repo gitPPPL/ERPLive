@@ -218,7 +218,7 @@ const VehicleUI = {
     //========Image Preview=========
     showImagePreview: function showImagePreview(path) {
         if (path) {
-            const imgUrl = `/Attachments/TransportInward/${path}`;
+            const imgUrl = `/Uploads/VehicleInward/${path}`;
             $('#imgPreview').attr('src', imgUrl);
             $('#previewContainer').show();
         } else {
@@ -318,6 +318,8 @@ const VehicleUI = {
         formData.append("GR_NO", "");
         formData.append("GR_DATE", "");
         formData.append("SaveOrUpdate", (!id || id == "") ? 'Save' : 'Update');
+        formData.append("RemoveAttachment", RemoveAttachment);
+        console.log("RemoveAttachment value:", RemoveAttachment);
         return formData;
     },
     //=======Fill Form=========

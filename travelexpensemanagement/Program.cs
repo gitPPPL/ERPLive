@@ -50,6 +50,7 @@ builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEnt
 builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryRepository, QCTemperatureEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryListRepository, QCTemperatureEntryListRepository>();
+builder.Services.AddScoped<ILaminationQCEntryRepository, LaminationQCEntryRepository>();
 
 // Gete Entry Transaction repositories
 

@@ -1,4 +1,8 @@
 ﻿/* Modal */
+
+.erppagesmodal {
+    max-width: 1000px;
+}
 .erppagesmodal-content {
     border: none;
     border-radius: 16px;
@@ -16,7 +20,12 @@
     justify-content: space-between;
     align-items: center;
 }
-
+.small-modal {
+    max-width: 650px;
+}
+.medium-modal {
+    max-width: 750px;
+}
 .erppagesmodal-header-left {
     display: flex;
     align-items: center;

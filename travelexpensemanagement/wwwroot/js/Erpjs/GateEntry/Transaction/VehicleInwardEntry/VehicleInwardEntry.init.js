@@ -1,5 +1,6 @@
 ﻿let docId = "";
 let readOnly; 
+let RemoveAttachment = false;
 
 $(async function () {
     try {
@@ -108,10 +109,11 @@ function initEventListeners(docId) {
         $('#TxtAttachment').val('');
         $('#imgPreview').attr('src', '');
         $('#previewContainer').fadeOut();
+        RemoveAttachment = true;
+        console.log("RemoveAttachment value:", RemoveAttachment);
     });
     //=========Save Event=========
     $('#btn-save').on('click', async function (e) {
-        console.log("docId", docId);
         e.preventDefault();
         const validate = await VehicleValidation.validateSave();
         if (validate) {

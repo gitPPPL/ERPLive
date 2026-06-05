@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 
@@ -12,11 +13,16 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         private readonly ModuleService.ModuleService _moduleService;
 
         private readonly IStoreWeighbridgeEntryListRepository _storeWbListRepository;
+        private readonly GlobalVariableService _globalVariableService;
+        private readonly GlobalValidationdate _globalValidationdate;
 
-        public StoreWeighbridgeEntryListController(ModuleService.ModuleService moduleService, IStoreWeighbridgeEntryListRepository storeWbListRepository)
+        public StoreWeighbridgeEntryListController(ModuleService.ModuleService moduleService, IStoreWeighbridgeEntryListRepository storeWbListRepository, GlobalVariableService globalVariableService
+            , GlobalValidationdate globalValidationdate)
         {
             _moduleService = moduleService;
             _storeWbListRepository = storeWbListRepository;
+            _globalVariableService = globalVariableService;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
@@ -84,15 +90,37 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAllDocs()
+        public IActionResult ExportAllDocs()
         {
-            var result = await _storeWbListRepository.ExportAllDocs();
-            if (!result.status)
+            try
             {
-                return Json(new { status = result.status, message = result.message });
-            }
-            return Json(new { status = result.status, data = result.data });
-        }
+                var gv = _globalVariableService.GetGlobalVariables();
 
+                var parameters = new Dictionary<string, object>
+        {
+            { "@YEAR_CODE", gv.PubFYearCode },
+            { "@COMP_CODE", gv.PubCompCode },
+            { "@BRANCH_CODE", gv.PubBranchCode },
+            { "@DOCTYPE",  "KantaStore"},
+            { "@Action", "Store_Wb_Excel" }
+        };
+
+                var fileBytes = _globalValidationdate.ExportToExcel("sp_GetWBEntry", "Store WeighBridge", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"StoreWeighBridge_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

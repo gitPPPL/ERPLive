@@ -1,24 +1,34 @@
-﻿using System.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using travelexpensemanagement.Dbconnection;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
+    [SessionAuthorize]
     public class TapeAndFabricMasterController : Controller
     {
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
+        private readonly DropdownService _dropdownService;
+        private readonly LogService.LogService _logService;
+
+
         int x;
-        public TapeAndFabricMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue)
+        public TapeAndFabricMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, DropdownService dropdownService, LogService.LogService logService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
+            _dropdownService = dropdownService;
+            _logService = logService;
         }
 
         public IActionResult Index()
@@ -26,34 +36,22 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             return View("~/Views/QualityControl/Master/TapeAndFabricMaster/Index.cshtml");
         }
 
-        [HttpGet]
-        public async Task<JsonResult> GetColorName()
+        public JsonResult GetDropdown(string type)
         {
-            try
+            string query = "";
+            var gv = _globalValue.GetGlobalVariables();
+            switch (type)
             {
-                var colorNameList = await _dbHelper.GetJsonDataAsync(" select distinct code, Name from COLOR_MAST where COMP_CODE='" + _globalValue.GetGlobalVariables().PubCompCode + "'  order by Name ");
-                return Json(new { status = true, data = colorNameList });
+                case "Color":
+                    query = $@"select distinct code, Name from COLOR_MAST where COMP_CODE={gv.PubCompCode}  order by Name";
+                    break;
+                case "Mesh":
+                    query = $@"select distinct code, Name from MESH_MAST where COMP_CODE={gv.PubCompCode}  order by Name";
+                    break;
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "Data load failed" });
-            }
+            var data = _dropdownService.GetDropdownList(query);
+            return Json(data);
         }
-
-        [HttpGet]
-        public async Task<JsonResult> GetMeshName()
-        {
-            try
-            {
-                var MeshNameList = await _dbHelper.GetJsonDataAsync(" select distinct code, Name from MESH_MAST where COMP_CODE='" + _globalValue.GetGlobalVariables().PubCompCode + "'  order by Name ");
-                return Json(new { status = true, data = MeshNameList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "Data load failed" });
-            }
-        }
-
         public class TapeNFabricModel
         {          
             public int? Code { get; set; }
@@ -81,7 +79,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             public int? Active { get; set; }
         }
 
-
         [HttpGet]
         public JsonResult getExistOrNot(string inputData)
         {
@@ -91,22 +88,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
 
                 using (var con = _dbcontext.GetErpConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand())
+                    using (SqlCommand cmd = new SqlCommand("sp_TapeNFabricMast_AED"))
                     {
                         cmd.Connection = con;
-                        cmd.CommandText = @"
-                         SELECT CASE 
-                        WHEN EXISTS (
-                        SELECT 1 
-                        FROM TAPE_NFABRIC_MAST 
-                        WHERE UPPER(ISNULL(NAME, '')) = UPPER(@Inputdata) 
-                        AND COMP_CODE = @CompCode
-                        ) 
-                        THEN 1 ELSE 0 
-                        END";
-
-                        cmd.Parameters.AddWithValue("@Inputdata", inputData);
-                        cmd.Parameters.AddWithValue("@CompCode", _globalValue.GetGlobalVariables().PubCompCode);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        
+                        cmd.Parameters.AddWithValue("@AED", "Exist");
+                        cmd.Parameters.AddWithValue("@Name", inputData);
+                        cmd.Parameters.AddWithValue("@CompanyCd", _globalValue.GetGlobalVariables().PubCompCode);
                         con.Open();
                         var result = cmd.ExecuteScalar();
                         isExist = Convert.ToInt32(result) == 1;
@@ -126,7 +115,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         {
             try
             {
-
+                int code = 0;
                 if (model == null)
                 {
                     return Json(new { status = false, message = "Data Save Failed" });
@@ -172,14 +161,19 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                         };
                         cmd.Parameters.Add(returnParam);
                         await con.OpenAsync();
-                        await cmd.ExecuteNonQueryAsync();
+                        //await cmd.ExecuteNonQueryAsync();
+                        code = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                         x = (int)cmd.Parameters["@ReturnVal"].Value;
 
                     }
                 }
 
                 if (x > 0)
+                {
+                    //===========log insert
+                    _logService.InsertLog("TAPE_NFABRIC_MAST", "Tape And Fabric Master", "Master", "INSERT", "", code.ToString(), null);
                     return Json(new { status = true, message = "Data Save Successfully" });
+                }
                 return Json(new { status = false, message = "Data Save Failed" });
             }
             catch (Exception ex)
@@ -192,23 +186,119 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         [HttpGet]
         public async Task<IActionResult> GetTape_NFabricDetailsById(string id)
         {
+            var gv = _globalValue.GetGlobalVariables();
+            var data = new TapeNFabricModel();
             try
             {
-                string strqry = $@"
-             	SELECT DISTINCT tnf.CODE, tnf.NAME, tnf.MESH_CODE, tnf.STD_GRAM, tnf.MIN_GRAM, tnf.MAX_GRAM, tnf.GSM, tnf.DENIER, tnf.UNIT_NAME, tnf.COLOR_CODE, tnf.WIDTH, tnf.GPD, tnf.MIN_GPD, tnf.MAX_GPD, tnf.STD_STRENGTH, tnf.STRENGTH_MAX, tnf.STRENGTH_MIN, tnf.STD_ELONG, tnf.ELONG_MAX, tnf.ELONG_MIN, tnf.UNLAM_FAB, tnf.LAM_FAB, tnf.ACTIVE, tnf.UUSER, tnf.UDATE, tnf.AED, tnf.LIP, tnf.LID 
-                FROM TAPE_NFABRIC_MAST tnf LEFT JOIN COLOR_MAST cm ON cm.CODE = tnf.COLOR_CODE LEFT JOIN MESH_MAST mm ON mm.CODE = tnf.MESH_CODE WHERE tnf.COMP_CODE = '{_globalValue.GetGlobalVariables().PubCompCode}' and tnf.code={id} ORDER BY tnf.NAME "; 
-                var data = await _dbHelper.GetJsonDataAsync(strqry);
-                if (data.Count > 0)
-                    return Json(new { status = true, data = data[0] });
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_TapeNFabricMast_AED", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AED", "GetById");
+                        cmd.Parameters.AddWithValue("@companyCd", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@Code", id);
 
-                return Json(new { status = false, message = "Not found" });
+                        await con.OpenAsync();
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                data.Code = reader["CODE"] != DBNull.Value ? Convert.ToInt32(reader["CODE"]) : null;
+                                data.Name = reader["NAME"]?.ToString();
+
+                                data.MeshCode = reader["MESH_CODE"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["MESH_CODE"])
+                                    : null;
+
+                                data.StdGram = reader["STD_GRAM"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["STD_GRAM"])
+                                    : null;
+
+                                data.MinGram = reader["MIN_GRAM"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["MIN_GRAM"])
+                                    : null;
+
+                                data.MaxGram = reader["MAX_GRAM"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["MAX_GRAM"])
+                                    : null;
+
+                                data.Gsm = reader["GSM"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["GSM"])
+                                    : null;
+
+                                data.Denier = reader["DENIER"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["DENIER"])
+                                    : null;
+
+                                data.UnitName = reader["UNIT_NAME"]?.ToString();
+
+                                data.ColorCode = reader["COLOR_CODE"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["COLOR_CODE"])
+                                    : null;
+
+                                data.Width = reader["WIDTH"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["WIDTH"])
+                                    : null;
+
+                                data.Gpd = reader["GPD"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["GPD"])
+                                    : null;
+
+                                data.MinGpd = reader["MIN_GPD"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["MIN_GPD"])
+                                    : null;
+
+                                data.MaxGpd = reader["MAX_GPD"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["MAX_GPD"])
+                                    : null;
+
+                                data.StdStrength = reader["STD_STRENGTH"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["STD_STRENGTH"])
+                                    : null;
+
+                                data.StrengthMax = reader["STRENGTH_MAX"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["STRENGTH_MAX"])
+                                    : null;
+
+                                data.StrengthMin = reader["STRENGTH_MIN"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["STRENGTH_MIN"])
+                                    : null;
+
+                                data.StdElong = reader["STD_ELONG"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["STD_ELONG"])
+                                    : null;
+
+                                data.ElongMax = reader["ELONG_MAX"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["ELONG_MAX"])
+                                    : null;
+
+                                data.ElongMin = reader["ELONG_MIN"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["ELONG_MIN"])
+                                    : null;
+
+                                data.UnlamFab = reader["UNLAM_FAB"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["UNLAM_FAB"])
+                                    : null;
+
+                                data.LamFab = reader["LAM_FAB"] != DBNull.Value
+                                    ? Convert.ToDecimal(reader["LAM_FAB"])
+                                    : null;
+
+                                data.Active = reader["ACTIVE"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["ACTIVE"])
+                                    : null;
+                            }
+                        }
+                        return Json(new { status = true, data = data });
+                    }
+                }
             }
             catch (Exception ex)
             {
                 return Json(new { status = false, message = ex.Message });
             }
         }
-
 
         [HttpPost]
         public async Task<IActionResult> UpdateTape_NFabricMast([FromBody] TapeNFabricModel model)
@@ -266,7 +356,11 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     }
                 }
                 if (x > 0)
+                {
+                    //===========log insert
+                    _logService.InsertLog("TAPE_NFABRIC_MAST", "Tape And Fabric Master", "Master", "UPDATE", "", model.Code.ToString(), null);
                     return Json(new { status = true, message = "Data update Successfully" });
+                }
                 return Json(new { status = false, message = "Data update failed" });
 
             }
@@ -276,7 +370,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             }
 
         }
-
 
     }
 }

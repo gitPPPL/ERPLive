@@ -39,8 +39,8 @@ namespace travelexpensemanagement.ModuleService
             int userLevel = GetUserLevel() ?? 0;
 
             string menuQuery = userLevel == 1
-                ? "SELECT CODE, MODULE_CODE, DISPLAY_NAME, WebFORM_NAME FROM MENU_MAST ORDER BY DISPLAY_NAME ASC"
-                : "SELECT CODE, MODULE_CODE, DISPLAY_NAME, WebFORM_NAME FROM MENU_MAST WHERE DISPLAY_NAME NOT IN ('User Authorizations') ORDER BY DISPLAY_NAME ASC";
+                ? "SELECT CODE, MODULE_CODE, DISPLAY_NAME, MAINMENU_CODE, WebFORM_NAME FROM MENU_MAST ORDER BY MODULE_CODE, MAINMENU_CODE, MENU_OPTION"
+                : "SELECT CODE, MODULE_CODE, DISPLAY_NAME, MAINMENU_CODE, WebFORM_NAME FROM MENU_MAST WHERE DISPLAY_NAME NOT IN ('User Authorizations') ORDER BY DISPLAY_NAME ASC";
             using var conn = _dbConnection.GetErpConnection();
             conn.Open();
             using var cmd = new SqlCommand(menuQuery, conn);
@@ -52,11 +52,75 @@ namespace travelexpensemanagement.ModuleService
                 {
                     CODE = reader["CODE"] != DBNull.Value ? Convert.ToInt32(reader["CODE"]) : 0,
                     MODULE_CODE = reader["MODULE_CODE"] != DBNull.Value ? Convert.ToInt32(reader["MODULE_CODE"]) : 0,
+                    MainMenuCode = reader["MAINMENU_CODE"] != DBNull.Value ? Convert.ToInt32(reader["MAINMENU_CODE"]) : 0,
                     DISPLAY_NAME = reader["DISPLAY_NAME"]?.ToString() ?? string.Empty,
                     WebFORM_NAME = reader["WebFORM_NAME"]?.ToString() ?? string.Empty
                 });
             }
             return menumodules;
+        }
+
+        //Added by sumesh
+        public List<ModuleMenuViewModel> BuildModuleMenus()
+        {
+            var modules = GetAllModules();
+
+            var allMenus = GetMenuMaster();
+
+            var result = new List<ModuleMenuViewModel>();
+
+            foreach (var module in modules)
+            {
+                var rootMenus = allMenus
+                    .Where(x =>
+                        x.MODULE_CODE == module.Code &&
+                        x.MainMenuCode == 0)
+                    .ToList();
+
+                foreach (var menu in rootMenus)
+                {
+                    menu.Children = GetChildMenus(menu.CODE, allMenus);
+                }
+
+                result.Add(new ModuleMenuViewModel
+                {
+                    ModuleCode = module.Code,
+                    ModuleName = module.DisplayName,
+                    Menus = rootMenus
+                });
+            }
+
+            return result;
+        }
+        public List<MenuModule> BuildMenuHierarchy(List<MenuModule> allMenus)
+        {
+            // Parent Menus
+            var parentMenus = allMenus
+                .Where(x => x.MainMenuCode == 0)
+                .ToList();
+
+            foreach (var menu in parentMenus)
+            {
+                menu.Children = GetChildMenus(menu.CODE, allMenus);
+            }
+
+            return parentMenus;
+        }
+        private List<MenuModule> GetChildMenus(int parentId, List<MenuModule> allMenus)
+        {
+            return allMenus
+                .Where(x => x.MainMenuCode == parentId)
+                .Select(x => new MenuModule
+                {
+                    CODE = x.CODE,
+                    MODULE_CODE = x.MODULE_CODE,
+                    MainMenuCode = x.MainMenuCode,
+                    DISPLAY_NAME = x.DISPLAY_NAME,
+                    WebFORM_NAME = x.WebFORM_NAME,
+
+                    Children = GetChildMenus(x.CODE, allMenus)
+                })
+                .ToList();
         }
         public List<UserMenuPermission> GetUserMenuPermissions()    
         {
@@ -87,7 +151,7 @@ namespace travelexpensemanagement.ModuleService
             while (reader.Read())
             {
                 userPermissions.Add(new UserMenuPermission
-                {
+                 {
                     MENU_CODE = reader["MENU_CODE"] != DBNull.Value ? Convert.ToInt32(reader["MENU_CODE"]) : 0,
                     MODULE_CODE = reader["MODULE_CODE"] != DBNull.Value ? Convert.ToInt32(reader["MODULE_CODE"]) : 0,
                     USER_CODE = reader["USER_CODE"] != DBNull.Value ? Convert.ToInt32(reader["USER_CODE"]) : 0,
@@ -138,12 +202,38 @@ namespace travelexpensemanagement.ModuleService
         }
         public class MenuModule
         {
-            public int MODULE_CODE { get; set; }
-            public string DISPLAY_NAME { get; set; }
-            //public string FORM_NAME { get; set; }
-            public string WebFORM_NAME { get; set; }
             public int CODE { get; set; }
+
+            public int MODULE_CODE { get; set; }
+
+            public string DISPLAY_NAME { get; set; }
+
+            public int MainMenuCode { get; set; }
+
+            public string WebFORM_NAME { get; set; }
+
+            // Child Menus
+            public List<MenuModule> Children { get; set; } = new List<MenuModule>();
         }
+
+        public class ModuleMenuViewModel
+        {
+            public int ModuleCode { get; set; }
+
+            public string ModuleName { get; set; }
+
+            public List<MenuModule> Menus { get; set; }
+        }
+        //commented by sumesh
+        //public class MenuModule
+        //{
+        //    public int MODULE_CODE { get; set; }
+        //    public string DISPLAY_NAME { get; set; }
+
+
+        //    public string WebFORM_NAME { get; set; }
+        //    public int CODE { get; set; }
+        //}
         public class UserMenuPermission
         {
             public int MODULE_CODE { get; set; }

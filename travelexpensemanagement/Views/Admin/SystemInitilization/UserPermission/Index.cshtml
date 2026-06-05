@@ -533,10 +533,13 @@
             // renderUserDetailsTableMultiple(response)
             console.log('renderUserDetailsTableMultiple',data)
             const tbody = $('#moduleTableBodyList');
-
-             if (isChecked) {
-              tbody.empty();
-              }
+            //Commented by Sumesh
+             // if (isChecked) {
+             //  tbody.empty();
+             //  }
+                 if (selectedCodes.length === 1 && isChecked) {
+                tbody.empty();
+                }
               else {
               }
             // then i checkout then data not empty then use

@@ -2,14 +2,14 @@
     ViewBag.Title = "Tape And Fabric Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<div id="erp-toast-container"></div>
 <fieldset>
     <legend class="legend-field">Tape And Fabric Master</legend>
     <div class="row">
         <div class="offset-md-10 col-md-2">
             <div class="btn-right">
                 <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "TapeAndFabricMasterList")'" type="button" class="btn btn-primary">
+						onclick="handleBack('@Url.Action("Index", "TapeAndFabricMasterList")', readOnly)" type="button" class="btn btn-primary">
                     <i class="fa fa-list"></i>Back to list
                 </button>
             </div>
@@ -179,7 +179,7 @@
             <div class="col-md-3">
                 <div class="btn-last">
 					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
+                    @* <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button> *@
                 </div>
             </div>
         </div>
@@ -190,35 +190,38 @@
 <script>
 	const inputSequence = [
 		'TxtName',
-		'NumStdGram',
-		'NumMaxGram',
-		'NumDenier',
-		'ddlColor',
-		'NumStdGPD',
-		'NumMaxGPD',
-		'NumStrengthMin',
-		'NumStdElong',
-		'NumElongMax',
-		'NumLamFabStr',
 		'ddlMeshName',
+		'NumStdGram',
 		'NumMinGram',
+		'NumMaxGram',
 		'NumGSM',
+		'NumDenier',
 		'TxtPPHD',
+		'ddlColor',
 		'NumWidth',
+		'NumStdGPD',
 		'NumMinGPD',
+		'NumMaxGPD',
 		'NumStdStrength',
+		'NumStrengthMin',
 		'NumStrengthMax',
+		'NumStdElong',
 		'NumElongMin',
-		'NumUnlamFabStr'
+		'NumElongMax',
+		'NumUnlamFabStr',
+		'NumLamFabStr'
 	];
 
 	let PreviousInputDt = "";
 	let MasterTblId ;
-	let readOnly;
+	var readOnly;
 
 	$(document).ready(function () {
-		getColorNameList();
-		getMeshNameList();
+		$('#TxtName').focus();
+		
+		//=======Bind Dropdowns============
+		bindDropdown('TapeAndFabricMaster', 'Color', '#ddlColor', ' Select Color ', null, null, false, null, false)
+		bindDropdown('TapeAndFabricMaster', 'Mesh', '#ddlMeshName', ' Select Mesh ', null, null, false, null, false)
 
 		MasterTblId = getQueryParam('id');
 		readOnly = getQueryParam('readOnly');
@@ -227,16 +230,16 @@
 			GetMasterDataList(MasterTblId, readOnly);
 		}
  
-	    inputSequence.forEach((id, index) => {
-		$(`#${id}`).on('keypress', function (e) {
-			if (e.key === 'Enter') {
-				e.preventDefault();
-				if (index + 1 < inputSequence.length) {
-					$(`#${inputSequence[index + 1]}`).focus();
+		inputSequence.forEach((id, index) => {
+			$(`#${id}`).on('keypress', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					if (index + 1 < inputSequence.length) {
+						$(`#${inputSequence[index + 1]}`).focus();
+					}
 				}
-			}
+			});
 		});
-	   });
 
 
 		$('#DdActive').on('change', function () {
@@ -249,12 +252,31 @@
 
 		$('#btn-save').on('click', function (e) {
 			e.preventDefault();
-			const masterData = collectFormData();
 
-			if (!masterData.Name) {
-				toastr.warning("Please fill all required fields");
-				return;
-			}
+			if (!validateRequiredField('#TxtName', 'Name')) return;
+			if (!validateRequiredField('#ddlMeshName', 'Mesh Name')) return;
+			if (!validateRequiredField('#NumMinGram', 'Min. Gram')) return;
+			if (!validateRequiredField('#NumMaxGram', 'Max Gram')) return;
+			if (!validateRequiredField('#NumGSM', 'GSM')) return;
+			if (!validateRequiredField('#NumDenier', 'Denier')) return;
+			if (!validateRequiredField('#TxtPPHD', 'PP/HD')) return;
+			if (!validateRequiredField('#ddlColor', 'Color')) return;
+			if (!validateRequiredField('#NumWidth', 'Width(MM.)')) return;
+			if (!validateRequiredField('#NumStdGPD', 'Std. GPD')) return;
+			if (!validateRequiredField('#NumStrengthMax', 'Strength Max.')) return;
+			if (!validateRequiredField('#NumStrengthMin', 'Strength Min.')) return;
+			if (!validateRequiredField('#NumElongMax', 'Elong. Max(%)')) return;
+			if (!validateRequiredField('#NumElongMin', 'Elong. Min(%)')) return;
+			if (!validateRequiredField('#NumUnlamFabStr', 'Unlam Fab Str')) return;
+			if (!validateRequiredField('#NumLamFabStr', 'Lam fab Str')) return;
+			if (!validateRequiredField('#NumStdGram', 'Std. Gram')) return;
+			if (!validateRequiredField('#NumMinGPD', 'Min. GPD')) return;
+			if (!validateRequiredField('#NumMaxGPD', 'Max. GPD')) return;
+			if (!validateRequiredField('#NumStdStrength', 'Std. Strength')) return;
+			if (!validateRequiredField('#NumStdElong', 'Std. Elong(%)')) return;
+
+
+			const masterData = collectFormData();
 
 			if (MasterTblId) {
 				EditMasterData(masterData);
@@ -267,13 +289,13 @@
 	function SaveMasterData(masterData) {
 		const Namee = masterData?.Name?.trim();		 
 		if (!Namee) {
-			toastr.warning("TapeNFabric Name is required.");
+			showToast("TapeNFabric Name is required!", { type: "warning" });
 			return;
 		}
 		checkExistOrNot(Namee)
 			.done(function (data) {
 				if (data?.status && data?.exists) {
-					toastr.warning("Duplicate TapeNFabric Name");
+					showToast("TapeNFabric Name Already Exists!", {type: "warning"});
 					return;
 				}
 
@@ -284,22 +306,22 @@
 					data: JSON.stringify(masterData),
 					success: function (response) {
 						if (response?.status) {
-							toastr.success('Data saved successfully.');
+							showToast('Data saved successfully.', {type:"success"});
 							resetFields();
 							setTimeout(() => {
 								window.location.href = '/TapeAndFabricMasterList/Index';
 							}, 1500);
 						} else {
-							toastr.error(response?.message || "Save failed. Please try again.");
+							showToast(response?.message || "Save failed. Please try again.", {type:"error"});
 						}
 					},
 					error: function () {
-						toastr.error("Error occurred while saving. Please contact admin.");
+						showToast("Error occurred while saving. Please contact admin.", {type:"error"});
 					}
 				});
 			})
 			.fail(function () {
-				toastr.error("Error while checking TapeNFabric name.");
+				showToast("Error while checking TapeNFabric name.", {type:"error"});
 			});
 	}
 
@@ -308,13 +330,13 @@
 			checkExistOrNot(masterData.Name)
 				.done(function (data) {
 					if (data?.status && data?.exists) {
-						toastr.warning("Duplicate TapeNFabric Name");
+						showToast("TapeNFabric Name Already Exists!", {type:"warning"});
 						return;
 					}
 					UpdateMasterData(masterData);
 				})
 				.fail(function () {
-					toastr.error("Error while checking TapeNFabric Name.");
+					showToast("Error while checking TapeNFabric Name.", {type:"error"});
 				});
 		} else {
 			UpdateMasterData(masterData);
@@ -330,17 +352,17 @@
 			dataType: 'json',
 			success: function (response) {
 				if (response?.status) {
-					toastr.success('Data updated successfully.');
+					showToast('Data updated successfully.', {type:"success"});
 					resetFields();
 					setTimeout(() => {
 						window.location.href = '/TapeAndFabricMasterList/Index';
 					}, 1500);
 				} else {
-					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+					showToast("Update failed: " + (response?.message || "Unknown error."), {type:"error"});
 				}
 			},
 			error: function (xhr, status, error) {
-				toastr.error("Data not updated: " + error);
+				showToast("Data not updated: " + error, {type:"error"});
 			}
 		});
 	}
@@ -354,58 +376,56 @@
 				if (res.status && res.data) {				 
 					fillFormFields(res.data);
 					if (readOnly === 'true') {
-						$('input, #ddlColor, #ddlMeshName, #DdActive').prop('disabled', true);
-						$('#btn-save, #cancelBtn').hide();
+						setFormReadOnly();
 					} else {
 						$('input, #ddlColor, #ddlMeshName, #DdActive').prop('disabled', false);
-						$('#btn-save, #cancelBtn').show();
+						$('#btn-save').show();
 					}
 				} else {
-					toastr.warning('No data found for this ID.');
+					showToast('No data found for this ID.', {type:"warning"});
 				}
 			},
 			error: function () {
-				toastr.error('Failed to load data.');
+				showToast('Failed to load data.', {type:"error"});
 			}
 		});
 	}
  
-		function resetFields() {		 
+	function resetFields() {		 
 		$('#TxtCode, #TxtName, #NumStdGram, #NumMaxGram, #NumDenier, #NumStdGPD, #NumMaxGPD, #NumStrengthMin, #NumStdElong, #NumElongMax, #NumLamFabStr, #NumMinGram, #NumGSM, #TxtPPHD, #NumWidth, #NumMinGPD, #NumStdStrength, #NumStrengthMax, #NumElongMin, #NumUnlamFabStr').val('');
  		$('#ddlColor, #ddlMeshName').prop('selectedIndex', 0);	 
 		setActiveStatus(1);		 
-	   }
-
-
-	function fillFormFields(dt) {
-		$('#TxtCode').val(dt.CODE);
-		$('#TxtName').val(dt.NAME);
-		$('#NumStdGram').val(dt.STD_GRAM);
-		$('#NumMinGram').val(dt.MIN_GRAM);
-		$('#NumMaxGram').val(dt.MAX_GRAM);
-		$('#NumGSM').val(dt.GSM);
-		$('#NumDenier').val(dt.DENIER);
-		$('#ddlColor').val(dt.COLOR_CODE);
-		$('#NumWidth').val(dt.WIDTH);
-		$('#NumStdGPD').val(dt.GPD);     
-		$('#NumMinGPD').val(dt.MIN_GPD);
-		$('#NumMaxGPD').val(dt.MAX_GPD);
-		$('#NumStdStrength').val(dt.STD_STRENGTH);
-		$('#NumStrengthMax').val(dt.STRENGTH_MAX);
-		$('#NumStrengthMin').val(dt.STRENGTH_MIN);
-		$('#NumStdElong').val(dt.STD_ELONG);
-		$('#NumElongMax').val(dt.ELONG_MAX);
-		$('#NumElongMin').val(dt.ELONG_MIN);
-		$('#NumUnlamFabStr').val(dt.UNLAM_FAB);
-		$('#NumLamFabStr').val(dt.LAM_FAB);
-		$('#ddlMeshName').val(dt.MESH_CODE);  
-		$('#TxtPPHD').val(dt.UNIT_NAME);   
-		setActiveStatus(dt.ACTIVE);          
-		PreviousInputDt = dt.NAME;          
 	}
 
+	function fillFormFields(dt) {
+		console.log("Fill Form Datat", dt);
+		$('#TxtCode').val(dt.code);
+		$('#TxtName').val(dt.name);
+		$('#NumStdGram').val(dt.stdGram);
+		$('#NumMinGram').val(dt.minGram);
+		$('#NumMaxGram').val(dt.maxGram);
+		$('#NumGSM').val(dt.gsm);
+		$('#NumDenier').val(dt.denier);
+		$('#NumWidth').val(dt.width);
+		$('#NumStdGPD').val(dt.gpd);
+		$('#NumMinGPD').val(dt.minGpd);
+		$('#NumMaxGPD').val(dt.maxGpd);
+		$('#NumStdStrength').val(dt.stdStrength);
+		$('#NumStrengthMax').val(dt.strengthMax);
+		$('#NumStrengthMin').val(dt.strengthMin);
+		$('#NumStdElong').val(dt.stdElong);
+		$('#NumElongMax').val(dt.elongMax);
+		$('#NumElongMin').val(dt.elongMin);
+		$('#NumUnlamFabStr').val(dt.unlamFab);
+		$('#NumLamFabStr').val(dt.lamFab);
+		$('#TxtPPHD').val(dt.unitName);
+		setActiveStatus(dt.active);
+		PreviousInputDt = dt.name;
+		bindDropdown('TapeAndFabricMaster', 'Color', '#ddlColor', ' Select Color ', dt.colorCode, null, false, null, false)
+		bindDropdown('TapeAndFabricMaster', 'Mesh', '#ddlMeshName', ' Select Mesh ', dt.meshCode, null, false, null, false)
+	}
 
-		function collectFormData() {
+	function collectFormData() {
 		return {
 			Code: toNullableInt($('#TxtCode').val()),
 			Name: toNullableString($('#TxtName').val()),
@@ -447,45 +467,6 @@
 		return urlParams.get(param);
 	}
 
-	document.getElementById("cancelBtn").addEventListener("click", function () {
-		Swal.fire({
-			title: 'Are you sure?',
-			text: "Do you want to cancel all the changes?",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Yes, cancel it!',
-			cancelButtonText: 'No, keep it',
-			reverseButtons: true
-		}).then((result) => {
-			if (result.isConfirmed) {
-				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
-				if (MasterTblId) {
-					GetMasterDataList(MasterTblId, readOnly);
-				} else {
-					resetFields();
-				}
-			} else if (result.dismiss === Swal.DismissReason.cancel) {
-				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
-			}
-		});
-	});
-
-	const toNullableInt = (v) => {
-		const t = String(v ?? '').trim();
-		return t === '' ? null : parseInt(t, 10);
-	};
-
-	const toNullableString = (v) => {
-		const t = String(v ?? '').trim();
-		return t === '' ? null : t;
-	};
-
-	function allowOnlyNumbers(input) {
-	  input.value = input.value
-		.replace(/[^0-9.]/g, '')
-		.replace(/(\..*)\./g, '$1');
-	}
-
 	function setActiveStatus(input) {
 		let isActive = input == 1;
 		$('#DdActive').prop('checked', isActive);
@@ -493,7 +474,7 @@
 		$('#statusText').text(isActive ? 'Active' : 'Inactive');
 	}
 
-	 function toNullableDecimal(value) {
+	function toNullableDecimal(value) {
 		if (value === null || value === undefined || value.trim() === '') {
 			return null;
 		}
@@ -505,52 +486,13 @@
 		return isNaN(parsed) ? null : parsed;
 	}
 
-
-	function getColorNameList() {
-		$.ajax({
-			url: '@Url.Action("GetColorName", "TapeAndFabricMaster")',
-			type: 'GET',
-			dataType: 'json',
-			success: function (data) {
-				if (data.status === true && Array.isArray(data.data)) {					 
-					var $colorGrpList = $('#ddlColor');
-					$colorGrpList.empty();
-					$colorGrpList.append($('<option selected disabled>').val('').text('Select Color Name'));
-					data.data.forEach(function (item) {
-						$colorGrpList.append($('<option>').val(item.code).text(item.Name));
-					});
-				} else {
-					toastr.warning("No data found");
-				}
-			},
-			error: function (xhr) {
-				toastr.error("Data load failed");
-			}
-		});
+	//=======Readonly============
+	function setFormReadOnly() {
+		const form = $('#TapeFabricMasterForm');
+		$('#statusText').addClass('text-muted');
+		$('input, #ddlColor, #ddlMeshName, #DdActive').prop('disabled', true);
+		$('#btn-save').hide();
+		form.addClass('erppage-readonly');
 	}
-
-	function getMeshNameList() {
-		$.ajax({
-			url: '@Url.Action("GetMeshName", "TapeAndFabricMaster")',
-			type: 'GET',
-			dataType: 'json',
-			success: function (data) {
-				if (data.status === true && Array.isArray(data.data)) {				 
-					var $colorGrpList = $('#ddlMeshName');
-					$colorGrpList.empty();
-					$colorGrpList.append($('<option selected disabled>').val('').text('Select Mesh Name'));
-					data.data.forEach(function (item) {
-						$colorGrpList.append($('<option>').val(item.code).text(item.Name));
-					});
-				} else {
-					toastr.warning("No data found");
-				}
-			},
-			error: function (xhr) {
-				toastr.error("Data load failed");
-			}
-		});
-	}
-
 
 </script>

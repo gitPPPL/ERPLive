@@ -19,14 +19,16 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly IQCTemperatureEntryListRepository _qCTempListRepository;
+        private readonly GlobalValidationdate _globalValidationdate;
         public QCTemperatureEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, 
-            GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IQCTemperatureEntryListRepository qCTempListRepository)
+            GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IQCTemperatureEntryListRepository qCTempListRepository, GlobalValidationdate globalValidationdate)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
             _qCTempListRepository = qCTempListRepository;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
@@ -92,27 +94,60 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> ExportAllDocs()
+        //{
+        //    try
+        //    {
+        //        var usersession = _globalValue.GetGlobalVariables();
+        //        var parameter = new Dictionary<string, object>
+        //        {
+        //            {"@COMP_CODE", usersession.PubCompCode },
+        //            {"@YEAR_CODE", usersession.PubFYearCode },
+        //            {"@BRANCH_CODE", 1},
+        //            {"@V_TYPE",  "TAPE"},
+        //            {"@Action", "Excel" }
+        //        };
+        //        var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetQcTempratureEntry]", parameter);
+
+        //        return Json(new { status = true, data = dataList });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { status = false, message = ex.Message });
+        //    }
+        //}
         [HttpGet]
-        public async Task<IActionResult> ExportAllDocs()
+        public IActionResult ExportAllDocs()
         {
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE",  "TAPE"},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetQcTempratureEntry]", parameter);
+                var gv = _globalValue.GetGlobalVariables();
 
-                return Json(new { status = true, data = dataList });
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode },
+                    {"@V_TYPE",  "TAPE"},
+                    { "@Action", "Excel" }
+                };
+
+                var fileBytes = _globalValidationdate.ExportToExcel("sp_GetQcTempratureEntry", "QC Tape Line", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"QCTapeLine_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
 
