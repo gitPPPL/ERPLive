@@ -352,14 +352,13 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 }
 
 
-
                 if(details.Count > 0)
                 {
-                    string approval = GetText("SELECT Approval_remark  FROM approval_status WHERE user_Code = " + g.PubUserId + " AND " +
-                    "V_Type = '" + header.V_TYPE + "' AND V_No = " + header.V_NO + "      AND  " +
+                    string approval = GetText("SELECT 1  FROM approval_status WHERE user_Code = " + g.PubUserId + " AND " +
+                    "V_Type = '" + header.V_TYPE + "' AND V_No = " + header.V_NO + "   AND  " +
                     "  COMP_CODE = " + g.PubCompCode + "  AND Branch_Code = " + g.PubBranchCode + "  AND Year_Code = " + g.PubFYearCode + ";");
 
-                    if (approval != "")
+                    if (isFinalApprovalBody == true && approval != "")
                     {
                         string UpdateSql = @"UPDATE approval_status
                         SET
@@ -375,24 +374,25 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                         AND Branch_Code = @Branch_Code
                         AND Year_Code = @Year_Code;";
 
-                        using (var updateCmd = new SqlCommand(deleteSql, conn))
-                        {
-                            updateCmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                        using (var updateCmd = new SqlCommand(UpdateSql, conn))
+                        {                           
                             updateCmd.Parameters.AddWithValue("@V_No", header.V_NO);
                             updateCmd.Parameters.AddWithValue("@V_Type", header.V_TYPE);
+                            updateCmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                             updateCmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
                             updateCmd.Parameters.AddWithValue("@Year_Code", g.PubFYearCode);
                             updateCmd.ExecuteNonQuery();
+
                         }
                     }
-                }
-                    
+                }                    
 
                 //if (action == "UPDATE")
                 //{
                 //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "gate1", sourceTable: "gate1", transactionType: "Transaction",
                 //    codeVNo: header.V_NO.ToString(), vtype: header.V_TYPE);
                 //}
+
                 return new ApiResponse { Status = "Success", Message = "Data Save Successfully" };
             }
             catch (Exception ex)
@@ -1311,18 +1311,33 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 string approvalRemark = string.Empty;
                 string faProvStatus = string.Empty;
 
-                // Query 1 : USER_CODE
-                    string userQuery = @"
-                    SELECT TOP 1 a.USER_CODE
-                    FROM DOC_APPROSTAGE a
-                    LEFT JOIN CONDATABASE.dbo.USER_MAST b
-                    ON a.USER_CODE = b.CODE
-                    LEFT JOIN CONDATABASE.dbo.SUBUSER_MAST c
-                    ON b.CODE = c.USER_CODE
-                    AND c.COMP_CODE = @COMP_CODE
-                    WHERE a.USER_CODE = @UUSER
-                    AND a.DOC_CODE = @V_TYPE
-                    AND a.COMP_CODE = @COMP_CODE";
+
+                // Query 3 : FAPROV_STATUS
+                string statusQuery = @"
+                SELECT TOP 1 FAPROV_STATUS FROM GATE1 WHERE V_TYPE = @V_TYPE  AND V_NO = @V_NO  AND COMP_CODE = @COMP_CODE  AND YEAR_CODE = @YEAR_CODE
+                AND FAPROV_STATUS <> 'Approved'";
+
+                using (SqlCommand cmd = new SqlCommand(statusQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                    cmd.Parameters.AddWithValue("@V_NO", v_no);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
+
+                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    if (await reader.ReadAsync())
+                    {
+                        faProvStatus = reader["FAPROV_STATUS"]?.ToString() ?? "";
+                    }
+                }
+
+
+
+                string userQuery = @"
+                    SELECT TOP 1 a.USER_CODE FROM DOC_APPROSTAGE a  LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.USER_CODE = b.CODE
+                    LEFT JOIN CONDATABASE.dbo.SUBUSER_MAST c ON b.CODE = c.USER_CODE AND c.COMP_CODE = @COMP_CODE
+                    WHERE a.USER_CODE = @UUSER  AND a.DOC_CODE = @V_TYPE  AND a.COMP_CODE = @COMP_CODE";
 
                 using (SqlCommand cmd = new SqlCommand(userQuery, conn))
                 {
@@ -1340,12 +1355,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 // Query 2 : Approval Remark
                 string approvalQuery = @"
-                SELECT TOP 1 Approval_remark
-                FROM APPROVAL_STATUS
-                WHERE V_TYPE = @V_TYPE
-                AND V_NO = @V_NO
-                AND COMP_CODE = @COMP_CODE
-                AND YEAR_CODE = @YEAR_CODE";
+                SELECT TOP 1 Approval_remark  FROM APPROVAL_STATUS WHERE V_TYPE = @V_TYPE  AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE  AND YEAR_CODE = @YEAR_CODE";
 
                 using (SqlCommand cmd = new SqlCommand(approvalQuery, conn))
                 {
@@ -1362,30 +1372,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     }
                 }
 
-                // Query 3 : FAPROV_STATUS
-                string statusQuery = @"
-                SELECT TOP 1 FAPROV_STATUS
-                FROM GATE1
-                WHERE V_TYPE = @V_TYPE
-                AND V_NO = @V_NO
-                AND COMP_CODE = @COMP_CODE
-                AND YEAR_CODE = @YEAR_CODE
-                AND FAPROV_STATUS = 'Approved'";
-
-                using (SqlCommand cmd = new SqlCommand(statusQuery, conn))
-                {
-                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
-                    cmd.Parameters.AddWithValue("@V_NO", v_no);
-                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
-                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
-
-                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        faProvStatus = reader["FAPROV_STATUS"]?.ToString() ?? "";
-                    }
-                }
+            
 
                 // Document already approved
                 if (!string.IsNullOrWhiteSpace(approvalRemark) ||

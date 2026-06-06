@@ -232,14 +232,14 @@
 
                     @if (canEdit)
                     {
-                     <button class="act-btn edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-edit"></i></button>
+                         <button class="act-btn edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
                     }        
                                           
                   <button class="act-btn view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
 
                    @if (canDelete)
                     {
-                    <button class="act-btn delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                        <button class="act-btn delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
                     }              
                 
                         <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
@@ -337,13 +337,51 @@
     }
 
     // ================= ACTIONS =================
-    function AddOrEditFunction(code, vtype) {
-        window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}`;
+    function AddOrEditFunction(code, vtype , v_DATE) {
+        Cheackview(vtype,code ,v_DATE);
+    
     }
 
-    function viewMenuDetails(code, vtype) {
+    function viewMenuDetails(code, vtype) { 
         window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
     }
+
+    function Cheackview(v_type, v_no, vdate) {
+
+        $.ajax({
+            url: '/InwardEntryList/CheackEdit',
+            type: 'POST',
+            data: {
+                v_type: v_type,
+                v_no: v_no,
+                v_DATE: formatDate(vdate)
+            },
+            success: function (res) {
+                  console.log("res.status",res.status);
+                if (res.status== false )
+                {   
+                    Swal.fire({
+                    title: 'Warning',
+                    text: res.message,
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                    });
+                    return ;
+                }        
+                else{
+                   window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
+                }
+
+
+            },
+            error: function (xhr) {
+                alert("Error: " + xhr.responseText);
+            }
+        });
+    }
+
+
+
 
     function deleteTemp(code, VType) {
 

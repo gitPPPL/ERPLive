@@ -83,7 +83,7 @@
         if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
         if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
         if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
-        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                      
+        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                     
 
         }
 
@@ -108,7 +108,7 @@
         if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
             if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
 
-                invalidateField("TxtBillAmt", `Bill Amount compulsory for ${PubDefEWaybillAmt}`, "warning");
+                invalidateField("TxtBillAmt", `Please enter the Bill Amount. This field is required.`, "warning");
                 return;
             }
 
@@ -190,7 +190,7 @@
         const itemCodeSet = new Set();
 
         for (let i = 0; i < Deatils.length; i++) {
-                   const row = Deatils[i];
+         const row = Deatils[i];
 
         if (row.ITEM_CODE !== null) {
             if (itemCodeSet.has(row.ITEM_CODE)) {
@@ -256,7 +256,8 @@
             success: function (response) {
                 console.log("Response", response);
             if (response.status === "Success") {   
-                showToast("Saved successfully!", { type: "success" });
+                showToast("Saved successfully!", { type: "success" });         
+
                 setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);                                
                // setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) ; }, 3000);                                
             }

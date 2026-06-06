@@ -267,6 +267,7 @@ $(document).ready(async function () {
         if (isValid === false) {
             return;
         }
+
         saveInwardEntry();
     });
 

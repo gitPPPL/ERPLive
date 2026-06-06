@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using StackExchange.Redis;
 using System.Data;
 using System.Data.Common;
 using System.Reflection.Metadata;
@@ -496,7 +497,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-        [HttpGet]
 
         [HttpPost]
         public IActionResult GetDataByCode([FromForm] int code, [FromForm] string vtype)
@@ -1124,38 +1124,173 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
 
-
-        public JsonResult CheackEdit(string v_type , int v_no)
+        public JsonResult CheackEdit(string v_type, int v_no, DateTime v_DATE)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+            int userLevel = Convert.ToInt32(GetGlobalCode.PubUserLevel);
+            string status = GetText(
+                "SELECT status FROM APPROVAL_STATUS " +
+                "WHERE v_type='" + v_type + "'" +
+                " AND v_no=" + v_no +
+                " AND comp_code=" + GetGlobalCode.PubCompCode +
+                " AND branch_code=" + GetGlobalCode.PubBranchCode +
+                " AND year_code=" + GetGlobalCode.PubFYearCode +
+                " AND status='OPEN'" +
+                " AND USER_CODE<>" + GetGlobalCode.PubUserId);
 
-            string status = GetText("select status from APPROVAL_STATUS where v_type= '"+  v_type +"' and v_NO= "+ v_no  +" and  " +
-            " comp_code= " + GetGlobalCode.PubCompCode + "  and branch_code= " + GetGlobalCode.PubBranchCode + " and year_code= " + GetGlobalCode.PubFYearCode +" and status='OPEN' and USER_CODE<> "+ GetGlobalCode.PubUserId +" ");
-
-            if(status != "")
+            if (!string.IsNullOrEmpty(status))
             {
-                string LASTUSER = GetText("select top 1 user_name from APPROVAL_STATUS where v_type= '" + v_type + "' and v_NO= " + v_no + " and comp_code=" + GetGlobalCode.PubBranchCode + "  " +
-                "  and branch_code= " + GetGlobalCode.PubBranchCode + " and year_code=" + GetGlobalCode.PubFYearCode + " and status='OPEN' and user_code<> " + GetGlobalCode.PubUserId + " order by srno desc");
-                return Json(new { status = false, message = "This Document Approval is in process at User:\" & lastuser & \", Edit not allowed." });
+                string lastUser = GetText(
+                    "SELECT TOP 1 user_name FROM APPROVAL_STATUS " +
+                    "WHERE v_type='" + v_type + "'" +
+                    " AND v_no=" + v_no +
+                    " AND comp_code=" + GetGlobalCode.PubCompCode +
+                    " AND branch_code=" + GetGlobalCode.PubBranchCode +
+                    " AND year_code=" + GetGlobalCode.PubFYearCode +
+                    " AND status='OPEN'" +
+                    " AND USER_CODE <> " + GetGlobalCode.PubUserId +
+                    " ORDER BY srno DESC");
+
+                return Json(new  { status = false, message = $"This Document Approval is in process at User: {lastUser}. Edit not allowed."  });
+            }
+
+            Boolean isApprovalBody = false;
+            string DOC_APPROSTAGE = GetText("select 1 from DOC_APPROSTAGE where USER_CODE= " + GetGlobalCode.PubUserId + " and DOC_CODE= '" + v_type + "' and comp_code= " + GetGlobalCode.PubCompCode + " ");
+
+            if (DOC_APPROSTAGE == "1")
+            {
+                isApprovalBody = true;
+            }
+
+
+            if(isApprovalBody == false)
+            {
+                int pubModifyDays = GetInt(
+                "SELECT a.ALLOW_DAYS " +
+                "FROM Condatabase.dbo.USER_MAST a " +
+                "LEFT JOIN Condatabase.dbo.SUBUSER_MAST b ON a.CODE = b.USER_CODE " +
+                "WHERE a.CODE = " + GetGlobalCode.PubUserId +
+                " AND a.ACTIVE = 1 " +
+                " AND b.COMP_CODE = " + GetGlobalCode.PubCompCode);
+
+                DateTime serverDate = DateTime.Now; // Replace with your server date
+
+               
+
+                DateOnly serverDateOnly = DateOnly.FromDateTime(DateTime.Now);
+
+                if (userLevel > 2 && v_DATE.Date < DateTime.Now.AddDays(-pubModifyDays).Date)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        message = "Modification not allowed. Doc Date exceeds allowed limit. Please check Doc Date."
+                    });
+                }
 
             }
 
-            int  pubModifyDays = GetText("Select a.ALLOW_DAYS from Condatabase.dbo.USER_MAST a left join Condatabase.dbo.SUBUSER_MAST b on a.CODE=b.USER_CODE where a.CODE=" + GetGlobalCode.PubUserId + " and a.ACTIVE=1 and b.COMP_CODE=" + GetGlobalCode.PubCompCode + " ");
+            string sql = @"SELECT top 1  v_no, v_date
+                    FROM WB1
+                    WHERE GATE_TYPE = @GATE_TYPE
+                    AND GATE_NO = @GATE_NO
+                    AND COMP_CODE = @COMP_CODE
+                    AND BRANCH_CODE = @BRANCH_CODE
+                    AND YEAR_CODE = @YEAR_CODE";
 
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@GATE_TYPE", v_type);
+                    cmd.Parameters.AddWithValue("@GATE_NO", v_no);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
 
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            string wbNo = reader["v_no"].ToString();
+                            DateTime wbDate = Convert.ToDateTime(reader["v_date"]);
+                                                      
+                           return Json(new { status = true, message = $"This document exists in Weighbridge Serial No : {wbNo}  V_Date : {wbDate:dd/MM/yyyy}, Edit not allowed." });
+           
+                        }
+                    }
+                }
+            }
 
+            string sql1 = @"SELECT TOP 1
+                a.v_no,
+                a.v_date AS v_date
+                FROM PURCHASE2 a
+                LEFT JOIN Doctype_mast b
+                ON a.V_type = b.code
+                WHERE b.Doctype IN ('MaterialReceipt', 'ServiceReceipt')
+                AND a.Gate_TYPE = @GATE_TYPE
+                AND a.Gate_NO = @GATE_NO
+                AND a.COMP_CODE = @COMP_CODE
+                AND a.BRANCH_CODE = @BRANCH_CODE;";
 
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
 
+                using (SqlCommand cmd = new SqlCommand(sql1, con))
+                {
+                    cmd.Parameters.AddWithValue("@GATE_TYPE", v_type);
+                    cmd.Parameters.AddWithValue("@GATE_NO", v_no);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
+
+                    using (SqlDataReader reader1 = cmd.ExecuteReader())
+                    {
+                        if (reader1.Read())
+                        {
+                            string wbNo = reader1["v_no"].ToString();
+                            DateTime wbDate = Convert.ToDateTime(reader1["v_date"]);
+
+                            if (userLevel != 1)
+                            {
+                                return Json(new { status = false, message = $"This document exists in Weighbridge Serial No : {wbNo}  V_Date : {wbDate:dd/MM/yyyy}, Edit not allowed."});
+                            }
+                            else
+                            {
+                                return Json(new { status = true, message = $"This document exists in Weighbridge Serial No : {wbNo}  V_Date : {wbDate:dd/MM/yyyy}, Edit not allowed."});
+                            }                          
+                        }
+                    }
+                }
+            }
 
             return Json(new { status = true });
-
-
-
         }
 
 
+        public int GetInt(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                con.Open();
+                using SqlCommand cmd = new SqlCommand(query, con);
+                object result = cmd.ExecuteScalar();
 
+                if (result == null || result == DBNull.Value)
+                    return 0;
 
+                return Convert.ToInt32(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetInt() Error: " + ex.Message);
+                return 0;
+            }
+        }
 
     }
 }
