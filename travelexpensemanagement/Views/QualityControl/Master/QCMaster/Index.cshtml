@@ -2,6 +2,100 @@
     ViewBag.Title = "QC Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-check-circle"></i>
+        </div>
+        <div class="erppage-header-title">QC Master</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCMasterList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="QCMasterform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Name</label>
+                    <input type="text" class="erppage-input" id="TxtName" placeholder="Enter Name">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Short Name</label>
+                    <input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Type</label>
+                    <select class="erppage-input erppage-select" id="ddlQCGroup">
+                        <option value="">Select QC Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Max PPM</label>
+                    <input type="text" class="erppage-input" id="TxtMaxPPM" placeholder="Enter Max PPM">
+                </div>
+            </div>
+            <div class="erppage-grid1">
+                <div class="erppage-divfield erppage-col-span-3">
+                    <label class="erppage-label"></label>
+                    <div class="erppage-toggle-container">
+                        <span class="erppage-toggle-text active" id="statusText">Active</span>
+                        <label class="erppage-toggle">
+                            <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                            <span class="erppage-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblQCMasteradd" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:80px;" />    
+                            <col style="width:220px;" />   
+                            <col style="width:120px;" />   
+                            <col style="width:120px;" />   
+                            <col style="width:120px;" />   
+                            <col style="width:140px;" />   
+                            <col style="width:120px;" />   
+                            <col style="width:120px;" />   
+                            <col style="width:250px;" />   
+                            <col style="width:120px;" />   
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Parameter</th>
+                                <th>Unit</th>
+                                <th>Std Result</th>
+                                <th>Deduct Qty</th>
+                                <th>Deduct Type</th>
+                                <th>Ppm Yes/No</th>
+                                <th>Base Price</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <style>
     .btn-plus {
         padding: 5px !important;
@@ -10,24 +104,9 @@
         margin: 0px !important;
     }
 </style>
-<fieldset>
-    <legend class="legend-field">QC Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "QCMasterList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <!-- 📝 Form starts -->
-    <form id="QCMasterform">
+@* <form id="QCMasterform">
         <input type="hidden" class="form-control" id="CODE" name="CODE">
-
-        <!-- Row 1 -->
         <div class="row">
             <div class="col-md-3">
                 <div class="form-group">
@@ -56,8 +135,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Trigger Button -->
         <div class="row">
             <div class="col-md-12">
                 <div class="btn-align">
@@ -95,7 +172,7 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="TxtDeductQty">Deduct Qty</label>
-                    @* <input type="text" class="form-control" id="TxtDeductQty" name="DeductQty" placeholder="Qty"> *@
+                    
                     <select class="form-control" id="ddlDeductQty" name="ddlDeductQty">
                         <option value="">--Select Deduct Qty--</option>
                         <option value="Fix">Fix</option>
@@ -185,7 +262,6 @@
             <ul class="pagination" id="tablePagination"></ul>
         </div>
 
-        <!-- Final Buttons Row -->
         <div class="row">
             <div class="offset-md-7 col-md-2">
                 <div class="active-toggle btn-align">
@@ -199,15 +275,14 @@
             <div class="col-md-3">
                 <div class="btn-last">
                     <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    @* <button type="submit" id="btnSubmit" class="btn btn-primary">Submit</button> *@
+                    
                     <button type="button" id="btnUpdate" class="btn btn-primary">Update</button>
                     <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
                 </div>
             </div>
         </div>
-    </form>
-    <!-- 📝 Form ends -->
-</fieldset>
+    </form> *@
+
 
 <!-- 🧾 Modal Moved Outside the Form -->
 <div class="modal fade" id="qcReportModal" tabindex="-1" aria-labelledby="qcReportModalLabel" aria-hidden="true">
@@ -665,7 +740,7 @@
             success: function(data) {
                 const $ddl1 = $('#ddlQCGroup');
                 const $ddl2 = $('#ddlQCGroupPR');
-                $ddl1.empty().append('<option value="">-- Select QC Group --</option>');
+                $ddl1.empty().append('<option value="">Select QC Group</option>');
                 $ddl2.empty().append('<option value="">-- Select Group --</option>');
 
                 $.each(data, function(i, item) {

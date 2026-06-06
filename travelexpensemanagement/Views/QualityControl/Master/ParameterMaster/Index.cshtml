@@ -2,79 +2,69 @@
     ViewBag.Title = "Parameter Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">Parameter Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-						onclick="handleBack('@Url.Action("Index", "ParameterMasterList")', readOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <form id="QCParameterForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-
-        <div class="row">
-            <!-- QC Parameter Name -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtQCParameterName">QC Parameter Name <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="TxtQCParameterName" maxlength="30" name="QCParameterName" placeholder="Enter QC Parameter Name">
-                </div>
-            </div>
-
-            <!-- Short Name -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtShortName">Short Name</label>
-                    <input type="text" class="form-control" id="TxtShortName" maxlength="30" name="ShortName" placeholder="Enter Short Name">
-                </div>
-            </div>
-
-            <!-- QC Unit -->
-            <div class="col-md-3">
-                <div class="form-group">
-					<label for="ddlQCUnit">QC Unit <span class="required">*</span></label>
-                    <select class="form-control" id="ddlQCUnit" name="QCUnit">
-                        <option selected disabled>--Select Unit Name--</option>                       
-                    </select>
-                </div>
-            </div>
-
-            <!-- Quantity -->
-            <div class="col-md-3">
-                <div class="form-group form-check mt-4">
-                    <input type="checkbox" class="form-check-input" id="ChkQuantity" value="0" name="Quantity">
-                    <label class="form-check-label" for="ChkQuantity"> Quantity</label>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-                <div class="active-toggle btn-align">
-                    <label class="toggle-switch">
-						<input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="label-status" id="statusText">Active</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="btn-last">
-					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-   </form>
-</fieldset>
-
+<div class="erppage-header">
+	<div class="erppage-header-left">
+		<div class="erppage-header-icon">
+			<i class="fa fa-shield"></i>
+		</div>
+		<div class="erppage-header-title">Parameter Master</div>
+	</div>
+	<div class="erppage-header-right">
+	
+		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ParameterMasterList")', readOnly)">
+			<i class="fa-solid fa-arrow-left"></i>Back to list
+		</button>
+	</div>
+</div>
+<div id="QCParameterForm">
+	<input type="hidden" class="form-control" id="TxtCode" name="CODE">
+	<div class="erppage-container">
+		<fieldset class="erppage-fieldset">
+			<div class="erppage-grid4">
+				<div class="erppage-divfield">
+					<label class="erppage-label">QC Par Name</label>
+					<input type="text" class="erppage-redinput" id="TxtQCParameterName" maxlength="30" name="QCParameterName" placeholder="Enter QC Parameter Name">
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">Short Name</label>
+					<input type="text" class="erppage-input" id="TxtShortName" maxlength="30" name="ShortName" placeholder="Enter Short Name">
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">QC Unit</label>
+					<select class="erppage-input erppage-required" id="ddlQCUnit" name="QCUnit">
+						<option selected disabled>Select Unit Name</option>
+					</select>
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label"></label>
+					<div class="erppage-checkbox-wrap">
+						<input type="checkbox" id="ChkQuantity" class="erppage-checkbox-input">
+						<label class="erppage-checkbox-label">Quantity</label>
+					</div>
+				</div>
+			</div>
+			<div class="erppage-grid4">
+				<div class="erppage-divfield erppage-col-span-3">
+					<label class="erppage-label"></label>
+					<div class="erppage-toggle-container">
+						<span class="erppage-toggle-text active" id="statusText">Active</span>
+						<label class="erppage-toggle">
+							<input type="checkbox" id="DdActive" value="1" checked>
+							<span class="erppage-toggle-slider"></span>
+						</label>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+		<div class="erppage-actions">
+			<button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+				<i class="fa-solid fa-floppy-disk"></i>
+				<span>Save</span>
+			</button>
+		</div>
+	</div>
+</div>
 
 <script>
 	let PreviousInputDt = "";
@@ -83,6 +73,7 @@
 	
 
 	$(document).ready(function () {
+		$('#TxtQCParameterName').focus();  
 		// getUnitList();
 		//=======ddlQCUnit============
 		bindDropdown('ParameterMaster', 'QCUnit', '#ddlQCUnit', ' Select Unit ', null, null, false, null, true)
@@ -341,7 +332,7 @@
 		const form = $('#QCParameterForm');
 		$('#statusText').addClass('text-muted');
 		$('input, #ddlQCUnit, #ChkQuantity, #DdActive').prop('disabled', true);
-		$('#btn-save, #cancelBtn').hide();
+		$('#btn-save').hide();
 		form.addClass('erppage-readonly');
 	}
 

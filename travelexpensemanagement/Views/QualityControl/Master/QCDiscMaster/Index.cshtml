@@ -1,122 +1,146 @@
 ﻿@{
     ViewBag.Title = "QC Disc Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
-<fieldset>
-    <legend class="legend-field">QC Disc Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "QCDiscMasterList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-clipboard-check"></i>
+        </div>
+        <div class="erppage-header-title">QC Disc Master</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCDiscMasterList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="QCDiscMasterForm">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Item Name</label>
+                    <select class="erppage-input erppage-select" id="ddlItemName">
+                        <option value="">Select Item Name</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Parameter</label>
+                    <select class="erppage-input erppage-select" id="ddlParameter">
+                        <option value="">Select Parameter Name</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Rate</label>
+                    <input type="number" class="erppage-input" id="TxtRate" placeholder="Enter Rate">
+                </div>
+                
             </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
     </div>
-
-    <form id="QCDiscMasterForm">
-        <input type="hidden" class="form-control" id="CODE" name="CODE">
-
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlItemName">Item Name</label>
-                    <select class="form-control" id="ddlItemName" name="ItemName">
-                        <option value="">--Select Item Name--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlParameter">Parameter Name</label>
-                    <select class="form-control" id="ddlParameter" name="ItemName">
-                        <option value="">--Select Parameter--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtRate">Rate</label>
-                    <input class="form-control" type="number" id="TxtRate" name="TxtRate"  placeholder="Enter Rate">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="btn-align form-group-active">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="label-status" id="statusText">Active</span>
-                </div>
-            </div>
-            <div class="col-md-1">
-                <div class="form-group-mt">
-                    <button id="addRow" class="btn btn-success btn-field"><i class="fa fa-plus"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlImportFrom">Import From</label>
-                    <select class="form-control" id="ddlImportFrom" name="ImportFrom">
-                        <option value="">--Select Import From--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group-mt">
-                    <button id="btnImport" type="submit" class="btn btn-import btn-field"><i class="fa fa-file-import"></i>Import</button>
-                </div>
-            </div>
-            <div class="col-md-3">
-            </div>
-            <div class="col-md-3">
-            </div>
-        </div>
+</div>
 
 
-        @* Getting Desc Master data by Item Code *@
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblQCDiscMasterByItem" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;">Code</th>
-                            <th>Qcpcode</th>
-                            <th>Parameter Name</th>
-                            <th>Rate</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-       @*  <div class="pagination-wrapper">
-            <ul class="pagination" id="tablePagination"></ul>
-        </div> *@
 
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-           </div>
-            <div class="col-md-3">
-                <div class="btn-last">
-                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-
-   
-
-</fieldset>
 <script>
+    $(document).ready(async function(){
+        const urlParams = new URLSearchParams(location.search);
+        const rowId = parseInt(urlParams.get('id'));
+        isReadOnly = urlParams.get('readOnly') === 'true';
+       
+        await LoadAllDropDowns();
+
+        if (rowId > 0) {
+            loadDataOnEdit(rowId);
+        }
+
+        $('#btnSave').click(function (e) {
+            e.preventDefault();
+            SaveData();
+        });
+    });
+
+    async function LoadAllDropDowns(){
+        await Promise.all([
+
+            bindDropdown("QCDiscMaster", "ITEM", "#ddlItemName","Select Item Name", null, null, false, null, true),
+
+            bindDropdown("QCDiscMaster", "PARAMETER", "#ddlParameter", "Select Parameter", null, null, false, null,true),
+
+        ]);
+    }
+
+    async function SaveData(){
+        let ITEM_CODE = $('#ddlItemName').val();
+        let ITEM_NAME = $('#ddlItemName option:selected').text();
+        let QCP_CODE = $('#ddlParameter').val();
+        let QCP_DIFF = parseFloat($('#TxtRate').val()) || 0;
+    
+        try {
+            const response = await $.ajax({
+                url: '/QCDiscMaster/SaveAndUpdateData',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    ITEM_CODE: ITEM_CODE,
+                    ITEM_NAME: ITEM_NAME,
+                    QCP_CODE: QCP_CODE,
+                    QCP_DIFF: QCP_DIFF
+                })
+            });
+            if (response.success) {
+                console.log("Response Saved",response);
+                toastr.success("Data saved successfully.");
+                // setTimeout(() => {
+                //     window.location.href = '/QCDiscMasterList/Index';
+                // }, 1000);
+            } else {
+                toastr.error(response.message || "Save failed.");
+            }
+        } catch (error) {
+            toastr.error('An error occurred while saving data: ' + error);
+        }
+    }
+
+    async function loadDataOnEdit(itemCode) {
+        try {
+            const res = await $.ajax({
+                url: '/QCDiscMaster/GetQcDiscOnChange',
+                type: 'GET',
+                data: { itemCode: itemCode }
+            });
+
+            if (res.success && res.lists.length > 0) {
+
+                let first = res.lists[0];
+                console.log("List data", first);
+
+                $('#ddlItemName').val(first.iteM_CODE).trigger('change.select2');
+                $('#ddlParameter').val(first.qcP_CODE).trigger('change.select2');
+                $('#TxtRate').val(first.qcP_DIFF);
+
+            } else {
+                toastr.info("No data found for selected item");
+            }
+
+        } catch (error) {
+            toastr.error("Error loading data");
+        }
+    }
+
+</script>
+
+@* <script>
     let qcDiscData = [];
     let isFormReadOnly = false;
 
@@ -149,12 +173,9 @@
                 }
             }, 100);
         }
+
         loadItemFromList();
         loadParameterList();
-
-        $('#cancelBtn').on('click', function () {
-            window.location.href = '/ColorGroupList/Index';
-        });
 
         $('#ACTIVE').on('change', function () {
             let status = $(this).is(':checked') ? 'Active' : 'Inactive';
@@ -182,6 +203,7 @@
             }
         });
     }
+
     function loadItemFromList() {
         $.ajax({
             url: '/QCDiscMaster/GetItemFromList',
@@ -201,6 +223,7 @@
             }
         });
     }
+
     function loadParameterList() {
         $.ajax({
             url: '/QCDiscMaster/GetParameterList',
@@ -263,6 +286,7 @@
             }
         });
     }
+
     function addManualRow() {
         let itemCode = $('#ddlItemName').val();
         let itemName = $('#ddlItemName option:selected').text();
@@ -305,6 +329,7 @@
 
         loadTableData(); // Reload updated data
     }
+
     function loadTableData() {
         let tbody = $('#tblQCDiscMasterByItem tbody');
         tbody.empty();
@@ -340,12 +365,14 @@
 
         loadTableData(); // Re-render after deletion
     });
+
     $('#ddlItemName').on('change', function () {
         let itemCode = $(this).val();
         if (itemCode) {
             loadServerData(itemCode);
         }
     });
+
     $('#addRow').on('click', function (e) {
         e.preventDefault();
         addManualRow();
@@ -360,6 +387,7 @@
         }
         importQcDiscData(selectedItemCode, qcDiscData)
     });
+
     $('#btnSave').click(function (e) {
         e.preventDefault(); 
 
@@ -414,6 +442,5 @@
         });
     }
 
-
-
 </script>
+ *@

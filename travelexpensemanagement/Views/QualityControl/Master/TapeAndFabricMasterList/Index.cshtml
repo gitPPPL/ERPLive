@@ -1,251 +1,429 @@
 ﻿@{
 	ViewBag.Title = "Tape And Fabric Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+	var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
-<fieldset>
-	<legend class="legend-field">Tape And Fabric Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TapeAndFabricMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add Tape and Fabric 
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Tape And Fabric Master List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button type="button" onclick="window.location.href='@Url.Action("Index", "TapeAndFabricMaster")'" class="erppage-header-back">
+				<i class="fa fa-plus"></i>Add New
 			</button>
-			<button class="btn btn-print">
+		}
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by all columns" />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="QCTapeAndFabricReport()">
 				<i class="fa fa-print"></i> Print
 			</button>
-			<button class="btn btn-export">
-				<i class="fas fa-file-export"></i> Export
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+				<i class="fa fa-file-excel"></i> Export
 			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-		</div>
+		}
 	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblTapeAndFabricMaster" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Name</th>						 
-						<th>Mesh Name</th>
-						<th style="display:none;">Std Gram</th>
-						<th>Min Gram</th>
-						<th>Max Gram</th>
-						<th>Gsm</th>
-						<th>Denier</th>
-						<th>Unit Name</th>						 
-						<th>Color Name</th>
-						<th style="display:none;">Width</th>
-						<th style="display:none;">GPD</th>
-						<th style="display:none;">Min GPD</th>
-						<th style="display:none;">Max GPD</th>
-						<th style="display:none;">Std Strength</th>
-						<th style="display:none;">Strength Max</th>
-						<th style="display:none;">Strength Min</th>
-						<th style="display:none;">Std Elong</th>
-						<th style="display:none;">Elong Max</th>
-						<th style="display:none;">Elong Min</th>
-						<th style="display:none;">Unlam Fab</th>
-						<th style="display:none;">Lam Fab</th>
-						<th>Active</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-	<div class="pagination-wrapper">
-		<ul class="pagination" id="tablePagination"></ul>
-	</div>
-</fieldset>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblTapeAndFabricMaster" class="excel-table fixed-grid-table resizable-table">
+			<colgroup>
+				<col style="display:none;">
+				<col style="width: 134px;">
+				<col style="width: 45px;">
+				<col style="width: 45px;">
+				<col style="width: 45px;">
+				<col style="width: 45px;">
+				<col style="width: 32px;">
+				<col style="width: 26px;">
+				<col style="width: 35px;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="display:none;">
+				<col style="width: 30px;">
+				<col style="width: 60px;">
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Name</th>
+					<th>Mesh Name</th>
+					<th>Color Name</th>
+					<th>Unit Name</th>
+					<th>Std Gram</th>
+					<th>Denier</th>
+					<th>Gsm</th>
+					<th>Std GPD</th>
+					<th class="hidden-col">Std Strength</th>
+					<th class="hidden-col">Std Elong</th>
+					<th class="hidden-col">Min Gram</th>
+					<th class="hidden-col">Max Gram</th>
+					<th class="hidden-col">Width</th>
+					<th class="hidden-col">Min GPD</th>
+					<th class="hidden-col">Max GPD</th>
+					<th class="hidden-col">Strength Max</th>
+					<th class="hidden-col">Strength Min</th>
+					<th class="hidden-col">Elong Max</th>
+					<th class="hidden-col">Elong Min</th>
+					<th class="hidden-col">Unlam Fab</th>
+					<th class="hidden-col">Lam Fab</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
 
+			<tbody></tbody>
+		</table>
+	</div>
+
+	<!-- PAGINATION -->
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+
+		<div class="pagination-center">
+			<button class="page-nav" id="prevBtn">‹</button>
+
+			<div id="tablePagination" class="page-numbers"></div>
+
+			<button class="page-nav" id="nextBtn">›</button>
+		</div>
+
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
+
+
+
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
 
 <script>
+	var permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower()
+	};
+	window.globalVariables = {
+		compCode: "@globalVariables?.PubCompCode",
+		yearCode: "@globalVariables?.PubFYearCode",
+		branchCode: "@globalVariables?.PubBranchCode",
+		companyName: "@globalVariables?.CompanyName",
+		add1: "@globalVariables?.Address1",
+		add2: "@globalVariables?.Address2",
+
+	};
+	window.database = {
+		 db: "@ViewBag.DatabaseName"
+	}
+
 	let currentPage = 1;
 	let pageSize = 10;
 
+	//=============Page Load=========
+	let TapeAndFabricPagination;
 	$(document).ready(function () {
-		GetMasterDataList();
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			GetMasterDataList();
-		});
-	});
-
-	function GetMasterDataList() {
-		const searchTerm = $('#searchBox').val().trim();
-		$.ajax({
-			url: '@Url.Action("GetTape_FabricList", "TapeAndFabricMasterList")',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
+		TapeAndFabricPagination = Pagination.create({
+			pageSize: 10,
+			paginationContainer: '#pageNumbers',
+			infoContainer: '#pageInfoText',
+			loader: function (params) {
+				$.ajax({
+					url: '/TapeAndFabricMasterList/GetTape_FabricList',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						searchTerm: $('#searchBox').val(),
+						pageNumber: params.pageNumber,
+						pageSize: params.pageSize
+					},
+					success: function (res) {
+						params.callback({
+							data: res.data,
+							totalCount: res.totalCount
+						});
+					},
+					error: function (xhr) {
+						showToast('Error loading data', { type: "error" });
+					}
+				});
 			},
-			success: function (res) {
-				const mastListData = res.data || [];
-				const totalCount = res.totalCount || 0;
-				let tbody = $('#tblTapeAndFabricMaster tbody');
+			render: function (docs) {
+				console.log(docs);
+				const tbody = $('#tblTapeAndFabricMaster tbody');
 				tbody.empty();
-				console.log(mastListData);
-				if (mastListData.length === 0) {
-					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
+				if (!docs.length) {
+					tbody.append(`<tr><td colspan="10" class="text-center text-muted">No records found.</td></tr>'`);
 					return;
 				}
-				$.each(mastListData, function (index, item) {
+
+				$.each(docs, function (index, item) {
+					let actions = '';
+					if (permissions.canEdit) {
+						actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.code}')"><i class="fa fa-edit"></i></button>`;
+					}
+					actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.code}')"><i class="fa fa-eye"></i></button>`;
+					if (permissions.canDelete) {
+						actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTapeAndFabric('${item.code}')"><i class="fa fa-trash"></i></button>`;
+					}
 					tbody.append(`
-						<tr>
-							<td class="code d-none">${item.CODE}</td>
-							<td>${item.NAME}</td>
-							<td>${item.MESH_CODE}</td>
-							<td class="d-none">${item.STD_GRAM}</td>
-							 <td>${item.MIN_GRAM}</td>
-							<td>${item.MAX_GRAM}</td>
-							<td>${item.GSM}</td>
-							 <td>${item.DENIER}</td>
-							<td>${item.UNIT_NAME}</td>
-							<td>${item.COLOR_CODE}</td>
-							 <td class="d-none">${item.WIDTH}</td>
-							<td class="d-none">${item.GPD}</td>
-							<td class="d-none">${item.MIN_GPD}</td>
-							 <td class="d-none">${item.MAX_GPD}</td>
-							<td class="d-none">${item.STD_STRENGTH}</td>
-							<td class="d-none">${item.STRENGTH_MAX}</td>
-							 <td class="d-none">${item.STRENGTH_MIN}</td>
-							<td class="d-none">${item.STD_ELONG}</td>
-							<td class="d-none">${item.ELONG_MAX}</td>
-							<td class="d-none">${item.ELONG_MIN}</td>
-							<td class="d-none">${item.UNLAM_FAB}</td>
-							<td class="d-none">${item.LAM_FAB}</td>
-							<td>${item.ACTIVE === 1 ? 'Yes' : 'No'}</td>
-							<td>
-								<button class="btn btn-sm btn-light" onclick="AddOrEditFunction('${item.CODE}')" title="Edit">
-									<i class="fas fa-edit"></i>
-								</button>
-								<button class="btn btn-sm btn-light" onclick="viewMenuDetails('${item.CODE}')" title="View Detail">
-									<i class="fas fa-eye"></i>
-								</button>
-								<button class="btn btn-sm btn-light btn-delete" title="Delete">
-									<i class="fas fa-trash text-danger"></i>
-								</button>
-							</td>
+						 <tr>
+							<td class="code d-none">${item.code}</td>
+							<td>${item.name}</td>
+							<td>${item.mesH_NAME}</td>
+							<td>${item.coloR_NAME}</td>
+							<td>${item.uniT_NAME}</td>
+							<td>${item.stD_GRAM}</td>
+							<td>${item.denier}</td>
+							<td>${item.gsm}</td>
+							<td>${item.gpd}</td>
+							<td class="d-none">${item.stD_STRENGTH}</td>
+							<td class="d-none">${item.stD_ELONG}</td>
+							<td class="d-none">${item.miN_GRAM}</td>
+							<td class="d-none">${item.maX_GRAM}</td>
+							<td class="d-none">${item.width}</td>
+							<td class="d-none">${item.miN_GPD}</td>
+							<td class="d-none">${item.maX_GPD}</td>
+							<td class="d-none">${item.strengtH_MAX}</td>
+							<td class="d-none">${item.strengtH_MIN}</td>
+							<td class="d-none">${item.elonG_MAX}</td>
+							<td class="d-none">${item.elonG_MIN}</td>
+							<td class="d-none">${item.unlaM_FAB}</td>
+							<td class="d-none">${item.laM_FAB}</td>
+							<td>${item.active === 1 ? 'Yes' : 'No'}</td>
+							<td class="action-col">${actions}</td>
 						</tr>
 					`);
 				});
 
-				renderPagination(totalCount, pageSize, currentPage);
-			},
-			error: function (xhr) {
-				toastr.error('Error loading PO list: ' + xhr.responseText);
 			}
 		});
+		// First Load
+		TapeAndFabricPagination.load();
+		// Search
+		$('#searchBox').keyup(function () {
+			TapeAndFabricPagination.load();
+		});
+	});
+
+	// Page Size Change
+	function changeRowsPerPage() {
+		TapeAndFabricPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+		TapeAndFabricPagination.load();
 	}
-
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const paginationContainer = $('#tablePagination');
-		paginationContainer.empty();
-
-		if (total <= 0 || totalPages <= 1) return;
-
-		let paginationHtml = '';
-
-		if (currentPage > 1) {
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, currentPage + 2);
-
-		if (currentPage <= 3) endPage = Math.min(5, totalPages);
-		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-		for (let i = startPage; i <= endPage; i++) {
-			paginationHtml += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1"
-						onclick="goToPage(${i})">${i}</button>`;
-		}
-
-		if (currentPage < totalPages) {
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-
-		paginationContainer.html(paginationHtml);
-	}
-
-	function goToPage(page) {
-		currentPage = page;
-		GetMasterDataList();
-	}
-
+	
+	//==============Edit==============
 	function AddOrEditFunction(rowId) {
 		window.location.href = '/TapeAndFabricMaster/Index?id=' + encodeURIComponent(rowId);
 	}
-
+	
+	//==============View==============
 	function viewMenuDetails(rowId) {
 		window.location.href = '/TapeAndFabricMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 	}
 
-	 $(document).on('click', '.btn-delete', function() {
-				const $row = $(this).closest('tr');
-				const CodeforDel = $row.find('.code').text().trim();
+	//=================Delete================
+	function deleteTapeAndFabric(docId) {
+
+		// STEP 1: Validate first
+		$.ajax({
+			url: `/TapeAndFabricMasterList/IsTapeFabricDeletable`,
+			type: 'GET',
+			data: { docId: docId },
+
+			success: function (response) {
+
+				if (!response.success) {
+					Swal.fire('Failed', response.message, 'warning');
+					return;
+				}
+
+				// STEP 2: Prepare message
+				let swalText = "This will permanently delete the Tape And Fabric Details.";
+				let cancelBtn = true;
+				let confirmBtn = true;
+				let swalTitle = "Are you sure?";
+				if (response.isExists) {
+					swalText = response.message;
+					cancelBtn = false;
+					confirmBtn = false;
+					swalTitle = "Can't delete!!";
+				}
+
+				// STEP 3: Show only ONE popup
 				Swal.fire({
-					title: 'Are you sure you want to delete?',
-					text: "This action cannot be undone.",
+					title: swalTitle,
+					html: swalText,
 					icon: 'warning',
-					showCancelButton: true,
+					showCancelButton: cancelBtn,
+					showConfirmButton: confirmBtn,
+					confirmButtonColor: '#d33',
+					cancelButtonColor: '#3085d6',
 					confirmButtonText: 'Yes, delete it!',
-					cancelButtonText: 'No, cancel!',
-					reverseButtons: true
+					cancelButtonText: 'Cancel'
 				}).then((result) => {
-					if (result.isConfirmed) {
-						$.ajax({
-							url: '/TapeAndFabricMasterList/DelTape_FabricMast',
-							type: 'DELETE',
-							data: { Code: CodeforDel },
-							success: function(data) {
-								if (data.status === true) {
-									Swal.fire(
-										'Deleted!',
-										'Your data has been deleted.',
-										'success'
-									);
-									$row.remove();
-									GetMasterDataList();
-								} else {
-									Swal.fire(
-										'Error!',
-										'There was an issue deleting the data.',
-										'error'
-									);
-								}
-							},
-							error: function(xhr, status, error) {
-								Swal.fire(
-									'Error!',
-									'Data could not be deleted: ' + error,
-									'error'
-								);
+
+					if (!result.isConfirmed) return;
+
+					// STEP 4: Delete
+					$.ajax({
+						url: `/TapeAndFabricMasterList/DelTape_FabricMast`,
+						type: 'POST',
+						data: { docId: docId },
+
+						success: function (res) {
+
+							if (res.success) {
+
+								Swal.fire({
+									icon: 'success',
+									title: 'Deleted!',
+									text: res.message || 'Deleted successfully',
+									showConfirmButton: false,   // Hide the OK button
+									timer: 2000,                 // Auto close
+								});
+								setTimeout(() => {
+									TapeAndFabricPagination.load();
+								}, 2000);
+							} else {
+								Swal.fire('Failed', res.message, 'warning');
 							}
-						});
-					}
+						},
+
+						error: function () {
+							Swal.fire('Error!', 'Error in deleting.', 'error');
+						}
+					});
+
 				});
+			},
+
+			error: function () {
+				Swal.fire('Error!', 'Something went wrong.', 'error');
+			}
+		});
+	}
+	
+	// ================= Download Excel =================
+	document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+		e.preventDefault();
+		window.location.href = "/TapeAndFabricMasterList/ExportAllDocs";
 	});
 
+	// ================= Download Pdf =================
+	function QCTapeAndFabricReport() {
+
+		var reportName = "loomstd";
+
+		// Crystal Report Formula
+		var formula =
+			"{TAPE_NFABRIC_MAST.COMP_CODE} = " + window.globalVariables.compCode;
+		const today = formatDateddmmyyyy(new Date());
+
+
+		var formulaFields = {
+			Reportname: reportName,
+			selectionFormula: formula,
+			Database: window.database.db,
+			Parameters: {
+				comp_name: window.globalVariables.companyName,
+				comp_add1: window.globalVariables.add1,
+				comp_add2: window.globalVariables.add2,
+				F1: "'" + today + "'",
+				RPTNAME: "TAPE/FABRIC QC STANDARD MASTER"
+			}
+		};
+
+		var now = new Date();
+		var day = String(now.getDate()).padStart(2, '0');
+		var month = String(now.getMonth() + 1).padStart(2, '0');
+		var year = String(now.getFullYear()).slice(-2);
+		var hours = String(now.getHours()).padStart(2, '0');
+		var minutes = String(now.getMinutes()).padStart(2, '0');
+		var seconds = String(now.getSeconds()).padStart(2, '0');
+		var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+		$.ajax({
+			url: 'http://localhost:34088/Report/PendingQCReport',
+			type: 'POST',
+			data: JSON.stringify(formulaFields),
+			contentType: "application/json",
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (response) {
+				console.log('PDF response:', response);
+				var file = new Blob([response], { type: 'application/pdf' });
+				var fileName = `${reportName}_${timestamp}.pdf`;
+
+				var link = document.createElement('a');
+				link.href = URL.createObjectURL(file);
+				link.download = fileName;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error generating report:', error);
+			}
+		});
+	}
 </script>

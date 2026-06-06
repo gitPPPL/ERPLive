@@ -184,16 +184,14 @@
 }
 /* For single select */
 .select2-container .select2-selection--single {
-    min-width: 100px; /* minimum width */
-    width: auto; /* allows it to grow if needed */
+    width: 100% !important;
 }
 
-    /* Make text wrap inside the selection */
     .select2-container .select2-selection--single .select2-selection__rendered {
-        white-space: normal; /* allow wrapping */
-        word-wrap: break-word; /* break long words */
+        white-space: nowrap !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-
 /* For multiple select */
 .select2-container .select2-selection--multiple {
     min-width: 100px;
@@ -202,7 +200,7 @@
 
     /* Wrap text for choices in multiple select */
     .select2-container .select2-selection--multiple .select2-selection__rendered {
-        white-space: normal;
+       
         word-wrap: break-word;
     }
 /* OUTER Select2 container */
@@ -711,23 +709,49 @@
 }
 
 /* ===== FIELD ===== */
-.erppage-divfield {
+/*.erppage-divfield {
     display: grid;
     grid-template-columns: 80px 1fr auto;
     align-items: center;
     gap: 4px;
-    flex-direction: column; /* 🔥 stack label + input always */
+    flex-direction: column;*/ /* 🔥 stack label + input always */
+    /*min-width: 0;
+}*/
+.erppage-divfield {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.erppage-label {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.erppage-input,
+.select2-container {
+    flex: 1;
+    min-width: 0;
 }
 
 /* ===== Select2 Container ===== */
 .erppage-select + .select2-container {
     width: 100% !important;
-    font-size: 13px;
+    max-width: 100% !important;
 }
 
+.select2-container {
+    min-width: 0 !important;
+}
+.erppage-select + .select2-container {
+    max-width: 100%;
+}
 /* ===== Selected Box ===== */
 .select2-container--default .select2-selection--single {
     height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    overflow: hidden;
     border: 1px solid #ced4da;
     border-radius: 6px;
     padding: 4px 10px;
@@ -738,9 +762,13 @@
 
     /* ===== Text inside select ===== */
     .select2-container--default .select2-selection--single .select2-selection__rendered {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 20px !important;
         color: #121212 !important;
-        line-height: normal !important;
         padding: 4px 8px;
+        padding-right:0px;
         word-wrap: break-word;
     }
 
@@ -823,10 +851,10 @@
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 13px;
+    font-size: 12px;
     color: #2c2c2c;
     border-left: 3px solid #ff2626;
 }
@@ -855,10 +883,10 @@
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    padding: 4px 6px;
+    padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 13px;
+    font-size: 12px;
     color: #181818;
 }
 /* ===== TEXTAREA ===== */
@@ -897,7 +925,7 @@ select.erppage-input {
     background-position: right 10px center;
     background-size: 16px;
     padding-right: 30px;
-    font-size: 13px;
+    font-size: 12px;
     color: #2c2c2c;
 }
 
@@ -908,7 +936,31 @@ select.erppage-input {
     box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
 }
 /* wrapper for date + checkbox */
+/* ERP Checkbox */
+.erppage-checkbox-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+}
 
+.erppage-checkbox-input {
+    width: 16px;
+    height: 16px;
+    accent-color: #2f7d32; /* ERP Green Theme */
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.erppage-checkbox-label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    user-select: none;
+}
 
 /* date input takes full space */
 .erppage-dateinput {

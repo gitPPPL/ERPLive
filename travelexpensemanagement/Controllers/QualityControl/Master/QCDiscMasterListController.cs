@@ -15,7 +15,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-
         private int? userLevel;
         public QCDiscMasterListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
     DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService)

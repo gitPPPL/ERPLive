@@ -2,8 +2,204 @@
     ViewBag.Title = "QC Master List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>QC Master List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button type="button" class="erppagelist-btn erppagelist-btn-action" data-bs-toggle="modal" data-bs-target="#qcReportModal">
+            <i class="fa fa-file-alt"></i> Print Report
+        </button>
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "QCMaster")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+                data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblQCMaster" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="width:80px;" />     <!-- Code -->
+                <col style="width:250px;" />    <!-- Name -->
+                <col style="width:180px;" />    <!-- Short Name -->
+                <col style="width:180px;" />    <!-- QC Type -->
+                <col style="width:120px;" />    <!-- Status -->
+                <col style="width:120px;" />    <!-- Action -->
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Short Name</th>
+                    <th>QC Type</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button class="page-nav" id="prevBtn">‹</button>
+            <div id="tablePagination" class="page-numbers"></div>
+            <button class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+@* Modal Popup *@
+<div class="modal fade" id="qcReportModal" tabindex="-1" aria-labelledby="qcReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog small-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-print"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="qcReportModalLabel">Print Report</h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="erppagesmodal-body">
+                <div class="erppagesmodal-topbar">
+                    <div class="erppagesmodal-group">
+                        <label class="erppagesmodal-label">QC Group</label>
+                        <select class="erppagesmodal-input" id="ddlQCGroupPR" name="QCGroupPR">
+                            <option value="">Select Group</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="report-type-switch">
+                    <input type="radio" id="report1" name="reportType" checked>
+                    <label for="report1">Report 1</label>
+                    <input type="radio" id="report2" name="reportType">
+                    <label for="report2">Report 2</label>
+                </div>
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblPrintReport" class="excel-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="width:120px;" />
+                                <col style="width:300px;" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>QC Group</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="erppagesmodal-action">
+                    <button type="button" class="erppagesmodal-btn">
+                        <i class="fa fa-print"></i>
+                        Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@* <div class="modal fade" id="qcReportModal" tabindex="-1" aria-labelledby="qcReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="popup-header">
+                <h5 class="popup-title" id="qcReportModalLabel">Print Report</h5>
+                <i class="fa fa-close btn-close" data-bs-dismiss="modal"></i>
+            </div>
+            <div class="modal-body">
+                <form id="qcReportForm">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-text">
+                                <label>QC Group</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" id="ddlQCGroupPR" name="QCGroupPR">
+                                <option value="">--Select Group--</option>
+                            </select>
+                        </div>
+                    </div>
 
-<fieldset>
+                    <div class="row">
+                        <div class="col-md-6 radio-text">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="reportType" id="report1" value="Report 1" style="gap:10px;" checked>
+                                <label class="form-check-label" for="report1">Report 1</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="reportType" id="report2" value="Report 2">
+                                <label class="form-check-label" for="report2">Report 2</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="tblPrintReport" class="table-width">
+                                <thead class="table-head">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>QC Group</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="pagination-wrapper">
+                        <ul class="pagination" id="tablePagination"></ul>
+                    </div>
+
+                    <div class="custom-footer-btn btn-last">
+                        <button type="button" class="btn btn-print">
+                            <i class="fa fa-print"></i> Print
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+@* <fieldset>
     <legend class="legend-field">QC Master List</legend>
     <div class="row">
         <div class="col-lg-4">
@@ -54,7 +250,7 @@
     <div class="row p-3">
         <div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
     </div>
-</fieldset>
+</fieldset> *@
 <script>
     let currentPage = 1;
     let pageSize = 10;
@@ -94,13 +290,16 @@
                                 <td>${menu.name}</td>
                                 <td>${menu.shortName}</td>
                                 <td>${menu.qcGroup}</td>
-                                <td>${menu.active === 1 ? 'Yes' : 'No'}</td>
                                 <td>
-                                <i class="fas fa-edit text-primary" style="cursor:pointer" title="Edit" onclick="AddOrEditItemGroup(${menu.code})"></i>
-                                <i class="fas fa-eye text-secondary ms-2" style="cursor:pointer" title="View" onclick="viewItemGroupDetails(${menu.code})"></i>
-                                    <button class="btn btn-sm btn-light btn-delete" data-code="${menu.code}">
-                                        <i class="fas fa-trash text-danger" title="Delete"></i>
-                                    </button>
+                                ${menu.active === 1
+                                    ? '<span class="erppagestatus-badge erppagestatus-active"><i class="fa fa-check-circle"></i>&nbsp;Active</span>'
+                                    : '<span class="erppagestatus-badge erppagestatus-inactive"><i class="fa fa-times-circle"></i>&nbsp;Inactive</span>'
+                                }
+                                </td>
+                                <td class="action-col">
+                                    <button class="act-btn edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditItemGroup(${menu.code})"><i class="fa fa-edit"></i></button>
+                                    <button class="act-btn view" title="View Row" style="cursor:pointer;" onclick="viewItemGroupDetails(${menu.code})"><i class="fa fa-eye"></i></button>
+                                    <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" data-code="${menu.code}"><i class="fa fa-trash"></i></button>
                                 </td>
                             </tr>
                         `);

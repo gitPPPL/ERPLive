@@ -2,223 +2,184 @@
     ViewBag.Title = "Tape And Fabric Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<fieldset>
-    <legend class="legend-field">Tape And Fabric Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "TapeAndFabricMasterList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-tags"></i>
+        </div>
+        <div class="erppage-header-title">Tape And Fabric Master</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "TapeAndFabricMasterList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="TapeFabricMasterForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Name</label>
+                    <input type="text" class="erppage-redinput" id="TxtName" maxlength="50" placeholder="Enter Name">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Mesh Name</label>
+                    <select class="erppage-input erppage-required" id="ddlMeshName">
+                        <option value="">Select Mesh Name</option>
+                    </select>
+                </div>
+                
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Denier</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumDenier" placeholder="Enter Denier">
+                </div>
             </div>
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">PP/HD</label>
+                    <input type="text" class="erppage-redinput" id="TxtPPHD" maxlength="30" placeholder="Enter PP/HD">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Color</label>
+                    <select class="erppage-input erppage-required" id="ddlColor">
+                        <option value="">Select Color</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Width (MM.)</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumWidth" placeholder="Enter Width (MM.)">
+                </div>
+            </div>
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Std. Gram</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumStdGram" placeholder="Enter Std. Gram">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Min. Gram</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumMinGram" placeholder="Enter Min. Gram">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Max Gram</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumMaxGram" placeholder="Enter Max Gram">
+                </div>
+            </div>
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Std. GPD</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumStdGPD" placeholder="Enter Std. GPD">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Min. GPD</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumMinGPD" placeholder="Enter Min. GPD">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Max. GPD</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumMaxGPD" placeholder="Enter Max. GPD">
+                </div>
+            </div>
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Std. Strength</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumStdStrength" placeholder="Enter Std. Strength">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Strength Min.</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumStrengthMin" placeholder="Enter Strength Min.">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Strength Max.</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumStrengthMax" placeholder="Enter Strength Max.">
+                </div>
+            </div>
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Std. Elong(%)</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumStdElong" placeholder="Enter Std. Elong(%)">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Elong. Min (%)</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumElongMin" placeholder="Enter Elong. Min (%)">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Elong. Max(%)</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumElongMax" placeholder="Enter Elong. Max(%)">
+                </div>
+            </div>
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Lam fab Str</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumLamFabStr" placeholder="Enter Lam Fab Str">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Unlam Fab Str</label>
+                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumUnlamFabStr" placeholder="Enter Unlam Fab Str">
+                </div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">GSM</label>
+					<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this)" maxlength="18" id="NumGSM" placeholder="Enter GSM">
+				</div>
+                <div class="erppage-divfield erppage-col-span-3">
+                    <label class="erppage-label"></label>
+                    <div class="erppage-toggle-container">
+                        <span class="erppage-toggle-text active" id="statusText">Active</span>
+                        <label class="erppage-toggle">
+                            <input type="checkbox" id="DdActive" name="ACTIVE" checked>
+                            <span class="erppage-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
     </div>
+</div>
 
-    <form id="TapeFabricMasterForm">
-		<input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtName">Name <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="TxtName" name="Name" maxlength="50" placeholder="Enter Name">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumStdGram">Std. Gram</label>
-					<input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumStdGram" name="StdGram" placeholder="Enter Std. Gram">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumMaxGram">Max Gram</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumMaxGram" name="MaxGram" placeholder="Enter Max Gram">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDenier">Denier</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumDenier" name="Denier" placeholder="Enter Denier">
-                </div>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlColor">Color</label>
-                    <select class="form-control" id="ddlColor" name="Color">
-                        <option value="">--Select Color--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumStdGPD">Std. GPD</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumStdGPD" name="StdGPD" placeholder="Enter Std. GPD">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumMaxGPD">Max. GPD</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumMaxGPD" name="MaxGPD" placeholder="Enter Max. GPD">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumStrengthMin">Strength Min.</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumStrengthMin" name="StrengthMin" placeholder="Enter Strength Min.">
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumStdElong">Std. Elong(%)</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumStdElong" name="StdElong" placeholder="Enter Std. Elong(%)">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumElongMax">Elong. Max(%)</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumElongMax" name="ElongMax" placeholder="Enter Elong. Max(%)">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumLamFabStr">Lam fab Str</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumLamFabStr" name="LamFabStr" placeholder="Enter Lam Fab Str">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlMeshName">Mesh Name</label>
-                    <select class="form-control" id="ddlMeshName" name="MeshName">
-                        <option value="">--Select Mesh Name--</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumMinGram">Min. Gram</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumMinGram" name="MinGram" placeholder="Enter Min. Gram">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumGSM">GSM</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumGSM" name="GSM" placeholder="Enter GSM">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtPPHD">PP/HD</label>
-                    <input type="text" class="form-control" id="TxtPPHD" name="PPHD" maxlength="30" placeholder="Enter PP/HD">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumWidth">Width(MM.)</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumWidth" name="Width" placeholder="Enter Width (MM.)">
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumMinGPD">Min. GPD</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumMinGPD" name="MinGPD" placeholder="Enter Min. GPD">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumStdStrength">Std. Strength</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumStdStrength" name="StdStrength" placeholder="Enter Std. Strength">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumStrengthMax">Strength Max.</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumStrengthMax" name="StrengthMax" placeholder="Enter Strength Max.">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumElongMin">Elong. Min(%)</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumElongMin" name="ElongMin" placeholder="Enter Elong. Min(%)">
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumUnlamFabStr">Unlam Fab Str</label>
-                    <input type="text" oninput="allowOnlyNumbers(this)" maxlength="18" class="form-control" id="NumUnlamFabStr" name="UnlamFabStr" placeholder="Enter Unlam Fab Str">
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-                <div class="active-toggle btn-align">
-                    <label class="toggle-switch">
-						<input type="checkbox" id="DdActive" name="ACTIVE" value="1" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="label-status" id="statusText">Active</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="btn-last">
-					<button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-
-</fieldset>
 
 <script>
 	const inputSequence = [
 		'TxtName',
-		'NumStdGram',
-		'NumMaxGram',
-		'NumDenier',
-		'ddlColor',
-		'NumStdGPD',
-		'NumMaxGPD',
-		'NumStrengthMin',
-		'NumStdElong',
-		'NumElongMax',
-		'NumLamFabStr',
 		'ddlMeshName',
+		'NumStdGram',
 		'NumMinGram',
+		'NumMaxGram',
 		'NumGSM',
+		'NumDenier',
 		'TxtPPHD',
+		'ddlColor',
 		'NumWidth',
+		'NumStdGPD',
 		'NumMinGPD',
+		'NumMaxGPD',
 		'NumStdStrength',
+		'NumStrengthMin',
 		'NumStrengthMax',
+		'NumStdElong',
 		'NumElongMin',
-		'NumUnlamFabStr'
+		'NumElongMax',
+		'NumUnlamFabStr',
+		'NumLamFabStr'
 	];
 
 	let PreviousInputDt = "";
 	let MasterTblId ;
-	let readOnly;
+	var readOnly;
 
 	$(document).ready(function () {
-		getColorNameList();
-		getMeshNameList();
+		$('#TxtName').focus();
+		
+		//=======Bind Dropdowns============
+		bindDropdown('TapeAndFabricMaster', 'Color', '#ddlColor', ' Select Color ', null, null, false, null, false)
+		bindDropdown('TapeAndFabricMaster', 'Mesh', '#ddlMeshName', ' Select Mesh ', null, null, false, null, false)
 
 		MasterTblId = getQueryParam('id');
 		readOnly = getQueryParam('readOnly');
@@ -227,16 +188,16 @@
 			GetMasterDataList(MasterTblId, readOnly);
 		}
  
-	    inputSequence.forEach((id, index) => {
-		$(`#${id}`).on('keypress', function (e) {
-			if (e.key === 'Enter') {
-				e.preventDefault();
-				if (index + 1 < inputSequence.length) {
-					$(`#${inputSequence[index + 1]}`).focus();
+		inputSequence.forEach((id, index) => {
+			$(`#${id}`).on('keypress', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					if (index + 1 < inputSequence.length) {
+						$(`#${inputSequence[index + 1]}`).focus();
+					}
 				}
-			}
+			});
 		});
-	   });
 
 
 		$('#DdActive').on('change', function () {
@@ -249,12 +210,32 @@
 
 		$('#btn-save').on('click', function (e) {
 			e.preventDefault();
-			const masterData = collectFormData();
 
-			if (!masterData.Name) {
-				toastr.warning("Please fill all required fields");
-				return;
-			}
+			if (!validateRequiredField('#TxtName', 'Name')) return;
+			if (!validateRequiredField('#ddlMeshName', 'Mesh Name')) return;
+			if (!validateRequiredField('#NumDenier', 'Denier')) return;
+			if (!validateRequiredField('#TxtPPHD', 'PP/HD')) return;
+			if (!validateRequiredField('#ddlColor', 'Color')) return;
+			if (!validateRequiredField('#NumWidth', 'Width(MM.)')) return;
+			if (!validateRequiredField('#NumStdGram', 'Std. Gram')) return;
+			if (!validateRequiredField('#NumMinGram', 'Min. Gram')) return;
+			if (!validateRequiredField('#NumMaxGram', 'Max Gram')) return;
+			if (!validateRequiredField('#NumStdGPD', 'Std. GPD')) return;
+			if (!validateRequiredField('#NumMinGPD', 'Min. GPD')) return;
+			if (!validateRequiredField('#NumMaxGPD', 'Max. GPD')) return;
+			if (!validateRequiredField('#NumStdStrength', 'Std. Strength')) return;
+			if (!validateRequiredField('#NumStrengthMin', 'Strength Min.')) return;
+			if (!validateRequiredField('#NumStrengthMax', 'Strength Max.')) return;
+			if (!validateRequiredField('#NumStdElong', 'Std. Elong(%)')) return;
+			if (!validateRequiredField('#NumElongMin', 'Elong. Min(%)')) return;
+			if (!validateRequiredField('#NumElongMax', 'Elong. Max(%)')) return;
+			if (!validateRequiredField('#NumLamFabStr', 'Lam fab Str')) return;
+			if (!validateRequiredField('#NumUnlamFabStr', 'Unlam Fab Str')) return;
+			if (!validateRequiredField('#NumGSM', 'GSM')) return;
+			
+			
+
+			const masterData = collectFormData();
 
 			if (MasterTblId) {
 				EditMasterData(masterData);
@@ -267,13 +248,13 @@
 	function SaveMasterData(masterData) {
 		const Namee = masterData?.Name?.trim();		 
 		if (!Namee) {
-			toastr.warning("TapeNFabric Name is required.");
+			showToast("TapeNFabric Name is required!", { type: "warning" });
 			return;
 		}
 		checkExistOrNot(Namee)
 			.done(function (data) {
 				if (data?.status && data?.exists) {
-					toastr.warning("Duplicate TapeNFabric Name");
+					showToast("TapeNFabric Name Already Exists!", {type: "warning"});
 					return;
 				}
 
@@ -284,22 +265,22 @@
 					data: JSON.stringify(masterData),
 					success: function (response) {
 						if (response?.status) {
-							toastr.success('Data saved successfully.');
+							showToast('Data saved successfully.', {type:"success"});
 							resetFields();
 							setTimeout(() => {
 								window.location.href = '/TapeAndFabricMasterList/Index';
 							}, 1500);
 						} else {
-							toastr.error(response?.message || "Save failed. Please try again.");
+							showToast(response?.message || "Save failed. Please try again.", {type:"error"});
 						}
 					},
 					error: function () {
-						toastr.error("Error occurred while saving. Please contact admin.");
+						showToast("Error occurred while saving. Please contact admin.", {type:"error"});
 					}
 				});
 			})
 			.fail(function () {
-				toastr.error("Error while checking TapeNFabric name.");
+				showToast("Error while checking TapeNFabric name.", {type:"error"});
 			});
 	}
 
@@ -308,13 +289,13 @@
 			checkExistOrNot(masterData.Name)
 				.done(function (data) {
 					if (data?.status && data?.exists) {
-						toastr.warning("Duplicate TapeNFabric Name");
+						showToast("TapeNFabric Name Already Exists!", {type:"warning"});
 						return;
 					}
 					UpdateMasterData(masterData);
 				})
 				.fail(function () {
-					toastr.error("Error while checking TapeNFabric Name.");
+					showToast("Error while checking TapeNFabric Name.", {type:"error"});
 				});
 		} else {
 			UpdateMasterData(masterData);
@@ -330,17 +311,17 @@
 			dataType: 'json',
 			success: function (response) {
 				if (response?.status) {
-					toastr.success('Data updated successfully.');
+					showToast('Data updated successfully.', {type:"success"});
 					resetFields();
 					setTimeout(() => {
 						window.location.href = '/TapeAndFabricMasterList/Index';
 					}, 1500);
 				} else {
-					toastr.error("Update failed: " + (response?.message || "Unknown error."));
+					showToast("Update failed: " + (response?.message || "Unknown error."), {type:"error"});
 				}
 			},
 			error: function (xhr, status, error) {
-				toastr.error("Data not updated: " + error);
+				showToast("Data not updated: " + error, {type:"error"});
 			}
 		});
 	}
@@ -354,58 +335,56 @@
 				if (res.status && res.data) {				 
 					fillFormFields(res.data);
 					if (readOnly === 'true') {
-						$('input, #ddlColor, #ddlMeshName, #DdActive').prop('disabled', true);
-						$('#btn-save, #cancelBtn').hide();
+						setFormReadOnly();
 					} else {
 						$('input, #ddlColor, #ddlMeshName, #DdActive').prop('disabled', false);
-						$('#btn-save, #cancelBtn').show();
+						$('#btn-save').show();
 					}
 				} else {
-					toastr.warning('No data found for this ID.');
+					showToast('No data found for this ID.', {type:"warning"});
 				}
 			},
 			error: function () {
-				toastr.error('Failed to load data.');
+				showToast('Failed to load data.', {type:"error"});
 			}
 		});
 	}
  
-		function resetFields() {		 
+	function resetFields() {		 
 		$('#TxtCode, #TxtName, #NumStdGram, #NumMaxGram, #NumDenier, #NumStdGPD, #NumMaxGPD, #NumStrengthMin, #NumStdElong, #NumElongMax, #NumLamFabStr, #NumMinGram, #NumGSM, #TxtPPHD, #NumWidth, #NumMinGPD, #NumStdStrength, #NumStrengthMax, #NumElongMin, #NumUnlamFabStr').val('');
  		$('#ddlColor, #ddlMeshName').prop('selectedIndex', 0);	 
 		setActiveStatus(1);		 
-	   }
-
-
-	function fillFormFields(dt) {
-		$('#TxtCode').val(dt.CODE);
-		$('#TxtName').val(dt.NAME);
-		$('#NumStdGram').val(dt.STD_GRAM);
-		$('#NumMinGram').val(dt.MIN_GRAM);
-		$('#NumMaxGram').val(dt.MAX_GRAM);
-		$('#NumGSM').val(dt.GSM);
-		$('#NumDenier').val(dt.DENIER);
-		$('#ddlColor').val(dt.COLOR_CODE);
-		$('#NumWidth').val(dt.WIDTH);
-		$('#NumStdGPD').val(dt.GPD);     
-		$('#NumMinGPD').val(dt.MIN_GPD);
-		$('#NumMaxGPD').val(dt.MAX_GPD);
-		$('#NumStdStrength').val(dt.STD_STRENGTH);
-		$('#NumStrengthMax').val(dt.STRENGTH_MAX);
-		$('#NumStrengthMin').val(dt.STRENGTH_MIN);
-		$('#NumStdElong').val(dt.STD_ELONG);
-		$('#NumElongMax').val(dt.ELONG_MAX);
-		$('#NumElongMin').val(dt.ELONG_MIN);
-		$('#NumUnlamFabStr').val(dt.UNLAM_FAB);
-		$('#NumLamFabStr').val(dt.LAM_FAB);
-		$('#ddlMeshName').val(dt.MESH_CODE);  
-		$('#TxtPPHD').val(dt.UNIT_NAME);   
-		setActiveStatus(dt.ACTIVE);          
-		PreviousInputDt = dt.NAME;          
 	}
 
+	function fillFormFields(dt) {
+		console.log("Fill Form Datat", dt);
+		$('#TxtCode').val(dt.code);
+		$('#TxtName').val(dt.name);
+		$('#NumStdGram').val(dt.stdGram);
+		$('#NumMinGram').val(dt.minGram);
+		$('#NumMaxGram').val(dt.maxGram);
+		$('#NumGSM').val(dt.gsm);
+		$('#NumDenier').val(dt.denier);
+		$('#NumWidth').val(dt.width);
+		$('#NumStdGPD').val(dt.gpd);
+		$('#NumMinGPD').val(dt.minGpd);
+		$('#NumMaxGPD').val(dt.maxGpd);
+		$('#NumStdStrength').val(dt.stdStrength);
+		$('#NumStrengthMax').val(dt.strengthMax);
+		$('#NumStrengthMin').val(dt.strengthMin);
+		$('#NumStdElong').val(dt.stdElong);
+		$('#NumElongMax').val(dt.elongMax);
+		$('#NumElongMin').val(dt.elongMin);
+		$('#NumUnlamFabStr').val(dt.unlamFab);
+		$('#NumLamFabStr').val(dt.lamFab);
+		$('#TxtPPHD').val(dt.unitName);
+		setActiveStatus(dt.active);
+		PreviousInputDt = dt.name;
+		bindDropdown('TapeAndFabricMaster', 'Color', '#ddlColor', ' Select Color ', dt.colorCode, null, false, null, false)
+		bindDropdown('TapeAndFabricMaster', 'Mesh', '#ddlMeshName', ' Select Mesh ', dt.meshCode, null, false, null, false)
+	}
 
-		function collectFormData() {
+	function collectFormData() {
 		return {
 			Code: toNullableInt($('#TxtCode').val()),
 			Name: toNullableString($('#TxtName').val()),
@@ -447,45 +426,6 @@
 		return urlParams.get(param);
 	}
 
-	document.getElementById("cancelBtn").addEventListener("click", function () {
-		Swal.fire({
-			title: 'Are you sure?',
-			text: "Do you want to cancel all the changes?",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Yes, cancel it!',
-			cancelButtonText: 'No, keep it',
-			reverseButtons: true
-		}).then((result) => {
-			if (result.isConfirmed) {
-				Swal.fire('Cancelled!', 'Your action has been cancelled.', 'success');
-				if (MasterTblId) {
-					GetMasterDataList(MasterTblId, readOnly);
-				} else {
-					resetFields();
-				}
-			} else if (result.dismiss === Swal.DismissReason.cancel) {
-				Swal.fire('Resumed', 'Your action is still in progress.', 'info');
-			}
-		});
-	});
-
-	const toNullableInt = (v) => {
-		const t = String(v ?? '').trim();
-		return t === '' ? null : parseInt(t, 10);
-	};
-
-	const toNullableString = (v) => {
-		const t = String(v ?? '').trim();
-		return t === '' ? null : t;
-	};
-
-	function allowOnlyNumbers(input) {
-	  input.value = input.value
-		.replace(/[^0-9.]/g, '')
-		.replace(/(\..*)\./g, '$1');
-	}
-
 	function setActiveStatus(input) {
 		let isActive = input == 1;
 		$('#DdActive').prop('checked', isActive);
@@ -493,7 +433,7 @@
 		$('#statusText').text(isActive ? 'Active' : 'Inactive');
 	}
 
-	 function toNullableDecimal(value) {
+	function toNullableDecimal(value) {
 		if (value === null || value === undefined || value.trim() === '') {
 			return null;
 		}
@@ -505,52 +445,13 @@
 		return isNaN(parsed) ? null : parsed;
 	}
 
-
-	function getColorNameList() {
-		$.ajax({
-			url: '@Url.Action("GetColorName", "TapeAndFabricMaster")',
-			type: 'GET',
-			dataType: 'json',
-			success: function (data) {
-				if (data.status === true && Array.isArray(data.data)) {					 
-					var $colorGrpList = $('#ddlColor');
-					$colorGrpList.empty();
-					$colorGrpList.append($('<option selected disabled>').val('').text('Select Color Name'));
-					data.data.forEach(function (item) {
-						$colorGrpList.append($('<option>').val(item.code).text(item.Name));
-					});
-				} else {
-					toastr.warning("No data found");
-				}
-			},
-			error: function (xhr) {
-				toastr.error("Data load failed");
-			}
-		});
+	//=======Readonly============
+	function setFormReadOnly() {
+		const form = $('#TapeFabricMasterForm');
+		$('#statusText').addClass('text-muted');
+		$('input, #ddlColor, #ddlMeshName, #DdActive').prop('disabled', true);
+		$('#btn-save').hide();
+		form.addClass('erppage-readonly');
 	}
-
-	function getMeshNameList() {
-		$.ajax({
-			url: '@Url.Action("GetMeshName", "TapeAndFabricMaster")',
-			type: 'GET',
-			dataType: 'json',
-			success: function (data) {
-				if (data.status === true && Array.isArray(data.data)) {				 
-					var $colorGrpList = $('#ddlMeshName');
-					$colorGrpList.empty();
-					$colorGrpList.append($('<option selected disabled>').val('').text('Select Mesh Name'));
-					data.data.forEach(function (item) {
-						$colorGrpList.append($('<option>').val(item.code).text(item.Name));
-					});
-				} else {
-					toastr.warning("No data found");
-				}
-			},
-			error: function (xhr) {
-				toastr.error("Data load failed");
-			}
-		});
-	}
-
 
 </script>

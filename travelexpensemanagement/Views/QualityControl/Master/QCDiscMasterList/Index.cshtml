@@ -1,57 +1,124 @@
 ﻿@{
 	ViewBag.Title = "QC Disc Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
-<fieldset>
-	<legend class="legend-field">QC Disc Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "QCDiscMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add QC Disc
-			</button>
-			<button class="btn btn-print">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export"> 
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblQCDiscMaster" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>CODE</th>
-						<th>NAME</th>
-						<th>NO OF QC DISCOUNT</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-	<div class="pagination-wrapper">
-		<ul class="pagination" id="tablePagination"></ul>
-	</div>
-</fieldset>
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>QC Disc Master List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        @if (canAdd)
+        {
+            <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "QCDiscMaster")'">
+                <i class="fa fa-plus"></i>Add New
+            </button>
+        }
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        @if (canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="QCGMasterReport()">
+                <i class="fa fa-print"></i> Print
+            </button>
+        }
+        @if (canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+                <i class="fa fa-file-excel"></i> Export
+            </button>
+        }
+        @if (canMail)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+                <i class="fa fa-envelope"></i>Mail
+            </button>
+        }
+        @if (canApproval)
+        {
+            <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+                <i class="fa fa-check-circle"></i>Approved
+            </button>
+        }
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblQCDiscMaster" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="width:80px;" />    
+                <col style="width:300px;" />   
+                <col style="width:180px;" />   
+                <col style="width:120px;" />   
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>No of QC Discount</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
 <script>
     let currentPage = 1;
     let pageSize = 10;
