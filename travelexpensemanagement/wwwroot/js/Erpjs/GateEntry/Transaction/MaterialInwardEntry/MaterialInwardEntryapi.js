@@ -768,53 +768,47 @@ async function Approvalbtn() {
 
         const res = await $.ajax({
             url: '/InwardEntry/Approvalbtn',
-            data: { v_type, v_no },
             type: 'GET',
-            dataType: 'json'
+            dataType: 'json',
+            data: {
+                v_type: v_type,
+                v_no: v_no
+            }
         });
 
-        console.log("Response =", res);
-
-        const message = (res.message || '').trim();
-
-        // Reset UI
+        // Hide everything first
         $('#btn_approval').hide().prop('disabled', true);
         $('#btn_Sendapproval').hide().prop('disabled', true);
         $('#span_approved').hide();
 
-        if (message === "ApprovalWindow") {
+        switch (res.message) {
 
-            $('#btn_approval')
-            .removeAttr('hidden')
-            .show()
-            .prop('disabled', false);
+            case "ApprovalWindow":
+                $('#btn_approval') .show() .prop('disabled', false);
+                break;
 
-            return;
+            case "SendForApproval":
+                $('#btn_Sendapproval') .show()  .prop('disabled', false);
+                break;
+
+            case "DocumentApproved":
+                $('#span_approved') .show();
+                break;
+
+            default:
+                console.log("No approval action available.");
+                break;
         }
 
-        if (message === "SendForApproval") {
+    } catch (err) {
 
-            $('#btn_Sendapproval')
-                .removeAttr('hidden')
-                .show()
-                .prop('disabled', false);
+        console.error("Approval button error:", err);
 
-            return;
-        }
-
-        if (message === "DocumentApproved") {
-
-            $('#span_approved')
-                .removeAttr('hidden')
-                .show();
-
-            return;
-        }
-
-    }
-    catch (error) {
-
-        console.error("Approval request failed:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Unable to check approval status.'
+        });
     }
 }
 
@@ -887,6 +881,12 @@ async function SendApproval() {
             showToast(res.message, { type: "success" });        
             return;
         }
+
+        else if (res.message == "Document Processed.")
+        {
+            showToast(res.message, { type: "info" });
+        }
+
         else {
             showToast(res.message, { type: "error" });
         }    

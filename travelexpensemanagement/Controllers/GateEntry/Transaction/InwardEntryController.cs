@@ -1307,101 +1307,30 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 using var conn = _dbConnection.GetErpConnection();
                 await conn.OpenAsync();
 
-                string userCode = string.Empty;
-                string approvalRemark = string.Empty;
-                string faProvStatus = string.Empty;
+                string message = "NoAction";
 
+                using SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
 
-                // Query 3 : FAPROV_STATUS
-                string statusQuery = @"
-                SELECT TOP 1 FAPROV_STATUS FROM GATE1 WHERE V_TYPE = @V_TYPE  AND V_NO = @V_NO  AND COMP_CODE = @COMP_CODE  AND YEAR_CODE = @YEAR_CODE
-                AND FAPROV_STATUS <> 'Approved'";
+                cmd.Parameters.AddWithValue("@Action", "ApprovalbtnShow");
+                cmd.Parameters.AddWithValue("@UUSER", globalvariable.PubUserId);
+                cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                cmd.Parameters.AddWithValue("@V_NO", v_no);
+                cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
+                cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
+             
 
-                using (SqlCommand cmd = new SqlCommand(statusQuery, conn))
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
                 {
-                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
-                    cmd.Parameters.AddWithValue("@V_NO", v_no);
-                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
-                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
-
-                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        faProvStatus = reader["FAPROV_STATUS"]?.ToString() ?? "";
-                    }
-                }
-
-
-
-                string userQuery = @"
-                    SELECT TOP 1 a.USER_CODE FROM DOC_APPROSTAGE a  LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.USER_CODE = b.CODE
-                    LEFT JOIN CONDATABASE.dbo.SUBUSER_MAST c ON b.CODE = c.USER_CODE AND c.COMP_CODE = @COMP_CODE
-                    WHERE a.USER_CODE = @UUSER  AND a.DOC_CODE = @V_TYPE  AND a.COMP_CODE = @COMP_CODE";
-
-                using (SqlCommand cmd = new SqlCommand(userQuery, conn))
-                {
-                    cmd.Parameters.AddWithValue("@UUSER", globalvariable.PubUserId);
-                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
-                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
-
-                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        userCode = reader["USER_CODE"]?.ToString() ?? "";
-                    }
-                }
-
-                // Query 2 : Approval Remark
-                string approvalQuery = @"
-                SELECT TOP 1 Approval_remark  FROM APPROVAL_STATUS WHERE V_TYPE = @V_TYPE  AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE  AND YEAR_CODE = @YEAR_CODE";
-
-                using (SqlCommand cmd = new SqlCommand(approvalQuery, conn))
-                {
-                    cmd.Parameters.AddWithValue("@V_TYPE", v_type);
-                    cmd.Parameters.AddWithValue("@V_NO", v_no);
-                    cmd.Parameters.AddWithValue("@COMP_CODE", globalvariable.PubCompCode);
-                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalvariable.PubFYearCode);
-
-                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        approvalRemark = reader["Approval_remark"]?.ToString() ?? "";
-                    }
-                }
-
-            
-
-                // Document already approved
-                if (!string.IsNullOrWhiteSpace(approvalRemark) ||
-                    !string.IsNullOrWhiteSpace(faProvStatus))
-                {
-                    return new JsonResult(new
-                    {
-                        success = true,
-                        approved = true,
-                        message = "DocumentApproved"
-                    });
-                }
-
-                // User is in approval stage
-                if (!string.IsNullOrWhiteSpace(userCode))
-                {
-                    return new JsonResult(new
-                    {
-                        success = true,
-                        approved = false,
-                        message = "ApprovalWindow"
-                    });
+                    message = reader["StatusMessage"]?.ToString() ?? "NoAction";
                 }
 
                 return new JsonResult(new
                 {
                     success = true,
-                    approved = false,
-                    message = "SendForApproval"
+                    message
                 });
             }
             catch (Exception ex)
@@ -1409,7 +1338,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return new JsonResult(new
                 {
                     success = false,
-                    approved = false,
                     message = ex.Message
                 });
             }
