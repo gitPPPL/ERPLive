@@ -1,4 +1,10 @@
 ﻿
+
+
+
+
+
+
 async function loadItemMaster() {
     const res = await fetch("/OutwardEntry/DDLItemMaster");
     const data = await res.json();
@@ -221,8 +227,6 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
         showToast(`Failed to load pending orders`, { type: "error" });
     }
 }
-
-
 
 
 function TransitReport() {

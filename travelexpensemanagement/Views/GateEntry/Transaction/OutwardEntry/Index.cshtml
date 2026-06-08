@@ -2,6 +2,9 @@
     ViewBag.Title = "Outward Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData
+             ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
     var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
     var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
     var CompCode = Convert.ToInt32(TempData["CompCode"]);
@@ -20,9 +23,6 @@
         <button type="button" class="erppage-header-back" onclick="TransitReport();" >
             <i class="fa-solid fa-chart-line"></i> Report
         </button>
-
-
-
 
         <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
             <i class="fa-solid fa-arrow-left"></i>Back to list

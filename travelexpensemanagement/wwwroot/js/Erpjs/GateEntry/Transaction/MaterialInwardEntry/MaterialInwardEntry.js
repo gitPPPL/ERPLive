@@ -510,7 +510,7 @@
         }
     }
 function populateTable(data) {
-
+    console.log("selected Row", data);
     const tbody = $("#tblellipsisIconmodal tbody");
     tbody.empty();
 
@@ -518,7 +518,7 @@ function populateTable(data) {
 
     data.forEach(function (row) {
 
-        const key = `${row.saudA_NO}_${row.iteM_CODE}`;
+        const key = `${data.refNo}_${row.iteM_CODE}`;
 
         if (uniqueRows.has(key)) {
             return; // Skip duplicate row

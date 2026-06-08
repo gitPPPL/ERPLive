@@ -17,6 +17,8 @@
     const mode = urlParams.get('mode');
 
 
+
+
     $(document).ready(function () {
         (async () => {
             try {
@@ -84,20 +86,32 @@
                         if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
                             showToast("Please check DocType and Doc No", "Warning", { type: "warning" });
                             return;                                                     
-                        }
-                          
-                        else {
-        
-                            if (DocType === "OUES" && ITEM_TYPE !== "E-Commerce Sale") {
-                                if (!validateRequiredField('#ddlDocType', 'Sale Type and Doctype mismatch.')) return;                              
-                            }
+                        }                        
+                       
 
+                    }
+                    else {
+
+                        if (DocType === "OUNR" && ITEM_TYPE !== "Sale") {
+                            showToast("Please check Sale Type and Doctype.", "Warning", { type: "warning" });
+                            return;
                         }
                     }
+
+                    if ((DocType === "OUES" || ITEM_TYPE != "E-Commerce Sale") || (DocType != "OUES" || ITEM_TYPE == "E-Commerce Sale")) {
+                        showToast("Please check DocType and Type", "Warning", { type: "warning" });
+                        return;
+                    }   
 
                     const rows = $("#tblOutwardEntry tbody tr");
                     let isValid = true;
                     let hasAtLeastOneItem = false;
+
+
+                    if (!hasAtLeastOneItem) {
+                        toastr.warning("Please add at least one item.");
+                        return;
+                    }
 
                     rows.each(function (index) {
                         const $row = $(this);
@@ -112,6 +126,15 @@
                         if (itemName) {
 
                             hasAtLeastOneItem = true;
+
+                            if (!itemName) {
+                                toastr.warning(`Please select Item Name in row ${index + 1}`);
+                                $row.find("select.itemName").focus();
+                                isValid = false;
+                                return false;
+                            }
+
+
 
                             if (!dept) {
                                 toastr.warning(`Please select Department in row ${index + 1}`);
@@ -159,12 +182,7 @@
 
                             }
                         }
-                    });
-
-                    if (!hasAtLeastOneItem) {
-                        toastr.warning("Please add at least one item.");
-                        return;
-                    }
+                    });                                    
 
                     if (!isValid) {
                         return;
@@ -319,14 +337,51 @@
                     FetchPendindorderno(selectedValue, typeText, v_date, BILL_NO);
                 });
 
+                //$("#Btn_selectedData").click(function () {
+                //    const selectedRows = getSelectedPendingRows();
+                //    if (selectedRows.length === 0) {
+                //        toastr.info("Please select at least one row");
+                //        return;
+                //    }
+                //    const $tbody = $("#tblOutwardEntry tbody");
+                //    selectedRows.forEach(row => {
+                //        addRow($tbody, {
+                //            itemName: row.ItemCode,
+                //            department: row.DeptCode || "",
+                //            unit: row.UnitCode,
+                //            quantity: parseFloat(row.Qty) || "",
+                //            no: parseInt(row.nos) || "",
+                //            remarks: row.remarks || "",
+                //            refType: row.Vouchertype || "",
+                //            refNo: row.VoucherNo || ""
+                //        });
+                //    });
+                //});
+
                 $("#Btn_selectedData").click(function () {
                     const selectedRows = getSelectedPendingRows();
+
                     if (selectedRows.length === 0) {
                         toastr.info("Please select at least one row");
                         return;
                     }
+
                     const $tbody = $("#tblOutwardEntry tbody");
+
                     selectedRows.forEach(row => {
+
+                        const isDuplicate = $tbody.find("tr").toArray().some(tr => {
+                            const refNo = $(tr).find(".ref-no").val();
+
+                            // Compare selected row ItemCode with table ref-no
+                            return refNo === row.ItemCode;
+                        });
+
+                        if (isDuplicate) {
+                            toastr.warning(`Item ${row.ItemCode} already exists.`);
+                            return;
+                        }
+
                         addRow($tbody, {
                             itemName: row.ItemCode,
                             department: row.DeptCode || "",
@@ -340,6 +395,16 @@
                     });
                 });
 
+
+
+
+
+
+
+
+
+
+
                 $(document).on("change", ".row-checkbox", function () {
                     const index = $(this).data("index");
                     pendingData[index].selected = $(this).is(":checked");
@@ -351,10 +416,7 @@
                     renderPendingTable();
                 });
 
-                $("#btn_approval").on('click', function () {
-
-                    alert("hello");
-
+                $("#btn_approval").on('click', function () {             
 
                 });
 

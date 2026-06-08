@@ -1,4 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Office.CustomUI;
+using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using StackExchange.Redis;
 using System.Data;
 using System.Reflection.Metadata;
 using travelexpensemanagement.Common.Globalvariable;
@@ -231,6 +234,22 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                     }
 
+
+
+                    using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "Validdata");
+                        cmd.Parameters.AddWithValue("@ShowActionOption", "PendingQuantitycheack");
+                        cmd.Parameters.AddWithValue("@PARTY_CITY", header.PARTY_CITY);
+                        using var reader = cmd.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            return new RepositoryResponse { status = true, message = "EWayBill is mandatory for Interstate Material Movement." };
+                        }
+                    }
+
+
                     decimal mainQty = 0;
                     decimal gateQty = 0;
 
@@ -250,6 +269,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                             cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                             cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
+                            cmd.Parameters.AddWithValue("@REMARKS", d.REMARKS);
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
@@ -261,8 +281,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
   
                         if (gateQty > mainQty)
                         {
-                            decimal pendingQty =
-                                mainQty - (gateQty - (d.QTY ?? 0));
+                            decimal pendingQty = mainQty - (gateQty - (d.QTY ?? 0));
 
                             return new RepositoryResponse
                             { status = true,  message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +  $"& Your Quantity is = {(d.QTY ?? 0)}, " +
@@ -270,6 +289,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             };
                         }
                     }
+
+
+                       
+
+
                 }
                 return new RepositoryResponse { status = false, message = "Success" };
             }
@@ -278,6 +302,40 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return new RepositoryResponse  { status = false,  message = ex.Message };
             }
         }
+
+
+
+        public decimal GetDecimal(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                con.Open();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    object result = cmd.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        return Convert.ToDecimal(result);
+                    }
+
+                    return 0m;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetDecimal() Error: " + ex.Message);
+                return 0m;
+            }
+        }
+
+
+
+
+
+
         public string GetText(string query)
         {
             try
