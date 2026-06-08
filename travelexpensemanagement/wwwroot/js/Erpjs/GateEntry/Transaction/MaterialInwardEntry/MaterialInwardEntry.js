@@ -45,6 +45,15 @@
          if (!validateRequiredField('#TxtRptDate', 'Please select Reporting Date and Time.')) return;               
         }
 
+        if (!SHIP_BILLNO) {
+            if (!BILL_NO && !CHALL_NO) {
+                showToast("Bill No./Challan No. is compulsary.", { type: "warning" });
+                return;
+            }
+        }
+
+
+
         if (BILL_NO && !BILL_DATE)
         {         
              if (!validateRequiredField('#DtPartyBillDate', 'Please select Party Bill Date.')) return;
@@ -103,8 +112,6 @@
         if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
         }
 
-
-
         if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
             if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
 
@@ -117,7 +124,6 @@
             }
         }     
 
-
         if (TRANSIT_NO && EWB_EXPDATE) {
             const expDate = new Date(EWB_EXPDATE);
             const inDate = new Date(V_DATE);
@@ -125,6 +131,10 @@
                 showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
         }        
+
+   
+
+
 
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
@@ -609,7 +619,7 @@ function populateTable(data) {
                 unit: item.uoM_CODE,
                 nos: item.nos,
                 qty: item.balQty,
-                shipRate: item.rate,
+                shipRate: 0,
                 empty: item.emptY_YN,
                 remarks: item.remarks,
                 refType: item.docType,
@@ -907,8 +917,7 @@ function populateTable(data) {
 
         if (res.success) {
             const header = res.data.header;
-            const Details = res.data.details;
-            
+            const Details = res.data.details;            
 
             if (header.partY_WBSLIPNO !== '') {
 
@@ -961,7 +970,6 @@ function populateTable(data) {
             $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
-
             $('#TxtEWayNo').val(header.waybilL_NO || '');
             $('#DtEWayDate').val(formatDate(header.ewB_DATE) || '');
             $('#TxtEWayDate').val(formatDate(header.ewB_DATE) || '');
@@ -1003,7 +1011,7 @@ function populateTable(data) {
             await DDlPartyAdd(header.partY_CODE);
             $('#ddladdressline1').val(header.partY_ADDRESSID || '');
 
-            await fetchTransitno(header.v_TYPE, header.v_NO, header.partY_CODE, formatDate(header.ewB_DATE));
+           await  fetchTransitno(header.v_TYPE, header.v_NO, header.partY_CODE, formatDate(header.ewB_DATE));
             $('#ddlTransit').val(header.transiT_NO || '');
 
         }

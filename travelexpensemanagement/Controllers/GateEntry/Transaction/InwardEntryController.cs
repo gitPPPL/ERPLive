@@ -1384,19 +1384,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 string approvalStatus = result1?.ToString();
                 if (!string.IsNullOrEmpty(approvalStatus))
                 {
+                    string LASTNAME = GetText("SELECT TOP 1 user_name  FROM APPROVAL_STATUS   WHERE v_type = '" + v_type + "'    AND v_no = " + v_no + "  AND comp_code =  " + globalvariable.PubCompCode + "  AND branch_code = " + globalvariable.PubBranchCode + "  AND year_code =  " + globalvariable.PubFYearCode + "    AND status = 'OPEN'   AND user_code <> " + globalvariable.PubUserId + " ORDER BY srno DESC;");
 
-                    using SqlCommand cmd3 = new SqlCommand("sp_InwardEntry", conn);
-                    cmd2.CommandType = CommandType.StoredProcedure;
-                    cmd2.Parameters.AddWithValue("@Action", "DocumentProcess");
-                    cmd2.Parameters.AddWithValue("@v_type", v_type);
-                    cmd2.Parameters.AddWithValue("@v_no", v_no);
-                    cmd2.Parameters.AddWithValue("@comp_code", globalvariable.PubCompCode);
-                    cmd2.Parameters.AddWithValue("@branch_code", globalvariable.PubBranchCode);
-                    cmd2.Parameters.AddWithValue("@year_code", globalvariable.PubFYearCode);
-                    cmd2.Parameters.AddWithValue("@UUSER", globalvariable.PubUserId);
-                    object result2 = await cmd3.ExecuteScalarAsync();
-                    string user_name = result2?.ToString();
-                    return new JsonResult(new {  success = false, approved = false, message = "This Document Approval is in process at User:"+ user_name + " " });
+                    return new JsonResult(new {  success = false, approved = false, message = "This Document Approval is in process at User:"+ LASTNAME + " " });
                 }
                
                 return new JsonResult(new {   success = true, approved = false,  message = approvalStatus });
@@ -1508,7 +1498,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
         [HttpPost]
         public async Task<JsonResult> SendApproval( string vtype, int vno,  DateTime vDate, string appStatus,  string appRemark, int SendTo,
-            string menuCode, string formName, string deptName,  string STATUS,  string TableName, string sendName, string tabletype = "ENTRY")
+            string menuCode, string formName, string deptName,  string STATUS,  string TableName, string sendName,int APPROVAL_CODE = 0, string tabletype = "ENTRY")
         {
             try
             {

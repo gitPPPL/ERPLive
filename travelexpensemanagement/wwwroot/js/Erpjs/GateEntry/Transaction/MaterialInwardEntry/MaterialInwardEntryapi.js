@@ -299,9 +299,15 @@ async function fetchShipFromAdd(ShipFromID) {
     }
 }
 
-async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit, mode) {
+async function fetchTransitno(
+    v_type,
+    v_no,
+    partycode,
+    ExpiryDate,
+    selectedTransit = '',
+    mode
+) {
     try {
-
         const queryParams = new URLSearchParams({
             v_type,
             v_no,
@@ -310,33 +316,83 @@ async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTrans
             mode
         });
 
-        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
+        const response = await fetch(
+            `/InwardEntry/DDlTransitNo?${queryParams.toString()}`
+        );
 
-        if (!response.ok)
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
 
         const result = await response.json();
 
-        const ddl = $('#ddlTransit');
+        const ddl = document.getElementById('ddlTransit');
 
-        // ✅ build HTML once (FAST)
-        let options = '<option value="">-- Select Transit No --</option>';
+        ddl.innerHTML = '';
+
+        const fragment = document.createDocumentFragment();
+
+        fragment.appendChild(
+            new Option('-- Select Transit No --', '')
+        );
 
         if (result.status && Array.isArray(result.data)) {
-            options += result.data
-                .map(x => `<option value="${x}">${x}</option>`)
-                .join('');
+            result.data.forEach(item => {
+                fragment.appendChild(new Option(item, item));
+            });
         }
 
-        ddl.html(options);
+        ddl.appendChild(fragment);
 
-        // ✅ set value WITHOUT triggering change (IMPORTANT)
-        ddl.val(selectedTransit || '');
+        if (selectedTransit) {
+            ddl.value = selectedTransit;
+        }
 
     } catch (error) {
+        console.error(error);
         showToast("Error loading Transit Numbers", { type: "error" });
     }
 }
+
+
+//async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit, mode) {
+//    try {
+
+//        const queryParams = new URLSearchParams({
+//            v_type,
+//            v_no,
+//            partycode,
+//            ExpiryDate,
+//            mode
+//        });
+
+//        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
+
+//        if (!response.ok)
+//            throw new Error(`HTTP error! Status: ${response.status}`);
+
+//        const result = await response.json();
+
+//        const ddl = $('#ddlTransit');
+
+//        // ✅ build HTML once (FAST)
+//        let options = '<option value="">-- Select Transit No --</option>';
+
+//        if (result.status && Array.isArray(result.data)) {
+//            options += result.data
+//                .map(x => `<option value="${x}">${x}</option>`)
+//                .join('');
+//        }
+
+//        ddl.html(options);
+
+//        // ✅ set value WITHOUT triggering change (IMPORTANT)
+//        ddl.val(selectedTransit || '');
+
+//    } catch (error) {
+//        showToast("Error loading Transit Numbers", { type: "error" });
+//    }
+//}
 
 async function GetVNo(Vtype) {
     try {
@@ -869,16 +925,17 @@ async function SendApproval() {
                 formName: "frmInwardEntry",
                 deptName: "",
                 STATUS: "OPEN",
-                sendName: $('#ddlsendto option:selected').text(),
-                TableName : "GATE1"
+                sendName: $('#ddlsendto option:selected').text()
+               
             }
         });
 
         console.log(res);
         if (res.status === "Success") {
-            $("#SendForapprovedModal").modal('hide');
+            $("#SendForapprovedModal").modal('hide');  
+
             setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) + '&mode=view' ; }, 100);                                
-            showToast(res.message, { type: "success" });        
+               
             return;
         }
 
@@ -930,7 +987,7 @@ async function DDlAPPStatus() {
         const res = await fetch('/InwardEntry/DDlAPPStatus');
         const data = await res.json();
         const ddl = $('#ddlApprovalStatus');
-        ddl.empty().append('<option value="">-- Select Approval Status --</option>');
+        ddl.empty().append('');
         data.forEach(item => {
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
@@ -965,25 +1022,31 @@ async function SendWindowApproval() {
         const ForwardTo = parseInt($('#ddlForwardTo').val() || 0);
         const AppRemark = $('#ddlRemarks').val().trim();
         const AppStatusText = $('#ddlApprovalStatus option:selected').text();
+        const APPROVAL_CODE = parseInt($('#ddlApprovalStatus').val() || 0);
+
+        const sendName = '';
+              
+        if (!ForwardTo)
+        {
+            const sendName = $('#ddlForwardTo option:selected').text();
+        }
 
         if (!validateRequiredField('#ddlApprovalStatus', 'Please select Approval Status'))
             return;
 
         // Forward user required for status 7 or 8
-        if ((AppStatus === 7 || AppStatus === 8) && ForwardTo === 0) {
+        if ((AppStatus === 4 || AppStatus === 5)) {
             showToast("Please select Forward User.", { type: "warning" });
             return;
         }
 
-        // Remarks required
-        if (!AppRemark && (AppStatus === 4 || AppStatus === 5 || AppStatus === 7)) {
-            showToast(`Remarks required for ${AppStatusText}`, { type: "warning" });
-            return;
-        }
+        //// Remarks required
+        //if (!AppRemark && (AppStatus === 4 || AppStatus === 5 || AppStatus === 7)) {
+        //    showToast(`Remarks required for ${AppStatusText}`, { type: "warning" });
+        //    return;
+        //}
 
-        let Status = (AppStatus === 5 || AppStatus === 8)
-            ? "CLOSE"
-            : "OPEN";
+        let Status = (AppStatus === 4 || AppStatus === 5) ? "CLOSE" : "OPEN";
 
         const res = await $.ajax({
             url: '/InwardEntry/SendApproval',
@@ -1001,7 +1064,8 @@ async function SendWindowApproval() {
                 deptName: "",
                 STATUS: Status,
                 sendName: $('#ddlForwardTo option:selected').text(),
-                TableName: "GATE1"
+                APPROVAL_CODE: APPROVAL_CODE
+             
             }
         });
         console.log(res);
@@ -1010,10 +1074,18 @@ async function SendWindowApproval() {
             $("#approvedModal").modal('hide');
             showToast(res.message, { type: "success" });
             setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + rowId + '&vtype=' + encodeURIComponent(vtype) + '&mode=view' ; }, 100);                                
-       
-           
+                 
             return;
-        } else {
+        }
+
+        else if (res.message == "Document Processed.") {
+            showToast(res.message, { type: "info" });
+        }
+
+
+
+
+        else {
             showToast(res.message, { type: "error" });
         }
 

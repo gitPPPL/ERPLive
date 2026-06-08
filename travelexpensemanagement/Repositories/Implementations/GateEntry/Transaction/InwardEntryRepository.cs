@@ -278,6 +278,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return response;
         }
+       
         //public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate, string mode = "")
         //{
         //    var getdata = _globalVariableService.GetGlobalVariables();
