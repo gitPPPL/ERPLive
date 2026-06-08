@@ -1,10 +1,5 @@
 ﻿
 
-
-
-
-
-
 async function loadItemMaster() {
     const res = await fetch("/OutwardEntry/DDLItemMaster");
     const data = await res.json();
@@ -198,10 +193,19 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
     try {
         const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}&BILL_NO=${BILL_NO}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const result = await res.json();
+
         if (result.success) {
 
             const details = result.data || [];
+
+            if (details.length === 0) {
+                showToast("No pending orders found.", { type: "info" });
+                return; // Stop further execution
+            }
+
+
             pendingData = details.map(detail => ({
                 Vouchertype: detail.v_type,
                 VoucherNo: detail.v_no,
@@ -217,17 +221,24 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
                 SRno: detail.srno,
                 selected: false
             }));
+
             currentPage = 1;
             renderPendingTable();
+
+            const modalElement = document.getElementById('pendingorders');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+ 
+
         } else {
             showToast(`Failed to load pending orders: ${result.message}`, { type: "error" });
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         showToast(`Failed to load pending orders`, { type: "error" });
     }
 }
-
 
 function TransitReport() {
 

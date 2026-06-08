@@ -3,9 +3,16 @@
     let itemMap = { };
     let UnitMap = { };
     let DeptMap = { };
-    let PubUserLevel='@PubUserLevel';
-    let CompCode='@CompCode';
-    let LoginDate = '@logindate';
+//    let PubUserLevel='@PubUserLevel';
+//    //let CompCode='@CompCode';
+////let LoginDate = '@logindate';
+
+let PubUserLevel = @Html.Raw(Json.Serialize(PubUserLevel));
+let CompCode = @Html.Raw(Json.Serialize(CompCode));
+let LoginDate = @Html.Raw(Json.Serialize(logindate));
+
+
+
     let pendingData = [];
     let currentPage = 1;
     let rowsPerPage = 10;
@@ -86,9 +93,7 @@
                         if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
                             showToast("Please check DocType and Doc No", "Warning", { type: "warning" });
                             return;                                                     
-                        }                        
-                       
-
+                        }                     
                     }
                     else {
 
