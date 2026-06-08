@@ -136,6 +136,41 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             }
         }
 
+        [HttpGet]
+        public JsonResult IsTapeFabricDeletable(int docId)
+        {
+            var gv = _globalValue.GetGlobalVariables();
+            bool isExists = false;
+            string msg = "";
+            try
+            {
+                //===========Check Qc Group existence in QC Master===========
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_TapeNFabricMast_AED", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AED", "Del_CheckInItem_Mast");
+                        cmd.Parameters.AddWithValue("@CODE", docId);
+                        cmd.Parameters.AddWithValue("@CompanyCd", gv.PubCompCode);
+
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+
+                        string qcTape_FabName = result?.ToString();
+                        isExists = string.IsNullOrEmpty(qcTape_FabName) ? false : true;
+
+                        msg = $"Tape And Fabric <b>{qcTape_FabName}</b> exists in Item Master and cannot be deleted.";
+                    }
+                    return Json(new { success = true, message = msg, isExists = isExists });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> DelTape_FabricMast(int docId)
         {

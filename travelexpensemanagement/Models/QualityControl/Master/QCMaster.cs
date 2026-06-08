@@ -3,26 +3,27 @@
    
     public class DetailModel
     {
-        public string Parameter { get; set; }
-        public string ParameterValue { get; set; }
-        public string Unit { get; set; }
-        public string StdResult { get; set; }
+        public int Parameter { get; set; }
+        public int ParameterValue { get; set; }
+        public int Unit { get; set; }
+        public decimal StdResult { get; set; }
         public string DeductQty { get; set; }
         public string DeductType { get; set; }
         public string Ppm { get; set; }
-        public string BasePrice { get; set; }
+        public decimal BasePrice { get; set; }
         public string Remarks { get; set; }
-        public string Code { get; set; }
+        public int Code { get; set; }
         public string CurrentCode { get; set; }
     }
 
     public class QCMaster
     {
+        public int? code { get; set; }
         public string Name { get; set; }
         public string ShortName { get; set; }
-        public string QCGroup { get; set; }
-        public string MaxPPM { get; set; }
-        public int ACTIVE { get; set; }
+        public int QCGroup { get; set; }
+        public decimal MaxPPM { get; set; }
+        public int active { get; set; }
         public List<DetailModel> Details { get; set; }
     }
 

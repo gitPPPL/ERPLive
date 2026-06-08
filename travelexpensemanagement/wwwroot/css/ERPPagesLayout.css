@@ -1,322 +1,4 @@
-﻿/*
-
-:root {
-    --erp-sidebar-bg: #0b1120;
-    --erp-sidebar-light: #111827;
-    --erp-hover: rgba(255,255,255,0.08);
-    --erp-active: linear-gradient(90deg,#66a644,#276537);
-    --erp-text: #e5e7eb;
-    --erp-muted: #94a3b8;
-    --erp-topbar: #ffffff;
-    --erp-shadow: 0 4px 18px rgba(0,0,0,.08);
-    --erp-radius: 14px;
-}
-
-.erppagelayout-wrapper {
-    display: flex;
-    min-height: 100vh;
-    background: #f3f4f6;
-}
-
-.erppagelayout-sidebar {
-    width: 260px;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: linear-gradient(180deg,#0b1120,#111827);
-    color: var(--erp-text);
-    overflow-y: auto;
-    transition: all .35s ease;
-    z-index: 1500;
-    box-shadow: 4px 0 18px rgba(0,0,0,.15);
-}
-
-    .erppagelayout-sidebar::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .erppagelayout-sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,.12);
-        border-radius: 10px;
-    }
-
-.erppagelayout-sidebar-top {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    padding: 18px 14px;
-    background: rgba(11,17,32,.98);
-    backdrop-filter: blur(8px);
-}
-
-.erppagelayout-logo {
-    text-align: center;
-    margin-bottom: 14px;
-}
-
-    .erppagelayout-logo img {
-        max-width: 100%;
-        height: auto;
-    }
-
-.erppagelayout-company {
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--erp-muted);
-}
-
-    .erppagelayout-company i {
-        margin-right: 8px;
-    }
-
-
-.erppagelayout-menu {
-    list-style: none;
-    margin: 0;
-    padding: 12px;
-}
-
-.erppagelayout-menu-item {
-    margin-bottom: 8px;
-}
-
-.erppagelayout-menu-link {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    padding: 11px 14px !important;
-    border-radius: 12px;
-    color: var(--erp-text) !important;
-    transition: all .25s ease;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-    .erppagelayout-menu-link:hover {
-        background: var(--erp-hover);
-        transform: translateX(4px);
-    }
-
-.erppagelayout-link-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.erppagelayout-arrow {
-    transition: transform .25s ease;
-}
-
-.active-parent > .erppagelayout-menu-link {
-    background: var(--erp-active);
-    color: #fff !important;
-    box-shadow: 0 6px 14px rgba(102,166,68,.25);
-}
-
-.active-parent .erppagelayout-arrow {
-    transform: rotate(180deg);
-}
-
-.erppagelayout-submenu {
-    list-style: none;
-    margin-top: 8px;
-    margin-left: 18px;
-    padding-left: 14px;
-    border-left: 1px solid rgba(255,255,255,.08);
-}
-
-.erppagelayout-submenu-item {
-    margin-bottom: 6px;
-    position: relative;
-}
-
-    .erppagelayout-submenu-item a {
-        display: block;
-        padding: 9px 12px;
-        color: var(--erp-muted);
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 13px;
-        transition: .25s ease;
-    }
-
-        .erppagelayout-submenu-item a:hover {
-            background: rgba(255,255,255,.06);
-            color: #fff;
-        }
-
-.active-submenu a {
-    background: rgba(102,166,68,.18);
-    color: #66a644 !important;
-    font-weight: 600;
-}
-
-.erppagelayout-topbar {
-    position: fixed;
-    top: 0;
-    left: 260px;
-    right: 0;
-    height: 68px;
-    background: rgba(255,255,255,.95);
-    backdrop-filter: blur(8px);
-    box-shadow: var(--erp-shadow);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 22px;
-    z-index: 1400;
-    transition: all .35s ease;
-}
-
-.erppagelayout-hamburger {
-    border: none;
-    background: transparent;
-    font-size: 24px;
-    color: #111827;
-    margin-right: 12px;
-}
-
-.erppagelayout-search-section {
-    flex: 1;
-    max-width: 500px;
-}
-
-.erppagelayout-search-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.erppagelayout-search-input {
-    width: 100%;
-    border: 1px solid #e5e7eb;
-    background: #f9fafb;
-    border-radius: 12px;
-    padding: 10px 14px 10px 40px;
-    font-size: 14px;
-}
-
-.search-icon {
-    position: absolute;
-    top: 50%;
-    left: 14px;
-    transform: translateY(-50%);
-    color: #94a3b8;
-}
-
-.erppagelayout-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.fullscreen {
-    font-size: 18px;
-    color: #374151;
-}
-
-.erppagelayout-user .user-image {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.user-avatar {
-    border-radius: 50%;
-    border: 2px solid #e5e7eb;
-}
-
-.user-name {
-    font-size: 14px;
-    color: #111827;
-    font-weight: 600;
-}
-
-
-.erppagelayout-main {
-    margin-left: 260px;
-    width: calc(100% - 260px);
-    transition: all .35s ease;
-}
-
-.erppagelayout-content-body {
-    margin-top: 78px;
-    padding: 20px;
-}
-
-
-.search-results {
-    position: absolute;
-    top: 55px;
-    left: 0;
-    width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: var(--erp-shadow);
-    z-index: 2000;
-    display: none;
-}
-
-    .search-results a {
-        display: block;
-        padding: 10px 14px;
-        color: #374151;
-        text-decoration: none;
-    }
-
-        .search-results a:hover {
-            background: #f3f4f6;
-        }
-
-
-@media (max-width: 992px) {
-    .erppagelayout-sidebar {
-        transform: translateX(-100%);
-    }
-
-        .erppagelayout-sidebar.open {
-            transform: translateX(0);
-        }
-
-    .erppagelayout-main {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .erppagelayout-topbar {
-        left: 0;
-    }
-}
-
-@media (max-width: 768px) {
-    .erppagelayout-topbar {
-        padding: 0 12px;
-    }
-
-    .user-name {
-        display: none;
-    }
-
-    .erppagelayout-search-section {
-        max-width: 250px;
-    }
-}
-
-@media (max-width: 576px) {
-    .erppagelayout-search-section {
-        max-width: 180px;
-    }
-
-    .erppagelayout-content-body {
-        padding: 12px;
-    }
-}
-*/
+﻿
 
 * {
     margin: 0;
@@ -326,8 +8,9 @@
 
 body {
     font-family: 'Poppins',sans-serif;
-    background: #E4E9E1;
+    background: linear-gradient(to bottom, #e9ecf3);
     overflow-x: hidden;
+    color: #000000;
 }
 /* =========================================
    OVERLAY
@@ -592,20 +275,19 @@ body {
     }
 
 /* SUBMENU */
-/* SUBMENU */
+
+
 
 .ERPPageLayout-submenu {
     list-style: none;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.35s ease;
+    display: none;
     padding-left: 18px;
     border-left: 1px dashed #c7d5c2;
     margin-top: 5px;
 }
 
     .ERPPageLayout-submenu.open {
-        max-height: 5000px;
+        display: block;
     }
 
     /* THIRD LEVEL */
@@ -633,27 +315,34 @@ body {
             transition: 0.25s;
         }
 
-          /*  .ERPPageLayout-submenu li a::before {
-                content: '';
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-                background: #edf4ea;
-                margin-right: 10px;
-            }*/
-
-            .ERPPageLayout-submenu li a:hover {
-                background: #edf4ea;
-                color: #1C5E31;
-                transform: translateX(4px);
-            }
-
         .ERPPageLayout-submenu li.active > a {
             background: rgb(233 255 240 / 12%);
             color: #ebfff2;
             font-weight: 600;
         }
+    /* =========================================
+   LEVEL 2 MENU (SECOND LEVEL) GREEN STYLE
+========================================= */
 
+    .ERPPageLayout-submenu > li > a {
+        border-radius: 10px;
+        transition: 0.25s ease;
+    }
+       
+        /* ACTIVE / OPEN LEVEL 2 (LIKE "Transaction") */
+        .ERPPageLayout-submenu > li.active > a,
+        .ERPPageLayout-submenu > li > a.active-page {
+            background: linear-gradient(135deg,#1C5E31,#2d7b46);
+            color: #fff !important;
+            font-weight: 600;
+            box-shadow: 0 6px 14px rgba(28,94,49,0.18);
+        }
+
+            /* ICON COLOR INSIDE LEVEL 2 */
+            .ERPPageLayout-submenu > li.active > a i,
+            .ERPPageLayout-submenu > li > a.active-page i {
+                color: #fff !important;
+            }
 /* ARROW */
 
 .ERPPageLayout-arrow {
@@ -667,23 +356,23 @@ body {
 
 /* CURRENT ACTIVE PAGE */
 
-.ERPPageLayout-menu-link.active-page,
-.ERPPageLayout-submenu li a.active-page {
+.ERPPageLayout-menu-link.active-page {
     background: linear-gradient(135deg,#1C5E31,#2d7b46);
     color: #fff !important;
     font-weight: 600;
     box-shadow: 0 6px 16px rgba(28,94,49,0.2);
 }
+    .ERPPageLayout-menu-link.active-page i,
+    .ERPPageLayout-menu-link.active-page span {
+        color: #fff !important;
+    }
 
-/* KEEP PARENT ACTIVE */
-
-.ERPPageLayout-menu li.active > .ERPPageLayout-menu-link {
-    background: linear-gradient(135deg,#1C5E31,#2d7b46);
-    color: #fff;
+/* Search result final page (Level-3) */
+.ERPPageLayout-submenu .ERPPageLayout-submenu li a {
+    background: transparent ;
+    color: #edf4ea ;
 }
-
-
-
+   
 /* =========================================
    MAIN
 ========================================= */
@@ -794,7 +483,7 @@ body {
 
 .ERPPageLayout-content {
     flex: 1;
-    padding: 20px;
+    padding: 8px 16px;
     overflow-y: auto;
     overflow-x: hidden;
 }

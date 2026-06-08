@@ -131,6 +131,42 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 }
             }
         }
+
+        [HttpGet]
+        public JsonResult IsQcGroupDeletable(int docId)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            bool isExists = false;
+            string msg = "";
+            try
+            {
+                //===========Check Qc Group existence in QC Master===========
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QCG_MAST", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "Del_CheckInQcMast");
+                        cmd.Parameters.AddWithValue("@CODE", docId);
+                        cmd.Parameters.AddWithValue("@Comp_Code", gv.PubCompCode);
+
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+
+                        string qcGroupName = result?.ToString();
+                        isExists = string.IsNullOrEmpty(qcGroupName) ? false : true;
+
+                        msg = $"QC Group <b>{qcGroupName}</b> exists in QC Master and cannot be deleted.";
+                    }
+                    return Json(new { success = true, message = msg, isExists = isExists });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public JsonResult DeleteQCGroupByCode(int docId)
         {

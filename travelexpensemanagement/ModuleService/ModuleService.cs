@@ -19,15 +19,17 @@ namespace travelexpensemanagement.ModuleService
             var modules = new List<Module>();
             using var conn = _dbConnection.GetErpConnection();
             conn.Open();
-            using var cmd = new SqlCommand("SELECT Code, DISPLAY_NAME FROM MODULE_MAST", conn);
+            using var cmd = new SqlCommand("SELECT Code, DISPLAY_NAME, ICON FROM MODULE_MAST", conn);
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
+                
                 modules.Add(new Module
                 {
                     Code = reader["Code"] != DBNull.Value ? Convert.ToInt32(reader["Code"]) : 0,
-                    DisplayName = reader["DISPLAY_NAME"]?.ToString() ?? string.Empty
+                    DisplayName = reader["DISPLAY_NAME"]?.ToString() ?? string.Empty,
+                    Icon = reader["ICON"]?.ToString() ?? "fa-folder"
                 });
             }
             return modules;
@@ -86,6 +88,7 @@ namespace travelexpensemanagement.ModuleService
                 {
                     ModuleCode = module.Code,
                     ModuleName = module.DisplayName,
+                    Icon = module.Icon, 
                     Menus = rootMenus
                 });
             }
@@ -199,6 +202,8 @@ namespace travelexpensemanagement.ModuleService
         {
             public int Code { get; set; }
             public string DisplayName { get; set; }
+
+            public string Icon { get; set; }
         }
         public class MenuModule
         {
@@ -222,6 +227,7 @@ namespace travelexpensemanagement.ModuleService
 
             public string ModuleName { get; set; }
 
+            public string Icon { get; set; }
             public List<MenuModule> Menus { get; set; }
         }
         //commented by sumesh

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
@@ -126,6 +127,41 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     object result = cmd.ExecuteScalar();
                     return result != null; // true if duplicate exist
                 }
+            }
+        }
+
+        [HttpGet]
+        public JsonResult IsQcUOMDeletable(int docId)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            bool isExists = false;
+            string msg = "";
+            try
+            {
+                //===========Check Qc Group existence in QC Master===========
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QCPUNIT_MAST", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "Del_CheckInQcMast1");
+                        cmd.Parameters.AddWithValue("@CODE", docId);
+                        cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+
+                        string qcUOMName = result?.ToString();
+                        isExists = string.IsNullOrEmpty(qcUOMName) ? false : true;
+
+                        msg = $"QC UOM <b>{qcUOMName}</b> exists in QC Master and cannot be deleted.";
+                    }
+                    return Json(new { success = true, message = msg, isExists = isExists });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
         [HttpPost]

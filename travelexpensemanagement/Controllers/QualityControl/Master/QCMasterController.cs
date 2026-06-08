@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Reflection.Emit;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -30,38 +32,75 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         {
             return View("~/Views/QualityControl/Master/QCMaster/Index.cshtml");
         }
+
         [HttpGet]
-        public JsonResult GetddlQCGroup()
+        public JsonResult GetDropdown(string type)
         {
-            string query = "Select Code, Name From QCG_MAST order by Name asc";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
+            string query = "";
+  
+            switch (type)
+            {
+                case "QCGroup":
+                    query = $@"Select Code, Name From QCG_MAST order by Name asc";
+                    break;
+            }
+            var data = _dropdownService.GetDropdownList(query);
+            return Json(data);
         }
+
         [HttpGet]
-        public JsonResult GetddlParameter()
+        public async Task<JsonResult> GetddlParameter()
         {
-            string query = "Select Code, Name from QCP_MAST order by Name asc";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
+            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+            string query = $@"Select a.CODE as Code, a.name as Name, b.NAME as Unit, b.CODE as Ucode from QCP_MAST a left join QCPUNIT_MAST b on a.QUNIT_CODE =b.code where a.comp_code={compCode}";
+            var dataList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = dataList });
         }
-        [HttpPost]
-        public JsonResult GetLastCode()
+
+        [HttpGet]
+        public JsonResult getExistOrNot(string inputData)
+        {
+            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+            try
+            {
+                bool isExist = false;
+
+                using (var con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("Insert_QC_MAST"))
+                    {
+                        cmd.Connection = con;
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@Action", "Exist");
+                        cmd.Parameters.AddWithValue("@Name", inputData);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", compCode);
+                        con.Open();
+                        var result = cmd.ExecuteScalar();
+                        isExist = Convert.ToInt32(result) == 1;
+                    }
+                }
+
+                return Json(new { status = true, exists = isExist });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = "Data check failed: " + ex.Message });
+            }
+        }
+
+        private int GetLastCode()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
             int maxCode = 0;
-            const string sql = @"SELECT ISNULL(MAX(CAST(Code AS INT)), 0) FROM QC_MAST WHERE COMP_CODE = @COMP_CODE";
+            const string sql = @"SELECT ISNULL(MAX(CAST(Code AS INT)), 0) + 1 FROM QC_MAST WHERE COMP_CODE = @COMP_CODE";
 
             using (var conn = _dbConnection.GetErpConnection())
             {
                 conn.Open();
-                using (var cmd = conn.CreateCommand())
+                using (var cmd = new SqlCommand(sql,conn))
                 {
-                    cmd.CommandText = sql;
-
-                    var paramCompCode = cmd.CreateParameter();
-                    paramCompCode.ParameterName = "@COMP_CODE";
-                    paramCompCode.Value = globalVar.PubCompCode;
-                    cmd.Parameters.Add(paramCompCode);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
 
                     var result = cmd.ExecuteScalar();
                     if (result != null && int.TryParse(result.ToString(), out int val))
@@ -70,50 +109,24 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     }
                 }
             }
-            // Do not auto-increment here; let the client decide if needed
-            return Json(new { LastCode = maxCode });
-        }
-
-        [HttpPost]
-        public JsonResult GetLastQCPCODE([FromBody] QcCodeRequest request)
-        {
-            int maxQcpCode = 0;
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            var sql = @"
-        SELECT ISNULL(MAX(QCP_CODE), 0)
-        FROM QC_MAST1
-        WHERE CODE = @CODE AND COMP_CODE = @COMP_CODE";
-
-            using (var conn = _dbConnection.GetErpConnection())
-            {
-                conn.Open();
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = sql;
-
-                    var paramCode = cmd.CreateParameter();
-                    paramCode.ParameterName = "@CODE";
-                    paramCode.Value = request.Code;
-                    cmd.Parameters.Add(paramCode);
-
-                    var paramCompCode = cmd.CreateParameter();
-                    paramCompCode.ParameterName = "@COMP_CODE";
-                    paramCompCode.Value = globalVar.PubCompCode;
-                    cmd.Parameters.Add(paramCompCode);
-
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && int.TryParse(result.ToString(), out int val))
-                    {
-                        maxQcpCode = val;
-                    }
-                }
-            }
-            return Json(new { LastQCPCODE = maxQcpCode });
+            return maxCode;
         }
 
         [HttpPost]
         public async Task<IActionResult> InsertDataQcMaster([FromBody] QCMaster model)
         {
+            int code = 0;
+
+            if (model == null)
+            {
+                return Json(new { success = false, message = "Invalid Data!" });
+            }
+
+            code = GetLastCode();
+            if(code <= 0)
+            {
+                return Json(new { success = false, message = "Invalid Code!" });
+            }
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 await con.OpenAsync();
@@ -123,28 +136,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     {
                         var globalVar = _globalVariableService.GetGlobalVariables();
 
-                        string firstCodeStr = model.Details?.FirstOrDefault()?.Code;
-                        string CurrentCode = model.Details?.FirstOrDefault()?.CurrentCode;
-                        if (!int.TryParse(firstCodeStr, out int firstCode))
-                            return BadRequest("Invalid or missing Code in the first detail row.");
-
-                        if (!int.TryParse(model.QCGroup, out int qcGroupCode))
-                            qcGroupCode = 0;
-
-                        if (!decimal.TryParse(model.MaxPPM, out decimal maxPpm))
-                            maxPpm = 0;
-
                         // Insert into QC_MAST (Header)
                         using (SqlCommand cmd = new SqlCommand("Insert_QC_MAST", con, transaction))
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
 
                             cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                            cmd.Parameters.AddWithValue("@CODE", CurrentCode);
+                            cmd.Parameters.AddWithValue("@CODE", code);
                             cmd.Parameters.AddWithValue("@NAME", model.Name ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@SHORTNAME", model.ShortName ?? (object)DBNull.Value);
-                            cmd.Parameters.AddWithValue("@QCGROUP_CODE", qcGroupCode);
-                            cmd.Parameters.AddWithValue("@ACTIVE", model.ACTIVE);
+                            cmd.Parameters.AddWithValue("@QCGROUP_CODE", model.QCGroup);
+                            cmd.Parameters.AddWithValue("@ACTIVE", model.active);
                             cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
                             cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
                             cmd.Parameters.AddWithValue("@EUSER", DBNull.Value);
@@ -153,37 +155,24 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                             cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? (object)DBNull.Value);
-                            cmd.Parameters.AddWithValue("@PPM", maxPpm);
+                            cmd.Parameters.AddWithValue("@PPM", model.MaxPPM);
                             cmd.Parameters.AddWithValue("@Action", "Insert");
 
                             await cmd.ExecuteNonQueryAsync();
                         }
+                        int srno = 1;
                         // Insert into QC_MAST1 (Details)
                         foreach (var detail in model.Details)
                         {
-
-                            if (!int.TryParse(detail.Unit, out int unit))
-                                unit = 0;
-
-                            if (!decimal.TryParse(detail.StdResult, out decimal stdResult))
-                                stdResult = 0;
-
-                            if (!decimal.TryParse(detail.BasePrice, out decimal basePrice))
-                                basePrice = 0;
-                            //if (!decimal.TryParse(detail.Code, out decimal Code))
-                            //    Code = 0;
-
-                            int srno = new Random().Next(1000, 9999); // Replace with real SRNO logic
-
                             using (SqlCommand cmd = new SqlCommand("Insert_QC_MAST1", con, transaction))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
 
                                 cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                                cmd.Parameters.AddWithValue("@CODE", CurrentCode);
+                                cmd.Parameters.AddWithValue("@CODE", code);
                                 cmd.Parameters.AddWithValue("@QCP_CODE", detail.Parameter);
-                                cmd.Parameters.AddWithValue("@QCP_UNIT", unit);
-                                cmd.Parameters.AddWithValue("@QCP_STD", stdResult);
+                                cmd.Parameters.AddWithValue("@QCP_UNIT", detail.Unit);
+                                cmd.Parameters.AddWithValue("@QCP_STD", detail.StdResult);
                                 cmd.Parameters.AddWithValue("@DEDUCT_QTY", detail.DeductQty ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@DEDUCT_TYPE", detail.DeductType ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@REMARKS", detail.Remarks ?? (object)DBNull.Value);
@@ -195,13 +184,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                                 cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? (object)DBNull.Value);
-                                //cmd.Parameters.AddWithValue("@SRNO", srno);
+                                cmd.Parameters.AddWithValue("@SRNO", srno);
                                 cmd.Parameters.AddWithValue("@MOBILE_APP", "NO");
-                                cmd.Parameters.AddWithValue("@PPM_YN", string.IsNullOrWhiteSpace(detail.Ppm) ? "NO" : "YES");
-                                cmd.Parameters.AddWithValue("@BASE_PRICE", basePrice);
+                                cmd.Parameters.AddWithValue("@PPM_YN", detail.Ppm == "YES" ? "YES" : "NO");
+                                cmd.Parameters.AddWithValue("@BASE_PRICE", detail.BasePrice);
                                 cmd.Parameters.AddWithValue("@Action", "Insert");
 
                                 await cmd.ExecuteNonQueryAsync();
+                                srno++;
                             }
                         }
                         // Commit transaction if all succeed
@@ -229,27 +219,16 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     {
                         var globalVar = _globalVariableService.GetGlobalVariables();
 
-                        string firstCodeStr = model.Details?.FirstOrDefault()?.Code;
-                        string CurrentCode = model.Details?.FirstOrDefault()?.CurrentCode;
-                        if (!int.TryParse(firstCodeStr, out int firstCode))
-                            return BadRequest("Invalid or missing Code in the first detail row.");
-
-                        if (!int.TryParse(model.QCGroup, out int qcGroupCode))
-                            qcGroupCode = 0;
-
-                        if (!decimal.TryParse(model.MaxPPM, out decimal maxPpm))
-                            maxPpm = 0;
-
                         // Insert into QC_MAST (Header)
                         using (SqlCommand cmd = new SqlCommand("Insert_QC_MAST", con, transaction))
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
                             cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                            cmd.Parameters.AddWithValue("@CODE", firstCodeStr);
+                            cmd.Parameters.AddWithValue("@CODE", model.code);
                             cmd.Parameters.AddWithValue("@NAME", model.Name ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@SHORTNAME", model.ShortName ?? (object)DBNull.Value);
-                            cmd.Parameters.AddWithValue("@QCGROUP_CODE", qcGroupCode);
-                            cmd.Parameters.AddWithValue("@ACTIVE", model.ACTIVE);
+                            cmd.Parameters.AddWithValue("@QCGROUP_CODE", model.QCGroup);
+                            cmd.Parameters.AddWithValue("@ACTIVE", model.active);
                             cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
                             cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
                             cmd.Parameters.AddWithValue("@EUSER", DBNull.Value);
@@ -258,7 +237,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                             cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? (object)DBNull.Value);
-                            cmd.Parameters.AddWithValue("@PPM", maxPpm);
+                            cmd.Parameters.AddWithValue("@PPM", model.MaxPPM);
                             cmd.Parameters.AddWithValue("@Action", "Update");
 
                             await cmd.ExecuteNonQueryAsync();
@@ -267,27 +246,20 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                         using (SqlCommand deleteCmd = new SqlCommand("DELETE FROM QC_MAST1 WHERE COMP_CODE = @COMP_CODE AND CODE = @CODE", con, transaction))
                         {
                             deleteCmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                            deleteCmd.Parameters.AddWithValue("@CODE", firstCodeStr);
+                            deleteCmd.Parameters.AddWithValue("@CODE", model.code);
                             await deleteCmd.ExecuteNonQueryAsync();
                         }
+                        int srno = 1;
                         foreach (var detail in model.Details)
                         {
-                            if (!int.TryParse(detail.Unit, out int unit))
-                                unit = 0;
-                            if (!decimal.TryParse(detail.StdResult, out decimal stdResult))
-                                stdResult = 0;
-                            if (!decimal.TryParse(detail.BasePrice, out decimal basePrice))
-                                basePrice = 0;
-                            int srno = new Random().Next(1000, 9999); // Replace with real SRNO logic
-
                             using (SqlCommand cmd = new SqlCommand("Insert_QC_MAST1", con, transaction))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
                                 cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                                cmd.Parameters.AddWithValue("@CODE", firstCodeStr);
+                                cmd.Parameters.AddWithValue("@CODE", model.code);
                                 cmd.Parameters.AddWithValue("@QCP_CODE", detail.Parameter);
-                                cmd.Parameters.AddWithValue("@QCP_UNIT", unit);
-                                cmd.Parameters.AddWithValue("@QCP_STD", stdResult);
+                                cmd.Parameters.AddWithValue("@QCP_UNIT", detail.Unit);
+                                cmd.Parameters.AddWithValue("@QCP_STD", detail.StdResult);
                                 cmd.Parameters.AddWithValue("@DEDUCT_QTY", detail.DeductQty ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@DEDUCT_TYPE", detail.DeductType ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@REMARKS", detail.Remarks ?? (object)DBNull.Value);
@@ -299,13 +271,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                                 cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? (object)DBNull.Value);
-                                //cmd.Parameters.AddWithValue("@SRNO", srno);
+                                cmd.Parameters.AddWithValue("@SRNO", srno);
                                 cmd.Parameters.AddWithValue("@MOBILE_APP", "NO");
-                                cmd.Parameters.AddWithValue("@PPM_YN", string.IsNullOrWhiteSpace(detail.Ppm) ? "NO" : "YES");
-                                cmd.Parameters.AddWithValue("@BASE_PRICE", basePrice);
+                                cmd.Parameters.AddWithValue("@PPM_YN", detail.Ppm == "YES" ? "YES" : "NO");
+                                cmd.Parameters.AddWithValue("@BASE_PRICE", detail.BasePrice);
                                 cmd.Parameters.AddWithValue("@Action", "Insert");
 
                                 await cmd.ExecuteNonQueryAsync();
+                                srno++;
                             }
                         }
                         // Commit transaction if all succeed
@@ -320,62 +293,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 }
             }
         }
-        // popup Sumbit button
-        //[HttpPost]
-        //public async Task<JsonResult> SaveDeductRates([FromBody] List<DeductRateModel> rates)
-        //{
-        //    using (SqlConnection con = _dbConnection.GetErpConnection())
-        //    {
-        //        await con.OpenAsync();
-        //        using (SqlTransaction transaction = con.BeginTransaction())
-        //        {
-        //            try
-        //            {
-
-        //                var globalVar = _globalVariableService.GetGlobalVariables();
-        //                foreach (var rate in rates)
-        //                {
-        //                    int srno = new Random().Next(1000, 9999); // You can replace this with a proper SRNO generator
-
-        //                    using (SqlCommand cmd = new SqlCommand("Insert_QC_MAST2", con, transaction))
-        //                    {
-        //                        cmd.CommandType = CommandType.StoredProcedure;
-
-        //                        cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                        cmd.Parameters.AddWithValue("@CODE", Convert.ToInt32(rate.Code));
-        //                        cmd.Parameters.AddWithValue("@QCP_CODE", Convert.ToInt32(rate.nextQcpCode));
-        //                        cmd.Parameters.AddWithValue("@FROM_RESULT", rate.From);
-        //                        cmd.Parameters.AddWithValue("@TO_RESULT", rate.To);
-        //                        cmd.Parameters.AddWithValue("@DEDUCT_TYPE", rate.Type ?? (object)DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@DEDUCT_RATE", rate.Rate);
-        //                        cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-        //                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-        //                        cmd.Parameters.AddWithValue("@EUSER", DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@AED", "A");
-        //                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? (object)DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? (object)DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? (object)DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@SRNO", srno);
-        //                        cmd.Parameters.AddWithValue("@DED_TYPE", rate.Type ?? (object)DBNull.Value);
-        //                        cmd.Parameters.AddWithValue("@Action", "Insert");
-
-        //                        await cmd.ExecuteNonQueryAsync();
-        //                    }
-        //                }
-
-        //                transaction.Commit();
-        //                return Json(new { success = true });
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                transaction.Rollback();
-        //                return Json(new { success = false, message = ex.Message });
-        //            }
-        //        }
-        //    }
-        //}
-
+        
         [HttpPost]
         public async Task<JsonResult> SaveDeductRates([FromBody] List<DeductRateModel> rates)
         {
@@ -440,6 +358,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 }
             }
         }
+        
         [HttpPost]
         public async Task<IActionResult> CheckDeductRates([FromBody] CheckDeductRateRequest request)
         {
@@ -479,9 +398,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             }
             return Json(deductRates);
         }
-        // Model for response items
-
-        // Model for request binding
+        
         [HttpPost]
         public JsonResult GetQCMasterListByCode([FromBody] CodeRequest request)
         {
@@ -508,9 +425,10 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                             {
                                 Name = rdr["NAME"]?.ToString(),
                                 ShortName = rdr["SHORTNAME"]?.ToString(),
-                                QCGroup = rdr["QCGROUP_CODE"]?.ToString(),
-                                MaxPPM = rdr["PPM"]?.ToString(),
-                                ACTIVE = rdr["ACTIVE"] != DBNull.Value ? Convert.ToInt32(rdr["ACTIVE"]) : 0,
+                                //QCGroup = rdr["QCGROUP_CODE"]?.ToString(),
+                                QCGroup = rdr["QCGROUP_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["QCGROUP_CODE"]) : 0,
+                                MaxPPM = rdr["PPM"] != DBNull.Value ? Convert.ToDecimal(rdr["PPM"]) : 0,
+                                active = rdr["ACTIVE"] != DBNull.Value ? Convert.ToInt32(rdr["ACTIVE"]) : 0,
                                 Details = new List<DetailModel>() // init here just in case
                             };
                         }
@@ -532,16 +450,16 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                         {
                             qcMaster.Details.Add(new DetailModel
                             {
-                                Code = rdr["CODE"]?.ToString(),
-                                Parameter = rdr["QCP_Name"]?.ToString(),
-                                ParameterValue = rdr["QCP_CODE"]?.ToString(),
-                                Unit = rdr["QCP_UNIT"]?.ToString(),
-                                StdResult = rdr["QCP_STD"]?.ToString(),
+                                Code = rdr["CODE"] != DBNull.Value ? Convert.ToInt32(rdr["CODE"]) : 0,
+                                //Parameter = rdr["QCP_Name"]?.ToString(),
+                                ParameterValue = rdr["QCP_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["QCP_CODE"]) : 0,
+                                Unit = rdr["QCP_UNIT"] != DBNull.Value ? Convert.ToInt32(rdr["QCP_UNIT"]) : 0,
+                                StdResult = rdr["QCP_STD"] != DBNull.Value ? Convert.ToDecimal(rdr["QCP_STD"]) : 0,
                                 DeductQty = rdr["DEDUCT_QTY"]?.ToString(),
                                 DeductType = rdr["DEDUCT_TYPE"]?.ToString(),
                                 Remarks = rdr["REMARKS"]?.ToString(),
                                 Ppm = rdr["PPM_YN"]?.ToString(),
-                                BasePrice = rdr["BASE_PRICE"]?.ToString()
+                                BasePrice = rdr["BASE_PRICE"] != DBNull.Value ? Convert.ToDecimal(rdr["BASE_PRICE"]) : 0
                             });
                         }
                     }
@@ -553,6 +471,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             }
             return Json(new { success = true, data = qcMaster });
         }
+        
         public class CodeRequest
         {
             public int code { get; set; }

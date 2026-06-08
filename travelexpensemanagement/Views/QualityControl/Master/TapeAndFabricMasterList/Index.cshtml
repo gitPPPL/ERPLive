@@ -57,7 +57,7 @@
 					<i class="fas fa-file-export"></i> Export
 				</button>
 			}
-			@if (canMail)
+			@* @if (canMail)
 			{
 				<button class="btn btn-mail">
 					<i class="fa fa-envelope"></i> Mail
@@ -71,7 +71,7 @@
 				<button class="btn btn-approved">
 					<i class="fa fa-check"></i> Approved
 				</button>
-			}
+			} *@
 		</div>
 	</div>
 	<div class="card">
@@ -82,21 +82,21 @@
 						<th style="display:none;">Code</th>
 						<th>Name</th>						 
 						<th>Mesh Name</th>
-						<th style="display:none;">Std Gram</th>
-						<th>Min Gram</th>
-						<th>Max Gram</th>
-						<th>Gsm</th>
-						<th>Denier</th>
-						<th>Unit Name</th>						 
 						<th>Color Name</th>
+						<th>Unit Name</th>						 
+						<th>Std Gram</th>
+						<th>Denier</th>
+						<th>Gsm</th>
+						<th>Std GPD</th>
+						<th>Std Strength</th>
+						<th>Std Elong</th>
+						<th style="display:none;">Min Gram</th>
+						<th style="display:none;">Max Gram</th>
 						<th style="display:none;">Width</th>
-						<th style="display:none;">GPD</th>
 						<th style="display:none;">Min GPD</th>
 						<th style="display:none;">Max GPD</th>
-						<th style="display:none;">Std Strength</th>
 						<th style="display:none;">Strength Max</th>
 						<th style="display:none;">Strength Min</th>
-						<th style="display:none;">Std Elong</th>
 						<th style="display:none;">Elong Max</th>
 						<th style="display:none;">Elong Min</th>
 						<th style="display:none;">Unlam Fab</th>
@@ -209,21 +209,21 @@
 							<td class="code d-none">${item.code}</td>
 							<td>${item.name}</td>
 							<td>${item.mesH_NAME}</td>
-							<td class="d-none">${item.stD_GRAM}</td>
-							<td>${item.miN_GRAM}</td>
-							<td>${item.maX_GRAM}</td>
-							<td>${item.gsm}</td>
-							<td>${item.denier}</td>
-							<td>${item.uniT_NAME}</td>
 							<td>${item.coloR_NAME}</td>
+							<td>${item.uniT_NAME}</td>
+							<td>${item.stD_GRAM}</td>
+							<td>${item.denier}</td>
+							<td>${item.gsm}</td>
+							<td>${item.gpd}</td>
+							<td>${item.stD_STRENGTH}</td>
+							<td>${item.stD_ELONG}</td>
+							<td class="d-none">${item.miN_GRAM}</td>
+							<td class="d-none">${item.maX_GRAM}</td>
 							<td class="d-none">${item.width}</td>
-							<td class="d-none">${item.gpd}</td>
 							<td class="d-none">${item.miN_GPD}</td>
 							<td class="d-none">${item.maX_GPD}</td>
-							<td class="d-none">${item.stD_STRENGTH}</td>
 							<td class="d-none">${item.strengtH_MAX}</td>
 							<td class="d-none">${item.strengtH_MIN}</td>
-							<td class="d-none">${item.stD_ELONG}</td>
 							<td class="d-none">${item.elonG_MAX}</td>
 							<td class="d-none">${item.elonG_MIN}</td>
 							<td class="d-none">${item.unlaM_FAB}</td>
@@ -262,13 +262,86 @@
 
 	//=================Delete================
 	function deleteTapeAndFabric(docId) {
-	   deleteRecord("TapeAndFabricMasterList", docId, {
-		   action: "DelTape_FabricMast",
-		   text: "This will permanently delete the Tape And Fabric Details.",
-		   successCallback: TapeAndFabricPagination.load
-	   });
-	}
 
+		// STEP 1: Validate first
+		$.ajax({
+			url: `/TapeAndFabricMasterList/IsTapeFabricDeletable`,
+			type: 'GET',
+			data: { docId: docId },
+
+			success: function (response) {
+
+				if (!response.success) {
+					Swal.fire('Failed', response.message, 'warning');
+					return;
+				}
+
+				// STEP 2: Prepare message
+				let swalText = "This will permanently delete the Tape And Fabric Details.";
+				let cancelBtn = true;
+				let confirmBtn = true;
+				let swalTitle = "Are you sure?";
+				if (response.isExists) {
+					swalText = response.message;
+					cancelBtn = false;
+					confirmBtn = false;
+					swalTitle = "Can't delete!!";
+				}
+
+				// STEP 3: Show only ONE popup
+				Swal.fire({
+					title: swalTitle,
+					html: swalText,
+					icon: 'warning',
+					showCancelButton: cancelBtn,
+					showConfirmButton: confirmBtn,
+					confirmButtonColor: '#d33',
+					cancelButtonColor: '#3085d6',
+					confirmButtonText: 'Yes, delete it!',
+					cancelButtonText: 'Cancel'
+				}).then((result) => {
+
+					if (!result.isConfirmed) return;
+
+					// STEP 4: Delete
+					$.ajax({
+						url: `/TapeAndFabricMasterList/DelTape_FabricMast`,
+						type: 'POST',
+						data: { docId: docId },
+
+						success: function (res) {
+
+							if (res.success) {
+
+								Swal.fire({
+									icon: 'success',
+									title: 'Deleted!',
+									text: res.message || 'Deleted successfully',
+									showConfirmButton: false,   // Hide the OK button
+									timer: 2000,                 // Auto close
+								});
+								setTimeout(() => {
+									TapeAndFabricPagination.load();
+								}, 2000);
+							} else {
+								Swal.fire('Failed', res.message, 'warning');
+							}
+						},
+
+						error: function () {
+							Swal.fire('Error!', 'Error in deleting.', 'error');
+						}
+					});
+
+				});
+			},
+
+			error: function () {
+				Swal.fire('Error!', 'Something went wrong.', 'error');
+			}
+		});
+	}
+	
 	// ================= Download Excel =================
 	document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
 		e.preventDefault();

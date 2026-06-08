@@ -35,19 +35,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             return View("~/Views/QualityControl/Master/ParameterMaster/Index.cshtml");
         }
 
-        //[HttpGet]
-        //public async Task<JsonResult> GetUnit()
-        //{
-        //    try
-        //    {
-        //        var colorTypeList = await _dbHelper.GetJsonDataAsync(" select distinct CODE, NAME from ITEMUNIT_MAST where COMP_CODE='" + _globalValue.GetGlobalVariables().PubCompCode + "'  order by NAME ");
-        //        return Json(new { status = true, data = colorTypeList });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { status = false, message = "Data load failed" });
-        //    }
-        //}
+        [HttpGet]
         public JsonResult GetDropdown(string type)
         {
             string query = "";
@@ -101,7 +89,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 return Json(new { status = false, message = "Data check failed: " + ex.Message });
             }
         }
-
 
         [HttpPost]
         public async Task<IActionResult> SaveQParamMast([FromBody] ParameterModel model)

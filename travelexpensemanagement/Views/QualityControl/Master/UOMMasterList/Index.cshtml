@@ -1,6 +1,6 @@
 ﻿@{
-	ViewBag.Title = "UOM Master List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "UOM Master List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 
     var currentMenu = ViewBag.CurrentMenu as string;
     bool canAdd = false;
@@ -31,60 +31,76 @@
     var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 <div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>UOM Master List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        @if (canAdd)
+        {
+            <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "UOMMaster")'">
+                <i class="fa fa-plus"></i>Add New
+            </button>
+        }
+    </div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        @if (canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="QCUOMMasterReport()">
+                <i class="fa fa-print"></i> Print
+            </button>
+        }
+        @if (canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+                <i class="fa fa-file-excel"></i> Export
+            </button>
+        }
+        @* @if (canMail)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+                <i class="fa fa-envelope"></i>Mail
+            </button>
+        }
+        @if (canApproval)
+        {
+            <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+                <i class="fa fa-check-circle"></i>Approved
+            </button>
+        } *@
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblUOMMaster" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="display:none;" />
+                <col style="width:250px;" />
+                <col style="width:180px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">Code</th>
+                    <th>QC UOM Name</th>
+                    <th>Short Name</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-<fieldset>
-	<legend class="legend-field">UOM Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-8 btn-align">
-            @if (canAdd)
-            {
-                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "UOMMaster")'" type="submit" class="btn btn-primary">
-                    <i class="fa fa-plus"></i>Add UOM
-                </button>
-            }
-            @if (canPrint)
-            {
-                <button class="btn btn-print" onclick="QCUOMMasterReport()"><i class="fa fa-print"></i> Print </button>
-            }
-            @if (canExport)
-            {
-                <button class="btn btn-export" id="btn-Export-Excel"><i class="fas fa-file-export"></i> Export</button>
-            }
-            @if (canMail)
-            {
-                <button class="btn btn-mail"><i class="fa fa-envelope"></i> Mail</button>
-            }
-            @if (canApproval)
-            {
-                <button class="btn btn-send"><i class="fa fa-paper-plane"></i> Approval Send</button>
-                <button class="btn btn-approved"><i class="fa fa-check"></i> Approved</button>
-            }
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblUOMMaster" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>QC Unit Name</th>
-						<th>Short Name</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-	@* <div class="pagination-wrapper">
-		<ul class="pagination" id="tablePagination"></ul>
-	</div> *@
     <div class="erppagelist-pagination">
         <div class="pagination-left">
             <select id="pageSizeSelect" onchange="changeRowsPerPage()">
@@ -104,10 +120,11 @@
             Results: 0 - 0 of 0
         </div>
     </div>
-</fieldset>
+</div>
+
+
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>
-
 
 <script>
     var permissions = {
@@ -159,7 +176,7 @@
                 const tbody = $('#tblUOMMaster tbody');
                 tbody.empty();
                 if (!docs.length) {
-                    tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
+                    tbody.append(`<tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>`);
                     return;
                 }
 
@@ -177,7 +194,12 @@
                             <td style="display:none;">${item.code}</td>
                             <td>${item.name || ''}</td>
                             <td>${item.shortname || ''}</td>
-                            <td>${item.active === 1 ? 'Active' : 'Inactive'}</td>
+                            <td>
+                                ${item.active === 1
+                                    ? '<span class="erppagestatus-badge erppagestatus-active"><i class="fa fa-check-circle"></i>&nbsp;Active</span>'
+                                    : '<span class="erppagestatus-badge erppagestatus-inactive"><i class="fa fa-times-circle"></i>&nbsp;Inactive</span>'
+                                }
+                            </td>
                             <td class="action-col">${actions}</td>
                         </tr>
                     `);
@@ -198,7 +220,7 @@
         QCPUOMMasterPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
         QCPUOMMasterPagination.load();
     }
-    
+
     //==============Edit==============
     function editUOM(code) {
         window.location.href = '/UOMMaster/Index?id=' + encodeURIComponent(code);
@@ -211,13 +233,86 @@
 
     //=================Delete================
     function deleteUOM(docId) {
-       deleteRecord("UOMMaster", docId, {
-           action: "DeleteUOMByCode",
-           text: "This will permanently delete the QC Unit.",
-           successCallback: QCPUOMMasterPagination.load
-       });
+
+        // STEP 1: Validate first
+        $.ajax({
+            url: `/UOMMaster/IsQcUOMDeletable`,
+            type: 'GET',
+            data: { docId: docId },
+
+            success: function (response) {
+
+                if (!response.success) {
+                    Swal.fire('Failed', response.message, 'warning');
+                    return;
+                }
+
+                // STEP 2: Prepare message
+                let swalText = "This will permanently delete the QC Unit.";
+                let cancelBtn = true;
+                let confirmBtn = true;
+                let swalTitle = "Are you sure?";
+                if (response.isExists) {
+                    swalText = response.message;
+                    cancelBtn = false;
+                    confirmBtn = false;
+                    swalTitle = "Can't delete!!";
+                }
+
+                // STEP 3: Show only ONE popup
+                Swal.fire({
+                    title: swalTitle,
+                    html: swalText,
+                    icon: 'warning',
+                    showCancelButton: cancelBtn,
+                    showConfirmButton: confirmBtn,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+
+                    if (!result.isConfirmed) return;
+
+                    // STEP 4: Delete
+                    $.ajax({
+                        url: `/UOMMaster/DeleteUOMByCode`,
+                        type: 'POST',
+                        data: { docId: docId },
+
+                        success: function (res) {
+
+                            if (res.success) {
+
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: res.message || 'Deleted successfully',
+                                    showConfirmButton: false,   // Hide the OK button
+                                    timer: 2000,                 // Auto close
+                                });
+                                setTimeout(() => {
+                                    QCPUOMMasterPagination.load();
+                                }, 2000);
+                            } else {
+                                Swal.fire('Failed', res.message, 'warning');
+                            }
+                        },
+
+                        error: function () {
+                            Swal.fire('Error!', 'Error in deleting.', 'error');
+                        }
+                    });
+
+                });
+            },
+
+            error: function () {
+                Swal.fire('Error!', 'Something went wrong.', 'error');
+            }
+        });
     }
-    
+
     // ================= Download Excel =================
     document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
         e.preventDefault();

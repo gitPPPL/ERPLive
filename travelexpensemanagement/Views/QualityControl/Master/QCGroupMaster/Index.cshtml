@@ -2,65 +2,64 @@
     ViewBag.Title = "QC Group Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">QC Group Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnSave"
-                        onclick="handleBack('@Url.Action("Index", "QCGroupMasterList")', isReadOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-shield"></i>
         </div>
+        <div class="erppage-header-title">QC Group Master</div>
     </div>
-    <form id="QCGroupMasterform">
-        <input type="hidden" class="form-control" id="CODE" name="CODE">
-        <!-- Row 1 -->
-        <div class="row">
-            <div class="col-md-3"> 
-                <div class="form-group">
-                    <label for="TxtQCGName" class="form-label">QCG Name</label>
-                    <input type="text" class="form-control" id="TxtQCGName" name="QCGName" placeholder="Enter QCG Name">
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCGroupMasterList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="QCGroupMasterform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QCG Name</label>
+                    <input type="text" class="erppage-redinput" id="TxtQCGName" name="QCGName" placeholder="Enter QCG Name" maxlength="100">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlQCType" class="form-label">QC Type</label>
-                    <select class="form-control" id="ddlQCType" name="QCType">
-                        <option value="">--Select QC Type--</option>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Type</label>
+                    <select class="erppage-redinput erppage-select" id="ddlQCType" name="QCType">
+                        <option value="">Select QC Type</option>
                         <option value="RMG">RMG</option>
                         <option value="STORE">STORE</option>
                         <option value="FINISH">FINISH</option>
                         <option value="WASTE">WASTE</option>
                         <option value="SCRAP">SCRAP</option>
-                        <option value="FULE">FULE</option>
+                        <option value="FUEL">FUEL</option>
                         <option value="SFG">SFG</option>
                         <option value="OTHERS">OTHERS</option>
                     </select>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-                <div class="active-toggle btn-align">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="label-status" id="statusText">Active</span>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label"></label>
+                    <div class="erppage-toggle-container">
+                        <span class="erppage-toggle-text active" id="statusText">Active</span>
+                        <label class="erppage-toggle">
+                            <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                            <span class="erppage-toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="btn-last">
-                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
 <script>
     let isReadOnly;
     //=========Page Load===========
@@ -79,9 +78,9 @@
             }
         }
 
-        $('#cancelBtn').on('click', function () {
-            window.location.href = '/QCGroupMasterList/Index';
-        });
+        // $('#cancelBtn').on('click', function () {
+        //     window.location.href = '/QCGroupMasterList/Index';
+        // });
 
         $('#ACTIVE').on('change', function () {
             let status = $(this).is(':checked') ? 'Active' : 'Inactive';
@@ -90,7 +89,7 @@
     });
 
     //========Save & Update=========
-    $('#QCGroupMasterform').on('submit', function (e) {
+    $('#btnSave').on('click', function (e) {
         e.preventDefault();
 
         const code = parseInt($('#CODE').val()) || 0;
@@ -116,7 +115,8 @@
             data: JSON.stringify(payload),
             success: function (response) {
                 if (response.success) {
-                    showToast("QC Group saved successfully!", { type: "success" });
+                    const msg = code > 0 ? "QC Group updated successfully!" : "QC Group saved successfully!";
+                    showToast(msg, { type: "success" });
                     setTimeout(function () {
                         window.location.href = '/QCGroupMasterList/Index';
                     }, 1000);
@@ -165,9 +165,10 @@
         $('#ACTIVE').prop('disabled', true);
         $('#statusText').addClass('text-muted');
 
-         $('#btnSave, #cancelBtn').hide();
+         $('#btnSave').hide();
         form.addClass('erppage-readonly');
     }
 
 </script>
+
 

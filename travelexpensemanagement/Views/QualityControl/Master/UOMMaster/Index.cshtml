@@ -3,58 +3,52 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">UOM Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="handleBack('@Url.Action("Index", "UOMMasterList")', isReadOnly)" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-balance-scale"></i>
+        </div>
+        <div class="erppage-header-title">UOM Master</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "UOMMasterList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="UOMMasterForm">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Unit Name</label>
+                    <input type="text" class="erppage-redinput" id="TxtQCUnitName" placeholder="Enter QC Unit Name" maxlength="100">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Short Name</label>
+                    <input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name" maxlength="20">
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label"></label>
+                    <div class="erppage-toggle-container">
+                        <span class="erppage-toggle-text active" id="statusText">Active</span>
+                        <label class="erppage-toggle">
+                            <input type="checkbox" id="ACTIVE" checked>
+                            <span class="erppage-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
     </div>
-
-    <form id="UOMMasterForm"> 
-        <input type="hidden" class="form-control" id="CODE" name="CODE">
-
-        <div class="row">
-            <!-- QC Unit Name -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtQCUnitName">QC Unit Name</label>
-                    <input type="text" class="form-control" id="TxtQCUnitName" name="QCUnitName" placeholder="Enter QC Unit Name">
-                </div>
-            </div>
-
-            <!-- Short Name -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtShortName">Short Name</label>
-                    <input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Enter Short Name">
-                </div>
-            </div>
-       </div>
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-                <div class="active-toggle btn-align">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="label-status" id="statusText">Active</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="btn-last">
-                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                    <button type="button" id="cancelBtn" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+</div>
 <script>
     let isReadOnly;
 
@@ -74,10 +68,10 @@
                 setUOMFormReadOnly();
             }
         }
-
-        $('#cancelBtn').on('click', function () {
-            window.location.href = '/UOMMasterList/Index';
-        });
+        //commented by sumesh
+        // $('#cancelBtn').on('click', function () {
+        //     window.location.href = '/UOMMasterList/Index';
+        // });
 
         $('#ACTIVE').on('change', function () {
             let status = $(this).is(':checked') ? 'Active' : 'Inactive';
@@ -85,7 +79,7 @@
         });
     });
     //==========Save & Update=======
-    $('#UOMMasterForm').on('submit', function (e) {
+    $('#btnSave').on('click', function (e) {
         e.preventDefault();
 
         const code = parseInt($('#CODE').val()) || 0;
@@ -169,7 +163,7 @@
         form.find('input, select, textarea, button').prop('disabled', true);
         $('#ACTIVE').prop('disabled', true);
         $('#statusText').addClass('text-muted');
-        $('#btnSave, #cancelBtn').hide();
+        $('#btnSave').hide();
 
         form.addClass('erppage-readonly');
     }

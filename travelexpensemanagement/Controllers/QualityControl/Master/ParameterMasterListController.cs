@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Data.Common;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
@@ -85,6 +86,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                                     NAME = reader["Name"]?.ToString(),
                                     SHORTNAME = reader["ShortName"]?.ToString(),
                                     QUNIT = reader["Unit"]?.ToString(),
+                                    qty = reader["Qty"] != DBNull.Value ? Convert.ToInt32(reader["Qty"]) : null,
                                     ACTIVE = reader["Active"] != DBNull.Value ? Convert.ToInt32(reader["Active"]) : null,
                                 });
                             }
@@ -106,6 +108,41 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             catch (Exception ex)
             {
                 return Json(new { status = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult IsQcParamDeletable(int docId)
+        {
+            var gv = _globalValue.GetGlobalVariables();
+            bool isExists = false;
+            string msg = "";
+            try
+            {
+                //===========Check Qc Group existence in QC Master===========
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QualityParameterMast_AED", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@AED", "Del_CheckInQcMast1");
+                        cmd.Parameters.AddWithValue("@Code", docId);
+                        cmd.Parameters.AddWithValue("@companyCd", gv.PubCompCode);
+
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+
+                        string qcParamName = result?.ToString();
+                        isExists = string.IsNullOrEmpty(qcParamName) ? false : true;
+
+                        msg = $"QC Parameter <b>{qcParamName}</b> exists in QC Master and cannot be deleted.";
+                    }
+                    return Json(new { success = true, message = msg, isExists = isExists });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -154,6 +191,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             public string? NAME { get; set; }
             public string? SHORTNAME { get; set; }
             public string? QUNIT { get; set; }
+            public int? qty { get; set; }
             public int? ACTIVE { get; set; }
         }
 
