@@ -194,6 +194,7 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const result = await res.json();
         if (result.success) {
+
             const details = result.data || [];
             pendingData = details.map(detail => ({
                 Vouchertype: detail.v_type,
@@ -222,3 +223,71 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
 }
 
 
+
+
+function TransitReport() {
+
+    var reportName = "gatepass1";
+
+    var v_no = $('#NumDocNo').val();
+    var v_type = $('#ddlDocType').val();
+
+    console.log("global Variable", window.globalVariables);
+    console.log("database Name", window.database);
+
+    var formula =
+        "{GATE1.comp_code} = " + window.globalVariables.compCode +
+        " and {GATE1.Year_code} = " + window.globalVariables.yearCode +
+        " and {GATE1.branch_code} = " + window.globalVariables.branchCode +
+        " and {GATE1.V_no} = " + v_no +
+        " and {GATE1.v_type} = " + v_type;
+
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.address1,
+            comp_add2: window.globalVariables.address2,
+            GST: window.globalVariables.gst,
+            PAN: window.globalVariables.pan,
+            COMP_PHONE: window.globalVariables.compPhone,
+            EMAIL: window.globalVariables.email,
+            RPTNAME: "FACTORY GATE PASS FOR OUTGOING MATERIAL"
+        }
+    };
+
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    $.ajax({
+        url: 'http://localhost:34055/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
+
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+}

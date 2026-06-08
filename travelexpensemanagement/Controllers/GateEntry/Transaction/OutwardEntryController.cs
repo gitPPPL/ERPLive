@@ -38,11 +38,26 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
         public IActionResult Index()
         {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database; // Get the database name
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
             TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
             TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
             TempData["CompCode"] = _globalVariableService.GetGlobalVariables().PubCompCode;
             return View("~/Views/GateEntry/Transaction/OutwardEntry/Index.cshtml");
         }
+
+
+
+
         public JsonResult GetVNo(string Vtype , string Tablename)
         {
           string   newV_NO = _globalValidationdate.GetVNo(Vtype, Tablename);

@@ -15,6 +15,8 @@
     const $tbody = $("#tblOutwardEntry tbody");
     const form = $('#OutwardEntryForm');
     const mode = urlParams.get('mode');
+
+
     $(document).ready(function () {
         (async () => {
             try {
@@ -63,29 +65,31 @@
                     const DocType = $.trim($('#ddlDocType').val());
                     const ITEM_TYPE = $.trim($('#ddlType option:selected').text());
                     const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
+                    if (!validateRequiredField('#NumDocNo', 'Please Enter a Doc No.')) return;
                     if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type.')) return;
-                    if (!validateRequiredField('#DtDocDate', 'Please select a Voucher Date.')) return;                              
+                    if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date.')) return;                              
 
                     if (DocType === "OURT") {
-
-                        if (!validateRequiredField('#DtExpectedDateReturn', 'Please select Return Date.')) return;
-                        if (!validateRequiredField('#DtExpectedDateReturn', 'Invalid Return Date. Return date should not be less than Doc date.')) return;
-                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return; 
-                        
+        
+                        if (RETURN_DATE < V_DATE) {                 
+                            showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
+                            return;
+                        }            
+                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
                     }
 
                     if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
 
                     if (CompCode == 2) {
-                        if (DocType === "DocType" || ITEM_TYPE === "Sale") {
-                            if (!validateRequiredField('#ddlDocType', 'Please check DocType and Doc No')) return;                     
+                        if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
+                            showToast("Please check DocType and Doc No", "Warning", { type: "warning" });
+                            return;                                                     
                         }
                           
                         else {
         
                             if (DocType === "OUES" && ITEM_TYPE !== "E-Commerce Sale") {
-                                if (!validateRequiredField('#ddlDocType', 'Sale Type and Doctype mismatch.')) return; 
-                             
+                                if (!validateRequiredField('#ddlDocType', 'Sale Type and Doctype mismatch.')) return;                              
                             }
 
                         }
@@ -308,6 +312,9 @@
                     const BILL_NO = $('#TxtWayBillNo').val();
                     const v_date = $('#DtDocDate').val();
                     const typeText = $('#ddlType option:selected').text();
+
+                    if (!validateRequiredField('#ddlPartyName', 'Please Select Party Name.')) return;
+                    if (!validateRequiredField('#ddlType', 'Please Select  Type.')) return;
 
                     FetchPendindorderno(selectedValue, typeText, v_date, BILL_NO);
                 });

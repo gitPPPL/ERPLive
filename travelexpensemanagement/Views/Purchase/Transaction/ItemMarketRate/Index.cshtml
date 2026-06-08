@@ -22,7 +22,7 @@
                 <div class="form-group">
                     <label for="ddlDocType">Doc Type</label>
                     <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
+                       
                     </select>
                 </div>
             </div>
@@ -114,12 +114,10 @@
     var compCode = '@ViewBag.CompCode';
     var branchCode = '@ViewBag.BranchCode';
     var yearCode = '@ViewBag.YearCode';
-
     let marketRateItems = [];
     let globalItemMap = {};
-
-
      //getting 
+
     const urlParams = new URLSearchParams(location.search);
     const rowId = parseInt(urlParams.get('id'));
     const isReadOnly = urlParams.get('readOnly') === 'true';
@@ -128,9 +126,15 @@
         loadItemList(compCode).then(() => {
             if (!isNaN(rowId) && rowId > 0) {
               loadFullItemMarketRateByVno(rowId);
-            } else {
+            } else 
+            {
                 addNewRowBelow(true);
             }
+
+           document.getElementById("DtDocDate").value = new Date().toISOString().split('T')[0];
+           document.getElementById("DtEffFrom").value = new Date().toISOString().split('T')[0];
+           document.getElementById("DtExpiredOn").value = new Date().toISOString().split('T')[0];
+
             loadNextDocNo(yearCode);
             loadDocTypeList();
             loadItemGroupTypeList(compCode);
@@ -160,7 +164,7 @@
             success: function (data) {
                 var ddl = $('#ddlDocType');
                 ddl.empty();
-                ddl.append('<option value="">-- Select Doc Type --</option>');
+                ddl.append('');
 
                 $.each(data, function (index, item) {
                     ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
@@ -197,7 +201,6 @@
         });
     }
 
-
     function loadItemList(compC) {
         return $.ajax({
             url: '/ItemMarketRate/GetItemList',
@@ -230,7 +233,6 @@
             marketRateItems[rowIndex].iteM_CODE = selectedCode;
         }
     });
-
 
     //function to LOAD DATA from MARKET_RATE 1,2 Table
     function loadFullItemMarketRateByVno(vNo) {
@@ -273,6 +275,7 @@
             }
         });
     }
+
     function generateRowHtml(row, i, itemMap, isLastRow = false) {
         const getValue = value => (value === undefined || value === null || value === '') ? '' : value;
         const dropdownOptions = generateDropdownOptions(itemMap, getValue(row.iteM_CODE));
@@ -306,18 +309,21 @@
             </tr>
         `;
     }
+
     function generateDropdownOptions(itemMap, selectedValue) {
         return Object.keys(itemMap).map(key => {
             const selected = (selectedValue == key) ? 'selected' : '';
             return `<option value="${key}" ${selected}>${itemMap[key]}</option>`;
         }).join('');
     }
+
     function deleteRow(button) {
         const row = button.closest('tr');
         if (row) {
             row.remove();
         }
     }
+
     function addNewRowBelow(suppressValidation = false) {
         const lastRow = $('#tblPurchaseBillPassEntry tbody tr:last');
         let isValid = true;
@@ -373,6 +379,7 @@
 
         $(`#itemName_${newIndex}`).select2({ width: '100%' });
     }
+
     function LoadPreviousData() {
         var grpType = $('#ddlItemGroup').val();
 
@@ -417,11 +424,6 @@
             }
         });
     }
-
-
-
-
-
 
     $('#btn-save').click(function (e) {
         e.preventDefault();
@@ -537,7 +539,6 @@
         });
     });
 
-
     function validateHeader() {
         let isValid = true;
 
@@ -603,4 +604,5 @@
 
         return isValid;
     }
+
 </script>

@@ -5,6 +5,7 @@
     var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
     var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
     var CompCode = Convert.ToInt32(TempData["CompCode"]);
+
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -15,6 +16,14 @@
         <div class="erppage-header-title">Outward Entry</div>
     </div>
     <div class="erppage-header-right">
+         
+        <button type="button" class="erppage-header-back" onclick="TransitReport();" >
+            <i class="fa-solid fa-chart-line"></i> Report
+        </button>
+
+
+
+
         <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
