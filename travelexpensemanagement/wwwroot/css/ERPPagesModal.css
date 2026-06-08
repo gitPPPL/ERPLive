@@ -10,7 +10,30 @@
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     background: #f9fafb;
 }
+.erppagesmodal-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 30px; /* increase spacing */
+    margin: 12px 0;
+}
 
+.erppagesmodal-radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .erppagesmodal-radio input[type="radio"] {
+        margin: 0;
+        transform: scale(1.1);
+    }
+
+    .erppagesmodal-radio label {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
 /* Header */
 .erppagesmodal-header {
     background: linear-gradient(135deg, #2f7d32, #1b5e20);

@@ -1,4 +1,4 @@
-﻿$(document).ready(function () {
+﻿   $(document).ready(function () {
     $('.erppage-tab').on('click', function () {
         var tabId = $(this).data('tab');
         $('.erppage-tab').removeClass('active');

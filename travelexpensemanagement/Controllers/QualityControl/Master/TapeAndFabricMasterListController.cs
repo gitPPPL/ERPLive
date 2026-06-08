@@ -1,33 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.LogService;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
     public class TapeAndFabricMasterListController : Controller
     {
-        private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly ModuleService.ModuleService _moduleService;
-        private readonly LogService.LogService _logService;
+        private readonly ITapeAndFabricMasterListRepository _repository;
 
-        public TapeAndFabricMasterListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, GlobalValidationdate globalValidationdate, 
-            ModuleService.ModuleService moduleService, LogService.LogService logService)
+        public TapeAndFabricMasterListController(DataBaseConnection dbcontext, GlobalVariableService globalValue, 
+            GlobalValidationdate globalValidationdate, ModuleService.ModuleService moduleService, ITapeAndFabricMasterListRepository repository)
         {
-            _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _globalValidationdate = globalValidationdate;
             _moduleService = moduleService;
-            _logService = logService;
+            _repository = repository;
         }
 
         public IActionResult Index()
@@ -55,159 +49,38 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         [HttpGet]
         public async Task<IActionResult> GetTape_FabricList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            try
+            var result = await _repository.GetTape_FabricListAsync(searchTerm, pageNumber, pageSize);
+            if(result.data != null)
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                
-                var pagedList = new List<QCStandardMasterDto>();
-                int totalCount = 0;
-
-                using (SqlConnection con = _dbcontext.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_TapeNFabricMast_AED", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@AED", "GET");
-                        cmd.Parameters.AddWithValue("@companyCd", UsersessionDt.PubCompCode);
-                        cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
-                         cmd.Parameters.AddWithValue("@PageSize", pageSize);
-                        await con.OpenAsync();
-
-                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                        {
-                            // --- RESULT SET 1: QualityParamList ---
-                            while (await reader.ReadAsync())
-                            {
-                                pagedList.Add(new QCStandardMasterDto
-                                {
-                                    CODE = reader["CODE"] != DBNull.Value ? Convert.ToInt32(reader["CODE"]) : null,
-                                    NAME = reader["NAME"]?.ToString(),
-                                    MESH_NAME = reader["MESH_NAME"]?.ToString(),
-
-                                    STD_GRAM = reader["STD_GRAM"] != DBNull.Value ? Convert.ToDecimal(reader["STD_GRAM"]) : null,
-                                    MIN_GRAM = reader["MIN_GRAM"] != DBNull.Value ? Convert.ToDecimal(reader["MIN_GRAM"]) : null,
-                                    MAX_GRAM = reader["MAX_GRAM"] != DBNull.Value ? Convert.ToDecimal(reader["MAX_GRAM"]) : null,
-
-                                    GSM = reader["GSM"] != DBNull.Value ? Convert.ToDecimal(reader["GSM"]) : null,
-                                    DENIER = reader["DENIER"] != DBNull.Value ? Convert.ToDecimal(reader["DENIER"]) : null,
-
-                                    UNIT_NAME = reader["UNIT_NAME"]?.ToString(),
-                                    COLOR_NAME = reader["COLOR_NAME"]?.ToString(),
-
-                                    WIDTH = reader["WIDTH"] != DBNull.Value ? Convert.ToDecimal(reader["WIDTH"]) : null,
-
-                                    GPD = reader["GPD"] != DBNull.Value ? Convert.ToDecimal(reader["GPD"]) : null,
-                                    MIN_GPD = reader["MIN_GPD"] != DBNull.Value ? Convert.ToDecimal(reader["MIN_GPD"]) : null,
-                                    MAX_GPD = reader["MAX_GPD"] != DBNull.Value ? Convert.ToDecimal(reader["MAX_GPD"]) : null,
-
-                                    STD_STRENGTH = reader["STD_STRENGTH"] != DBNull.Value ? Convert.ToDecimal(reader["STD_STRENGTH"]) : null,
-                                    STRENGTH_MAX = reader["STRENGTH_MAX"] != DBNull.Value ? Convert.ToDecimal(reader["STRENGTH_MAX"]) : null,
-                                    STRENGTH_MIN = reader["STRENGTH_MIN"] != DBNull.Value ? Convert.ToDecimal(reader["STRENGTH_MIN"]) : null,
-
-                                    STD_ELONG = reader["STD_ELONG"] != DBNull.Value ? Convert.ToDecimal(reader["STD_ELONG"]) : null,
-                                    ELONG_MAX = reader["ELONG_MAX"] != DBNull.Value ? Convert.ToDecimal(reader["ELONG_MAX"]) : null,
-                                    ELONG_MIN = reader["ELONG_MIN"] != DBNull.Value ? Convert.ToDecimal(reader["ELONG_MIN"]) : null,
-
-                                    UNLAM_FAB = reader["UNLAM_FAB"] != DBNull.Value ? Convert.ToDecimal(reader["UNLAM_FAB"]) : null,
-                                    LAM_FAB = reader["LAM_FAB"] != DBNull.Value ? Convert.ToDecimal(reader["LAM_FAB"]) : null,
-
-                                    ACTIVE = reader["ACTIVE"] != DBNull.Value ? Convert.ToInt32(reader["ACTIVE"]) : null
-                                });
-                            }
-
-                            // --- RESULT SET 2: TotalCount ---
-                            if (await reader.NextResultAsync())
-                            {
-                                if (await reader.ReadAsync())
-                                {
-                                    totalCount = (int)reader["TotalCount"];
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return Json(new { status = true, data = pagedList, totalCount });
+                return Json(new { status = result.status, data = result.data, totalCount = result.totalCount });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return Json(new { status = result.status, message = result.message });
         }
 
         [HttpGet]
         public JsonResult IsTapeFabricDeletable(int docId)
         {
-            var gv = _globalValue.GetGlobalVariables();
-            bool isExists = false;
-            string msg = "";
-            try
+            if (docId <= 0)
             {
-                //===========Check Qc Group existence in QC Master===========
-                using (SqlConnection con = _dbcontext.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_TapeNFabricMast_AED", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@AED", "Del_CheckInItem_Mast");
-                        cmd.Parameters.AddWithValue("@CODE", docId);
-                        cmd.Parameters.AddWithValue("@CompanyCd", gv.PubCompCode);
-
-                        con.Open();
-                        object result = cmd.ExecuteScalar();
-
-                        string qcTape_FabName = result?.ToString();
-                        isExists = string.IsNullOrEmpty(qcTape_FabName) ? false : true;
-
-                        msg = $"Tape And Fabric <b>{qcTape_FabName}</b> exists in Item Master and cannot be deleted.";
-                    }
-                    return Json(new { success = true, message = msg, isExists = isExists });
-                }
+                return Json(new { success = false, message = "Invalid Id!" });
             }
-            catch (Exception ex)
+            var result = _repository.IsTapeFabricDeletableAsync(docId);
+            if (result.data)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = result.status, message = result.message, isExists = result.data });
             }
+            return Json(new { success = result.status, message = result.message });
+
         }
-
         [HttpPost]
         public async Task<IActionResult> DelTape_FabricMast(int docId)
         {
-            try
+            if (docId <= 0)
             {
-                int x;
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_TapeNFabricMast_AED]", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@AED", "D");
-                        cmd.Parameters.AddWithValue("@companyCd", _globalValue.GetGlobalVariables().PubCompCode);
-                        cmd.Parameters.AddWithValue("@Code", _dbHelper.Xnull(docId));
-                        var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int)
-                        {
-                            Direction = ParameterDirection.ReturnValue
-                        };
-                        cmd.Parameters.Add(returnParam);
-                        await con.OpenAsync();
-                        await cmd.ExecuteNonQueryAsync();
-                        x = (int)cmd.Parameters["@ReturnVal"].Value;
-                    }
-                }
-                if (x > 0)
-                {
-                    //===========log insert
-                    _logService.InsertLog("TAPE_NFABRIC_MAST", "Tape And Fabric Master", "Master", "Delete", "", docId.ToString(), null);
-                    return Json(new { success = true, message = "Data delete successfully" });
-                }
-                return Json(new { success = false, message = "data delete failed" });
-
+                return Json(new { success = false, message = "Invalid Id!" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "data delete failed" });
-            }
+            var result = await _repository.DelTape_FabricMastAsync(docId);
+            return Json(new { success = result.status, message = result.message });
         }
         [HttpGet]
         public IActionResult ExportAllDocs()

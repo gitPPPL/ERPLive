@@ -80,6 +80,329 @@
     .erppage-header-back i {
         font-size: 12px;
     }
+/* Container */
+.erppagedropdown .dropdown-menu {
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+    top: 100% !important;
+    margin-top: 4px !important;
+}
+.erppagedropdown {
+    display: inline-flex;
+    position: relative;
+}
+
+.erppagedropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0d6efd;
+    color: #fff;
+    border: none;
+    padding: 4px 12px;
+    /* padding: 10px 16px; */
+    height: 28px;
+    border-radius: 8px 0 0 8px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+    .erppagedropdown-btn:hover {
+        background: #0b5ed7;
+    }
+
+.erppagedropdown-toggle {
+    width: 28px;
+    height: 28px;
+    background: #0d6efd;
+    color: #fff;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, .15);
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+    .erppagedropdown-toggle:hover {
+        background: #0b5ed7;
+    }
+
+.erppagedropdown-menu {
+    min-width: 200px;
+    margin-top: 6px !important;
+    padding: 0px;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    background: #dbdbdb;
+    border: 1px solid #d5d5d5;
+}
+
+.erppagedropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #212529;
+    font-size: 14px;
+    transition: all .2s ease;
+    cursor: pointer;
+}
+
+    .erppagedropdown-item:hover {
+        background: #f5f8ff;
+        color: #0d6efd;
+    }
+
+    .erppagedropdown-item i {
+        width: 18px;
+        text-align: center;
+        color: #0d6efd;
+        font-size: 15px;
+    }
+
+    .erppagedropdown-item span {
+        font-weight: 500;
+    }
+
+/*Upload divide section Attachment css*/
+.erppageattachmentsection {
+    width: 100%;
+  
+    background: #f5f6fa;
+    box-sizing: border-box;
+}
+
+.erppageattachmentsectionrow {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.erppageattachmentsectioncol {
+    flex: 1;
+    min-width: 350px;
+}
+
+.erppageattachmentsectionuploadcard,
+.erppageattachmentsectionfilecard {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #d5d7ff;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+}
+
+.erppageattachmentsectiontitle {
+    text-align: center;
+    color: #6c73a8;
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.erppageattachmentsectionsubtitle {
+    text-align: center;
+    color: #a0a7cb;
+    margin: 10px 0 25px;
+}
+
+.erppageattachmentsectiondropzone {
+    border: 2px dashed #c8cbff;
+    border-radius: 12px;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #ebecfd;
+    cursor: pointer;
+}
+
+.erppageattachmentsectioncloud {
+    font-size: 55px;
+    color: #d6d9ff;
+}
+
+.erppageattachmentsectiondragtext {
+    color: #8f96c2;
+    margin-top: 10px;
+}
+
+.erppageattachmentsectionor {
+    margin: 15px 0;
+    color: #b0b5d5;
+}
+
+.erppageattachmentsectionbrowsebtn {
+    background: #6574ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+    .erppageattachmentsectionbrowsebtn:hover {
+        background: #5464f5;
+    }
+
+.erppageattachmentsectionheader {
+    font-size: 15px;
+    color: #9098c0;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.erppageattachmentsectionfilelist {
+    max-height: 310px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+    .erppageattachmentsectionfilelist::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .erppageattachmentsectionfilelist::-webkit-scrollbar-thumb {
+        background: #8f95ff;
+        border-radius: 20px;
+    }
+
+.erppageattachmentsectionfileitem {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #fafbff;
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.erppageattachmentsectionicon {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    background: #5f84ff;
+}
+
+.erppageattachmentsectioncontent {
+    flex: 1;
+}
+
+.erppageattachmentsectionfilename {
+    color: #4f587b;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.erppageattachmentsectionprogress {
+    width: 100%;
+    height: 6px;
+    background: #e6e8ff;
+    border-radius: 30px;
+    overflow: hidden;
+}
+
+.erppageattachmentsectionprogressbar {
+    height: 100%;
+    width: 0;
+    background: #7a7fff;
+    border-radius: 30px;
+    transition: width .3s linear;
+}
+
+.erppageattachmentsectionactions {
+    display: flex;
+    gap: 6px;
+}
+
+    .erppageattachmentsectionactions button {
+        border: none;
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+.erppageattachmentsectionview {
+    background: #e9f1ff;
+    color: #346bff;
+}
+
+
+.erppageattachmentsectiondelete {
+    background: #ffe9e9;
+    color: #df4343;
+}
+/* PDF - Orange */
+.erppageattachmentsectionpdf {
+    background: #ff8a3d;
+}
+
+/* Images - Green */
+.erppageattachmentsectionimage {
+    background: #38c172;
+}
+
+/* Word - Blue */
+.erppageattachmentsectionword {
+    background: #2b7cff;
+}
+
+/* Excel - Dark Green */
+.erppageattachmentsectionexcel {
+    background: #1f9d55;
+}
+
+/* PowerPoint - Red */
+.erppageattachmentsectionppt {
+    background: #ff5c35;
+}
+
+/* Text - Purple */
+.erppageattachmentsectiontxt {
+    background: #8b5cf6;
+}
+
+/* Zip - Yellow */
+.erppageattachmentsectionzip {
+    background: #f5b301;
+}
+
+/* Default */
+.erppageattachmentsectiondefault {
+    background: #7f8c8d;
+}
+@media(max-width:768px) {
+
+    .erppageattachmentsectionrow {
+        flex-direction: column;
+    }
+
+    .erppageattachmentsectionfileitem {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .erppageattachmentsectionactions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
 /* ICON */
 .erppage-header-icon {
     display: flex;
@@ -160,7 +483,49 @@
 .page-number {
     padding: 4px 8px;
 }
+.erppagefieldset {
+    width: 100%;
+    border: 1px solid #a2bee7;
+    border-left: 4px solid #2952cc;
+    border-radius: 8px;
+    padding: 15px;
+    background: #fafcff;
+    box-sizing: border-box;
+    margin-top:12px;
+}
 
+.erppagefieldset-legend {
+    padding: 0 10px;
+    /* margin-left: 8px; */
+    font-size: 15px;
+    font-weight: 600;
+    color: #2952cc;
+    width: fit-content;
+    display: block;
+    box-shadow: 4px 3px;
+    border: 1px solid #2952cc7d;
+    margin:0px;
+}
+/* Responsive */
+@media (max-width: 768px) {
+    .erppagefieldset {
+        min-height: 45px;
+    }
+
+    .erppagefieldset-legend {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .erppagefieldset {
+        min-height: 42px;
+    }
+
+    .erppagefieldset-legend {
+        font-size: 10px;
+    }
+}
 /* TITLE */
 .erppage-header-title {
     font-size: 16px;
@@ -401,7 +766,7 @@
 /* ===== SECTION (FIELDSET) ===== */
 .erppage-fieldset {
     border: 1px solid #e5e7eb;
-    border-radius: 14px;
+    border-radius: 12px;
     background: #fff;
     overflow: visible;
     margin-bottom: 6px;
@@ -411,10 +776,10 @@
 }
 
     /* Keep semantic but hide default legend */
-.erppage-fieldset legend {
+/*.erppage-fieldset legend {
     position: absolute;
     opacity: 0;
-}
+}*/
    
     /* ===== SECTION HEADER ===== */
 .erppage-section-header {
@@ -851,10 +1216,10 @@
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 13px;
+    font-size: 12px;
     color: #2c2c2c;
     border-left: 3px solid #ff2626;
 }
@@ -883,10 +1248,10 @@
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    padding: 4px 6px;
+    padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 13px;
+    font-size: 12px;
     color: #181818;
 }
 /* ===== TEXTAREA ===== */
@@ -925,7 +1290,7 @@ select.erppage-input {
     background-position: right 10px center;
     background-size: 16px;
     padding-right: 30px;
-    font-size: 13px;
+    font-size: 12px;
     color: #2c2c2c;
 }
 
@@ -1176,12 +1541,12 @@ input[type="number"] {
 }
 
 .erppage-tab {
-    padding: 8px 14px;
+    padding: 4px 8px;
     border: 1px solid #d9d9d9;
     background: #f3f4f6;
     cursor: pointer;
     border-radius: 6px 6px 0 0;
-    font-size: 13px;
+    font-size: 12px;
     transition: 0.2s;
 }
 
@@ -1417,9 +1782,9 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 6px 12px;
+    padding: 4px 12px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.25s ease;
     width: fit-content;

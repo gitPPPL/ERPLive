@@ -1,0 +1,181 @@
+﻿using Microsoft.Data.SqlClient;
+using System.Data;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
+using travelexpensemanagement.Models.QualityControl.Master;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
+
+namespace travelexpensemanagement.Repositories.Implementations.QualityControl.Master
+{
+    public class UOMMasterRepository : IUOMMasterRepository
+    {
+        private readonly DataBaseConnection _dbConnection;
+        private readonly GlobalVariableService _globalVariableService;
+        private readonly LogService.LogService _logService;
+
+        private int? userLevel;
+        public UOMMasterRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, LogService.LogService logService)
+        {
+            _dbConnection = dbConnection;
+            _globalVariableService = globalVariableService;
+            _logService = logService;
+        }
+        public RepositoryResponse DeleteUOMByCode(int docId)
+        {
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QCPUNIT_MAST", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "DELETE");
+                        cmd.Parameters.AddWithValue("@CODE", docId);
+
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                        //===========log insert
+                        _logService.InsertLog("QCPUNIT_MAST", "QC UOM Master", "Master", "Delete", "", docId.ToString(), null);
+                    }
+                }
+
+                return new RepositoryResponse { status = true, message = "UOM deleted successfully." };
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponse { status = false, message = ex.Message };
+            }
+        }
+
+        private bool IsDuplicateUOM(string name, int code)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_QCPUNIT_MAST", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "Exist");
+                    cmd.Parameters.AddWithValue("@Name", name.Trim());
+                    cmd.Parameters.AddWithValue("@CODE", code);
+
+                    con.Open();
+                    object result = cmd.ExecuteScalar();
+                    return result != null; // true if duplicate exist
+                }
+            }
+        }
+
+        private string SaveOrUpdateUOM(QCPUNIT_MAST model, string action)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QCPUNIT_MAST", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@Action", action);
+                        cmd.Parameters.AddWithValue("@CODE", model.CODE);
+                        cmd.Parameters.AddWithValue("@NAME", model.NAME ?? "");
+                        cmd.Parameters.AddWithValue("@SHORTNAME", model.SHORTNAME ?? "");
+                        cmd.Parameters.AddWithValue("@ACTIVE", model.ACTIVE);
+                        cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
+                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
+                        cmd.Parameters.AddWithValue("@EDATE", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? "WEB");
+                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? "127.0.0.1");
+                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? "WEB");
+
+                        con.Open();
+                        string mode = action == "INSERT" ? "INSERT" : "UPDATE";
+                        int code = 0;
+                        if (action == "INSERT")
+                        {
+                            code = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+                        else
+                        {
+                            cmd.ExecuteNonQuery();
+                            code = model.CODE;
+                        }
+
+                        //===========log insert
+                        _logService.InsertLog("QCPUNIT_MAST", "QC UOM Master", "Master", mode, "", code.ToString(), null);
+                        return "Success";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+        public RepositoryResponseData<bool> IsQcUOMDeletable(int docId)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            bool isExists = false;
+            string msg = "";
+            try
+            {
+                //===========Check Qc Group existence in QC Master===========
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QCPUNIT_MAST", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "Del_CheckInQcMast1");
+                        cmd.Parameters.AddWithValue("@CODE", docId);
+                        cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+
+                        string qcUOMName = result?.ToString();
+                        isExists = string.IsNullOrEmpty(qcUOMName) ? false : true;
+
+                        msg = $"QC UOM <b>{qcUOMName}</b> exists in QC Master and cannot be deleted.";
+                    }
+                    return new RepositoryResponseData<bool> { status = true, message = msg, data = isExists };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseData<bool> { status = false, message = ex.Message };
+            }
+        }
+
+        public RepositoryResponse SaveUOM(QCPUNIT_MAST model)
+        {
+            if (string.IsNullOrWhiteSpace(model.NAME))
+            {
+                return new RepositoryResponse { status = false, message = "QC Unit name cannot be blank." };
+            }
+
+            string action = model.ACTION == "INSERT" ? "INSERT" : "UPDATE";
+
+            if (IsDuplicateUOM(model.NAME, model.CODE))
+            {
+                return new RepositoryResponse { status = false, message = "QC Unit name already exists." };
+            }
+
+            var result = SaveOrUpdateUOM(model, action);
+
+            if (result == "Success")
+            {
+                return new RepositoryResponse { status = true };
+            }
+            else
+            {
+                return new RepositoryResponse { status = false, message = result };
+            }
+        }
+    }
+}

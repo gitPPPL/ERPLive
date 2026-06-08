@@ -1,33 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.LogService;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
     [SessionAuthorize]
     public class ParameterMasterController : Controller
     {
-        private readonly DbHelper _dbHelper;
-        private readonly DataBaseConnection _dbcontext;
-        private readonly GlobalVariableService _globalValue;
         private readonly DropdownService _dropdownService;
-        private readonly LogService.LogService _logService;
+        private readonly IParameterMasterRepository _repository;
 
-
-        int x;
-        public ParameterMasterController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, DropdownService dropdownService, LogService.LogService logService)
+        public ParameterMasterController(DropdownService dropdownService, IParameterMasterRepository repository)
         {
-            _dbHelper = dbHelper;
-            _dbcontext = dbcontext;
-            _globalValue = globalValue;
             _dropdownService = dropdownService;
-            _logService = logService;
+            _repository = repository;
         }
 
         public IActionResult Index()
@@ -62,187 +49,50 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         [HttpGet]
         public JsonResult getExistOrNot(string inputData)
         {
-            try
+            if (string.IsNullOrWhiteSpace(inputData))
             {
-                bool isExist = false;
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_QualityParameterMast_AED"))
-                    {
-                        cmd.Connection = con;
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@AED", "Exist");
-                        cmd.Parameters.AddWithValue("@Name", inputData);
-                        cmd.Parameters.AddWithValue("@companyCd", _globalValue.GetGlobalVariables().PubCompCode);
-                        con.Open();
-                        var result = cmd.ExecuteScalar();
-                        isExist = Convert.ToInt32(result) == 1;
-                    }
-                }
-
-                return Json(new { status = true, exists = isExist });
+                return Json(new { status = false, message = "Invalid Name!" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "Data check failed: " + ex.Message });
-            }
+            var result = _repository.GetExistOrNotAsync(inputData);
+            return Json(new { status = result.status, exists = result.data, message = result.message});
         }
 
         [HttpPost]
         public async Task<IActionResult> SaveQParamMast([FromBody] ParameterModel model)
         {
-            try
-            {
-                int code = 0;
-                if (model == null)
-                {
-                    return Json(new { status = false, message = "Data Save Failed" });
-                }
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    var usersessionDt = _globalValue.GetGlobalVariables();
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_QualityParameterMast_AED]", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@AED", "A");
-                        cmd.Parameters.AddWithValue("@companyCd", usersessionDt.PubCompCode);
-                        cmd.Parameters.AddWithValue("@Code", _dbHelper.Xnull(model.code));                     
-                        cmd.Parameters.AddWithValue("@Name", _dbHelper.Xnull(model.Name));
-                        cmd.Parameters.AddWithValue("@ShortName", _dbHelper.Xnull(model.ShortName));
-                        cmd.Parameters.AddWithValue("@QUnitCd", _dbHelper.Xnull(model.QUnitCd));
-                        cmd.Parameters.AddWithValue("@Qty", _dbHelper.Xnull(model.Qty));
-                        cmd.Parameters.AddWithValue("@active", _dbHelper.Xnull(model.active));
-                        cmd.Parameters.AddWithValue("@Lip", usersessionDt.PubLocalId);
-                        cmd.Parameters.AddWithValue("@User", usersessionDt.PubUserId);
-                        cmd.Parameters.AddWithValue("@wsid", usersessionDt.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@lid", Environment.MachineName);
-
-                        var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int)
-                        {
-                            Direction = ParameterDirection.ReturnValue
-                        };
-                        cmd.Parameters.Add(returnParam);
-                        await con.OpenAsync();
-                        //await cmd.ExecuteNonQueryAsync();
-                        code = Convert.ToInt32(cmd.ExecuteScalar());
-                        x = (int)cmd.Parameters["@ReturnVal"].Value;
-
-                    }
-                }
-
-                if (x > 0)
-                {
-                    //===========log insert
-                    _logService.InsertLog("QCP_MAST", "QC Parameter Master", "Master", "INSERT", "", code.ToString(), null);
-                    return Json(new { status = true, message = "Data Save Successfully" });
-                }
-                return Json(new { status = false, message = "Data Save Failed" });
-            }
-            catch (Exception ex)
+            if(model == null)
             {
                 return Json(new { status = false, message = "Data Save Failed" });
             }
-
+            var result = await _repository.SaveQParamMastAsync(model);
+            return Json(new { status = result.status, message = result.message });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetQParameterDetailsById(string id)
         {
-            var gv = _globalValue.GetGlobalVariables();
-            var data = new ParameterModel();
-            try
+            if (Convert.ToInt32(id) <= 0)
             {
-                using(SqlConnection con = _dbcontext.GetErpConnection())
-                {
-                    using(SqlCommand cmd = new SqlCommand("sp_QualityParameterMast_AED", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@AED", "GetById");
-                        cmd.Parameters.AddWithValue("@companyCd", gv.PubCompCode);
-                        cmd.Parameters.AddWithValue("@Code", id);
-
-                        await con.OpenAsync();
-                        using(SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                        {
-                            if(await reader.ReadAsync())
-                            {
-                                data.code = reader["CODE"] != DBNull.Value ? Convert.ToInt32(reader["CODE"]) : null;
-                                data.Name = reader["NAME"]?.ToString();
-                                data.ShortName = reader["SHORTNAME"]?.ToString();
-                                data.QUnitCd = reader["QUNIT_CODE"] != DBNull.Value ? Convert.ToInt32(reader["QUNIT_CODE"]) : null;
-                                data.Qty = reader["QTY"] != DBNull.Value ? Convert.ToInt32(reader["QTY"]) : null;
-                                data.active = reader["ACTIVE"] != DBNull.Value ? Convert.ToInt32(reader["ACTIVE"]) : null;
-                            }
-                        }
-                        return Json(new { status = true, data = data });
-                    }
-                }
+                return Json(new { status = false, message = "Invalid Id!" });
             }
-            catch (Exception ex)
+            var result = await _repository.GetQParameterDetailsByIdAsync(id);
+            if (result.data != null)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new { status = true, data = result.data });
             }
+            return Json(new { status = result.status, message = result.message });
         }
-
 
         [HttpPost]
         public async Task<IActionResult> UpdateQParameterMast([FromBody] ParameterModel model)
         {
-            try
+            if (model == null)
             {
-                if (model == null)
-                {
-                    return Json(new { status = false, message = "Data update Failed" });
-                }
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    var usersessionDt = _globalValue.GetGlobalVariables();
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_QualityParameterMast_AED]", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@AED", "E");
-                        cmd.Parameters.AddWithValue("@companyCd", usersessionDt.PubCompCode);
-                        cmd.Parameters.AddWithValue("@Code", _dbHelper.Xnull(model.code));
-                        cmd.Parameters.AddWithValue("@Name", _dbHelper.Xnull(model.Name));
-                        cmd.Parameters.AddWithValue("@ShortName", _dbHelper.Xnull(model.ShortName));
-                        cmd.Parameters.AddWithValue("@QUnitCd", _dbHelper.Xnull(model.QUnitCd));
-                        cmd.Parameters.AddWithValue("@Qty", _dbHelper.Xnull(model.Qty));
-                        cmd.Parameters.AddWithValue("@active", _dbHelper.Xnull(model.active));
-                        cmd.Parameters.AddWithValue("@Lip", usersessionDt.PubLocalId);
-                        cmd.Parameters.AddWithValue("@User", usersessionDt.PubUserId);
-                        cmd.Parameters.AddWithValue("@wsid", usersessionDt.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@lid", Environment.MachineName);
-
-                        var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int)
-                        {
-                            Direction = ParameterDirection.ReturnValue
-                        };
-                        cmd.Parameters.Add(returnParam);
-                        await con.OpenAsync();
-                        await cmd.ExecuteNonQueryAsync();
-                        x = (int)cmd.Parameters["@ReturnVal"].Value;
-
-                    }
-                }
-                if (x > 0)
-                {
-                    //===========log insert
-                    _logService.InsertLog("QCP_MAST", "QC Parameter Master", "Master", "UPDATE", "", model.code.ToString(), null);
-                    return Json(new { status = true, message = "Data update Successfully" });
-                }
-                return Json(new { status = false, message = "Data update failed" });
-
+                return Json(new { status = false, message = "Data Save Failed" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "Data update Failed" });
-            }
+            var result = await _repository.UpdateQParameterMastAsync(model);
+            return Json(new { status = result.status, message = result.message });
 
         }
-
     }
 }

@@ -2,8 +2,10 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transaction;
+using travelexpensemanagement.ModuleService;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseRequestModel;
 using PurchaseDocuments = travelexpensemanagement.Models.Purchase.Transaction.PurchaseRequestModel.PurchaseDocuments;
 
@@ -11,20 +13,30 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseRequestListController : Controller
     {
-        public dynamic viewbag { get; }
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
+        private readonly ModuleService.ModuleService _moduleService;
         public PurchaseRequestListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
           ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _moduleService = moduleService;
         }
-     public IActionResult Index()
+        public IActionResult Index()
         {
-            return View("~/Views/Purchase/Transaction/PurchaseRequestList/Index.cshtml");
+            ViewBag.CurrentMenu = "Transit EWwaybill";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel,
+            };
+
+            return View("~/Views/Purchase/Transaction/PurchaseRequestList/Index.cshtml", model);
         }
-     public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             var getvariabledata = _globalVariableService.GetGlobalVariables();
             var PurchaseHeader = new List<PurchaseRequestModel.Header>();
@@ -81,8 +93,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return Json(new { success = true, lists = PurchaseHeader, totalCount });
         }
-     [HttpGet]
-     public IActionResult GetDataByCode(int code)
+        [HttpGet]
+        public IActionResult GetDataByCode(int code)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             var resultWrapper = new PurchaseRequest_model
@@ -156,7 +168,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     Make = rdr["Make"]?.ToString(),
                                     TECH_DESC = rdr["TechnicalDescription"]?.ToString(),
                                     APROX_RATE = rdr["Aprox_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Aprox_Rate"]) : 0,
+                                    
+                                    APROV_CODE = rdr["APROV_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["APROV_CODE"]) : 0,
                                     APROV_STATUS = rdr["APROV_STATUS"]?.ToString(),
+                                    
                                     APROV_REMARKS = rdr["APROV_REMARKS"]?.ToString(),
                                     STD_REQ = rdr["STD_REQ"] != DBNull.Value ? Convert.ToDecimal(rdr["STD_REQ"]) : 0,
                                     CUR_STK = rdr["CUR_STK"] != DBNull.Value ? Convert.ToDecimal(rdr["CUR_STK"]) : 0,
@@ -167,10 +182,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     USER_QTY = rdr["USER_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["USER_QTY"]) : 0,
                                     REQ_QTY = rdr["REQ_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["REQ_QTY"]) : 0,
                                     REQ_REASON = rdr["REQ_REASON"]?.ToString(),
+                                    PLACE_Code = rdr["PLACE_USECODE"] != DBNull.Value ? Convert.ToInt32(rdr["PLACE_USECODE"]) : 0,
                                     PLACE_USE = rdr["PLACE_USE"]?.ToString(),
+                                    
+                                    PRIORITY_CODE = rdr["PRIORITY_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["PRIORITY_CODE"]) : 0,
                                     PRIORITY_TYPE = rdr["PRIORITY_TYPE"]?.ToString(),
+                                    
                                     SCRAP_TYPE = rdr["SCRAP_TYPE"]?.ToString(),
+                                    
+                                    WORK_TYPECODE = rdr["WORK_TYPECODE"] != DBNull.Value ? Convert.ToInt32(rdr["WORK_TYPECODE"]) : 0,
                                     WORK_TYPE = rdr["WORK_TYPE"]?.ToString(),
+                                    
                                     REMARKS = rdr["REMARKS"]?.ToString(),
                                     STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0
                                 });
@@ -211,8 +233,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
-     [HttpGet]
-     public async Task<IActionResult> GetDataCopyForm()
+        [HttpGet]
+        public async Task<IActionResult> GetDataCopyForm()
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             try
@@ -228,8 +250,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_Type", "STAP");
-                         using (SqlDataReader rdr = await cmd.ExecuteReaderAsync()) 
+                        //cmd.Parameters.AddWithValue("@V_Type", "STAP");
+                        cmd.Parameters.AddWithValue("@V_Type", "STQT");
+                        using (SqlDataReader rdr = await cmd.ExecuteReaderAsync()) 
                         {
                             var results = new List<object>();
                             while (await rdr.ReadAsync()) 
@@ -285,8 +308,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 });
             }
         }
-     [HttpGet]
-     public async Task<IActionResult> GetDataMonthlyRequirement(int Deptid)
+        [HttpGet]
+        public async Task<IActionResult> GetDataMonthlyRequirement(int Deptid)
         {
 
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
@@ -302,31 +325,43 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "MonthlyReq");
                         cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_Type", "STAP");
                         cmd.Parameters.AddWithValue("@DEPT_CODE", Deptid);
                         
                         using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
                         {
-                            var results = new List<object>();
+                            var results = new List<ItamDetails>();
+                            //var results = new List<object>();
 
                             while (await rdr.ReadAsync())
                             {
                  
-                                var result = new
+                                //var result = new
+                                //{
+                                                 
+                                //    ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
+                                //    ItemName = rdr["ItemName"]?.ToString(),
+                                //    Make = rdr["Make"]?.ToString(),
+                                //    Unit = rdr["Unit"]?.ToString(),
+                                //    MakeCode = rdr["MakeCode"] != DBNull.Value ? Convert.ToInt32(rdr["MakeCode"]) : 0,
+                                //    UCode = rdr["UCode"]?.ToString(),
+                                //    currentStock = rdr["CurStk"] != DBNull.Value ? Convert.ToInt32(rdr["CurStk"]) : 0,
+                                //    ReserveQty = rdr["RESERVE_QTY"] != DBNull.Value ? Convert.ToInt32(rdr["RESERVE_QTY"]) : 0,
+                                //    DeptQty = rdr["DEPT_QTY"] != DBNull.Value ? Convert.ToInt32(rdr["DEPT_QTY"]) : 0
+
+                                //};
+                                var result = new ItamDetails
                                 {
                                                  
                                     ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
                                     ItemName = rdr["ItemName"]?.ToString(),
                                     Make = rdr["Make"]?.ToString(),
-                                    Unit = rdr["Unit"]?.ToString(),
-                                    MakeCode = rdr["MakeCode"] != DBNull.Value ? Convert.ToInt32(rdr["MakeCode"]) : 0,
-                                    UCode = rdr["UCode"]?.ToString(),
-                                    currentStock = rdr["CurStk"] != DBNull.Value ? Convert.ToInt32(rdr["CurStk"]) : 0,
-                                    ReserveQty = rdr["RESERVE_QTY"] != DBNull.Value ? Convert.ToInt32(rdr["RESERVE_QTY"]) : 0,
-                                    DeptQty = rdr["DEPT_QTY"] != DBNull.Value ? Convert.ToInt32(rdr["DEPT_QTY"]) : 0
-
+                                    MAKE_CODE = rdr["MakeCode"] != DBNull.Value ? Convert.ToInt32(rdr["MakeCode"]) : 0,
+                                    UOM_CODE = rdr["UCode"] != DBNull.Value ? Convert.ToInt32(rdr["UCode"]) : 0,
+                                    CUR_STK = rdr["CurStk"] != DBNull.Value ? Convert.ToInt32(rdr["CurStk"]) : 0,
+                                    RESERVE_QTY = rdr["RESERVE_QTY"] != DBNull.Value ? Convert.ToInt32(rdr["RESERVE_QTY"]) : 0,
                                 };
 
                                 results.Add(result);
@@ -364,8 +399,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 });
             }
         }
-     [HttpPost]
-     public JsonResult Delete(int code)
+        [HttpPost]
+        public JsonResult Delete(int code)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
             try

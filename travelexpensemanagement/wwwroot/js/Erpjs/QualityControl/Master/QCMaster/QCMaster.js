@@ -1,10 +1,16 @@
 ﻿let parameterOptionsHtml = '';
 let PreviousInputDt = "";
 let rowId = 0;
+let isReadOnly = true;
+let isEdit = false;
+
 
 $(document).ready(function () {
+    
     const code = getQueryParam('id');
     const mode = getQueryParam("mode");
+    isReadOnly = mode === "view";
+
     rowId = code;
     $('#TxtName').focus();
 
@@ -14,11 +20,12 @@ $(document).ready(function () {
 
 
     if (code) {
-        getQcDataByCode(code);
+        isEdit = true;
+        getQcDataByCode(code, isReadOnly);
     }
-    if (mode === "view") {
-        setFormReadOnly();
-    }
+    //if (mode === "view") {
+    //    setFormReadOnly();
+    //}
 
     $('#ACTIVE').on('change', function () {
         let status = $(this).is(':checked') ? 'Active' : 'Inactive';
@@ -26,11 +33,15 @@ $(document).ready(function () {
     });
 
     // Submit main form
-    $('#btnSave').on('click', function (e) {
+    $('#btnSave').on('click', async function (e) {
         e.preventDefault();
 
         if (!validateRequiredField('#TxtName', 'QC Test Name')) return;
 
+        let isValid = await validateData();
+        if (!isValid) {
+            return;
+        }
         const formData = CollectFormData();
 
         if (code) {
@@ -41,6 +52,19 @@ $(document).ready(function () {
         }
 
     });
+
+    //==========Save Deduct Rate==========
+    $('#btnSaveQCDeductRate').on('click', function (e) {
+        e.preventDefault();
+        const deductRateData = collectDeductRateData();
+        if (deductRateData) {
+            saveDeductRate(deductRateData);
+        }
+        else {
+            showToast("Failed to collect deduct rates!", { type: "error" });
+        }
+        
+    })
 })
 
 function getQueryParam(param) {
@@ -49,7 +73,7 @@ function getQueryParam(param) {
 }
 
 //==========Get By Code========
-function getQcDataByCode(code) {
+function getQcDataByCode(code, isReadOnly) {
     $.ajax({
         url: '/QCMaster/GetQCMasterListByCode',
         type: 'POST',
@@ -57,9 +81,12 @@ function getQcDataByCode(code) {
         data: JSON.stringify({ code: parseInt(code) }),
         success: function (response) {
             bindItemDeptForm(response);
+            if (isReadOnly) {
+                setFormReadOnly();
+            }
         },
         error: function (xhr) {
-            alert('Error: ' + xhr.responseText);
+            showToast('Error: ' + xhr.responseText, {type:"error"});
         }
     });
 }
@@ -67,7 +94,7 @@ function getQcDataByCode(code) {
 //==========Fill Form========
 function bindItemDeptForm(response) {
     if (!response.success || !response.data || !response.data.details) {
-        toastr.warning('No details found to bind.');
+        showToast('No details found to bind.', { type:"warning" });
         return;
     }
 
@@ -75,9 +102,10 @@ function bindItemDeptForm(response) {
 
     console.log("data", data);
 
+    $('#CODE').val(rowId);
     $('#TxtName').val(data.name);
     $('#TxtShortName').val(data.shortName);
-    $('#TxtMaxPPM').val(data.maxPPM);
+    $('#TxtMaxPPM').val(data.maxPPM.toFixed(4));
     $('#ACTIVE').prop('checked', data.active === 1);
     // Load QCGroup dropdown then set value
     bindDropdown('QCMaster', 'QCGroup', '#ddlQCGroup', ' Select QC Group ', data.qcGroup, null, false, null, false);
@@ -90,14 +118,6 @@ function bindItemDeptForm(response) {
     PreviousInputDt = data.name;
 }
 
-//============Readonly==========
-function setFormReadOnly() {
-    $('#QCMasterform input, #QCMasterform select').prop('disabled', true);
-    $('#customToggle').css('pointer-events', 'none');
-    $('#btnSubmit, #btnUpdate, ').hide();
-    $('.btn-delete').hide();
-}
-
 //============DropDowns=========
 function ddlParameter(selector, selectedValue = null) {
     const $ddl = $(selector);
@@ -107,10 +127,7 @@ function ddlParameter(selector, selectedValue = null) {
         $ddl.html(parameterOptionsHtml);
 
         if (!$ddl.hasClass('select2-hidden-accessible')) {
-            $ddl.select2({
-                placeholder: '-- Select Parameter --',
-                allowClear: true
-            });
+            initSelect2($ddl)
         }
 
         $ddl.val(selectedValue || '').trigger('change');
@@ -133,19 +150,8 @@ function ddlParameter(selector, selectedValue = null) {
 
                 $ddl.html(parameterOptionsHtml);
 
-                $ddl.select2({
-                    placeholder: '-- Select Parameter --',
-                    allowClear: true,
-                });
-                $ddl.on('select2:open', function () {
-                    setTimeout(function () {
-                        let searchBox = document.querySelector('.select2-container--open .select2-search__field');
+                initSelect2($ddl)
 
-                        if (searchBox) {
-                            searchBox.focus();
-                        }
-                    }, 0);
-                });
                 if (selectedValue && $ddl.find(`option[value="${selectedValue}"]`).length > 0) {
                     $ddl.val(selectedValue).trigger('change');
                 } else {
@@ -162,8 +168,33 @@ function ddlParameter(selector, selectedValue = null) {
     });
 }
 
+//=========Initialize Select2============
+function initSelect2($ddl) {
+    $ddl.select2({
+        placeholder: '-- Select Parameter --',
+        allowClear: true,
+    });
+    $ddl.on('select2:open', function () {
+        setTimeout(function () {
+            let searchBox = document.querySelector('.select2-container--open .select2-search__field');
+
+            if (searchBox) {
+                searchBox.focus();
+            }
+        }, 0);
+    });
+}
+
 //============Add Row===========
 function addRow(item = {}) {
+    
+    const moreBtn = isEdit
+        ? `<button type="button" class="act-btn more erppage-dropdownaction-btn">
+                    <i class="fa fa-minus-circle"></i>
+                    </button>`
+        : '';
+
+
     const tbody = $('#tblQCMasteradd tbody');
     tbody.find('.btn-add-action').remove();
 
@@ -175,8 +206,8 @@ function addRow(item = {}) {
                    ${parameterOptionsHtml}
                 </select>
             </td>
-            <td><input type="text" name="Unit" class="form-control TxtUnit" value="${item.unit || ''}"/></td>
-            <td><input type="number" name="StdResult" class="form-control TxtStdResult" value="${item.stdResult || ''}"/></td>
+            <td><input type="text" name="Unit" class="form-control TxtUnit" value="${item.unit || ''}" readonly/></td>
+            <td><input type="number" name="StdResult" class="form-control TxtStdResult" value="${item.stdResult != null ? parseFloat(item.stdResult).toFixed(4) : ''}"/></td>
             <td>
                 <select name="DeductQty" class="form-control ddlDeductQty">
                     <option value="">- Deduct Qty -</option>
@@ -204,11 +235,12 @@ function addRow(item = {}) {
                     <option value="NO">NO</option>
                 </select>
             </td>
-            <td><input type="number" step="0.01" name="BasePrice" class="form-control TxtBasePrice" value="${item.basePrice != null ? parseFloat(item.basePrice).toFixed(2) : ''}"/></td>
-            <td><input type="text" name="Remarks" class="form-control TxtRemarks" value="${item.remarks || ''}"/></td>
+            <td><input type="number" step="0.01" name="BasePrice" class="form-control TxtBasePrice" value="${item.basePrice != null ? parseFloat(item.basePrice).toFixed(4) : ''}"/></td>
+            <td><input type="text" name="Remarks" class="form-control TxtRemarks" value="${item.remarks || ''}" maxlength="255"/></td>
             <td class="action-col">
                     <button class="act-btn add btn-add-action" title="Add" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
                     <button class="act-btn delete btn-delete-action" title="Delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                    ${moreBtn}  
             </td>
         </tr>`;
 
@@ -250,13 +282,20 @@ $('#tblQCMasteradd tbody').on('click', '.btn-delete-action', function () {
 });
 
 //========Fill Unit From Parameter========
-$(document).on('select2:select', '.ddlParameter', function () {
-
+$(document).on('change', '.ddlParameter', function () {
     const $row = $(this).closest('tr');
 
     const unit = $(this).find(':selected').data('unit') || '';
 
     $row.find('.TxtUnit').val(unit);
+    setTimeout(() => {
+        checkDuplicateParameters();
+    }, 0);
+});
+//========Set Focus========
+$(document).on('select2:select', '.ddlParameter', function () {
+
+    const $row = $(this).closest('tr');
     
     setTimeout(() => {
         $row.find('.TxtStdResult').focus();
@@ -318,7 +357,7 @@ function saveData(formData) {
                     }
                 },
                 error: function (xhr, status, error) {
-                    alert('Error: ' + error);
+                    showToast('Error: ' + error, { type: "error" });
                 }
             });
         })
@@ -361,7 +400,7 @@ function updateData(formData) {
             }
         },
         error: function (xhr, status, error) {
-            alert('Error: ' + error);
+            showToast('Error: ' + error, {type:"error"});
         }
     });
 }
@@ -377,28 +416,48 @@ function checkExistOrNot(inputData) {
 }
 
 //======Open Deduct Rate Modal============
-$(document).on('contextmenu', '#tblQCMasteradd tbody tr', function (e) {
-    e.preventDefault(); // stop browser menu
+$(document).on("click", ".erppage-dropdownaction-btn", function (e) {
+    e.preventDefault();
 
-    const $row = $(this);
+    const $btn = $(this);
+    const $row = $btn.closest("tr");
 
-    const modal = new bootstrap.Modal(
-        document.getElementById('qcparameterbtnadd')
-    );
+    $(".erppage-dropdownaction-menu").remove();
 
-    const code = $row.find('.txtCode').text().trim();
-    const parameterText = $row.find('.ddlParameter option:selected').text().trim() || '';
-    const deductTypeText = $row.find('.ddlDeductType option:selected').text().trim() || '';
-    const parameterId = parseInt($row.find('.ddlParameter').val()) || 0;
+    // ===== Extract row values (same as your contextmenu logic) =====
+    //const code = parseInt($row.find(".txtCode").val()) || 0;
+    const code = $('#CODE').val();
+    
+    const parameterText =
+        $row.find(".ddlParameter option:selected").text().trim() || "";
 
-    $('#lblParameterText').text(parameterText);
-    $('#lblDeductTypeText').text(deductTypeText);
-    $('#hdnCode').val(code);
-    $('#hdnnextQcpCode').val(parameterId);
-    modal.show();
-    //GetDeductdata(code, parameterId);
+    const deductTypeText =
+        $row.find(".ddlDeductType option:selected").text().trim() || "";
+
+    const parameterId =
+        parseInt($row.find(".ddlParameter").val()) || 0;
+
+    //==========Check for NA======
+    const deductType = $row.find(".ddlDeductType").val();
+    if (!deductType || deductType === "NA") {
+        showToast("Please select Deduct Type!", { type: "warning" })
+        return;
+    }
+
+    // ===== Set modal values =====
+    $("#lblParameterText").text(parameterText);
+    $("#lblDeductTypeText").text(deductTypeText);
+    $("#hdnCode").val(code);
+    $("#hdnnextQcpCode").val(parameterId);
+
+    console.log(code, parameterId);
+
+    GetDeductdata(code, parameterId);
+
+    
 });
 
+//============Get Deduct Rates==========
 function GetDeductdata(code, parameterId) {
     $.ajax({
         url: '/QCMaster/CheckDeductRates',
@@ -406,55 +465,365 @@ function GetDeductdata(code, parameterId) {
         data: JSON.stringify({ code: code, parameterId: parameterId }),
         contentType: 'application/json',
         success: function (response) {
-            if (response && response.length > 0) {
-                showDeductRateListPopup(response);
-            } else {
-                showDeductRateListPopup([]);
+            if (response.success) {
+                if (response.data) {
+                    showDeductRateListPopup(response.data);
+                } else {
+                    showDeductRateListPopup([]);
+                }
+            }
+            else {
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            alert('Error retrieving data: ' + error);
+            showToast('Error retrieving data: ' + error, {type:"error"});
         }
     });
 
 }
+
+//============Show Deduct Rates PopUp==========
 function showDeductRateListPopup(deductRates) {
-    console.log('deductRates', deductRates);
     const $tbody = $('#tblParameterDR tbody');
     $tbody.empty();
     if (!Array.isArray(deductRates) || deductRates.length === 0) {
         addDeductRateRows();
-        return;
+    } else {
+        deductRates.forEach(rate => {
+            addDeductRateRows(rate);
+        });
     }
-    deductRates.forEach(rate => {
-        addDeductRateRows(rate);
-    });
+    
+    // ===== Open modal =====
+    const modal = new bootstrap.Modal(
+        document.getElementById("qcparameterbtnadd")
+    );
     modal.show();
 }
 
+//============Add Deduct Rate Rows==========
 function addDeductRateRows(rate = {}) {
     const $tbody = $('#tblParameterDR tbody');
+    $tbody.find('.btn-add-deductRate-row').remove();
+    const fromVal = parseFloat(rate.fromResult || 0).toFixed(4);
+    const toVal = parseFloat(rate.toResult || 0).toFixed(4);
+    const rateVal = parseFloat(rate.deductRate || 0).toFixed(4);
+
     const rowHtml = `
                 <tr>
-                    <td><input type="number" class="form-control form-control-sm" placeholder="From" value="${rate.fromResult ?? ''}"></td>
-                    <td><input type="number" class="form-control form-control-sm" placeholder="To" value="${rate.toResult ?? ''}"></td>
-                    <td><input type="number" class="form-control form-control-sm" placeholder="Rate" value="${rate.deductRate ?? ''}"></td>
+                    <td><input type="number" class="form-control form-control-sm from-result" placeholder="From" value="${fromVal}"></td>
+                    <td><input type="number" class="form-control form-control-sm to-result" placeholder="To" value="${toVal}"></td>
+                    <td><input type="number" class="form-control form-control-sm deduct-rate" placeholder="Rate" value="${rateVal}"></td>
                     <td>
-                        <select class="form-control form-control-sm">
+                        <select class="form-control form-control-sm deduct-type">
                             <option value="Base" ${rate.deductType === 'Base' ? 'selected' : ''}>Base</option>
-                            <option value="Percent" ${rate.deductType === 'Percent' ? 'selected' : ''}>Percent</option>
+                            <option value="Landed" ${rate.deductType === 'Landed' ? 'selected' : ''}>Landed</option>
+                            <option value="Landed Half" ${rate.deductType === 'Landed Half' ? 'selected' : ''}>Landed Half</option>
                         </select>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-success btn-sm btn-add-row btn-add-deductRate-row">
-                            <i class="fa fa-plus"></i>
-                        </button>
+                        <button type="button" class="btn btn-success btn-sm btn-add-row btn-add-deductRate-row"><i class="fa fa-plus"></i></button>
+                        <button class="act-btn delete btn-delete-action btn-delete-Deduct" title="Delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
             `;
     $tbody.append(rowHtml);
 }
+
 $(document).on('click', '.btn-add-deductRate-row', function () {
+    if (!validateDeductRateOrder()) return;
     addDeductRateRows();
 });
 
+$('#tblParameterDR tbody').on('click', '.btn-delete-Deduct', function () {
+    const $tbody = $('#tblParameterDR tbody');
+    // Prevent deleting if only one row exists
+    if ($tbody.find('tr').length === 1) {
+        return;
+    }
+    const $row = $(this).closest('tr');
+    const isLastRow = $row.is(':last-child');
+    $row.remove();
+    if (isLastRow) {
+        const $lastRow = $tbody.find('tr:last');
+        if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
+            $lastRow.find('td:last').prepend(
+                `<button type="button" class="btn btn-success btn-sm btn-add-row btn-add-deductRate-row"><i class="fa fa-plus"></i></button>`
+            );
+        }
+    }
+});
+//============Collect Deduct Rates==========
+function collectDeductRateData() {
+    const code = parseInt($('#hdnCode').val()) || 0;
+    const nextQcpCode = parseInt($('#hdnnextQcpCode').val()) || 0;
+    const ded_type = $('#lblDeductTypeText').val() || '';
+    let rowData = [];
+    $('#tblParameterDR tbody tr').each(function () {
+        const from = $(this).find('.from-result').val();
+        const to = $(this).find('.to-result').val();
+        const rate = $(this).find('.deduct-rate').val();
+        const type = $(this).find('.deduct-type').val() || '';
+        rowData.push({
+            From: parseFloat(from) || 0,
+            To: parseFloat(to) || 0,
+            Rate: parseFloat(rate) || 0,
+            Type: type,
+            Code: code,
+            nextQcpCode: nextQcpCode,
+            ded_type: ded_type
+        });
+    });
+    return rowData;
+}
+
+//============Save Deduct Rates==========
+function saveDeductRate(rowData) {
+    let isValidOrder = validateDeductRateOrder();
+    if (!isValidOrder) {
+        return;
+    }
+    const modalEl = document.getElementById("qcparameterbtnadd");
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    $.ajax({
+        url: '/QCMaster/SaveDeductRates',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(rowData),
+        success: function (response) {
+            if (response.success) {
+                showToast('Data saved successfully!', { type:"success" });
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            }
+            else {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                showToast('Failed to save deduct rate: ' + response.message, { type:"error" });
+            }
+        },
+        error: function (xhr, status, error) {
+            showToast('Error saving data: ' + error, { type:"error" });
+        }
+    });
+}
+
+//===========Validation==============
+async function validateData() {
+
+    try {
+
+        // No Record To Save
+        const rows = $('#tblQCMasteradd tbody tr');
+
+        let hasData = false;
+
+        rows.each(function () {
+
+            const parameter = $(this).find('.ddlParameter').val();
+
+            if (parameter && parameter !== '') {
+                hasData = true;
+                return false; // break loop
+            }
+        });
+
+        if (!hasData) {
+            showToast('No Record to save.', { type: 'warning' });
+            return false;
+        }
+
+        let isDuplicate = checkDuplicateParameters();
+        if (isDuplicate) {
+            return false;
+        }
+
+        let ppmYesFound = false;
+
+        // Row Validation
+        for (let i = 0; i < rows.length; i++) {
+
+            const row = $(rows[i]);
+            const parameterInput = row.find('.ddlParameter');
+            const basePriceInput = row.find('.TxtBasePrice');
+
+            const code = row.find('.txtCode').val();
+            const parameter = $(parameterInput).val();
+            const parameterName = $(parameterInput).find("option:selected").text();
+            const qcpCode = parseInt(row.find('.txtCode').val() || 0);
+            const deductType = row.find('.ddlDeductType').val();
+            const ppm = row.find('.ddlPPM').val();
+            const basePrice = parseFloat($(basePriceInput).val()) || 0;
+
+            // Base Price Validation
+            if (qcpCode > 0) {
+
+                if (deductType !== 'NA' && deductType !== '') {
+
+                    let result = await checkDeductRateExist(code, parameter);
+
+                    if (!result.exists) {
+                        setInvalid(parameterInput,`Deduct Rate is not filled against ${parameterName} where Deduct type other than 'NA'.`);
+                        return false;
+                    }
+
+                    if (deductType === 'BasePrice' && basePrice <= 0) {
+                        setInvalid(basePriceInput, 'Base Price must be greater than 0, if Deduct type is BasePrice.');
+                        row.find('.TxtBasePrice').focus();
+                        return false;
+                    }
+                }
+            }
+
+            // PPM Validation
+            if (parameter && ppm === 'YES') {
+                ppmYesFound = true;
+            }
+        }
+
+        // MAX PPM Validation
+        const maxPPMInput = $('#TxtMaxPPM');
+        const maxPPM = parseFloat($(maxPPMInput).val()) || 0;
+
+        if (maxPPM > 0 && !ppmYesFound) {
+            showToast('PPM Yes/No must be Yes in any of the Grid Row.', { type: "warning" });
+            return false;
+        }
+        else if (maxPPM <= 0 && ppmYesFound) {
+            setInvalid(maxPPMInput,'Max PPM should be greater than 0 if PPM Yes/No is Yes.', { type: "warning" });
+            return false;
+        }
+
+        return true;
+    }
+    catch (ex) {
+        console.error(ex);
+        return false;
+    }
+}
+
+//===========CHeck Duplicate=======
+function checkDuplicateParameters() {
+    const seen = {}; 
+    let hasDuplicate = false;
+    let rows = $('#tblQCMasteradd tbody tr');
+    $(rows).each(function () {
+        const paramInput = $(this).find('.ddlParameter');
+        const param = paramInput.val();
+
+        // Skip empty names 
+        if (!param) return;
+
+        if (seen[param]) {
+            hasDuplicate = true;
+            setInvalid(paramInput, "Duplicate Parameter!");
+
+        } else {
+            seen[param] = paramInput;
+        }
+    });
+
+    return hasDuplicate; 
+}
+
+//============Check Deduct Rate Existence=========
+function checkDeductRateExist(code, qcpCode) {
+
+    return $.ajax({
+        url: '/QCMaster/CheckDeductRateExist',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            code: code,
+            qcpCode: qcpCode
+        }
+    });
+}
+
+//============Readonly==========
+function setFormReadOnly() {
+    const form = $('#QCMasterform');
+    
+    $('#QCMasterform input, #QCMasterform select').prop('disabled', true);
+    $('#customToggle').css('pointer-events', 'none');
+    $('#btnSave').hide();
+    $('.btn-delete-action, .btn-add-action').prop('disabled', true);
+    form.addClass('erppage-readonly');
+
+    //==========Modal Readonly==============
+    const DeductModal = $('#qcparameterbtnadd');
+    $('#qcparameterbtnadd').on('shown.bs.modal', function () {
+        $('#tblParameterDR tbody')
+            .find('.btn-delete-Deduct, .btn-add-deductRate-row')
+            .prop('disabled', true);
+    });
+    DeductModal.addClass('erppage-readonly');
+    
+}
+
+//============Validate order of Deduct Rates==============
+function validateDeductRateOrder() {
+    const rows = $('#tblParameterDR tbody tr');
+
+    if (rows.length === 0) {
+        return true;
+    }
+
+    let isValid = true;
+
+    const firstFromInput = $(rows[0]).find('.from-result');
+    const firstToInput = $(rows[0]).find('.to-result');
+
+    const firstFrom = parseFloat(firstFromInput.val()) || 0;
+    const firstTo = parseFloat(firstToInput.val()) || 0;
+
+    if (firstFrom === firstTo) {
+        setInvalid(firstToInput, 'From and To cannot be equal.');
+        return false;
+    }
+
+    const isAscending = firstTo > firstFrom;
+
+    rows.each(function (index) {
+        const fromInput = $(this).find('.from-result');
+        const toInput = $(this).find('.to-result');
+
+        const from = parseFloat(fromInput.val()) || 0;
+        const to = parseFloat(toInput.val()) || 0;
+        
+        // Validate against previous row
+        if (index > 0) {
+            const prevTo =
+                parseFloat($(rows[index - 1]).find('.to-result').val()) || 0;
+
+            if (isAscending && from <= prevTo) {
+                setInvalid($(fromInput), 'From value must be greater than previous row To value');
+                isValid = false;
+                return false;
+            }
+
+            if (!isAscending && from >= prevTo) {
+                setInvalid($(fromInput), 'From value must be less than previous row To value');
+                isValid = false;
+                return false;
+            }
+        }
+        // Validate current row direction
+        if (isAscending && to <= from) {
+            setInvalid($(toInput), 'To value must be greater than From value.');
+            isValid = false;
+            return false;
+        }
+
+        if (!isAscending && to >= from) {
+            setInvalid($(toInput), 'To value must be less than From value');
+            isValid = false;
+            return false;
+        }
+    });
+
+    return isValid;
+}

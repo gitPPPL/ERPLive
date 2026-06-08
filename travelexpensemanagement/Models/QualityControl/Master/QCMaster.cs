@@ -33,8 +33,9 @@
         public decimal To { get; set; }
         public decimal Rate { get; set; }
         public string Type { get; set; }
-        public string Code { get; set; }
-        public string nextQcpCode { get; set; }
+        public int Code { get; set; }
+        public int nextQcpCode { get; set; }
+        public string ded_type { get; set; }
     }
     public class QcCodeRequest
     {
@@ -54,8 +55,8 @@
     }
     public class CheckDeductRateRequest
     {
-        public string Code { get; set; }
-        public string ParameterId { get; set; }
+        public int Code { get; set; }
+        public int ParameterId { get; set; }
     }
     public class DeductRateModelList
     {

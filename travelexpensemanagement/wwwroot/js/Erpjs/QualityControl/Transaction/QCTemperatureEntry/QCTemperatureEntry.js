@@ -926,6 +926,11 @@ async function Validate() {
         isValid = false;
         return isValid;
     }
+    const isTestParamValid = validateTestParameterGrid();
+    if (!isTestParamValid) {
+        isValid = false;
+        return isValid;
+    }
     return isValid;
 }
 
@@ -989,21 +994,27 @@ function validateMaterialTable() {
 
     return isValid;
 }
-function validateMaterialTable() {
-    let isValid = true;
-    const tbody = $('#tblMaterial tbody');
 
-    tbody.find('tr').each(function () {
-        // Winder select
-        const winderSelect = $(this).find('select[id^="ddlMaterial"]');
-        const winderValue = winderSelect.val();
-        if (!winderValue) {
-            setInvalid(winderSelect, "Material name empty!");
-            isValid = false;
+function validateTestParameterGrid() {
+
+    let hasRecord = false;
+
+    $('#tblTestParameter tbody tr').each(function () {
+
+        const parameter = $(this).find('select[id^="TxtPlantZoneId"]').val();
+
+        if (parameter && parameter !== '') {
+            hasRecord = true;
+            return false; // break loop
         }
     });
 
-    return isValid;
+    if (!hasRecord) {
+        showToast('No Record to save.', { type: 'warning' });
+        return false;
+    }
+
+    return true;
 }
 
 //========================================

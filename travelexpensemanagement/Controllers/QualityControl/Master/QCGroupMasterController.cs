@@ -1,28 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
 using travelexpensemanagement.Authorize;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.QualityControl.Master;
-using static travelexpensemanagement.Controllers.Payroll.Master.HODMasterController;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
     [SessionAuthorize]
     public class QCGroupMasterController : Controller
     {
-        private readonly DataBaseConnection _dbConnection;
-        private readonly GlobalVariableService _globalVariableService;
-        private readonly LogService.LogService _logService;
-
-
-        public QCGroupMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, LogService.LogService logService)
+        private readonly IQCGroupMasterRepository _repository;
+        
+        public QCGroupMasterController(IQCGroupMasterRepository repository)
         {
-            _dbConnection = dbConnection;
-            _globalVariableService = globalVariableService;
-            _logService = logService;
+            _repository = repository;
         }
         public IActionResult Index()
         {
@@ -40,159 +30,31 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
             {
                 return Json(new { success = false, message = "QC Type cannot be blank." });
             }
-
-            string action = model.ACTION == "INSERT" ? "INSERT" : "UPDATE";
-
-            //if (action == "INSERT" && IsDuplicateQCGroup(model.NAME))
-            if (IsDuplicateQCGroup(model.NAME, model.CODE))
-            {
-                return Json(new { success = false, message = "QC Group name already exists." });
-            }
-
-            var result = SaveOrUpdateQCGroup(model, action);
-
-            if (result == "Success")
-            {
-                return Json(new { success = true });
-            }
-            else
-            {
-                return Json(new { success = false, message = result });
-            }
+            var result = _repository.SaveQCGroup(model);
+            return Json(new { success = result.status, message = result.message });
         }
-        private string SaveOrUpdateQCGroup(QCG_MAST model, string action)
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-
-            try
-            {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_QCG_MAST", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@Action", action);
-                        cmd.Parameters.AddWithValue("@CODE", model.CODE);
-                        cmd.Parameters.AddWithValue("@NAME", model.NAME ?? "");
-                        cmd.Parameters.AddWithValue("@QC_TYPE", model.QC_TYPE ?? "");
-                        cmd.Parameters.AddWithValue("@ACTIVE", model.ACTIVE);
-                        cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
-                        cmd.Parameters.AddWithValue("@EDATE", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? "WEB");
-                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? "127.0.0.1");
-                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? "WEB");
-
-                        con.Open();
-                        string mode = action == "INSERT" ? "INSERT" : "UPDATE";
-                        int code = 0;
-                        if (action == "INSERT")
-                        {
-                            code = Convert.ToInt32(cmd.ExecuteScalar());
-                        }
-                        else
-                        {
-                            cmd.ExecuteNonQuery();
-                            code = model.CODE;
-                        }
-
-
-                        //===========log insert
-                        _logService.InsertLog("QCG_MAST", "QC Group Master", "Master", mode, "", code.ToString(), null);
-
-                        return "Success";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return "Error: " + ex.Message;
-            }
-        }
-        private bool IsDuplicateQCGroup(string name, int code)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return false;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                using (SqlCommand cmd = new SqlCommand("sp_QCG_MAST", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Action", "Exist");
-                    cmd.Parameters.AddWithValue("@Name", name.Trim());
-                    cmd.Parameters.AddWithValue("@CODE", code);
-
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-                    return result != null; // true if duplicate exist
-                }
-            }
-        }
+        
 
         [HttpGet]
         public JsonResult IsQcGroupDeletable(int docId)
         {
-            var gv = _globalVariableService.GetGlobalVariables();
-            bool isExists = false;
-            string msg = "";
-            try
+            if(docId <= 0)
             {
-                //===========Check Qc Group existence in QC Master===========
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_QCG_MAST", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Action", "Del_CheckInQcMast");
-                        cmd.Parameters.AddWithValue("@CODE", docId);
-                        cmd.Parameters.AddWithValue("@Comp_Code", gv.PubCompCode);
-
-                        con.Open();
-                        object result = cmd.ExecuteScalar();
-
-                        string qcGroupName = result?.ToString();
-                        isExists = string.IsNullOrEmpty(qcGroupName) ? false : true;
-
-                        msg = $"QC Group <b>{qcGroupName}</b> exists in QC Master and cannot be deleted.";
-                    }
-                    return Json(new { success = true, message = msg, isExists = isExists });
-                }
+                return Json(new { success = false, message = "Invalid Id!" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            var result = _repository.IsQcGroupDeletable(docId);
+            return Json(new { success = result.status, message = result.message, isExists = result.data});
         }
 
         [HttpPost]
         public JsonResult DeleteQCGroupByCode(int docId)
         {
-            try
+            if (docId <= 0)
             {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_QCG_MAST", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@CODE", docId);
-
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                //===========log insert
-                _logService.InsertLog("QCG_MAST", "QC Group Master", "Master", "Delete", "", docId.ToString(), null);
-
-                return Json(new { success = true, message = "QC Group deleted successfully." });
+                return Json(new { success = false, message = "Invalid Id!" });
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            var result = _repository.DeleteQCGroupByCode(docId);
+            return Json(new { success = result.status, message = result.message });
         }
 
     }

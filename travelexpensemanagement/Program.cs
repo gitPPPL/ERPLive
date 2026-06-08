@@ -9,12 +9,14 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
@@ -51,6 +53,16 @@ builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridg
 builder.Services.AddScoped<IQCTemperatureEntryRepository, QCTemperatureEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryListRepository, QCTemperatureEntryListRepository>();
 builder.Services.AddScoped<ILaminationQCEntryRepository, LaminationQCEntryRepository>();
+builder.Services.AddScoped<IQCMasterRepository, QCMasterRepository>();
+builder.Services.AddScoped<IQCMasterListRepository, QCMasterListRepository>();
+builder.Services.AddScoped<ITapeAndFabricMasterListRepository, TapeAndFabricMasterListRepository>();
+builder.Services.AddScoped<ITapeAndFabricMasterRepository, TapeAndFabricMasterRepository>();
+builder.Services.AddScoped<IUOMMasterListRepository, UOMMasterListRepository>();
+builder.Services.AddScoped<IUOMMasterRepository, UOMMasterRepository>();
+builder.Services.AddScoped<IQCGroupMasterListRepository, QCGroupMasterListRepository>();
+builder.Services.AddScoped<IQCGroupMasterRepository, QCGroupMasterRepository>();
+builder.Services.AddScoped<IParameterMasterListRepository, ParameterMasterListRepository>();
+builder.Services.AddScoped<IParameterMasterRepository, ParameterMasterRepository>();
 
 // Gete Entry Transaction repositories
 

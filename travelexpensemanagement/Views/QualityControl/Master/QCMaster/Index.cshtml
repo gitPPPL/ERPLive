@@ -2,122 +2,98 @@
     ViewBag.Title = "QC Master";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<style>
-    .btn-plus {
-        padding: 5px !important;
-    }
-
-        .btn-plus i {
-            margin: 0px !important;
-        }
-</style>
 <div id="erp-toast-container"></div>
-<fieldset>
-    <legend class="legend-field">QC Master</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "QCMasterList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-check-circle"></i>
         </div>
+        <div class="erppage-header-title">QC Master</div>
     </div>
-
-    <!-- 📝 Form starts -->
-    <form id="QCMasterform">
-        <input type="hidden" class="form-control" id="CODE" name="CODE">
-
-        <!-- Row 1 -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtName">Name</label>
-                    <input type="text" class="form-control" id="TxtName" name="Name" placeholder="Enter Name">
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QCMasterList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="QCMasterform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Name</label>
+                    <input type="text" class="erppage-redinput" id="TxtName" placeholder="Enter Name" maxlength="100">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtShortName">Short Name</label>
-                    <input type="text" class="form-control" id="TxtShortName" name="Short Name" placeholder="Enter Short Name">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Short Name</label>
+                    <input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name" maxlength="30">
                 </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlQCGroup">QC Group</label>
-                    <select class="form-control" id="ddlQCGroup" name="QCGroup">
-                        <option value="">--Select QC Group--</option>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Type</label>
+                    <select class="erppage-input erppage-select" id="ddlQCGroup">
+                        <option value="">Select QC Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtMaxPPM">Max PPM</label>
-                    <input type="number" class="form-control" id="TxtMaxPPM" name="Max PPM" placeholder="Enter Max PPM">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Max PPM</label>
+                    <input type="number" class="erppage-input" id="TxtMaxPPM" placeholder="Enter Max PPM">
                 </div>
             </div>
-        </div>
-
-        <!-- Trigger Button -->
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-                <div class="active-toggle btn-align">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="label-status" id="statusText">Active</span>
+            <div class="erppage-grid1">
+                <div class="erppage-divfield erppage-col-span-3">
+                    <label class="erppage-label"></label>
+                    <div class="erppage-toggle-container">
+                        <span class="erppage-toggle-text active" id="statusText">Active</span>
+                        <label class="erppage-toggle">
+                            <input type="checkbox" id="ACTIVE" name="ACTIVE" checked>
+                            <span class="erppage-toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-md-10">
-                <div class="btn-align">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qcReportModal">
-                        <i class="fa fa-file-alt"></i> Print Report
-                    </button>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblQCMasteradd" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="display:none;">
+                            <col style="width: 102px;">
+                            <col style="width: 53px;">
+                            <col style="width: 87px;">
+                            <col style="width: 88px;">
+                            <col style="width: 99px;">
+                            <col style="width: 94px;">
+                            <col style="width: 86px;">
+                            <col style="width: 73px;">
+                            <col style="width:120px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="hidden-col">Code</th>
+                                <th>Parameter</th>
+                                <th>Unit</th>
+                                <th>Std Result</th>
+                                <th>Deduct Qty</th>
+                                <th>Deduct Type</th>
+                                <th>Ppm Yes/No</th>
+                                <th>Base Price</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-
-        <div class="card mt-2">
-            <div class="table-responsive">
-                <table id="tblQCMasteradd" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;">Code</th>
-                            <th>Parameter</th>
-                            <th>Unit</th>
-                            <th>Std Result</th>
-                            <th>Deduct Qty</th>
-                            <th>Deduct Type</th>
-                            <th>Ppm Yes/No</th>
-                            <th>Base Price</th>
-                            <th>Remarks</th>
-                            <th colspan="2">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Final Buttons Row -->
-        <div class="row">
-            <div class="offset-md-7 col-md-2">
-
-            </div>
-            <div class="col-md-3">
-                <div class="btn-last">
-                    <button id="btnSave" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                </div>
-            </div>
-        </div>
-    </form>
-    <!-- 📝 Form ends -->
-</fieldset>
+    </div>
+</div>
 
 <!-- 🧾 Modal Moved Outside the Form -->
 <div class="modal fade" id="qcReportModal" tabindex="-1" aria-labelledby="qcReportModalLabel" aria-hidden="true">
@@ -185,75 +161,93 @@
 
 <!--Parameter Popup-->
 <div class="modal fade" id="qcparameterbtnadd" tabindex="-1" aria-labelledby="qcparameterbtnaddLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="popup-header">
-                <h5 class="popup-title" id="qcparameterbtnaddLabel">QC Deduct Rate</h5>
-                <i class="fa fa-close btn-close" data-bs-dismiss="modal"></i>
+    <div class="modal-dialog medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-percent"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="qcparameterbtnaddLabel">
+                        QC Deduct Rate
+                    </h5>
+                </div>
+
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body">
-                <form id="qcDeductRateForm">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Parameter: <span id="lblParameterText" class="fw-bold text-primary"></span></label>
+            <div class="erppagesmodal-body">
+                <div class="erppagesmodal-topbar">
+                    <div class="erppage-grid4">
 
-                            </div>
+                        <div class="erppage-divfield">
+                            <label class="erppagesmodal-label">Parameter : </label>
+                            <div id="lblParameterText" class="erppagelisthighlight"></div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Deduct Type: <span id="lblDeductTypeText" class="fw-bold text-primary"></span></label>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="tblParameterDR" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th>From</th>
-                                        <th>To</th>
-                                        <th>Rate</th>
-                                        <th>Type</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><input type="number" class="form-control form-control-sm" placeholder="From"></td>
-                                        <td><input type="number" class="form-control form-control-sm" placeholder="To"></td>
-                                        <td><input type="number" class="form-control form-control-sm" placeholder="Type"></td>
-                                        <td>
-                                            <select class="form-control form-control-sm">
-                                                <option value="Base">Base</option>
-                                                <option value="Percent">Percent</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-success btn-sm btn-add-row">
-                                                <i class="fa fa-plus"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="erppage-divfield">
+                            <label class="erppagesmodal-label">Deduct Type :</label>
+                            <div id="lblDeductTypeText" class="erppagelisthighlight"></div>
                         </div>
-                    </div>
-                    <div class="pagination-wrapper">
-                        <ul class="pagination" id="tablePagination"></ul>
-                    </div>
 
-                    <div class="col-md-12">
-                        <div class="btn-last">
-                            <button id="btnSaveQCDeductRate" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Submit</button>
-                            <button type="button" id="cancelBtnQCDeductRate" class="btn btn-danger"><i class="fa fa-close"></i>Cancel</button>
-                        </div>
                     </div>
+                </div>
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
 
-                    <input type="hidden" id="hdnCode" />
-                    <input type="hidden" id="hdnnextQcpCode" />
-                </form>
+                        <table id="tblParameterDR" class="excel-table fixed-grid-table">
+
+                            <thead>
+                                <tr>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Rate</th>
+                                    <th>Type</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="number" class="erppagesmodal-input" placeholder="From">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" class="erppagesmodal-input" placeholder="To">
+                                    </td>
+
+                                    <td>
+                                        <input type="number" class="erppagesmodal-input" placeholder="Rate">
+                                    </td>
+
+                                    <td>
+                                        <select class="erppagesmodal-input">
+                                            <option value="Base">Base</option>
+                                            <option value="Percent">Percent</option>
+                                        </select>
+                                    </td>
+
+                                    <td class="action-col">
+                                        <button type="button" class="act-btn add btn-add-row">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="erppagesmodal-action">
+                    <button type="submit" id="btnSaveQCDeductRate" class="erppagesmodal-btn">
+                        <i class="fa fa-save"></i>
+                        Save
+                    </button>
+                </div>
+                <input type="hidden" id="hdnCode" />
+                <input type="hidden" id="hdnnextQcpCode" />
+
             </div>
         </div>
     </div>
