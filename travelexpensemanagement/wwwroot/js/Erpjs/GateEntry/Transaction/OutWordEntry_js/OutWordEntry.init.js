@@ -68,25 +68,23 @@
                     const DocType = $.trim($('#ddlDocType').val());
                     const ITEM_TYPE = $.trim($('#ddlType option:selected').text());
                     const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
+
                     if (!validateRequiredField('#NumDocNo', 'Please Enter a Doc No.')) return;
                     if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type.')) return;
-                    if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date.')) return;                              
-
+                    if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date.')) return;                             
                     if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
+                    if (!validateRequiredField('#TxtVehicleNo', 'Please Fill Vehicle No.')) return; 
 
-                    //const isValid =  checkValidDate();
-                    //if (isValid === false) {
-                    //    return;
-                    //}
+                
 
-                    //if (DocType === "OURT") {
+                    if (DocType === "OURT") {
         
-                    //    if (RETURN_DATE < V_DATE) {                 
-                    //        showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
-                    //        return;
-                    //    }            
-                    //    if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
-                    //}
+                        if (RETURN_DATE < V_DATE) {                 
+                            showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
+                            return;
+                        }            
+                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
+                    }
 
                     //if (CompCode == 2) {
                     //    if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
@@ -112,10 +110,7 @@
                     let isValid = true;
                     let hasAtLeastOneItem = false;
 
-                    if (!hasAtLeastOneItem) {
-                        toastr.warning("Please add at least one item.");
-                        return;
-                    }
+               
 
                     rows.each(function (index) {
                         const $row = $(this);
@@ -190,6 +185,15 @@
                         return;
                     }
 
+                    if (!hasAtLeastOneItem) {
+                        toastr.warning("Please add at least one item.");
+                        return;
+                    }
+
+
+
+
+
                     const header = {
                         RETURN_DATE: RETURN_DATE,
                         RESPONSIBLE_PERSONB: RESPONSIBLE_PERSON,
@@ -240,9 +244,7 @@
                                     showToast("Saved successfully!", { type: "success" });
 
                                     setTimeout(function () {
-                                        window.location.href =
-                                            '/OutwardEntry/Index?id=' + V_NO +
-                                            '&VType=' + encodeURIComponent(DocType) +
+                                        window.location.href =  '/OutwardEntry/Index?id=' + V_NO + '&VType=' + encodeURIComponent(DocType) +
                                             '&mode=view';
                                     }, 3000);
 

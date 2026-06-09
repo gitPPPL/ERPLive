@@ -130,15 +130,15 @@ function addRow($tbody, data = {}) {
 
       <!-- Enabled -->
       <td>
-        <input type="number" class="form-control no"  maxlength="8" value="${data.no || ''}"/>
+        <input type="number" class="form-control no"   value="${data.no || ''}"/>
       </td>
 
       <td>
-        <input type="number" class="form-control quantity"  maxlength="8" value="${data.quantity || ''}"/>
+        <input type="number" class="form-control quantity"   value="${data.quantity || ''}"/>
       </td>
 
       <td>
-        <input type="text" class="form-control remarks"  maxlength="150" value="${data.remarks || ''}"/>
+        <input type="text" class="form-control remarks"   value="${data.remarks || ''}"/>
       </td>
 
       <!-- Readonly -->
@@ -153,7 +153,7 @@ function addRow($tbody, data = {}) {
       </td>
 
       <td class="action-col">
-        <button class="act-btn edit" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus btn-add-action"></i></button>
+        
         <button class="act-btn delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash btn-delete-action"></i></button> 
       </td>
     </tr>`;

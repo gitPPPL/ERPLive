@@ -31,7 +31,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             {
                 var validation = Validdata(header, details);
 
-                if (!validation.status == true)
+                if (validation.status == true)
                 {
                     return new RepositoryResponse  {  status = true,  message = validation.message };
                 }
@@ -289,10 +289,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             };
                         }
                     }
-
-
-                       
-
 
                 }
                 return new RepositoryResponse { status = false, message = "Success" };
