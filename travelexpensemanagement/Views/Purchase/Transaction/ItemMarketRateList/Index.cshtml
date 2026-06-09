@@ -3,65 +3,85 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
 }
-
-<fieldset>
-    <legend class="legend-field">Item Market Rate List</legend>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Item Market Rate List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ItemMarketRate")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+                data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblItemMarketRate" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="width:80px;" />    
+                <col style="width:250px;" />   
+                <col style="width:180px;" />   
+                <col style="width:180px;" />   
+                <col style="width:120px;" />   
+                <col style="width:150px;" />   
+                <col style="width:120px;" />   
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">Code</th>
+                    <th>Document Type</th>
+                    <th>Document No</th>
+                    <th>Document Date</th>
+                    <th>Group Type</th>
+                    <th>Remarks</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
         </div>
-        <div class="col-lg-6">
-            <div class="btn-rightalign">
-                <button onclick="window.location.href='@Url.Action("Index", "ItemMarketRate")'" type="button" class="btn btn-add">
-                    <i class="fa fa-plus"></i>Add
-                </button>
-                <button class="btn btn-print" onclick="printCityMasterReport()">
-                    <i class="fa fa-print"></i> Print
-                </button>
-                <button class="btn btn-export">
-                    <i class="fas fa-file-export"></i> Export
-                </button>
-                <button class="btn btn-mail">
-                    <i class="fa fa-envelope"></i> Mail
-                </button>
-                <button class="btn btn-approved">
-                    <i class="fa fa-check"></i> Approved
-                </button>
-            </div>
+        <div class="pagination-center">
+            <button class="page-nav" id="prevBtn">‹</button>
+            <div id="tablePagination" class="page-numbers"></div>
+            <button class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
         </div>
     </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table id="tblItemMarketRate" class="table-width">
-                <thead class="table-head">
-                    <tr>
-                        <th style="display:none;">Code</th>
-                        <th>Document Type</th>
-                        <th>Document No</th>
-                        <th>Document Date</th>
-                        <th>Group Type</th>
-                        <th>Remarks</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <!-- Pagination container -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="pagination-end">
-                    <div class="custom-pagination" id="tablePagination"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 
-
-
-</fieldset>
 
 <script>
 
@@ -114,10 +134,11 @@
                             <td>${item.v_DATE || ''}</td>
                             <td>${item.mgrouP_TYPE || ''}</td>
                             <td>${item.remarks || ''}</td>
-                            <td>
-                                <i class="fa fa-edit btn-edit" title="Edit" onclick="editItemMarketRate(${item.v_NO})"></i>
-                                <i class="fa fa-eye btn-view" title="View" onclick="viewItemMarketRate(${item.v_NO})"></i>
-                                <i class="fa fa-trash btn-delete" title="Delete" onclick="deleteItemMarketRate(${item.v_NO},'${item.v_TYPE}')"></i>
+                            <td class="action-col">
+                                <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editItemMarketRate(${item.v_NO})"><i class="fa fa-edit"></i></button>
+                                    <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewItemMarketRate(${item.v_NO})"><i class="fa fa-eye"></i></button>
+                                    <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteItemMarketRate(${item.v_NO},'${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+                                
                             </td>
                         </tr>
                     `);

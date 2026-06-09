@@ -56,16 +56,16 @@
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblQCMasteradd" class="excel-table fixed-grid-table resizable-table">
                         <colgroup>
-                            <col style="width:80px;" />    
-                            <col style="width:220px;" />   
-                            <col style="width:120px;" />   
-                            <col style="width:120px;" />   
-                            <col style="width:120px;" />   
-                            <col style="width:140px;" />   
-                            <col style="width:120px;" />   
-                            <col style="width:120px;" />   
-                            <col style="width:250px;" />   
-                            <col style="width:120px;" />   
+                            <col style="width: 51px;">
+                            <col style="width: 102px;">
+                            <col style="width: 53px;">
+                            <col style="width: 87px;">
+                            <col style="width: 88px;">
+                            <col style="width: 99px;">
+                            <col style="width: 94px;">
+                            <col style="width: 86px;">
+                            <col style="width: 73px;">
+                            <col style="width:120px;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -95,7 +95,7 @@
     </div>
 </div>
 
-
+@* 
 <style>
     .btn-plus {
         padding: 5px !important;
@@ -103,7 +103,7 @@
     .btn-plus i {
         margin: 0px !important;
     }
-</style>
+</style> *@
 
 @* <form id="QCMasterform">
         <input type="hidden" class="form-control" id="CODE" name="CODE">
@@ -808,14 +808,11 @@
                     <td>${item.basePrice}</td>
                     <td>${item.remarks}</td>
 
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm btn-delete">Delete</button>
+                    <td class="action-col">
+                         <button class="act-btn add" title="Add Row" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#qcparameterbtnadd"><i class="fa fa-plus"></i></button>
+                         <button class="act-btn delete btn-delete" title="Delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
                     </td>
-                    <td>
-                        <button type="button" class="btn btn-success btn-sm btn-plus" data-bs-toggle="modal" data-bs-target="#qcparameterbtnadd">
-                            <i class="fa fa-plus"></i>
-                        </button>
-                    </td>
+                   
                 </tr>
             `;
             tbody.append(newRow);

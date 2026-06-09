@@ -42,12 +42,12 @@
     <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblQCMaster" class="excel-table fixed-grid-table resizable-table">
             <colgroup>
-                <col style="width:80px;" />     <!-- Code -->
-                <col style="width:250px;" />    <!-- Name -->
-                <col style="width:180px;" />    <!-- Short Name -->
-                <col style="width:180px;" />    <!-- QC Type -->
-                <col style="width:120px;" />    <!-- Status -->
-                <col style="width:120px;" />    <!-- Action -->
+                <col style="width:80px;" />     
+                <col style="width:250px;" />    
+                <col style="width:180px;" />    
+                <col style="width:180px;" />    
+                <col style="width:120px;" />    
+                <col style="width:120px;" />    
             </colgroup>
             <thead>
                 <tr>
@@ -96,16 +96,20 @@
             </div>
             <div class="erppagesmodal-body">
                 <div class="erppagesmodal-topbar">
-                    <div class="erppagesmodal-group">
-                        <label class="erppagesmodal-label">QC Group</label>
-                        <select class="erppagesmodal-input" id="ddlQCGroupPR" name="QCGroupPR">
-                            <option value="">Select Group</option>
-                        </select>
+                    <div class="erppage-grid4">
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">QC Group</label>
+                            <select class="erppage-input" id="ddlQCGroupPR" name="QCGroupPR">
+                                <option value="">Select Group</option>
+                            </select>
+                        </div>
+                        
                     </div>
                 </div>
                 <div class="report-type-switch">
                     <input type="radio" id="report1" name="reportType" checked>
                     <label for="report1">Report 1</label>
+
                     <input type="radio" id="report2" name="reportType">
                     <label for="report2">Report 2</label>
                 </div>
