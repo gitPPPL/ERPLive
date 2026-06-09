@@ -129,11 +129,11 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDataByPendingorder( int PartyCode, string Type, DateTime v_date,  int BILL_NO)
+        public async Task<IActionResult> GetDataByPendingorder( int PartyCode, string Type, DateTime v_date)
         {
             try
             {
-                var result = await _outwardEntryListRepository.GetDataByPendingorder( PartyCode,  Type,  v_date, BILL_NO);
+                var result = await _outwardEntryListRepository.GetDataByPendingorder( PartyCode,  Type,  v_date);
                 return Json(result);
             }
             catch (Exception ex)

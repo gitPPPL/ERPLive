@@ -486,7 +486,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         }
 
         [HttpGet]
-        public async Task<object> GetDataByPendingorder(int PartyCode, string Type, DateTime v_date, int BILL_NO)
+        public async Task<object> GetDataByPendingorder(int PartyCode, string Type, DateTime v_date)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             var Datalist = new List<object>();
@@ -508,8 +508,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd3.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd3.Parameters.AddWithValue("@PARTY_CODE", PartyCode);
                         cmd3.Parameters.Add("@v_date", SqlDbType.SmallDateTime).Value = v_date;
-                        cmd3.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = fromDate;
-                        cmd3.Parameters.AddWithValue("@BILL_NO", BILL_NO);
+                        cmd3.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = fromDate;               
 
                         using (SqlDataReader rdr = cmd3.ExecuteReader())
                         {

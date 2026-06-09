@@ -51,8 +51,8 @@
             <i class="fa-solid fa-chart-line"></i> Report
         </button>
 
-        <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "OutwardEntryList")'">
-            <i class="fa-solid fa-arrow-left"></i>Back to list
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "OutwardEntryList")', isReadOnly)">
+        <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
     </div>
 </div>
@@ -71,15 +71,18 @@
                     <label class="erppage-label">Document No</label>
                     <input type="text" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly />
                 </div>
+
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Date</label>
                     <input type="date" class="erppage-input" id="DtDocDate" />
                     <input type="time" class="erppage-input" id="DtTxtDocDate" />
                 </div>
+
+
                 <div class="erppage-divfield">
                     <label class="erppage-label">Type</label>
                     <Select class="erppage-input" id="ddlType">
-                        <option> Select Type </option>
+                        <option value=""> Select Type </option>
                         <option value="Sale">Sale</option>
                         <option value="Scrap Sale">Scrap Sale</option>
                         <option value="Order">Order</option>
@@ -151,7 +154,7 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Vehicle No</label>
-                        <input type="text" class="erppage-input" id="TxtVehicleNo" placeholder="Enter Vehicle No." />
+                        <input type="text" class="erppage-input" id="TxtVehicleNo" placeholder="Enter Vehicle No." maxlength="30" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Pincode</label>
@@ -163,7 +166,7 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">WayBill No</label>
-                        <input type="text" class="erppage-input" id="TxtWayBillNo" placeholder="Enter WayBill No" />
+                        <input type="text" class="erppage-input" id="TxtWayBillNo" placeholder="Enter WayBill No" maxlength="30" />
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Remarks</label>

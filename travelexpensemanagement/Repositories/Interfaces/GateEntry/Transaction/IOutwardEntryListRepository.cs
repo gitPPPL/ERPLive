@@ -17,6 +17,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
 
         Task<byte[]> ExportToPdf(string searchTerm = null);
 
-        Task<object> GetDataByPendingorder(int PartyCode, string Type,  DateTime v_date,  int BILL_NO);
+        Task<object> GetDataByPendingorder(int PartyCode, string Type,  DateTime v_date);
     }
 }

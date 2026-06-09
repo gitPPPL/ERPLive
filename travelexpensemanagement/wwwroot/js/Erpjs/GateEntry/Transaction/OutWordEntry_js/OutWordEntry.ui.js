@@ -130,15 +130,15 @@ function addRow($tbody, data = {}) {
 
       <!-- Enabled -->
       <td>
-        <input type="number" class="form-control no" value="${data.no || ''}"/>
+        <input type="number" class="form-control no"  maxlength="8" value="${data.no || ''}"/>
       </td>
 
       <td>
-        <input type="number" class="form-control quantity" value="${data.quantity || ''}"/>
+        <input type="number" class="form-control quantity"  maxlength="8" value="${data.quantity || ''}"/>
       </td>
 
       <td>
-        <input type="text" class="form-control remarks" value="${data.remarks || ''}"/>
+        <input type="text" class="form-control remarks"  maxlength="150" value="${data.remarks || ''}"/>
       </td>
 
       <!-- Readonly -->

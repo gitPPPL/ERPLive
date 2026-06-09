@@ -189,9 +189,9 @@ function LoadFormByID(rowId, vtype) {
     });
 }
 
-async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
+async function FetchPendindorderno(PartyCode, Type, v_date) {
     try {
-        const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}&BILL_NO=${BILL_NO}`);
+        const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const result = await res.json();
@@ -248,8 +248,7 @@ function TransitReport() {
     var v_type = $('#ddlDocType').val();
 
     // Ensure global variables exist
-    var globalVars = window.globalVariables || {};
-    var database = window.database || "";
+
 
     // Build Crystal Reports selection formula
     var formula =
