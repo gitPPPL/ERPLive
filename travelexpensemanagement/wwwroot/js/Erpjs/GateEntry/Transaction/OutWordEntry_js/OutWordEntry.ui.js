@@ -98,14 +98,13 @@ function addRow($tbody, data = {}) {
         return !$(this).find("select.itemName").val();
     }).first();
 
-    //$tbody.find(".btn-add-action").remove();
     $tbody.find(".act-btn.edit").hide();
 
     const selectItems = generateSelect(itemMap, data.itemName || "");
     const selectDept = generateSelect(DeptMap, data.department || "");
     const selectunit = generateSelect(UnitMap, data.unit || "");
 
-    const row = `
+    const row = $(`
     <tr class="no-border-input">
       <td style="display:none;">${data.code || ""}</td>
 
@@ -128,42 +127,49 @@ function addRow($tbody, data = {}) {
         </select>
       </td>
 
-      <!-- Enabled -->
+      <!-- Enabled Inputs -->
       <td>
-        <input type="number" class="form-control no"   value="${data.no || ''}"/>
+        <input type="number" class="form-control no" value="${data.no || ''}" />
       </td>
 
       <td>
-        <input type="number" class="form-control quantity"   value="${data.quantity || ''}"/>
+        <input type="number" class="form-control quantity" value="${data.quantity || ''}" />
       </td>
 
       <td>
-        <input type="text" class="form-control remarks"   value="${data.remarks || ''}"/>
+        <input type="text" class="form-control remarks" value="${data.remarks || ''}"/>
       </td>
 
       <!-- Readonly -->
       <td>
-        <input type="text" class="form-control ref-type"
-               value="${data.refType || ''}" readonly/>
+        <input type="text" class="form-control ref-type" value="${data.refType || ''}" readonly/>
       </td>
 
       <td>
-        <input type="text" class="form-control ref-no"
-               value="${data.refNo || ''}" readonly/>
+        <input type="text" class="form-control ref-no" value="${data.refNo || ''}" readonly/>
       </td>
 
       <td class="action-col">
-        
-        <button class="act-btn delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash btn-delete-action"></i></button> 
+        <button class="act-btn delete" title="Delete Row" style="cursor:pointer;">
+          <i class="fa fa-trash btn-delete-action"></i>
+        </button> 
       </td>
-    </tr>`;
+    </tr>
+    `);
 
+    // Append or insert row
     if ($emptyRow.length) {
         $emptyRow.before(row);
-    }
-    else {
+    } else {
         $tbody.append(row);
     }
+
+    // Enforce max 18 digits on number inputs
+    row.find("input[type=number]").on("input", function () {
+        if (this.value.length > 18) {
+            this.value = this.value.slice(0, 18);
+        }
+    });
 }
 
 function renderPendingTable() {
