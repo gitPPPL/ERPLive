@@ -302,9 +302,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return new RepositoryResponse  { status = false,  message = ex.Message };
             }
         }
-
-
-
+        
         public decimal GetDecimal(string query)
         {
             try
@@ -330,11 +328,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 return 0m;
             }
         }
-
-
-
-
-
 
         public string GetText(string query)
         {
@@ -440,5 +433,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return dataList;
         }
+        
     }
 }

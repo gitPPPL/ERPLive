@@ -132,7 +132,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         public async Task<IActionResult> GetDataByPendingorder( int PartyCode, string Type, DateTime v_date)
         {
             try
-            {
+            {         
+
                 var result = await _outwardEntryListRepository.GetDataByPendingorder( PartyCode,  Type,  v_date);
                 return Json(result);
             }
@@ -141,6 +142,38 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new  { success = false, message = "Error fetching pending order data.",  error = ex.Message });
             }
         }
+
+
+        [HttpGet]
+        public IActionResult GetDeptCode()
+        {
+            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                string sql = @"SELECT TOP 1 CODE 
+                       FROM ITEMDEPT_MAST 
+                       WHERE NAME LIKE @Name 
+                       AND COMP_CODE = @CompCode";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@Name", "dispatch%");
+                    cmd.Parameters.AddWithValue("@CompCode", compCode);
+
+                    var result = cmd.ExecuteScalar();
+
+                    if (result != null && int.TryParse(result.ToString(), out int deptCode))
+                        return Json(deptCode);
+                }
+            }
+
+            return Json(0);
+        }
+
+
 
     }
 }  

@@ -72,46 +72,41 @@
                     if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type.')) return;
                     if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date.')) return;                              
 
-
-
-                    const isValid =  checkValidDate();
-                    if (isValid === false) {
-                        return;
-                    }
-
-
-
-
-                    if (DocType === "OURT") {
-        
-                        if (RETURN_DATE < V_DATE) {                 
-                            showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
-                            return;
-                        }            
-                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
-                    }
-
                     if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
 
-                    if (CompCode == 2) {
-                        if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
-                            showToast("Please check DocType and Doc No", "Warning", { type: "warning" });
-                            return;                                                     
-                        }                     
-                    }
+                    //const isValid =  checkValidDate();
+                    //if (isValid === false) {
+                    //    return;
+                    //}
 
-                    else {
+                    //if (DocType === "OURT") {
+        
+                    //    if (RETURN_DATE < V_DATE) {                 
+                    //        showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
+                    //        return;
+                    //    }            
+                    //    if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
+                    //}
 
-                        if (DocType === "OUNR" && ITEM_TYPE !== "Sale") {
-                            showToast("Please check Sale Type and Doctype.", "Warning", { type: "warning" });
-                            return;
-                        }
-                    }
+                    //if (CompCode == 2) {
+                    //    if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
+                    //        showToast("Please check DocType and Doc No", "Warning", { type: "warning" });
+                    //        return;                                                     
+                    //    }                     
+                    //}
 
-                    if ((DocType === "OUES" || ITEM_TYPE != "E-Commerce Sale") || (DocType != "OUES" || ITEM_TYPE == "E-Commerce Sale")) {
-                        showToast("Please check DocType and Type", "Warning", { type: "warning" });
-                        return;
-                    }   
+                    //else {
+
+                    //    if (DocType === "OUNR" && ITEM_TYPE !== "Sale") {
+                    //        showToast("Please check Sale Type and Doctype.", "Warning", { type: "warning" });
+                    //        return;
+                    //    }
+                    //}
+
+                    //if ((DocType === "OUES" || ITEM_TYPE != "E-Commerce Sale") || (DocType != "OUES" || ITEM_TYPE == "E-Commerce Sale")) {
+                    //    showToast("Please check DocType and Type", "Warning", { type: "warning" });
+                    //    return;
+                    //}   
 
                     const rows = $("#tblOutwardEntry tbody tr");
                     let isValid = true;
@@ -351,32 +346,40 @@
                         return;
                     }
 
-                    const $tbody = $("#tblOutwardEntry tbody");
+                    $.ajax({
+                        url: "/OutwardEntryList/GetDeptCode",
+                        type: "GET",
+                        success: function (deptCode) {
 
-                    selectedRows.forEach(row => {
+                            const $tbody = $("#tblOutwardEntry tbody");
 
-                        const isDuplicate = $tbody.find("tr").toArray().some(tr => {
-                            const refNo = $(tr).find(".ref-no").val();
+                            selectedRows.forEach(row => {
 
-                            // Compare selected row ItemCode with table ref-no
-                            return refNo === row.ItemCode;
-                        });
+                                const isDuplicate = $tbody.find("tr").toArray().some(tr => {
+                                    const refNo = $(tr).find(".ref-no").val();
+                                    return refNo === row.ItemCode;
+                                });
 
-                        if (isDuplicate) {
-                            toastr.warning(`Item ${row.ItemCode} already exists.`);
-                            return;
+                                if (isDuplicate) {
+                                    toastr.warning(`Item ${row.ItemCode} already exists.`);
+                                    return;
+                                }
+
+                                addRow($tbody, {
+                                    itemName: row.ItemCode,
+                                    department: deptCode || "",   // ✅ from server
+                                    unit: row.UnitCode,
+                                    quantity: parseFloat(row.Qty) || "",
+                                    no: parseInt(row.nos) || "",
+                                    remarks: row.remarks || "",
+                                    refType: row.Vouchertype || "",
+                                    refNo: row.VoucherNo || ""
+                                });
+                            });
+                        },
+                        error: function () {
+                            toastr.error("Failed to fetch department code");
                         }
-
-                        addRow($tbody, {
-                            itemName: row.ItemCode,
-                            department: row.DeptCode || "",
-                            unit: row.UnitCode,
-                            quantity: parseFloat(row.Qty) || "",
-                            no: parseInt(row.nos) || "",
-                            remarks: row.remarks || "",
-                            refType: row.Vouchertype || "",
-                            refNo: row.VoucherNo || ""
-                        });
                     });
                 });
 
