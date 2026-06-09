@@ -241,38 +241,42 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
 }
 
 function TransitReport() {
-
     var reportName = "gatepass1";
 
+    // Get input values
     var v_no = $('#NumDocNo').val();
     var v_type = $('#ddlDocType').val();
 
-    console.log("global Variable", window.globalVariables);
-    console.log("database Name", window.database);
+    // Ensure global variables exist
+    var globalVars = window.globalVariables || {};
+    var database = window.database || "";
 
+    // Build Crystal Reports selection formula
     var formula =
-        "{GATE1.comp_code} = " + window.globalVariables.compCode +
-        " and {GATE1.Year_code} = " + window.globalVariables.yearCode +
-        " and {GATE1.branch_code} = " + window.globalVariables.branchCode +
+        "{GATE1.comp_code} = " + globalVars.CompCode +
+        " and {GATE1.Year_code} = " + globalVars.FYearCode +
+        " and {GATE1.branch_code} = " + globalVars.BranchCode +
         " and {GATE1.V_no} = " + v_no +
-        " and {GATE1.v_type} = " + v_type;
+        " and {GATE1.v_type} = '" + v_type + "'";
 
-    var formulaFields = {
+    // Prepare the payload for the API
+    var payload = {
         Reportname: reportName,
         selectionFormula: formula,
-        Database: window.database.db,
+        Database: database,
         Parameters: {
-            comp_name: window.globalVariables.companyName,
-            comp_add1: window.globalVariables.address1,
-            comp_add2: window.globalVariables.address2,
-            GST: window.globalVariables.gst,
-            PAN: window.globalVariables.pan,
-            COMP_PHONE: window.globalVariables.compPhone,
-            EMAIL: window.globalVariables.email,
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            GST: globalVars.GST || "",
+            PAN: globalVars.PAN || "",
+            COMP_PHONE: globalVars.Phone || "",
+            EMAIL: globalVars.Email || "",
             RPTNAME: "FACTORY GATE PASS FOR OUTGOING MATERIAL"
         }
     };
 
+    // Timestamp for file name
     var now = new Date();
     var timestamp =
         String(now.getDate()).padStart(2, '0') +
@@ -282,17 +286,20 @@ function TransitReport() {
         String(now.getMinutes()).padStart(2, '0') +
         String(now.getSeconds()).padStart(2, '0');
 
+    // AJAX call to the Crystal Report API
     $.ajax({
-        url: 'http://localhost:34055/Report/PendingQCReport',
+        url: 'http://localhost:34089/Report/PendingQCReport', // check port
         type: 'POST',
-        data: JSON.stringify(formulaFields),
+        data: JSON.stringify(payload),
         contentType: "application/json",
-        xhrFields: { responseType: 'blob' },
+        xhrFields: { responseType: 'blob' }, // Important for PDF
 
         success: function (response) {
+            // Convert response to a Blob
             var file = new Blob([response], { type: 'application/pdf' });
             var fileName = `${reportName}_${timestamp}.pdf`;
 
+            // Trigger download
             var link = document.createElement('a');
             link.href = URL.createObjectURL(file);
             link.download = fileName;
@@ -302,7 +309,12 @@ function TransitReport() {
         },
 
         error: function (xhr, status, error) {
-            console.error('Error generating report:', error);
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
         }
     });
 }

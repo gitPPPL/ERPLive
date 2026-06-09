@@ -1,15 +1,42 @@
-﻿@{
+﻿
+
+@using System.Text.Json
+
+@{
     ViewBag.Title = "Outward Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData
              ?? new Models.UserSessionData();
-    var databaseName = ViewBag.DatabaseName as string;
-    var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
-    var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
-    var CompCode = Convert.ToInt32(TempData["CompCode"]);
-
+        var databaseName = ViewBag.DatabaseName as string;
+        var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; // Ensure proper type conversion
+        var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;  
+        var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+         
 }
+
+<script>
+    // Passing only required variables to JS
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email
+    }));
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
+
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">

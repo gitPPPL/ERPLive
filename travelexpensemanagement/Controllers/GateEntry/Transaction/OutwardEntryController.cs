@@ -49,10 +49,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             ViewBag.GlobalVariables = globalVariables;
             ViewBag.DatabaseName = databaseName;
 
-
-            TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
-            TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
-            TempData["CompCode"] = _globalVariableService.GetGlobalVariables().PubCompCode;
             return View("~/Views/GateEntry/Transaction/OutwardEntry/Index.cshtml");
         }
 

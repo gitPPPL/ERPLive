@@ -2,16 +2,7 @@
 
     let itemMap = { };
     let UnitMap = { };
-    let DeptMap = { };
-//    let PubUserLevel='@PubUserLevel';
-//    //let CompCode='@CompCode';
-////let LoginDate = '@logindate';
-
-let PubUserLevel = @Html.Raw(Json.Serialize(PubUserLevel));
-let CompCode = @Html.Raw(Json.Serialize(CompCode));
-let LoginDate = @Html.Raw(Json.Serialize(logindate));
-
-
+    let DeptMap = {};
 
     let pendingData = [];
     let currentPage = 1;
@@ -22,9 +13,7 @@ let LoginDate = @Html.Raw(Json.Serialize(logindate));
     const $tbody = $("#tblOutwardEntry tbody");
     const form = $('#OutwardEntryForm');
     const mode = urlParams.get('mode');
-
-
-
+let PubUserLevel  = 
 
     $(document).ready(function () {
         (async () => {
@@ -399,15 +388,6 @@ let LoginDate = @Html.Raw(Json.Serialize(logindate));
                         });
                     });
                 });
-
-
-
-
-
-
-
-
-
 
 
                 $(document).on("change", ".row-checkbox", function () {
