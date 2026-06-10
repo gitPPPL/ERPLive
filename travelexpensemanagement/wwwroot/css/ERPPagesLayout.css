@@ -276,18 +276,18 @@ body {
 
 /* SUBMENU */
 
+
+
 .ERPPageLayout-submenu {
     list-style: none;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.35s ease;
+    display: none;
     padding-left: 18px;
     border-left: 1px dashed #c7d5c2;
     margin-top: 5px;
 }
 
     .ERPPageLayout-submenu.open {
-        max-height: 5000px;
+        display: block;
     }
 
     /* THIRD LEVEL */
@@ -314,10 +314,6 @@ body {
             font-size: 13px;
             transition: 0.25s;
         }
-
-          
-
-           
 
         .ERPPageLayout-submenu li.active > a {
             background: rgb(233 255 240 / 12%);
@@ -373,16 +369,10 @@ body {
 
 /* Search result final page (Level-3) */
 .ERPPageLayout-submenu .ERPPageLayout-submenu li a {
-    background: transparent !important;
-    color: #edf4ea !important;
+    background: transparent ;
+    color: #edf4ea ;
 }
-    /* Prevent Level-3 search match from becoming green */
-    .ERPPageLayout-submenu .ERPPageLayout-submenu li a.active-page {
-        background: transparent !important;
-        color: #cfd8d3 !important;
-        box-shadow: none !important;
-        font-weight: 500 !important;
-    }
+   
 /* =========================================
    MAIN
 ========================================= */
@@ -493,7 +483,7 @@ body {
 
 .ERPPageLayout-content {
     flex: 1;
-    padding: 20px;
+    padding: 8px 16px;
     overflow-y: auto;
     overflow-x: hidden;
 }

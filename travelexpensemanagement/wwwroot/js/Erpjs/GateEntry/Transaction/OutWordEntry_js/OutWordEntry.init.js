@@ -193,10 +193,6 @@
                         return;
                     }
 
-
-
-
-
                     const header = {
                         RETURN_DATE: RETURN_DATE,
                         RESPONSIBLE_PERSONB: RESPONSIBLE_PERSON,
@@ -392,7 +388,7 @@
                                 itemName: itemCode,
                                 department: deptCode || "",
                                 unit: row.UnitCode || "",
-                                quantity: row.PQty ? parseFloat(row.PQty) : "",
+                                quantity: row.PQty ? (row.PQty) : "",
                                 no: row.nos ? parseInt(row.nos) : "",
                                 remarks: row.remarks || "",
                                 refType: row.Vouchertype || "",

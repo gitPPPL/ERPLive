@@ -82,7 +82,7 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Type</label>
                     <Select class="erppage-input" id="ddlType">
-                        <option value=""> Select Type </option>
+                 
                         <option value="Sale">Sale</option>
                         <option value="Scrap Sale">Scrap Sale</option>
                         <option value="Order">Order</option>
@@ -125,7 +125,7 @@
                         </Select>
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
-                        <label class="erppage-label">Party Address</label>
+                        <label class="erppage-label">P. Address</label>
                         <Select class="erppage-input" id="ddlPartyNameByAddress">
                             <option>Select Party Address</option>
                         </Select>
@@ -170,7 +170,7 @@
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Remarks</label>
-                        <textarea type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                        <input type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks"/>
                     </div>
                 </div>
             </fieldset>
@@ -191,20 +191,19 @@
 </div>
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblOutwardEntry" class="excel-table fixed-grid-table">
+        <table id="tblOutwardEntry" class="excel-table fixed-grid-table resizable-table">
 
-            <!-- Column Width Control -->
-            <colgroup>
-                <col style="display:none;" /> <!-- Code -->
-                <col style="width: 300px;" /> <!-- Item Name -->
-                <col style="width: 120px;" /> <!-- Department -->
-                <col style="width: 80px;" />  <!-- Unit -->
-                <col style="width: 55px;" />  <!-- No -->
-                <col style="width: 70px;" /> <!-- Quantity -->
-                <col style="width: 180px;" /> <!-- Remarks -->
-                <col style="width: 80px;" /> <!-- Reff Type -->
-                <col style="width: 95px;" /> <!-- Reff No -->
-                <col style="width: 140px;" /> <!-- Action -->
+           <colgroup>
+                <col style="display:none;">
+                <col style="width: 263px;">
+                <col style="width: 120px;">
+                <col style="width: 80px;"> 
+                <col style="width: 55px;"> 
+                <col style="width: 75px;"> 
+                <col style="width: 167px;">
+                <col style="width: 80px;"> 
+                <col style="width: 95px;"> 
+                <col style="width: 140px;">
             </colgroup>
 
             <thead>
@@ -278,22 +277,22 @@
                 
                 <div class="erppagelist-container">
                     <div class="excel-wrapper fixed-grid-wrapper">
-                        <table id="tblpendingordermodal" class="excel-table fixed-grid-table">
+                        <table id="tblpendingordermodal" class="excel-table fixed-grid-table resizable-table">
 
                             <colgroup>
-                                <col style="width:50px;" />
-                                <col style="width:100px;" />
-                                <col style="width:100px;" />
-                                <col style="width:100px;" />
-                                <col style="width:80px;" />
-                                <col style="width:260px;" />
-                                <col style="width:65px;" />
-                                <col style="width:90px;" />
-                                <col style="width:195px;" />
-                                <col style="width:65px;" />
-                                <col style="width:80px;" />
-                                <col style="width:80px;" />
-                                <col style="width:80px;" />
+                                <col style="width:50px;">
+                                <col style="width: 106px;">
+                                <col style="width:100px;">
+                                <col style="width: 108px;">
+                                <col style="width:80px;">
+                                <col style="width: 158px;">
+                                <col style="width:65px;">
+                                <col style="width:90px;">
+                                <col style="width: 111px;">
+                                <col style="display:none;">
+                                <col style="display:none;">
+                                <col style="display:none;">
+                                <col style="display:none;">
                             </colgroup>
 
                             <thead>
@@ -307,10 +306,10 @@
                                     <th>Quantity</th>
                                     <th>Balance Qty</th>
                                     <th>Remark</th>
-                                    <th style="display:none;">NOS</th>
-                                    <th style="display:none;">Unit Name</th>
-                                    <th style="display:none;">Unit Code</th>
-                                    <th style="display:none;">Sr.No </th>
+                                    <th class="hidden-col">NOS</th>
+                                    <th class="hidden-col">Unit Name</th>
+                                    <th class="hidden-col">Unit Code</th>
+                                    <th class="hidden-col">Sr.No </th>
                                 </tr>
                             </thead>
 

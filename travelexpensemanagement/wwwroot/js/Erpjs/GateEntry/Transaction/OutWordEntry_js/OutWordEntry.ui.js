@@ -208,10 +208,10 @@ function PendingaddRow($tbody, data = {}, index) {
               <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
               <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
               <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-              <td style="display:none;"><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
-              <td style="display:none;"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
-              <td style="display:none;"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
-              <td style="display:none;"><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
+              <td class="hidden-col"><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
+              <td class="hidden-col"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
+              <td class="hidden-col"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
+              <td class="hidden-col"><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
             </tr>`;
     $tbody.append(row);
 }
