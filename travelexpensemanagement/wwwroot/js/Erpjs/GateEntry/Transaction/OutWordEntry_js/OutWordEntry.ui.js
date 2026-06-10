@@ -10,6 +10,11 @@ function setFormReadOnly() {
     $('#OutwardEntryForm select').prop('disabled', true);
     $('#OutwardEntryForm textarea').prop('readonly', true);
     $('#OutwardEntryForm button').prop('disabled', true);
+    $('#btn-save').prop('disabled', true);
+
+
+
+
     $('#OutwardEntryForm a').css({
         'pointer-events': 'none',
         'opacity': '0.5'
@@ -104,7 +109,7 @@ function addRow($tbody, data = {}) {
     const selectDept = generateSelect(DeptMap, data.department || "");
     const selectunit = generateSelect(UnitMap, data.unit || "");
 
-    const row = $(`
+     const row = $(`
     <tr class="no-border-input">
       <td style="display:none;">${data.code || ""}</td>
 

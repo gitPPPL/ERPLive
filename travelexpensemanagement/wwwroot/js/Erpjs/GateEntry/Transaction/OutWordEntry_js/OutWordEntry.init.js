@@ -24,7 +24,7 @@
         (async () => {
             try {
                 await LoadDropDowns();
-                addRow($tbody);
+              /*  addRow($tbody);*/
                 if (rowId) {
                     $('#ddlDocType').prop('disabled', true);
                     $('#DtDocDate').prop('disabled', true);
@@ -392,7 +392,7 @@
                                 itemName: itemCode,
                                 department: deptCode || "",
                                 unit: row.UnitCode || "",
-                                quantity: row.Qty ? parseFloat(row.Qty) : "",
+                                quantity: row.PQty ? parseFloat(row.PQty) : "",
                                 no: row.nos ? parseInt(row.nos) : "",
                                 remarks: row.remarks || "",
                                 refType: row.Vouchertype || "",
