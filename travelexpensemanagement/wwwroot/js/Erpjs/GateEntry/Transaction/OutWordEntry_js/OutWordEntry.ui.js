@@ -116,7 +116,7 @@ function addRow($tbody, data = {}) {
       </td>
 
       <td>
-        <select class="form-control department" disabled>
+        <select class="form-control department" >
           <option value="">-- Select --</option>${selectDept}
         </select>
       </td>
@@ -129,12 +129,14 @@ function addRow($tbody, data = {}) {
 
       <!-- Enabled Inputs -->
       <td>
-        <input type="number" class="form-control no" value="${data.no || ''}" />
+        <input type="number" class="form-control no" value="${data.no || ''}" oninput="if(this.value.length > 12) this.value = this.value.slice(0,12)" />
+      </td>
+      <td>
+      <input type="number" class="form-control quantity" value="${data.quantity || ''}" oninput="if(this.value.length > 12) this.value = this.value.slice(0,12)" />
       </td>
 
-      <td>
-        <input type="number" class="form-control quantity" value="${data.quantity || ''}" />
-      </td>
+
+
 
       <td>
         <input type="text" class="form-control remarks" value="${data.remarks || ''}"/>
@@ -201,10 +203,10 @@ function PendingaddRow($tbody, data = {}, index) {
               <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
               <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
               <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-              <td><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
-              <td><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
-              <td><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
-              <td><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
+              <td style="display:none;"><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
+              <td style="display:none;"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
+              <td style="display:none;"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
+              <td style="display:none;"><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
             </tr>`;
     $tbody.append(row);
 }

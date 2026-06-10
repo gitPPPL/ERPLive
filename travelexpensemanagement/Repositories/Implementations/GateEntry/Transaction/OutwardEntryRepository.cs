@@ -234,8 +234,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                     }
 
-
-
                     using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -249,10 +247,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                     }
 
-
                     decimal mainQty = 0;
                     decimal gateQty = 0;
-
                     if (header.ITEM_TYPE != "Others")
                     {
                         using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
@@ -278,16 +274,21 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             }
                         }
                         gateQty += (d.QTY ?? 0);
-  
-                        if (gateQty > mainQty)
-                        {
-                            decimal pendingQty = mainQty - (gateQty - (d.QTY ?? 0));
+                 
+                            if (gateQty > mainQty)
+                            {                           
 
-                            return new RepositoryResponse
-                            { status = true,  message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +  $"& Your Quantity is = {(d.QTY ?? 0)}, " +
+                                decimal pendingQty = (mainQty - gateQty - (d.QTY ?? 0));
+
+                                return new RepositoryResponse
+                                {
+                                    status = true,
+                                    message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " +
                                     $"Please Check Item Name {d.ITEM_NAME}"
-                            };
-                        }
+                                };
+                            }
+             
+                       
                     }
 
                 }
@@ -391,6 +392,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             return dataList;
         }
+
+
+
+
         public List<object> GetDataByPartyandAddressidCodeAsync(  int partyId, int addressid)
         {
             var getdata = _globalVariableService.GetGlobalVariables();

@@ -131,11 +131,7 @@
                 showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
         }        
-
-   
-
-
-
+        
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
         V_NO: V_NO,
@@ -630,35 +626,6 @@ function populateTable(data) {
     });
 }
 
-   async function checkValidDate() {
-        const data = {
-            vdate: $("#InDate").val(),
-            vtype: $("#ddlDocType").val(),
-            vno: $("#TxtDocNo").val()
-        };
-        try {
-            const response = await fetch('/InwardEntry/CheckValidDate', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-            const result = await response.json();
-
-            if (result.status === false) {
-            showToast("result.message", { type: "warning" });
-            return false;
-            }
-
-            return true;
-
-        } catch (error) {
-        showToast("result.message", { type: "warning" });
-        return false;
-        }
-   } 
    function addRow($tbody, data = {}) {
 
     const isINMS = $('#ddlDocType').val() === 'INMS';
@@ -1019,3 +986,10 @@ function populateTable(data) {
         showToast("Something went wrong while loading the form.", { type: "error" });
     }
 }
+
+
+
+
+
+
+

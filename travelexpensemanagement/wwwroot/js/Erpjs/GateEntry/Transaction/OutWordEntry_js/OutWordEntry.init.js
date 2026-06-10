@@ -58,7 +58,7 @@
                     $('#DtTxtDocDate').val(now.toTimeString().slice(0, 8));
                 }
 
-                $("#btn-save").click(function (e) {
+                $("#btn-save").click(async function (e) {
                     e.preventDefault();
 
                     const V_DATE = formatDate($("#DtDocDate").val());
@@ -75,7 +75,11 @@
                     if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
                     if (!validateRequiredField('#TxtVehicleNo', 'Please Fill Vehicle No.')) return; 
 
-                
+                    const checkdate = await checkValidDate(); 
+
+                    if (!checkdate) {
+                        return; 
+                    }
 
                     if (DocType === "OURT") {
         
@@ -85,32 +89,31 @@
                         }            
                         if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
                     }
+     
 
-                    //if (CompCode == 2) {
-                    //    if ((DocType === "OUSL" || ITEM_TYPE === "Sale") || (DocType === "OUSL" || ITEM_TYPE != "Sale")) {
-                    //        showToast("Please check DocType and Doc No", "Warning", { type: "warning" });
-                    //        return;                                                     
-                    //    }                     
-                    //}
+                    if (CompCode != 2)
+                    {
+                        if ((DocType === "OUSL" && ITEM_TYPE !== "Sale") || (DocType !== "OUSL" && ITEM_TYPE === "Sale")) {
+                            showToast("Please check DocType : " + DocType + " and Type : " + ITEM_TYPE  +" ", "Warning", { type: "warning" });
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (DocType !== "OUNR" && ITEM_TYPE === "Sale") {
+                            showToast("Please check Sale Type and Doctype.", "Warning", { type: "warning" });
+                            return;
+                        }
+                    }
 
-                    //else {
-
-                    //    if (DocType === "OUNR" && ITEM_TYPE !== "Sale") {
-                    //        showToast("Please check Sale Type and Doctype.", "Warning", { type: "warning" });
-                    //        return;
-                    //    }
-                    //}
-
-                    //if ((DocType === "OUES" || ITEM_TYPE != "E-Commerce Sale") || (DocType != "OUES" || ITEM_TYPE == "E-Commerce Sale")) {
-                    //    showToast("Please check DocType and Type", "Warning", { type: "warning" });
-                    //    return;
-                    //}   
+                    if ((DocType === "OUES" && ITEM_TYPE !== "E-Commerce Sale") || (DocType !== "OUES" && ITEM_TYPE === "E-Commerce Sale")) {
+                        showToast("Please check DocType : "+ DocType +" and Type : "+ ITEM_TYPE +"", "Warning", { type: "warning" });
+                        return;
+                    } 
 
                     const rows = $("#tblOutwardEntry tbody tr");
                     let isValid = true;
-                    let hasAtLeastOneItem = false;
-
-               
+                    let hasAtLeastOneItem = false;                                  
 
                     rows.each(function (index) {
                         const $row = $(this);
@@ -339,51 +342,81 @@
                     FetchPendindorderno(selectedValue, typeText, v_date);
                 });
                  
+                $("#Btn_selectedData").click(async function () {
 
-                $("#Btn_selectedData").click(function () {
                     const selectedRows = getSelectedPendingRows();
 
-                    if (selectedRows.length === 0) {
+                    if (!selectedRows.length) {
                         toastr.info("Please select at least one row");
                         return;
                     }
 
-                    $.ajax({
-                        url: "/OutwardEntryList/GetDeptCode",
-                        type: "GET",
-                        success: function (deptCode) {
+                    try {
 
-                            const $tbody = $("#tblOutwardEntry tbody");
+                        const deptCode = await $.ajax({
+                            url: "/OutwardEntryList/GetDeptCode",
+                            type: "GET"
+                        });
 
-                            selectedRows.forEach(row => {
+                        const $tbody = $("#tblOutwardEntry tbody");
 
-                                const isDuplicate = $tbody.find("tr").toArray().some(tr => {
-                                    const refNo = $(tr).find(".ref-no").val();
-                                    return refNo === row.ItemCode;
-                                });
-
-                                if (isDuplicate) {
-                                    toastr.warning(`Item ${row.ItemCode} already exists.`);
-                                    return;
-                                }
-
-                                addRow($tbody, {
-                                    itemName: row.ItemCode,
-                                    department: deptCode || "",   // ✅ from server
-                                    unit: row.UnitCode,
-                                    quantity: parseFloat(row.Qty) || "",
-                                    no: parseInt(row.nos) || "",
-                                    remarks: row.remarks || "",
-                                    refType: row.Vouchertype || "",
-                                    refNo: row.VoucherNo || ""
-                                });
-                            });
-                        },
-                        error: function () {
-                            toastr.error("Failed to fetch department code");
+                        // Close modal ONCE (not inside loop)
+                        const modalElement = document.getElementById('pendingorders');
+                        if (modalElement) {
+                            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                            if (modalInstance) modalInstance.hide();
                         }
-                    });
+
+                        for (const row of selectedRows) {
+
+                            const itemCode = (row.ItemCode || "").trim();
+                            const voucherNo = (row.VoucherNo || "").trim();
+
+                            // ✅ Proper duplicate check
+                            const exists = $tbody.find("tr").toArray().some(tr => {
+
+                                const existingItemCode = $(tr).find(".itemName").val();
+                                const existingRefNo = $(tr).find(".ref-no").val()?.trim() || "";
+
+                                return existingItemCode === itemCode && existingRefNo === voucherNo;
+                            });
+
+                            if (exists) {
+                                toastr.warning(`Item ${itemCode} with Ref No ${voucherNo} already exists.`);
+                                continue;
+                            }
+
+                            // Add row (IMPORTANT: use "code", not itemCode)
+                            addRow($tbody, {
+                                code: itemCode,
+                                itemName: itemCode,
+                                department: deptCode || "",
+                                unit: row.UnitCode || "",
+                                quantity: row.Qty ? parseFloat(row.Qty) : "",
+                                no: row.nos ? parseInt(row.nos) : "",
+                                remarks: row.remarks || "",
+                                refType: row.Vouchertype || "",
+                                refNo: voucherNo
+                            });
+                        }
+
+                        // Load header from first row
+                        const $firstRow = $tbody.find("tr:first");
+                        if ($firstRow.length) {
+
+                            const refType = $firstRow.find(".ref-type").val() || "";
+                            const refNo = $firstRow.find(".ref-no").val() || "";
+                            if (refNo != '' && refType != '') {
+                                await fetchPendingOrderHeaderData(refType, refNo);
+                            }                        
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        toastr.error("Failed to fetch data");
+                    }
                 });
+
 
                 $(document).on("change", ".row-checkbox", function () {
                     const index = $(this).data("index");

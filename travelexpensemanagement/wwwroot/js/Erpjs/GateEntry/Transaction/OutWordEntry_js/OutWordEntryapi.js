@@ -241,13 +241,24 @@ async function FetchPendindorderno(PartyCode, Type, v_date) {
 }
 
 function TransitReport() {
-    var reportName = "gatepass1";
 
-    // Get input values
+    if (!rowId) {
+        showToast(`Please save the data before printing the report.`, { type: "info" });
+        return;
+    }
+
+
+
+
+    var reportName = "gatepass1";
+        // Get input values
     var v_no = $('#NumDocNo').val();
     var v_type = $('#ddlDocType').val();
 
     // Ensure global variables exist
+
+
+
 
 
     // Build Crystal Reports selection formula
@@ -316,4 +327,44 @@ function TransitReport() {
             }
         }
     });
+}
+
+
+
+async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO) {
+    try {
+        const baseUrl = "/OutwardEntry/GetPendingrowHeaderData";
+        const queryParams = `REF_TYPE=${encodeURIComponent(REF_TYPE)}&REF_NO=${encodeURIComponent(REF_NO)}`;
+        const url = `${baseUrl}?${queryParams}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const details = await res.json();
+        if (details.length) {
+            const d = details[0];
+            $("#TxtVehicleNo").val(d.vehiclE_NO || "");
+            $("#TxtWayBillNo").val(d.ewaybilL_NO || "");
+            $("#TxtAdd1PD").val(d.bilL_ADD1 || "");
+            $("#TxtAdd2PD").val(d.bilL_ADD2 || "");
+            $("#TxtAdd3PD").val(d.bilL_ADD3 || "");
+            $("#ddlCity").val(d.bilL_CITY || "");
+            $("#TxtState").val(d.statE_CODE || "");     
+            $("#TxtGSTNo").val(d.bilL_GST || "");
+            $("#NumPincode").val(d.bilL_PINCODE || "");
+        } else {
+            $("#TxtVehicleNo").val( "");
+            $("#TxtWayBillNo").val( "");
+            $("#TxtAdd1PD").val("");
+            $("#TxtAdd2PD").val("");
+            $("#TxtAdd3PD").val("");
+            $("#ddlCity").val("");
+            $("#TxtState").val("");
+            $("#TxtGSTNo").val("");
+            $("#NumPincode").val("");
+        }
+    } catch (error) {
+        console.error("Error fetching pending order header data:", error);
+  
+    }
 }

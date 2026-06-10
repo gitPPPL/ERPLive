@@ -47,8 +47,8 @@
     </div>
     <div class="erppage-header-right">
          
-        <button type="button" class="erppage-header-back" onclick="TransitReport();" >
-            <i class="fa-solid fa-chart-line"></i> Report
+        <button type="button" class="erppage-btn erppage-btn-copy" onclick="TransitReport();" >
+            <i class="fa-solid fa-print"></i> Print
         </button>
 
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "OutwardEntryList")', isReadOnly)">
@@ -305,12 +305,12 @@
                                     <th>Item code</th>
                                     <th>Item Name</th>
                                     <th>Quantity</th>
-                                    <th>Purchase Qty</th>
+                                    <th>Balance Qty</th>
                                     <th>Remark</th>
-                                    <th>NOS</th>
-                                    <th>Unit Name</th>
-                                    <th>Unit Code</th>
-                                    <th>Sr.No </th>
+                                    <th style="display:none;">NOS</th>
+                                    <th style="display:none;">Unit Name</th>
+                                    <th style="display:none;">Unit Code</th>
+                                    <th style="display:none;">Sr.No </th>
                                 </tr>
                             </thead>
 
