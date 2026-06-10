@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "Loom Fabric Width Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+}
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-scissors"></i>
+        </div>
+        <div class="erppage-header-title">Loom Fabric Width Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "LoomFabricWidthEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="LoomFabricWidthEntryForm">
+    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Time</label>
+                    <input type="time" class="erppage-input" id="DtTime">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shift</label>
+                    <select class="erppage-input erppage-select erppage-required" id="ddlShift">
+                        <option value="">Select Shift</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-select erppage-required" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Inspected By</label>
+                    <select class="erppage-input erppage-select erppage-required" id="ddlInspectBy">
+                        <option value="">Select Inspected By</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Total Rec.</label>
+                    <input type="text" class="erppage-input" id="TxtTotalRec" placeholder="Enter Total Rec" readonly>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <input type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks" />
+                </div>
+                <button id="btn-import" type="button" class="erppage-btn erppage-btn-common">
+                    <i class="fa fa-refresh"></i>
+                    Import Obtained Width
+                </button>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLoomFabricWidthEntry" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="display:none;">        
+                            <col style="width:110px;">         
+                            <col style="width:250px;">         
+                            <col style="display:none;">        
+                            <col style="display:none;">        
+                            <col style="display:none;">        
+                            <col style="display:none;">        
+                            <col style="width:120px;">         
+                            <col style="width:120px;">         
+                            <col style="width:150px;">         
+                            <col style="width:150px;">         
+                            <col style="width:100px;">         
+                        </colgroup>
+                        <thead class="table-head">
+                            <tr>
+                                <th class="hidden-col">LID</th>
+                                <th>Loom</th>
+                                <th>Item Name</th>
+                                <th class="hidden-col">Type</th>
+                                <th class="hidden-col">Width (MM)</th>
+                                <th class="hidden-col">Gram</th>
+                                <th class="hidden-col">Color</th>
+                                <th>DNR</th>
+                                <th>Obt. Width</th>
+                                <th>Bobbin Marking</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+            <button id="btn-print" type="button" class="erppage-btn erppage-btn-common">
+                <i class="fa fa-print"></i>
+                Print
+            </button>
+        </div>
+    </div>
+</div>
+<script src="~/js/erpjs/qualitycontrol/transaction/loomfabricwidthentry/loomfabricwidthentry.js"></script>
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>
+
+

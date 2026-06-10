@@ -39,7 +39,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                 cmd.Parameters.AddWithValue("@V_TYPE", vType);
                 cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
-                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
                 cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
 
                 int nextNo = Convert.ToInt32(cmd.ExecuteScalar());

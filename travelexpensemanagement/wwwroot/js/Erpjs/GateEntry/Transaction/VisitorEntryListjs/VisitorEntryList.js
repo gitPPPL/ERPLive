@@ -5,17 +5,17 @@
 	$(document).ready(function () {
 		loadAllVisitors();
 
-		//===Export====
+		////===Export====
 		$('#btnExport').on('click', function () {
 			const searchTerm = $('#tableSearch').val() || '';
 			window.location.href = `/VisitorEntryList/ExportVisitorToExcel?searchTerm=${encodeURIComponent(searchTerm)}`;
 		});
 
-		//====Print(pdf)====
-		$('#btnPrint').on('click', function () {
-			const searchTerm = $('#tableSearch').val() || '';
-			window.open(`/VisitorEntryList/ExportVisitorToPdf?searchTerm=${encodeURIComponent(searchTerm)}`, '_blank');
-		});
+		////====Print(pdf)====
+		//$('#btnPrint').on('click', function () {
+		//	const searchTerm = $('#tableSearch').val() || '';
+		//	window.open(`/VisitorEntryList/ExportVisitorToPdf?searchTerm=${encodeURIComponent(searchTerm)}`, '_blank');
+		//});
 	});
 
 	function loadAllVisitors() {
@@ -48,7 +48,41 @@
 				}
 
 				$.each(visitors, function (index, item) {
-					tbody.append(`
+
+					let actions = '';
+
+					// Edit Permission
+					if (window.permissions.canEdit) {
+						actions += `
+						<button class="act-btn edit"
+								title="Edit"
+								style="cursor:pointer;"
+								onclick="checkModificationAllowed('${item.v_DATE}', '${item.doC_ID}')">
+							<i class="fa fa-edit"></i>
+						</button>`;
+					}
+
+					// View Always Visible
+					actions += `
+					<button class="act-btn view"
+							title="View"
+							style="cursor:pointer;"
+							onclick="viewVisitor('${item.doC_ID}')">
+						<i class="fa fa-eye"></i>
+					</button>`;
+
+					// Delete Permission
+					if (window.permissions.canDelete) {
+						actions += `
+						<button class="act-btn delete"
+								title="Delete"
+								style="cursor:pointer;"
+								onclick="deleteVisitor('${item.doC_ID}')">
+							<i class="fa fa-trash"></i>
+						</button>`;
+					}
+
+				    tbody.append(`
 						<tr>
 							<td style="display:none;">${item.doC_ID || ''}</td>
 							<td>${item.v_NO || ''}</td>
@@ -62,12 +96,9 @@
 							<td>${item.address || ''}</td>
 							<td>${item.mobilE_NO || ''}</td>
 							<td>${item.vehiclE_NO || ''}</td>
-							
-							<td class="action-col">
-								<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="editVisitor('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
-								<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewVisitor('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
-								<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteVisitor('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
 
+							<td class="action-col">
+								${actions}
 							</td>
 						</tr>
 					`);
@@ -76,10 +107,7 @@
 				renderNewPagination(); 
 			},
 			error: function (xhr) {
-				showCenterToast('Error loading visitors: ' + xhr.responseText, "error");
-			},
-			complete: function () {
-				$('.circle-loader').css('display', 'none');
+				showToast('Error loading visitors: ' + xhr.responseText, "error");
 			}
 		});
 	}
@@ -173,30 +201,45 @@
 		loadAllVisitors();
 	});
 
-	// Edit
-	function editVisitor(docId) {
-		window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId);
-	}
+// Edit
+function editVisitor(docId) {
+	window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId);
+}
 
-	// View
-	function viewVisitor(docId) {
-		window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
-	}
+// View
+function viewVisitor(docId) {
+	window.location.href = '/VisitorEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
+}
 
-	function deleteVisitor(docId) {
-		deleteRecord('VisitorEntry', docId, {
-			action: 'DeleteVisitorEntry',
-			title: 'Delete Confirmation',
-			text: 'Are you sure you want to delete this entry?',
-			successCallback: function () {
-				loadAllVisitors();
-			}
-		});
-	}
+function deleteVisitor(docId) {
+	deleteRecord('VisitorEntry', docId, {
+		action: 'DeleteVisitorEntry',
+		title: 'Delete Confirmation',
+		text: 'Are you sure you want to delete this entry?',
+		successCallback: function () {
+			loadAllVisitors();
+		}
+	});
+}
 
-	// Date format
-	function formatDate(dateString) {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		return date.toLocaleDateString('en-GB');
-	}
+// Date format
+function formatDate(dateString) {
+	if (!dateString) return '';
+	const date = new Date(dateString);
+	return date.toLocaleDateString('en-GB');
+}
+
+function checkModificationAllowed(vDate, rowId) {
+	checkModificationDays({
+		controller: 'VisitorEntry',
+		vDate: vDate,
+		rowId: rowId,
+		onAllowed: function (rowId) {
+			editVisitor(rowId);
+		}
+	})
+}
+
+
+	
+

@@ -246,27 +246,59 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStrengthList(decimal minStd = 0,decimal maxStd = 0)
+        public async Task<IActionResult> GetStrengthList(decimal minStd = 0, decimal maxStd = 0)
         {
             try
             {
-                var result = await _loomFabricStrengthEntry.GetStrengthListAsync(minStd, maxStd);
+                bool isExist = false;
+                string strengthFilter = "";
+                string strqry = "";
+                var matchingCode = "";
+                //if (minStd != 0 && maxStd != 0)
+                //{
+                strengthFilter = $" and  MIN_STD = {minStd} and MAX_STD = {maxStd} ";
+                //}
+                strqry = $@"select CODE, NAME from TENACITY_MAST where COMP_CODE ={_globalValue.GetGlobalVariables().PubCompCode}
+                               {strengthFilter} order by NAME";
+                var itemlist1 = await _dbHelper.GetJsonDataAsync(strqry);
+
+                //if (itemlist1.Count > 0)
+                //{
+                //    isExist = true;
+                //    //dynamic first = itemlist1[0];
+                //    //matchingCode = first.NAME;
+                //    matchingCode = minStd+"-"+maxStd;
+                //}
+
+                if (itemlist1.Count > 0)
+                {
+                    isExist = true;
+
+                    dynamic first = itemlist1[0];
+
+                   // matchingCode = $"{minStd} - {maxStd}";
+                   matchingCode = first.CODE.ToString();
+                }
+                else
+                    isExist = false;
+
+                strqry = $@"select CODE, NAME from TENACITY_MAST where COMP_CODE ={_globalValue.GetGlobalVariables().PubCompCode}
+                                order by NAME";
+                var allList = await _dbHelper.GetJsonDataAsync(strqry);
 
                 return Json(new
                 {
                     status = true,
-                    data = result.Data,
-                    isExist = result.IsExist,
-                    matchingCode = result.MatchingCode
+                    data = allList,
+                    isExist = isExist,
+                    matchingCode = matchingCode
                 });
+
+                //return Json(new { status = true, data = itemlist, isExist = isExist });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Json(new
-                {
-                    status = false,
-                    message = "data load failed"
-                });
+                return Json(new { status = false, messsage = "data load failed" });
             }
         }
 

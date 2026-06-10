@@ -39,6 +39,7 @@ async function Misconsumptioninit() {
 
     $(document).on("click", ".btn-add-action", function () {
         addRow($tbody);
+
     });
 
     $(document).on("click", ".btn-add-row", function () {
@@ -71,13 +72,13 @@ async function Misconsumptioninit() {
         }
         await loadPendingDocuments(partyId);
     });
-
-    $(document).on('click', '#PendngAddRow', function (e) {
+    
+    $(document).on('click', '#PendngAddRow', async function (e) {
         e.preventDefault();
 
         let selectedRows = getSelectedPendingDocuments();
 
-        addSelectedToConsumptionTable(selectedRows);
+       await addSelectedToConsumptionTable(selectedRows);
 
         $('#pendingModal').modal('hide');
     });
@@ -151,7 +152,10 @@ async function initDropdowns() {
     if (defaultDocType) {
         await GetVNo(defaultDocType);
     }
-    addRow($tbody);
+    //addRow($tbody);
+    if (!rowId) {
+        addRow($tbody);
+    }
     initSelect2();
    
 }
@@ -464,12 +468,13 @@ function addRow($tbody, data = {}) {
         $newRow.find('.unit').val(data.unit);
     }
 
-    // trigger change for select2
-    $newRow.find('.itemName').trigger('change');
-    $newRow.find('.department').trigger('change');
-    $newRow.find('.unit').trigger('change');
+    //initRowSelect2($newRow);
 
-    initRowSelect2($newRow);
+    if (data.itemName) $newRow.find('.itemName').val(data.itemName);
+    if (data.department) $newRow.find('.department').val(data.department);
+    if (data.unit) $newRow.find('.unit').val(data.unit);
+
+    //initRowSelect2($newRow);
 
     if (data.isPendingRow) {
         $newRow.find('.itemName').prop('disabled', true).trigger('change.select2');
@@ -485,84 +490,125 @@ function getKeyByValue(map, value) {
     return Object.keys(map).find(key => map[key] === value);
 }
 
-function addSelectedToConsumptionTable(selectedRows) {
-    const $tbody = $("#tblConsumptionEntry tbody");
+async function addSelectedToConsumptionTable(selectedRows) {
 
-    selectedRows.forEach(row => {
+    const existingSrnos = new Set();
 
-        if (isAlreadyAdded(row.srno)) {
-            showToast("Already added this record", { type: "warning" });
-            return;
-        }
+    $("#tblConsumptionEntry tbody input.srno-hidden").each(function () {
+        existingSrnos.add(String($(this).val()).trim());
+    });
+
+    const $last = $tbody.find("tr:last");
+
+    if (
+        !$last.find("select.itemName").val() &&
+        !$last.find("input.quantity").val()
+    ) {
+        $last.remove();
+    }
+
+    let htmlBuffer = ""; 
+
+    for (const row of selectedRows) {
+
+        if (existingSrnos.has(String(row.srno).trim())) continue;
+
+        existingSrnos.add(String(row.srno).trim());
 
         const itemCode = getKeyByValue(itemMap, row.item_name);
         const unitCode = getKeyByValue(UnitMap, row.unit);
         const deptCode = row.depT_CODE || row.department || "";
 
-        let $blankRow = null;
+        htmlBuffer += `
+        <tr class="no-border-input">
+            <td style="display:none;">
+                ${row.code || ""}
+                <input type="hidden" class="srno-hidden" value="${row.srno || ''}">
+            </td>
 
-        $tbody.find("tr").each(function () {
-            const itemVal = $(this).find("select.itemName").val();
-            const qtyVal = $(this).find("input.quantity").val();
+            <td style="display:none;">${row.code || ""}</td>
 
-            const isEmptyRow = !itemVal && (!qtyVal || qtyVal == 0);
+            <td>
+                <select class="form-control itemName" disabled>
+                    ${buildOptions(itemList, itemCode)}
+                </select>
+            </td>
 
-            if (isEmptyRow) {
-                $blankRow = $(this);
-                return false;
-            }
-        });
+            <td>
+                <select class="form-control department" disabled>
+                    ${buildOptions(deptList, deptCode)}
+                </select>
+            </td>
 
-        const fillRow = ($row) => {
+            <td>
+                <select class="form-control unit" disabled>
+                    ${buildOptions(unitList, unitCode)}
+                </select>
+            </td>
 
-            // Fill values
-            $row.find("select.itemName")
-                .val(itemCode || "")
-                .trigger("change");
+            <td><input type="number" class="no" value="${row.nos || ''}"/></td>
+            <td><input type="number" class="quantity" value="${row.quantity || ''}"/></td>
+            <td><input type="text" class="remarks" value="${row.remarks || ''}" readonly /></td>
+            <td><input class="refType" value="${row.refType || ''}" readonly></td>
+            <td><input class="refNo" value="${row.refNo || ''}" readonly></td>
 
-            $row.find("select.unit")
-                .val(unitCode || "")
-                .trigger("change");
+            <td class="action-col">
+                <button class="act-btn add btn-add-action"><i class="fa fa-plus"></i></button>
+                <button class="act-btn delete btn-delete-action"><i class="fa fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }
 
-            $row.find("select.department")
-                .val(deptCode)
-                .trigger("change");
+    //SINGLE DOM UPDATE
+    $tbody.append(htmlBuffer);
 
-            //if (deptCode) {
-            //    $row.find("select.department")
-            //        .val(deptCode)
-            //        .trigger("change");
-            //}
+    //SINGLE SELECT2 INIT (NOT PER ROW)
+    initAllSelect2Fast();
 
-            $row.find("input.no").val(row.nos || "");
-            $row.find("input.quantity").val(row.quantity || "");
-            $row.find("input.remarks").val(row.remarks || "");
-            $row.find("input.srno-hidden").val(row.srno || "");
-            $row.data("srno", row.srno || "");
-            $row.find(".refType").val(row.refType || "");
-            $row.find(".refNo").val(row.refNo || "");
-            // ==========================
-            // MAKE ITEM + UNIT READONLY
-            // ==========================
+    // REMOVE EMPTY LAST ROW IF EXISTS
+    const $lastRow = $tbody.find("tr:last");
 
-            // If Select2 is applied, disable select
-            $row.find("select.itemName").prop("disabled", true);
-            $row.find("select.unit").prop("disabled", true);
+    const isEmpty =
+        !$lastRow.find("select.itemName").val() &&
+        !$lastRow.find("input.quantity").val();
 
-            // Refresh Select2 UI
-            $row.find("select.itemName").trigger("change.select2");
-            $row.find("select.unit").trigger("change.select2");
-            $row.find("select.department").trigger("change.select2");
-            
-        };
+    if (isEmpty) {
+        $lastRow.remove();
+    }
+}
 
-        if ($blankRow) {
-            fillRow($blankRow);
-        } else {
-            addRow($tbody);
-            const $newRow = $tbody.find("tr:last");
-            fillRow($newRow);
-        }
+function buildOptions(list, selectedValue) {
+    let html = '<option value="">-- Select --</option>';
+
+    for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        html += `<option value="${item.value}" ${item.value == selectedValue ? "selected" : ""}>
+                    ${item.text}
+                 </option>`;
+    }
+    return html;
+}
+
+function initAllSelect2Fast() {
+
+    const $rows = $('#tblConsumptionEntry tbody tr');
+
+    $rows.find('.itemName').select2({
+        width: '100%',
+        placeholder: "-- Select Item --",
+        minimumResultsForSearch: 2  
+    });
+
+    $rows.find('.department').select2({
+        width: '100%',
+        placeholder: "-- Select Dept --",
+        minimumResultsForSearch: 2
+    });
+
+    $rows.find('.unit').select2({
+        width: '100%',
+        placeholder: "-- Select Unit --",
+        minimumResultsForSearch: 2
     });
 }
 
@@ -602,7 +648,7 @@ function bindSelectOptions($select, data) {
 async function loadItemMaster() {
     const data = await MisConsumptionApi.getItemMaster();
 
-    itemList = data; // ✅ store list
+    itemList = data;
     itemMap = {};
 
     data.forEach(i => {
@@ -665,7 +711,8 @@ async function loadPendingDocuments(partyId) {
             const row = `
                <tr data-ref-type="${item.refType || ''}"
                    data-ref-no="${item.refNo || ''}"
-                    data-dept-code="${item.depT_CODE || ''}">
+                    data-dept-code="${item.depT_CODE || ''}"
+                    data-srno="${item.srno || ''}">
                     <td style="display:none;">${item.v_NO}</td>
 
                     <td>
@@ -713,11 +760,12 @@ function getSelectedPendingDocuments() {
         // const deptCode = row.find('td').eq(11).text().trim();
         const deptCode = row.data('deptCode');
 
-        const srno = row.find('td').eq(11).text();
+        //const srno = row.find('td').eq(11).text();
+        const srno = row.data('srno');
 
         if (isAlreadyAdded(srno)) {
-            showToast("Already added this pending record.", { type: "warning" });
-            return; // skip this row only
+            showToast("already added this pending record.", { type: "warning" });
+            return; 
         }
 
         selectedRows.push({
@@ -735,7 +783,6 @@ function getSelectedPendingDocuments() {
         });
     });
 
-    // 🔥 ONLY ONE PLACE FOR THIS MESSAGE
     if (!hasChecked) {
         showToast("Please select at least one row.", { type: "warning" });
     }
@@ -813,14 +860,14 @@ function setFormReadOnly() {
         $(this).find('.btn-add-action, .btn-delete-action')
         .css({
             'pointer-events': 'none',
-            'opacity': '0.5'
+           
         });
     });
 
     //ADD THIS (TABLE CSS LOCK - SIMPLE & CLEAN)
     $('#tblConsumptionEntry').css({
         'pointer-events': 'none',
-        'opacity': '0.85'
+       
     });
 
     // Pending table also disable
@@ -830,18 +877,15 @@ function setFormReadOnly() {
 
     $('#tblPendingDocument').css({
         'pointer-events': 'none',
-        'opacity': '0.85'
     });
 
     // global row buttons
     $('.btn-add-row, .btn-delete-row, #PendngAddRow').css({
         'pointer-events': 'none',
-        'opacity': '0.5'
     });
 
     $('#tablePagination').css({
         'pointer-events': 'none',
-        'opacity': '0.5'
     });
 
     $(`${formSelector} input, ${formSelector} select, ${formSelector} textarea`)

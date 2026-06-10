@@ -1,176 +1,260 @@
 ﻿@{
-    ViewBag.Title = "Item Market Rate List";
+    ViewBag.Title = "Purchase Price List";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.MENU_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
 
 }
 
-<fieldset>
-    <legend class="legend-field">Item Market Rate List</legend>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Item Market Rate List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        @if (canAdd)
+        {
+            <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ItemMarketRate")'">
+                <i class="fa fa-plus"></i>Add New
+        </button>
+        }
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        @if (canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+                <i class="fa fa-print"></i> Print
+        </button>
+        }
+        @if (canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+                <i class="fa fa-file-excel"></i> Export
+        </button>
+        }
+
+        @if (canApproval)
+        {
+            <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+            data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+        }
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblItemMarketRate" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="display:none;" />
+                <col style="width:100px;" />
+                <col style="width:120px;" />
+                <col style="width:80px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
+                <col style="width:120px;" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="display:none;">Document Type</th>
+                    <th>Doc No</th>
+                    <th>Doc Date</th>
+                    <th>Group Type</th>
+                    <th>Eff From</th>
+                    <th>Expired On</th>
+                    <th>Remarks</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
         </div>
-        <div class="col-lg-6">
-            <div class="btn-rightalign">
-                <button onclick="window.location.href='@Url.Action("Index", "ItemMarketRate")'" type="button" class="btn btn-add">
-                    <i class="fa fa-plus"></i>Add
-                </button>
-                <button class="btn btn-print" onclick="printCityMasterReport()">
-                    <i class="fa fa-print"></i> Print
-                </button>
-                <button class="btn btn-export">
-                    <i class="fas fa-file-export"></i> Export
-                </button>
-                <button class="btn btn-mail">
-                    <i class="fa fa-envelope"></i> Mail
-                </button>
-                <button class="btn btn-approved">
-                    <i class="fa fa-check"></i> Approved
-                </button>
-            </div>
+        <div class="pagination-center">
+            <button class="page-nav" id="prevBtn">‹</button>
+            <div id="tablePagination" class="page-numbers"></div>
+            <button class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
         </div>
     </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table id="tblItemMarketRate" class="table-width">
-                <thead class="table-head">
-                    <tr>
-                        <th style="display:none;">Code</th>
-                        <th>Document Type</th>
-                        <th>Document No</th>
-                        <th>Document Date</th>
-                        <th>Group Type</th>
-                        <th>Remarks</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <!-- Pagination container -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="pagination-end">
-                    <div class="custom-pagination" id="tablePagination"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-</fieldset>
+</div>
 
 <script>
+    window.permissions = {
+        canEdit: @canEdit.ToString().ToLower(),
+        canDelete: @canDelete.ToString().ToLower(),
+        canDocDetail: @canDocDetail.ToString().ToLower()
+    };
 
     // Global Variable getting from controller
     var compCode = '@ViewBag.CompCode';
     var branchCode = '@ViewBag.BranchCode';
     var yearCode = '@ViewBag.YearCode';
 
-
-    let currentPage = 1;
-    let pageSize = 10;
-
-    $(document).ready(function () {
-        loadAllItemRateList();
+    document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+        e.preventDefault();
+        window.location.href = "/ItemMarketRateList/ExportAllDocs";
     });
+</script>
 
-    function loadAllItemRateList() {
-        const searchTerm = $('#searchBox').val();
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/purchase/transaction/itemmarketratelistjs/itemmarketratelist.js"></script>
 
-        $.ajax({
-            url: '/ItemMarketRateList/GetAllItemRateList',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm: searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
+
+@* <script>
+    $(document).ready(function () {
+
+        itemMarketRatePagination = Pagination.create({
+
+            pageSize: 10,
+
+            paginationContainer: '#tablePagination',
+
+            infoContainer: '#pageInfoText',
+
+            loader: function (params) {
+
+                $.ajax({
+                    url: '/ItemMarketRateList/GetAllItemRateList',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        searchTerm: $('#searchBox').val(),
+                        pageNumber: params.pageNumber,
+                        pageSize: params.pageSize
+                    },
+                    success: function (res) {
+
+                        params.callback({
+                            data: res.itemRates,
+                            totalCount: res.totalCount
+                        });
+
+                    },
+                    error: function (xhr) {
+                        toastr.error('Error loading data');
+                    }
+                });
             },
-            success: function (res) {
-                const lists = res.itemRates;
-                const totalCount = res.totalCount;
+
+            render: function (lists) {
 
                 let tbody = $('#tblItemMarketRate tbody');
+                console.log("list Data:", lists);
                 tbody.empty();
 
                 if (!lists || lists.length === 0) {
-                    tbody.append('<tr><td colspan="11" class="text-center text-muted">No records found.</td></tr>');
-                    renderPagination(0, pageSize, currentPage);
+                    tbody.append(`
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                No records found
+                            </td>
+                        </tr>
+                    `);
                     return;
                 }
 
                 $.each(lists, function (index, item) {
+
                     tbody.append(`
                         <tr>
                             <td style="display:none;">${item.comP_CODE}</td>
                             <td style="display:none;">${item.brancH_CODE}</td>
                             <td style="display:none;">${item.yeaR_CODE}</td>
-                            <td>${item.v_TYPE || ''}</td>
+
+                            <td style="display:none;">${item.v_TYPE || ''}</td>
                             <td>${item.v_NO || ''}</td>
-                            <td>${item.v_DATE || ''}</td>
+                            <td>${formatDate(item.v_DATE)}</td>
                             <td>${item.mgrouP_TYPE || ''}</td>
+                            <td>${formatDate(item.efF_DATE)}</td>
+                            <td>${formatDate(item.exP_DATE)}</td>
                             <td>${item.remarks || ''}</td>
-                            <td>
-                                <i class="fa fa-edit btn-edit" title="Edit" onclick="editItemMarketRate(${item.v_NO})"></i>
-                                <i class="fa fa-eye btn-view" title="View" onclick="viewItemMarketRate(${item.v_NO})"></i>
-                                <i class="fa fa-trash btn-delete" title="Delete" onclick="deleteItemMarketRate(${item.v_NO},'${item.v_TYPE}')"></i>
+
+                            <td class="action-col">
+                                <button class="act-btn edit btn-edit"
+                                        onclick="editItemMarketRate(${item.v_NO})">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+
+                                <button class="act-btn view btn-view"
+                                        onclick="viewItemMarketRate(${item.v_NO})">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+
+                                <button class="act-btn delete btn-delete"
+                                        onclick="deleteItemMarketRate(${item.v_NO}, '${item.v_TYPE}')">
+                                    <i class="fa fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                     `);
                 });
-
-                renderPagination(totalCount, pageSize, currentPage);
-            },
-            error: function (xhr) {
-                toastr.error('Error loading UOM data: ' + xhr.responseText);
             }
         });
-    }
 
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const paginationContainer = $('#tablePagination');
-        paginationContainer.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-        }
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (currentPage <= 3) endPage = Math.min(5, totalPages);
-        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-        }
-
-        paginationContainer.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadAllItemRateList();
-    }
+        itemMarketRatePagination.load();
+    });
 
     $('#searchBox').on('keyup', function () {
-        currentPage = 1;
-        loadAllItemRateList();
+        itemMarketRatePagination.load();
+    });
+
+    $('#pageSizeSelect').on('change', function () {
+
+        itemMarketRatePagination.setPageSize(
+            parseInt($(this).val())
+        );
+
+    });
+
+    $('#prevBtn').click(function () {
+        Pagination.prev();
+    });
+
+    $('#nextBtn').click(function () {
+        Pagination.next();
     });
 
     function editItemMarketRate(code) {
@@ -206,7 +290,7 @@
                     success: function (response) {
                         if (response.success) {
                             Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                loadAllItemRateList();
+                                itemMarketRatePagination.load();
                             });
                         } else {
                             Swal.fire('Failed', response.message, 'warning');
@@ -220,5 +304,16 @@
         });
     }
 
+    function formatDate(dateString) {
 
-</script>
+        if (!dateString) return '';
+
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+</script> *@

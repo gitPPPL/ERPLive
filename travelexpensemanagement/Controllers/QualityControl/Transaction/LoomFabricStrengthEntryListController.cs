@@ -36,6 +36,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 UserMenuPermissions = permissions,
                 UserLevel = userLevel
             };
+
+            string databaseName;
+            using (var connection = _dbcontext.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVariables = _globalValue.GetGlobalVariables();
             return View("~/Views/QualityControl/Transaction/LoomFabricStrengthEntryList/Index.cshtml", model);
         }
 

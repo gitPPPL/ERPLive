@@ -5,7 +5,7 @@
 
         public int CompCode { get; set; }
         public string VType { get; set; }
-        public int? Code { get; set; }
+        public int? CODE { get; set; }
         public string Name { get; set; }
         public string ShortName { get; set; }
         public int SortNo { get; set; }

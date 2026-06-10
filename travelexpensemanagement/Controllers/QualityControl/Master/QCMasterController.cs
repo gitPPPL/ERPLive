@@ -19,7 +19,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly DbHelper _dbHelper;
 
         public QCMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-     DropdownService dropdownService, DbHelper dbHelper)
+        DropdownService dropdownService, DbHelper dbHelper)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -216,7 +216,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                 }
             }
         }
-
+         
         [HttpPost]
         public async Task<IActionResult> UpdateDataQcMaster([FromBody] QCMaster model)
         {

@@ -1,7 +1,32 @@
 ﻿@{
-	ViewBag.Title = "Misc Consumption Entry List";
+	ViewBag.Title = "Contractor Material Consumption List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
 }
 
 <div id="erp-center-toast-container"></div>
@@ -12,9 +37,12 @@
 		<span>Misc Consumption Entry List</span>
 	</div>
 	<div class="erppagelist-header-right">
-		<button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "MiscConsumptionEntry")'">
-			<i class="fa fa-plus"></i>Add New
-		</button>
+		@if (canAdd)
+		{
+			<button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "MiscConsumptionEntry")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
 	</div>
 </div>
 
@@ -25,18 +53,30 @@
 		<input type="text" id="tableSearch" placeholder="Search by All Columns Name...." />
 	</div>
 	<div class="erppagelist-actions">
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btnPrint">
-			<i class="fa fa-print"></i>Print
-		</button>
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
-			<i class="fa fa-file-excel"></i>Export
-		</button>
-		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
-			<i class="fa fa-envelope"></i>Mail
-		</button>
-		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
-			<i class="fa fa-check-circle"></i>Approved
-		</button>
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btnPrint" onclick="PendingQCReport()">
+				<i class="fa fa-print"></i>Print
+			</button>
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
+				<i class="fa fa-file-excel"></i>Export
+			</button>
+		}
+		@if (canMail)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+				<i class="fa fa-envelope"></i>Mail
+			</button>
+		}
+		@if (canApproval)
+		{
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i>Approved
+			</button>
+		}
 	</div>
 </div>
 
@@ -89,4 +129,11 @@
 <script src="~/common/pagination.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/misconsumptionentrylistjs/misconsumptionentrylist.js"></script>
 
+<script>
+	window.permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+</script>
 

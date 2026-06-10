@@ -2,141 +2,204 @@
     ViewBag.Title = "Item Market Rate";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-line-chart"></i>
+        </div>
+        <div class="erppage-header-title">Item Market Rate</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ItemMarketRateList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="ItemMarketRateForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select " id="ddlDocType">
+                        <option value="">Select DOC Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input erppage-required" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input erppage-required" id="DtDocDate">
+                </div>
+                
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Item Group</label>
+                    <select class="erppage-input erppage-select erppage-required" id="ddlItemGroup">
+                        <option value="">Select Item Group</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Eff. From</label>
+                    <input type="date" class="erppage-input" id="DtEffFrom">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Expired On</label>
+                    <input type="date" class="erppage-input" id="DtExpiredOn">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <input class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks" maxlength="200" />
+                </div>
 
-<fieldset>
-    <legend class="legend-field">Item Market Rate</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "ItemMarketRateList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
+                <button type="button" id="btn-load-data" onclick="LoadPreviousData()" class="erppage-btn erppage-btn-common">
+                    <i class="fa fa-rotate-left"></i>
+                    <span>Load Previous Data</span>
                 </button>
             </div>
-        </div> 
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table resizable-table" >
+                        <colgroup>
+                            <col style="width:80px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Minimum Rate</th>
+                                <th>Maximum Rate</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
     </div>
-    <form id="ItemMarketRateForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlItemGroup">Item Group</label>
-                    <select class="form-control" id="ddlItemGroup">
-                        <option>--Select Item Group--</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtEffFrom">Eff. From</label>
-                    <input type="date" class="form-control" id="DtEffFrom">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtExpiredOn">Expired On</label>
-                    <input type="date" class="form-control" id="DtExpiredOn">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="TxtRemarks">Remarks</label>
-                    <textarea type="text" class="form-control" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2 mb-2">
-                <div class="btn-last">
-                    <button id="btn-load-data" type="button" onclick="LoadPreviousData()" class="btn btn-success"><i class="fa fa-rotate-left"></i>Load Previous Data</button>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblPurchaseBillPassEntry" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th style="display:none;">Code</th>
-                            <th>ICode</th>
-                            <th>Item Name</th>
-                            <th>Minimum Rate</th>
-                            <th>Maximum Rate</th>
-                            <th>Remarks</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
-                    </div>
-                </div>  
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="button" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
+</div>
+
 <script>
     // Global Variable getting from controller
     var compCode = '@ViewBag.CompCode';
     var branchCode = '@ViewBag.BranchCode';
     var yearCode = '@ViewBag.YearCode';
+</script>
 
+<script src="~/js/erpjs/purchase/transaction/itemmarketratejs/itemmarketrate.js"></script>
+
+
+@* <script>
+    let isEditLoading = false;
     let marketRateItems = [];
     let globalItemMap = {};
 
-
-     //getting 
+    //getting 
     const urlParams = new URLSearchParams(location.search);
     const rowId = parseInt(urlParams.get('id'));
     const isReadOnly = urlParams.get('readOnly') === 'true';
 
     $(document).ready(function () {
-        loadItemList(compCode).then(() => {
+        $("#ddlDocType").focus();
+        $('#DtDocDate').val(new Date().toISOString().split('T')[0]);
+        $('#DtEffFrom').val(new Date().toISOString().split('T')[0]);
+        $('#DtExpiredOn').val(new Date().toISOString().split('T')[0]);
+
+        $.when(
+            loadItemList(compCode),
+            loadDocTypeList(),
+            loadItemGroupTypeList(compCode)
+        ).done(function () {
+
             if (!isNaN(rowId) && rowId > 0) {
-              loadFullItemMarketRateByVno(rowId);
-            } else {
-                addNewRowBelow(true);
+                loadFullItemMarketRateByVno(rowId);
             }
-            loadNextDocNo(yearCode);
-            loadDocTypeList();
-            loadItemGroupTypeList(compCode);
+            else {
+               addNewRowBelow(true);
+                loadNextDocNo(yearCode);
+            }
+
+        });
+
+        $('#ddlDocType').change(function () {
+
+            if ($(this).val()) {
+
+                $(this).prop('disabled', true);
+
+                $('#DtDocDate').focus();
+
+            }
+
+        });
+
+        $('#ddlItemGroup').change(function () {
+             if (isEditLoading) return;
+            const groupType = $(this).val();
+
+            loadItemList(compCode, groupType).done(function () {
+                console.log("addNewRowBelow called");
+                $('#tblPurchaseBillPassEntry tbody').empty();
+                marketRateItems = [];
+
+                addNewRowBelow(true);
+            });
+        });
+
+        $(document).on('change', 'select[name^="itemName"]', function () {
+
+            const currentValue = $(this).val();
+            const currentRow = $(this).closest('tr');
+
+            let duplicateFound = false;
+
+            $('#tblPurchaseBillPassEntry tbody tr').each(function () {
+
+                if ($(this)[0] === currentRow[0]) {
+                    return true;
+                }
+
+                const otherValue = $(this).find('select[name^="itemName"]').val();
+
+                if (otherValue === currentValue && currentValue !== '') {
+                    duplicateFound = true;
+                    return false;
+                }
+            });
+
+            if (duplicateFound) {
+                showToast("This Item Is Already Added", { type: "warning" });
+
+                $(this).val('').trigger('change');
+
+                const rowIndex = currentRow.index();
+                $(`#itemCode_${rowIndex}`).val('');
+
+                return;
+            }
+
+            const rowIndex = currentRow.index();
+            $(`#itemCode_${rowIndex}`).val(currentValue);
         });
     });
-
 
     function loadNextDocNo(yearC){
         $.ajax({
@@ -144,13 +207,14 @@
             type: 'GET',
             data: { yearCode : yearC },
             success: function (response) {
-                $('#NumDocNo').val(response).attr('disabled',true);
+                $('#NumDocNo').val(response);
             },
             error: function (xhr, status, error) {
-                toastr.error('Error loading Item make: ' + error);
+                showToast("Error loading Item Make: " + error, { type: "error" });
             }
         });
     }
+
     function loadDocTypeList() {
         docTypeMap = {};
         return $.ajax({
@@ -160,7 +224,6 @@
             success: function (data) {
                 var ddl = $('#ddlDocType');
                 ddl.empty();
-                ddl.append('<option value="">-- Select Doc Type --</option>');
 
                 $.each(data, function (index, item) {
                     ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
@@ -168,7 +231,7 @@
                 });
             },
             error: function (xhr, status, error) {
-                toastr.error('Error loading DocType list: ' + error);
+                showToast("Error Loading DocType List: " + error, { type: "error" });
             }
         });
     }
@@ -190,37 +253,48 @@
                     ddl.append('<option value="' + item + '">' + item + '</option>');
                     docTypeMap[item] = item;
                 });
+
+                ddl.select2({
+                    placeholder: "Select Item Group",
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                ddl.on('select2:open', function () {
+                    setTimeout(function () {
+                        const searchBox = document.querySelector('.select2-container--open .select2-search__field');
+                        if (searchBox) {
+                            searchBox.focus();   
+                        }
+                    }, 50);
+                });
             },
             error: function (xhr, status, error) {
-                toastr.error('Error loading DocType list: ' + error);
+                showToast("Error Loading DocType List: " + error, { type: "error" });
             }
         });
     }
 
+    let globalItemList = [];
 
-    function loadItemList(compC) {
+    function loadItemList(compC, groupType) {
         return $.ajax({
             url: '/ItemMarketRate/GetItemList',
             type: 'GET',
             dataType: 'json',
-            data: { cCode : compC },
+            data: { cCode: compC , groupType: groupType }
         }).then(function (data) {
-            const map = {};
-            data.forEach(item => {
-                map[item.value] = item.text;
-            });
-            globalItemMap = map;  // ✅ Important!
-            return map;
-        }).catch(function (xhr, status, error) {
-            toastr.error('Error loading Item list: ' + error);
-            return {};
+            console.log("Item", data);
+            globalItemList = data;
+            console.log(globalItemList[0]);
+            return data;
         });
     }
-
+    
     $(document).on('change', 'select[name^="itemName"]', function () {
         const selectedCode = $(this).val();
         const row = $(this).closest('tr');
-        const rowIndex = row.index(); // same as marketRateItems index
+        const rowIndex = row.index(); 
 
         // Update itemCode input
         $(`#itemCode_${rowIndex}`).val(selectedCode);
@@ -231,57 +305,103 @@
         }
     });
 
-
-    //function to LOAD DATA from MARKET_RATE 1,2 Table
     function loadFullItemMarketRateByVno(vNo) {
+        isEditLoading = true;
+
         $.ajax({
             url: '/ItemMarketRate/GetItemMarketRateByVno',
             type: 'GET',
             data: { vNo },
             success: function (res) {
+
                 if (!res.success || !res.header) {
-                    toastr.warning("Item Market Rate not found.");
+                    showToast("Item Market Rate not Found", { type: "warning" });
                     return;
                 }
 
                 const header = res.header;
                 marketRateItems = res.items || [];
 
+                // =========================
+                // 1. Bind Header FIRST
+                // =========================
                 $('#ddlDocType').val(header.v_TYPE).trigger('change');
                 $('#DtDocDate').val(header.v_DATE?.substring(0, 10));
                 $('#NumDocNo').val(header.v_NO);
+
+                //$('#ddlItemGroup').val(header.mgrouP_TYPE);
                 $('#ddlItemGroup').val(header.mgrouP_TYPE).trigger('change');
                 $('#DtEffFrom').val(header.efF_DATE?.substring(0, 10));
                 $('#DtExpiredOn').val(header.exP_DATE?.substring(0, 10));
                 $('#TxtRemarks').val(header.remarks);
 
+                // =========================
+                // 2. WAIT for item list if needed
+                // (important fix)
+                // =========================
+                const renderRows = () => {
 
-                // ✅ Render rows manually, one by one
-                const tbody = $('#tblPurchaseBillPassEntry tbody');
-                tbody.empty();
+                    const tbody = $('#tblPurchaseBillPassEntry tbody');
+                    tbody.empty();
 
-                marketRateItems.forEach((row, i) => {
-                    const isLastRow = (i === marketRateItems.length - 1);
-                    const rowHtml = generateRowHtml(row, i, globalItemMap, isLastRow);
-                    tbody.append(rowHtml);
-                });
+                    marketRateItems.forEach((row, i) => {
+                        const isLastRow = (i === marketRateItems.length - 1);
 
-                $('select.form-select').select2();
+                        const rowHtml = generateRowHtml(row, i, globalItemMap, isLastRow);
+                        tbody.append(rowHtml);
+                    });
+
+                    // =========================
+                    // 3. Init select2 AFTER DOM render
+                    // =========================
+                    // setTimeout(() => {
+                    //     $('select[id^="itemName_"]').select2({
+                    //         width: '100%'
+                    //     });
+                    // }, 0);
+                    initItemSelect2('select[id^="itemName_"]');
+
+                    // =========================
+                    // 4. Readonly mode
+                    // =========================
+                    if (isReadOnly) {
+                        applyReadOnlyMode();
+                    }
+
+                    isEditLoading = false;
+                };
+
+                // =========================
+                // 5. Ensure item list loaded first
+                // =========================
+                if (typeof loadItemList === "function") {
+                    loadItemList(compCode, header.mgrouP_TYPE)
+                        .done(function () {
+                            renderRows();
+                        })
+                        .fail(function () {
+                            showToast("Item list load failed", { type: "error" });
+                        });
+                } else {
+                    renderRows();
+                }
             },
+
             error: function (xhr) {
-                toastr.error("Failed to load quotation: " + xhr.responseText);
+                showToast("Failed To Load Item Market Rate: " + xhr.responseText, { type: "error" });
+                isEditLoading = false;
             }
         });
     }
+    
     function generateRowHtml(row, i, itemMap, isLastRow = false) {
         const getValue = value => (value === undefined || value === null || value === '') ? '' : value;
-        const dropdownOptions = generateDropdownOptions(itemMap, getValue(row.iteM_CODE));
-
+        const dropdownOptions =generateDropdownOptions(globalItemList, getValue(row.iteM_CODE));
         return `
-            <tr>    
-                <td style="display:none;">
-                    <input type="hidden" id="hidden_${i}" name="hidden[${i}]" value="${getValue(row.v_NO)}" />
-                </td>
+            <tr>  
+            
+                <input type="hidden" id="hidden_${i}" name="hidden[${i}]" value="${getValue(row.v_NO)}" />
+              
                 <td>
                     <input class="form-control" type="text" id="itemCode_${i}" name="itemCode[${i}]" class="form-control-sm" value="${getValue(row.iteM_CODE)}" readonly />
                 </td>
@@ -291,68 +411,69 @@
                     </select>
                 </td>
                 <td>
-                    <input class="form-control" type="number" id="minRate_${i}" name="minRate[${i}]" class="form-control-sm" value="${getValue(row.miN_RATE)}" style="width: 50px;" />
+                    <input class="form-control" type="number" id="minRate_${i}" name="minRate[${i}]" class="form-control-sm" value="${getValue(row.miN_RATE)}" />
                 </td>
                 <td>
-                    <input class="form-control" type="number" id="maxRate_${i}" name="maxRate[${i}]" class="form-control-sm" value="${getValue(row.maX_RATE)}" style="width: 50px;" />
+                    <input class="form-control" type="number" id="maxRate_${i}" name="maxRate[${i}]" class="form-control-sm" value="${getValue(row.maX_RATE)}" />
                 </td>
                 <td>
                     <input class="form-control" type="text" id="remarks_${i}" name="remarks[${i}]" class="form-control-sm" value="${getValue(row.remark || '')}" />
                 </td>
-                <td>
-                    <i class="fas fa-trash ms-2" style="color:red; cursor:pointer;" onclick="deleteRow(this)"></i>
-                    ${isLastRow ? `<i class="fas fa-plus-circle ms-2 text-success" style="cursor:pointer;" onclick="addNewRowBelow()"></i>` : ''}
-                </td>
+                <td class="action-col">
+                     ${isLastRow ? `
+                     <button class="act-btn add" title="Add Row" onclick="addNewRowBelow()"><i class="fa fa-plus"></i></button>
+                       ` : ''}
+                    <button class="act-btn delete" title="Delete Row" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
+                 </td>
             </tr>
         `;
     }
-    function generateDropdownOptions(itemMap, selectedValue) {
-        return Object.keys(itemMap).map(key => {
-            const selected = (selectedValue == key) ? 'selected' : '';
-            return `<option value="${key}" ${selected}>${itemMap[key]}</option>`;
-        }).join('');
+
+    function generateDropdownOptions(itemList, selectedValue) {
+        console.log("itemList Length =", itemList.length);
+        console.log("selectedValue =", selectedValue);
+
+        let options = '<option value=""></option>';
+
+        itemList.forEach(item => {
+
+            const selected = item.value == selectedValue ? 'selected' : '';
+
+            options += `<option value="${item.value}" ${selected}>
+                            ${item.value} - ${item.text}
+                        </option>`;
+
+            
+        });
+
+        return options;
     }
+
     function deleteRow(button) {
         const row = button.closest('tr');
         if (row) {
             row.remove();
         }
     }
+
     function addNewRowBelow(suppressValidation = false) {
         const lastRow = $('#tblPurchaseBillPassEntry tbody tr:last');
         let isValid = true;
 
-        // Don't run validation if suppressValidation is true
         if (!suppressValidation && lastRow.length > 0) {
-            const fieldsToValidate = [
-                { idPrefix: 'itemName', label: 'Item Name' },
-                { idPrefix: 'minRate', label: 'Minimum Rate', isNumeric: true },
-                { idPrefix: 'maxRate', label: 'Maximum Rate', isNumeric: true }
-            ];
 
-            fieldsToValidate.forEach(field => {
-                const input = lastRow.find(`[id^='${field.idPrefix}_']`);
-                const value = input.val();
+            const item = lastRow.find('select[id^="itemName_"]').val();
+            const minRate = lastRow.find('input[id^="minRate_"]').val();
+            const maxRate = lastRow.find('input[id^="maxRate_"]').val();
 
-                let fieldIsValid = true;
-
-                if (!value || value === '' || (field.isNumeric && parseFloat(value) <= 0)) {
-                    fieldIsValid = false;
-                }
-
-                if (!fieldIsValid) {
-                    input.addClass('is-invalid');
-                    toastr.warning(`Please enter a valid ${field.label}.`);
-                    isValid = false;
-                } else {
-                    input.removeClass('is-invalid');
-                }
-            });
-
-            if (!isValid) return;
+            //only block completely empty last row (if needed)
+            if (!item && !minRate && !maxRate) {
+                showToast("Please Fill Current Row Before Adding New Row", { type: "warning" });
+                return;
+            }
         }
 
-        // ✅ Remove all plus icons from existing rows
+        // Remove all plus icons from existing rows
         $('#tblPurchaseBillPassEntry tbody tr').each(function () {
             $(this).find('.fa-plus-circle').remove();
         });
@@ -364,20 +485,21 @@
             maX_RATE: '',
             remark: ''
         };
-
+         
         const newIndex = marketRateItems.length;
         marketRateItems.push(emptyRow);
 
         const newRowHtml = generateRowHtml(emptyRow, newIndex, globalItemMap, true);
         $('#tblPurchaseBillPassEntry tbody').append(newRowHtml);
 
-        $(`#itemName_${newIndex}`).select2({ width: '100%' });
+        initItemSelect2('#itemName_' + newIndex);
     }
+
     function LoadPreviousData() {
         var grpType = $('#ddlItemGroup').val();
 
         if (!grpType || grpType === "0" || grpType === "--Select Item Group--") {
-            toastr.warning("Please select a valid group type.");
+           showToast("Please Select a Valid Group Type", { type: "warning" });
             return;
         }
 
@@ -387,18 +509,17 @@
             data: { groupType: grpType },
             success: function (res) {
                 const tbody = $('#tblPurchaseBillPassEntry tbody');
-
+                
                 if (!res.success || !Array.isArray(res.items) || res.items.length === 0) {
-                    toastr.warning("No previous data found for selected group.");
+                    showToast("No Previoud Data Found For Selected Group", { type: "warning" });
 
-                    // ✅ Clear global array and table
+                    //  Clear global array and table
                     marketRateItems = [];
-                    tbody.empty();
 
                     return;
                 }
 
-                // ✅ Assign and render
+                //  Assign and render
                 marketRateItems = res.items;
                 tbody.empty();
 
@@ -409,22 +530,19 @@
                 });
 
                 $('select.form-select').select2({ width: '100%' });
-
-                toastr.success("Previous data loaded successfully.");
+                showToast("Previous Data Loaded Successfully", { type: "success" });
             },
             error: function (xhr, status, error) {
-                toastr.error('Error loading previous data: ' + error);
+                showToast("Error Loading Previoud Data: " + error, { type: "error" });
             }
         });
     }
 
-
-
-
-
-
-    $('#btn-save').click(function (e) {
+    $('#btn-save').click(async function (e) {
         e.preventDefault();
+
+        const isValidDate = await checkValidDate();
+        if (!isValidDate) return;
 
         if (!validateHeader()) {
             return;
@@ -433,7 +551,7 @@
         let rowsData = [];
         let isAllRowsValid = true;
 
-        // 1. Header data
+        // Header data
         const headerData = {
             COMP_CODE: compCode,
             BRANCH_CODE: branchCode,
@@ -447,62 +565,38 @@
             REMARKS: $('#TxtRemarks').val()
         };
 
-        // Validate each row and collect valid ones only
+        if (!validateDetails()) {
+            return;
+        }
+
         $('#tblPurchaseBillPassEntry tbody tr').each(function () {
+
             const row = $(this);
-
             const itemCode = row.find('select[id^="itemName_"]').val();
-            const minRate = parseFloat(row.find('input[id^="minRate_"]').val());
-            const maxRate = parseFloat(row.find('input[id^="maxRate_"]').val());
+            const minRate = row.find('input[id^="minRate_"]').val();
+            const maxRate = row.find('input[id^="maxRate_"]').val();
 
-            let isRowValid = true;
-
-            // Clear previous invalid styles
-            row.find('select[id^="itemName_"]').removeClass('is-invalid');
-            row.find('input[id^="minRate_"]').removeClass('is-invalid');
-            row.find('input[id^="maxRate_"]').removeClass('is-invalid');
-
-            // Validate individual inputs with separate toastr messages
-            if (!itemCode) {
-                row.find('select[id^="itemName_"]').addClass('is-invalid');
-                toastr.warning('Please select an Item Name.');
-                isRowValid = false;
+            // Skip completely blank row
+            if (!itemCode && !minRate && !maxRate) {
+                return true;
             }
-
-            if (isNaN(minRate) || minRate <= 0) {
-                row.find('input[id^="minRate_"]').addClass('is-invalid');
-                toastr.warning('Please enter a valid Minimum Rate greater than zero.');
-                isRowValid = false;
-            }
-
-            if (isNaN(maxRate) || maxRate <= 0) {
-                row.find('input[id^="maxRate_"]').addClass('is-invalid');
-                toastr.warning('Please enter a valid Maximum Rate greater than zero.');
-                isRowValid = false;
-            }
-
-            if (isRowValid) {
-                // If this row is valid, add to rowsData
-                rowsData.push({
-                    COMP_CODE: compCode,
-                    BRANCH_CODE: branchCode,
-                    YEAR_CODE: yearCode,
-                    V_TYPE: headerData.V_TYPE,
-                    V_NO: headerData.V_NO,
-                    V_DATE: headerData.V_DATE,
-                    ITEM_CODE: parseInt(itemCode),
-                    MIN_RATE: minRate,
-                    MAX_RATE: maxRate,
-                    AVG_RATE: 0,
-                    REMARK: row.find('input[id^="remarks_"]').val(),
-                });
-            } else {
-                isAllRowsValid = false;
-            }
+            rowsData.push({
+                COMP_CODE: compCode,
+                BRANCH_CODE: branchCode,
+                YEAR_CODE: yearCode,
+                V_TYPE: headerData.V_TYPE,
+                V_NO: headerData.V_NO,
+                V_DATE: headerData.V_DATE,
+                ITEM_CODE: parseInt(row.find('select[id^="itemName_"]').val()),
+                MIN_RATE: parseFloat(row.find('input[id^="minRate_"]').val()),
+                MAX_RATE: parseFloat(row.find('input[id^="maxRate_"]').val()),
+                AVG_RATE: 0,
+                REMARK: row.find('input[id^="remarks_"]').val()
+            });
         });
 
         if (rowsData.length === 0) {
-            toastr.warning('Please add at least one valid detail row before saving.');
+            showToast("Please Add At least One Valid Detail Row Before Saving ", { type: "warning" });
             return;
         }
 
@@ -523,66 +617,50 @@
             data: JSON.stringify(payload),
             success: function (response) {
                 if (response.success) {
-                    toastr.success('Saved successfully!');
+                    showToast(response.message, {
+                        type: "success"
+                    });
                     setTimeout(() => {
                         window.location.href = '/ItemMarketRateList/Index';
                     }, 1000);
                 } else {
-                    toastr.error('Error saving data: ' + response.message);
+                   showToast("Error While Saving Data: " + response.message, { type: "error" });
                 }
             },
             error: function (xhr, status, error) {
-                toastr.error('Error saving data: ' + error);
+                showToast("Error Saving Data: " + error, { type: "error" });
             }
         });
     });
 
-
     function validateHeader() {
         let isValid = true;
 
-        // Validate Doc Type
-        const docType = $('#ddlDocType').val();
-        if (!docType || docType === '--Select DOC Type--') {
-            $('#ddlDocType').addClass('is-invalid');
-            toastr.warning('Please select a valid Doc Type.');
-            isValid = false;
-        } else {
-            $('#ddlDocType').removeClass('is-invalid');
+        if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+        if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
+        if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
+        if (!validateRequiredField('#ddlItemGroup', 'Item Group')) return;
+
+        const effDate = new Date($('#DtEffFrom').val());
+        const expDate = new Date($('#DtExpiredOn').val());
+
+        if (effDate > expDate) {
+            showToast("Effective From Date cannot be greater than Expiry Date", { type: "warning" });
+            return false;
         }
 
-        // Validate Doc Date
-        const docDate = $('#DtDocDate').val();
-        if (!docDate) {
-            $('#DtDocDate').addClass('is-invalid');
-            toastr.warning('Please enter a valid Doc Date.');
-            isValid = false;
-        } else {
-            $('#DtDocDate').removeClass('is-invalid');
-        }
+        const diffDays =Math.abs((expDate - effDate) / (1000 * 60 * 60 * 24));
 
-        // Validate Doc No
-        const docNo = $('#NumDocNo').val();
-        if (!docNo || parseInt(docNo) <= 0) {
-            $('#NumDocNo').addClass('is-invalid');
-            toastr.warning('Please enter a valid Doc No.');
-            isValid = false;
-        } else {
-            $('#NumDocNo').removeClass('is-invalid');
-        }
-
-        // Validate Item Group
-        const itemGroup = $('#ddlItemGroup').val();
-        if (!itemGroup || itemGroup === '--Select Item Group--') {
-            $('#ddlItemGroup').addClass('is-invalid');
-            toastr.warning('Please select a valid Item Group.');
-            isValid = false;
-        } else {
-            $('#ddlItemGroup').removeClass('is-invalid');
+        if (diffDays > 20) {
+            showToast(
+                "Difference between Effective Date and Expiry Date cannot be more than 20 days",
+                { type: "warning" }
+            );
+            return false;
         }
 
         // Validate Effective From Date
-        const effDate = $('#DtEffFrom').val();
+       
         if (!effDate) {
             $('#DtEffFrom').addClass('is-invalid');
             toastr.warning('Please enter a valid Effective From date.');
@@ -591,8 +669,6 @@
             $('#DtEffFrom').removeClass('is-invalid');
         }
 
-        // Validate Expired On Date
-        const expDate = $('#DtExpiredOn').val();
         if (!expDate) {
             $('#DtExpiredOn').addClass('is-invalid');
             toastr.warning('Please enter a valid Expired On date.');
@@ -603,4 +679,168 @@
 
         return isValid;
     }
-</script>
+
+    function validateDetails() {
+        const selectedItems = [];
+        let isValid = true;
+
+        $('#tblPurchaseBillPassEntry tbody tr').each(function () {
+
+            const row = $(this);
+
+            const itemCode = row.find('select[id^="itemName_"]').val();
+
+            const minRateText = row.find('input[id^="minRate_"]').val();
+            const maxRateText = row.find('input[id^="maxRate_"]').val();
+
+            const minRate = parseFloat(minRateText);
+            const maxRate = parseFloat(maxRateText);
+            row.find('select[id^="itemName_"]').removeClass('is-invalid');
+            row.find('input[id^="minRate_"]').removeClass('is-invalid');
+            row.find('input[id^="maxRate_"]').removeClass('is-invalid');
+
+            if (!itemCode && !minRateText && !maxRateText) {
+                return true; // skip completely blank row
+            }
+
+            if (selectedItems.includes(itemCode)) {
+                row.find('select[id^="itemName_"]').addClass('is-invalid');
+
+                showToast(
+                    `Duplicate Item Not Allowed (Line ${row.index() + 1})`,
+                    { type: "warning" }
+                );
+
+                isValid = false;
+                return false;
+            }
+
+            selectedItems.push(itemCode);
+
+            if (!itemCode) {
+                row.find('select[id^="itemName_"]').addClass('is-invalid');
+                showToast("Please Select Item Name", { type: "warning" });
+                isValid = false;
+                return false;
+            }
+
+            if (isNaN(minRate) || minRate <= 0) {
+                row.find('input[id^="minRate_"]').addClass('is-invalid');
+                showToast("Please Enter Valid Minimum Rate", { type: "warning" });
+                isValid = false;
+                return false;
+            }
+
+            if (isNaN(maxRate) || maxRate <= 0) {
+                row.find('input[id^="maxRate_"]').addClass('is-invalid');
+                showToast("Please Enter Valid Maximum Rate", { type: "warning" });
+                isValid = false;
+                return false;
+            }
+
+            if (minRate > maxRate) {
+                showToast(
+                    `Min Rate Cannot Be Greater Than Max Rate At Line ${row.index() + 1}`,
+                    { type: "warning" }
+                );
+                isValid = false;
+                return false;       
+            }
+
+            const allowedMax = minRate + (minRate * 5 / 100);
+
+            if (maxRate > allowedMax) {
+                showToast(
+                    `Difference Between Min Rate And Max Rate Cannot Exceed 5% (Line ${row.index() + 1})`,
+                    { type: "warning" }
+                );
+                isValid = false;
+                return false;
+            }
+        });
+
+        return isValid;
+    }
+
+    function applyReadOnlyMode() {
+
+        $('#ddlDocType').prop('disabled', true);
+        $('#DtDocDate').prop('disabled', true);
+        $('#ddlItemGroup').prop('disabled', true);
+        $('#DtEffFrom').prop('disabled', true);
+        $('#DtExpiredOn').prop('disabled', true);
+        $('#TxtRemarks').prop('readonly', true);
+
+        $('#btn-load-data').prop('disabled', true);
+        $('#btn-save').hide();
+
+        // Detail table controls disable
+        $('#tblPurchaseBillPassEntry').find('input, select, textarea').prop('disabled', true);
+
+        // Add/Delete buttons hide
+        $('#tblPurchaseBillPassEntry').find('.act-btn').prop('disabled', true);
+    }
+
+    async function checkValidDate() {
+
+        const data = {
+            vdate: $("#DtDocDate").val(),
+            vtype: $("#ddlDocType").val(),
+            vno: $("#NumDocNo").val()
+        };
+
+        try {
+
+            const response = await fetch('/ItemMarketRate/CheckValidDate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (result.status === false) {
+                showToast(result.message, { type: "warning" });
+                return false;
+            }
+            return true;
+
+        } catch (error) {
+            console.error(error);
+            showToast("Date validation failed", { type: "error" });
+            return false;
+        }
+    }
+
+    function initItemSelect2(selector) {
+        $(selector).select2({
+            placeholder: '-- Select Item --',
+            allowClear: true,
+            width: '100%',
+
+            templateResult: function (data) {
+                return data.text;
+            },
+
+            templateSelection: function (data) {
+                if (!data.id || !data.text) return '';
+
+                const item = globalItemList.find(x => x.value == data.id);
+
+                if (!item) return data.text;
+
+                const parts = item.text.split('-');
+                return parts.length > 1 ? parts.slice(1).join('-').trim() : item.text;
+ 
+            }
+        });
+
+        $(selector).on('select2:open', function () {
+            setTimeout(function () {
+                document.querySelector('.select2-container--open .select2-search__field')?.focus();
+            }, 50);
+        });
+    }
+
+</script> *@

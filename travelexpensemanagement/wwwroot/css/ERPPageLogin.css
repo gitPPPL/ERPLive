@@ -1,0 +1,615 @@
+﻿
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.erppagelogin-body {
+    font-family: 'Poppins', sans-serif;
+    background: #E4E9E1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.erppagelogin-container {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 600px;
+    max-height: 720px;
+    display: flex;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    background: #E4E9E1;
+    margin: auto;
+}
+
+/* LEFT SIDE */
+.erppagelogin-left {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient( rgba(255,255,255,0.08), rgba(255,255,255,0.08) ), url('../images/auth/Login_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100%;
+}
+
+/* GLASS OVERLAY */
+.erppagelogin-glass-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1;
+}
+
+/* GLASS CIRCLE 1 */
+.erppagelogin-shape {
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    top: -100px;
+    left: -80px;
+    box-shadow: 0 8px 32px rgba(31,38,135,0.15), inset 0 0 20px rgba(255,255,255,0.15);
+    z-index: 1;
+}
+
+/* GLASS CIRCLE 2 */
+.erppagelogin-shape2 {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 50%;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    bottom: -60px;
+    right: -40px;
+    box-shadow: 0 8px 32px rgba(31,38,135,0.10), inset 0 0 18px rgba(255,255,255,0.12);
+    z-index: 1;
+}
+
+.erppage-text,
+.erppagelogin-content {
+    position: relative;
+    z-index: 2;
+}
+
+.erppagelogin-logo {
+    font-size: 40px;
+    font-weight: 700;
+    color: #1C5E31;
+}
+
+.erppagelogin-tagline {
+    font-size: 14px;
+    color: #2a2a2a;
+}
+
+.erppagelogin-content {
+    margin-top: 60px;
+}
+
+.erppagelogin-title {
+    font-size: 40px;
+    font-weight: 600;
+    color: #181818;
+    margin-bottom: 20px;
+}
+
+.erppagelogin-description {
+    font-size: 15px;
+    color: #fffcdb;
+    line-height: 1.7;
+    max-width: 500px;
+}
+
+.erppagelogin-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.erppagelogin-btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+.erppagelogin-btn-outline {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.30);
+    color: #FFFFFF;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+    .erppagelogin-btn-outline:hover {
+        background: rgba(255,255,255,0.20);
+    }
+
+.erppagelogin-btn-fill {
+    background: #FFFFFF;
+    border: none;
+    color: #1C5E31;
+}
+
+    .erppagelogin-btn-fill:hover {
+        background: #5DA823;
+        color: #FFFFFF;
+    }
+
+/* RIGHT SIDE */
+.erppagelogin-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    min-height: 100%;
+    background: #E4E9E1;
+}
+
+.erppagelogin-form {
+    width: 100%;
+    max-width: 400px;
+    background: #FFFFFF;
+    padding: 30px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+    .erppagelogin-form h2 {
+        font-size: 28px;
+        color: #1C5E31;
+        text-align: center;
+    }
+
+.erppagelogin-subtitle {
+    font-size: 13px;
+    color: #1C5E31;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.erppagelogin-group {
+    margin-bottom: 18px;
+}
+
+.erppagelogin-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #1C5E31;
+    font-weight: 600;
+}
+
+.erppagelogin-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.erppagelogin-input {
+    width: 100%;
+    padding: 6px 8px 6px 35px;
+    border-radius: 8px;
+    border: 1px solid #B5C5AD;
+    outline: none;
+    font-family: 'Poppins';
+    background: #FFFFFF;
+    color: #1C5E31;
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+    .erppagelogin-input:focus {
+        border-color: #1C5E31;
+        box-shadow: 0 0 0 3px rgba(28,94,49,0.08);
+    }
+
+.erppagelogin-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #1C5E31;
+    font-size: 14px;
+}
+
+.erppagelogin-password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #1C5E31;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.erppagelogin-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.erppagelogin-select-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #1C5E31;
+    pointer-events: none;
+    font-size: 13px;
+}
+
+.erppagelogin-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: #1C5E31;
+}
+
+    .erppagelogin-options a {
+        color: #121212;
+        text-decoration: none;
+    }
+
+.erppagelogin-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+    .erppagelogin-remember input {
+        width: 16px;
+        height: 16px;
+        accent-color: #1C5E31;
+        cursor: pointer;
+        margin: 0;
+    }
+
+.erppagelogin-btn-login {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #1C5E31;
+    color: #FFFFFF;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .erppagelogin-btn-login:hover {
+        background: #5DA823;
+    }
+
+.erppagelogin-footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #1C5E31;
+}
+
+    .erppagelogin-footer a {
+        color: #1C5E31;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+.erppagelogin-form-logo {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+    .erppagelogin-form-logo img {
+        width: 160px;
+        height: auto;
+        object-fit: contain;
+    }
+
+/* =========================================
+       ERP LOGIN LOADER
+    ========================================= */
+
+.erppagelogin-loader {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /*background: linear-gradient( 135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.96) ), url('../images/auth/pashupati_logo.webp');*/
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 99999;
+    overflow: hidden;
+}
+
+    .erppagelogin-loader::before {
+        content: '';
+        position: absolute;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.10);
+        top: -120px;
+        left: -120px;
+        filter: blur(2px);
+    }
+
+    .erppagelogin-loader::after {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        bottom: -100px;
+        right: -80px;
+        filter: blur(2px);
+    }
+
+/* GLASS BOX */
+.erppagelogin-loader-box {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    border-radius: 30px;
+    /* GREY GLASS EFFECT */
+    background: rgba(220, 220, 220, 0.18);
+    border: 1px solid rgba(180, 180, 180, 0.30);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 0 20px rgba(255,255,255,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* ROTATING CIRCLE */
+.erppagelogin-loader-circle {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 4px solid rgba(120,120,120,0.18);
+    border-top: 4px solid #5f5f5f;
+    animation: erpLoaderRotate 1.3s linear infinite;
+    z-index: 1;
+}
+
+/* LOGO */
+.erppagelogin-loader-logo {
+    width: 90px;
+    height: auto;
+    object-fit: contain;
+    z-index: 5;
+    animation: erpLogoPulse 1.8s ease-in-out infinite;
+    position: relative;
+}
+
+/* TEXT */
+.erppagelogin-loader-text {
+    margin-top: 22px;
+    color: #4f4f4f;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    z-index: 5;
+    position: relative;
+    text-align: center;
+}
+/* DATE INPUT FIX */
+.erppagelogin-date-wrapper {
+    position: relative;
+    width: 100%;
+}
+.erppagelogin-date-input {
+    width: 100%;
+    height: 34px; /* same height as other inputs */
+    padding-left: 45px;
+    padding-right: 15px;
+    border-radius: 8px;
+    border: 1px solid #B5C5AD;
+    font-size: 14px;
+    background: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+}
+    /* Hide default browser calendar icon */
+    .erppagelogin-date-input::-webkit-calendar-picker-indicator {
+        opacity: 0;
+        position: absolute;
+        right: 15px;
+        cursor: pointer;
+    }
+/* Icon alignment */
+.erppagelogin-date-wrapper .erppagelogin-input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    color: #1C5E31;
+    font-size: 14px;
+}
+/* FINANCIAL YEAR + DATE ROW */
+
+.erppagelogin-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+    .erppagelogin-row .erppagelogin-group {
+        width: 50%;
+        flex: 0 0 calc(50% - 6px);
+    }
+
+/* DATE ICON FIX */
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+}
+
+input[type="date"] {
+    position: relative;
+}
+
+/* MOBILE RESPONSIVE */
+
+@media(max-width:576px) {
+
+    .erppagelogin-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+        .erppagelogin-row .erppagelogin-group {
+            width: 100%;
+            flex: 100%;
+        }
+}
+/* ROTATION */
+@keyframes erpLoaderRotate {
+
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* LOGO PULSE */
+@keyframes erpLogoPulse {
+
+    0% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+}
+
+/* HIDE LOADER ANIMATION */
+.erppagelogin-loader-hide {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+
+/* RESPONSIVE */
+@media(max-width:992px) {
+
+    .erppagelogin-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .erppagelogin-left {
+        padding: 40px;
+        text-align: center;
+    }
+
+    .erppagelogin-content {
+        margin-top: 30px;
+    }
+
+    .erppagelogin-buttons {
+        justify-content: center;
+    }
+
+    .erppagelogin-right {
+        padding: 20px;
+    }
+}
+
+@media(max-width:576px) {
+
+    .erppagelogin-left {
+        padding: 25px;
+    }
+
+    .erppagelogin-form {
+        padding: 25px;
+    }
+
+    .erppagelogin-title {
+        font-size: 28px;
+    }
+
+    .erppagelogin-input {
+        padding: 6px 10px 6px 40px;
+        font-size: 13px;
+    }
+
+    .erppagelogin-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .erppagelogin-loader-box {
+        width: 220px;
+        height: 220px;
+    }
+
+    .erppagelogin-loader-circle {
+        width: 150px;
+        height: 150px;
+    }
+
+    .erppagelogin-loader-logo {
+        width: 75px;
+    }
+}

@@ -1,7 +1,7 @@
 ﻿@{
 	ViewBag.Title = "Loom Fabric Strength Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-
+	var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 	var currentMenu = ViewBag.CurrentMenu as string;
 	bool canAdd = false;
 	bool canEdit = false;
@@ -143,6 +143,20 @@
 		canDelete: @canDelete.ToString().ToLower(),
 		canDocDetail: @canDocDetail.ToString().ToLower()
 	};
+
+	window.globalVariables = {
+		compCode: "@globalVariables?.PubCompCode",
+		yearCode: "@globalVariables?.PubFYearCode",
+		branchCode: "@globalVariables?.PubBranchCode",
+		companyName: "@globalVariables?.CompanyName",
+		add1: "@globalVariables?.Address1",
+		add2: "@globalVariables?.Address2",
+
+	};
+
+	window.database = {
+		db: "@ViewBag.DatabaseName"
+	}
 </script>
 
 @* <script>

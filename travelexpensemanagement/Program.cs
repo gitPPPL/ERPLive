@@ -9,12 +9,16 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
+using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
@@ -52,8 +56,14 @@ builder.Services.AddScoped<IBigWeighbridgeRepository, BigWeighbridgeRepository>(
 builder.Services.AddScoped<IBigWeighbridgeListRepository, BigWeighbridgeListRepository>();
 builder.Services.AddScoped<ILoomFabricStrengthEntryRepository, LoomFabricStrengthEntryRepository>();
 builder.Services.AddScoped<ILoomFabricStrengthEntryListRepository, LoomFabricStrengthEntryListRepository>();
-
-
+builder.Services.AddScoped<ILoomFabricWidthEntryRepository, LoomFabricWidthEntryRepository>();
+builder.Services.AddScoped<ILoomFabricWidthEntryListRepository, LoomFabricWidthEntryListRepository>();
+builder.Services.AddScoped<IQCDiscMasterRepository, QCDiscMasterRepository>();
+builder.Services.AddScoped<IQCDiscMasterListRepository, QCDiscMasterListRepository>();
+builder.Services.AddScoped<ITempratureMasterRepository, TemperatureMasterRepository>();
+builder.Services.AddScoped<ITemperatureMasterListRepository, TemperatureMasterListRepository>();
+builder.Services.AddScoped<IItemMarketRateRepository, ItemMarketRateRepository>();
+builder.Services.AddScoped<IItemMarketRateListRepository, ItemMarketRateListRepository>();
 
 
 // Gete Entry Transaction repositories

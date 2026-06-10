@@ -22,7 +22,7 @@ namespace travelexpensemanagement.Repositories.Interfaces.QualityControl.Transac
 
         Task<object> GetItemTypeAsync();
 
-        Task<(object Data, bool IsExist, string MatchingCode)> GetStrengthListAsync(decimal minStd, decimal maxStd);
+       // Task<(object Data, bool IsExist, string MatchingCode)> GetStrengthListAsync(decimal minStd, decimal maxStd);
 
         Task<(object Header, object Detail)> GetLoomFabricSByIdAsync(string docId);
 

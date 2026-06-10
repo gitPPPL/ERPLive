@@ -1,155 +1,211 @@
 ﻿@{
 	ViewBag.Title = "QC Disc Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
-<fieldset>
-	<legend class="legend-field">QC Disc Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search Module..." aria-label="Search term">
-			</div>
+<div id="erp-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+	 	<i class="fa fa-list"></i>
+		<span>QC Disc Master List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		
+		<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "QCDiscMaster")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+		
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="callLoomQcReportAsPdf()">
+			<i class="fa fa-print"></i> Print
+		</button>
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-exportData">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+		
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblQCDiscMaster" class="excel-table fixed-grid-table resizable-table sortable-table">
+			<colgroup>
+				<col style="width:70px;" />
+				<col style="width:120px;" />
+				<col style="width:70px;" />
+				<col style="width:120px;" />
+				<col style="width:70px;" />
+				<col style="width:140px;" />
+			</colgroup>
+			<thead>
+				<tr>
+					<th data-column="0">
+						Code <span class="sort-icon"></span>
+					</th>
+					<th data-column="1">
+						Item Name <span class="sort-icon"></span>
+					</th>
+					<th data-column="2">
+						Parameter Code <span class="sort-icon"></span>
+					</th>
+					<th data-column="3">
+						Parameter Name <span class="sort-icon"></span>
+					</th>
+					<th data-column="7">
+						Rate <span class="sort-icon"></span>
+					</th>
+					<th class="action-col">
+						Action
+					</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "QCDiscMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add QC Disc
-			</button>
-			<button class="btn btn-print">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export"> 
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblQCDiscMaster" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>CODE</th>
-						<th>NAME</th>
-						<th>NO OF QC DISCOUNT</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-	<div class="pagination-wrapper">
-		<ul class="pagination" id="tablePagination"></ul>
-	</div>
-</fieldset>
+</div>
+
+<script src="~/common/pagination.js"></script>
 <script>
-    let currentPage = 1;
-    let pageSize = 10;
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>
+
+<script>
+	let qcDiscPagination;
 
     $(document).ready(function () {
-        loadAllQCDiscSummary();
-    });
 
-    function loadAllQCDiscSummary() {
-        const searchTerm = $('#searchBox').val();
-        $.ajax({
-            url: '/QCDiscMasterList/GetAllQCDisc',
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                searchTerm: searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
+        qcDiscPagination = Pagination.create({
+
+            pageSize: 10,
+
+            paginationContainer: '#pageNumbers',
+
+            infoContainer: '#pageInfoText',
+
+            loader: function (params) {
+              
+                $.ajax({
+                    url: '/QCDiscMasterList/GetAllListData',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        searchTerm: $('#searchBox').val(),
+                        pageNumber: params.pageNumber,
+                        pageSize: params.pageSize
+                    },
+                    success: function (res) {
+
+                        params.callback({
+                            data: res.data,
+                            totalCount: res.totalCount
+                        });
+
+                    }
+                });
             },
-            success: function (res) {
 
-                const lists = res.lists;
-                const totalCount = res.totalCount;
+            render: function (lists) {
 
                 let tbody = $('#tblQCDiscMaster tbody');
                 tbody.empty();
 
                 if (!lists || lists.length === 0) {
-                    tbody.append('<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>');
-                    renderPagination(0, pageSize, currentPage);
-                    return;
-                }
 
-                $.each(lists, function (index, item) {
                     tbody.append(`
                         <tr>
-                            <td style="display:none;">${item.item_Code}</td>
-                            <td>${item.item_Code || ''}</td>
-                            <td>${item.item_Name || ''}</td>
-                            <td>${item.item_Count || 0}</td>
-                            <td>
-                                <i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editQCDisc(${item.item_Code})"></i>
-                                <i class="fas fa-eye text-primary" style="cursor:pointer;" title="View" onclick="viewQCDisc(${item.item_Code})"></i>
-                                <i class="fas fa-trash text-danger ms-2" style="cursor:pointer;" title="Delete" onclick="deleteQCDisc(${item.item_Code})"></i>
+                            <td colspan="6" class="text-center">
+                                No records found
                             </td>
                         </tr>
                     `);
+
+                    return;
+                }
+                 
+                $.each(lists, function (index, item) {
+
+                    tbody.append(`
+                        <tr>
+                            <td>${item.iteM_CODE || ''}</td>
+                            <td>${item.iteM_NAME || ''}</td>
+                            <td>${item.qcP_CODE || ''}</td>
+                            <td>${item.parameteR_NAME || ''}</td>
+                            <td>${item.qcP_DIFF || ''}</td>
+                            <td>
+                                <i class="fas fa-edit text-primary"
+                                   style="cursor:pointer;"
+                                   onclick="editQCDisc(${item.iteM_CODE})"></i>
+
+                                <i class="fas fa-eye text-primary"
+                                   style="cursor:pointer;"
+                                   onclick="viewQCDisc(${item.iteM_CODE})"></i>
+
+                                <i class="fas fa-trash text-danger ms-2"
+                                   style="cursor:pointer;"
+                                   onclick="deleteQCDisc(${item.iteM_CODE})"></i>
+                            </td>
+                        </tr>
+                    `);
+
                 });
-
-                renderPagination(totalCount, pageSize, currentPage);
-            },
-            error: function (xhr) {
-                toastr.success('Error loading QC Disc data: ' + xhr.responseText);
             }
+
         });
-    }
 
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const paginationContainer = $('#tablePagination');
-        paginationContainer.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button></li>`;
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button></li>`;
-        }
-
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (currentPage <= 3) endPage = Math.min(5, totalPages);
-        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<li><button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button></li>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button></li>`;
-            html += `<li><button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button></li>`;
-        }
-
-        paginationContainer.html(html);
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        loadAllQCDiscSummary();
-    }
+        qcDiscPagination.load();
+    });
 
     $('#searchBox').on('keyup', function () {
-        currentPage = 1;
-        loadAllQCDiscSummary();
+        qcDiscPagination.load();
     });
+
+    function changeRowsPerPage() {
+
+        let size = parseInt($('#pageSizeSelect').val());
+
+        qcDiscPagination.setPageSize(size);
+    }
 
     function editQCDisc(code) {
         window.location.href = '/QCDiscMaster/Index?id=' + encodeURIComponent(code);
@@ -178,7 +234,7 @@
                     success: function (response) {
                         if (response.success) {
                             Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                loadAllQCDiscSummary();
+                                qcDiscPagination.load();
                             });
                         } else {
                             Swal.fire('Failed', response.message, 'warning');
@@ -188,6 +244,64 @@
                         Swal.fire('Error!', 'An error occurred while deleting the record.', 'error');
                     }
                 });
+            }
+        }); 
+    }
+    
+    document.getElementById("btn-exportData").addEventListener("click", function (e) {
+        e.preventDefault();
+        window.location.href = "/QCDiscMasterList/ExportAllDocs";
+    });
+    
+    function callLoomQcReportAsPdf() {
+
+        var reportName = "rptPurchaseDiscGroup";
+
+        var SelForMul = "{QCDISC_MAST.COMP_CODE} = " + window.globalVariables.compCode +
+                        " AND {QCDISC_MAST.QCP_DIFF} <> 0";
+            
+        var formulaFields = {
+            Reportname: reportName,
+            selectionFormula: SelForMul,
+            Database: window.database.db,
+            Parameters: {
+                rptname: "QC Discount Group Master",
+                comp_name: window.globalVariables.companyName,
+                comp_add1: window.globalVariables.add1,
+                comp_add2: window.globalVariables.add2
+            }
+        };
+
+        var now = new Date();
+        var timestamp =
+            String(now.getDate()).padStart(2, '0') +
+            String(now.getMonth() + 1).padStart(2, '0') +
+            String(now.getFullYear()).slice(-2) + "_" +
+            String(now.getHours()).padStart(2, '0') +
+            String(now.getMinutes()).padStart(2, '0') +
+            String(now.getSeconds()).padStart(2, '0');
+        
+        $.ajax({
+            url: 'http://localhost:34089/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(formulaFields),
+            contentType: "application/json",
+            xhrFields: { responseType: 'blob' },
+
+            success: function (response) {
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
             }
         });
     }

@@ -1,0 +1,162 @@
+﻿@{
+	ViewBag.Title = "Loom Fabric Width Entry List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.MENU_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+}
+<div id="erp-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Loom Fabric Width Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "LoomFabricWidthEntry")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="callGetReportAsPdf()">
+				<i class="fa fa-print"></i> Print
+			</button>
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" onclick="exportToExcel()">
+				<i class="fa fa-file-excel"></i> Export
+			</button>
+		}
+		@if (canMail)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+				<i class="fa fa-envelope"></i>Mail
+			</button>
+		}
+		@if (canApproval)
+		{
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i>Approved
+			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblLoomFabricWidthEntryList" class="excel-table fixed-grid-table resizable-table sortable-table">
+			<colgroup>
+				<col style="display:none;" />
+				<col style="width:120px;" />
+				<col style="width:120px;" />
+				<col style="width:120px;" />
+				<col style="width:80px;" />
+				<col style="width:120px;" />
+				<col style="width:140px;" />
+				<col style="width:250px;" />
+				<col style="width:140px;" />
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col" data-column="0">
+						Code <span class="sort-icon"></span>
+					</th>
+					<th data-column="1">
+						Doc No <span class="sort-icon"></span>
+					</th>
+					<th data-column="2">
+						Doc Type <span class="sort-icon"></span>
+					</th>
+					<th data-column="3">
+						Doc Date <span class="sort-icon"></span>
+					</th>
+					<th data-column="4">
+						Shift <span class="sort-icon"></span>
+					</th>
+					<th data-column="5">
+						Place <span class="sort-icon"></span>
+					</th>
+					<th data-column="6">
+						Inspected By <span class="sort-icon"></span>
+					</th>
+					<th data-column="7">
+						Remarks <span class="sort-icon"></span>
+					</th>
+					<th class="action-col">
+						Action
+					</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
+
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/qualitycontrol/transaction/loomfabricwidthentrylist/loomfabricwidthentrylist.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
+<script>
+	window.permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+</script>
+

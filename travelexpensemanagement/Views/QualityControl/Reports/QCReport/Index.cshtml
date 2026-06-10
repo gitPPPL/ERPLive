@@ -1,0 +1,108 @@
+﻿<div id="erp-toast-container"></div>
+
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-clipboard-check"></i>
+        </div>
+        <div class="erppage-header-title">QC Report Generator</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back">
+            <i class="fa-solid fa-arrow-left"></i>Back
+        </button>
+    </div>
+</div>
+
+<div id="QCReportForm">
+    <div class="erppage-container">
+
+        <fieldset class="erppage-fieldset">
+            <legend>Report Filters</legend>
+            <div class="erppage-grid4">
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">From Date</label>
+                    <input type="date" class="erppage-input" id="fromDate">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">To Date</label>
+                    <input type="date" class="erppage-input" id="toDate">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Type</label>
+                    <div>
+                        <label><input type="radio" name="docType" value="Selected"> Selected</label>
+                        <label><input type="radio" name="docType" value="All" checked> All</label>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Item Group</label>
+                    <div>
+                        <label><input type="radio" name="itemGroup" value="Selected"> Selected</label>
+                        <label><input type="radio" name="itemGroup" value="All" checked> All</label>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Type</label>
+                    <div>
+                        <label><input type="radio" name="qcType" value="Selected"> Selected</label>
+                        <label><input type="radio" name="qcType" value="All" checked> All</label>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QC Parameter</label>
+                    <div>
+                        <label><input type="radio" name="qcParam" value="Selected"> Selected</label>
+                        <label><input type="radio" name="qcParam" value="All" checked> All</label>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Item</label>
+                    <div>
+                        <label><input type="radio" name="item" value="Selected"> Selected</label>
+                        <label><input type="radio" name="item" value="All" checked> All</label>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party</label>
+                    <div>
+                        <label><input type="radio" name="party" value="Selected"> Selected</label>
+                        <label><input type="radio" name="party" value="All" checked> All</label>
+                    </div>
+                </div>
+
+            </div>
+        </fieldset>
+
+        <fieldset class="erppage-fieldset">
+            <legend>Report Type</legend>
+            <div class="erppage-divfield">
+                <label><input type="radio" name="reportType" value="PartyWise" checked> QC Report (Party Wise)</label><br>
+                <label><input type="radio" name="reportType" value="ItemWise"> QC Report (Item Wise)</label><br>
+                <label><input type="radio" name="reportType" value="ItemGroupWise"> QC Report (Item Group Wise)</label><br>
+                <label><input type="radio" name="reportType" value="DocTypeWise"> QC Report (Document Type Wise)</label><br>
+                <label><input type="radio" name="reportType" value="ReceiptPartyWise"> Receipt Party Wise</label><br>
+                <label><input type="radio" name="reportType" value="ReceiptPartyItemWise"> Receipt Party/Item Wise</label><br>
+                <label><input type="radio" name="reportType" value="AvgMonthlyBaleWt"> Avg Monthly Bale Wt (Green/Nat)</label>
+            </div>
+        </fieldset>
+
+        <div class="erppage-actions">
+            <button id="btnPrint" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa fa-print"></i> Print
+            </button>
+            <button id="btnExit" type="button" class="erppage-btn erppage-btn-exit">
+                <i class="fa fa-times"></i> Exit
+            </button>
+        </div>
+
+    </div>
+</div>

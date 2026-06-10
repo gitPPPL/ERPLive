@@ -280,9 +280,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
                     cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
-                    Console.WriteLine(item.REF_TYPE);
-                    Console.WriteLine(item.REF_NO);
-
                     cmd.ExecuteNonQuery();
                 }
 

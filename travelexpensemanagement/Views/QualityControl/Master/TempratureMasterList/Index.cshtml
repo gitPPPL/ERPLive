@@ -18,7 +18,7 @@
 			<button class="btn btn-print">
 				<i class="fa fa-print"></i> Print
 			</button>
-			<button class="btn btn-export">
+			<button class="btn btn-export" id="btn-exportData">
 				<i class="fas fa-file-export"></i> Export
 			</button>
 			<button class="btn btn-mail">
@@ -54,15 +54,18 @@
 	</div>
 </fieldset>
 <script>
-
 	let currentPage = 1;
 	let pageSize = 10;
 	let moduleMap = {};
 	let parentModuleMap = {};
 
-
 	$(document).ready(function () {
 		loadAllMenus();
+	});
+
+	document.getElementById("btn-exportData").addEventListener("click", function (e) {
+		e.preventDefault();
+		window.location.href = "/TempratureMasterList/ExportAllDocs";
 	});
 
 	function loadAllMenus() {
@@ -123,8 +126,7 @@
 			  toastr.error('Error loading menu list: ' + xhr.responseText);
 			}
 		  });
-		}
-	
+    }
 	
 	function renderPagination(total, pageSize, currentPage) {
 		const totalPages = Math.ceil(total / pageSize);
@@ -156,6 +158,7 @@
 		if (currentPage <= 3) {
 			endPage = Math.min(5, totalPages);
 		}
+
 		if (currentPage >= totalPages - 2) {
 			startPage = Math.max(totalPages - 4, 1);
 		}
@@ -174,59 +177,55 @@
 
 		paginationContainer.html(paginationHtml);
 	}
+
 	function goToPage(page) {
 		currentPage = page;
 		loadAllMenus();
 	}
+
 	$('#searchBox').on('keyup', function () {
 		currentPage = 1;
 		loadAllMenus();
 	});
 
+	function AddOrEditFunction(code) {
+		window.location.href = '/TempratureMaster/Index?id=' + encodeURIComponent(code);
+	}
 
-	//Load Full LIST END
+    function viewMenuDetails(code) {
+		window.location.href ='/TempratureMaster/Index?id=' +encodeURIComponent(code) +'&readOnly=true';
+	}
 
-
-	//Redirect to EDIT AND VIEW FROM
-		
-				function AddOrEditFunction(code) {
-		
-				window.location.href = '/TempratureMaster/Index?id=' + encodeURIComponent(code);
-				}
-
-				function viewMenuDetails(code) {
-		
-				window.location.href = '/TempratureMaster/Index?id=' + encodeURIComponent(code) ;
-				}
-
-
-
-			function deleteTemp(code) {
-				if (!confirm('Are you sure you want to delete this Tolrance?')) return;
-				 alert('delete: ' + code);
-
+	function deleteTemp(code) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "This action cannot be undone.",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
 				$.ajax({
-				url: '/TempratureMasterList/Delete',
-				type: 'POST',
-				data: { code: code },
-				success: function (res) {
-				if (res.success) {
-				toastr.success('Deleted successfully.');
-				loadAllMenus();
-				} else {
-				toastr.error(res.message || 'Failed to delete.');
-				}
-				},
-				error: function () {
-				toastr.error('Error deleting Tolrance.');
-				}
+					url: '/TempratureMasterList/Delete',
+					type: 'POST',
+					data: { code: code },
+					success: function (response) {
+						if (response.success) {
+							Swal.fire('Deleted!', response.message, 'success').then(() => {
+								loadAllMenus();
+							});
+						} else {
+							Swal.fire('Failed', response.message, 'warning');
+						}
+					},
+					error: function () {
+						Swal.fire('Error!', 'An error occurred while deleting the record.', 'error');
+					}
 				});
-				}
-
-
-
-
-
-
-
+			}
+		});
+	}
 </script>

@@ -122,13 +122,29 @@ function wireEvents() {
         });
     });
 
+    //$(document).on('input', 'input[id^=TxtWeftWay]', function () {
+    //    let currentRow = $(this).closest('tr');
+    //    let rowIndex = currentRow.index() + 1;
+    //    var WeftWay = $(this).val();
+    //    let warpWayValue = currentRow.find('input[id^=TxtWarpWay]').val();
+    //    bindStrengthDropdown(rowIndex, WeftWay, warpWayValue);
+
+    //});
+
     $(document).on('input', 'input[id^=TxtWeftWay]', function () {
+
         let currentRow = $(this).closest('tr');
         let rowIndex = currentRow.index() + 1;
-        var WeftWay = $(this).val();
-        let warpWayValue = currentRow.find('input[id^=TxtWarpWay]').val();
-        bindStrengthDropdown(rowIndex, WeftWay, warpWayValue);
 
+        let weftWay = parseFloat($(this).val()) || 0;
+        let warpWay = parseFloat(
+            currentRow.find('input[id^=TxtWarpWay]').val()
+        ) || 0;
+
+        const minStd = Math.min(warpWay, weftWay);
+        const maxStd = Math.max(warpWay, weftWay);
+
+        bindStrengthDropdown(rowIndex, minStd, maxStd);
     });
 
     $(document).on('input', 'input[id^="TxtWarpWay"], input[id^="TxtWeftWay"]', function () {
@@ -144,21 +160,35 @@ function wireEvents() {
             const combinedText = `${warpWay} - ${weftWay}`;
             const $strength = $row.find(`#ddlStrength${rowIndex}`);
 
-            bindStrengthDropdown(rowIndex, weftWay, warpWay).then(() => {
+            const minStd = Math.min(
+                parseFloat(warpWay) || 0,
+                parseFloat(weftWay) || 0
+            );
+
+            const maxStd = Math.max(
+                parseFloat(warpWay) || 0,
+                parseFloat(weftWay) || 0
+            );
+
+            bindStrengthDropdown(rowIndex, minStd, maxStd).then(() => {
 
                 let matchedValue = null;
 
                 $strength.find('option').each(function () {
-                    if ($(this).text().trim() === combinedText) {
+
+                    if ($(this).text().trim() === combinedText.trim()) {
+
                         matchedValue = $(this).val();
                         return false;
                     }
                 });
 
                 if (matchedValue) {
+
                     $strength.val(matchedValue).trigger('change');
 
                 } else {
+
                     $strength.append(
                         `<option value="${combinedText}">${combinedText}</option>`
                     );
@@ -168,6 +198,44 @@ function wireEvents() {
             });
         }
     });
+
+    //$(document).on('input', 'input[id^="TxtWarpWay"], input[id^="TxtWeftWay"]', function () {
+
+    //    const $row = $(this).closest('tr');
+    //    const rowIndex = $row.index() + 1;
+
+    //    const warpWay = $row.find(`#TxtWarpWay${rowIndex}`).val().trim();
+    //    const weftWay = $row.find(`#TxtWeftWay${rowIndex}`).val().trim();
+
+    //    if (warpWay !== '' && weftWay !== '') {
+
+    //        const combinedText = `${warpWay} - ${weftWay}`;
+    //        const $strength = $row.find(`#ddlStrength${rowIndex}`);
+
+    //        bindStrengthDropdown(rowIndex, weftWay, warpWay).then(() => {
+
+    //            let matchedValue = null;
+
+    //            $strength.find('option').each(function () {
+    //                if ($(this).text().trim() === combinedText) {
+    //                    matchedValue = $(this).val();
+    //                    return false;
+    //                }
+    //            });
+
+    //            if (matchedValue) {
+    //                $strength.val(matchedValue).trigger('change');
+
+    //            } else {
+    //                $strength.append(
+    //                    `<option value="${combinedText}">${combinedText}</option>`
+    //                );
+
+    //                $strength.val(combinedText).trigger('change');
+    //            }
+    //        });
+    //    }
+    //});
 
     $(document).on('focus', '[id^=ddlStrength]', function () {
         const $ddl = $(this);
@@ -198,7 +266,6 @@ function wireEvents() {
             }
         });
     });
-
 }
 
 function fetchAndFillRowDataByLoom(loomCode, row) {
@@ -218,35 +285,6 @@ function fetchAndFillRowDataByLoom(loomCode, row) {
                 const $color = row.find('select[id^="ddlColor"]');
                 const $dnr = row.find('input[id^="TxtDNR"]');
                 $lid.val(loomCode);
-
-                // Wait a bit to ensure dropdowns are fully initialized
-                //setTimeout(function () {
-
-                //    // Item Name
-                //    if ($item.find(`option[value="${data.ITEM_CODE}"]`).length > 0) {
-                //        $item.val(data.ITEM_CODE).trigger('change.select2');
-                //    }
-
-                //    // Type
-                //    if ($type.find(`option[value="${data.PTYPE_CODE}"]`).length > 0) {
-                //        $type.val(data.PTYPE_CODE).trigger('change.select2');
-                //    }
-
-                //    // Width
-                //    $width.val(data.WIDTH);
-
-                //    // Gram
-                //    $gram.val(data.GRAM);
-
-                //    // Color
-                //    if ($color.find(`option[value="${data.COLOR_CODE}"]`).length > 0) {
-                //        $color.val(data.COLOR_CODE).trigger('change.select2');
-                //    }
-
-                //    // DNR
-                //    $dnr.val(data.DNR);
-                //    row.find('input[id^="TxtWarpWay"]').focus().select();
-                //}, 200);
 
                 if ($item.find(`option[value="${data.ITEM_CODE}"]`).length > 0) {
                     $item.val(data.ITEM_CODE).trigger('change');
@@ -560,26 +598,82 @@ async function fillItemDetailTable(itemsData) {
         $(`#TxtWeftMesh${idx}`).val(item.WEFT_MESH ?? '');
         $(`#TxtRemarks${idx}`).val(item.REMARKS ?? '');
 
-        const safeSetDropdown = (selector, value) => {
+        //const safeSetDropdown = (selector, value) => {
+        //    const $select = $(`${selector}${idx}`);
+        //    if ($select.find(`option[value="${value}"]`).length > 0) {
+        //        $select.val(value).trigger('change');
+        //    }
+        //};
+
+        const safeSetDropdown = async (selector, value, idx) => {
             const $select = $(`${selector}${idx}`);
-            if ($select.find(`option[value="${value}"]`).length > 0) {
-                $select.val(value).trigger('change');
+
+            let tries = 0;
+
+            while (tries < 20) {
+                if ($select.find(`option[value="${value}"]`).length > 0) {
+                    $select.val(value).trigger('change');
+                    return;
+                }
+
+                await new Promise(r => setTimeout(r, 100));
+                tries++;
             }
+
+            console.log("Option not found:", selector, value);
         };
 
-        safeSetDropdown('#ddlLoom', item.LOOM_CODE);
-        safeSetDropdown('#ddlItemName', item.ITEM_CODE);
-        safeSetDropdown('#ddlType', item.PTYPE_CODE);
-        safeSetDropdown('#ddlColor', item.COLOR_CODE);
+        await safeSetDropdown('#ddlItemName', item.ITEM_CODE, idx);
+        await safeSetDropdown('#ddlLoom', item.LOOM_CODE, idx);
+        await safeSetDropdown('#ddlType', item.PTYPE_CODE, idx);
+        await safeSetDropdown('#ddlColor', item.COLOR_CODE, idx);
+
+        //safeSetDropdown('#ddlLoom', item.LOOM_CODE);
+        //safeSetDropdown('#ddlItemName', item.ITEM_CODE);
+        //safeSetDropdown('#ddlType', item.PTYPE_CODE);
+        //safeSetDropdown('#ddlColor', item.COLOR_CODE);
+
         /* safeSetDropdown('#ddlStrength', item.MESH_CODE);*/
-        console.log("RESULT1 =", item.RESULT1);
-        console.log("RESULT2 =", item.RESULT2);
-        await bindStrengthDropdown(
-            idx,
-            item.RESULT1,
-            item.RESULT2
-        );
-        $(`#ddlStrength${idx}`).val(item.MESH_CODE).trigger('change');
+
+        const originalResult1 = parseFloat(item.RESULT1) || 0;
+        const originalResult2 = parseFloat(item.RESULT2) || 0;
+
+        const round1 = Math.round(originalResult1);
+        const round2 = Math.round(originalResult2);
+
+        const minStd = Math.min(originalResult1, originalResult2);
+        const maxStd = Math.max(originalResult1, originalResult2);
+
+        await bindStrengthDropdown(idx, minStd, maxStd);
+
+        const $strength = $(`#ddlStrength${idx}`);
+
+        // ORIGINAL ORDER FOR DISPLAY
+       // const combinedText = `${originalResult1} - ${originalResult2}`;
+        const combinedText = `${round1} - ${round2}`;
+        let matchedValue = null;
+
+        $strength.find('option').each(function () {
+
+            if ($(this).text().trim() === combinedText.trim()) {
+
+                matchedValue = $(this).val();
+                return false;
+            }
+        });
+
+        if (matchedValue) {
+
+            $strength.val(matchedValue).trigger('change');
+
+        } else {
+
+            $strength.append(
+                `<option value="${combinedText}">${combinedText}</option>`
+            );
+
+            $strength.val(combinedText).trigger('change');
+        }
         
     }
 }
@@ -635,7 +729,7 @@ function GetDocid() {
         }
     });
 }
-
+ 
 function GetPlaceList(selectedValue = null) {
     $.ajax({
         url: '/LoomFabricStrengthEntry/GetPlaceMast',
@@ -692,7 +786,6 @@ async function GetEmployeeList(selectedValue = null) {
             url: '/LoomFabricStrengthEntry/GetUserMast',
             type: 'GET',
             dataType: 'json',
-
             success: function (response) {
 
                 if (response.status) {
@@ -1231,7 +1324,7 @@ async function checkValidDate() {
 }
 
 function validateItemRows() {
-
+    
     let validRowCount = 0;
     let isValid = true;
 

@@ -102,21 +102,33 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 var result = _repository.SaveMiscConsumption( request.Header, request.Deatils, action );
 
-                //_logservice.insertlog("gate1", "miscconsumptionentry", "transaction", action, request.header.v_type, request.header.v_no.tostring(),
-                //          request.header.v_date);
-
-                //_logservice.insertlog("gate2", "miscconsumptionentry", "transaction", action, request.header.v_type, request.header.v_no.tostring(),
-                //          request.header.v_date);
-
-                //if (action == "update")
+                //if (action == "UPDATE")
                 //{
-                //    _globalvalidationdate.loginsertupdatedelete("gate1", "gate1", "transaction", request.header.v_no.tostring(), request.header.v_type);
+                //    _globalValidationdate.LogInsertUpdateDelete(
+                //        "gate1",
+                //        "gate1",
+                //        "Transaction",
+                //        request.Header.V_NO.ToString(),
+                //        request.Header.V_TYPE
+                //    );
 
-                //    _globalvalidationdate.loginsertupdatedelete("gate2", "gate2", "transaction", request.header.v_no.tostring(), request.header.v_type);
+                //    _globalValidationdate.LogInsertUpdateDelete(
+                //        "gate2",
+                //        "gate2",
+                //        "Transaction",
+                //        request.Header.V_NO.ToString(),
+                //        request.Header.V_TYPE
+                //    );
                 //}
 
                 if (result == "Success")
                 {
+                    _logService.InsertLog("gate1", "miscconsumptionentry", "transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
+                          request.Header.V_DATE);
+
+                    _logService.InsertLog("gate2", "miscconsumptionentry", "transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
+                              request.Header.V_DATE);
+
                     return Json(new { success = true, message = "Saved successfully" });
                 }
                 else

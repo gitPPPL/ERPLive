@@ -47,7 +47,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
         [HttpGet]
-
         public int GetNextV_NO(string yearCode)
         {
             string newV_NO = "00000";
@@ -56,36 +55,50 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             {
                 con.Open();
 
-                // Execute query to get PREFIXYR
-                string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = '" + yearCode + "'";
+                // Get PREFIXYR
+                string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
+
                 SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
+                prefixCmd.Parameters.AddWithValue("@YearCode", yearCode);
+
                 string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
 
-                // Execute query to get last V_NO
-                string lastV_NO_Query = "SELECT TOP 1 V_NO FROM QUOTATION1 ORDER BY V_NO DESC";
+                // Get last V_NO of same year prefix
+                    string lastV_NO_Query = @"
+                    SELECT TOP 1 V_NO
+                    FROM QUOTATION1
+                    WHERE CAST(V_NO AS VARCHAR(20)) LIKE @Prefix + '%'
+                    ORDER BY V_NO DESC";
+
                 SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
+                lastVnoCmd.Parameters.AddWithValue("@Prefix", prefixYR);
+
                 string lastV_NO = lastVnoCmd.ExecuteScalar()?.ToString();
 
                 int lastNumber = 0;
-                if (!string.IsNullOrEmpty(lastV_NO) && lastV_NO.Length >= 9)
+
+                if (!string.IsNullOrEmpty(lastV_NO))
                 {
-                    string numericPart = lastV_NO.Substring(lastV_NO.Length - 5);
+                    string numericPart = lastV_NO.Substring(prefixYR.Length);
+
                     int.TryParse(numericPart, out lastNumber);
                 }
 
-                // Increment and format the new V_NO
                 string newRunningNo = (lastNumber + 1).ToString("D5");
+
                 newV_NO = prefixYR + newRunningNo;
             }
 
             return Convert.ToInt32(newV_NO);
         }
+
         public IActionResult GetDocTypeList()
         {
             string query = "SELECT CODE,NAME FROM DOCTYPE_MAST WHERE DOCTYPE= 'PurchaseQuotation' ORDER BY NAME DESC";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
+
         public IActionResult GetPartyList()
         {
             var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
@@ -93,6 +106,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
+
         public IActionResult GetPaymentTermList()
         {
             var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
@@ -141,12 +155,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     string query = @"
-                SELECT DISTINCT IMK.MAKE_CODE, IMM.NAME 
-                FROM ITEM_MAKE IMK
-                LEFT JOIN ITEMMAKE_MAST IMM ON IMM.CODE = IMK.MAKE_CODE
-                WHERE IMM.COMP_CODE = @COMP_CODE  
-                AND IMK.ITEM_CODE = @ITEM_CODE
-                ORDER BY IMM.NAME";
+                    SELECT DISTINCT IMK.MAKE_CODE, IMM.NAME 
+                    FROM ITEM_MAKE IMK
+                    LEFT JOIN ITEMMAKE_MAST IMM ON IMM.CODE = IMK.MAKE_CODE
+                    WHERE IMM.COMP_CODE = @COMP_CODE  
+                    AND IMK.ITEM_CODE = @ITEM_CODE
+                    ORDER BY IMM.NAME";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {

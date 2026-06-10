@@ -11,19 +11,21 @@ let formState = {
     isSaved: false,
     isReadOnlyFromUrl: isReadOnly
 };
-let isSaving = false;
+
 // ============ INIT ============
 function VisitorInit() {
 
     setCurrentDate();
     setCurrentTime();
     $("#NumDocNo").focus();
+    $("#btn_Print").hide();
     if (rowId) {
 
         loadEmpList().then(() => {
             initSelect2();  
             loadVisitorEntry(rowId);
             if (isReadOnly) {
+                $("#btn_Print").show();
                 setVisitorEntryFormReadOnly();
             }
         });
@@ -35,8 +37,7 @@ function VisitorInit() {
         });
     }
 
-    $('#VisitorEntryForm')
-        .off('submit')   
+    $('#VisitorEntryForm').off('submit')   
         .on('submit', function (e) {
             onFormSubmit(e);
         });
@@ -104,7 +105,6 @@ function VisitorInit() {
     });
 
     // ===== MOBILE AUTOFILL=====
-
     $('#NumMobileNo').off('blur').on('blur', function () {
 
         const mobile = $(this).val().trim();
@@ -119,31 +119,6 @@ function VisitorInit() {
                     showToast("Failed to fetch visitor data", { type: "error" });
                 });
         }, 200);
-    });
-
-    // ===== PRINT BUTTON(logic) =====
-    $('#btn_Print').off('click').on('click', function () {
-
-        const vType = 'VISI';
-        const vNo = $('#NumDocNo').val()?.trim();
-        const docId = $('#DOCID').val()?.trim();
-
-        if (!vNo || vNo === "0") {
-            showToast("Invalid document number", { type: "warning" });
-            return;
-        }
-
-        if (isReadOnly === true) {
-            openPrint(vNo, vType, docId);
-            return;
-        }
-
-        if (vNo && vType) {
-            openPrint(vNo, vType);
-            return;
-        }
-
-        showToast("Please save data first", { type: "warning" });
     });
 
     $('#ddlMeetEmployee, #TxtMeetOther').on('change input', function () {
@@ -271,9 +246,6 @@ async function onFormSubmit(e) {
 
     e.preventDefault();
 
-    if (isSaving) return;   // block double call
-    isSaving = true;
-
     if ( isMobileLoading) {
         showToast("Please wait, mobile data loading...", { type: "warning" });
         btn.prop('disabled', false);
@@ -352,7 +324,7 @@ async function onFormSubmit(e) {
             formState.isReadOnlyFromUrl = true;
 
             if (response.message.includes("Saved")) {
-
+                $("#btn_Print").show();
                 if (response.docId) {
                     $('#DOCID').val(response.docId);
                 }
@@ -360,6 +332,7 @@ async function onFormSubmit(e) {
                 showToast("Data Saved Successfully", { type: "success" });
 
             } else {
+                $("#btn_Print").show();
                 showToast("Data Updated Successfully", { type: "success" });
             }
 
@@ -371,10 +344,7 @@ async function onFormSubmit(e) {
     })
     .fail(function () {
         showToast("Error while saving", { type: "error" });
-    }).always(function () {
-        isSaving = false;
-        $('#btn-save').prop('disabled', false);
-    });
+    })
     
 }
 
@@ -725,28 +695,122 @@ function removePhoto() {
 
 //=== Camera Code End=========
 
-//===Open Print======
-function openPrint(vNo, vType) {
+function PendingQCReport() {
+
+    var reportName = "VISITOR_SLIP";
+    // Crystal Report Formula
+    var SelForMul =
+        " {VISITOR.V_TYPE}='VISI'" +
+        " AND {VISITOR.V_NO}= " + $("#NumDocNo").val() +
+        " AND {VISITOR.COMP_CODE}= " + window.globalVariables.compCode +
+        " AND {VISITOR.BRANCH_CODE}= " + window.globalVariables.branchCode +
+        " AND {VISITOR.YEAR_CODE}= " + window.globalVariables.yearCode;
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: SelForMul,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: "VISITOR SLIP"
+        }
+    };
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
     $.ajax({
-        url: '/VisitorEntry/PrintSlip',
-        type: 'GET',
-        data: { vNo: vNo, vType: vType },
-
-        success: function (res) {
-            // No Data Found case
-            if (res.success === false) {
-                showToast(res.message, { type: "warning" });
-                return;
-            }
-            const printWindow = window.open("", "_blank", "width=900,height=700");
-            printWindow.document.open();
-            printWindow.document.write(res.html || res);
-            printWindow.document.close();
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
         },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
 
-        error: function () {
-            showToast("Error while printing", { type: "error" });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
         }
     });
 }
+
+
+// ===== PRINT BUTTON(logic) =====
+//function PendingQCReport() {
+//    var reportName = "VISITOR_SLIP";
+//    var now = new Date();
+//    var day = String(now.getDate()).padStart(2, '0');
+//    var month = String(now.getMonth() + 1).padStart(2, '0');
+//    var year = String(now.getFullYear()).slice(-2);
+//    var hours = String(now.getHours()).padStart(2, '0');
+//    var minutes = String(now.getMinutes()).padStart(2, '0');
+//    var seconds = String(now.getSeconds()).padStart(2, '0');
+//    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+//    $.ajax({
+//        url: 'http://localhost:34089/Report/PendingQCReport',
+//        type: 'GET',
+//        data: {
+//            Reportname: reportName,
+//            tableName: "VISITOR",
+//            vNo: $('#NumDocNo').val(),
+//            compCode: window.globalCompCode,
+//            branchCode: window.globalBranchCode,
+//            yearCode: window.globalYearCode,
+//            vType: 'VISI',
+//        },
+
+//        xhrFields: {
+//            responseType: 'blob'
+//        },
+
+//        success: function (response) {
+
+//            var file = new Blob(
+//                [response],
+//                { type: 'application/pdf' });
+
+//            var fileName =
+//                `${reportName}_${timestamp}.pdf`;
+
+//            var link = document.createElement('a');
+
+//            link.href = URL.createObjectURL(file);
+
+//            link.download = fileName;
+
+//            document.body.appendChild(link);
+
+//            link.click();
+
+//            document.body.removeChild(link);
+//        },
+
+//        error: function (xhr, status, error) {
+
+//            console.error(
+//                'Error generating report:',
+//                error
+//            );
+//        }
+//    });
+//}
+
+
 

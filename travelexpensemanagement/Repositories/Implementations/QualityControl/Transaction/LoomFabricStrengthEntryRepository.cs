@@ -191,36 +191,36 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl.Tr
             return await _dbHelper.GetJsonDataAsync(query);
         }
 
-        public async Task<(object Data, bool IsExist, string MatchingCode)> GetStrengthListAsync(decimal minStd, decimal maxStd)
-        {
-            bool isExist = false;
-            string matchingCode = "";
-            string strengthFilter = "";
+        //public async Task<(object Data, bool IsExist, string MatchingCode)> GetStrengthListAsync(decimal minStd, decimal maxStd)
+        //{
+        //    bool isExist = false;
+        //    string matchingCode = "";
+        //    string strengthFilter = "";
 
-            var companyCode = _globalValue.GetGlobalVariables().PubCompCode;
+        //    var companyCode = _globalValue.GetGlobalVariables().PubCompCode;
 
-            strengthFilter = $" AND MIN_STD = {minStd} AND MAX_STD = {maxStd}";
+        //    strengthFilter = $" AND MIN_STD = {minStd} AND MAX_STD = {maxStd}";
 
-            string query = $@"SELECT CODE, NAME FROM TENACITY_MAST WHERE COMP_CODE = {companyCode} {strengthFilter} ORDER BY NAME";
+        //    string query = $@"SELECT CODE, NAME FROM TENACITY_MAST WHERE COMP_CODE = {companyCode} {strengthFilter} ORDER BY NAME";
 
-            var matchedList = await _dbHelper.GetJsonDataAsync(query);
+        //    var matchedList = await _dbHelper.GetJsonDataAsync(query);
 
-            if (matchedList.Count > 0)
-            {
-                isExist = true;
-                matchingCode = $"{minStd} - {maxStd}";
-            }
+        //    if (matchedList.Count > 0)
+        //    {
+        //        isExist = true;
+        //        matchingCode = $"{minStd} - {maxStd}";
+        //    }
 
-            query = $@"SELECT CODE, NAME FROM TENACITY_MAST WHERE COMP_CODE = {companyCode} ORDER BY NAME";
+        //    query = $@"SELECT CODE, NAME FROM TENACITY_MAST WHERE COMP_CODE = {companyCode} ORDER BY NAME";
 
-            var allList = await _dbHelper.GetJsonDataAsync(query);
+        //    var allList = await _dbHelper.GetJsonDataAsync(query);
 
-            return (
-                Data: allList,
-                IsExist: isExist,
-                MatchingCode: matchingCode
-            );
-        }
+        //    return (
+        //        Data: allList,
+        //        IsExist: isExist,
+        //        MatchingCode: matchingCode
+        //    );
+        //}
 
         public async Task<(object Header, object Detail)> GetLoomFabricSByIdAsync(string docId)
         {
@@ -282,6 +282,8 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl.Tr
 
                                 foreach (DataRow row in prod2Table.Rows)
                                 {
+                                    Console.WriteLine($"MESH = {row["MESH"]}");
+                                    Console.WriteLine($"MESH_CODE = {row["MESH_CODE"]}");
                                     var meshCode = row["MESH"]?.ToString();
 
                                     if (!string.IsNullOrWhiteSpace(meshCode))
@@ -411,7 +413,7 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl.Tr
         }
 
         private async Task<DataTable> ToProd2QCDataTable(List<Prod2QCDetailModel> data)
-        {
+        {   
             var table = new DataTable();
             table.Columns.Add("SNO", typeof(int));
             table.Columns.Add("PLACE_CODE", typeof(int));

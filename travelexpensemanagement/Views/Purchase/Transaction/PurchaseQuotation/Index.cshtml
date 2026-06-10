@@ -498,13 +498,13 @@
                 addNewRowBelow();
             });
         }
+
         loadNextDocNo(yearCode);
         loadDocTypeList();
         loadPartyList();
         loadPaymentTermList();
         loadStatusList();
     });
-
 
     function loadNextDocNo(yearC){
         $.ajax({
@@ -519,6 +519,7 @@
             }
         });
     }
+
     function loadDocTypeList() {
         docTypeMap = {};
         return $.ajax({
@@ -540,6 +541,7 @@
             }
         });
     }
+
     function loadPartyList(updateDropdown = true) {
         return $.ajax({
             url: '/PurchaseQuotation/GetPartyList',
@@ -566,6 +568,7 @@
             return {}; // Return empty map on error
         });
     }
+
     // function loadStatusList() {
     //     statusMap = {};
     //     return $.ajax({
@@ -587,6 +590,7 @@
     //         }
     //     });
     // }
+
     function loadStatusList() {
         statusMap = {};
         return $.ajax({
@@ -1157,7 +1161,7 @@
                  </td>
              </tr>
          `;
-     }
+    }
 
     function generateDropdownOptions(map, selectedValue) {
         const selectedStr = String(selectedValue).trim();
@@ -1235,7 +1239,6 @@
 
         row.remove();
     });
-
 
     //For SAVING DATA TO DATABASE.....
     $('#btn-save').click(function(e) {
@@ -1495,7 +1498,6 @@
         return headerValid;
     }
 
-
     // Calculation function.
     $('#tblPurchaseQuotationListByVno').on('input change', 'input[id^="rate_"], input[id^="qty_"], input[id^="packPerc_"], input[id^="discountPerc_"], select[id^="taxCode_"]', function() {
         const $row = $(this).closest('tr');
@@ -1522,8 +1524,6 @@
 
         updateItemTotals();
     });
-
-    
 
     function updateItemTotals() {
         let totalQty = 0, totalAmount = 0, totalPackAmt = 0, totalDiscAmt = 0, totalBulkQty = 0, totalBulkDiscAmt = 0;

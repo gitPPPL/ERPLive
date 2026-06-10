@@ -4,42 +4,9 @@ body {
     font-size: 0.875em;
     overflow-x: hidden;
     color: #353c4e;
-    font-family: 'Montserrat', sans-serif !important;
+   
 }
 
-ul {
-    padding-left: 0;
-    list-style-type: none;
-    margin-bottom: 0;
-}
-
-*:focus {
-    outline: none;
-}
-
-a {
-    font-size: 14px;
-    color: #303548;
-}
-
-    a:focus, a:hover {
-        text-decoration: none;
-        color: #4680ff;
-    }
-
-h6 {
-    font-size: 14px;
-}
-
-p {
-    font-size: 13px;
-}
-
-@media only screen and (min-width: 1400px) {
-    p {
-        font-size: 14px;
-    }
-}
 
 .media-left {
     padding-right: 20px;

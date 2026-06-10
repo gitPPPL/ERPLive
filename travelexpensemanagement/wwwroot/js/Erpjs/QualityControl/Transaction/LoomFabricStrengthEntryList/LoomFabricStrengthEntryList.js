@@ -1,7 +1,7 @@
 ﻿let loomFabricPagination;
 
 $(document).ready(function () {
-
+	
 	loomFabricPagination = Pagination.create({
 
 		pageSize: 10,
@@ -189,42 +189,6 @@ function exportToExcel() {
 		});
 }
 
-function callGetReportAsPdf() {
-	var reportName = "rpt_emp_mast";
-	var now = new Date();
-	var day = String(now.getDate()).padStart(2, '0');
-	var month = String(now.getMonth() + 1).padStart(2, '0');
-	var year = String(now.getFullYear()).slice(-2);
-	var hours = String(now.getHours()).padStart(2, '0');
-	var minutes = String(now.getMinutes()).padStart(2, '0');
-	var seconds = String(now.getSeconds()).padStart(2, '0');
-	var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
-
-	$.ajax({
-		url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
-		type: 'GET',
-		data: { Reportname: reportName },
-		xhrFields: {
-			responseType: 'blob'
-		},
-		success: function (response) {
-			console.log('PDF response:', response);
-			var file = new Blob([response], { type: 'application/pdf' });
-			var fileName = `${reportName}_${timestamp}.pdf`;
-
-			var link = document.createElement('a');
-			link.href = URL.createObjectURL(file);
-			link.download = fileName;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-		},
-		error: function (xhr, status, error) {
-			console.error('Error generating report:', error);
-		}
-	});
-}
-
 function showImpExpExpensePopup(docCode) {
 	$.ajax({
 		url: '/LoomFabricStrengthEntryList/GetLoomFabricStrengthEntryDetails',
@@ -240,6 +204,62 @@ function showImpExpExpensePopup(docCode) {
 		},
 		error: function () {
 			toastr.error("An error occurred while fetching document details.");
+		}
+	});
+}
+
+function callLoomQcReportAsPdf(vno) {
+
+	var reportName = "QC_LOOM1";
+
+	var formula =
+		"{PROD1_QC.V_TYPE} = 'LMQC' " +
+		"and {PROD1_QC.V_NO} = " + vno +
+		" and {PROD1_QC.COMP_CODE} = " + window.globalVariables.compCode +
+		" and {PROD1_QC.YEAR_CODE} = " + window.globalVariables.yearCode +
+		" and {PROD1_QC.BRANCH_CODE} = " + window.globalVariables.branchCode;
+
+	var formulaFields = {
+		Reportname: reportName,
+		selectionFormula: formula,
+		Parameters: {
+			RPTNAME: "LOOM FABRIC STRENGTH REPORT",
+			comp_name: window.globalVariables.companyName,
+			comp_add1: window.globalVariables.add1,
+			comp_add2: window.globalVariables.add2
+		}
+	};
+
+	var now = new Date();
+	var timestamp =
+		String(now.getDate()).padStart(2, '0') +
+		String(now.getMonth() + 1).padStart(2, '0') +
+		String(now.getFullYear()).slice(-2) + "_" +
+		String(now.getHours()).padStart(2, '0') +
+		String(now.getMinutes()).padStart(2, '0') +
+		String(now.getSeconds()).padStart(2, '0');
+    
+	$.ajax({
+		url: 'http://localhost:34088/Report/PendingQCReport',
+		type: 'POST',
+		data: JSON.stringify(formulaFields),
+		contentType: "application/json",
+		xhrFields: { responseType: 'blob' },
+
+		success: function (response) {
+			var file = new Blob([response], { type: 'application/pdf' });
+			var fileName = `${reportName}_${timestamp}.pdf`;
+
+			var link = document.createElement('a');
+			link.href = URL.createObjectURL(file);
+			link.download = fileName;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		},
+
+		error: function (xhr, status, error) {
+			console.error('Error generating report:', error);
 		}
 	});
 }

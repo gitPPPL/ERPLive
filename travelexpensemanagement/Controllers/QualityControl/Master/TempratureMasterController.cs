@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
@@ -8,110 +7,124 @@ using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.QualityMaster;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Master
 {
     public class TempratureMasterController : Controller
     {
-
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
-        public TempratureMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-  DropdownService dropdownService, DbHelper dbHelper,
-  ModuleService.ModuleService moduleService)
+        private readonly ITempratureMasterRepository _tempratureMasterRepository;
+        public TempratureMasterController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,DropdownService dropdownService, DbHelper dbHelper,ModuleService.ModuleService moduleService, ITempratureMasterRepository tempratureMasterRepository)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _tempratureMasterRepository = tempratureMasterRepository;
         }
-
 
         public IActionResult Index()
         {
             return View("~/Views/QualityControl/Master/TempratureMaster/Index.cshtml");
         }
 
-
         [HttpPost]
         public IActionResult SaveTempMaster([FromBody] TempratureMasterModel data)
         {
             if (data == null)
             {
-                return Json(new { success = false, message = "Input model is null" });
+                return Json(new
+                {
+                    success = false,
+                    message = "Input model is null"
+                });
             }
 
-            string action = data.action == "INSERT" ? "Insert" : "Update";
-
-            var result = Submitbtn(data, action);
+            var result = _tempratureMasterRepository.SaveTempMaster(data);
 
             if (result == "Success")
             {
                 return Json(new { success = true });
             }
-            else
+
+            return Json(new
             {
-                return Json(new { success = false, message = result });
-            }
+                success = false,
+                message = result
+            });
         }
 
+        //[HttpPost]
+        //public IActionResult SaveTempMaster([FromBody] TempratureMasterModel data)
+        //{
+        //    if (data == null)
+        //    {
+        //        return Json(new { success = false, message = "Input model is null" });
+        //    }
 
-        [HttpPost]
-        private string Submitbtn(TempratureMasterModel data, string action)
-        {
-            try
-            {
-                var globalVar = _globalVariableService.GetGlobalVariables();
-                using (SqlConnection conn = _dbConnection.GetErpConnection())
-                {
-                    conn.Open();
+        //    string action = data.action == "INSERT" ? "Insert" : "Update";
 
-                    using (SqlCommand cmd = new SqlCommand("sp_TempratureMaster", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@V_TYPE", data.VType);
-                        cmd.Parameters.AddWithValue("@Action", action);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@CODE", data.Code);
-                        cmd.Parameters.AddWithValue("@NAME", data.Name);
-                        cmd.Parameters.AddWithValue("@SHORTNAME", data.ShortName);
-                        cmd.Parameters.AddWithValue("@SORT_NO", data.SortNo);
-                        cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
-                        cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
-                        cmd.Parameters.AddWithValue("@AED", "A");
-                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
-                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-                        cmd.Parameters.Add("@ACTIVE", SqlDbType.Int).Value = data.Active;
+        //    var result = Submitbtn(data, action);
 
-                        int rowsInserted = cmd.ExecuteNonQuery();
+        //    if (result == "Success")
+        //    {
+        //        return Json(new { success = true });
+        //    }
+        //    else
+        //    {
+        //        return Json(new { success = false, message = result });
+        //    }
+        //}
 
-                        return "Success";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                //_logger.LogError($"Error in Submitbtn method: {ex.Message}", ex);
-                return $"Error: {ex.Message}";
-            }
-        }
+        //[HttpPost]
+        //private string Submitbtn(TempratureMasterModel data, string action)
+        //{
+        //    try
+        //    {
+        //        var globalVar = _globalVariableService.GetGlobalVariables();
+        //        using (SqlConnection conn = _dbConnection.GetErpConnection())
+        //        {
+        //            conn.Open();
 
+        //            using (SqlCommand cmd = new SqlCommand("sp_TempratureMaster", conn))
+        //            {
+        //                cmd.CommandType = CommandType.StoredProcedure;
+        //                cmd.Parameters.AddWithValue("@V_TYPE", data.VType);
+        //                cmd.Parameters.AddWithValue("@Action", action);
+        //                cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
+        //                cmd.Parameters.AddWithValue("@CODE", data.CODE);
+        //                cmd.Parameters.AddWithValue("@NAME", data.Name);
+        //                cmd.Parameters.AddWithValue("@SHORTNAME", data.ShortName);
+        //                cmd.Parameters.AddWithValue("@SORT_NO", data.SortNo);
+        //                cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
+        //                cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+        //                cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
+        //                cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@AED", "A");
+        //                cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
+        //                cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
+        //                cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
+        //                cmd.Parameters.Add("@ACTIVE", SqlDbType.Int).Value = data.Active;
 
+        //                int rowsInserted = cmd.ExecuteNonQuery();
 
-
-
-
-
-
+        //                return "Success";
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //_logger.LogError($"Error in Submitbtn method: {ex.Message}", ex);
+        //        return $"Error: {ex.Message}";
+        //    }
+        //}
 
     }
 }

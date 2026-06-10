@@ -44,29 +44,63 @@ $(document).ready(function () {
 			tbody.empty();
 
 			if (!Array.isArray(list) || list.length === 0) {
-				tbody.append(`<tr>
-					<td colspan="10" class="text-center text-muted">No records found.</td>
-				</tr>`);
+				tbody.append(`
+			<tr>
+				<td colspan="10" class="text-center text-muted">
+					No records found.
+				</td>
+			</tr>`);
 				return;
 			}
 
 			list.forEach(item => {
-				console.log("ITEM:", item);
-				tbody.append(`
-					<tr>
-						<td>${item.v_NO ?? ''}</td>
-						<td>${item.v_TYPE ?? ''}</td>
-						<td>${formatDate(item.v_DATE)}</td>
-						<td>${item.partY_NAME ?? ''}</td>
-						<td class="action-col">
-							<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-edit"></i></button>
-							<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete " title="Delete" style="cursor:pointer;" onclick="deleteTemp('${item.v_NO}', '${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
 
-						</td>
-					</tr>
-				`);
+				let actions = '';
+
+				// Edit Permission
+				if (window.permissions.canEdit) {
+					actions += `
+					<button class="act-btn edit"
+							title="Edit"
+							style="cursor:pointer;"
+							onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')">
+						<i class="fa fa-edit"></i>
+					</button>`;
+				}
+
+				// View Always Visible
+				actions += `
+				<button class="act-btn view"
+						title="View"
+						style="cursor:pointer;"
+						onclick="viewMenuDetails('${item.v_NO}', '${item.vtypeCode}')">
+					<i class="fa fa-eye"></i>
+				</button>`;
+
+				// Delete Permission
+				if (window.permissions.canDelete) {
+					actions += `
+					<button class="act-btn delete"
+							title="Delete"
+							style="cursor:pointer;"
+							onclick="deleteTemp('${item.v_NO}', '${item.vtypeCode}')">
+						<i class="fa fa-trash"></i>
+					</button>`;
+				}
+
+				tbody.append(`
+			<tr>
+				<td>${item.v_NO ?? ''}</td>
+				<td>${item.v_TYPE ?? ''}</td>
+				<td>${formatDate(item.v_DATE)}</td>
+				<td>${item.partY_NAME ?? ''}</td>
+				<td class="action-col">
+					${actions}
+				</td>
+			</tr>
+		`);
 			});
+			
 		}
 	});
 
@@ -123,4 +157,42 @@ function deleteTemp(code, vtype) {
 			}
 		}
 	);
+}
+
+function PendingQCReport() {
+
+	// var reportName = "rpt_city_master";
+	var reportName = "Rpt_gate_MiscConsumption";
+	var now = new Date();
+	var day = String(now.getDate()).padStart(2, '0');
+	var month = String(now.getMonth() + 1).padStart(2, '0');
+	var year = String(now.getFullYear()).slice(-2);
+	var hours = String(now.getHours()).padStart(2, '0');
+	var minutes = String(now.getMinutes()).padStart(2, '0');
+	var seconds = String(now.getSeconds()).padStart(2, '0');
+	var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+	$.ajax({
+		url: 'http://localhost:34089/Report/PendingQCReport',
+		type: 'GET',
+		data: { Reportname: reportName },
+		xhrFields: {
+			responseType: 'blob'
+		},
+		success: function (response) {
+			console.log('PDF response:', response);
+			var file = new Blob([response], { type: 'application/pdf' });
+			var fileName = `${reportName}_${timestamp}.pdf`;
+
+			var link = document.createElement('a');
+			link.href = URL.createObjectURL(file);
+			link.download = fileName;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		},
+		error: function (xhr, status, error) {
+			console.error('Error generating report:', error);
+		}
+	});
 }

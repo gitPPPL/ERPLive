@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Visitor Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
 <div id="erp-toast-container"></div>
@@ -156,11 +157,28 @@
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Save</span>
         </button>
-        <button  type="button"class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
+        <button type="button" class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print" onclick="PendingQCReport()">
             <i class="fa fa-print"></i>Print
         </button>
     </div>
 </form>
+
+<script>
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+   
+</script>
 
 <script src="~/js/erpjs/gateentry/transaction/visitorentryjs/visitorapi.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/visitorentryjs/visitor.js"></script>
