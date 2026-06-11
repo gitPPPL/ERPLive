@@ -43,17 +43,13 @@
         <table id="tblOutwardEntryList" class="excel-table fixed-grid-table resizable-table">
 
             <colgroup>
-                <col style="display:none;">
-                <col style="width: 117px;">
-                <col style="width:75px;">
-                <col style="width:75px;">
-                <col style="width:80px;">
-                <col style="width:74px;">
-                <col style="width:90px;">
-                <col style="width:85px;">
-                <col style="width:85px;">
-                <col style="width:430px;">
-                <col style="width:120px;">
+                <col style="display:none;"> <!-- Code -->
+                <col style="width: 117px;"> <!-- Party Name -->
+                <col style="width:75px;">   <!-- Item Type -->
+                <col style="width:75px;">   <!-- E - Waybill No -->
+                <col style="width:80px;">   <!-- Vehicle No -->
+                <col style="width:74px;">   <!-- GST No. -->
+                <col style="width:90px;">   <!-- Action -->
             </colgroup>
 
             <thead>
@@ -61,13 +57,13 @@
                     <th class="hidden-col">Code</th>
                     <th>Doc ID</th>
                     <th>Doc No</th>
-                    <th>Doc Date</th>
-                    <th>Ref Type</th>
-                    <th>Ref No</th>
-                    <th>Truck No</th>
-                    <th>Bill No</th>
-                    <th>Bill Date</th>
+                    <th>Doc Type</th>
+                    <th>Doc Date</th>              
                     <th>Party Name</th>
+                    <th>Item Type</th>
+                    <th>E - Waybill No</th>
+                    <th>Vehicle No</th>
+                    <th>GST No.</th>              
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -145,6 +141,10 @@
             },
             success: function (res) {
 
+                console.log("List data",res);
+
+
+
                 if (!res.success) {
                     toastr.error("Failed to load data.");
                     return;
@@ -172,20 +172,20 @@
             return;
         }
 
-        list.forEach(item => {
+        list.forEach(item => {     
 
             tbody.append(`
                 <tr>
                     <td style="display:none;">${item.doC_ID ?? ''}</td>
-                    <td>${item.doC_ID ?? ''}</td>
-                    <td>${item.v_NO ?? ''}</td>
-                    <td>${formatDate(item.v_DATE)}</td>
-                    <td>${item.reF_TYPE ?? ''}</td>
-                    <td>${item.reF_NO ?? ''}</td>
-                    <td>${item.trucK_NO ?? ''}</td>
-                    <td>${item.bilL_NO ?? ''}</td>
-                    <td>${formatDate(item.bilL_DATE)}</td>
-                    <td>${item.partY_NAME ?? ''}</td>
+                        <td>${item.doC_ID ?? ''}</td>
+                        <td>${item.v_NO ?? ''}</td>
+                        <td>${item.v_TYPE ?? ''}</td>
+                        <td>${formatDate(item.v_DATE) ?? ''}</td>
+                        <td>${item.partY_NAME ?? ''}</td>
+                        <td>${item.iteM_TYPE ?? ''}</td>
+                        <td>${item.waybilL_NO ?? ''}</td>
+                        <td>${item.trucK_NO ?? ''}</td>
+                        <td>${item.partY_GST ?? ''}</td>
 
                     <td class="action-col">
                         <button class="act-btn edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>

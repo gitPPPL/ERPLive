@@ -4,22 +4,78 @@ function getSelectedPendingRows() {
 }
 
 function setFormReadOnly() {
-    $('#OutwardEntryForm input:not([type="hidden"])').prop('readonly', true);
-    $('#OutwardEntryForm input[type="checkbox"], input[type="radio"], input[type="file"]').prop('disabled', true);
-    $('#OutwardEntryForm input[type="time"], #OutwardEntryForm input[type="date"]').prop('disabled', true);
-    $('#OutwardEntryForm select').prop('disabled', true);
-    $('#OutwardEntryForm textarea').prop('readonly', true);
-    $('#OutwardEntryForm button').prop('disabled', true);
-    $('#btn-save').prop('disabled', true);
-    $('#OutwardEntryForm a').css({ 'pointer-events': 'none', 'opacity': '0.5' });
-    $('#tblOutwardEntry tbody').find('input, select, textarea, button').prop('disabled', true);
-    $('#btnpendingorderno, #btn-pending').prop('disabled', true);
+    const form = $('#OutwardEntryForm');
+
+    // -------------------------
+    // 1. Inputs (text, number, email etc.)
+    // -------------------------
+    form.find('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"])')
+        .prop('readonly', true);
+
+    // -------------------------
+    // 2. Disable checkboxes, radios, file, date, time
+    // -------------------------
+    form.find('input[type="checkbox"], input[type="radio"], input[type="file"], input[type="date"], input[type="time"]')
+        .prop('disabled', true);
+
+    // -------------------------
+    // 3. Disable selects
+    // -------------------------
+    form.find('select').prop('disabled', true);
+
+    // -------------------------
+    // 4. Textareas
+    // -------------------------
+    form.find('textarea').prop('readonly', true);
+
+    // -------------------------
+    // 5. Buttons
+    // -------------------------
+    form.find('button').prop('disabled', true);
+    $('#btn-save, #btnpendingorderno, #btn-pending').prop('disabled', true);
+
+    // -------------------------
+    // 6. Links
+    // -------------------------
+    form.find('a').css({ 'pointer-events': 'none', 'opacity': '0.5' });
+
+    // -------------------------
+    // 7. TABLE FIX (ALL ROWS AND CELLS)
+    // -------------------------
+    $('#tblOutwardEntry').addClass('table-readonly')
+        .find('input, select, textarea, button')
+        .each(function () {
+            const $el = $(this);
+            if ($el.is('select') || $el.is('button') ||
+                $el.is(':checkbox') || $el.is(':radio') || $el.is('[type=file]') ||
+                $el.is('[type=date]') || $el.is('[type=time]')) {
+                $el.prop('disabled', true);
+            } else {
+                $el.prop('readonly', true); // text, number, textarea
+            }
+        });
+
+    // Optional: disable pointer events on table
+    $('#tblOutwardEntry.table-readonly').css('pointer-events', 'none');
+
+    // -------------------------
+    // 8. Modal Inputs
+    // -------------------------
     $('#pendingorders').find('input, select, button').prop('disabled', true);
-    $('.btn-add-action, .btn-delete-action').css({ 'pointer-events': 'none', 'opacity': '0.5'  });
-    $('#tablePagination').css({ 'pointer-events': 'none', 'opacity': '0.5' });
-    $('#OutwardEntryForm') .find('input, select, textarea, button, a') .attr('tabindex', '-1');
-    $('#OutwardEntryForm').css({ 'opacity': '0.95'  });
+
+    // -------------------------
+    // 9. Add/Delete buttons
+    // -------------------------
+    $('.btn-add-action, .btn-delete-action').css({ 'pointer-events': 'none', 'opacity': '0.5' });
+
+    // -------------------------
+    // 10. Form opacity and tab navigation
+    // -------------------------
+    form.css({ 'opacity': '0.95' });
+    form.find('input, select, textarea, button, a').attr('tabindex', '-1');
 }
+
+
 
 async function LoadDropDowns() {
     await Promise.all([

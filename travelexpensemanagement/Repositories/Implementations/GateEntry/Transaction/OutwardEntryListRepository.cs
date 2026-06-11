@@ -67,7 +67,9 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
                         PARTY_NAME = reader["NAME"]?.ToString(),
                         REF_TYPE = reader["Ref_type"]?.ToString(),
-                        V_TYPE = reader["V_TYPE"]?.ToString()
+                        V_TYPE = reader["V_TYPE"]?.ToString(),
+                        PARTY_GST = reader["PARTY_GST"]?.ToString(),
+                        ITEM_TYPE = reader["ITEM_TYPE"]?.ToString()
                     });
                 }
 
