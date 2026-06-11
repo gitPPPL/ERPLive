@@ -24,7 +24,16 @@
         (async () => {
             try {
                 await LoadDropDowns();
-              /*  addRow($tbody);*/
+                SetFYDate('DtDocDate', LoginDate);
+                if (PubUserLevel == 1) {
+                    $('#DtDocDate').prop('disabled', false);
+                    $('#DtTxtDocDate').prop('disabled', false);
+                }
+                else {
+                    $('#DtDocDate').prop('disabled', true);
+                    $('#DtTxtDocDate').prop('disabled', true);
+                }
+
                 if (rowId) {
                     $('#ddlDocType').prop('disabled', true);
                     $('#DtDocDate').prop('disabled', true);
@@ -33,27 +42,17 @@
                     if (mode == 'view') {
                         setFormReadOnly();
                         form.addClass('erppage-readonly');
+                    } 
 
-                    }
                 }
                 else {
                     const selectedVType = $("#ddlDocType").val();
                     if (selectedVType) {
                         await GetVNo(selectedVType, "GATE1");
-                    }
+                    }             
 
-                    if (PubUserLevel == 1) {
-                        $('#DtDocDate').prop('disabled', false);
-                        $('#DtTxtDocDate').prop('disabled', false);
-                    }
-                    else {
-                        $('#DtDocDate').prop('disabled', true);
-                        $('#DtTxtDocDate').prop('disabled', true);
-                    }
-
-                    let today = new Date().toISOString().split('T')[0];
-                    $('#DtTxtDocDate').attr('min', LoginDate);
-                    $('#DtDocDate').val(today);
+                    //let today = new Date().toISOString().split('T')[0];   
+                    //$('#DtDocDate').val(today);
                     let now = new Date();
                     $('#DtTxtDocDate').val(now.toTimeString().slice(0, 8));
                 }
@@ -304,6 +303,7 @@
                     }
                 });
 
+
                 $("#ddlDocType").change(function () {
                     if (!rowId) GetVNo(this.value, "GATE1");
                     $('#ddlDocType').prop('disabled', true);
@@ -362,7 +362,8 @@
                             const modalInstance = bootstrap.Modal.getInstance(modalElement);
                             if (modalInstance) modalInstance.hide();
                         }
-
+                        $('#ddlType').prop('disabled', true);
+                        $('#ddlPartyName').prop('disabled', true);
                         for (const row of selectedRows) {
 
                             const itemCode = (row.ItemCode || "").trim();
@@ -394,6 +395,8 @@
                                 refType: row.Vouchertype || "",
                                 refNo: voucherNo
                             });
+
+                           
                         }
 
                         // Load header from first row
@@ -432,3 +435,38 @@
         })();
     });
 
+function SetFYDate(inputId, loginDate) {
+    var d = new Date(loginDate);
+    var y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+
+    var minDate = y + '-04-01';
+    var maxDate = (y + 1) + '-03-31';
+
+    var $input = $('#' + inputId);
+
+ 
+    $input.attr('min', minDate)
+        .attr('max', maxDate)
+        .val(loginDate);
+
+    $input.off('blur').on('blur', function () {
+        var selectedDate = $(this).val();
+
+  
+        var selDateObj = new Date(selectedDate);
+        var minDateObj = new Date(minDate);
+        var maxDateObj = new Date(maxDate);
+
+        if (!selectedDate) return; 
+
+        if (selDateObj < minDateObj || selDateObj > maxDateObj) {
+            toastr.warning(
+                'Please select a date between ' +
+                new Date(minDate).toLocaleDateString('en-GB') +
+                ' and ' +
+                new Date(maxDate).toLocaleDateString('en-GB')
+            );
+            $(this).val(LoginDate);   
+        }
+    });
+}

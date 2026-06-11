@@ -262,6 +262,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             cmd.Parameters.AddWithValue("@ITEM_CODE", d.ITEM_CODE);
                             cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                             cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                            cmd.Parameters.AddWithValue("@DOC_ID", header.V_TYPE + header.V_NO);
+
                             cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                             cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                             cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);

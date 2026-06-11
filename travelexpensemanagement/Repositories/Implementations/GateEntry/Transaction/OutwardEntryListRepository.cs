@@ -491,7 +491,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             var Datalist = new List<object>();
             DateTime fromDate = v_date.AddDays(-10);
-
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -523,8 +522,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                     var Item_name = rdr["Item_name"]?.ToString();
                                     var UNIT_NAME = rdr["UNIT_NAME"]?.ToString();
                                     var UNIT_CODE = rdr["UNIT_CODE"]?.ToString();
-                                    var NOS = rdr["NOS"]?.ToString();
-                                    var QTY = rdr["QTY"]?.ToString();
+                                    var NOS = rdr["NOS"]?.ToString();                  
+                                    decimal? QTY = rdr["QTY"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["QTY"]) : null;
                                     var P_QTY = rdr["P_QTY"]?.ToString();
                                     var REMARK = rdr["REMARK"]?.ToString();
                                     var SRNO = rdr["SRNO"]?.ToString();

@@ -61,7 +61,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateOutward') order by Name ";
+                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateOutward') order by Name desc";
                 var VtypeList = _dropdownService.GetDropdownList(query);
                 return Json(VtypeList);
             }

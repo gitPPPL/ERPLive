@@ -12,9 +12,6 @@ function setFormReadOnly() {
     $('#OutwardEntryForm button').prop('disabled', true);
     $('#btn-save').prop('disabled', true);
 
-
-
-
     $('#OutwardEntryForm a').css({
         'pointer-events': 'none',
         'opacity': '0.5'
@@ -194,25 +191,26 @@ function renderPendingTable() {
 
 function PendingaddRow($tbody, data = {}, index) {
     const row = `
-            <tr>
-              <td>
-                <input type="checkbox" class="row-checkbox"
-                       data-index="${index}"
-                       ${data.selected ? "checked" : ""}/>
-              </td>
-              <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}"/></td>
-              <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}"/></td>
-              <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}"/></td>
-              <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}"/></td>
-              <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}"/></td>
-              <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
-              <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
-              <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-              <td class="hidden-col"><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
-              <td class="hidden-col"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
-              <td class="hidden-col"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
-              <td class="hidden-col"><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
-            </tr>`;
+        <tr>
+          <td>
+            <input type="checkbox" class="row-checkbox"
+                   data-index="${index}"
+                   ${data.selected ? "checked" : ""}
+                   />
+          </td>
+          <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}" readonly/></td>
+          <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}" readonly/></td>
+          <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}" readonly/></td>
+          <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}" readonly/></td>
+          <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}" readonly/></td>
+          <td><input type="text" class="form-control Qty" value="${data.Qty || ''}" readonly/></td>
+          <td><input type="number" class="form-control PQty" value="${data.PQty || ''}" readonly/></td>
+          <td><input type="text" class="form-control remarks" value="${data.remarks || ''}" readonly/></td>
+          <td class="hidden-col"><input type="text" class="form-control nos" value="${data.nos || ''}" readonly/></td>
+          <td class="hidden-col"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}" readonly/></td>
+          <td class="hidden-col"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}" readonly/></td>
+          <td class="hidden-col"><input type="text" class="form-control SRno" value="${data.SRno || ''}" readonly/></td>
+        </tr>`;
     $tbody.append(row);
 }
 
