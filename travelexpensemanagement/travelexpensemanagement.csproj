@@ -86,7 +86,6 @@
     <Folder Include="Controllers\FinancialAccounting\Accounting\" />
     <Folder Include="wwwroot\attachments\PurchaseQuotation\" />
     <Folder Include="wwwroot\attachments\Purchase\" />
-    <Folder Include="wwwroot\BusinessCards\" />
   
     <Folder Include="wwwroot\css\css\bootstrap\css\" />
     <Folder Include="wwwroot\css\css\images\" />
