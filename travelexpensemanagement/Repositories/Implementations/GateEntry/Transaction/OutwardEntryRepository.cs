@@ -278,17 +278,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 gateQty =  Convert.ToDecimal(reader["GateQty"]);
                             }
                         }
-                        gateQty += (d.QTY ?? 0);
+                        gateQty = gateQty + (d.QTY ?? 0);
                  
                             if (gateQty > mainQty)
                             {                           
 
-                                //decimal pendingQty = (mainQty - gateQty - (d.QTY ?? 0));
+                                decimal pendingQty = ((mainQty - gateQty));
 
                                 return new RepositoryResponse
                                 {
                                     status = true,
-                                    message = $"{header.ITEM_TYPE} Pending Quantity is = {mainQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " +
+                                    message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " +
                                     $"Please Check Item Name {d.ITEM_NAME}"
                                 };
                             }

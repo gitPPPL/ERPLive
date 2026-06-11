@@ -241,7 +241,7 @@ function PendingaddRow($tbody, data = {}, index) {
           </td>
           <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}" readonly/></td>
           <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}" readonly/></td>
-          <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}" readonly/></td>
+          <td><input type="text" class="form-control VoucherDate" value="${formatDate(data.VoucherDate) || ''}" readonly/></td>
           <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}" readonly/></td>
           <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}" readonly/></td>
           <td><input type="text" class="form-control Qty" value="${data.Qty || ''}" readonly/></td>

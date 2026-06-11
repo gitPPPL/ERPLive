@@ -35,9 +35,6 @@
                 }
 
                 if (rowId) {
-                    $('#ddlDocType').prop('disabled', true);
-                    $('#DtDocDate').prop('disabled', true);
-                    $('#DtTxtDocDate').prop('disabled', true);
                     await LoadFormByID(rowId, vtype);
                     if (mode == 'view') {
                         setFormReadOnly();
@@ -443,16 +440,14 @@ function SetFYDate(inputId, loginDate) {
     var $input = $('#' + inputId);
 
  
-    $input.attr('min', minDate)
-        .attr('max', maxDate)
-        .val(loginDate);
+    $input.attr('min', minDate).attr('max', loginDate) .val(loginDate);
 
     $input.off('blur').on('blur', function () {
         var selectedDate = $(this).val();
 
   
         var selDateObj = new Date(selectedDate);
-        var minDateObj = new Date(minDate);
+        var minDateObj = new Date(loginDate);
         var maxDateObj = new Date(maxDate);
 
         if (!selectedDate) return; 
@@ -464,7 +459,7 @@ function SetFYDate(inputId, loginDate) {
                 ' and ' +
                 new Date(maxDate).toLocaleDateString('en-GB')
             );
-            $(this).val(LoginDate);   
+            //$(this).val(LoginDate);   
         }
     });
 }

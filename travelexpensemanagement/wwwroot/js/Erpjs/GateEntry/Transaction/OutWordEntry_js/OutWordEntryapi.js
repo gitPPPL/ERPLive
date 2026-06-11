@@ -199,7 +199,7 @@ async function FetchPendindorderno(PartyCode, Type, v_date) {
         if (result.success) {
 
             const details = result.data || [];
-
+            console.log("details", details);
             if (details.length === 0) {
                 showToast("No pending orders found.", { type: "info" });
                 return; // Stop further execution
@@ -209,7 +209,7 @@ async function FetchPendindorderno(PartyCode, Type, v_date) {
             pendingData = details.map(detail => ({
                 Vouchertype: detail.v_type,
                 VoucherNo: detail.v_no,
-                VoucherDate: formatDate(detail.v_DATE),
+                VoucherDate: detail.v_DATE,
                 ItemCode: detail.item_code,
                 ItemName: detail.item_name,
                 Qty: detail.qty,
