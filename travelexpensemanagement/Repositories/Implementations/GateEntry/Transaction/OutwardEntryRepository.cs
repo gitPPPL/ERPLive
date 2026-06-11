@@ -266,7 +266,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                             cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
                             cmd.Parameters.AddWithValue("@DOC_ID", header.V_TYPE + header.V_NO);
-
                             cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                             cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                             cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
@@ -281,11 +280,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         gateQty = gateQty + (d.QTY ?? 0);
                  
                             if (gateQty > mainQty)
-                            {                           
+                            {
 
-                                decimal pendingQty = ((mainQty - gateQty));
+                            decimal pendingQty = (decimal)((mainQty - gateQty) + d.QTY);
 
-                                return new RepositoryResponse
+                            return new RepositoryResponse
                                 {
                                     status = true,
                                     message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " +

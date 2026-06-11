@@ -231,6 +231,24 @@ function renderPendingTable() {
 }
 
 function PendingaddRow($tbody, data = {}, index) {
+
+    let formattedDate = '';
+
+    if (data.VoucherDate) {
+        // remove time part
+        let datePart = data.VoucherDate.split(' ')[0]; // "21-05-2026"
+
+        let parts = datePart.split('-');
+
+        if (parts.length === 3) {
+            let day = parts[0].padStart(2, '0');
+            let month = parts[1].padStart(2, '0');
+            let year = parts[2];
+
+            formattedDate = `${day}-${month}-${year}`;
+        }
+    }
+
     const row = `
         <tr>
           <td>
@@ -239,19 +257,32 @@ function PendingaddRow($tbody, data = {}, index) {
                    ${data.selected ? "checked" : ""}
                    />
           </td>
+
           <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}" readonly/></td>
+
           <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}" readonly/></td>
-          <td><input type="text" class="form-control VoucherDate" value="${formatDate(data.VoucherDate) || ''}" readonly/></td>
+
+          <td><input type="text" class="form-control VoucherDate" value="${formattedDate}" readonly/></td>
+
           <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}" readonly/></td>
+
           <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}" readonly/></td>
+
           <td><input type="text" class="form-control Qty" value="${data.Qty || ''}" readonly/></td>
+
           <td><input type="number" class="form-control PQty" value="${data.PQty || ''}" readonly/></td>
+
           <td><input type="text" class="form-control remarks" value="${data.remarks || ''}" readonly/></td>
+
           <td class="hidden-col"><input type="text" class="form-control nos" value="${data.nos || ''}" readonly/></td>
+
           <td class="hidden-col"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}" readonly/></td>
+
           <td class="hidden-col"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}" readonly/></td>
+
           <td class="hidden-col"><input type="text" class="form-control SRno" value="${data.SRno || ''}" readonly/></td>
         </tr>`;
+
     $tbody.append(row);
 }
 
