@@ -1,4 +1,6 @@
-﻿    function isItemInMainTable(itemCode) {
+﻿
+
+    function isItemInMainTable(itemCode) {
         let exists = false;
         $('#tblInwardEntry tbody tr').each(function () {
         const code = $(this).find('td:eq(0)').text().trim();
@@ -38,52 +40,59 @@
         const SHIP_BILLNO   = $.trim($('#ShipBillNo').val()) || null;
         const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
 
-        if (!validateRequiredField('#ddlDocType', 'Please select a Voucher Type')) return;
-        if (!validateRequiredField('#TxtDocNo', 'Please select a Voucher No')) return;
-        if (!validateRequiredField('#ddlDocStatus', 'Please select a Status.')) return;
-        if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
-        if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return;
-
-        if (!R_DATE && !R_TIME) {
+        if (!R_DATE && !R_TIME)
+        {
          if (!validateRequiredField('#TxtRptDate', 'Please select Reporting Date and Time.')) return;               
         }
 
-        if (BILL_NO && !BILL_DATE) {         
+        if (!SHIP_BILLNO) {
+            if (!BILL_NO && !CHALL_NO) {
+                showToast("Bill No./Challan No. is compulsary.", { type: "warning" });
+                return;
+            }
+        }
+
+
+
+        if (BILL_NO && !BILL_DATE)
+        {         
              if (!validateRequiredField('#DtPartyBillDate', 'Please select Party Bill Date.')) return;
         }
 
-        if (CHALL_NO && !CHALL_DATE) {
+        if (CHALL_NO && !CHALL_DATE)
+        {
             if (!validateRequiredField('#TxtChallanDate', 'Please select Challan Date.')) return;
-        }
+        }         
 
-        if (!validateRequiredField('#TxtBillAmt', 'Please fill Bill Amount.')) return;
         if (!validateRequiredField('#TxtVehicleNo', 'Please fill Vehicle No')) return;
 
+        if (TRUCK_NO)
+            {
+                var numericPart = TRUCK_NO.replace(/\D/g, '');
+                var lastFour = numericPart.slice(-4);
 
-
-        if (TRUCK_NO) {
-            var numericPart = TRUCK_NO.replace(/\D/g, '');
-            var lastFour = numericPart.slice(-4);
-
-        if (lastFour) {
+                if (lastFour)
+                {
         
-            if (!validateRequiredField('#TxtDriverName', 'Please enter Driver Name.')) return;
-            if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) {
-
-        showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
-        $("#TxtDriverMobile").addClass("is-invalid").focus();
-        return;
-        } else {
-        $("#TxtDriverMobile").removeClass("is-invalid");
-        }
-        }
+                if (!validateRequiredField('#TxtDriverName', 'Please enter Driver Name.')) return;
+                    if (!DRIVER_NO || DRIVER_NO.toString().length !== 10) 
+                    {
+                        showToast("Please enter a valid 10-digit mobile number.", { type: "warning" });
+                        $("#TxtDriverMobile").addClass("is-invalid").focus();
+                        return;
+                    }
+                    else
+                    {
+                        $("#TxtDriverMobile").removeClass("is-invalid");
+                    }
+            }
         }
 
         if (WAYBILL_NO) {
         if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
         if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
         if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
-        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                       
+        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                     
 
         }
 
@@ -104,30 +113,28 @@
         }
 
         if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
-        if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {        
-        if (!validateRequiredField('#TxtBillAmt', 'Bill Amount compulsory for')) return;                      
-        }
-        }
+            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
 
-        if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
-        showToast("Transit No. and E-Way Bill required.", { type: "info" });
-            if (!TRANSIT_NO) {
-             $("#ddlTransit").addClass("is-invalid").focus();
-            } else {
-             $("#TxtEWayNo").addClass("is-invalid").focus();
+                invalidateField("TxtBillAmt", `Please enter the Bill Amount. This field is required.`, "warning");
+                return;
             }
-             return;
+
+            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
+                showToast(`Transit No./Ewaybill compulsory if Bill Amount > ${PubDefEWaybillAmt}`, { type: "info" });
             }
+        }     
 
         if (TRANSIT_NO && EWB_EXPDATE) {
             const expDate = new Date(EWB_EXPDATE);
             const inDate = new Date(V_DATE);
-
             if (expDate < inDate) {
-                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });
-                return;
+                showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
-        }
+        }        
+
+   
+
+
 
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
@@ -157,7 +164,6 @@
         EWB_INVNO: EWB_INVNO,
         EWB_INVAMT: EWB_INVAMT,
         PARTY_WBSLIPNO: $.trim($('#TxtWbSlipNo').val()) || null,
-        TRANSPORT_CODE: $.trim($('#TxtTransporter').val()) || null,
         PARTY_WBGRWT: parseFloat($('#TxtGrWt').val()) || 0.0,
         PARTY_WBTRWT: parseFloat($('#TxtTrWt').val()) || 0.0,
         PARTY_WBTIME: formatDate($("#DtWBTime").val()) || null,
@@ -187,14 +193,14 @@
         const Deatils = collectTableRowData();
 
         if (!Deatils || Deatils.length === 0) {
-        showToast("Please fill at least one row in Detail", { type: "info" });
+        showToast("Please fill at least one row in Detail", { type: "Warning" });
         return;
         }
 
         const itemCodeSet = new Set();
 
         for (let i = 0; i < Deatils.length; i++) {
-                   const row = Deatils[i];
+         const row = Deatils[i];
 
         if (row.ITEM_CODE !== null) {
             if (itemCodeSet.has(row.ITEM_CODE)) {
@@ -235,9 +241,9 @@
             }
 
             if (V_TYPE == "INFU" || V_TYPE == "INST" || V_TYPE == "INRM") {
-            if (!row.REF_TYPE) {
-            showToast(`Reference Type required (Row ${i + 1})`, { type: "warning" });
-            focusCell(i, 9);
+            if (!row.REF_TYPE && !row.reF_NO) {
+                showToast(`Reference Type and Reference No. required (Row ${i + 1})`, { type: "warning" });
+                focusCell(i, 9);
             return;
             }
             }
@@ -245,45 +251,54 @@
     }
 
         const payload = {
-        Header: Header,
-        Deatils: Deatils
+            Header: Header,
+            Deatils: Deatils
         };
 
         $("#btn-save").prop("disabled", true);
 
         $.ajax({
             url: '/InwardEntry/SavedData',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(payload),
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
 
-        success: function (response) {
+            success: function (response) {
+                console.log("Response", response);
             if (response.status === "Success") {   
-                showToast("Saved successfully!", { type: "success" });
+                showToast("Saved successfully!", { type: "success" });         
+
                 setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);                                
+               // setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) ; }, 3000);                                
             }
-            else {
-            showToast(response.message, { type: "info" });
+
+            else if (response.status === "VALIDATION")
+            {
+                showToast(response.message, { type: "warning" });             
+            }
+            else
+            {
+            showToast(response.message, { type: "error" });
             }
         },
 
-        error: function (xhr) {
+            error: function (xhr) {
             let errorMessage = "Something went wrong.";
 
         if (xhr.status === 400) {
             errorMessage = "Bad Request: " + xhr.responseText;
-                        } else if (xhr.status === 500) {
+            } else if (xhr.status === 500) {
             errorMessage = "Server error: " + xhr.responseText;
-                        } else {
+            } else {
             errorMessage = "Unexpected error: " + xhr.statusText;
-                        }
-        showToast(errorMessage, {type: "error" });
-                    },
+            }
+            showToast(errorMessage, {type: "error" });
+            },
 
-        complete: function () {
+            complete: function () {
             $("#btn-save").prop("disabled", false);
-                        }
-                    });
+            }
+        });
     }
     function focusCell(rowIndex, colIndex) {
      const row = document.querySelectorAll('#tblInwardEntry tbody tr')[rowIndex];
@@ -298,109 +313,128 @@
     if (input) {
         input.focus();
                 }
-            }
+}
     function setFormReadOnly() {
-                    const form = document.getElementById("InwardEntryForm");
+
+    const form = document.getElementById("InwardEntryForm");
     if (!form) return;
-    // add readonly class
-    form.classList.add('erppage-readonly');
-    // Hide approval button
-    $('.erppagelist-toolbar-end').hide();
-    $('#btn_approval').hide();
 
-    // Disable all inputs except hidden
-    const inputs = form.querySelectorAll("input");
-                    inputs.forEach(el => {
-                        if (el.type !== "hidden") {
-                            if (
-    el.type === "text" ||
-    el.type === "date" ||
-    el.type === "time" ||
-    el.type === "number"
-    ) {
-        el.setAttribute("readonly", true);
-                            } else {
-        el.setAttribute("disabled", true);
-                            }
-                        }
-                    });
+    form.classList.add("erppage-readonly");
+    form.classList.add("readonly-mode");
 
-    // Disable all textareas
-    const textareas = form.querySelectorAll("textarea");
-                    textareas.forEach(el => {
-        el.setAttribute("readonly", true);
-                    });
+    // Hide approval controls initially
+    $("#btn_approval").hide();
+    $("#btn_Sendapproval").hide();
+    $("#span_approved").hide();
 
-    // Disable all selects
-    const selects = form.querySelectorAll("select");
-                    selects.forEach(el => {
-        el.setAttribute("disabled", true);
-                    });
+    // Inputs
+    form.querySelectorAll("input").forEach(el => {
 
-    // Disable all buttons except Back/List buttons if needed
-    const buttons = form.querySelectorAll("button");
-                    buttons.forEach(btn => {
-                        const txt = btn.innerText.trim().toLowerCase();
+        if (el.type === "hidden") return;
 
-    if (
-    !txt.includes("back") &&
-    !txt.includes("close")
-    ) {
-        btn.setAttribute("disabled", true);
-                        }
-                    });
+        if (
+            el.type === "text" ||
+            el.type === "date" ||
+            el.type === "time" ||
+            el.type === "number"
+        ) {
+            el.readOnly = true;
+        }
+        else {
+            el.disabled = true;
+        }
+    });
 
-    // Disable clickable icons/spans
-    const clickableIcons = form.querySelectorAll(`
-    .input-icon,
-    .fa-search,
-    .fa-cog,
-    .fa-database,
-    .fa-ellipsis-h
-    `);
+    // Textareas
+    form.querySelectorAll("textarea").forEach(el => {
+        el.readOnly = true;
+    });
 
-                    clickableIcons.forEach(icon => {
+    // Selects
+    form.querySelectorAll("select").forEach(el => {
+        el.disabled = true;
+    });
+
+    // Buttons
+    form.querySelectorAll("button").forEach(btn => {
+
+        // Skip approval buttons
+        if (
+            btn.id === "btn_approval" ||
+            btn.id === "btn_Sendapproval"
+        ) {
+            btn.disabled = false;
+            return;
+        }
+
+        const txt = (btn.innerText || "").trim().toLowerCase();
+
+        if (
+            !txt.includes("back") &&
+            !txt.includes("close")
+        ) {
+            btn.disabled = true;
+        }
+    });
+
+    // Icons
+    form.querySelectorAll(`
+        .input-icon,
+        .fa-search,
+        .fa-cog,
+        .fa-database,
+        .fa-ellipsis-h
+    `).forEach(icon => {
+
         icon.style.pointerEvents = "none";
-    icon.style.opacity = "0.5";
-    icon.style.cursor = "not-allowed";
-                    });
+        icon.style.opacity = "0.5";
+        icon.style.cursor = "not-allowed";
+    });
 
-    // Disable modal triggers
-    const modalTriggers = form.querySelectorAll("[data-bs-toggle='modal']");
-                    modalTriggers.forEach(el => {
+    // Modal triggers
+    form.querySelectorAll("[data-bs-toggle='modal']").forEach(el => {
+
         el.removeAttribute("data-bs-toggle");
-    el.removeAttribute("data-bs-target");
-    el.style.pointerEvents = "none";
-    el.style.opacity = "0.5";
-    el.style.cursor = "not-allowed";
-                    });
+        el.removeAttribute("data-bs-target");
 
-    // Disable table controls
-    const tableControls = form.querySelectorAll(`
-    table input,
-    table select,
-    table textarea,
-    table button,
-    table .fa,
-    table span
-    `);
+        el.style.pointerEvents = "none";
+        el.style.opacity = "0.5";
+        el.style.cursor = "not-allowed";
+    });
 
-                    tableControls.forEach(el => {
-                        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-        el.setAttribute("readonly", true);
-                        } else if (el.tagName === "SELECT" || el.tagName === "BUTTON") {
-        el.setAttribute("disabled", true);
-                        }
+    // Table controls
+    form.querySelectorAll(`
+        table input,
+        table select,
+        table textarea,
+        table button,
+        table .fa,
+        table span
+    `).forEach(el => {
 
-    el.style.pointerEvents = "none";
-    el.style.opacity = "0.5";
-                    });
+        // Skip approval status
+        if (el.id === "span_approved")
+            return;
+
+        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+            el.readOnly = true;
+        }
+        else if (
+            el.tagName === "SELECT" ||
+            el.tagName === "BUTTON"
+        ) {
+            el.disabled = true;
+        }
+
+        el.style.pointerEvents = "none";
+        el.style.opacity = "0.5";
+    });
+
+    // Allow tabs
     $('.erppage-tab[data-tab="partydetails"]').prop('disabled', false);
     $('.erppage-tab[data-tab="shippinginfo"]').prop('disabled', false);
     $('.erppage-tab[data-tab="billchallan"]').prop('disabled', false);
-    // Add readonly class for CSS styling
-    form.classList.add("readonly-mode");
-                }
+}
     function collectTableRowData() {
             const table = document.getElementById('tblInwardEntry');
     if (!table) return [];
@@ -456,18 +490,18 @@
     async function LoadDropDown() {
     try {
         await Promise.all([
-             DDLVtype(),
-             DDLParty(),
-             DDLShipFrom(),
-             DDDocStatus(),
-             DDlPartyCity(),
-             LoadItemMaster(),
-             LoadUnitMaster(),
-             LoadDeptMaster(),
-             DDlTransportname(),
-             DDlCity(),
-             DDlState()
-            
+            DDLVtype(),
+            DDLParty(),
+            DDLShipFrom(),
+            DDDocStatus(),
+            DDlPartyCity(),
+            LoadItemMaster(),
+            LoadUnitMaster(),
+            LoadDeptMaster(),
+            DDlTransportname(),
+            DDlCity(),
+            DDlState(),
+            DDlpono()           
 
         ]);
         } catch (error) {
@@ -475,35 +509,48 @@
 
         }
     }
-    function populateTable(data) {
-                  const tbody = $("#tblellipsisIconmodal tbody");
+function populateTable(data) {
+
+    const tbody = $("#tblellipsisIconmodal tbody");
     tbody.empty();
 
+    const uniqueRows = new Set();
+
     data.forEach(function (row) {
-        let tr = `<tr>
-        <td><input type="checkbox" class="rowCheckbox" /></td>
-        <td>${row.saudA_NO}</td>
-        <td>${row.saudaDate}</td>
-        <td>${row.itemName}</td>
-        <td>${row.iteM_CODE}</td>
-        <td>${row.qty}</td>
-        <td>${row.rate}</td>
-        <td>${row.supplieR_INVNO}</td>
-        <td>${row.supplieR_INVDATE}</td>
-        <td>${row.supplieR_INVAMT}</td>
-        <td>${row.containeR_NO}</td>
-        <td>${row.grS_WEIGHT}</td>
-        <td>${row.conT_SIZE}</td>
-        <td>${row.v_no}</td>
-        <td style="display:none;"></td>
-    </tr>`;
-    tbody.append(tr);
-              });
+
+        const key = `${row.saudA_NO}_${row.iteM_CODE}`;
+
+        if (uniqueRows.has(key)) {
+            return; // Skip duplicate row
         }
+
+        uniqueRows.add(key);
+
+        let tr = `<tr>
+            <td><input type="checkbox" class="rowCheckbox" /></td>
+            <td>${row.saudA_NO}</td>
+            <td>${row.saudaDate}</td>
+            <td>${row.itemName}</td>
+            <td>${row.iteM_CODE}</td>
+            <td>${row.qty}</td>
+            <td>${row.rate}</td>
+            <td>${row.supplieR_INVNO}</td>
+            <td>${row.supplieR_INVDATE}</td>
+            <td>${row.supplieR_INVAMT}</td>
+            <td>${row.containeR_NO}</td>
+            <td>${row.grS_WEIGHT}</td>
+            <td>${row.conT_SIZE}</td>
+            <td>${row.v_no}</td>
+            <td style="display:none;"></td>
+        </tr>`;
+
+        tbody.append(tr);
+    });
+}
    function getSelectedPendingOrderRows() {
-                  const selectedRows = [];
-    $('#tblpendingordermodal tbody tr').each(function () {
-                    const checkbox = $(this).find('.rowCheckbox');
+        const selectedRows = [];
+        $('#tblpendingordermodal tbody tr').each(function () {
+        const checkbox = $(this).find('.rowCheckbox');
     if (checkbox.is(':checked')) {
         const row = $(this).children('td');
         const rowData = {
@@ -525,172 +572,279 @@
         };
         selectedRows.push(rowData);
     }
-                      });
+   });
 
         return selectedRows;
     }
    function populateInwardEntryTable(selectedData) {
-                const $tbody = $('#tblInwardEntry tbody');
-    $tbody.empty();
 
-     $.each(selectedData, function (idx, item) {
+    const $tbody = $('#tblInwardEntry tbody');
+
+    $.each(selectedData, function (idx, item) {
+
+        // Find first empty row
+        let $emptyRow = $tbody.find('tr').filter(function () {
+
+            const itemCode = $.trim($(this).find('.itemCode').val());
+            const itemName = $(this).find('.ItemName').val();
+
+            return (!itemCode && !itemName);
+        }).first();
+
+        if ($emptyRow.length) {
+
+            // Populate existing empty row
+            $emptyRow.find('.itemCode').val(item.itemCode);
+            $emptyRow.find('.ItemName').val(item.itemCode).trigger('change');
+            $emptyRow.find('.DeptName').val(item.deptCode).trigger('change');
+            $emptyRow.find('.unit').val(item.uoM_CODE).trigger('change');
+
+            $emptyRow.find('.nos').val(item.nos);
+            $emptyRow.find('.quantity').val(item.balQty);
+            $emptyRow.find('.shiprate').val(item.rate);
+            $emptyRow.find('.Empty').val(item.emptY_YN);
+
+            $emptyRow.find('.remarks').val(item.remarks);
+            $emptyRow.find('.refType').val(item.docType);
+            $emptyRow.find('.refNo').val(item.docNo);
+
+        } else {
+
+            // No empty row found → add new row
             addRow($tbody, {
                 itemCode: item.itemCode,
                 itemId: item.itemCode,
+                DeptCode: item.deptCode,
                 DepttName: item.deptCode,
-                unit: item.UOM_CODE,
+                unit: item.uoM_CODE,
                 nos: item.nos,
-                qty: item.qty,
-                shipRate: item.rate,
+                qty: item.balQty,
+                shipRate: 0,
                 empty: item.emptY_YN,
                 remarks: item.remarks,
                 refType: item.docType,
                 refNo: item.docNo
             });
-      });
-    }
+
+        }
+    });
+}
 
    async function checkValidDate() {
-            const data = {
-        vdate: $("#InDate").val(),
-    vtype: $("#ddlDocType").val(),
-    vno: $("#TxtDocNo").val()
-            };
-    try {
-                    const response = await fetch('/InwardEntry/CheckValidDate', {
-        method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-                    },
-    body: JSON.stringify(data)
-                });
+        const data = {
+            vdate: $("#InDate").val(),
+            vtype: $("#ddlDocType").val(),
+            vno: $("#TxtDocNo").val()
+        };
+        try {
+            const response = await fetch('/InwardEntry/CheckValidDate', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 
-    const result = await response.json();
+            const result = await response.json();
 
-    if (result.status === false) {
-        showToast("result.message", { type: "warning" });
-    return false;
+            if (result.status === false) {
+            showToast("result.message", { type: "warning" });
+            return false;
             }
 
-    return true;
+            return true;
 
         } catch (error) {
         showToast("result.message", { type: "warning" });
-    return false;
+        return false;
         }
-    } 
-   function addRow($tbody, data = { }) {
-                const isINMS = $('#ddlDocType').val() !== 'INMS';
+   } 
+   function addRow($tbody, data = {}) {
+
+    const isINMS = $('#ddlDocType').val() === 'INMS';
     const isNewRow = !data || Object.keys(data).length === 0;
 
     const normalStyle = "background-color:#fff;opacity:1;color:#000;";
 
+    // ================= ITEM =================
     let itemOptions = `<option value="">Select</option>`;
     $.each(itemList, function (i, item) {
-                const selected = item.value == data.itemId ? "selected" : "";
-    itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}> ${item.text} </option>`;
-            });
+        const selected = item.value == data.itemId ? "selected" : "";
+        itemOptions += `<option value="${item.value}" data-code="${item.code}" ${selected}>${item.text}</option>`;
+    });
 
-    // DEPARTMENT
+    // ================= DEPARTMENT =================
     let deptOptions = `<option value="">Select</option>`;
     $.each(deptList, function (i, item) {
-                    const selected = item.value == data.DepttName ? "selected" : "";
-    deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
-                });
+        const selected = item.value == data.DepttName ? "selected" : "";
+        deptOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+    });
 
-    // UNIT
+    // ================= UNIT =================
     let unitOptions = `<option value="">Select</option>`;
     $.each(unitList, function (i, item) {
-                    const selected = item.value == data.unit ? "selected" : "";
-    unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
-                });
+        const selected = item.value == data.unit ? "selected" : "";
+        unitOptions += `<option value="${item.value}" ${selected}>${item.text}</option>`;
+    });
 
+    // ================= ROW HTML =================
     const row = `
     <tr class="no-border-input">
+
         <td>
-            <input type="text" class="form-control itemCode numeric-only" style="${normalStyle}" value="${data.itemCode ?? ''}" readonly />   </td>
-    </td>
+            <input type="text" class="form-control itemCode numeric-only"
+                   style="${normalStyle}"
+                   value="${data.itemCode ?? ''}" readonly />
+        </td>
 
-    <td> <select class="form-control ItemName searchable-item" style="${normalStyle}; width: 350px;">  ${itemOptions} </select>
-    </td>
+        <td>
+            <select class="form-control ItemName searchable-item"
+                    style="${normalStyle}; width:350px;">
+                ${itemOptions}
+            </select>
+        </td>
 
-    <td>
-        <select class="form-control DeptName" style="${normalStyle}"> ${deptOptions}  </select>
-    </td>
+        <td>
+            <select class="form-control DeptName" style="${normalStyle}">
+                ${deptOptions}
+            </select>
+        </td>
 
-    <td>
-        <select class="form-control unit" style="${normalStyle}">  ${unitOptions} </select>
-    </td>
+        <td>
+            <select class="form-control unit" style="${normalStyle}">
+                ${unitOptions}
+            </select>
+        </td>
 
-    <td>
-        <input type="text" class="form-control nos numeric-only" style="${normalStyle}" value="${data.nos ?? ''}" />   </td>
-    <td>
-        <input type="text" class="form-control quantity numeric-only" style="${normalStyle}" value="${data.qty ?? ''}" />
-    </td>
-    <td>
-        <input type="text" class="form-control shiprate numeric-only" style="${normalStyle}" value="${data.shipRate ?? ''}" />
-    </td>
+        <td>
+            <input type="text" class="form-control nos numeric-only"
+                   maxlength="4"
+                   style="${normalStyle}"
+                   value="${data.nos ?? ''}" />
+        </td>
 
-    <td>
-        <select class="form-control Empty">
-            <option value="" ${(data.empty ?? '') === '' ? 'selected' : ''}>Select</option>
-            <option value="Yes" ${data.empty === 'Yes' ? 'selected' : ''}>Yes</option>
-            <option value="No" ${data.empty === 'No' ? 'selected' : ''}>No</option>
-        </select>
-    </td>
+        <td>
+            <input type="text" class="form-control quantity numeric-only"
+                   maxlength="10"
+                   style="${normalStyle}"
+                   value="${data.qty ?? ''}" />
+        </td>
 
-    <td>
-        <input type="text" class="form-control remarks" style="${normalStyle}" value="${data.remarks ?? ''}" />
-    </td>
+        <td>
+            <input type="text" class="form-control shiprate numeric-only"
+                   maxlength="13"
+                   style="${normalStyle}"
+                   value="${data.shipRate ?? ''}" />
+        </td>
 
-    <td>
-        <input type="text" class="form-control refType" style="${normalStyle}" value="${data.refType ?? ''}" />
-    </td>
+        <td>
+            <select class="form-control Empty">
+                <option value="">Select</option>
+                <option value="Yes" ${data.empty === 'Yes' ? 'selected' : ''}>Yes</option>
+                <option value="No" ${data.empty === 'No' ? 'selected' : ''}>No</option>
+            </select>
+        </td>
 
-    <td>
-        <input type="text" class="form-control refNo" style="${normalStyle}" value="${data.refNo ?? ''}" />
-    </td>
+        <td>
+            <input type="text" class="form-control remarks"
+                   maxlength="225"
+                   style="${normalStyle}"
+                   value="${data.remarks ?? ''}" />
+        </td>
 
-    <td>
-        <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
-        <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
-    </td>
-</tr>
-`;
+        <td>
+            <input type="text" class="form-control refType"
+                   maxlength="4"
+                   style="${normalStyle}"
+                   value="${data.refType ?? ''}" readonly />
+        </td>
 
-                $tbody.append(row);
-                const $row = $tbody.find('tr:last');
+        <td>
+            <input type="text" class="form-control refNo"
+                   maxlength="9"
+                   style="${normalStyle}"
+                   value="${data.refNo ?? ''}" readonly />
+        </td>
 
-                $row.find('.searchable-item').select2({
-                    placeholder: "Search Item",
-                    width: '100%'
-                });
+        <td>
+            <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
+            <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+        </td>
 
-                $row.find('.btn-add-row').on('click', function () {
-                    addRow($('#tblInwardEntry tbody'));
-                });
+    </tr>`;
 
-                $row.find('.btn-delete-action').on('click', function () {
-                    $(this).closest('tr').remove();
-                });
+    // ================= APPEND ROW =================
+    $tbody.append(row);
 
-                $row.find('.numeric-only').on('input', function () {
-                    this.value = this.value.replace(/[^0-9.]/g, '');
-                });
+    const $row = $tbody.find('tr:last');
 
-                if (isNewRow) {
-                    $row.find('.itemCode').val('');
-                }
+    // ================= SELECT2 =================
+    $row.find('.searchable-item').select2({
+        placeholder: "Search Item",
+        width: '100%'
+    });
 
+    // ================= RULE ENGINE =================
+    function applyRules() {
 
-                if (isINMS) {
-                    $row.find('input').prop('readonly', true).attr('style', normalStyle);
-                    $row.find('select').prop('disabled', true).attr('style', normalStyle);
-                    $tbody.find('.btn-add-row').hide();
-                } else {
-                    $tbody.find('.btn-add-row').show();
-                }
-            }
+        const refType = $.trim($row.find('.refType').val());
+        const refNo = $.trim($row.find('.refNo').val());
+
+        const isINMS = $('#ddlDocType').val() === 'INMS';
+
+        // Always readonly
+        $row.find('.refType, .refNo').prop('readonly', true);
+
+        if (isINMS) {
+            $row.find('.ItemName').prop('disabled', false);
+            $row.find('.DeptName').prop('disabled', false);
+            $row.find('.unit').prop('disabled', false);
+            // ENTRY FIELDS ENABLED
+            $row.find('.nos').prop('readonly', false);
+            $row.find('.quantity').prop('readonly', false);
+            $row.find('.shiprate').prop('readonly', false);
+            $row.find('.remarks').prop('readonly', false);
+            $row.find('.Empty').prop('disabled', false);
+
+        }
+        else
+        {
+            // NON INMS → MASTER ALWAYS DISABLED
+            $row.find('.ItemName').prop('disabled', true);
+            $row.find('.DeptName').prop('disabled', false);
+            $row.find('.unit').prop('disabled', false);
+            // ENTRY FIELDS ENABLED
+            $row.find('.nos').prop('readonly', false);
+            $row.find('.quantity').prop('readonly', false);
+            $row.find('.shiprate').prop('readonly', false);
+            $row.find('.remarks').prop('readonly', false);
+            $row.find('.Empty').prop('disabled', false);
+        }
+
+        $row.find('.ItemName').trigger('change.select2');
+    }
+
+    applyRules();
+
+    // ================= EVENTS =================
+    $row.find('.btn-add-row').on('click', function () {
+        addRow($('#tblInwardEntry tbody'));
+    });
+
+    $row.find('.btn-delete-action').on('click', function () {
+        $(this).closest('tr').remove();
+    });
+
+    $row.find('.numeric-only').on('input', function () {
+        this.value = this.value.replace(/[^0-9.]/g, '');
+    });
+
+    if (isNewRow) {
+        $row.find('.itemCode').val('');
+    }
+
+    $tbody.find('.btn-add-row').show();
+}
 
    async function getcontainerdata(Container_No) {
           try {
@@ -763,9 +917,27 @@
 
         if (res.success) {
             const header = res.data.header;
-            const Details = res.data.details;
-     
+            const Details = res.data.details;            
+
+            if (header.partY_WBSLIPNO !== '') {
+
+                $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                    .removeClass('erppage-input')
+                    .addClass('erppage-redinput');
+
+            } else {
+
+                $('#TxtGrWt, #TxtTrWt, #TxtWbTime, #DtWBTime')
+                    .removeClass('erppage-redinput')
+                    .addClass('erppage-input');
+            }
+
             $('#ddlDocType').val(header.v_TYPE || '');
+
+       /*     $('#TxtPONo').val(header.disP_PLAN_NO || '');*/
+
+            $('#TxtPONo').val(header.disP_PLAN_NO || '').trigger('change');
+
             $('#TxtTransporter').val(header.transporT_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
             $('#TxtDocNo').val(header.v_NO || '');
@@ -789,7 +961,7 @@
             $('#DtVehicleOutTime').val(formatDate(header.ouT_DATE) || '');
             $('#TiVehicleOutTime').val(header.ouT_TIME || '');
             $('#VehicleReturn').val(header.returN_TYPE || '');
-            $('#TxtPONo').val(header.disP_PLAN_NO || '');
+         
             $('#TxtRptDate').val(formatDate(header.r_DATE) || '');
             $('#TiRptDate').val(header.r_TIME || '');
             $('#TxtBillNo').val(header.bilL_NO || '');
@@ -798,22 +970,13 @@
             $('#TxtChallanDate').val(formatDate(header.chalL_DATE) || '');
             $('#TxtBillAmt').val(header.bilL_AMT || '');
             $('#ddlDocStatus').val(header.status || '');
-
-            await fetchTransitno(
-                header.v_TYPE,
-                header.v_NO,
-                header.partY_CODE,
-                formatDate(header.ewB_DATE) 
-            );
-
-            $('#ddlTransit').val(header.transiT_NO || '');
             $('#TxtEWayNo').val(header.waybilL_NO || '');
             $('#DtEWayDate').val(formatDate(header.ewB_DATE) || '');
             $('#TxtEWayDate').val(formatDate(header.ewB_DATE) || '');
             $('#TxtEWBInvNo').val(header.ewB_INVNO || '');
             $('#TxtEWBInvAmt').val(header.ewB_INVAMT || '');
             $('#TxtWbSlipNo').val(header.partY_WBSLIPNO || '');
-            $('#TxtGrWt').val(header.gR_NO || '');
+            $('#TxtGrWt').val(header.partY_WBGRWT || '');
             $('#TxtTrWt').val(header.partY_WBTRWT || '');
             $('#DtWBTime').val(formatDate(header.partY_WBTIME) || '');
             $('#TxtWbTime').val(header.partY_WBTIME || '');
@@ -827,9 +990,10 @@
             $('#TxtDriverMobile').val(header.driveR_NO || '');
             $('#txt_VehicleRemarks').val(header.remarks2 || '');
 
+
             Details.forEach(item => {
                 addRow($('#tblInwardEntry tbody'), {
-                    itemCode: "345",
+                    itemCode: item.iteM_CODE,
                     itemId: item.iteM_CODE,
                     DepttName: item.depT_CODE,
                     unit: item.uoM_CODE,
@@ -842,6 +1006,14 @@
                     refNo: item.reF_NO
                 });
             });
+
+
+            await DDlPartyAdd(header.partY_CODE);
+            $('#ddladdressline1').val(header.partY_ADDRESSID || '');
+
+           await  fetchTransitno(header.v_TYPE, header.v_NO, header.partY_CODE, formatDate(header.ewB_DATE));
+            $('#ddlTransit').val(header.transiT_NO || '');
+
         }
     } catch (err) {
         showToast("Something went wrong while loading the form.", { type: "error" });

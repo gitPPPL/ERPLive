@@ -497,7 +497,7 @@ body {
       Modal css start
 ==========================  **/
 .modal {
-    z-index: 99999999999;
+    z-index: 9999;
 }
 
 .bd-example .modal {

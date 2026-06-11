@@ -8,12 +8,12 @@ using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 {
-    public class CourierTrackingEntryListRepository : ICourierTrackingEntryListRepository
+    public class ApprovalService : IApprovalService
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
 
-        public CourierTrackingEntryListRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
+        public ApprovalService(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;

@@ -15,7 +15,7 @@
 .erppagesmodal-header {
     background: linear-gradient(135deg, #2f7d32, #1b5e20);
     color: #fff;
-    padding: 8px 14px;
+    padding: 8px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -23,6 +23,14 @@
 .small-modal {
     max-width: 650px;
 }
+.medium-modal {
+    max-width: 750px;
+}
+
+.large-modal{
+    max-width:1000px;
+}
+
 .erppagesmodal-header-left {
     display: flex;
     align-items: center;
@@ -62,7 +70,7 @@
 
 /* Body */
 .erppagesmodal-body {
-    padding: 16px;
+    padding: 8px;
     max-height: 85vh;
     overflow-y: auto;
     overflow-x: hidden;

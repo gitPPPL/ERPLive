@@ -6,12 +6,15 @@
     .col-color-1 {
         background-color: #e8f7e4;
     }
+
     .col-color-2 {
         background-color: #f0f0f0;
     }
+
     .readonly-cell {
         display: none !important;
     }
+
     input[readonly] {
         background-color: #CCC !important;
         cursor: not-allowed;
@@ -64,18 +67,22 @@
                 </div>
                 <div class="erppage-divfield erppage-datefield">
                     <label class="erppage-label">MRN Date</label>
-                    <div class="erppage-datebox">
-                        <input type="date" class="erppage-input erppage-dateinput" id="MRNDate">
+                    <input type="date" class="erppage-input erppage-dateinput" id="MRNDate">
+                    @* <div class="erppage-datebox">
                         <label class="erppage-checkbox-inside">
                             <input type="checkbox" id="chkBillDate">
                         </label>
-                    </div>
+                    </div> *@
                 </div>
             </div>
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Party Name</label>
-                    <input type="text" class="erppage-input" id="TxtPartyName" placeholder="Enter Party Name">
+                    @* <input type="text" class="erppage-input" id="TxtPartyName" placeholder="Enter Party Name"> *@
+                    <select class="erppage-input" id="ddlPartyName">
+                        <option value="">Select Party Name</option>
+                    </select>
+
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Bill No</label>
@@ -83,12 +90,12 @@
                 </div>
                 <div class="erppage-divfield erppage-datefield">
                     <label class="erppage-label">Bill Date</label>
-                    <div class="erppage-datebox">
-                        <input type="date" class="erppage-input erppage-dateinput" id="DtBillDate">
+                    <input type="date" class="erppage-input erppage-dateinput" id="DtBillDate">
+                    @* <div class="erppage-datebox">
                         <label class="erppage-checkbox-inside">
                             <input type="checkbox" id="chkBillDate">
                         </label>
-                    </div>
+                    </div> *@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Truck No</label>
@@ -137,8 +144,6 @@
                     <input type="text" class="erppage-input" id="TxtTransport" placeholder="Enter Transport">
                 </div>
             </div>
-           
-           
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group" style="display:none;">
@@ -182,54 +187,51 @@
             </div>
             <fieldset class="erppage-fieldset">
                 <div class="erppage-section-header">MRN Details</div>
-                <div class="erppage-body">
-                    <div class="erppage-grid4">
+                <div class="erppagesrow">
+                    <div class="erppagescol-6">
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Item Name</label>
+                                <select class="erppage-input" id="ddlItemName">
+                                    <option value="">Select Item Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="lastUpdatedInfo" style="display:none;margin-bottom:8px;padding:8px 12px;background:#e8f7e4;border:1px solid #28a745; border-radius:4px;font-weight:600;">
+                        </div>
+                        <div class="erppagelist-container" style="margin:0px;">
+                            <div class="erppagetabledynamic-wrapper">
+                                <table id="itemTable" class="erppagetabledynamic-table">
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="erppagescol-6">
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Deduc Amt</label>
+                                <input type="number" class="erppage-input" id="NumDeductAmount" placeholder="Enter Deduction Amount" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Narration</label>
+                                <input type="text" class="erppage-input" id="TxtNarration" placeholder="Enter Narration" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Remarks1</label>
+                                <input type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks" />
+                            </div>
+                            <div class="erppage-actions" style="margin:0;padding:4px 0;">
 
-                        <div class="erppage-divfield erppage-col-span-2">
-                            <label class="erppage-label">Item Name</label>
-                            <select class="erppage-input" id="ddlItemName">
-                                <option value="">Select Item Name</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="erppagelist-container" style="margin:0px;">
-                        <div class="erppagetabledynamic-wrapper">
-                            <table id="itemTable" class="erppagetabledynamic-table">
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="erppage-col-span-2">
-                        <div class="erppage-actions" style="margin: 0px;padding: 4px 0px;">
-                            <button type="button" class="erppage-btn erppage-btn-save" id="btn_fill">
-                                <i class="fa fa-fill"></i>
-                                <span>Fill</span>
-                            </button>
-                            <button type="button" class="erppage-btn erppage-btn-common" id="btn_calculate">
-                                <i class="fa fa-calculator"></i>
-                                <span>Calculate</span>
-                            </button>
+                                <button type="button" class="erppage-btn erppage-btn-common" id="btn_calculate">
+                                    <span>Calculate</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </fieldset>
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Deduc Amt</label>
-                    <input type="number" class="erppage-input" id="NumDeductAmount" placeholder="Enter Deduction Amount" />
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Narration</label>
-                    <input type="text" class="erppage-input" id="TxtNarration" placeholder="Enter Narration" />
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Remarks1</label>
-                    <input type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks" />
-                </div>
-                <div class="erppage-internalaction" style="margin:0px;">
-                   
-                </div>
-            </div>
+
             <!-- Pending QC Modal -->
             <div class="modal fade" id="pendingQCModal" tabindex="-1" aria-labelledby="pendingQCLabel" aria-hidden="true">
                 <div class="modal-dialog modal-xl">
@@ -298,13 +300,74 @@
             </button>
         </div>
     </div>
+    @* Modal Popup *@
+    <div class="modal fade" id="qcParameterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog erppagesmodal large-modal">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-flask"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="qcModalTitle">
+                            QC Parameter Details
+                        </h5>
+                    </div>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="erppagesmodal-body" style="max-height: none;overflow-y: hidden;overflow-x: hidden;">
+                    <div class="erppagelist-container">
+                        <div class="excel-wrapper fixed-grid-wrapper" style="max-height: 65vh;overflow-y: auto;overflow-x: hidden;">
+                            <table id="tblQCParameter" class="excel-table fixed-grid-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:90px;">ItemName</th>
+                                        <th style="width:100px;">Parameter</th>
+                                        <th style="width:80px;">Unit</th>
+                                        <th style="width:80px;">Level</th>
+                                        <th style="width:150px;">Result</th>
+                                        <th style="width:150px;">Deduct Amount</th>
+                                        <th style="width:150px;">Deduct Narr</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="erppage-actions" style="padding:0px;margin:0px;">
+                        <button type="button" id="btnUpdateQCParameter" class="erppage-btn erppage-btn-save">
+                            <i class="fa fa-save"></i><span>Update</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-         $(document).ready(function () {
+   $(document).ready(function () {
+           let selectedItemCode = '';
+           let selectedItemName = '';
+           let qcDataStore = []; 
            ddlDocType();
            ddlQCIncharge();
            ddlCheme();
+           ddlPartyName();
            ddlItemName();
            let Headerdata = [];
            let Itemdata = [];
@@ -346,14 +409,16 @@
                 }
             });
             $('#ddlGateNo').on('change', function () {
-                 alert("ok")
-               //   if (!ddlGateNoInitialized) {
-               //    ddlGateNoInitialized = true;
-               //    return;
-               // }
-              
                var selectedNo = $(this).val(); // Gets the selected value
-               const selectedText = $(this).find('option:selected').text(); 
+               const selectedText = $(this).find('option:selected').text();
+               const parts = selectedText.split('|');
+               if (parts.length > 1) {
+                   const dateStr = parts[1].trim(); // 25/04/2025
+                   const [day, month, year] = dateStr.split('/');
+                   const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                   console.log("Formatted Date:", formattedDate);
+                   $('#MRNDate').val(formattedDate).trigger('change');
+               }              
 
                if (selectedNo !== "0" && selectedNo !== "") {
                    $.ajax({
@@ -376,329 +441,333 @@
                    });
                }
            });
-        // ===========================================================================================
-        //Commented by sumesh
-         //   $('#ddlItemName').on('change', function () {
-         //     var selectedNo = $(this).val(); // item code
-         //     var selectedText = $(this).find('option:selected').text(); // item name
+            $('#ddlItemName').on('change', function () {
+            var selectedNo = $(this).val();
+            var selectedText = $(this).find('option:selected').text();
 
-
-         //     if (selectedNo) {
-         //         $('#itemTable tbody').append(
-         //             '<tr class="text-left"><td>' + selectedNo + '</td><td>' + selectedText + '</td></tr>'
-         //         );
-         //     }
-         //     $(this).val('');
-         //     console.log('Selected Item Code:', selectedNo);
-         //     console.log('Selected Item Name:', selectedText);
-         // });
-          $('#ddlItemName').on('change', function () {
-
-        var selectedNo = $(this).val(); 
-        var selectedText = $(this).find('option:selected').text(); 
-
-       
-
-        if (selectedNo) {
-
+            if (selectedNo) {
             $('#itemTable tbody').append(
                 '<tr class="text-left">' +
                     '<td>' + selectedNo + '</td>' +
                     '<td>' + selectedText + '</td>' +
-                   
                     '<td>' +
-                        '<button class="act-btn delete" ' +
-                                'title="Delete" ' +
-                                'style="cursor:pointer;" ' +
-                                'onclick="$(this).closest(\'tr\').remove();">' +
-                            '<i class="fa fa-trash"></i>' +
-                        '</button>' +
+                    '<button type="button" ' + 'class="act-btn add btnQCParameter" ' + 'title="Add Parameter">' + '<i class="fa fa-plus"></i>' + '</button>' +
+                    '<button type="button" ' + 'class="act-btn view btnQCView" ' + 'title="View">' + '<i class="fa fa-eye"></i>' + '</button>' +
+                    '<button type="button" ' + 'class="act-btn delete" ' + 'title="Delete" ' + 'onclick="$(this).closest(\'tr\').remove();">' +
+                        '<i class="fa fa-trash"></i>' + '</button>' +
                     '</td>' +
                 '</tr>'
-            );
+                );
+            }
+            $(this).val('');
+         });
+    $(document).on('click', '.btnQCParameter', function () {
+        const row = $(this).closest('tr');
+        selectedItemCode = row.find('td:eq(0)').text().trim();
+        selectedItemName = row.find('td:eq(1)').text().trim();
+        $('#qcModalTitle').text(
+            selectedItemName + ' (' + selectedItemCode + ')'
+        );
+        // Check existing data
+        let existingItem = qcDataStore.find(x => x.ItemCode == selectedItemCode);
+        if (existingItem) {
+            let tbody = $('#tblQCParameter tbody');
+            tbody.empty();
+            $.each(existingItem.Details, function (i, item) {
+                tbody.append(`
+                    <tr>
+                        <td>
+
+                 <input type="hidden" class="itemCode" value="${item.ItemCode}">
+                 <input type="hidden" class="itemNameHidden" value="${item.ItemName}">
+                 <input type="hidden" class="qcCode" value="${item.QC_CODE}">
+                 <input type="hidden" class="qcpCode" value="${item.QCP_CODE}">
+                 <input type="hidden" class="qty" value="${item.Qty}">
+
+                        <input type="text" class="form-control itemName" value="${selectedItemName}" readonly> </td>
+                        <td>
+                            <input type="hidden" class="qcpCode"value="${item.QCP_CODE}">
+                            <input type="text" class="form-control parameter" value="${item.Parameter}" readonly>
+                        </td>
+
+                        <td><input type="text" class="form-control unit" value="${item.Unit}" readonly> </td>
+
+                        <td>
+                            <input type="text"
+                                   class="form-control level"
+                                   value="${item.Level}"
+                                   readonly>
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                   class="form-control result"
+                                   value="${item.Result || ''}">
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                   class="form-control deductAmount"
+                                   value="${item.DeductAmont || ''}">
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                   class="form-control deductNarr"
+                                   value="${item.DeductNarr || ''}">
+                        </td>
+
+                    </tr>
+                `);
+
+            });
+
+            $('#qcParameterModal').modal('show');
+            return;
         }
+        // Load from Database
+        $.ajax({
+            url: '/IncommingQCRM/GetItemDetails',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify([
+                {
+                    // ItemCode: selectedItemCode
+                      ItemCode: selectedItemCode,
+                      V_TYPE: vType || null,
+                      V_NO: vNo ? parseInt(vNo) : null
+                }
+            ]),
+            success: function (response) {
+                 console.log('show List when add', response)
 
-        $(this).val('');
+            if (!response.data || response.data.length === 0) 
+            {
+             toastr.warning('QC is not defined for this item.');
+             return;
+            }
+            let tbody = $('#tblQCParameter tbody');
+            tbody.empty();
+            $.each(response.data, function (i, item) {
 
-        console.log('Selected Item Code:', selectedNo);
-        console.log('Selected Item Name:', selectedText);
+            tbody.append(`
+                <tr>
+
+                    <td>
+
+                     <input type="hidden" class="itemCode" value="${item.item_Code}">
+                     <input type="hidden" class="itemNameHidden" value="${item.item_Name}">
+                     <input type="hidden" class="qcCode" value="${item.qC_CODE}">
+                     <input type="hidden" class="qcpCode" value="${item.qcP_CODE}">
+                     <input type="hidden" class="qty" value="${item.qty}">
+
+
+                        <input type="text"
+                               class="form-control itemName"
+                               value="${item.item_Name}"
+                               readonly>
+                    </td>
+
+                    <td>
+                        <input type="hidden"
+                               class="qcpCode"
+                               value="${item.QCP_CODE}">
+
+                        <input type="text"
+                               class="form-control parameter"
+                               value="${item.parameter}"
+                               readonly>
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               class="form-control unit"
+                               value="${item.unit}"
+                               readonly>
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               class="form-control level"
+                               value="${item.qcP_STD}"
+                               readonly>
+                    </td>
+
+                      <td>
+         <input type="text"
+                class="form-control result"
+                value="${item.result || ''}">
+     </td>
+
+     <td>
+         <input type="text"
+                class="form-control deductAmount"
+                value="${item.deductAmount || ''}">
+     </td>
+
+     <td>
+         <input type="text"
+                class="form-control deductNarr"
+                value="${item.deductNarr || ''}">
+     </td>
+
+                </tr>
+            `);
+
+        });
+            $('#qcParameterModal').modal('show');
+            },
+            error: function () {
+                toastr.error('Error loading QC Parameters');
+            }
+        });
+
     });
 
-           $('#btn_fill').on('click', function () {
-        const rows = $('#itemTable tbody tr');
-        if (rows.length === 0) {
-            alert("No item data found.");
+    $('#btnUpdateQCParameter').click(function () {
+
+        let details = [];
+
+        $('#tblQCParameter tbody tr').each(function () {
+
+            details.push({
+
+                ItemCode: $(this).find('.itemCode').val(),
+                ItemName: $(this).find('.itemNameHidden').val(),
+
+                QC_CODE: $(this).find('.qcCode').val(),
+                QCP_CODE: $(this).find('.qcpCode').val(),
+
+                Qty: parseInt($(this).find('.qty').val()) || 0,
+
+                Parameter: $(this).find('.parameter').val(),
+                Unit: $(this).find('.unit').val(),
+                Level: $(this).find('.level').val(),
+
+                Result: $(this).find('.result').val(),
+
+                DeductAmont:
+                    $(this).find('.deductAmount').val() === ''
+                        ? null
+                        : parseFloat($(this).find('.deductAmount').val()),
+
+                DeductNarr: $(this).find('.deductNarr').val()
+            });
+        });
+
+        let existingIndex = qcDataStore.findIndex(
+            x => x.ItemCode == selectedItemCode
+        );
+
+        if (existingIndex > -1) {
+
+            qcDataStore[existingIndex].Details = details;
+
+        } else {
+
+            qcDataStore.push({
+                ItemCode: selectedItemCode,
+                ItemName: selectedItemName,
+                Details: details
+            });
+        }
+
+        console.log("QC Store Data:", qcDataStore);
+
+        toastr.success('QC Data Updated');
+
+        $('#qcParameterModal').modal('hide');
+    });
+
+        $('#btn-save').click(function (e) {
+
+        e.preventDefault();
+
+        if (qcDataStore.length === 0) {
+            toastr.warning('Please add QC Parameters first.');
             return;
         }
 
-        let dataToSend;
-        let itemsToAdd = []; // define here so it's accessible
-
-        rows.each(function () {
-            const itemCode = $(this).find('td:first').text().trim();
-            const itemName = $(this).find('td:eq(1)').text().trim();
-            itemsToAdd.push({ itemCode: itemCode, itemName: itemName });
-        });
-        console.log('total column',itemsToAdd)
-
-        if (vNo) {
-            // Add columns only if vNo exists
-            AddColumnsOnly(itemsToAdd);
-        } else {
-            // Prepare JSON to send
-            dataToSend = JSON.stringify(itemsToAdd);
-        }
-
-        if (!vNo) {
-            $.ajax({
-                url: '/IncommingQCRM/GetItemDetails',
-                type: 'POST',
-                contentType: 'application/json',
-                data: dataToSend,
-                success: function (response) {
-                    GetalldataClickonFill(response, itemsToAdd);
-                },
-                error: function (xhr) {
-                    console.error('Error:', xhr.responseText);
-                }
-            });
-        }
-    });
-         function AddColumnsOnly(itemsToAdd) {
-        const theadRow = $('#tblPreIncomming thead tr');
-        const tbodyRows = $('#tblPreIncomming tbody tr');
-        itemsToAdd.forEach(item => {
-            // Avoid adding duplicate columns
-            if ($('#' + item.itemCode).length === 0) {
-                // Add new <th> to header
-                theadRow.append(`<th id="${item.itemCode}">${item.itemName}</th>`);
-
-                // Add new <td> to each existing row
-                tbodyRows.each(function () {
-                    const bgColor = '#d4edda'; // background color
-                    $(this).append(`
-                        <td style="background-color: ${bgColor};">
-                            <input type="text"
-                                   class="form-control"
-                                   name="Item_${item.itemCode}"
-                                   style="background-color: ${bgColor};" />
-                        </td>
-                    `);
-                });
-            }
-        });
-     }
-         function GetalldataClickonFill(response, dataToSend) {
-             const tbody = $('#tblPreIncomming tbody');
-             tbody.empty();
-              console.log('response', response)
-              console.log('dataToSend', dataToSend)
-              debugger
-             let itemList = [];
-
-             if (Array.isArray(dataToSend)) {
-                 itemList = dataToSend;
-             } else if (dataToSend.itemCodes) {
-                 itemList = dataToSend.itemCodes.map(code => ({
-                     itemCode: code,
-                     itemName: code
-                 }));
-             } else if (dataToSend.itemCode) {
-                 itemList = [{
-                     itemCode: dataToSend.itemCode,
-                     itemName: dataToSend.itemName || dataToSend.itemCode
-                 }];
-             }
-
-             const hasItems = itemList.length > 0;
-             // --- Header HTML ---
-             let theadHTML = `
-                 <tr class="table-head">
-                     <th style="display:none;">Code</th>
-                     <th>Qcid</th>
-                     <th>Qcpid</th>
-                     <th>Parameter</th>
-                     <th>Unit</th>
-                     <th>Level</th>
-                     <th>Allow Amount</th>
-                     <th>Deduction Amount</th>
-                     <th>Deduction Narration</th>`;
-
-             if (hasItems) {
-                 itemList.forEach(item => {
-                     theadHTML += `<th id="${item.itemCode}">${item.itemName}</th>`;
-                 });
-             }
-
-             theadHTML += `</tr>`;
-
-             $('#tblPreIncomming thead').html(theadHTML);
-
-             // if (Array.isArray(response) && response.length > 0) {
-             if (Array.isArray(response.data) && response.data.length > 0) {
-                 const colorPalette = ['#d4edda', '#fff9c4', '#f28b82', '#f8bbd0', '#ce93d8', '#81d4fa','#ffcc80'];
-                 const qcCodeColorMap = {};
-                 let qcColorIndex = 0;
-
-                 response.data.forEach((item, index) => {
-                     const qcCode = item.qC_CODE;
-
-                     if (!qcCodeColorMap.hasOwnProperty(qcCode)) {
-                         qcCodeColorMap[qcCode] = colorPalette[qcColorIndex % colorPalette.length];
-                         qcColorIndex++;
-                     }
-                     const dynamicTDColor = qcCodeColorMap[qcCode];
-
-                     let newRow = `
-                         <tr>
-                             <td style="display:none;">${item.qC_CODE || ''}</td>
-                             <td>${item.qC_CODE || ''}</td>
-                             <td>${item.qcP_CODE || ''}</td>
-                             <td>${item.parameter || ''}</td>
-                             <td>${item.unit || ''}</td>
-                             <td>${item.qcP_STD || ''}</td>
-                             <td><input type="text" class="form-control" name="AllowAmt" /></td>
-                             <td><input type="text" class="form-control" name="DeductAmt" /></td>
-                             <td><input type="text" class="form-control" name="DeductNarr" /></td>`;
-
-                     if (hasItems) {
-                         itemList.forEach(it => {
-                             // Editable if first row or matching item code
-                             const isFirstRow = index === 0;
-                             const isEditable = isFirstRow || (item.item_Code === it.itemCode);
-                             const bgColor = dynamicTDColor;
-
-                             newRow += `
-                                 <td style="background-color: ${bgColor};">
-                                     <input type="text"
-                                            class="form-control"
-                                            name="Item_${it.itemCode}"
-                                            ${!isEditable ? 'readonly' : ''}
-                                            style="background-color: ${bgColor};" />
-                                 </td>`;
-                         });
-                     }
-
-                     newRow += `</tr>`;
-                     tbody.append(newRow);
-                 });
-
-             } else {
-                 const colspan = 9 + (hasItems ? itemList.length : 0);
-                 tbody.append(`<tr><td colspan="${colspan}" class="text-center">No data found</td></tr>`);
-             }
+         function parseDecimal(val) {
+                  val = val.trim();
+                  return val === "" ? null : parseFloat(val);
+         }
+         function parseIntOrNull(val) {
+             val = val.trim();
+             return val === "" ? null : parseInt(val);
          }
 
-         $('#btn-save').on('click', function () {
-             debugger
-             function parseDecimal(val) {
-                 val = val.trim();
-                 return val === "" ? null : parseFloat(val);
-             }
-             function parseIntOrNull(val) {
-                 val = val.trim();
-                 return val === "" ? null : parseInt(val);
-             }
-             // Step 1: Collect Form Data
-             let formData = {
-                 docType: $('#ddlDocType').val(),
-                 docNo: $('#NumDocNo').val(),
-                 date: $('#DtDate').val(),
-                 gateNo: $('#ddlGateNo option:selected').text(),
-                 qcIncharge: $('#ddlQCIncharge').val(),
-                 chem: $('#ddlChem').val(),
-                 partyName: $('#TxtPartyName').val(),
-                 transport: $('#TxtTransport').val(),
-                 truckNo: $('#TxtTruckNo').val(),
-                 containerNo: $('#TxtContainerNo').val(),
-                 invoiceQty: parseDecimal($('#TxtInvoiceQty').val()),
-                 recordedQty: parseDecimal($('#TxtRecordedQty').val()),
-                 purType: $('#TxtPurType').val(),
-                 shortage: parseDecimal($('#TxtShortage').val()),
-                 billNo: parseIntOrNull($('#NumBillNo').val()),
-                 billDate: $('#DtBillDate').val(),
-                 billDateChecked: $('#chkBillDate').is(':checked'),
-                 wastage: parseDecimal($('#TxtWastage').val()),
-                 gateDate: $('#DtGateDate').val(),
-                 gateDateChecked: $('#chkGateDate').is(':checked'),
-                 bales: parseIntOrNull($('#TxtBales').val()),
-                 remarks: $('#TxtRemarks').val(),
-                 MRNDate: $('#MRNDate').val(),
-                 DeductAmount: $('#NumDeductAmount').val(),
-                 Narration: $('#TxtNarration').val(),
-                 ACTION: vNo > 0 ? "UPDATE" : "INSERT",
-             };
-             debugger
-             // Step 3: Collect Table Data
-             let preIncomingData = [];
-             let combinedItems = {};
+        let formData = {
+            docType: $('#ddlDocType').val(),
+            docNo: $('#NumDocNo').val(),
+            date: $('#DtDate').val(),
+            gateNo: $('#ddlGateNo option:selected').text(),
+            qcIncharge: $('#ddlQCIncharge').val(),
+            chem: $('#ddlChem').val(),
+            partyName: $('#ddlPartyName').val(),
+            transport: $('#TxtTransport').val(),
+            truckNo: $('#TxtTruckNo').val(),
+            containerNo: $('#TxtContainerNo').val(),
+            invoiceQty: parseDecimal($('#TxtInvoiceQty').val()),
+            recordedQty: parseDecimal($('#TxtRecordedQty').val()),
+            purType: $('#TxtPurType').val(),
+            shortage: parseDecimal($('#TxtShortage').val()),
+            // billNo: parseIntOrNull($('#NumBillNo').val()),
+            billNo: $('#NumBillNo').val(),
+            billDate: $('#DtBillDate').val(),
+            billDateChecked: $('#chkBillDate').is(':checked'),
+            wastage: parseDecimal($('#TxtWastage').val()),
+            gateDate: $('#DtGateDate').val(),
+            gateDateChecked: $('#chkGateDate').is(':checked'),
+            bales: parseIntOrNull($('#TxtBales').val()),
+            remarks: $('#TxtRemarks').val(),
+            MRNDate: $('#MRNDate').val(),
+            DeductAmount: parseDecimal($('#NumDeductAmount').val()),
+            Narration: $('#TxtNarration').val(),
+            ACTION: vNo > 0 ? "UPDATE" : "INSERT"
+        };
 
-             $('#tblPreIncomming tbody tr').each(function (index) {
-                 const $row = $(this);
+        let requestData = {
+            Header: formData,
+            QCData: qcDataStore
+        };
 
-                 // Store the row data in sequence (with RowIndex as Rid)
-                 const rowData = {
-                     RowIndex: index + 1,  // To keep the sequence starting from 1
-                     QC_CODE: $row.find('td:eq(1)').text().trim(),
-                     QCP_CODE: $row.find('td:eq(2)').text().trim(),
-                     Parameter: $row.find('td:eq(3)').text().trim(),
-                     Unit: $row.find('td:eq(4)').text().trim(),
-                     QCP_STD: $row.find('td:eq(5)').text().trim(),
-                     AllowAmt: $row.find('input[name="AllowAmt"]').val(),
-                     DeductAmt: $row.find('input[name="DeductAmt"]').val(),
-                     DeductNarr: $row.find('input[name="DeductNarr"]').val(),
-                     Items: []   // This will be an array of item objects
-                 };
+        console.log(requestData);
 
-                 // Loop through item inputs and maintain their values
-                 $row.find('input[name^="Item_"]').each(function () {
-                     const inputName = $(this).attr('name');
-                     const value = $(this).val();
+        $.ajax({
+            url: '/IncommingQCRM/SaveQCData',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify(requestData),
 
-                     const itemCodeMatch = inputName.match(/^Item_(.+)$/);
-                     if (itemCodeMatch) {
-                         const itemCode = itemCodeMatch[1];
-                         rowData.Items.push({ [itemCode]: value });
+            success: function (response) {
 
-                         // Build combinedItems for each itemCode
-                         if (!combinedItems[itemCode]) {
-                             combinedItems[itemCode] = [];
-                         }
-                         combinedItems[itemCode].push(value);
-                     }
-                 });
-                 preIncomingData.push(rowData);
-             });
-             debugger
-             // Step 4: Final Object to send in the AJAX request
-             let dataToSend = {
-                 Header: formData,
-                 Details: preIncomingData
-             };
+                if (response.success) {
 
-             console.log("📦 Data to send:", dataToSend);
-             debugger
-             // Step 5: Send Data to the Server via AJAX
-             $.ajax({
-                 url: '/IncommingQCRM/SaveAllData',
-                 method: 'POST',
-                 contentType: 'application/json',
-                 data: JSON.stringify(dataToSend),
-                 success: function (response) {
-                     alert('✅ Data saved successfully!');
-                 },
-                 error: function (xhr) {
-                     alert('❌ Failed to save data: ' + xhr.responseText);
-                     console.error(xhr.responseText);
-                 }
-             });
-         });
+                    toastr.success(response.message);
 
-           // ===========================================================
-          // save Button End Block
+                    console.log(response);
 
-         });
-         function ddlDocType(callback) {
+                } else {
+
+                    toastr.error(response.message);
+                }
+            },
+
+            error: function (xhr, status, error) {
+
+                console.log(xhr.responseText);
+                toastr.error('Error while saving data');
+            }
+        });
+    });
+    
+
+   });
+
+
+   function ddlDocType(callback) {
                $.ajax({
                    url: '/IncommingQCRM/GetddlDocType',
                    type: 'GET',
@@ -716,7 +785,7 @@
                    }
                });
            }
-         function sendDocType(docType, docName) {
+   function sendDocType(docType, docName) {
               $.ajax({
                   url: '/IncommingQCRM/GetDocNo',
                   type: 'POST',
@@ -740,7 +809,7 @@
                   }
               });
             }
-         function ddlGateNo(vNo, vType1, selectedValue = null) {
+   function ddlGateNo(vNo, vType1, selectedValue = null) {
                const ddl = $('#ddlGateNo');
                return $.ajax({
                    url: '/IncommingQCRM/GetddlMRNNo',
@@ -751,12 +820,12 @@
                        if (ddl.hasClass("select2-hidden-accessible")) {
                            ddl.select2('destroy');
                        }
-                       ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
+                       ddl.empty().append('<option value="" disabled selected hidden>Select Party</option>');
                        data.forEach(item => {
                            ddl.append(new Option(item.text, item.value));
                        });
                        ddl.select2({
-                           placeholder: "-- Select Party --",
+                           placeholder: "Select Party",
                            allowClear: true,
                            width: '100%',
                            minimumResultsForSearch: data.length >= 5 ? 0 : Infinity,
@@ -781,7 +850,7 @@
                    }
                });
            }
-         function ddlQCIncharge(callback) {
+   function ddlQCIncharge(callback) {
             $.ajax({
                   url: '/IncommingQCRM/GetddlQCIncharge',
                 type: 'GET',
@@ -799,7 +868,7 @@
                 }
             });
          }
-         function ddlCheme(callback) {
+   function ddlCheme(callback) {
             $.ajax({
                 url: '/IncommingQCRM/GetddlChem',
                 type: 'GET',
@@ -817,7 +886,28 @@
                 }
             });
           }
-         function ddlItemName(callback) {
+
+   function ddlPartyName(callback) {
+             $.ajax({
+                 url: '/IncommingQCRM/GetddlPartyName',
+                 type: 'GET',
+                 dataType: 'json',
+                 success: function (data) {
+                          const ddl = $('#ddlPartyName');
+                     ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                     $.each(data, function (index, item) {
+                         ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                     });
+                     if (typeof callback === "function") callback();
+                 },
+                 error: function (xhr) {
+                         console.error("Error loading ddlChem:", xhr.responseText);
+                 }
+             });
+           }
+
+
+   function ddlItemName(callback) {
               $.ajax({
                       url: '/IncommingQCRM/GetddlItemName',
                   type: 'GET',
@@ -835,9 +925,8 @@
                   }
               });
          }
-
-          function GetalldatafetchGatonchange(response) {
-              console.log('MRN Onchange', response);
+   function GetalldatafetchGatonchange(response) {
+        console.log('MRN Onchange', response);
 
         const data = response.header;
 
@@ -856,8 +945,8 @@
 
         // Header Data
 
-        $('#TxtPartyName')
-            .val(data.partyName || '')
+         $('#ddlPartyName')
+            .val(data.partY_CODE || '')
             .attr('readonly', 'readonly')
             .css('background-color', '#CCC');
 
@@ -868,6 +957,11 @@
 
         $('#NumBillNo')
             .val(data.bilL_NO || '')
+            .attr('readonly', 'readonly')
+            .css('background-color', '#CCC');
+
+        $('#MRNDate')
+            .val(data.MRN_DATE || '')
             .attr('readonly', 'readonly')
             .css('background-color', '#CCC');
 
@@ -892,7 +986,9 @@
             .css('background-color', '#CCC');
 
         $('#TxtShortage')
-            .val(data.shortageQty || 0);
+            .val(data.shortageQty || 0)
+            .attr('readonly', 'readonly')
+            .css('background-color', '#CCC');
 
         $('#DtBillDate')
             .val(formatDate(data.bilL_DATE))
@@ -904,7 +1000,7 @@
         // Item Grid
 
         $('#itemTable tbody').empty();
-        
+
 
         $.each(response.items, function (index, item) {
 
@@ -912,76 +1008,48 @@
                 <tr class="text-left">
                     <td>${item.iteM_CODE}</td>
                     <td>${item.iteM_NAME}</td>
-                    <td><button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="$(this).closest('tr').remove();">
+                    <td>
+                    <button type="button" class="act-btn add btnQCParameter" title="Add Parameter"><i class="fa fa-plus"></i></button>
+                    <button type="button" class="act-btn view btnQCView"  title="View"><i class="fa fa-eye"></i></button>
+                    <button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="$(this).closest('tr').remove();">
                         <i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
             `);
         });
     }
+   function LoadQCParameterGrid(response) {
+        if (!response.success) {
+            toastr.error('No data found');
+            return;
+        }
+        let tbody = $('#tblQCParameter tbody');
+        tbody.empty();
+        $.each(response.data, function (i, item) {
+            tbody.append(`
+                <tr>
+                    <td>
+                        <input type="text" class="form-control"
+                               value="${item.Parameter || ''}">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"
+                               value="${item.Unit || ''}">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"
+                               value="${item.QCP_STD || ''}">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control">
+                    </td>
+                </tr>
+            `);
 
-
-    //      function GetalldatafetchGatonchange(response) {
-    //            if (!response || response.length === 0) return;
-
-    //            const data = response[0];
-    //            console.log('MRN Onchange', data)
-
-    //            // Format date function (optional reuse)
-    //            const formatDate = (dateStr) => {
-    //                if (!dateStr) return "";
-    //                const parts = dateStr.split('/');
-    //                if (parts.length !== 3) return "";
-    //                return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-    //            };
-    //             // $('#DtGateDate').val(formatDate(data.v_DATE)).prop('readonly', true);
-    //             // $('#TxtPartyName').val(data.partyName || '').prop('readonly', true);
-    //             // $('#TxtTruckNo').val(data.trucK_NO || '').prop('readonly', true);
-    //             // $('#NumBillNo').val(data.bilL_NO || '').prop('readonly', true);
-    //             // $('#DtBillDate').val(formatDate(data.bilL_DATE)).prop('readonly', true);
-    //             // $('#TxtInvoiceQty').val(data.qty || '').prop('readonly', true);
-    //             // $('#TxtRecordedQty').val(data.qty || '').prop('readonly', true);
-
-                
-    //             $('#DtDate').prop('disabled', true).css('background-color', '#CCC');
-    //             $('#DtBillDate')
-    // .val(formatDate(data.bilL_DATE))
-    // .attr('readonly', 'readonly')
-    // .css({
-    //     'background-color': '#CCC',
-    //     'pointer-events': 'none'
-    // });
-    //             $('#TxtPartyName').val(data.partyName || '');
-    //             $('#TxtPartyName').attr('readonly', 'readonly');
-    //             $('#TxtTruckNo').val(data.trucK_NO || '');
-    //             $('#TxtTruckNo').attr('readonly', 'readonly');
-    //             $('#NumBillNo').val(data.bilL_NO || '');
-    //             $('#NumBillNo').attr('readonly', 'readonly');
-    //             $('#TxtInvoiceQty').val(data.qty || '');
-    //             $('#TxtInvoiceQty').attr('readonly', 'readonly');
-    //             $('#TxtRecordedQty').val(data.qty || '');
-    //             $('#TxtRecordedQty').attr('readonly', 'readonly');
-    //             $('#TxtShortage').val('0');
-    //             $('#TxtWastage').val('0');
-    //             $('#TxtTransport').val('');
-    //             $('#TxtContainerNo').val('');
-
-    //            // ✅ Populate itemTable
-    //            const itemCode = data.iteM_CODE || '';
-    //            const itemName = data.iteM_NAME || '';
-
-    //            $('#itemTable thead tr').empty();
-    //            $('#itemTable tbody').empty();
-    //            // Add table row
-    //            $('#itemTable tbody').append(`
-    //                <tr class="text-left">
-    //                    <td>${itemCode}</td>
-    //                    <td>${itemName}</td>
-    //                </tr>
-    //            `);
-    //      }
-
-          function GetallDataPreIncommingQCRM(response) {
+        });
+    }
+   
+    function GetallDataPreIncommingQCRM(response) {
              const Headerdata = response.header;
              const Itemdata = response.items;
 
@@ -995,7 +1063,12 @@
                  ddlDocType(() => {
                      $('#ddlDocType').val(header.V_TYPE);
                  });
-                 $('#NumDocNo').val(header.DOC_ID);
+                 $('#NumDocNo').val(header.V_NO);
+
+
+                  ddlPartyName(() => {
+                        $('#ddlPartyName').val(header.PARTY_CODE);
+                  });
 
                  ddlQCIncharge(() => {
                      $('#ddlQCIncharge').val(header.QC_INCHARGE);
@@ -1028,6 +1101,7 @@
                  $('#NumDeductAmount').val(header.DEDUCT_AMT);
                  $('#TxtNarration').val(header.DEDUCT_NARR);
                  $('#TxtRemarks').val(header.REMARKS);
+                 $('#TxtBales').val(header.BALES);
              }
 
              // --- 2. Build Item Table
@@ -1046,11 +1120,11 @@
                      columns.forEach(col => {
                  const parts = col.split('_');
                  if (parts.length >= 3) {
-                     const rn = parts.pop(); // remove row number (last part)
-                     const itemCode = parts.pop(); // remove item code (second last part)
-                     const itemName = parts.join('_') + '_' + itemCode; // reconstruct full item name with code
+                     const rn = parts.pop();
+                     const itemCode = parts.pop();
+                     const itemName = parts.join('_') + '_' + itemCode;
 
-                     columnDisplayNames.push(col); // use full column name
+                     columnDisplayNames.push(col);
                      itemCodes.push(itemCode);
                      itemMappings.push({ itemName, itemCode });
                  } else {
@@ -1073,44 +1147,65 @@
                          <tr class="text-left">
                              <td>${item.itemCode}</td>
                              <td>${item.itemName}</td>
+
+                              <td>
+                               <button type="button"
+                                       class="act-btn add btnQCParameter"
+                                       title="Add Parameter">
+                                   <i class="fa fa-plus"></i>
+                               </button>
+
+                               <button type="button"
+                                       class="act-btn view btnQCView"
+                                       title="View">
+                                   <i class="fa fa-eye"></i>
+                               </button>
+
+                               <button type="button"
+                                       class="act-btn delete"
+                                       title="Delete"
+                                       onclick="$(this).closest('tr').remove();">
+                                   <i class="fa fa-trash"></i>
+                               </button>
+             </td>
+
                          </tr>
                      `);
                  });
 
-                 // --- 4. Build dynamic table headers
-                 columnDisplayNames.forEach(displayName => {
-                     const th = document.createElement("th");
-                     th.textContent = displayName;
-                     tableHeader.appendChild(th);
-                 });
+                 // // --- 4. Build dynamic table headers
+                 // columnDisplayNames.forEach(displayName => {
+                 //     const th = document.createElement("th");
+                 //     th.textContent = displayName;
+                 //     tableHeader.appendChild(th);
+                 // });
 
-                 // --- 5. Build dynamic table body
-                 Itemdata.forEach(row => {
-                     const tr = document.createElement("tr");
-                     columns.forEach((col, index) => {
-                         const td = document.createElement("td");
+                 // // --- 5. Build dynamic table body
+                 // Itemdata.forEach(row => {
+                 //     const tr = document.createElement("tr");
+                 //     columns.forEach((col, index) => {
+                 //         const td = document.createElement("td");
 
-                         if (index >= 5) {
-                             // Editable input for dynamic columns
-                             const input = document.createElement("input");
-                             input.type = "text";
-                             input.value = row[col] !== null && row[col] !== undefined ? row[col] : '';
-                             input.className = "form-control";
-                             input.dataset.col = col;
-                             td.appendChild(input);
-                         } else {
-                             // Static display for fixed columns
-                             td.textContent = row[col] !== null && row[col] !== undefined ? row[col] : '';
-                         }
+                 //         if (index >= 5) {
+                 //             // Editable input for dynamic columns
+                 //             const input = document.createElement("input");
+                 //             input.type = "text";
+                 //             input.value = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                 //             input.className = "form-control";
+                 //             input.dataset.col = col;
+                 //             td.appendChild(input);
+                 //         } else {
+                 //             // Static display for fixed columns
+                 //             td.textContent = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                 //         }
 
-                         tr.appendChild(td);
-                     });
-                     tableBody.appendChild(tr);
-                 });
+                 //         tr.appendChild(td);
+                 //     });
+                 //     tableBody.appendChild(tr);
+                 // });
              }
          }
-
-      function convertToDateInputFormat(dateStr) {
+   function convertToDateInputFormat(dateStr) {
         if (!dateStr) return '';
 
         // Check if date is in dd/MM/yyyy format
@@ -1118,19 +1213,14 @@
             const [day, month, year] = dateStr.split('/');
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
         }
-
         // Handle ISO format: 2025-08-16T00:00:00
         const date = new Date(dateStr);
         if (isNaN(date)) return '';
-
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-
         return `${year}-${month}-${day}`;
     }
-
-
 </script>
 
 
@@ -1146,3 +1236,4 @@
         }
     });
 </script>
+

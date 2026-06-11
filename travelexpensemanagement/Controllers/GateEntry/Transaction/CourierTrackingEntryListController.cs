@@ -5,9 +5,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
     public class CourierTrackingEntryListController : Controller
     {
-        private readonly ICourierTrackingEntryListRepository _repository;
+        private readonly IApprovalService _repository;
 
-        public CourierTrackingEntryListController(ICourierTrackingEntryListRepository repository)
+        public CourierTrackingEntryListController(IApprovalService repository)
         {
             _repository = repository;
         }

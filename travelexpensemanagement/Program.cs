@@ -1,128 +1,130 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
-using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
-using travelexpensemanagement.Common.EncryptionHelper;
-using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.LogService;
-using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
-using travelexpensemanagement.ModuleService;
-using travelexpensemanagement.Repositories.Implementations;
-using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
-using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
-
-// ADD THESE (Repository)
-using travelexpensemanagement.Repositories.Interfaces;
-using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
-using travelexpensemanagement.Services;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddScoped<DataBaseConnection>();
-builder.Services.AddScoped<GlobalValidationdate>();
-
-builder.Services.AddScoped<DbHelper>();
-builder.Services.AddScoped<DropdownService>();
-builder.Services.AddScoped<LogService>();
-builder.Services.AddScoped<ErrorLoggerService>();
-builder.Services.AddScoped<IMasterDataService, MasterDataService>();
-
-//Master page repositories
-builder.Services.AddScoped<IAssetRepository, AssetRepository>();
-//Master page repositories
-// Gete Entry Transaction repositories
-builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
-builder.Services.AddScoped<ICourierTrackingEntryListRepository, CourierTrackingEntryListRepository>();
-builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
-builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
-builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
-builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
-builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
-builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
-builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
-builder.Services.AddScoped<IMiscConsumptionListRepository, MiscConsumptionListRepository>();
-builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
-builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
-builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
-// Gete Entry Transaction repositories
-//Weighbridge Transaction repositories
-builder.Services.AddScoped<IBigWeighbridgeListRepository, BigWeighbridgeListRepository>();
-builder.Services.AddScoped<IBigWeighbridgeRepository, BigWeighbridgeRepository>();
-builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
-builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
-//Weighbridge Transaction repositories
+﻿    using Microsoft.AspNetCore.RateLimiting;
+    using travelexpensemanagement.Common.DbHelper;
+    using travelexpensemanagement.Common.DropdownService;
+    using travelexpensemanagement.Common.EncryptionHelper;
+    using travelexpensemanagement.Common.Globalvariable;
+    using travelexpensemanagement.Dbconnection;
+    using travelexpensemanagement.LogService;
+    using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
+    using travelexpensemanagement.ModuleService;
+    using travelexpensemanagement.Repositories.Implementations;
+    using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+    using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 
+    // ADD THESE (Repository)
+    using travelexpensemanagement.Repositories.Interfaces;
+    using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+    using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
+    using travelexpensemanagement.Services;
+    
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add services
+    builder.Services.AddControllersWithViews();
+
+    builder.Services.AddScoped<DataBaseConnection>();
+    builder.Services.AddScoped<GlobalValidationdate>();
+
+    builder.Services.AddScoped<DbHelper>();
+    builder.Services.AddScoped<DropdownService>();
+    builder.Services.AddScoped<LogService>();
+    builder.Services.AddScoped<ErrorLoggerService>();
+    builder.Services.AddScoped<IMasterDataService, MasterDataService>();
+
+    //Master page repositories
+    builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+    //Master page repositories
+    // Gete Entry Transaction repositories
+    builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
+    builder.Services.AddScoped<travelexpensemanagement.Repositories.Interfaces.IApprovalService, travelexpensemanagement.Repositories.Implementations.ApprovalService>();
+    builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
+    builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
+    builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
+    builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
+    builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
+    builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
+    builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
+    builder.Services.AddScoped<IMiscConsumptionListRepository, MiscConsumptionListRepository>();
+    builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
+    builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
+    builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
+    // Gete Entry Transaction repositories
+    //Weighbridge Transaction repositories
+    builder.Services.AddScoped<IBigWeighbridgeListRepository, BigWeighbridgeListRepository>();
+    builder.Services.AddScoped<IBigWeighbridgeRepository, BigWeighbridgeRepository>();
+    builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
+    builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
+    //Weighbridge Transaction repositories
 
 
-builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
-builder.Services.AddScoped<EncryptionHelper>();
 
-builder.Services.AddDistributedMemoryCache();
 
-// Session Configuration
+    builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
+    builder.Services.AddScoped<EncryptionHelper>();
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.Name = ".TravelExpense.Session";
+    builder.Services.AddDistributedMemoryCache();
 
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    // Session Configuration
 
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
-});
-
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<GlobalVariableService>();
-builder.Services.AddScoped<ModuleService>();
-
-// Rate Limiter
-
-builder.Services.AddRateLimiter(options =>
-{
-    options.AddFixedWindowLimiter("LoginLimiter", limiter =>
+    builder.Services.AddSession(options =>
     {
-        limiter.PermitLimit = 10;
-        limiter.Window = TimeSpan.FromMinutes(10);
-        limiter.QueueLimit = 0;
+        options.IdleTimeout = TimeSpan.FromMinutes(30);
+        options.Cookie.Name = ".TravelExpense.Session";
+
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
     });
 
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-});
-//builder.Services.AddMemoryCache();
+    builder.Services.AddHttpContextAccessor();
 
-var app = builder.Build();
+    builder.Services.AddScoped<GlobalVariableService>();
+    builder.Services.AddScoped<ModuleService>();
 
-// Middleware Pipeline
-app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+    // Rate Limiter
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.AddFixedWindowLimiter("LoginLimiter", limiter =>
+        {
+            limiter.PermitLimit = 10;
+            limiter.Window = TimeSpan.FromMinutes(10);
+            limiter.QueueLimit = 0;
+        });
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    });
+    //builder.Services.AddMemoryCache();
 
-app.UseRouting();
+    var app = builder.Build();
 
-app.UseSession();
-app.UseRateLimiter();
+    // Middleware Pipeline
+    app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
-app.UseMiddleware<SessionTimeoutMiddleware>();
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
 
-app.UseAuthorization();
-// Routing
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}");
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
 
-app.Run();
+    app.UseRouting();
+
+    app.UseSession();
+    app.UseRateLimiter();
+
+    app.UseMiddleware<SessionTimeoutMiddleware>();
+
+    app.UseAuthorization();
+    // Routing
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Login}/{action=Index}/{id?}");
+
+    app.Run();

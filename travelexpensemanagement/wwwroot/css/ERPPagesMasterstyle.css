@@ -36,6 +36,9 @@
     display: flex;
     justify-content: flex-end;
 }
+.ui-widget.ui-widget-content {
+    z-index: 9999;
+}
 /* ===== ADD BUTTON (GREEN / SUCCESS STYLE) ===== */
 .erppage-btn-add {
     background: linear-gradient(135deg, #4c6ef5, #364fc7); /* accessible blue */
@@ -305,7 +308,76 @@
     margin: 8px auto;
     /* padding: 0 10px;*/
 }
+/* Status Container */
+.erppage-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 100%;
+}
 
+/* Status Text */
+.erppage-toggle-text {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 55px;
+    text-align: right;
+}
+
+    .erppage-toggle-text.active {
+        color: #2f7d32;
+    }
+
+    .erppage-toggle-text.inactive {
+        color: #6b7280;
+    }
+
+/* Toggle Switch */
+.erppage-toggle {
+    position: relative;
+    width: 52px;
+    height: 23px;
+    display: inline-block;
+    cursor: pointer;
+    margin: 0px;
+}
+
+    .erppage-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.erppage-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #9ca3af; /* OFF = Grey */
+    border-radius: 30px;
+    transition: .3s;
+}
+
+    .erppage-toggle-slider:before {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 7px;
+        top: 2px;
+        background: #fff;
+        border-radius: 50%;
+        transition: .3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    }
+
+/* ON State */
+.erppage-toggle input:checked + .erppage-toggle-slider {
+    background: linear-gradient(135deg,#2f7d32,#1b5e20);
+}
+
+    .erppage-toggle input:checked + .erppage-toggle-slider:before {
+        transform: translateX(24px);
+    }
 /* ===== SECTION (FIELDSET) ===== */
 .erppage-fieldset {
     border: 1px solid #e5e7eb;
@@ -343,7 +415,7 @@
 }
 /* ===== Dynamic Item Table ===== */
 .erppagetabledynamic-wrapper {
-    width:50%;
+    width:100%;
     /*display: inline-block;*/ /* wrapper shrinks to content */
     max-height: 180px; /* Fixed height */
     overflow-y: auto; /* Vertical scrollbar */
@@ -1146,6 +1218,12 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
+.erppage-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px;
+    align-items: start;
+}
 /* ===== INPUT + BUTTON GROUP ===== */
 .erppage-inputgroup {
     display: flex;
@@ -1241,11 +1319,11 @@ input[type="number"] {
 
 /* BASE BUTTON */
 .erppage-btn {
-    display: block;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;

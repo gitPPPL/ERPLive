@@ -1,4 +1,5 @@
 ﻿
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json.Linq;
@@ -11,6 +12,7 @@ using travelexpensemanagement.Models.Admin.Setup;
 using travelexpensemanagement.Models.GateEntry;
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using UglyToad.PdfPig.DocumentLayoutAnalysis;
 using static travelexpensemanagement.Controllers.GateEntry.Transaction.InwardEntryController;
 namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 {
@@ -113,7 +115,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             var dataList = new List<object>();
             var globalData = _globalVariableService.GetGlobalVariables();
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 await con.OpenAsync();
@@ -122,7 +123,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@COMP_CODE", globalData.PubCompCode);
                     cmd.Parameters.AddWithValue("@SHIP_PARTY", shipFromId);
                     cmd.Parameters.AddWithValue("@Action", "FetchShipFromAddressAsync");
-
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -144,74 +144,34 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             {
                 if (partyCode <= 0 || string.IsNullOrWhiteSpace(billNo))
                 {
-                    return new RepositoryResponse
-                    {
-                        status = false,
-                        message = "Invalid input"
-                    };
+                    return new RepositoryResponse { status = false, message = "Invalid input" };
                 }
-
                 var g = _globalVariableService.GetGlobalVariables();
-
                 using var conn = _dbConnection.GetErpConnection();
                 await conn.OpenAsync();
-
                 using SqlCommand cmd = new SqlCommand("sp_InwardEntry", conn);
 
                 // IMPORTANT
                 cmd.CommandType = CommandType.StoredProcedure;
-
                 cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partyCode;
-
-                cmd.Parameters.Add("@BILL_NO", SqlDbType.NVarChar, 30).Value =
-                    billNo;
-
+                cmd.Parameters.Add("@BILL_NO", SqlDbType.NVarChar, 30).Value = billNo;
                 cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNo;
-
-                cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value =
-                    g.PubCompCode;
-
-                cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value =
-                    g.PubBranchCode;
-
-                cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value =
-                    g.PubFYearCode;
-
-                // EXACT ACTION NAME FROM SP
-                cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value =
-                    "ValidateBillNoAsync";
-
+                cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value =  g.PubCompCode;
+                cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = g.PubBranchCode;
+                cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = g.PubFYearCode;  
+                cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value ="ValidateBillNoAsync";
                 using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                if (await reader.ReadAsync())
-                {
+                if (await reader.ReadAsync())                {
                     string docId = reader["doc_id"]?.ToString() ?? "";
+                    string vDate = reader["V_date"] != DBNull.Value ? Convert.ToDateTime(reader["V_date"]) .ToString("dd-MMM-yyyy") : "";
 
-                    string vDate = reader["V_date"] != DBNull.Value
-                        ? Convert.ToDateTime(reader["V_date"])
-                            .ToString("dd-MMM-yyyy")
-                        : "";
-
-                    return new RepositoryResponse
-                    {
-                        status = false,
-                        message = $"Bill No '{billNo}' already exists at Serial No: {docId} dated: {vDate}"
-                    };
+                    return new RepositoryResponse  { status = false,  message = $"Bill No '{billNo}' already exists at Serial No: {docId} dated: {vDate}" };
                 }
-
-                return new RepositoryResponse
-                {
-                    status = true,
-                    message = ""
-                };
+                return new RepositoryResponse { status = true, message = "" };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse
-                {
-                    status = false,
-                    message = ex.Message
-                };
+                return new RepositoryResponse { status = false, message = ex.Message };
             }
         }
         public async Task<RepositoryResponse> ValidateGateNoAsync( string vType,  int vNo)
@@ -318,47 +278,123 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return response;
         }
-        public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate)
+       
+        //public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate, string mode = "")
+        //{
+        //    var getdata = _globalVariableService.GetGlobalVariables();
+        //    var dataList = new List<int>();
+
+        //    using (SqlConnection con = _dbConnection.GetErpConnection())
+        //    {
+        //        await con.OpenAsync();
+
+        //        using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", con))
+        //        {
+        //            cmd.CommandType = CommandType.StoredProcedure;
+        //            cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = getdata.PubCompCode;
+        //            cmd.Parameters.Add("@V_Type", SqlDbType.NVarChar, 10).Value = (object)v_type ?? DBNull.Value;
+        //            cmd.Parameters.Add("@V_No", SqlDbType.Int).Value = v_no;
+        //            cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partycode;
+        //            cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
+        //            cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value = "DDlTransitNo";
+        //            cmd.Parameters.Add("@SaveAction", SqlDbType.NVarChar, 50).Value = mode;
+        //            cmd.Parameters.Add("@EWB_EXPDATE", SqlDbType.Date).Value = Convert.ToDateTime(ExpiryDate).AddMonths(-1);
+
+        //            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+        //            {
+        //                while (await reader.ReadAsync())
+        //                {
+        //                    dataList.Add(Convert.ToInt32(reader["V_No"]));
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return new RepositoryResponseList<int>  {  status = true, message = "Success",  totalCount = dataList.Count, data = dataList  };
+        //}
+
+
+
+public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate, string mode = "")
+    {
+        var getdata = _globalVariableService.GetGlobalVariables();
+
+        using (SqlConnection con = _dbConnection.GetErpConnection())
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            var dataList = new List<int>();
+            await con.OpenAsync();
+
+            var parameters = new
+            {
+                COMP_CODE = getdata.PubCompCode,
+                V_Type = v_type,
+                V_No = v_no,
+                PARTY_CODE = partycode,
+                BRANCH_CODE = getdata.PubBranchCode,
+                Action = "DDlTransitNo",
+                SaveAction = mode,
+                EWB_EXPDATE = ExpiryDate.AddMonths(-1)
+            };
+
+            var dataList = (await con.QueryAsync<int>( "sp_InwardEntry", parameters, commandType: CommandType.StoredProcedure )).ToList();
+
+            return new RepositoryResponseList<int>
+            {
+                status = true,
+                message = "Success",
+                totalCount = dataList.Count,
+                data = dataList
+            };
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    public async Task<List<object>> GetGetTransitDataCode(int TransitNo)
+        {
+            var dataList = new List<object>();
+            var globalData = _globalVariableService.GetGlobalVariables();
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 await con.OpenAsync();
-
                 using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = getdata.PubCompCode;
-
-                    cmd.Parameters.Add("@V_Type", SqlDbType.NVarChar, 10).Value =
-                        (object)v_type ?? DBNull.Value;
-
-                    cmd.Parameters.Add("@V_No", SqlDbType.Int).Value = v_no;
-
-                    cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partycode;
-
-                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
-
-                    // ✅ FIXED ACTION (this was your main bug)
-                    cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value = "DDlTransitNo";
-
-                    // ❌ removed wrong -1 month adjustment
-                    cmd.Parameters.Add("@EWB_EXPDATE", SqlDbType.Date).Value = ExpiryDate;
-
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalData.PubCompCode);
+                    cmd.Parameters.AddWithValue("@V_NO", TransitNo);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalData.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Action", "TransitNoData");
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            dataList.Add(Convert.ToInt32(reader["V_No"]));
+                            dataList.Add(new
+                            {
+                                FORM_NO = reader["FORM_NO"]?.ToString(),
+                                BILL_NO = reader["BILL_NO"]?.ToString(),
+                                FORM_DATE = reader["FORM_DATE"]?.ToString(),
+                                TOTAL_AMT = reader["TOTAL_AMT"]?.ToString(),
+                                EXPIRY_DATE = reader["EXPIRY_DATE"]?.ToString()
+                             
+                            });
                         }
                     }
                 }
             }
 
-            return new RepositoryResponseList<int>  {  status = true, message = "Success",  totalCount = dataList.Count, data = dataList  };
+            return dataList;
         }
+
+
+
+
+
+
     }
 }
