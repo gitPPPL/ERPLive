@@ -11,29 +11,14 @@ function setFormReadOnly() {
     $('#OutwardEntryForm textarea').prop('readonly', true);
     $('#OutwardEntryForm button').prop('disabled', true);
     $('#btn-save').prop('disabled', true);
-
-    $('#OutwardEntryForm a').css({
-        'pointer-events': 'none',
-        'opacity': '0.5'
-    });
+    $('#OutwardEntryForm a').css({ 'pointer-events': 'none', 'opacity': '0.5' });
     $('#tblOutwardEntry tbody').find('input, select, textarea, button').prop('disabled', true);
     $('#btnpendingorderno, #btn-pending').prop('disabled', true);
     $('#pendingorders').find('input, select, button').prop('disabled', true);
-    $('.btn-add-action, .btn-delete-action').css({
-        'pointer-events': 'none',
-        'opacity': '0.5'
-    });
-
-    $('#tablePagination').css({
-        'pointer-events': 'none',
-        'opacity': '0.5'
-    });
-    $('#OutwardEntryForm')
-        .find('input, select, textarea, button, a')
-        .attr('tabindex', '-1');
-    $('#OutwardEntryForm').css({
-        'opacity': '0.95'
-    });
+    $('.btn-add-action, .btn-delete-action').css({ 'pointer-events': 'none', 'opacity': '0.5'  });
+    $('#tablePagination').css({ 'pointer-events': 'none', 'opacity': '0.5' });
+    $('#OutwardEntryForm') .find('input, select, textarea, button, a') .attr('tabindex', '-1');
+    $('#OutwardEntryForm').css({ 'opacity': '0.95'  });
 }
 
 async function LoadDropDowns() {

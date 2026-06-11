@@ -50,9 +50,7 @@
                     if (selectedVType) {
                         await GetVNo(selectedVType, "GATE1");
                     }             
-
-                    //let today = new Date().toISOString().split('T')[0];   
-                    //$('#DtDocDate').val(today);
+                
                     let now = new Date();
                     $('#DtTxtDocDate').val(now.toTimeString().slice(0, 8));
                 }
