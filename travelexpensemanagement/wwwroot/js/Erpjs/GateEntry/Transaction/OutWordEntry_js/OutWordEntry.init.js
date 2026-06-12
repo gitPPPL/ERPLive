@@ -317,10 +317,29 @@
                     fetchPartyDetails(partyId);
                 });
 
+
+                //$("#ddlPartyName").autocomplete({
+                //    source: partyData,
+                //    minLength: 0,
+                //    select: function (event, ui) {
+                //        $("#ddlPartyName").val(ui.item.label);
+                //        $("#hdnPartyId").val(ui.item.value);
+                //        return false;
+                //    }
+                //});
+
+
+
                 $("#ddlPartyNameByAddress").on("change", function () {
                     const partyId = $("#ddlPartyName").val();
                     const addId = $(this).val();
-                    fetchPartyAddressDetails(partyId, addId);
+                    //fetchPartyAddressDetails(partyId, addId);
+                    GetDataByPartyandAddressidCodeAsync(partyId, addId);
+
+
+
+
+
                 });
 
                 $("#btnpendingorderno").click(function () {
@@ -336,7 +355,7 @@
                 $("#Btn_selectedData").click(async function () {
 
                     const selectedRows = getSelectedPendingRows();
-
+                    let condiiton = false;
                     if (!selectedRows.length) {
                         toastr.info("Please select at least one row");
                         return;
@@ -351,7 +370,6 @@
 
                         const $tbody = $("#tblOutwardEntry tbody");
 
-                        // Close modal ONCE (not inside loop)
                         const modalElement = document.getElementById('pendingorders');
                         if (modalElement) {
                             const modalInstance = bootstrap.Modal.getInstance(modalElement);
@@ -364,7 +382,6 @@
                             const itemCode = (row.ItemCode || "").trim();
                             const voucherNo = (row.VoucherNo || "").trim();
 
-                            // ✅ Proper duplicate check
                             const exists = $tbody.find("tr").toArray().some(tr => {
 
                                 const existingItemCode = $(tr).find(".itemName").val();
@@ -378,7 +395,6 @@
                                 continue;
                             }
 
-                            // Add row (IMPORTANT: use "code", not itemCode)
                             addRow($tbody, {
                                 code: itemCode,
                                 itemName: itemCode,
@@ -390,21 +406,26 @@
                                 refType: row.Vouchertype || "",
                                 refNo: voucherNo
                             });
-
-                           
+                             condiiton = true;
                         }
 
                         // Load header from first row
-                        const $firstRow = $tbody.find("tr:first");
-                        if ($firstRow.length) {
 
-                            const refType = $firstRow.find(".ref-type").val() || "";
-                            const refNo = $firstRow.find(".ref-no").val() || "";
-                            if (refNo != '' && refType != '') {
-                                await fetchPendingOrderHeaderData(refType, refNo);
-                            }                        
+                        if (condiiton == true) {
+                            const $firstRow = $tbody.find("tr:first");
+                            if ($firstRow.length) {
+
+                                const refType = $firstRow.find(".ref-type").val() || "";
+                                const refNo = $firstRow.find(".ref-no").val() || "";
+                                if (refNo != '' && refType != '') {
+                                    await fetchPendingOrderHeaderData(refType, refNo);
+                                }
+                            }
                         }
 
+
+                     
+                         
                     } catch (err) {
                         console.error(err);
                         toastr.error("Failed to fetch data");
@@ -430,7 +451,7 @@
         })();
     });
 
-function SetFYDate(inputId, loginDate) {
+function  SetFYDate(inputId, loginDate) {
     var d = new Date(loginDate);
     var y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
 
@@ -444,20 +465,21 @@ function SetFYDate(inputId, loginDate) {
 
     $input.off('blur').on('blur', function () {
         var selectedDate = $(this).val();
-
   
         var selDateObj = new Date(selectedDate);
-        var minDateObj = new Date(loginDate);
+        var minDateObj = new Date(minDate);
         var maxDateObj = new Date(maxDate);
 
         if (!selectedDate) return; 
 
         if (selDateObj < minDateObj || selDateObj > maxDateObj) {
             toastr.warning(
-                'Please select a date between ' +
+                'Please Select a Date Between ' +
                 new Date(minDate).toLocaleDateString('en-GB') +
                 ' and ' +
                 new Date(maxDate).toLocaleDateString('en-GB')
+              $input.trigger('focus');
+
             );
             //$(this).val(LoginDate);   
         }

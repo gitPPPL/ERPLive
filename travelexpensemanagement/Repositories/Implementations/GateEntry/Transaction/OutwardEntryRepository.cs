@@ -278,21 +278,20 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             }
                         }
                         gateQty = gateQty + (d.QTY ?? 0);
-                 
-                            if (gateQty > mainQty)
-                            {
 
+
+                        if (gateQty > mainQty)
+                        {
                             decimal pendingQty = (decimal)((mainQty - gateQty) + d.QTY);
-
                             return new RepositoryResponse
-                                {
-                                    status = true,
-                                    message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " +
-                                    $"Please Check Item Name {d.ITEM_NAME}"
-                                };
-                            }
-             
-                       
+                            {
+                                status = true,
+                                message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
+                                          $"& Your Quantity is = {(d.QTY ?? 0)}, " +
+                                          $"Please Check Item Name {d.ITEM_NAME}"
+                            };
+                        }
+
                     }
 
                 }

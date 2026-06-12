@@ -29,6 +29,15 @@ async function DDLVtype() {
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 }
 
+async function DDLstate() {
+    const res = await fetch("/OutwardEntry/DDLstate");
+    const list = await res.json();
+    const ddl = $("#TxtState");
+    ddl.empty().append('<option value="">-- Select Party State--</option>');
+    list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+}
+
+
 async function DDLParty() {
     const res = await fetch("/OutwardEntry/DDlParty");
     const list = await res.json();
@@ -37,11 +46,33 @@ async function DDLParty() {
     ddl.empty().append('<option value="">Select Party Name</option>');
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 
-    ddl.select2({
-        placeholder: "-- Select Party --",
-        allowClear: true
-    });
 }
+
+//function DDLParty() {
+
+//    $.ajax({
+//        url: '/OutwardEntry/DDlParty',
+//        type: 'GET',
+//        success: function (response) {
+//            var remarks = [];
+//            $.each(response, function (i, item) {
+//                remarks.push(item.text);
+//            });
+//            if ($("#ddlPartyName").data("ui-autocomplete")) {
+//                $("#ddlPartyName").autocomplete("destroy");
+//            }
+//            $("#ddlPartyName").autocomplete({
+//                source: remarks,
+//                minLength: 0
+//            });
+//            $("#ddlPartyName").off("focus").on("focus", function () {
+//                $(this).autocomplete("search", "");
+//            });
+//        }
+//    });
+//}
+
+
 
 async function DDLcity_mast() {
     const res = await fetch("/OutwardEntry/DDLcity_mast");
@@ -65,7 +96,7 @@ async function loadPartyAddresses(partyId) {
     const res = await fetch(`/OutwardEntry/fetchPartyAdd?PartyId=${encodeURIComponent(partyId)}`);
     const list = await res.json();
     const ddl = $("#ddlPartyNameByAddress");
-    ddl.empty().append('');
+    ddl.append('<option value="">Select Party Address</option>');
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 }
 
@@ -78,6 +109,7 @@ async function fetchPartyDetails(partyId) {
     if (details.length) {
         const d = details[0];
 
+        $("#ddlPartyNameByAddress").val(d.addressId || "");
         $("#TxtAdd1PD").val(d.add1 || "");
         $("#TxtAdd2PD").val(d.add2 || "");
         $("#TxtAdd3PD").val(d.add3 || "");
@@ -101,6 +133,8 @@ async function GetDataByPartyandAddressidCodeAsync(partyId, addressId) {
     if (details.length) {
         const d = details[0];
 
+        console.log("GetDataByPartyandAddressidCodeAsync", d);
+          
         $("#TxtAdd1PD").val(d.add1 || "");
         $("#TxtAdd2PD").val(d.add2 || "");
         $("#TxtAdd3PD").val(d.add3 || "");
@@ -139,13 +173,15 @@ function LoadFormByID(rowId, vtype) {
                 document.getElementById("Conditionnaldesignid").style.display = "none";
             }
             document.getElementById("ddlPartyName").disabled = true;
-            $('#TxtCode').val(header.doC_ID || '');
-            $('#ddlDocType').val(header.v_TYPE || '');
-            $('#NumDocNo').val(header.v_NO || '');
-            $('#DtDocDate').val(formatDate(header.v_DATE));
-            $('#DtExpectedDateReturn').val(formatDate(header.returN_DATE));
-            DDLParty().then(() => { $('#ddlPartyName') .val(header.partY_CODE || '') .trigger('change');
-            });
+                $('#TxtCode').val(header.doC_ID || '');
+                $('#ddlDocType').val(header.v_TYPE || '');
+                $('#NumDocNo').val(header.v_NO || '');
+                $('#DtDocDate').val(formatDate(header.v_DATE));
+                $('#DtExpectedDateReturn').val(formatDate(header.returN_DATE));
+                $('#ddlPartyName').val(header.partY_CODE || '');
+                $('#TxtState').val(header.statE_CODE || '');
+
+
             $('#TxtVehicleNo').val(header.trucK_NO || '');
             $('#txtResponsiblePerson').val(header.responsiblE_PERSONB || '');
             $('#TxtWayBillNo').val(header.waybilL_NO || '');
@@ -239,16 +275,12 @@ async function FetchPendindorderno(PartyCode, Type, v_date) {
         showToast(`Failed to load pending orders`, { type: "error" });
     }
 }
-
 function TransitReport() {
 
     if (!rowId) {
         showToast(`Please save the data before printing the report.`, { type: "info" });
         return;
     }
-
-
-
 
     var reportName = "gatepass1";
         // Get input values
@@ -329,8 +361,6 @@ function TransitReport() {
     });
 }
 
-
-
 async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO) {
     try {
         const baseUrl = "/OutwardEntry/GetPendingrowHeaderData";
@@ -343,12 +373,14 @@ async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO) {
         const details = await res.json();
         if (details.length) {
             const d = details[0];
+
             $("#TxtVehicleNo").val(d.vehiclE_NO || "");
             $("#TxtWayBillNo").val(d.ewaybilL_NO || "");
             $("#TxtAdd1PD").val(d.bilL_ADD1 || "");
             $("#TxtAdd2PD").val(d.bilL_ADD2 || "");
             $("#TxtAdd3PD").val(d.bilL_ADD3 || "");
             $("#ddlCity").val(d.bilL_CITY || "");
+            $("#ddlPartyNameByAddress").val(d.bilL_ADDRESSID || "");
             $("#TxtState").val(d.statE_CODE || "");     
             $("#TxtGSTNo").val(d.bilL_GST || "");
             $("#NumPincode").val(d.bilL_PINCODE || "");

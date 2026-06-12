@@ -906,12 +906,21 @@ function populateTable(data) {
             $('#TxtPONo').val(header.disP_PLAN_NO || '').trigger('change');
 
             $('#TxtTransporter').val(header.transporT_CODE || '');
+            $('#ddlPartyName').val(header.partY_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
             $('#TxtDocNo').val(header.v_NO || '');
             $('#InDate').val(formatDate(header.v_DATE) || '');
             $('#DtVehicleOutTime').val(formatDate(header.Out_Date) || '');
             $('#InTime').val(header.v_TIME || '');
-            $('#ddlPartyName').val(header.partY_CODE).trigger('change');
+
+
+          //  $('#ddlPartyName').val(header.partY_CODE).trigger('change');
+
+
+
+
+
+
             $('#TxtAddLine1').val(header.add1 || '');
             $('#TxtAddLine2').val(header.add2 || '');
             $('#TxtAddLine3').val(header.add3 || '');
@@ -927,8 +936,7 @@ function populateTable(data) {
             $('#ShipBillDate').val(formatDate(header.shiP_BILLDATE) || '');
             $('#DtVehicleOutTime').val(formatDate(header.ouT_DATE) || '');
             $('#TiVehicleOutTime').val(header.ouT_TIME || '');
-            $('#VehicleReturn').val(header.returN_TYPE || '');
-         
+            $('#VehicleReturn').val(header.returN_TYPE || '');         
             $('#TxtRptDate').val(formatDate(header.r_DATE) || '');
             $('#TiRptDate').val(header.r_TIME || '');
             $('#TxtBillNo').val(header.bilL_NO || '');

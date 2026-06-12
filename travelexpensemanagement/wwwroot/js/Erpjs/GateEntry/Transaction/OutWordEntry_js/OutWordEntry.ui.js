@@ -84,7 +84,8 @@ async function LoadDropDowns() {
         loadUnit(),
         DDLVtype(),
         DDLParty(),
-        DDLcity_mast()
+        DDLcity_mast(),
+        DDLstate()
     ]);
 }
 

@@ -69,7 +69,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         REF_TYPE = reader["Ref_type"]?.ToString(),
                         V_TYPE = reader["V_TYPE"]?.ToString(),
                         PARTY_GST = reader["PARTY_GST"]?.ToString(),
-                        ITEM_TYPE = reader["ITEM_TYPE"]?.ToString()
+                        ITEM_TYPE = reader["ITEM_TYPE"]?.ToString(),
+                        WAYBILL_NO = reader["WayBill_No"]?.ToString()
                     });
                 }
 
@@ -128,6 +129,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             Add2 = rdr["ADD2"]?.ToString(),
                             Add3 = rdr["ADD3"]?.ToString(),
                             PARTY_CITY = rdr["PARTY_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_CITY"]) : 0,
+                            PARTY_ADDRESSID = rdr["PARTY_ADDRESSID"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_ADDRESSID"]) : 0,
                             City = rdr["CITY"]?.ToString(),
                             STATE_CODE = rdr["STATE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["STATE_CODE"]) : 0,
                             state = rdr["state"]?.ToString(),

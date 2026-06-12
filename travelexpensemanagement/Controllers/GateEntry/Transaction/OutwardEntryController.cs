@@ -67,6 +67,17 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
 
         }
+        public JsonResult DDLstate()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = " select * from STATE_MAST where ACTIVE = 1  order by Name desc";
+                var VtypeList = _dropdownService.GetDropdownList(query);
+                return Json(VtypeList);
+            }
+
+        }
         public JsonResult fetchPartyAdd(int PartyId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -162,7 +173,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                                 BILL_CITY = reader["BILL_CITY"]?.ToString(),
                                 BILL_GST = reader["BILL_GST"]?.ToString(),
                                 BILL_PINCODE = reader["BILL_PINCODE"]?.ToString(),
-                                STATE_CODE = reader["STATE_CODE"]?.ToString()
+                                STATE_CODE = reader["STATE_CODE"]?.ToString(),
+                                BILL_ADDRESSID = reader["BILL_ADDRESSID"]?.ToString()
                             });
                         }
                     }
