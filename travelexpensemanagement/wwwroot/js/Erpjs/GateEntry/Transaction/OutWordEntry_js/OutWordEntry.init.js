@@ -477,10 +477,13 @@ function  SetFYDate(inputId, loginDate) {
                 'Please Select a Date Between ' +
                 new Date(minDate).toLocaleDateString('en-GB') +
                 ' and ' +
-                new Date(maxDate).toLocaleDateString('en-GB')
-              $input.trigger('focus');
+                new Date(maxDate).toLocaleDateString('en-GB')               
 
             );
+
+
+
+
             //$(this).val(LoginDate);   
         }
     });
