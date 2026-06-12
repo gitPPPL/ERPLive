@@ -172,7 +172,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 // Make sure header.V_DATE exists and is valid
                 if (header.V_DATE != null)
                 {
-                    string sql = "SELECT START_DATE, END_DATE FROM YEAR_MAST WHERE CODE = 9";
+                    string sql = "SELECT START_DATE, END_DATE FROM YEAR_MAST WHERE CODE = " +  g.PubFYearCode + "";
 
                     using var cmd = new SqlCommand(sql, conn);
                     using var reader = cmd.ExecuteReader();

@@ -463,25 +463,5 @@ function  SetFYDate(inputId, loginDate) {
  
     $input.attr('min', minDate).attr('max', loginDate) .val(loginDate);
 
-    $input.off('blur').on('blur', function () {
-        var selectedDate = $(this).val();
-  
-        var selDateObj = new Date(selectedDate);
-        var minDateObj = new Date(minDate);
-        var maxDateObj = new Date(maxDate);
-
-        if (!selectedDate) return; 
-
-        if (selDateObj < minDateObj || selDateObj > maxDateObj) {
-            toastr.warning(
-                'Please Select a Date Between ' +
-                new Date(minDate).toLocaleDateString('en-GB') +
-                ' and ' +
-                new Date(maxDate).toLocaleDateString('en-GB')               
-
-            );
-
-        
-        }
-    });
+   
 }

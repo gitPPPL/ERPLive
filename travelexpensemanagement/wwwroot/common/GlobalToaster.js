@@ -47,7 +47,7 @@
     // Auto remove after duration
     setTimeout(() => {
         toast.removeClass("show");
-        setTimeout(() => toast.remove(), 300);
+        setTimeout(() => toast.remove(), 600);
     }, settings.duration);
 }
 
