@@ -37,22 +37,24 @@ namespace travelexpensemanagement.Controllers.Approval
         public IActionResult GetApprovalList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             var documentData = new List<ApprovalListModel>();
-            var UserID = _globalVariableService.GetGlobalVariables();
+            var gv = _globalVariableService.GetGlobalVariables();
             try
             {
                 using (SqlConnection conn = _dbConnection.GetErpConnection())
                 {
                     using (SqlCommand cmd = new SqlCommand(@"SELECT doc_name, v_no, send_code, b.USER_NAME as sendname, send_date, status as Documentstatus,
-                    Approval_remark, c.NAME as Approvalstatus, remarks, d.name as remarkname, new_modify, 
+                    Approval_remark, c.NAME as Approvalstatus, remarks, a.remarks as remarkname, new_modify, 
                     a.Department, origin_name, origin_date, a.v_type,user_code,form_name FROM approval_status a LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.send_code = b.CODE
-                    LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE LEFT JOIN APPROVAL_RMKS d ON a.remarks = d.CODE
-                    WHERE send_code = @send_code AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm)
+                    LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE WHERE user_code = @user_code and a.year_code=@year_code 
+                    and a.COMP_CODE=@COMP_CODE AND status IN ('OPEN') and (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm)
                     ORDER BY send_date OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY", conn))
                     {
-                        cmd.Parameters.AddWithValue("@send_code", UserID.PubUserId);
+                        cmd.Parameters.AddWithValue("@user_code", gv.PubUserId);
                         cmd.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
                         cmd.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
                         cmd.Parameters.AddWithValue("@PageSize", pageSize);
+                        cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
 
                         conn.Open();
                         using (SqlDataReader reader = cmd.ExecuteReader())

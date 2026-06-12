@@ -41,10 +41,45 @@ namespace travelexpensemanagement.Controllers.Dashboard
             return View("Index");
         }
 
+        public JsonResult GetAllDashboardCount()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            int receivedCount = 0;
+            int sendCount = 0;
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                SqlCommand cmd = new SqlCommand("GetDashboardRequestCount", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@GetCODE", gv.PubUserId);
+                cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+                cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
+
+                con.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        sendCount = Convert.ToInt32(reader["SendTotalCount"]);
+                        receivedCount = Convert.ToInt32(reader["RecivedTotalCount"]);
+                    }
+                }
+            }
+
+            return Json(new
+            {
+                success = true,
+                requestCount = receivedCount,
+                sendRequestCount = sendCount
+            });
+        }
+
         //public JsonResult GetAllDashboardCount()
         //{
-        //    var userId = HttpContext.Session.GetString("CODE");
-        //    var compCode = HttpContext.Session.GetString("COMP_CODE");
+        //    var gv = _globalVariableService.GetGlobalVariables();
 
         //    int requestCount = 0;
         //    int sendRequestCount = 0;
@@ -54,8 +89,10 @@ namespace travelexpensemanagement.Controllers.Dashboard
         //        SqlCommand cmd = new SqlCommand("GetDashboardRequestCount", con);
         //        cmd.CommandType = CommandType.StoredProcedure;
 
-        //        cmd.Parameters.AddWithValue("@GetCODE", userId);
-        //        cmd.Parameters.AddWithValue("@comp_code", compCode);
+        //        cmd.Parameters.AddWithValue("@GetCODE", gv.PubUserId);
+        //        cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+        //        cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
+
 
         //        con.Open();
 

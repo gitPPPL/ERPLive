@@ -369,6 +369,12 @@
         border-radius: 4px;
         padding: 4px 6px;
     }
+    .act-btn.approve {
+        background: #bbedca;
+        color: #27723f;
+        border-radius: 4px;
+        padding: 4px 6px;
+    }
     .act-btn.view {
         background: #d9faff;
         color: #0492a9;

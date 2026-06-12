@@ -612,6 +612,7 @@ $(document).ready(async function () {
     //kks
 
     $(document).on('click', '#btn_Sendapproval', function () {
+        var FromName = window.location.pathname.split('/')[1];
         $.ajax({
             url: '/Approval/CheckPendingUser',
             type: 'POST',
@@ -643,7 +644,8 @@ $(document).ready(async function () {
                     UserCode: null,
                     UserName: null,
                     DocDate: null,
-                    TableName: 'GATE1'
+                    TableName: 'GATE1', 
+                    FromName, FromName
                 });
                
             },

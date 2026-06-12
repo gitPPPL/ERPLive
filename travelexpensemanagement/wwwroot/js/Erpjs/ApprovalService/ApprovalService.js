@@ -221,7 +221,8 @@ $(document).on('click', '#btn_Sendapp', function () {
         DocNo: ApprovalData.DocNo,
         SendTo: sendTo,
         Remarks: remarks,
-        tableName: ApprovalData.TableName
+        tableName: ApprovalData.TableName,
+        FromName: ApprovalData.FromName
     };
 
     $.ajax({

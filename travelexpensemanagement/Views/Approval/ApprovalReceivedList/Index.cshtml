@@ -67,54 +67,7 @@
         </div>
     </div>
     @* Modal Popup *@
-    <div class="modal fade" id="ApprovedModal" tabindex="-1" aria-labelledby="ApprovedLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content draggable-modal">
-                <div class="popup-header">
-                    <h5 class="popup-title" id="ApprovedLabel">Document Approval Window</h5>
-                    <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                </div>
-                <div class="modal-body">
-                    <fieldset>
-                        <legend class="sub-legend">Approval User</legend>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ddlApprovalStatus">Approval Status</label>
-                                    <select class="form-control" id="ddlApprovalStatus">
-                                        <option value="">Select Approval Status</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ddlForwardTo">Forward to</label>
-                                    <select class="form-control" id="ddlForwardTo">
-                                        <option value="">Select Forward to</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="TxtRemarks">Remarks</label>
-                                    <select class="form-control" id="ddlRemarks">
-                                        <option value="">Select Forward to</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="offset-md-4 col-md-8">
-                                <div class="button-right">
-                                    <button type="button" class="btn btn-success" id="btn_sendapproval"><i class="fa fa-paper-plane"></i> Send Approval</button>
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </fieldset>
 
 <script>
@@ -143,7 +96,7 @@
             },
             success: function (res) {
                 console.log('kks',res)
-                const docs = res.data || []; 
+                const docs = res.data || [];
                 const totalCount = res.totalCount || 0;
 
                 const tbody = $('#tblApprovedReceivedList tbody');
@@ -173,10 +126,8 @@
                             <td>${formattedOriginDate}</td>
                             <td style="display:none;">${doc.form_name || ''}</td>
                             <td class="vType">${doc.vType || ''}</td>
-                            <td>
-                                <div class="action-icons">
-                                    <i class="fa fa-check btn-view" title="View" onclick="Approvedpopup(this)"></i>
-                                </div>
+                            <td class="action-col">
+                                <button class="act-btn view" title="View Row" style="cursor:pointer;" onclick="viewbtn(this)"><i class="fa fa-eye"></i></button>
                             </td>
                         </tr>
                     `);
@@ -190,7 +141,7 @@
     }
     function formatDate(date) {
         const d = new Date(date);
-        const day = ("0" + d.getDate()).slice(-2); 
+        const day = ("0" + d.getDate()).slice(-2);
         const month = ("0" + (d.getMonth() + 1)).slice(-2);
         const year = d.getFullYear();
         return `${day}/${month}/${year}`;
@@ -249,7 +200,7 @@
                 $.each(data, function (index, item) {
                     ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
                 });
-              
+
                 if (typeof callback === "function") callback();
             },
             error: function (xhr, status, error) {
@@ -263,96 +214,20 @@
             toastr.warning('Please select at least one document.');
         }
     }
-    function ddlApprovalStatus(callback) {
-        $.ajax({
-            url: '/ApprovalReceivedList/GetApprovalReceived',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var ddl = $('#ddlApprovalStatus');
-                ddl.empty();
-                ddl.append('<option value="">-- Select Approval Status --</option>');
+     function viewbtn(button) {
+        const row = $(button).closest('tr');
+        const vNo = row.find('.vNo').text().trim();
+        const vType = row.find('.vType').text().trim();
+        const formName = row.find('td:nth-child(14)').text().trim(); // form_name column
 
-                $.each(data, function (index, item) {
-                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error loading module: ", xhr.responseText);
-                toastr.error('Error loading module: ' + error);
-            }
-        });
-    }
-    function ddlRemarks(callback) {
-        $.ajax({
-            url: '/ApprovalReceivedList/GetRemarks',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var ddl = $('#ddlRemarks');
-                ddl.empty();
-                ddl.append('<option value="">-- Select Remarks --</option>');
-
-                $.each(data, function (index, item) {
-                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
-                });
-                if (typeof callback === "function") callback();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error loading module: ", xhr.responseText);
-                toastr.error('Error loading module: ' + error);
-            }
-        });
-    }
-    $('#btn_sendapproval').click(function () {
-        const selectedRows = [];  
-        if (!validateRequiredField('#ddlApprovalStatus', 'Approval Status')) return;
-        if (!validateRequiredField('#ddlForwardTo', 'Forward to')) return;
-        if (!validateRequiredField('#ddlRemarks', 'Remarks')) return;
-
-        $('#tblApprovedReceivedList tbody input[type="checkbox"]:checked').each(function () {
-            var row = $(this).closest('tr'); 
-
-            var rowData = {
-                userCode: row.find('.usercode').text(),
-                vNo: row.find('.vNo').text(),
-                vType: row.find('.vType').text(),
-                docName: row.find('td:nth-child(3)').text(), 
-                sendName: row.find('td:nth-child(5)').text(),
-                sendDate: row.find('td:nth-child(6)').text(), 
-                documentStatus: row.find('td:nth-child(7)').text(),
-                approvalStatus: $('#ddlApprovalStatus').val(), 
-                remarks: $('#ddlRemarks').val(), 
-                forwardTo: $('#ddlForwardTo').val(), 
-                newModify: row.find('td:nth-child(10)').text(), 
-                department: row.find('td:nth-child(11)').text(),
-                originName: row.find('td:nth-child(12)').text(),
-                originDate: row.find('td:nth-child(13)').text(), 
-                form_name: row.find('td:nth-child(14)').text()
-            };
-            selectedRows.push(rowData);
-        });
-        if (selectedRows.length === 0) {
-            toastr.warning('Please select at least one document.');
-            return; 
+        if (!vNo || !vType || !formName) {
+            toastr.error("Missing data for navigation");
+            return;
         }
-
-        console.log('Selected Row Data:', selectedRows); 
-        $.ajax({
-            url: '/ApprovalReceivedList/SaveApprovaldata', 
-            type: 'POST',
-            contentType: 'application/json', 
-            data: JSON.stringify({ rows: selectedRows }), 
-            success: function (response) {
-                console.log('Server Response:', response);
-                toastr.success('Data sent successfully');
-            },
-            error: function (xhr, status, error) {
-                console.error('Error:', error);
-                toastr.error('Error sending data');
-            }
-        });
-    });
+        // build URL
+        const url = `/${formName}/Index?id=${vNo}&vtype=${vType}`;
+        // open in same tab
+        window.location.href = url;
+    }
 
 </script>

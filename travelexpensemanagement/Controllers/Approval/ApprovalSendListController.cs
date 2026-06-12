@@ -1,6 +1,7 @@
 ﻿
 using AngleSharp.Dom;
 using Dapper;
+using DocumentFormat.OpenXml.Office.Word;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -38,8 +39,9 @@ namespace travelexpensemanagement.Controllers.Approval
         [HttpGet]
         public IActionResult GetApprovalList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
+
             var documentData = new List<ApprovalListModel>();
-            var user = _globalVariableService.GetGlobalVariables();
+            var gv = _globalVariableService.GetGlobalVariables();
             int totalCount = 0;
             try
             {
@@ -51,30 +53,33 @@ namespace travelexpensemanagement.Controllers.Approval
                         SELECT COUNT(*) FROM approval_status a 
                         LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.send_code = b.CODE
                         LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE 
-                        LEFT JOIN APPROVAL_RMKS d ON a.remarks = d.CODE
-                        WHERE send_code = @send_code AND status IN ('OPEN') AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm) ", conn))
+                        WHERE send_code = @send_code and a.comp_code=@comp_code and a.year_code=@year_code
+                         AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm) ", conn))
                     {
-                        countCmd.Parameters.AddWithValue("@send_code", user.PubUserId);
+                        countCmd.Parameters.AddWithValue("@send_code", gv.PubUserId);
                         countCmd.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
+                        countCmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+                        countCmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
                         totalCount = (int)countCmd.ExecuteScalar();
                     }
                     using (SqlCommand cmd = new SqlCommand(@"
                         SELECT doc_name, v_no, send_code, b.USER_NAME as sendname, send_date, 
                         status AS Documentstatus, Approval_remark, c.NAME as Approvalstatus, remarks, 
-                        d.name as remarkname, new_modify, a.Department, origin_name, origin_date, 
+                        a.remarks as remarkname, new_modify, a.Department, origin_name, origin_date, 
                         a.v_type, user_code, form_name
                         FROM approval_status a 
                         LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.send_code = b.CODE
                         LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE 
-                        LEFT JOIN APPROVAL_RMKS d ON a.remarks = d.CODE
-                        WHERE user_code = @send_code AND status IN ('OPEN')
+                        WHERE send_code = @send_code AND a.comp_code=@comp_code and a.year_code=@year_code
                         AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm)
                         ORDER BY send_date OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY ", conn))
                     {
-                        cmd.Parameters.AddWithValue("@send_code", user.PubUserId);
+                        cmd.Parameters.AddWithValue("@send_code", gv.PubUserId);
                         cmd.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
                         cmd.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
                         cmd.Parameters.AddWithValue("@PageSize", pageSize);
+                        cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
