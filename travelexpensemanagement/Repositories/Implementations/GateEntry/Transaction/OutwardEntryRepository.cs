@@ -168,6 +168,42 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                 decimal mainQty = 0;
                 decimal gateQty = 0;
+                      
+                // Make sure header.V_DATE exists and is valid
+                if (header.V_DATE != null)
+                {
+                    string sql = "SELECT START_DATE, END_DATE FROM YEAR_MAST WHERE CODE = 9";
+
+                    using var cmd = new SqlCommand(sql, conn);
+                    using var reader = cmd.ExecuteReader();
+
+                    if (reader.Read()) 
+                    {
+                      
+                        DateTime startDate = reader.GetDateTime(reader.GetOrdinal("START_DATE"));
+                        DateTime endDate = reader.GetDateTime(reader.GetOrdinal("END_DATE"));
+                        DateTime vDate = header.V_DATE.Value;
+
+
+                        if (vDate < startDate || vDate > endDate)
+                        {
+                            return new RepositoryResponse
+                            {
+                                status = false,
+                                message = "Voucher Date must be within the Financial Year."
+                            };
+                        }
+
+                    }
+                  
+                }
+
+
+
+
+
+
+
 
                 foreach (var d in details)
                 {

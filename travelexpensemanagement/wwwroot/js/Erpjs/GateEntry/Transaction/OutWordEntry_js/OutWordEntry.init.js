@@ -481,10 +481,7 @@ function  SetFYDate(inputId, loginDate) {
 
             );
 
-
-
-
-            //$(this).val(LoginDate);   
+        
         }
     });
 }
