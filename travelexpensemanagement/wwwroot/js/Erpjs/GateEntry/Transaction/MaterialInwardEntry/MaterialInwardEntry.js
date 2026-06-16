@@ -659,9 +659,7 @@ function populateTable(data) {
     <tr class="no-border-input">
 
         <td>
-            <input type="text" class="form-control itemCode numeric-only"
-                   style="${normalStyle}"
-                   value="${data.itemCode ?? ''}" readonly />
+            <input type="text" class="form-control itemCode numeric-only"  style="${normalStyle}" value="${data.itemCode ?? ''}" readonly />
         </td>
 
         <td>
@@ -713,10 +711,7 @@ function populateTable(data) {
         </td>
 
         <td>
-            <input type="text" class="form-control remarks"
-                   maxlength="225"
-                   style="${normalStyle}"
-                   value="${data.remarks ?? ''}" />
+            <input type="text" class="form-control remarks" maxlength="225" style="${normalStyle}" value="${data.remarks ?? ''}" />
         </td>
 
         <td>

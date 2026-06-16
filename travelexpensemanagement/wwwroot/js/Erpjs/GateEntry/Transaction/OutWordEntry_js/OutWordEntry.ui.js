@@ -148,6 +148,10 @@ function addRow($tbody, data = {}) {
     const selectDept = generateSelect(DeptMap, data.department || "");
     const selectunit = generateSelect(UnitMap, data.unit || "");
 
+
+    console.log("Item", itemMap);
+
+
      const row = $(`
     <tr class="no-border-input">
       <td style="display:none;">${data.code || ""}</td>
@@ -173,17 +177,14 @@ function addRow($tbody, data = {}) {
 
       <!-- Enabled Inputs -->
       <td>
-        <input type="number" class="form-control no" value="${data.no || ''}" oninput="if(this.value.length > 12) this.value = this.value.slice(0,12)" />
+        <input type="number" class="form-control no" value="${data.no || ''}" oninput="if(this.value.length > 10) this.value = this.value.slice(0,12)" />
       </td>
       <td>
-      <input type="number" class="form-control quantity" value="${data.quantity || ''}" oninput="if(this.value.length > 12) this.value = this.value.slice(0,12)" />
+      <input type="number" class="form-control quantity" value="${data.quantity || ''}" oninput="if(this.value.length > 14) this.value = this.value.slice(0,14)" />
       </td>
 
-
-
-
       <td>
-        <input type="text" class="form-control remarks" value="${data.remarks || ''}"/>
+        <input type="text" class="form-control remarks" maxlength="225" value="${data.remarks || ''}"/>
       </td>
 
       <!-- Readonly -->

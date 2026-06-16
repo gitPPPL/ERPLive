@@ -7,8 +7,10 @@ using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.GateEntry;
+using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 
@@ -21,16 +23,29 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly IOutwardEntryListRepository _outwardEntryListRepository;
+        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         public OutwardEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
          DbHelper dbHelper, ModuleService.ModuleService moduleService, IOutwardEntryListRepository outwardEntryListRepository)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _outwardEntryListRepository = outwardEntryListRepository;
+            _moduleService = moduleService;
+
         }
         public IActionResult Index()
         {
-            return View("~/Views/GateEntry/Transaction/OutwardEntryList/Index.cshtml");
+            ViewBag.CurrentMenu = "Material Outward";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel,
+            };
+
+
+            return View("~/Views/GateEntry/Transaction/OutwardEntryList/Index.cshtml" , model);
         }
 
         [HttpGet]

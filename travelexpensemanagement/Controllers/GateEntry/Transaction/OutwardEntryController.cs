@@ -116,7 +116,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "SELECT  a.CODE, a.NAME AS Shortname, b.mgroup_type FROM  ITEM_MAST a  LEFT JOIN  ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE  WHERE  a.Active = 1  AND a.comp_code = "+ getdata.PubCompCode  +" group by a.NAME ,a.code,b.mgroup_type order by a.NAME asc";
+                string query = "SELECT  a.CODE, a.NAME AS Shortname FROM  ITEM_MAST a  LEFT JOIN  ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE  WHERE   a.comp_code = "+ getdata.PubCompCode  +" group by a.NAME ,a.code,b.mgroup_type order by a.NAME asc";
                 var ItemList = _dropdownService.GetDropdownList(query);
                 return Json(ItemList);
             }
@@ -140,8 +140,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(UnitList);
             }
         }
-
-        public JsonResult GetPendingrowHeaderData(String REF_TYPE , int REF_NO)
+        public JsonResult GetPendingrowHeaderData(String REF_TYPE , int REF_NO, string ItemType)
         {
 
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -158,6 +157,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
                     cmd.Parameters.AddWithValue("@REF_TYPE", REF_TYPE);
                     cmd.Parameters.AddWithValue("@REF_NO", REF_NO);
+                    cmd.Parameters.AddWithValue("@ITEM_TYPE", ItemType);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -183,7 +183,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
             return Json(dataList);
         }
-
         public JsonResult DDLcity_mast()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -225,7 +224,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 return Json(new  { success = false, message = ex.Message  });
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
         {

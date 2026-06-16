@@ -168,8 +168,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                 decimal mainQty = 0;
                 decimal gateQty = 0;
-                      
-                // Make sure header.V_DATE exists and is valid
+
                 if (header.V_DATE != null)
                 {
                     string sql = "SELECT START_DATE, END_DATE FROM YEAR_MAST WHERE CODE = " +  g.PubFYearCode + "";
@@ -184,7 +183,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         DateTime endDate = reader.GetDateTime(reader.GetOrdinal("END_DATE"));
                         DateTime vDate = header.V_DATE.Value;
 
-
                         if (vDate < startDate || vDate > endDate)
                         {
                             return new RepositoryResponse
@@ -194,16 +192,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             };
                         }
 
-                    }
-                  
+                    }                  
                 }
-
-
-
-
-
-
-
 
                 foreach (var d in details)
                 {
@@ -287,7 +277,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                     }
 
-
                     if (header.ITEM_TYPE != "Others")
                     {
                         using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
@@ -315,22 +304,20 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         }
                         gateQty = gateQty + (d.QTY ?? 0);
 
-
                         if (gateQty > mainQty)
                         {
                             decimal pendingQty = (decimal)((mainQty - gateQty) + d.QTY);
                             return new RepositoryResponse
                             {
                                 status = true,
-                                message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
-                                          $"& Your Quantity is = {(d.QTY ?? 0)}, " +
-                                          $"Please Check Item Name {d.ITEM_NAME}"
+                                message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " + $"Please Check Item Name {d.ITEM_NAME}"
                             };
                         }
 
                     }
 
                 }
+
                 return new RepositoryResponse { status = false, message = "Success" };
             }
             catch (Exception ex)
@@ -431,10 +418,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             return dataList;
         }
-
-
-
-
         public List<object> GetDataByPartyandAddressidCodeAsync(  int partyId, int addressid)
         {
             var getdata = _globalVariableService.GetGlobalVariables();

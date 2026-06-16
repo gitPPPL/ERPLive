@@ -46,33 +46,16 @@ async function DDLParty() {
     ddl.empty().append('<option value="">Select Party Name</option>');
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 
+    ddl.select2({
+        placeholder: "-- Select Party Name --",
+        allowClear: true,
+        width: '100%'
+    });
+
+
+
+
 }
-
-//function DDLParty() {
-
-//    $.ajax({
-//        url: '/OutwardEntry/DDlParty',
-//        type: 'GET',
-//        success: function (response) {
-//            var remarks = [];
-//            $.each(response, function (i, item) {
-//                remarks.push(item.text);
-//            });
-//            if ($("#ddlPartyName").data("ui-autocomplete")) {
-//                $("#ddlPartyName").autocomplete("destroy");
-//            }
-//            $("#ddlPartyName").autocomplete({
-//                source: remarks,
-//                minLength: 0
-//            });
-//            $("#ddlPartyName").off("focus").on("focus", function () {
-//                $(this).autocomplete("search", "");
-//            });
-//        }
-//    });
-//}
-
-
 
 async function DDLcity_mast() {
     const res = await fetch("/OutwardEntry/DDLcity_mast");
@@ -96,7 +79,8 @@ async function loadPartyAddresses(partyId) {
     const res = await fetch(`/OutwardEntry/fetchPartyAdd?PartyId=${encodeURIComponent(partyId)}`);
     const list = await res.json();
     const ddl = $("#ddlPartyNameByAddress");
-    ddl.append('<option value="">Select Party Address</option>');
+    ddl.empty().append('<option value="">Select Party Address</option>');
+
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 }
 
@@ -109,7 +93,7 @@ async function fetchPartyDetails(partyId) {
     if (details.length) {
         const d = details[0];
 
-        $("#ddlPartyNameByAddress").val(d.addressId || "");
+        $("#ddlPartyNameByAddress").val(d.addresS_ID || "");
         $("#TxtAdd1PD").val(d.add1 || "");
         $("#TxtAdd2PD").val(d.add2 || "");
         $("#TxtAdd3PD").val(d.add3 || "");
@@ -172,31 +156,35 @@ function LoadFormByID(rowId, vtype) {
             } else {
                 document.getElementById("Conditionnaldesignid").style.display = "none";
             }
+      
+            DDLParty().then(() => {
+                $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
+            });
+
             document.getElementById("ddlPartyName").disabled = true;
-                $('#TxtCode').val(header.doC_ID || '');
+
+
+            $('#TxtCode').val(header.doC_ID || '');
                 $('#ddlDocType').val(header.v_TYPE || '');
                 $('#NumDocNo').val(header.v_NO || '');
                 $('#DtDocDate').val(formatDate(header.v_DATE));
                 $('#DtExpectedDateReturn').val(formatDate(header.returN_DATE));
-                $('#ddlPartyName').val(header.partY_CODE || '');
                 $('#TxtState').val(header.statE_CODE || '');
+                $('#TxtVehicleNo').val(header.trucK_NO || '');
+                $('#txtResponsiblePerson').val(header.responsiblE_PERSONB || '');
+                $('#TxtWayBillNo').val(header.waybilL_NO || '');
+                $('#TxtRemarks').val(header.remarks || '');
+                $('#TxtAdd1PD').val(header.add1 || '');
+                $('#TxtAdd2PD').val(header.add2 || '');
+                $('#TxtAdd3PD').val(header.add3 || '');
 
-
-            $('#TxtVehicleNo').val(header.trucK_NO || '');
-            $('#txtResponsiblePerson').val(header.responsiblE_PERSONB || '');
-            $('#TxtWayBillNo').val(header.waybilL_NO || '');
-            $('#TxtRemarks').val(header.remarks || '');
-            $('#TxtAdd1PD').val(header.add1 || '');
-            $('#TxtAdd2PD').val(header.add2 || '');
-            $('#TxtAdd3PD').val(header.add3 || '');
-
-            $('#ddlCity').val(header.partY_CITY || '');
-            $('#TxtGSTNo').val(header.partY_GST || '');
-            $('#NumPincode').val(header.partY_PINCODE || '');
-            $('#ddlType').val(header.iteM_TYPE || '');
-            $('#DtTxtDocDate').val(header.v_TIME || '');
-            loadPartyAddresses(header.partY_CODE).then(() => {
-                $('#ddlPartyNameByAddress').val(header.partY_ADDRESSID || '');
+                $('#ddlCity').val(header.partY_CITY || '');
+                $('#TxtGSTNo').val(header.partY_GST || '');
+                $('#NumPincode').val(header.partY_PINCODE || '');
+                $('#ddlType').val(header.iteM_TYPE || '');
+                $('#DtTxtDocDate').val(header.v_TIME || '');
+                loadPartyAddresses(header.partY_CODE).then(() => {
+                    $('#ddlPartyNameByAddress').val(header.partY_ADDRESSID || '');
             });
 
             const $tbody = $("#tblOutwardEntry tbody");
@@ -361,10 +349,10 @@ function TransitReport() {
     });
 }
 
-async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO) {
+async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO, typeText) {
     try {
         const baseUrl = "/OutwardEntry/GetPendingrowHeaderData";
-        const queryParams = `REF_TYPE=${encodeURIComponent(REF_TYPE)}&REF_NO=${encodeURIComponent(REF_NO)}`;
+        const queryParams = `REF_TYPE=${encodeURIComponent(REF_TYPE)}&REF_NO=${encodeURIComponent(REF_NO)}&ItemType=${encodeURIComponent(typeText)}`;
         const url = `${baseUrl}?${queryParams}`;
 
         const res = await fetch(url);
@@ -384,17 +372,7 @@ async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO) {
             $("#TxtState").val(d.statE_CODE || "");     
             $("#TxtGSTNo").val(d.bilL_GST || "");
             $("#NumPincode").val(d.bilL_PINCODE || "");
-        } else {
-            $("#TxtVehicleNo").val( "");
-            $("#TxtWayBillNo").val( "");
-            $("#TxtAdd1PD").val("");
-            $("#TxtAdd2PD").val("");
-            $("#TxtAdd3PD").val("");
-            $("#ddlCity").val("");
-            $("#TxtState").val("");
-            $("#TxtGSTNo").val("");
-            $("#NumPincode").val("");
-        }
+        } 
     } catch (error) {
         console.error("Error fetching pending order header data:", error);
   

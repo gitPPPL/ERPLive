@@ -19,7 +19,6 @@
         let CompCode = globalVars.CompCode;
         let LoginDate = globalVars.LoginDate;
 
-
     $(document).ready(function () {
         (async () => {
             try {
@@ -50,6 +49,13 @@
                 
                     let now = new Date();
                     $('#DtTxtDocDate').val(now.toTimeString().slice(0, 8));
+
+                    var today = new Date().toISOString().split('T')[0];
+                    $('#DtExpectedDateReturn').val(today);
+
+
+
+
                 }
 
                 $("#btn-save").click(async function (e) {
@@ -76,11 +82,14 @@
                     }
 
                     if (DocType === "OURT") {
-        
+
+                        if (!validateRequiredField('#DtExpectedDateReturn', 'Please Select Exp.Dt of Return.')) return;    
+
                         if (RETURN_DATE < V_DATE) {                 
                             showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
                             return;
-                        }            
+                        }    
+                                            
                         if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
                     }
      
@@ -183,7 +192,7 @@
                     }
 
                     if (!hasAtLeastOneItem) {
-                        toastr.warning("Please add at least one item.");
+                        toastr.warning("Please Add One Row In Detail Section. ");
                         return;
                     }
 
@@ -288,14 +297,7 @@
                     const $row = $(this).closest("tr");
                     const wasLast = $row.is(":last-child");
                     $row.remove();
-                    if (wasLast) {
-                        const $last = $tbody.find("tr:last");
-                        if ($last.length && !$last.find(".btn-add-action").length) {
-                            $last.find("td:last").prepend(
-                                `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
-                            );
-                        }
-                    }
+          
                 });
 
 
@@ -310,35 +312,20 @@
 
                 });
 
-                $("#ddlPartyName").on("change", function () {
+                $("#ddlPartyName").on("change", async function () {
                     const partyId = $(this).val();
-                    $('#ddlDocType').prop('disabled', true);
-                    loadPartyAddresses(partyId);
-                    fetchPartyDetails(partyId);
+                    if (mode != 'view' && !rowId) {
+                        $('#ddlDocType').prop('disabled', true);
+                       await loadPartyAddresses(partyId);
+                       await fetchPartyDetails(partyId);
+                    } 
                 });
-
-
-                //$("#ddlPartyName").autocomplete({
-                //    source: partyData,
-                //    minLength: 0,
-                //    select: function (event, ui) {
-                //        $("#ddlPartyName").val(ui.item.label);
-                //        $("#hdnPartyId").val(ui.item.value);
-                //        return false;
-                //    }
-                //});
-
-
 
                 $("#ddlPartyNameByAddress").on("change", function () {
                     const partyId = $("#ddlPartyName").val();
                     const addId = $(this).val();
                     //fetchPartyAddressDetails(partyId, addId);
                     GetDataByPartyandAddressidCodeAsync(partyId, addId);
-
-
-
-
 
                 });
 
@@ -418,7 +405,10 @@
                                 const refType = $firstRow.find(".ref-type").val() || "";
                                 const refNo = $firstRow.find(".ref-no").val() || "";
                                 if (refNo != '' && refType != '') {
-                                    await fetchPendingOrderHeaderData(refType, refNo);
+
+                                    const typeText = $('#ddlType option:selected').text();
+
+                                    await fetchPendingOrderHeaderData(refType, refNo, typeText);
                                 }
                             }
                         }
@@ -431,7 +421,6 @@
                         toastr.error("Failed to fetch data");
                     }
                 });
-
 
                 $(document).on("change", ".row-checkbox", function () {
                     const index = $(this).data("index");
@@ -451,17 +440,30 @@
         })();
     });
 
-function  SetFYDate(inputId, loginDate) {
-    var d = new Date(loginDate);
-    var y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
-
-    var minDate = y + '-04-01';
-    var maxDate = (y + 1) + '-03-31';
-
+function SetFYDate(inputId, loginDate) {
     var $input = $('#' + inputId);
+    var d = new Date(loginDate);
 
- 
-    $input.attr('min', minDate).attr('max', loginDate) .val(loginDate);
+    // Determine the financial year start year
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
 
-   
+    var minDate = fyStartYear + '-04-01';  // FY start
+    var maxDate = loginDate;               // Cannot select beyond login date
+
+    // Set attributes and default value
+    $input.attr('min', minDate)
+        .attr('max', maxDate)
+        .val(maxDate);
+
+    // Validate user input
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
 }
