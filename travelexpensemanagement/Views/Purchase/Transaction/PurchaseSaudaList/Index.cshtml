@@ -109,6 +109,12 @@
                     <th>Customer Name</th>
                     <th>City</th>
                     <th>Item Name</th>
+                    <th>Weight</th>
+                    <th>Rate</th>
+                    <th>Freight Term</th>
+                    <th>PI No.</th>
+                    <th>Offer No.</th>
+
                     <th>Remarks</th>
                     <th class="action-col">Action</th>
                 </tr>
@@ -160,15 +166,16 @@
             currentPage = 1;
             loadSaudaList();
         });
+          
 
-        $('#btnExport').click(function () {
-            let text = $('#searchBox').val();
-            window.location.href = '/PurchaseSaudaList/Export?searchTerm=' + encodeURIComponent(text);
+         $('#btnExport').on('click', function () {
+        var text = $('#searchBox').val();
+        window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#btnPrint').click(function () {
-            let text = $('#searchBox').val();
-            window.open('/PurchaseSaudaList/Print?searchTerm=' + encodeURIComponent(text), '_blank');
+         $('#btnPrint').on('click', function () {
+        var text = $('#searchBox').val();
+        window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
         });
 
     });
@@ -223,6 +230,11 @@
                     <td>${item.customerName || ''}</td>
                     <td>${item.cityName || ''}</td>
                     <td>${item.itemName || ''}</td>
+                     <td>${item.qty || ''}</td>
+                     <td>${item.rate || ''}</td>
+                     <td>${item.frT_TERM || ''}</td>
+                     <td>${item.pino || ''}</td>
+                     <td>${item.offerno || ''}</td>
                     <td>${item.remark || ''}</td>
 
                     <td class="action-col">
