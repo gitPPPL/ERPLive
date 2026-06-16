@@ -31,9 +31,14 @@
                 else {
                     $('#DtDocDate').prop('disabled', true);
                     $('#DtTxtDocDate').prop('disabled', true);
-                }
+                }          
+
 
                 if (rowId) {
+
+                    $('#ddlDocType').prop('disabled', true);
+                    $('#ddlType').prop('disabled', true);
+
                     await LoadFormByID(rowId, vtype);
                     if (mode == 'view') {
                         setFormReadOnly();
