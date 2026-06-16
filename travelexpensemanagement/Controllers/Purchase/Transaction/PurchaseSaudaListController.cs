@@ -5,9 +5,11 @@ using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.FincialAccounting.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
+using travelexpensemanagement.ModuleService;
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseSaudaListController : Controller
@@ -15,18 +17,30 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
+        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         public PurchaseSaudaListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
     DropdownService dropdownService, DbHelper dbHelper,
     ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-
+            _moduleService = moduleService;
         }
 
         public IActionResult Index()
         {
-            return View("~/Views/Purchase/Transaction/PurchaseSaudaList/Index.cshtml");
+
+            ViewBag.CurrentMenu = "Purchase Contract";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel,
+            };
+
+
+            return View("~/Views/Purchase/Transaction/PurchaseSaudaList/Index.cshtml", model);
         }
 
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
