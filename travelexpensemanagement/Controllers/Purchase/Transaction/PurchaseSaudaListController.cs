@@ -1,6 +1,7 @@
 ﻿using iTextSharp.text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
@@ -86,7 +87,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 PARTY_TO = reader["PARTY_TO"] != DBNull.Value ? reader["PARTY_TO"].ToString() : string.Empty,
                                 ItemName = reader["ItemName"] != DBNull.Value ? reader["ItemName"].ToString() : string.Empty,
                                 Type = reader["ITEM_TYPE"] != DBNull.Value ? reader["ITEM_TYPE"].ToString() : string.Empty,
-                                REMARK = reader["REMARK"] != DBNull.Value ? reader["REMARK"].ToString() : string.Empty
+                                REMARK = reader["REMARK"] != DBNull.Value ? reader["REMARK"].ToString() : string.Empty,
+                                DOC_ID = reader["DOC_ID"] != DBNull.Value ? reader["DOC_ID"].ToString() : string.Empty,
+                               V_TYPE = reader["v_TYPE"] != DBNull.Value ? reader["v_TYPE"].ToString() : string.Empty
                             });
                         }
 
@@ -289,46 +292,219 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
 
-
-        [HttpPost]
-        public JsonResult Delete(int code)
+       public JsonResult Deletevalidation(int code, string v_type)
         {
-            var getGlobalCode = _globalVariableService.GetGlobalVariables();
+            var global = _globalVariableService.GetGlobalVariables();
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseSauda", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
 
-                        cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@V_NO", code);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", "PAUD");
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
+                    // 1. GATE check
+                    using (SqlCommand cmd = new SqlCommand(@"
+                        SELECT TOP 1 v_no, v_date  FROM GATE2 WHERE REF_TYPE = @v_type  AND REF_NO = @v_no
+                        AND COMP_CODE = @comp AND BRANCH_CODE = @branch AND YEAR_CODE = @year", con))
+                    {
+                        cmd.Parameters.AddWithValue("@v_type", v_type);
+                        cmd.Parameters.AddWithValue("@v_no", code);
+                        cmd.Parameters.AddWithValue("@comp", global.PubCompCode);
+                        cmd.Parameters.AddWithValue("@branch", global.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@year", global.PubFYearCode);
+
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                            {
+                                if(global.PubUserLevel != "1")
+                                {
+
+                                    return Json(new { success = false, message = $"Exists in Gate Serial No: {r["v_no"]} dated {r["v_date"]}" });
+
+                                }
+                                return Json(new { success = true, message = $"Exists in Gate Serial No: {r["v_no"]} dated {r["v_date"]}" });
+
+                            }
+                        }
+                    }
+
+                    // 2. ORDER check
+                    using (SqlCommand cmd = new SqlCommand(@"
+                        SELECT TOP 1 v_no, v_date
+                        FROM ORDER2
+                        WHERE SAUDA_TYPE = @v_type
+                        AND SAUDA_NO = @v_no
+                        AND COMP_CODE = @comp
+                        AND BRANCH_CODE = @branch
+                        AND YEAR_CODE = @year", con))
+                    {
+                        cmd.Parameters.AddWithValue("@v_type", v_type);
+                        cmd.Parameters.AddWithValue("@v_no", code);
+                        cmd.Parameters.AddWithValue("@comp", global.PubCompCode);
+                        cmd.Parameters.AddWithValue("@branch", global.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@year", global.PubFYearCode);
+
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                            {
+
+                                if (global.PubUserLevel != "1")
+                                {
+                                    return Json(new
+                                    {
+                                        success = false,
+                                        message = $"Exists in Order Serial No: {r["v_no"]} dated {r["v_date"]}"
+                                    });
+                                }
+
+                                    return Json(new
+                                    {
+                                        success = true,
+                                        message = $"Exists in Order Serial No: {r["v_no"]} dated {r["v_date"]}"
+                                    });
+                            }
+                        }
+                    }
+
+                    // 3. Approval check
+                    using (SqlCommand cmd = new SqlCommand(@"
+                        SELECT FAPROV_STATUS
+                        FROM SAUDA
+                        WHERE V_TYPE = @v_type
+                        AND V_NO = @v_no
+                        AND COMP_CODE = @comp
+                        AND BRANCH_CODE = @branch
+                        AND YEAR_CODE = @year", con))
+                    {
+                        cmd.Parameters.AddWithValue("@v_type", v_type);
+                        cmd.Parameters.AddWithValue("@v_no", code);
+                        cmd.Parameters.AddWithValue("@comp", global.PubCompCode);
+                        cmd.Parameters.AddWithValue("@branch", global.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@year", global.PubFYearCode);
+
+                        var status = cmd.ExecuteScalar()?.ToString();
+
+                        if (status == "Approved")
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = "Document is Approved. Deletion not allowed."
+                            });
+                        }
                     }
                 }
 
-                return Json(new { success = true, message = "Purchase Sauda deleted successfully." });
+                // ✅ If everything is OK
+                return Json(new
+                {
+                    success = true,
+                    message = "Validation passed. Safe to delete."
+                });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error deleting Purchase Sauda .", error = ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    message = "Error occurred during validation.",
+                    error = ex.Message
+                });
             }
         }
 
 
+        [HttpPost]
+        public JsonResult Delete(int code, string v_type)
+        {
+            var global = _globalVariableService.GetGlobalVariables();
 
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+                    // 4. Delete using stored procedure
+                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseSauda", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "DELETE");
+                        cmd.Parameters.AddWithValue("@V_NO", code);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@V_TYPE", v_type);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                        cmd.ExecuteNonQuery();
+                    }
 
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Purchase Sauda deleted successfully."
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error deleting Purchase Sauda.",
+                    error = ex.Message
+                });
+            }
+        }
 
+        public JsonResult DocDetailsCode(string docCode)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            List<InwardEntryDetailDto> docDetails = new List<InwardEntryDetailDto>();
 
+            using (SqlConnection conn = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseSauda", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "DocDetailID");
+                    cmd.Parameters.AddWithValue("@DOC_ID", docCode);
 
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var InwardEntryDetailDto = new InwardEntryDetailDto
+                            {
+                                Code = reader["Code"]?.ToString(),
+                                UUser = reader["UUser"]?.ToString(),
+                                UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : (DateTime?)null,
+                                EUSER = reader["EUSER"]?.ToString(),
+                                EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : (DateTime?)null,
+                                WSID = reader["WSID"]?.ToString(),
+                                LIP = reader["LIP"]?.ToString(),
+                                LID = reader["LID"]?.ToString()
+                            };
+                            docDetails.Add(InwardEntryDetailDto);
+                        }
+                    }
+                }
+            }
 
+            return Json(new { success = true, data = docDetails });
+        }
 
+        public class InwardEntryDetailDto
+        {
+            public string? Code { get; set; }
+            public string? UUser { get; set; }
+            public DateTime? UDATE { get; set; }
+            public string? EUSER { get; set; }
+            public DateTime? EDATE { get; set; }
+            public string? WSID { get; set; }
+            public string? LIP { get; set; }
+            public string? LID { get; set; }
+        }
 
     }
 }

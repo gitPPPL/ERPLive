@@ -92,8 +92,16 @@
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
 
-        <table id="tblPurchaseSaudaList" class="excel-table fixed-grid-table">
-
+        <table id="tblPurchaseSaudaList" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="width: 100px;">  
+                <col style="width: 120px;">  
+                <col style="width: 200px;">  
+                <col style="width: 150px;">  
+                <col style="width: 200px;">  
+                <col style="width: 250px;">  
+                <col style="width: 120px;">  
+            </colgroup>
             <thead>
                 <tr>
                     <th>Serial No</th>
@@ -112,11 +120,12 @@
 
     </div>
 
+
     <!-- PAGINATION -->
     <div class="erppagelist-pagination">
 
         <div class="pagination-left">
-            <select id="pageSizeSelect" onchange="changePageSize()">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
                 <option value="5">5</option>
                 <option value="10" selected>10</option>
                 <option value="20">20</option>
@@ -125,9 +134,9 @@
         </div>
 
         <div class="pagination-center">
-            <button onclick="prevPage()" id="prevBtn">‹</button>
-            <div id="pageNumbers"></div>
-            <button onclick="nextPage()" id="nextBtn">›</button>
+            <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
         </div>
 
         <div class="pagination-right" id="pageInfoText">
@@ -177,7 +186,7 @@
                 pageSize: pageSize
             },
             success: function (res) {
-
+                console.log("Res", res);
                 if (!res.success) {
                     toastr.error("Failed to load data");
                     return;
@@ -220,16 +229,21 @@
 
                         @if (canEdit)
                         {
-                                <button onclick="edit('${item.v_NO}')"><i class="fa fa-edit"></i></button>
+                                <button class="act-btn edit" onclick="edit('${item.v_NO}')"><i class="fa fa-edit"></i></button>
+                                
                         }
-
-                        <button onclick="view('${item.v_NO}')"><i class="fa fa-eye"></i></button>
+                        <button class="act-btn view" onclick="view('${item.v_NO}')"><i class="fa fa-eye"></i></button>
+                        
 
                         @if (canDelete)
                         {
-                                <button onclick="deleteRow('${item.v_NO}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn delete"
+                                 onclick="deletevalidation('${item.v_NO}', '${item.v_TYPE}')">
+                            <i class="fa fa-trash"></i>
+                            </button>
+                                
                         }
-
+                         <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
                     </td>
                 </tr>
             `);
@@ -295,19 +309,44 @@
         window.location.href = '/PurchaseSauda/Index?id=' + id + '&mode=view';
     }
 
-    function deleteRow(id) {
+    function deletevalidation(id, v_TYPE) {
+             
 
-        if (!confirm("Delete this record?")) return;
-
-        $.post('/PurchaseSaudaList/Delete', { code: id }, function (res) {
-            if (res.success) {
-                toastr.success("Deleted");
-                loadSaudaList();
-            } else {
-                toastr.error(res.message);
+        $.post('/PurchaseSaudaList/Deletevalidation',
+            {
+                code: id,
+                v_type: v_TYPE
+            },
+            function (res) {        
+                if (!res.success) {
+                    toastr.warning(res.message);
+                    return;
+                }       
+                if (confirm(res.message + "\n\nDo you want to proceed with DELETE?")) {
+                    deleteRow(id, v_TYPE);
+                }
             }
-        });
+        );
+    }
 
+
+    function deleteRow(id, v_TYPE) {
+       if (!confirm("Do you want to delete this record?")) return;
+
+         $.post('/PurchaseSaudaList/Delete',
+            {
+                code: id,
+                v_type: v_TYPE
+            },
+            function (res) {
+                if (res.success) {
+                    toastr.success(res.message || "Deleted successfully");
+                    loadSaudaList();
+                } else {
+                    toastr.warning(res.message);
+                }
+            }
+        );
     }
 
     // UTIL
@@ -316,6 +355,26 @@
         let d = new Date(dateStr);
         if (isNaN(d)) return '';
         return d.toISOString().split('T')[0];
+    }
+
+   function showDocumentPopup(docCode) {
+    
+        $.ajax({
+            url: '/PurchaseSaudaList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
     }
 
 </script>
