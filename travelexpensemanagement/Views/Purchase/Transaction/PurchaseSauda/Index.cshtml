@@ -513,11 +513,9 @@
                 await GetVNo();
                 document.getElementById('dtDocDate').valueAsDate = new Date();
                  document.getElementById('DispatchDocDate').valueAsDate = new Date();
-            }
+            }              
 
-               
-
-                    LoadDropDown()
+             LoadDropDown()
             .then(() => {
                 if (rowId) {
                     return LoadFormByID(rowId).then(() => {
@@ -529,14 +527,12 @@
                         } else {
                             $('#GradeID').html('Grade');
                         }
-
                         const DtSBLCDue = $("#DtSBLCDue").val();
                         if (DtSBLCDue) {
-                        $("#chkSBLCDue").prop("checked", true);
+                         $("#chkSBLCDue").prop("checked", true);
                         } else {
-                        $("#chkSBLCDue").prop("checked", false);
+                         $("#chkSBLCDue").prop("checked", false);
                         }
-
                         const DtLCDue = $("#DtLCDue").val();
                         if (DtLCDue) {
                         $("#chkDtLCDue").prop("checked", true);
@@ -623,7 +619,7 @@
             $row.find('input[type="text"]').val(fileName);
           });
 
-          $("#btn-save").click(function (e) {
+          $("#btn-save").click(async function (e) {
             e.preventDefault();
                     const DOC_ID = $.trim($('#TxtCode').val()) || null;
                     const V_NO = $.trim($('#txtDocNo').val()) ? parseFloat($.trim($('#txtDocNo').val())) : null;
@@ -686,83 +682,39 @@
                     const ACTION = !DOC_ID ? 'INSERT' : 'UPDATE';
                     const TAX_TERM = $.trim($('#ddlPackingType option:selected').text()) || "";
 
-                    if (!V_DATE) {
-                        toastr.warning("Please select a Voucher Date.");
-                            $("#dtDocDate").focus();
-                        return;
-                    }
-                    if (!SHIP_TYPE) {
-                        toastr.warning("Please select a Supply From.");
-                            $("#ddlSupplyFrom").focus();
-                        return;
-                    }
-                    if (!PARTY_CODE) {
-                        toastr.warning("Please select a Party Name.");
-                            $("#ddlPartyName").focus();
-                        return;
-                    }
-                    if (!ITEM_CODE) {
-                                toastr.warning("Please select a Item Name.");
-                                $("#ddlItemName").focus();
-                                return;
-                            }
-                    if (!DEAL_THROUGH) {
-                            toastr.warning("Please select a Purchase Through.");
-                            $("#ddlPurchaseThrough").focus();
-                            return;
-                        }
-                    if (!DEAL_THROUGH) {
-                        toastr.warning("Please select a Purchase Through.");
-                        $("#ddlPurchaseThrough").focus();
-                        return;
-                    }
-        
-                    if (!QTY) {
-                        toastr.warning("Please Fill Weight (Kgs) .");
-                        $("#numWeight").focus();
-                        return;
-                    }
-                    if (!TAX_CODE) {
-                        toastr.warning("Please Select Tax Rate");
-                        $("#ddlTaxRate").focus();
-                        return;
-                    }
-                    if (!PAYTERM_CODE) {
-                        toastr.warning("Please Select Payment Term ");
-                        $("#ddlPaymentTerm").focus();
-                        return;
-                    }
-                    if (FRT_TERM === "-- Select Freight Term --" || !FRT_TERM) {
-                        toastr.warning("Please Select Freight Term ");
-                        $("#ddlFreightTerm").focus();
-                        return;
-                        }
 
-                    if (!RATE) {
-                        toastr.warning("Please Fill Rate");
-                        $("#numRate").focus();
-                        return;
-                    }
-                  
-                    
+
+                       if (!validateRequiredField('#dtDocDate', 'Please select a Voucher Date.')) return;
+                       if (!validateRequiredField('#ddlSupplyFrom', 'Please select a Supply From.')) return;
+                       if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
+                       if (!validateRequiredField('#ddlItemName', 'Please select a Item Name.')) return;
+                       if (!validateRequiredField('#ddlItemName', 'Please select a Item Name.')) return;
+                       if (!validateRequiredField('#ddlFreightTerm', 'Please Select Freight Term')) return;
+                       if (!validateRequiredField('#numWeight', 'Please Fill Weight (Kgs) .')) return;
+                       if (!validateRequiredField('#numRate', 'Please Fill Rate .')) return;
+                       if (!validateRequiredField('#ddlPurchaseThrough', 'Please select a Purchase Through.')) return;
+                       if (!validateRequiredField('#ddlTaxRate', 'Please Select Tax Rate')) return;
+                       if (!validateRequiredField('#ddlPaymentTerm', 'Please Select Payment Term')) return;
            
+                        if ($("#chkSBLCDue").is(":checked")) {
 
-                       if ($("#chkSBLCDue").is(":checked")) {
-                            if (!SBLC_DUEDATE) {
-                            toastr.warning("Please Select SBLC Due Date");
-                            $("#DtSBLCDue").focus();
-                            return;
+                         if (!validateRequiredField('#DtSBLCDue', 'Please Select SBLC Due Date')) return;
                         }
-
-                       }
+                                               
                        if ($("#chkDtLCDue").is(":checked")) {
-                            if (!LC_DUEDATE) {
-                            toastr.warning("Please Select LC Due Dt");
-                            $("#DtLCDue").focus();
-                            return;
-                        }
-
+                          if (!validateRequiredField('#DtLCDue', 'Please Select LC Due Dt')) return;
                        }
+
+
+                    const checkdate = await checkValidDate();
+
+                    if (!checkdate) {
+                    return;
+                    }
+
+
+
+
 
 
             const Header = {
@@ -818,7 +770,6 @@
             if (SHIP_TYPE === "IMPORT") {
                 if (GRADE === "-- Select Grade --" || !GRADE )
                 {
-
                     toastr.warning("Please Select Grade.");
                     return;
                 }
@@ -884,25 +835,20 @@
               console.error("Error loading dropdowns:", error);
             }
           }
+             
+          function formatDate(dateStr) {
+              if (!dateStr) return null;
 
-    
+              const date = new Date(dateStr);
+              if (isNaN(date)) return null;
 
-            function formatDate(dateStr) {
-      if (!dateStr) return null;
+              // Extract local date parts
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0'); // Months 0-11
+              const day = String(date.getDate()).padStart(2, '0');
 
-      const date = new Date(dateStr);
-      if (isNaN(date)) return null;
-
-      // Extract local date parts
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months 0-11
-      const day = String(date.getDate()).padStart(2, '0');
-
-      return `${year}-${month}-${day}`;
-    }
-
-
-
+              return `${year}-${month}-${day}`;
+            }
 
           function collectPurchaseDocumentsData() {
             const documents = [];
@@ -927,7 +873,7 @@
             return documents;
         }
 
-         function addAttachmentRow(data = {}) {
+          function addAttachmentRow(data = {}) {
           const index = data.index || attachmentIndex++;
           const row = `
         <tr>
@@ -950,7 +896,7 @@
       $attachmentTbody.append(row);
     }
 
-         function recalculateNetRate() {
+          function recalculateNetRate() {
                     const baseRate = parseFloat($('#numRate').val()) || 0;
                     const discountPercent = parseFloat($('#numDiscount').val()) || 0;
                     let taxRate = 0;
@@ -968,7 +914,7 @@
                     $('#numTaxRate').val(taxRate.toFixed(2));
                 }
 
-         async function GetVNo() {
+          async function GetVNo() {
             try {
               const res = await fetch('/PurchaseSauda/GetVNo');
               if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -983,7 +929,7 @@
             }
           }
 
-         async function LoadFormByID(id) {
+          async function LoadFormByID(id) {
           try {
             const res = await $.ajax({
               url: '/PurchaseSaudaList/GetDataByCode',
@@ -995,8 +941,7 @@
 
               const header = res.data.header;
               const DispatchDetails = res.data.details;
-              const attachments = res.data.attachment || [];
-         
+              const attachments = res.data.attachment || [];         
 
                 $('#TxtCode').val(header.doC_ID || '');
                 $('#txtDocNo').val(header.v_NO || '');
@@ -1044,12 +989,7 @@
                 $('#ddlPurchaseThrough').val(header.deaL_THROUGH || 0);
                 $('#txtCountry').val(header.countrY_CODE || 0);
                 $('#txtCountry').val(header.country|| '');
-
-
-              
-
-
-
+                        
 
               $attachmentTbody.empty();
               if (attachments.length === 0) {
@@ -1090,7 +1030,7 @@
           }
         }
 
-         async function fetchDDlParty(PartyId) {
+          async function fetchDDlParty(PartyId) {
             try {
               const response = await fetch(`/PurchaseSauda/GetDataByPartyCode?PartyId=${PartyId}`);
               const data = await response.json();
@@ -1108,7 +1048,7 @@
             }
           }
 
-         async function DDLPartyMast() {
+          async function DDLPartyMast() {
             try {
                 const res = await fetch('/PurchaseSauda/DDLPartyMast');
                 const data = await res.json();
@@ -1160,8 +1100,7 @@
 
           async function DDLItemMaster() {
             try {
-         const res = await fetch('/PurchaseSauda/DDLItemMaster');
-
+             const res = await fetch('/PurchaseSauda/DDLItemMaster');
               const data = await res.json();
               const ddl = $('#ddlItemName');
               ddl.empty().append('<option value="">-- Select Item Name --</option>');
@@ -1254,13 +1193,38 @@
                 form.find('.btn-save').hide();
             }
 
-  
+          async function checkValidDate() {
+            const data = {
+                vdate: $("#dtDocDate").val(),
+                vtype: 'PAUD',
+                vno: $("#txtDocNo").val()
+            };
+            try {
+            const response = await fetch('/PurchaseSauda/CheckValidDate', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+            });
 
-           
+            const result = await response.json();
+
+            if (result.status === false) {
+                showToast(result.message, { type: "warning" });
+                return false;
+            }
+
+            return true;
+
+            } catch (error) {
+                showToast(result.message, { type: "warning" });
+                return false;
+            }
+            }
 
 
-
-                    });
+        });
 
 </script>
 
@@ -1398,10 +1362,6 @@
         toastr.warning('Please Fill Atleast One Row in Dispatch Delivery Planning.');
         return ; 
         } 
-
-
-
-
 
 
         $("#DispatchSave").prop("disabled", true);

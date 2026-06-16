@@ -3,6 +3,7 @@ using iTextSharp.text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -18,8 +19,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly GlobalValidationdate _globalValidationdate;
 
-        public PurchaseSaudaController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+        public PurchaseSaudaController(DataBaseConnection dbConnection, GlobalValidationdate globalValidationdate, GlobalVariableService globalVariableService,
             DropdownService dropdownService, DbHelper dbHelper,
             ModuleService.ModuleService moduleService)
         {
@@ -28,6 +30,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
 
         public IActionResult Index()
@@ -515,6 +518,23 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return $"Error: {ex.Message}";
             }
         }
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("SAUDA", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+
+
+
 
 
 
