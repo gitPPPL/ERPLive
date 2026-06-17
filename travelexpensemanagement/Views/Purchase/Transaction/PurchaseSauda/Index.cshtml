@@ -37,21 +37,17 @@
                 <div class="form-group">
                     <label>Doc Status</label>
                     <select class="form-control" id="ddlDocStatus">
-                        <option value="">-- Select Status --</option>
-                        <option value="open" selected>Open</option>
+                        <option value="open">Open</option>
                         <option value="closed">Closed</option>
                     </select>
-
                 </div>
-            </div>
-      
+            </div>      
             <div class="col-md-3">
                 <div class="form-group">
                     <label>Supply From<span class="required">*</span></label>
-                    <select class="form-control" id="ddlSupplyFrom">
-                        <option value="">-- Select Supply From --</option>
-                        <option>LOCAL</option>
-                        <option>IMPORT</option>
+                    <select class="form-control" id="ddlSupplyFrom">                       
+                        <option value="LOCAL">LOCAL</option>
+                        <option value="IMPORT">IMPORT</option>
                     </select>
                 </div>
             </div>
@@ -499,13 +495,14 @@
 </fieldset>
 
 <script>
-        $(document).ready(async function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const rowId = urlParams.get('id');
-            const mode = urlParams.get('mode');
-            const $attachmentTbody = $('#tblAttachmentPS tbody');
-            const $dispatchtableTbody = $('#tblPurchaseQuotationList tbody');
-            let attachmentIndex = Date.now();
+        const urlParams = new URLSearchParams(window.location.search);
+        const rowId = urlParams.get('id');
+        const mode = urlParams.get('mode');
+        const $attachmentTbody = $('#tblAttachmentPS tbody');
+        const $dispatchtableTbody = $('#tblPurchaseQuotationList tbody');
+        let attachmentIndex = Date.now();
+
+    $(document).ready(async function () {
 
           addAttachmentRow()
 
@@ -559,6 +556,14 @@
                 const selectedValue = this.value;
                 if (selectedValue) {
                 fetchDDlParty(selectedValue);
+
+                var CountryName = $('#txtCountry').val();
+
+                if(CountryName != 'INDIA')
+                {
+                    $('#ddlSupplyFrom').val('LOCAL');
+                }
+
             }
             });
 
@@ -682,8 +687,6 @@
                     const ACTION = !DOC_ID ? 'INSERT' : 'UPDATE';
                     const TAX_TERM = $.trim($('#ddlPackingType option:selected').text()) || "";
 
-
-
                        if (!validateRequiredField('#dtDocDate', 'Please select a Voucher Date.')) return;
                        if (!validateRequiredField('#ddlSupplyFrom', 'Please select a Supply From.')) return;
                        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
@@ -695,7 +698,7 @@
                        if (!validateRequiredField('#ddlPurchaseThrough', 'Please select a Purchase Through.')) return;
                        if (!validateRequiredField('#ddlTaxRate', 'Please Select Tax Rate')) return;
                        if (!validateRequiredField('#ddlPaymentTerm', 'Please Select Payment Term')) return;
-           
+                       
                         if ($("#chkSBLCDue").is(":checked")) {
 
                          if (!validateRequiredField('#DtSBLCDue', 'Please Select SBLC Due Date')) return;
@@ -705,17 +708,11 @@
                           if (!validateRequiredField('#DtLCDue', 'Please Select LC Due Dt')) return;
                        }
 
-
                     const checkdate = await checkValidDate();
 
                     if (!checkdate) {
                     return;
                     }
-
-
-
-
-
 
             const Header = {
                 DOC_ID: DOC_ID,
@@ -818,7 +815,9 @@
             });
         });
 
-          async function LoadDropDown() {
+        });
+
+    async function LoadDropDown() {
             try {
               await Promise.all([
                         DDLShipFrom(),
@@ -836,7 +835,7 @@
             }
           }
              
-          function formatDate(dateStr) {
+    function formatDate(dateStr) {
               if (!dateStr) return null;
 
               const date = new Date(dateStr);
@@ -849,8 +848,8 @@
 
               return `${year}-${month}-${day}`;
             }
-
-          function collectPurchaseDocumentsData() {
+    
+    function collectPurchaseDocumentsData() {
             const documents = [];
             let hasError = false;
             let errorMessages = [];
@@ -872,8 +871,8 @@
             }
             return documents;
         }
-
-          function addAttachmentRow(data = {}) {
+    
+    function addAttachmentRow(data = {}) {
           const index = data.index || attachmentIndex++;
           const row = `
         <tr>
@@ -895,8 +894,8 @@
       `;
       $attachmentTbody.append(row);
     }
-
-          function recalculateNetRate() {
+    
+    function recalculateNetRate() {
                     const baseRate = parseFloat($('#numRate').val()) || 0;
                     const discountPercent = parseFloat($('#numDiscount').val()) || 0;
                     let taxRate = 0;
@@ -913,8 +912,8 @@
                     $('#numNetRate').val(finalNetRate.toFixed(2));
                     $('#numTaxRate').val(taxRate.toFixed(2));
                 }
-
-          async function GetVNo() {
+    
+    async function GetVNo() {
             try {
               const res = await fetch('/PurchaseSauda/GetVNo');
               if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -928,8 +927,8 @@
                 toastr.error('Error loading Document Number: ' + e.message);
             }
           }
-
-          async function LoadFormByID(id) {
+    
+    async function LoadFormByID(id) {
           try {
             const res = await $.ajax({
               url: '/PurchaseSaudaList/GetDataByCode',
@@ -1029,8 +1028,8 @@
             toastr.error("Something went wrong while loading the form.");
           }
         }
-
-          async function fetchDDlParty(PartyId) {
+    
+    async function fetchDDlParty(PartyId) {
             try {
               const response = await fetch(`/PurchaseSauda/GetDataByPartyCode?PartyId=${PartyId}`);
               const data = await response.json();
@@ -1047,8 +1046,8 @@
               console.error('Failed to fetch party data:', error);
             }
           }
-
-          async function DDLPartyMast() {
+    
+    async function DDLPartyMast() {
             try {
                 const res = await fetch('/PurchaseSauda/DDLPartyMast');
                 const data = await res.json();
@@ -1061,8 +1060,8 @@
                 console.error("Error loading Party:", error);
             }
         }
-
-          async function DDLShipFrom() {
+    
+    async function DDLShipFrom() {
             try {
               const res = await fetch('/PurchaseSauda/DDLShipFrom');
               const data = await res.json();
@@ -1075,8 +1074,8 @@
               console.error("Error loading Ship From:", error);
             }
           }
-
-          async function DDLPurchaseThrough() {
+    
+    async function DDLPurchaseThrough() {
           try {
             const res = await fetch('/PurchaseSauda/DDLPurchaseThrough');
             const data = await res.json();
@@ -1097,8 +1096,8 @@
             toastr.error("Failed to load Purchase Through options.");
           }
         }
-
-          async function DDLItemMaster() {
+    
+    async function DDLItemMaster() {
             try {
              const res = await fetch('/PurchaseSauda/DDLItemMaster');
               const data = await res.json();
@@ -1111,8 +1110,8 @@
               console.error("Error loading Item Master:", error);
             }
           }
-
-          async function DDLTaxRate() {
+    
+    async function DDLTaxRate() {
             try {
               const res = await fetch('/PurchaseSauda/DDLTaxRate');
               const data = await res.json();
@@ -1125,8 +1124,8 @@
               console.error("Error loading Tax Rate:", error);
             }
           }
-
-          async function DDLPaymentTerm() {
+    
+    async function DDLPaymentTerm() {
             try {
               const res = await fetch('/PurchaseSauda/DDLPaymentTerm');
               const data = await res.json();
@@ -1139,8 +1138,8 @@
               console.error("Error loading Payment Term:", error);
             }
           }
-
-          async function DDLBrokerName() {
+    
+    async function DDLBrokerName() {
             try {
               const res = await fetch('/PurchaseSauda/DDLBrokerName');
               const data = await res.json();
@@ -1153,8 +1152,8 @@
               console.error("Error loading Broker Name:", error);
             }
           }
-
-           async function DDLItemGroup() {
+    
+    async function DDLItemGroup() {
                 try {
                       const res = await fetch('/PurchaseSauda/DDLItemGroup');
                   const data = await res.json();
@@ -1167,8 +1166,8 @@
                   console.error("Error loading Broker Name:", error);
                 }
               }
-
-          async function DDLDispatchForm() {
+    
+    async function DDLDispatchForm() {
             try {
               const res = await fetch('/PurchaseSauda/DDLDispatchForm');
               const data = await res.json();
@@ -1181,8 +1180,8 @@
               console.error("Error loading Dispatch Form:", error);
             }
           }
-
-          function setFormReadOnly() {
+    
+    function setFormReadOnly() {
                 const form = $('#PurchaseSaudaForm');
                 form.find('input, select, textarea, button').prop('disabled', true);
                 form.find('textarea').css('background-color', '#f0f0f0');
@@ -1192,8 +1191,8 @@
                 });
                 form.find('.btn-save').hide();
             }
-
-          async function checkValidDate() {
+    
+    async function checkValidDate() {
             const data = {
                 vdate: $("#dtDocDate").val(),
                 vtype: 'PAUD',
@@ -1222,9 +1221,6 @@
                 return false;
             }
             }
-
-
-        });
 
 </script>
 
