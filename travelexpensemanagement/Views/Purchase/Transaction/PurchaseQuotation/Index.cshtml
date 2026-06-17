@@ -4,1740 +4,1005 @@
     var compCode = @ViewBag.CompCode;
     var branchCode = @ViewBag.BranchCode;
     var yearCode = @ViewBag.YearCode;
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
-<style>
-    #tblPurchaseQuotationListByVno {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    #tblPurchaseQuotationListByVno tbody tr:hover {
-        background-color: #f0f8ff; /* Light blue hover */
-    } 
-
-    #tblPurchaseQuotationListByVno td,
-    #tblPurchaseQuotationListByVno th {
-        padding: 3px 8px;
-        vertical-align: top;
-        border: 1px solid #ddd;
-        min-width: 100px; /* Added minimum width */
-        max-width: 150px;
-        overflow: hidden; 
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    #tblPurchaseQuotationListByVno input,
-    #tblPurchaseQuotationListByVno select,
-    #tblPurchaseQuotationListByVno label.form-control-sm {
-        min-width: 100px; /* Add this */
-        max-width: 150px;
-        width: 100%;
-        padding: 2px 4px;
-        font-size: 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    #tblPurchaseQuotationListByVno input:read-only {
-        background-color: #f9f9f9;
-        color: #555;
-    }
-
-    #tblPurchaseQuotationListByVno label.form-control-sm {
-        display: inline-block;
-        width: 100%;
-        max-width: 150px; /* Increased width */
-        padding: 2px 4px; /* Reduced padding */
-        font-size: 12px;
-        line-height: 1.5;
-        color: #555;
-        background-color: #f9f9f9;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        cursor: default;
-    }
-
-    #tblPurchaseQuotationListByVno td:last-child i {
-        cursor: pointer;
-        margin: 0 4px;
-        color: #007bff;
-    }
-
-    #tblPurchaseQuotationListByVno td:last-child i:hover {
-        color: #0056b3;
-    }
-
-</style>
-
-
-<fieldset>
-    <legend class="legend-field">Purchase Quotation</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "PurchaseQuotationList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-invoice-dollar"></i>
         </div>
+        <div class="erppage-header-title">Purchase Quotation</div>
     </div>
-    <form id="PurchaseQuotationForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-
-        @* Header form fields START *@
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseQuotationList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PurchaseQuotationForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Doc No</label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="dtDocDate">
                 </div>
             </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Doc Date</label>
-                    <input type="date" class="form-control" id="dtDocDate" disabled>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Group No</label>
-                    <input type="number" class="form-control" id="NumGroupNo">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Status</label>
-                    <select class="form-control" id="ddlStatus">
-                        <option>-- Select status --</option>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-input erppage-required" id="txtPartyName">
+                        <option value="">Select Party Name</option>
                     </select>
                 </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Cont. Person</label>
+                    <input type="text" class="erppage-input" id="NumContactPerson" placeholder="Enter Contact Person" maxlength="50">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Quotation No</label>
+                    <input type="text" class="erppage-input" id="txtQuotationNo" placeholder="Enter Quotation No" maxlength="50">
+                </div>
             </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Party Name</label>
-                    <select class="form-control" id="txtPartyName">
-                        <option>--Select DOC Type--</option>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Quot Date</label>
+                    <input type="date" class="erppage-input" id="dtQuotDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Valid Date</label>
+                    <input type="date" class="erppage-input" id="dtValidDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Paym. Term</label>
+                    <select class="erppage-input erppage-select" id="ddlPaymentTerm">
+                        <option value="">Select Payment Term</option>
                     </select>
+                    <input type="text" class="erppage-input" id="txtPaymentTerm" />
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Quotation No</label>
-                    <input type="text" class="form-control" id="txtQuotationNo" placeholder="Enter Quotation No">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Contact Person</label>
-                    <input type="text" class="form-control" id="NumContactPerson" placeholder="Enter Contact Person">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Quot Date</label>
-                    <input type="date" class="form-control" id="dtQuotDate">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Valid Date</label>
-                    <input type="date" class="form-control" id="dtValidDate" value="2025-06-23">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Remarks</label>
-                    <textarea class="form-control" id="txtRemarks" placeholder="Enter remarks"></textarea>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Payment Term</label>
-                    <select class="form-control" id="ddlPaymentTerm">
-                        <option>-- Select Payment Terms --</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Freight Term</label>
-                    <select class="form-control" id="ddlFreightTerm">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Freight Term</label>
+                    <select class="erppage-input erppage-select" id="ddlFreightTerm">
                         <option value="Ex-Work">Ex-Work</option>
                         <option value="F.O.R-at out Plant">F.O.R-at out Plant</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Delivery Term</label>
-                    <input type="text" class="form-control" id="txtDeliveryTerm">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Delivery Term</label>
+                    <input type="text" class="erppage-input" id="txtDeliveryTerm" maxlength="250">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Group No</label>
+                    <input type="number" class="erppage-input" id="NumGroupNo">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Currency</label>
+                    <select class="erppage-input erppage-select" id="ddlCurrency">
+                        <option value="">Select Currency</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ex-Rate</label>
+                    <input type="number" class="erppage-input" id="NumExRate">
                 </div>
             </div>
-        </div>
-        @* Header form fields END *@
-
-
-
-        <div class="row">
-            <div class="offset-md-6 col-md-6">
-                <div class="button-right">
-                    <button type="button" class="btn btn-primary">
-                        <i class="fa fa-copy"></i> Copy From ▴
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <input type="text" class="erppage-input" id="txtRemarks" placeholder="Enter Remarks">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-required" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+                <div class="erppage-action erppage-col-span-2" style="margin:0px;gap: 240px;display: flex;">
+                    <div class="dropdown erppagedropdown">
+                        <button type="button" class="erppagedropdown-btn" id="CopyFrom">
+                            <i class="fa fa-copy"></i>
+                            <span>Copy From</span>
+                        </button>
+                        <button type="button" class="erppagedropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-chevron-down"></i>
+                        </button>
+                        <ul class="dropdown-menu erppagedropdown-menu">
+                            <li>
+                                <a class="erppagedropdown-item" data-bs-toggle="modal" data-bs-target="#purchasequotationModal" onclick="openCopyModal('CopyFromPurchaseQuotation', '#purchasequotationModal', '#tblpurchasequotationmodal')">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    <span>Purchase Quotation</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="erppagedropdown-item" data-bs-toggle="modal" data-bs-target="#purchaserequestModal" onclick="openCopyModal('CopyFromPurchaseRequest', '#purchaserequestModal', '#tblpurchaserequestmodal')">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    <span>Purchase Request</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    @* <button type="button" class="erppage-btn erppage-btn-print">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print</span>
+                </button> *@
+                    <button type="button" class="erppage-btn erppage-btn-common" id="btn-duplicate">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Create Duplicate</span>
                     </button>
                 </div>
             </div>
-        </div>
-        <div class="navtab-form">
-            <ul class="nav nav-tabs" id="formTabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Item Total</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Attachments</button>
-                </li>
-            </ul>
+          
+            <fieldset class="erppagefieldset">
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblPurchaseQuotationListByVno" class="excel-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="display:none;" />
+                                <col style="width:160px;" />
+                                <col style="width:160px;" />
+                                <col style="width:120px;" />
+                                <col style="width:120px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:120px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:80px;" />
+                                <col style="width:100px;" />
+                                <col style="width:120px;" />
+                                <col style="width:100px;" />
+                                <col style="width:120px;" />
+                                <col style="width:100px;" />
+                                <col style="width:120px;" />
+                                <col style="width:140px;" />
+                                <col style="width:100px;" />
+                                <col style="width:140px;" />
+                                <col style="width:120px;" />
+                                <col style="width:140px;" />
+                                <col style="width:100px;" />
+                                <col style="width:120px;" />
+                                <col style="width:140px;" />
+                                <col style="width:140px;" />
+                                <col style="width:120px;" />
+                                <col style="width:120px;" />
+                                <col style="width:120px;" />
+                                <col style="width:120px;" />
+                                <col style="width:140px;" />
+                                <col style="width:140px;" />
+                                <col style="width:120px;" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">DOC_ID</th>
+                                    <th>Item Code</th>
+                                    <th>Make Code</th>
+                                    <th>Remarks</th>
+                                    <th>Unit</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th id="thImportRate">Import Rate</th>
+                                    <th>Amount</th>
+                                    <th>Pack %</th>
+                                    <th>Pack Amount</th>
+                                    <th>Discount %</th>
+                                    <th>Discount Amount</th>
+                                    <th>Freight</th>
+                                    <th>Tax Code</th>
+                                    <th>CGST %</th>
+                                    <th>CGST Amount</th>
+                                    <th>SGST %</th>
+                                    <th>SGST Amount</th>
+                                    <th>IGST %</th>
+                                    <th>IGST Amount</th>
+                                    <th>VAT %</th>
+                                    <th>VAT Amount</th>
+                                    <th>CESS %</th>
+                                    <th>CESS Amount</th>
+                                    <th>Other Expenses</th>
+                                    <th>LD Rate</th>
+                                    <th>Net Amount</th>
+                                    <th>Warranty</th>
+                                    <th>Lead Time (Days)</th>
+                                    <th>Bulk Qty</th>
+                                    <th>Bulk Rate</th>
+                                    <th>Bulk Discount %</th>
+                                    <th>Bulk Discount Amt</th>
+                                    <th>Rate Monthly</th>
+                                    <th>Rate Quarterly</th>
+                                    <th>Rate Annually</th>
+                                    <th>Rate Special</th>
+                                    <th>Request Type</th>
+                                    <th>Request No</th>
+                                    <th class="action-col">Action</th>
+                                </tr>
+                            </thead>
 
-            <div class="tab-content">
-                <!-- tab 1 -->
-                <div class="tab-pane fade show active" id="tab1">
-                    <br />
-                    <hr style="height: 6px; border: none; background: linear-gradient(90deg, #66a644, #276537);border-radius:5px;" />
-                    <br />
-                 @*    <div class="row">
-                        <div class="col-lg-3">
-                            <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                <input type="text" id="tableSearch" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Quantity</label>
+                        <input type="number" class="erppage-input" id="numQuantityIT" placeholder="Enter Quantity" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Amount</label>
+                        <input type="number" class="erppage-input" id="numAmountIT" placeholder="Enter Amount" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Pack Amt</label>
+                        <input type="number" class="erppage-input" id="numPackAmtIT" placeholder="Enter Pack Amt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Disc Amt</label>
+                        <input type="number" class="erppage-input" id="numDiscAmtIT" placeholder="Enter Disc Amt" readonly>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Freight</label>
+                        <input type="number" class="erppage-input" id="numFreightIT" placeholder="Enter Freight" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CGST Amt</label>
+                        <input type="number" class="erppage-input" id="numCGSTAmtIT" placeholder="Enter CGST Amt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">SGST Amt</label>
+                        <input type="number" class="erppage-input" id="numSGSTAmtIT" placeholder="Enter SGST Amt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">IGST Amt</label>
+                        <input type="number" class="erppage-input" id="numIGSTAmtIT" placeholder="Enter IGST Amt" readonly>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cess Amt</label>
+                        <input type="number" class="erppage-input" id="numCessAmtIT" placeholder="Enter Cess Amt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">VAT Amt</label>
+                        <input type="number" class="erppage-input" id="numVATAmtIT" placeholder="Enter VAT Amt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Other Amt</label>
+                        <input type="number" class="erppage-input" id="numOtherAmtIT" placeholder="Enter Other Amt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Net Amt</label>
+                        <input type="number" class="erppage-input" id="numNetAmtIT" placeholder="Enter Net Amount" readonly>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bulk Qty</label>
+                        <input type="number" class="erppage-input" id="numBulkQtyIT" placeholder="Enter Bulk Qty">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">B. Disc Amt</label>
+                        <input type="number" class="erppage-input" id="numBulkDiscAmtIT" placeholder="Enter Bulk Disc Amt">
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                    @* <legend class="erppagefieldset-legend">Attachment</legend> *@
+                    <div class="erppageattachmentsection">
+                        <div class="erppageattachmentsectionrow">
+                            <div class="erppageattachmentsectioncol">
+                                <div class="erppageattachmentsectionuploadcard">
+                                    <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                    <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                        <div class="erppageattachmentsectioncloud">
+                                            ☁
+                                        </div>
+                                        <div class="erppageattachmentsectiondragtext">
+                                            Drag & Drop your files here
+                                        </div>
+                                        <div class="erppageattachmentsectionor">
+                                            OR
+                                        </div>
+                                        <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                            Browse Files
+                                        </button>
+                                        <input type="file" id="fileInput" multiple hidden>
+                                    </div>
+                                </div>
                             </div>
+                            <div class="erppageattachmentsectioncol">
+                                <div class="erppageattachmentsectionfilecard">
+                                    <div class="erppageattachmentsectionheader">
+                                        Uploaded Files
+                                    </div>
+                                    <div class="erppageattachmentsectionfilelist"
+                                         id="fileList">
+                                    </div>
+                                </div>
+
+                            </div>
+
                         </div>
-                    </div> *@
 
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="tblPurchaseQuotationListByVno" class="table table-bordered table-hover table-sm table-striped">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th style="display:none;">DOC_ID</th>
-                                        <th>Item Code</th>
-                                        <th>Make Code</th>
-                                        <th>Remarks</th>
-                                        <th>Unit</th>
-                                        <th>Quantity</th>
-                                        <th>Rate</th>
-                                        <th>Amount</th>
-                                        <th>Pack %</th>
-                                        <th>Pack Amount</th>
-                                        <th>Discount %</th>
-                                        <th>Discount Amount</th>
-                                        <th>Freight</th>
-                                        <th>Tax Code</th>
-                                        <th>CGST %</th>
-                                        <th>CGST Amount</th>
-                                        <th>SGST %</th>
-                                        <th>SGST Amount</th>
-                                        <th>IGST %</th>
-                                        <th>IGST Amount</th>
-                                        <th>VAT %</th>
-                                        <th>VAT Amount</th>
-                                        <th>CESS %</th>
-                                        <th>CESS Amount</th>
-                                        <th>Other Expenses</th>
-                                        <th>LD Rate</th>
-                                        <th>Net Amount</th>
-                                        <th>Warranty</th>
-                                        <th>Lead Time (Days)</th>
-                                        <th>Bulk Qty</th>
-                                        <th>Bulk Rate</th>
-                                        <th>Bulk Discount %</th>
-                                        <th>Bulk Discount Amt</th>
-                                        <th>Rate Monthly</th>
-                                        <th>Rate Quarterly</th>
-                                        <th>Rate Annually</th>
-                                        <th>Rate Special</th>
-                                        <th>Request Type</th>
-                                        <th>Request No</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
+                    </div>
+                </fieldset>
 
-                            </table>
+        </fieldset>
+        <div class="erppage-actions">
+            <button type="button" class="erppage-btn erppage-btn-common" onclick="PendingQCReport()">
+                <i class="fa-solid fa-print"></i>
+                <span>Print</span>
+            </button>
+            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+</div>
+@* Modal popup *@
+<div class="modal fade" id="purchasequotationModal" tabindex="-1" aria-labelledby="purchasequotationLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-copy"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="purchasequotationLabel">
+                        Copy From Purchase Quotation
+                    </h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <div class="erppagelist-search-wrapper">
+                            <i class="fa fa-search"></i>
+                            <input type="text" id="searchBoxPR" placeholder="Search..." />
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label"></label>
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="chkAppendPQModal" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Append</label>
                         </div>
                     </div>
                 </div>
-                <!-- tab 2 -->
-                <div class="tab-pane fade" id="tab2">
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Item Total</legend>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Quantity</label>
-                                    <input type="number" class="form-control" id="numQuantityIT" placeholder="Enter Quantity">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Amount</label>
-                                    <input type="number" class="form-control" id="numAmountIT" placeholder="Enter Amount">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Pack Amt</label>
-                                    <input type="number" class="form-control" id="numPackAmtIT" placeholder="Enter Pack Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Disc Amt</label>
-                                    <input type="number" class="form-control" id="numDiscAmtIT" placeholder="Enter Disc Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Bulk Qty</label>
-                                    <input type="number" class="form-control" id="numBulkQtyIT" placeholder="Enter Bulk Qty">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Bulk Disc Amt</label>
-                                    <input type="number" class="form-control" id="numBulkDiscAmtIT" placeholder="Enter Bulk Disc Amt">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Freight</label>
-                                    <input type="number" class="form-control" id="numFreightIT" placeholder="Enter Freight">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>CGST Amt</label>
-                                    <input type="number" class="form-control" id="numCGSTAmtIT" placeholder="Enter CGST Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>SGST Amt</label>
-                                    <input type="number" class="form-control" id="numSGSTAmtIT" placeholder="Enter SGST Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>IGST Amt</label>
-                                    <input type="number" class="form-control" id="numIGSTAmtIT" placeholder="Enter IGST Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Cess Amt</label>
-                                    <input type="number" class="form-control" id="numCessAmtIT" placeholder="Enter Cess Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>VAT Amt</label>
-                                    <input type="number" class="form-control" id="numVATAmtIT" placeholder="Enter VAT Amt">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Other Amt</label>
-                                    <input type="number" class="form-control" id="numOtherAmtIT" placeholder="Enter Other Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Net Amt</label>
-                                    <input type="number" class="form-control" id="numNetAmtIT" placeholder="Enter Net Amount">
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblpurchasequotationmodal" class="excel-table width-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:50px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:130px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:250px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="display:none;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAllPQ" /></th>
+                                <th>V No</th>
+                                <th>V Type</th>
+                                <th>V Date</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Tech Desc</th>
+                                <th>Unit</th>
+                                <th>Quantity</th>
+                                <th>Make Code</th>
+                                <th>U Code</th>
+                                <th>Tax Code</th>
+                                <th class="hidden-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                <!--tab 3-->
-                <div class="tab-pane fade" id="tab3">
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Attachment</legend>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>File Name</label>
-                                    <input type="text" class="form-control" id="txtFileName" placeholder="Enter file name">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Upload File</label>
-                                    <input type="file" class="form-control" id="fileUpload">
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <button type="button" class="btn btn-success-plus" id="btnAddAttachment"><i class="fa fa-plus"></i></button>
-                            </div>
-                        </div>
-                        <div class="card mt-3">
-                            <div class="table-responsive">
-                                <table id="tblAttachmentPQ" class="table table-bordered">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th style="display:none;">Base64</th>
-                                            <th>File Name</th>
-                                            <th>View</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </fieldset>
+                <div class="erppagesmodal-action mt-2">
+                    <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal" onclick="getSelectedRows('#tblpurchasequotationmodal','#purchasequotationModal')">
+                        <i class="fa fa-copy"></i>Copy
+                    </button>
                 </div>
             </div>
+
         </div>
-        <div class="row">
-            <div class="offset-md-9 col-md-3">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+    </div>
+</div>
+
+<div class="modal fade" id="purchaserequestModal" tabindex="-1" aria-labelledby="purchaserequestLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-copy"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="purchaserequestLabel">
+                        Copy From Purchase Request
+                    </h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <div class="erppagelist-search-wrapper">
+                            <i class="fa fa-search"></i>
+                            <input type="text" id="searchBoxRS" placeholder="Search..." />
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label"></label>
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="chkAppendRSModal" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Append</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblpurchaserequestmodal" class="excel-table width-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:50px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:130px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:250px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="display:none;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAllPR" /></th>
+                                <th>Doc No</th>
+                                <th>Doc Type</th>
+                                <th>Doc Date</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Tech Desc</th>
+                                <th>Unit</th>
+                                <th>Quantity</th>
+                                <th>Make Code</th>
+                                <th>U Code</th>
+                                <th>Tax Code</th>
+                                <th style="display:none;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="erppagesmodal-action mt-2">
+                    <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal" onclick="getSelectedRows('#tblpurchaserequestmodal','#purchaserequestModal')">
+                        <i class="fa fa-copy"></i>Copy
+                    </button>
                 </div>
             </div>
+
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
+
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@* Last 10 Order History Modal *@
+<div class="modal fade" id="lastTenOrderHistoryModal" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Order History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenOrderHistory"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Oth Amt</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 History Quotation modal *@
+<div class="modal fade" id="lastTenPurchaseHistoryQuotation" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Quotation History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenQuotationOrderHistory"class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width: 89px;">
+                            <col style="width: 90px;">
+                            <col style="width: 91px;">
+                            <col style="width: 93px;">
+                            <col style="width: 130px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Group No</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Freight</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>Oth Exps</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 History Quotation modal *@
+<div class="modal fade" id="lastTenOrderHistory" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Quotation History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="lastTenOrderQuotation" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width: 89px;">
+                            <col style="width: 90px;">
+                            <col style="width: 91px;">
+                            <col style="width: 93px;">
+                            <col style="width: 130px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>Oth Exps</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <script>
-    // Global Variable getting from controller
+    const fileInput = document.getElementById('fileInput');
+    const browseBtn = document.getElementById('browseBtn');
+    const dropZone = document.getElementById('dropZone');
+    const fileList = document.getElementById('fileList');
+
+    browseBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function () {
+        renderFiles(this.files);
+    });
+
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        renderFiles(e.dataTransfer.files);
+    });
+
+    function renderFiles(files) {
+
+        Array.from(files).forEach(file => {
+
+            const fileItem = document.createElement('div');
+            fileItem.className =
+                'erppageattachmentsectionfileitem';
+
+            fileItem.innerHTML = `
+                <div class="erppageattachmentsectionicon ${getFileColorClass(file.name)}">
+                    ${getFileType(file.name)}
+                </div>
+
+                <div class="erppageattachmentsectioncontent">
+
+                    <div class="erppageattachmentsectionfilename">
+                        ${file.name}
+                    </div>
+
+                    <div class="erppageattachmentsectionprogress">
+                        <div class="erppageattachmentsectionprogressbar"></div>
+                    </div>
+
+                </div>
+
+                <div class="erppageattachmentsectionactions">
+
+                    <button class="erppageattachmentsectionview">
+                        View
+                    </button>
+
+                    <button class="erppageattachmentsectiondelete">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+
+            fileList.appendChild(fileItem);
+
+            const progressBar =
+                fileItem.querySelector(
+                    '.erppageattachmentsectionprogressbar'
+                );
+
+            let progress = 0;
+
+            const interval = setInterval(() => {
+
+                progress += 5;
+
+                progressBar.style.width =
+                    progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+
+            }, 10);
+
+            fileItem
+                .querySelector(
+                    '.erppageattachmentsectiondelete'
+                )
+                .addEventListener('click', () => {
+                    fileItem.remove();
+                });
+
+        });
+    }
+
+    function getFileType(fileName) {
+        return fileName.split('.').pop().toUpperCase();
+    }
+
+    function getFileColorClass(fileName) {
+
+        const ext = fileName.split('.').pop().toLowerCase();
+
+        switch (ext) {
+
+            case 'pdf':
+                return 'erppageattachmentsectionpdf';
+
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+            case 'gif':
+            case 'svg':
+            case 'webp':
+                return 'erppageattachmentsectionimage';
+
+            case 'doc':
+            case 'docx':
+                return 'erppageattachmentsectionword';
+
+            case 'xls':
+            case 'xlsx':
+            case 'csv':
+                return 'erppageattachmentsectionexcel';
+
+            case 'ppt':
+            case 'pptx':
+                return 'erppageattachmentsectionppt';
+
+            case 'txt':
+                return 'erppageattachmentsectiontxt';
+
+            case 'zip':
+            case 'rar':
+            case '7z':
+                return 'erppageattachmentsectionzip';
+
+            default:
+                return 'erppageattachmentsectiondefault';
+        }
+    }
+</script>
+
+<script>
     var compCode = '@ViewBag.CompCode';
     var branchCode = '@ViewBag.BranchCode';
     var yearCode = '@ViewBag.YearCode';
-
-    let rowsData = [];
-    let rowsAttachment = [];
-
-    let rowIndex = 0;
-
-    //To replace id with Names.
-    let docTypeMap = {};
-    let partyMap = {};
-    let statusMap = {};
-    let paymentTermMap = {};
-    let freightTermMap = {};
-    let taxCodeMap = {};
-    let itemMakeMap = {};
-    let uomMap = {};
-
-    //For pagination
-    let currentPage = 1;
-    const pageSize = 10;
-
-    //getting
-    const urlParams = new URLSearchParams(location.search);
-    const rowId = parseInt(urlParams.get('id'));
-    const isReadOnly = urlParams.get('readOnly') === 'true';
-
-    let currentDocCode = 'STQT';
-
-
-    $(document).ready(function () {
-        const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-        $('#dtDocDate').val(today);
-        freightTermMap = {
-            "Ex-Work": "Ex-Work",
-            "F.O.R-at out Plant": "F.O.R-at out Plant",
-        };
-
-        if (!isNaN(rowId) && rowId > 0) {
-            loadFullQuotationByVno(rowId, currentDocCode);
-            if (isReadOnly) {
-                // setQCDiscMasterFormReadOnly();
-            }
-             loadItemList(),
-             loadItemMakeList(),
-             loadUOMList(),
-             loadTaxCodeList()
-        } else {
-            $.when(
-                loadItemList(),
-                loadItemMakeList(),
-                loadUOMList(),
-                loadTaxCodeList()
-            ).then(function () {
-                addNewRowBelow();
-            });
-        }
-
-        loadNextDocNo(yearCode);
-        loadDocTypeList();
-        loadPartyList();
-        loadPaymentTermList();
-        loadStatusList();
-    });
-
-    function loadNextDocNo(yearC){
-        $.ajax({
-            url: '/PurchaseQuotation/GetNextV_NO',
-            type: 'GET',
-            data: { yearCode : yearC },
-            success: function (response) {
-                $('#NumDocNo').val(response).attr('disabled',true);
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading Item make: ' + error);
-            }
-        });
-    }
-
-    function loadDocTypeList() {
-        docTypeMap = {};
-        return $.ajax({
-            url: '/PurchaseQuotation/GetDocTypeList',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var ddl = $('#ddlDocType');
-                ddl.empty();
-                ddl.append('<option value="">-- Select Doc Type --</option>');
-
-                $.each(data, function (index, item) {
-                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
-                    docTypeMap[item.value] = item.text;
-                });
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading DocType list: ' + error);
-            }
-        });
-    }
-
-    function loadPartyList(updateDropdown = true) {
-        return $.ajax({
-            url: '/PurchaseQuotation/GetPartyList',
-            type: 'GET',
-            dataType: 'json',
-        }).then(function (data) {
-            const map = {};
-            if (updateDropdown) {
-                const ddl = $('#txtPartyName');
-                ddl.empty();
-                ddl.append('<option value="">-- Select Party --</option>');
-                data.forEach(item => {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                    map[item.value] = item.text;
-                });
-            } else {
-                data.forEach(item => {
-                    map[item.value] = item.text;
-                });
-            }
-            return map;
-        }).catch(function (xhr, status, error) {
-            toastr.error('Error loading Party list: ' + error);
-            return {}; // Return empty map on error
-        });
-    }
-
-    // function loadStatusList() {
-    //     statusMap = {};
-    //     return $.ajax({
-    //         url: '/PurchaseQuotation/GetStatusList',
-    //         type: 'GET',
-    //         dataType: 'json',
-    //         success: function (data) {
-    //             var ddl = $('#ddlStatus');
-    //             ddl.empty();
-    //             ddl.append('<option value="">-- Select Status --</option>');
-
-    //             $.each(data, function (index, item) {
-    //                 ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
-    //                 statusMap[item.value] = item.text;
-    //             });
-    //         },
-    //         error: function (xhr, status, error) {
-    //             toastr.error('Error loading Status list: ' + error);
-    //         }
-    //     });
-    // }
-
-    function loadStatusList() {
-        statusMap = {};
-        return $.ajax({
-            url: '/PurchaseQuotation/GetStatusList',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var ddl = $('#ddlStatus');
-                ddl.empty();
-                ddl.append('<option value="">-- Select Status --</option>');
-
-                let openStatusValue = null;
-
-                $.each(data, function (index, item) {
-                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
-                    statusMap[item.value] = item.text;
-
-                    if (item.text.trim().toLowerCase() === 'open') {
-                        openStatusValue = item.value;
-                    }
-                });
-
-                // Set "Open" as selected if found
-                if (openStatusValue !== null) {
-                    ddl.val(openStatusValue);
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading Status list: ' + error);
-            }
-        });
-    }
-
-    function loadPaymentTermList() {
-        paymentTermMap = {};
-        return $.ajax({
-            url: '/PurchaseQuotation/GetPaymentTermList',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var ddl = $('#ddlPaymentTerm');
-                ddl.empty();
-                ddl.append('<option value="">-- Select Payment Terms --</option>');
-
-
-                $.each(data, function (index, item) {
-                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
-                    paymentTermMap[item.value] = item.text;
-                });
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading Payment Term list: ' + error);
-            }
-        });
-    }
-    function loadItemList() {
-        return $.ajax({
-            url: '/PurchaseQuotation/GetItemList',
-            type: 'GET',
-            dataType: 'json',
-        }).then(function (data) {
-            const map = {};
-            data.forEach(item => {
-                map[item.value] = item.text;
-            });
-            return map;
-        }).catch(function (xhr, status, error) {
-            toastr.error('Error loading Item list: ' + error);
-            return {};
-        });
-    }
-    function loadItemMakeList() {
-        return $.ajax({
-            url: '/PurchaseQuotation/GetItemMakeList',
-            type: 'GET',
-            dataType: 'json',
-        }).then(function (data) {
-            const map = {};
-            data.forEach(item => {
-                map[item.value] = item.text;
-            });
-            return map;
-        }).catch(function (xhr, status, error) {
-            toastr.error('Error loading Item Make list: ' + error);
-            return {};
-        });
-    }
-
-    // When item is selected, load corresponding item makes
-    $(document).on('change', 'select[id^="itemName_"]', function () {
-        const $row = $(this).closest('tr');
-        const rowId = this.id.split('_')[1];
-        const selectedItemCode = $(this).val();
-
-        const $makeDropdown = $(`#itemMake_${rowId}`);
-        $makeDropdown.empty().append('<option value="">-- Select Item Make --</option>');
-
-        if (!selectedItemCode) return;
-
-        $.ajax({
-            url: '/PurchaseQuotation/GetMakeItemsByItemCode',
-            type: 'GET',
-            data: { itemCode: selectedItemCode },
-            success: function (response) {
-                if (response.success && Array.isArray(response.data)) {
-                    response.data.forEach(item => {
-                        $makeDropdown.append(`<option value="${item.makeCode}">${item.name}</option>`);
-                    });
-                } else {
-                    toastr.warning('No makes found for this item.');
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading item make list: ' + error);
-            }
-        });
-    });
-
-
-    function loadUOMList() {
-        return $.ajax({
-            url: '/PurchaseQuotation/GetUOMList',
-            type: 'GET',
-            dataType: 'json',
-        }).then(function (data) {
-            const map = {};
-            data.forEach(item => {
-                map[item.value] = item.text;
-            });
-            return map;
-        }).catch(function (xhr, status, error) {
-            toastr.error('Error loading UOM list: ' + error);
-            return {};
-        });
-    }
-    function loadTaxCodeList() {
-        return $.ajax({
-            url: '/PurchaseQuotation/GetTextCodeList',
-            type: 'GET',
-            dataType: 'json'
-        }).then(function (data) {
-            const taxCodeMap = {};
-            data.forEach(item => {
-                taxCodeMap[item.value] = item.text;
-            });
-            return taxCodeMap; // ✅ returning map here is crucial
-        }).catch(function (xhr, status, error) {
-            toastr.error('Error loading Tax Code list: ' + error);
-            return {};
-        });
-    }
-
-
-    $('#ddlItemName').on('change',function(){
-        var itemCode= $(this).val();
-        $.ajax({
-            url: '/PurchaseQuotation/GetMakeItemByItemCode',
-            type: 'GET',
-            data: { itemCode: itemCode },
-            success: function (data) {
-                $('#txtMake').val(data.itemMake);
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading Item make: ' + error);
-            }
-        });
-    });
-
-    $(document).on('change', '.ddlTaxCode', function () {
-        const $row = $(this).closest('tr');
-        const taxCode = $(this).val();
-        const rowId = $(this).attr('id').split('_')[1]; // e.g., taxCode_2 → "2"
-
-        $.ajax({
-            url: '/PurchaseQuotation/GetTextRelatedDetailsTaxCode',
-            type: 'GET',
-            data: { taxCode: taxCode },
-            success: function (response) {
-                const data = response.taxDetails;
-
-                // Set tax % values in the row
-                $row.find(`#cgstPerc_${rowId}`).val(data.cgstPer);
-                $row.find(`#sgstPerc_${rowId}`).val(data.sgstPer);
-                $row.find(`#igstPerc_${rowId}`).val(data.igstPer);
-                $row.find(`#vatPerc_${rowId}`).val(data.vatPer);
-                $row.find(`#otherExpenses_${rowId}`).val(data.othPer);
-
-                // Now recalculate all amounts with new tax percentages
-                recalculateRowWithTax($row, rowId);
-                updateItemTotals();
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading tax details: ' + error);
-            }
-        });
-    });
-
-
-    // $(document).on('change', '.ddlTaxCode', function () {
-    //     const $row = $(this).closest('tr');
-    //     const taxCode = $(this).val();
-
-    //     $.ajax({
-    //         url: '/PurchaseQuotation/GetTextRelatedDetailsTaxCode',
-    //         type: 'GET',
-    //         data: { taxCode: taxCode },
-    //         success: function (response) {
-    //             const data = response.taxDetails;
-
-    //             // Set values in the same row
-    //             $row.find('[id^="cgstPerc_"]').val(data.cgstPer);
-    //             $row.find('[id^="sgstPerc_"]').val(data.sgstPer);
-    //             $row.find('[id^="igstPerc_"]').val(data.igstPer);
-    //             $row.find('[id^="vatPerc_"]').val(data.vatPer); // Make sure capitalization matches
-    //             $row.find('[id^="otherExpenses_"]').val(data.othPer);
-    //         },
-    //         error: function (xhr, status, error) {
-    //             toastr.error('Error loading tax details: ' + error);
-    //         }
-    //     });
-    // });
-
-    //function to LOAD DATA from QUOTATION 1,2,3 Table
-    function loadFullQuotationByVno(vNo, vType) {
-        $.ajax({
-            url: '/PurchaseQuotation/GetFullQuotationByVno',
-            type: 'GET',
-            data: { vNo, vType },
-            success: function (res) {
-                console.log(res);
-                if (!res.success || !res.header) {
-                    toastr.warning("Quotation not found.");
-                    return;
-                }
-                const header = res.header;
-                const items = res.items || [];
-                const attachments = res.attachments || [];
-
-                // Loading for QUOTATION1/Header
-                $('#TxtCode').val(header.DOC_ID);
-                $('#ddlDocType').val(header.v_TYPE).trigger('change');
-                $('#NumDocNo').val(header.v_NO);
-                $('#dtDocDate').val(header.v_DATE?.substring(0, 10));
-                $('#NumGroupNo').val(header.grouP_NO);
-                $('#ddlStatus').val(header.status).trigger('change');
-                loadPartyList().then(function () {
-                    $('#txtPartyName').val(header.partY_CODE).trigger('change');
-                });
-
-                $('#txtQuotationNo').val(header.quotE_NO);
-                $('#NumContactPerson').val(header.conT_PERSON);
-                $('#dtQuotDate').val(header.quotE_DATE?.substring(0, 10));
-                $('#dtValidDate').val(header.valiD_DATE?.substring(0, 10));
-                $('#txtRemarks').val(header.remarks);
-                loadPaymentTermList().then(function () {
-                    $('#ddlPaymentTerm').val(header.payterM_CODE).trigger('change');
-                });
-                // $('#ddlPaymentTerm').val(header.payterM_CODE).trigger('change');
-                const freightTerm = header.freighT_TERM?.trim();
-                $("#ddlFreightTerm").val(freightTerm).trigger("change");
-                $('#txtDeliveryTerm').val(header.deliverY_TERM);
-
-                // Item Total Tab Fields
-                $('#numQuantityIT').val(header.qty);
-                $('#numAmountIT').val(header.amount);
-                $('#numPackAmtIT').val(header.pacK_AMT);
-                $('#numDiscAmtIT').val(header.disC_AMT);
-                $('#numBulkQtyIT').val(header.bulK_QTY);
-                $('#numBulkDiscAmtIT').val(header.bulK_DISCAMT);
-                $('#numFreightIT').val(header.freighT_AMT);
-                $('#numCGSTAmtIT').val(header.cgsT_AMT);
-                $('#numSGSTAmtIT').val(header.sgsT_AMT);
-                $('#numIGSTAmtIT').val(header.igsT_AMT);
-                $('#numCessAmtIT').val(header.cesS_AMT);
-                $('#numVATAmtIT').val(header.vaT_AMT);
-                $('#numOtherAmtIT').val(header.otH_AMT);
-                $('#numNetAmtIT').val(header.neT_AMT);
-
-
-                // Loading for QUOTATION2/items,
-                if (!Array.isArray(items) || items.length === 0) {
-                    addNewRowBelow();
-                } else {
-                    Promise.all([
-                        loadItemList(),
-                        loadItemMakeList(),
-                        loadTaxCodeList(),
-                        loadUOMList()
-                    ]).then(([itemMap, itemMakeMap, taxCodeMap,uomMap]) => {
-                        items.forEach((row, i) => {
-                            rowIndex++;
-                            const isLastRow = (i === items.length - 1);
-                            const rowHtml = generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap,uomMap,isLastRow);
-                            $('#tblPurchaseQuotationListByVno tbody').append(rowHtml);
-                        });
-                    }).catch(err => {
-                        toastr.error("Failed to load item metadata: " + err);
-                    });
-                }
-
-                // Loading for QUOTATION1/Attachment
-                const attachBody = $('#tblAttachmentPQ tbody');
-                attachBody.empty();
-
-                if (attachments.length === 0) {
-                    attachBody.append('<tr><td colspan="3" class="text-center text-muted">No attachments found.</td></tr>');
-                } else {
-                    attachments.forEach((att, idx) => {
-                        const fileName = att.attachment?.split('/').pop() || `Attachment_${idx + 1}`;
-                        const base64File = att.ATTACHMENT_FILE || att.attachmenT_FILE; 
-                        const mimeType = "application/octet-stream";
-
-                        // Guess mime type
-                        const extension = fileName.split('.').pop()?.toLowerCase();
-                        let guessedMime = mimeType;
-                        if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(extension)) {
-                            guessedMime = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
-                        } else if (extension === 'pdf') {
-                            guessedMime = 'application/pdf';
-                        }
-
-                        const fullBase64 = `data:${guessedMime};base64,${base64File}`;
-
-                        // Push to rowsAttachment array (your goal)
-                        rowsAttachment.push({
-                            ATTACHMENT: fileName,
-                            ATTACHMENT_FILE: base64File
-                        });
-
-                        // Build preview
-                        let filePreview = '';
-                        let tdStyle = '';
-
-                        if (guessedMime.startsWith('image/')) {
-                            filePreview = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
-                            tdStyle = 'style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #ccc; overflow: hidden; text-align: center; vertical-align: middle;"';
-                        } else if (guessedMime === 'application/pdf') {
-                            filePreview = `<a href="${fullBase64}" target="_blank">View PDF</a>`;
-                        } else {
-                            filePreview = `<a href="${fullBase64}" download="${fileName}">Download File</a>`;
-                        }
-
-                        const row = `
-                            <tr data-filename="${fileName}" style="height: 100px;">
-                                <td style="vertical-align: middle;">${fileName}</td>
-                                <td ${tdStyle}>${filePreview}</td>
-                                <td style="vertical-align: middle;">
-                                    <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
-                                </td>
-                            </tr>`;
-
-                        attachBody.append(row);
-                    });
-                }
-            },
-            error: function (xhr) {
-                toastr.error("Failed to load quotation: " + xhr.responseText);
-            }
-        });
-    }
-
-    // section to ADD, UPDATE and DELETE DATA
-    function addNewRowBelow() {
-        rowIndex++;
-
-        const newRowData = {
-            hidden: '',
-            itemName: '',
-            itemMake: '',
-            purchaserRemarks: '',
-            unit: '',
-            qty: '',
-            rate: '',
-            amount: '',
-            packPerc: '',
-            packAmount: '',
-            discountPerc: '',
-            discountAmount: '',
-            freight: '',
-            taxCode: '',
-            cgstPerc: '',
-            cgstAmount: '',
-            sgstPerc: '',
-            sgstAmount: '',
-            igstPerc: '',
-            igstAmount: '',
-            vatPerc: '',
-            vatAmount: '',
-            cessPerc: '',
-            cessAmount: '',
-            otherExpenses: '',
-            ldRate: '',
-            netAmount: '',
-            warranty: '',
-            leadTime: '',
-            bulkQty: '',
-            bulkRate: '',
-            bulkDiscountPerc: '',
-            bulkDiscountAmount: '',
-            rateMonthly: '',
-            rateQuarterly: '',
-            rateAnnually: '',
-            rateSpecial: '',
-            requestType: '',
-            requestNo: ''
-        };
-        rowsData.push(newRowData);
-
-        const createRow = () => {
-            return `
-                <tr>
-                    <td style="display:none;"><input id="hidden_${rowIndex}" name="hidden[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td style="display:none;"><label class="form-control-sm" id="yearCode_${rowIndex}" readonly>@ViewBag.YearCode</label></td>
-                    <td style="display:none;"><label class="form-control-sm" id="compCode_${rowIndex}" readonly>@ViewBag.CompCode</label></td>
-                    <td style="display:none;"><label class="form-control-sm" id="branchCode_${rowIndex}" readonly>@ViewBag.BranchCode</label></td>
-                    <td style="display:none;"><input id="vNo_${rowIndex}" name="vNo[${rowIndex}]" class="form-control-sm" value="${rowId}" readonly></td>
-                    <td style="display:none;"><select id="vType_${rowIndex}" name="vType[${rowIndex}]" class="form-select form-select-sm ddlDocType"></select></td>
-                    <td><select id="itemName_${rowIndex}" name="itemName[${rowIndex}]" class="form-select form-select-sm"></select></td>
-                    <td><select id="itemMake_${rowIndex}" name="itemMake[${rowIndex}]" class="form-select form-select-sm"></select></td>
-                    <td><input type="text" id="purchaserRemarks_${rowIndex}" name="purchaserRemarks[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><select id="uom_${rowIndex}" name="uom[${rowIndex}]" class="form-select form-select-sm"></select></td>
-                    <td><input type="number" value="0" id="qty_${rowIndex}" name="qty[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="rate_${rowIndex}" name="rate[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="amount_${rowIndex}" name="amount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="packPerc_${rowIndex}" name="packPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="packAmount_${rowIndex}" name="packAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="discountPerc_${rowIndex}" name="discountPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="discountAmount_${rowIndex}" name="discountAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="freight_${rowIndex}" name="freight[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td>
-                       <select id="taxCode_${rowIndex}" name="taxCode[${rowIndex}]" class="form-select form-select-sm ddlTaxCode" style="max-width:100px;">
-                    </td>
-                    <td><input type="number" value="0" id="cgstPerc_${rowIndex}" name="cgstPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="cgstAmount_${rowIndex}" name="cgstAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="sgstPerc_${rowIndex}" name="sgstPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="sgstAmount_${rowIndex}" name="sgstAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="igstPerc_${rowIndex}" name="igstPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="igstAmount_${rowIndex}" name="igstAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="vatPerc_${rowIndex}" name="vatPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="vatAmount_${rowIndex}" name="vatAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="cessPerc_${rowIndex}" name="cessPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="cessAmount_${rowIndex}" name="cessAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="otherExpenses_${rowIndex}" name="otherExpenses[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="ldRate_${rowIndex}" name="ldRate[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="netAmount_${rowIndex}" name="netAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="text" id="warranty_${rowIndex}" name="warranty[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="leadTime_${rowIndex}" name="leadTime[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="bulkQty_${rowIndex}" name="bulkQty[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="bulkRate_${rowIndex}" name="bulkRate[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="bulkDiscountPerc_${rowIndex}" name="bulkDiscountPerc[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="bulkDiscountAmount_${rowIndex}" name="bulkDiscountAmount[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="rateMonthly_${rowIndex}" name="rateMonthly[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="rateQuarterly_${rowIndex}" name="rateQuarterly[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="rateAnnually_${rowIndex}" name="rateAnnually[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input type="number" value="0" id="rateSpecial_${rowIndex}" name="rateSpecial[${rowIndex}]" class="form-control-sm" value=""></td>
-                    <td><input id="requestType_${rowIndex}" name="requestType[${rowIndex}]" class="form-control-sm" value="" maxlength="4"></td>
-                    <td><input id="requestNo_${rowIndex}" name="requestNo[${rowIndex}]" class="form-control-sm" value="" ></td>
-                    <td>
-                        <i class="fas fa-trash ms-2" onclick="deleteRow(this)" style="color: red;"></i>
-                        <i class="fas fa-plus-circle ms-2 text-success add-row-icon" style="cursor:pointer;" onclick="addNewRowBelow()"></i>
-                    </td>
-            </tr>`;
-        };
-
-        $('#tblPurchaseQuotationListByVno tbody').append(createRow());
-
-        Promise.all([
-            loadItemList(),
-            loadItemMakeList(),
-            loadUOMList(),
-            loadTaxCodeList()
-        ]).then(([ itemMap, itemMakeMap, uomMap,taxCodeMap]) => {
-            const itemName = $(`#itemName_${rowIndex}`);
-            itemName.empty().append('<option value="">-- Select Item --</option>');
-            $.each(itemMap, (code, name) => itemName.append(`<option value="${code}">${name}</option>`));
-
-            const itemMake = $(`#itemMake_${rowIndex}`);
-            itemMake.empty().append('<option value="">-- Select Item Make --</option>');
-            $.each(itemMakeMap, (code, name) => itemMake.append(`<option value="${code}">${name}</option>`));
-
-            const uom = $(`#uom_${rowIndex}`);
-            uom.empty().append('<option value="">-- Select UOM --</option>');
-            $.each(uomMap, (code, name) => uom.append(`<option value="${code}">${name}</option>`));
-
-            const taxCode = $(`#taxCode_${rowIndex}`);
-            taxCode.empty().append('<option value="">-- Select Tax Code --</option>');
-            $.each(taxCodeMap, (code, name) => taxCode.append(`<option value="${code}">${name}</option>`));
-        });
-
-        $('#tblPurchaseQuotationListByVno tbody tr').each(function(index, tr) {
-            $(tr).find('.add-row-icon').toggle(index === $('#tblPurchaseQuotationListByVno tbody tr').length - 1);
-        });
-    }
-
-    function generateRowHtml(row, i, itemMap, itemMakeMap,taxCodeMap,uomMap,isLastRow) {
-
-         // Helper function to return '0' if value is falsy (null, undefined, '', etc.)
-         const getValue = value => (value === undefined || value === null || value === '') ? 0 : value;
-
-         return `
-             <tr>
-                 <td style="display:none;">
-                     <input id="hidden_${i}" name="hidden[${i}]" class="form-control-sm" value="${row.hidden || ''}">
-                 </td>
-                     <td style="display:none;"><label class="form-control-sm" id="yearCode_${rowIndex}" readonly>@ViewBag.YearCode</label></td>
-                     <td style="display:none;"><label class="form-control-sm" id="compCode_${rowIndex}" readonly>@ViewBag.CompCode</label></td>
-                     <td style="display:none;"><label class="form-control-sm" id="branchCode_${rowIndex}" readonly>@ViewBag.BranchCode</label></td>
-                     <td style="display:none;"><input id="vNo_${rowIndex}" name="vNo[${rowIndex}]" class="form-control-sm" value="${rowId}" readonly></td>
-                     <td style="display:none;"><select id="vType_${rowIndex}" name="vType[${rowIndex}]" class="form-select form-select-sm ddlDocType"></select></td>
-
-                 <td>
-                     <select id="itemName_${i}" name="itemName[${i}]" class="form-select">
-                         ${generateDropdownOptions(itemMap, row.iteM_CODE)}
-                     </select>
-                 </td>
-                 <td>
-                     <select id="itemMake_${i}" name="itemMake[${i}]" class="form-select form-select-sm" style="max-width:100px;">
-                         ${generateDropdownOptions(itemMakeMap, row.makE_CODE)}
-                     </select>
-                 </td>
-                 <td><input type="text" id="purchaserRemarks_${i}" name="purchaserRemarks[${i}]" class="form-control-sm" value="${row.purchaseR_REMARKS || ''}"></td>
-                  <td>
-                     <select id="uom_${i}" name="uom[${i}]" class="form-select form-select-sm" style="max-width:100px;">
-                         ${generateDropdownOptions(uomMap, row.uoM_CODE)}
-                     </select>
-                 </td>
-                 <td><input type="number" id="qty_${i}" name="qty[${i}]" class="form-control-sm" value="${getValue(row.qty)}"></td>
-                 <td><input type="number" id="rate_${i}" name="rate[${i}]" class="form-control-sm" value="${getValue(row.rate)}"></td>
-                 <td><input type="number" id="amount_${i}" name="amount[${i}]" class="form-control-sm" value="${getValue(row.amount)}"></td>
-                 <td><input type="number" id="packPerc_${i}" name="packPerc[${i}]" class="form-control-sm" value="${getValue(row.pacK_PER)}"></td>
-                 <td><input type="number" id="packAmount_${i}" name="packAmount[${i}]" class="form-control-sm" value="${getValue(row.pacK_AMT)}"></td>
-                 <td><input type="number" id="discountPerc_${i}" name="discountPerc[${i}]" class="form-control-sm" value="${getValue(row.disC_PER)}"></td>
-                 <td><input type="number" id="discountAmount_${i}" name="discountAmount[${i}]" class="form-control-sm" value="${getValue(row.disC_AMT)}"></td>
-                 <td><input type="number" id="freight_${i}" name="freight[${i}]" class="form-control-sm" value="${getValue(row.freight)}"></td>
-                 <td>
-                     <select id="taxCode_${i}" name="taxCode[${i}]" class="form-select form-select-sm ddlTaxCode" style="max-width:100px;">
-                         ${generateDropdownOptions(taxCodeMap, row.taX_CODE)}
-                     </select>
-                 </td>
-                 <td><input type="number" id="cgstPerc_${i}" name="cgstPerc[${i}]" class="form-control-sm" value="${getValue(row.cgsT_PER)}"></td>
-                 <td><input type="number" id="cgstAmount_${i}" name="cgstAmount[${i}]" class="form-control-sm" value="${getValue(row.cgsT_AMT)}"></td>
-                 <td><input type="number" id="sgstPerc_${i}" name="sgstPerc[${i}]" class="form-control-sm" value="${getValue(row.sgsT_PER)}"></td>
-                 <td><input type="number" id="sgstAmount_${i}" name="sgstAmount[${i}]" class="form-control-sm" value="${getValue(row.sgsT_AMT)}"></td>
-                 <td><input type="number" id="igstPerc_${i}" name="igstPerc[${i}]" class="form-control-sm" value="${getValue(row.igsT_PER)}"></td>
-                 <td><input type="number" id="igstAmount_${i}" name="igstAmount[${i}]" class="form-control-sm" value="${getValue(row.igsT_AMT)}"></td>
-                 <td><input type="number" id="vatPerc_${i}" name="vatPerc[${i}]" class="form-control-sm" value="${getValue(row.vaT_PER)}"></td>
-                 <td><input type="number" id="vatAmount_${i}" name="vatAmount[${i}]" class="form-control-sm" value="${getValue(row.vaT_AMT)}"></td>
-                 <td><input type="number" id="cessPerc_${i}" name="cessPerc[${i}]" class="form-control-sm" value="${getValue(row.cesS_PER)}"></td>
-                 <td><input type="number" id="cessAmount_${i}" name="cessAmount[${i}]" class="form-control-sm" value="${getValue(row.cesS_AMT)}"></td>
-                 <td><input type="number" id="otherExpenses_${i}" name="otherExpenses[${i}]" class="form-control-sm" value="${getValue(row.otH_EXPS)}"></td>
-                 <td><input type="number" id="ldRate_${i}" name="ldRate[${i}]" class="form-control-sm" value="${getValue(row.lD_RATE)}"></td>
-                 <td><input type="number" id="netAmount_${i}" name="netAmount[${i}]" class="form-control-sm" value="${getValue(row.neT_AMT)}"></td>
-                 <td><input type="text" id="warranty_${i}" name="warranty[${i}]" class="form-control-sm" value="${row.warranty || ''}"></td>
-                 <td><input type="number" id="leadTime_${i}" name="leadTime[${i}]" class="form-control-sm" value="${getValue(row.leadtimE_DAYS)}"></td>
-                 <td><input type="number" id="bulkQty_${i}" name="bulkQty[${i}]" class="form-control-sm" value="${getValue(row.bulK_QTY)}"></td>
-                 <td><input type="number" id="bulkRate_${i}" name="bulkRate[${i}]" class="form-control-sm" value="${getValue(row.bulK_RATE)}"></td>
-                 <td><input type="number" id="bulkDiscountPerc_${i}" name="bulkDiscountPerc[${i}]" class="form-control-sm" value="${getValue(row.bulK_DISC_PER)}"></td>
-                 <td><input type="number" id="bulkDiscountAmount_${i}" name="bulkDiscountAmount[${i}]" class="form-control-sm" value="${getValue(row.bulK_DISC_AMT)}"></td>
-                 <td><input type="number" id="rateMonthly_${i}" name="rateMonthly[${i}]" class="form-control-sm" value="${getValue(row.ratE_MONTHLY)}"></td>
-                 <td><input type="number" id="rateQuarterly_${i}" name="rateQuarterly[${i}]" class="form-control-sm" value="${getValue(row.ratE_QUARTERLY)}"></td>
-                 <td><input type="number" id="rateAnnually_${i}" name="rateAnnually[${i}]" class="form-control-sm" value="${getValue(row.ratE_ANNUALY)}"></td>
-                 <td><input type="number" id="rateSpecial_${i}" name="rateSpecial[${i}]" class="form-control-sm" value="${getValue(row.ratE_SPECIAL)}"></td>
-                 <td><input id="requestType_${i}" name="requestType[${i}]" class="form-control-sm" value="${row.reQ_TYPE || ''}" maxlength="4"></td>
-                 <td><input id="requestNo_${i}" name="requestNo[${i}]" class="form-control-sm" value="${row.reQ_NO || ''}"></td>
-                 <td>
-                     <i class="fas fa-trash ms-2" onclick="deleteRow(this)" style="color: red;"></i>
-                     ${isLastRow ? `<i class="fas fa-plus-circle ms-2 text-success add-row-icon" style="cursor:pointer;" onclick="addNewRowBelow()"></i>` : ''}
-                 </td>
-             </tr>
-         `;
-    }
-
-    function generateDropdownOptions(map, selectedValue) {
-        const selectedStr = String(selectedValue).trim();
-        let foundSelected = false;
-
-        const options = Object.entries(map).map(([key, label]) => {
-            const keyStr = String(key).trim();
-            const isSelected = keyStr === selectedStr;
-            if (isSelected) foundSelected = true;
-            return `<option value="${keyStr}"${isSelected ? ' selected' : ''}>${label}</option>`;
-        });
-
-        if (!foundSelected && selectedValue != null && selectedValue !== '') {
-            options.unshift(`<option value="" selected></option>`);
-        }
-
-        return options.join('');
-    }
-
-    $('#btnAddAttachment').on('click', function () {
-        const fileName = $('#txtFileName').val().trim();
-        const fileInput = $('#fileUpload')[0].files[0];
-
-        if (!fileName || !fileInput) {
-            toastr.error("Please provide both file name and file.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            let fullBase64 = e.target.result;
-            let base64File = fullBase64.split(',')[1]; // remove MIME prefix
-
-            const attachment = {
-                ATTACHMENT: fileName,
-                ATTACHMENT_FILE: base64File
-            };
-            rowsAttachment.push(attachment);
-
-            const isImage = fileInput.type.startsWith('image/');
-            let previewHtml = '';
-            let tdStyle = '';
-
-            if (isImage) {
-                tdStyle = 'style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #ccc; overflow: hidden; text-align: center; vertical-align: middle;"';
-                previewHtml = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
-            } else {
-                previewHtml = `<a href="${fullBase64}" target="_blank">Preview</a>`;
-            }
-
-            const row = `
-                <tr data-filename="${fileName}" style="height: 100px;">
-                    <td style="vertical-align: middle;">${fileName}</td>
-                    <td ${tdStyle}>${previewHtml}</td>
-                    <td style="vertical-align: middle;">
-                        <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
-                    </td>
-                </tr>`;
-
-            $('#tblAttachmentPQ tbody').append(row);
-
-            $('#txtFileName').val('');
-            $('#fileUpload').val('');
-        };
-
-        reader.readAsDataURL(fileInput);
-    });
-
-    $('#tblAttachmentPQ').on('click', '.btn-delete-attachment', function () {
-        const row = $(this).closest('tr');
-        const fileName = row.data('filename');
-
-        // Remove from array
-        rowsAttachment = rowsAttachment.filter(item => item.FileName !== fileName);
-
-        row.remove();
-    });
-
-    //For SAVING DATA TO DATABASE.....
-    $('#btn-save').click(function(e) {
-        e.preventDefault();
-
-        // Validation for Quotation1/header
-        if(!validateHeader()){
-            return; 
-        }
-
-        // Validation for Quotation2/items
-        const lastRow = $('#tblPurchaseQuotationListByVno tbody tr:last');
-        let isValid = true;
-        const requiredFields = ['itemName', 'itemMake', 'uom', 'taxCode'];
-        requiredFields.forEach(field => {
-            const select = lastRow.find(`select[id^='${field}_']`);
-            const value = select.val();
-
-            if (!value) {
-                select.addClass('is-invalid');
-                toastr.warning(`Please select a valid value for ${field.replace(/([A-Z])/g, ' $1')}.`);
-                isValid = false;
-            } else {
-                select.removeClass('is-invalid');
-            }
-        });
-        if (!isValid) {
-            return; 
-        }
-
-        // Validation for Quotation3/attachments
-        if (!rowsAttachment || rowsAttachment.length === 0) {
-            toastr.warning("Please attach at least one file before saving.");
-            return;
-        }
-
-        let rowsData = [];
-
-        // 1. Gather data for Quotation1
-        const headerData = {
-            V_TYPE:$('#ddlDocType').val(),
-            V_NO: parseInt($('#NumDocNo').val()) || null,
-            V_DATE: $('#dtDocDate').val(),
-            GROUP_NO: parseInt($('#NumGroupNo').val()) || null,
-            STATUS: parseInt($('#ddlStatus').val()) || null,
-            PARTY_CODE: parseInt($('#txtPartyName').val()) || null,
-            QUOTE_NO: $('#txtQuotationNo').val(),
-            CONT_PERSON: $('#NumContactPerson').val(),
-            QUOTE_DATE: $('#dtQuotDate').val(),
-            VALID_DATE: $('#dtValidDate').val(),
-            REMARKS: $('#txtRemarks').val(),
-            PAYTERM_CODE: parseInt($('#ddlPaymentTerm').val()) || null,
-            FREIGHT_TERM: $('#ddlFreightTerm').val(),
-            DELIVERY_TERM: $('#txtDeliveryTerm').val(),
-
-             // Item Total Values
-            RECD_QTY: parseFloat($('#numQuantityIT').val()) || 0,
-            AMOUNT: parseFloat($('#numAmountIT').val()) || 0,
-            PACK_AMT: parseFloat($('#numPackAmtIT').val()) || 0,
-            DISC_AMT: parseFloat($('#numDiscAmtIT').val()) || 0,
-            BILL_QTY: parseFloat($('#numBulkQtyIT').val()) || 0,
-            DIFF_AMT: parseFloat($('#numBulkDiscAmtIT').val()) || 0,
-            FRTPAY_AMT: parseFloat($('#numFreightIT').val()) || 0,
-            CGST_AMT: parseFloat($('#numCGSTAmtIT').val()) || 0,
-            SGST_AMT: parseFloat($('#numSGSTAmtIT').val()) || 0,
-            IGST_AMT: parseFloat($('#numIGSTAmtIT').val()) || 0,
-            CESS_AMT: parseFloat($('#numCessAmtIT').val()) || 0,
-            VAT_AMT: parseFloat($('#numVATAmtIT').val()) || 0,
-            OTH_AMT: parseFloat($('#numOtherAmtIT').val()) || 0,
-            NET_AMT: parseFloat($('#numNetAmtIT').val()) || 0
-        };
-
-
-        // 2. Gather data for Quotation2
-        $('#tblPurchaseQuotationListByVno tbody tr').each(function() {
-            const row = $(this);
-            rowsData.push({
-                HIDDEN: row.find('input[id^="hidden_"]').val(),
-                YEAR_CODE: parseInt(row.find('label[id^="yearCode_"]').text()) || null,
-                COMP_CODE: parseInt(row.find('label[id^="compCode_"]').text()) || null,
-                BRANCH_CODE: parseInt(row.find('label[id^="branchCode_"]').text()) || null,
-                // V_NO: parseInt(row.find('input[id^="vNo_"]').val()) || null,
-                V_NO: headerData.V_NO,
-                // V_TYPE: row.find('select[id^="vType_"]').val(),
-                V_TYPE: headerData.V_TYPE,
-                V_DATE: row.find('input[id^="vDate_"]').val() || null,
-                ITEM_CODE: parseInt(row.find('select[id^="itemName_"]').val()) || null,
-                MAKE_CODE: parseInt(row.find('select[id^="itemMake_"]').val()) || null,
-                PURCHASER_REMARKS: row.find('input[id^="purchaserRemarks_"]').val(),
-                UOM_CODE: parseInt(row.find('select[id^="uom_"]').val()) || null,
-                QTY: parseInt(row.find('input[id^="qty_"]').val()) || null,
-                RATE: parseFloat(row.find('input[id^="rate_"]').val()) || 0,
-                AMOUNT: parseFloat(row.find('input[id^="amount_"]').val()) || 0,
-                PACK_PER: parseFloat(row.find('input[id^="packPerc_"]').val()) || 0,
-                PACK_AMT: parseFloat(row.find('input[id^="packAmount_"]').val()) || 0,
-                DISC_PER: parseFloat(row.find('input[id^="discountPerc_"]').val()) || 0,
-                DISC_AMT: parseFloat(row.find('input[id^="discountAmount_"]').val()) || 0,
-                FREIGHT: parseFloat(row.find('input[id^="freight_"]').val()) || 0,
-                TAX_CODE: parseInt(row.find('select[id^="taxCode_"]').val()) || null,
-                CGST_PER: parseFloat(row.find('input[id^="cgstPerc_"]').val()) || 0,
-                CGST_AMT: parseFloat(row.find('input[id^="cgstAmount_"]').val()) || 0,
-                SGST_PER: parseFloat(row.find('input[id^="sgstPerc_"]').val()) || 0,
-                SGST_AMT: parseFloat(row.find('input[id^="sgstAmount_"]').val()) || 0,
-                IGST_PER: parseFloat(row.find('input[id^="igstPerc_"]').val()) || 0,
-                IGST_AMT: parseFloat(row.find('input[id^="igstAmount_"]').val()) || 0,
-                VAT_PER: parseFloat(row.find('input[id^="vatPerc_"]').val()) || 0,
-                VAT_AMT: parseFloat(row.find('input[id^="vatAmount_"]').val()) || 0,
-                CESS_PER: parseFloat(row.find('input[id^="cessPerc_"]').val()) || 0,
-                CESS_AMT: parseFloat(row.find('input[id^="cessAmount_"]').val()) || 0,
-                OTH_EXPS: parseFloat(row.find('input[id^="otherExpenses_"]').val()) || 0,
-                LD_RATE: parseFloat(row.find('input[id^="ldRate_"]').val()) || 0,
-                NET_AMT: parseFloat(row.find('input[id^="netAmount_"]').val()) || 0,
-                WARRANTY: row.find('input[id^="warranty_"]').val(),
-                LEADTIME_DAYS: parseInt(row.find('input[id^="leadTime_"]').val()) || null,
-                BULK_QTY: parseFloat(row.find('input[id^="bulkQty_"]').val()) || 0,
-                BULK_RATE: parseFloat(row.find('input[id^="bulkRate_"]').val()) || 0,
-                BULK_DISC_PER: parseFloat(row.find('input[id^="bulkDiscountPerc_"]').val()) || 0,
-                BULK_DISC_AMT: parseFloat(row.find('input[id^="bulkDiscountAmount_"]').val()) || 0,
-                PREORITY_LEVEL: parseInt(row.find('input[id^="priorityLevel_"]').val()) || null,
-                RATE_MONTHLY: parseFloat(row.find('input[id^="rateMonthly_"]').val()) || 0,
-                RATE_QUARTERLY: parseFloat(row.find('input[id^="rateQuarterly_"]').val()) || 0,
-                RATE_ANNUALY: parseFloat(row.find('input[id^="rateAnnually_"]').val()) || 0,
-                RATE_SPECIAL: parseFloat(row.find('input[id^="rateSpecial_"]').val()) || 0,
-                REQ_TYPE: row.find('input[id^="requestType_"]').val(),
-                REQ_NO: parseInt(row.find('input[id^="requestNo_"]').val()) || null
-            });
-        });
-
-        const data = {
-            header: headerData,
-            lineRows: rowsData,
-            Attachement: rowsAttachment
-        };
-
-        console.log(rowsData);
-        
-        $.ajax({
-            url: '/PurchaseQuotation/SaveQuotation',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function(response) {
-                if (response.success === true) {
-                    toastr.success('Saved successfully!');
-                    setTimeout(() => {
-                            window.location.href = '/PurchaseQuotationList/Index';
-                    }, 1000);                
-                }else{
-                    toastr.error('Error saving data: ' + response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                toastr.error('Error saving data: ' + error);
-            }
-        });
-    });
-
-    function deleteRow(iconElement) {
-        // 1. Find the row
-        const $row = $(iconElement).closest('tr');
-
-        // 2. Extract the row index from any input/select ID (e.g., "qty_2")
-        const idMatch = $row.find('input, select').first().attr('id').match(/_(\d+)$/);
-        if (!idMatch) return;
-
-        const rowIdx = parseInt(idMatch[1]);
-
-        // 3. Remove row from DOM
-        $row.remove();
-
-        // 4. Remove entry from rowsData
-        rowsData.splice(rowIdx, 1);
-
-        // 5. Re-index DOM and rowsData
-        $('#tblPurchaseQuotationListByVno tbody tr').each(function (i, tr) {
-            $(tr).find('input, select').each(function () {
-                const id = $(this).attr('id');
-                const name = $(this).attr('name');
-                if (id) {
-                    const baseId = id.substring(0, id.lastIndexOf('_'));
-                    $(this).attr('id', `${baseId}_${i}`);
-                }
-                if (name) {
-                    const baseName = name.substring(0, name.indexOf('['));
-                    $(this).attr('name', `${baseName}[${i}]`);
-                }
-            });
-        });
-
-        // 6. Fix rowsData indexes by resetting it (deep clone optional)
-        rowsData = rowsData.map((row, i) => ({ ...row }));
-
-        // 7. Update last row "+" icon visibility
-        $('#tblPurchaseQuotationListByVno tbody tr').each(function (index, tr) {
-            $(tr).find('.add-row-icon').toggle(index === $('#tblPurchaseQuotationListByVno tbody tr').length - 1);
-        });
-    }
-
-    //Header Validation function
-    function validateHeader() {
-        let headerValid = true;
-
-        const docType = $('#ddlDocType').val();
-        const docDate = $('#dtDocDate').val();
-        const partyName = $('#txtPartyName').val();
-        const quotDate = $('#dtQuotDate').val();
-        const paymentTerm = $('#ddlPaymentTerm').val();
-        const status = $('#ddlStatus').val();
-
-        if (!docType || docType.includes("Select")) {
-            toastr.warning("Please select a valid Document Type.");
-            $('#ddlDocType').addClass('is-invalid');
-            headerValid = false;
-        } else {
-            $('#ddlDocType').removeClass('is-invalid');
-        }
-
-        if (!docDate) {
-            toastr.warning("Please enter a valid Document Date.");
-            $('#dtDocDate').addClass('is-invalid');
-            headerValid = false;
-        } else {
-            $('#dtDocDate').removeClass('is-invalid');
-        }
-
-        if (!partyName || partyName.includes("Select")) {
-            toastr.warning("Please select a Party Name.");
-            $('#txtPartyName').addClass('is-invalid');
-            headerValid = false;
-        } else {
-            $('#txtPartyName').removeClass('is-invalid');
-        }
-
-        if (!quotDate) {
-            toastr.warning("Please enter a valid Quotation Date.");
-            $('#dtQuotDate').addClass('is-invalid');
-            headerValid = false;
-        } else {
-            $('#dtQuotDate').removeClass('is-invalid');
-        }
-
-        if (!paymentTerm || paymentTerm.includes("Select")) {
-            toastr.warning("Please select Payment Terms.");
-            $('#ddlPaymentTerm').addClass('is-invalid');
-            headerValid = false;
-        } else {
-            $('#ddlPaymentTerm').removeClass('is-invalid');
-        }
-
-        if (!status || status.includes("Select")) {
-            toastr.warning("Please select a Status.");
-            $('#ddlStatus').addClass('is-invalid');
-            headerValid = false;
-        } else {
-            $('#ddlStatus').removeClass('is-invalid');
-        }
-        return headerValid;
-    }
-
-    // Calculation function.
-    $('#tblPurchaseQuotationListByVno').on('input change', 'input[id^="rate_"], input[id^="qty_"], input[id^="packPerc_"], input[id^="discountPerc_"], select[id^="taxCode_"]', function() {
-        const $row = $(this).closest('tr');
-        const rowId = this.id.split('_')[1]; // e.g. "2"
-
-        // Grab input/select values
-        const rate = $row.find(`#rate_${rowId}`).val();
-        const qty = $row.find(`#qty_${rowId}`).val();
-        const packPerc = $row.find(`#packPerc_${rowId}`).val();
-        const discPerc = $row.find(`#discountPerc_${rowId}`).val();
-
-        const taxSelect = $row.find(`#taxCode_${rowId}`);
-        const taxPerc = taxSelect.find('option:selected').data('taxpercent') || 0;
-
-        // Calculate amounts
-        const result = calculateAmounts(rate, qty, packPerc, discPerc, taxPerc);
-
-        // Update fields
-        $row.find(`#amount_${rowId}`).val(result.amount);
-        $row.find(`#packAmount_${rowId}`).val(result.packAmt);
-        $row.find(`#discountAmount_${rowId}`).val(result.discAmt);
-        $row.find(`#netAmount_${rowId}`).val(result.netAmount);
-        $row.find(`#ldRate_${rowId}`).val(result.ldRate);
-
-        updateItemTotals();
-    });
-
-    function updateItemTotals() {
-        let totalQty = 0, totalAmount = 0, totalPackAmt = 0, totalDiscAmt = 0, totalBulkQty = 0, totalBulkDiscAmt = 0;
-        let totalFreight = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0, totalCess = 0, totalVAT = 0;
-        let totalOtherAmt = 0, totalNetAmt = 0;
-
-        $('#tblPurchaseQuotationListByVno tbody tr').each(function () {
-            const $row = $(this);
-            const rowId = $row.find('input[id^="qty_"], input[id^="rate_"]').first().attr('id')?.split('_')[1];
-            if (!rowId) return;
-
-            totalQty += parseFloat($row.find(`#qty_${rowId}`).val()) || 0;
-            totalAmount += parseFloat($row.find(`#amount_${rowId}`).val()) || 0;
-            totalPackAmt += parseFloat($row.find(`#packAmount_${rowId}`).val()) || 0;
-            totalDiscAmt += parseFloat($row.find(`#discountAmount_${rowId}`).val()) || 0;
-            totalBulkQty += parseFloat($row.find(`#bulkQty_${rowId}`).val()) || 0;
-            totalBulkDiscAmt += parseFloat($row.find(`#bulkDiscountAmount_${rowId}`).val()) || 0;
-
-            totalFreight += parseFloat($row.find(`#freight_${rowId}`).val()) || 0;
-            totalCGST += parseFloat($row.find(`#cgstAmount_${rowId}`).val()) || 0;
-            totalSGST += parseFloat($row.find(`#sgstAmount_${rowId}`).val()) || 0;
-            totalIGST += parseFloat($row.find(`#igstAmount_${rowId}`).val()) || 0;
-            totalCess += parseFloat($row.find(`#cessAmount_${rowId}`).val()) || 0;
-            totalVAT += parseFloat($row.find(`#vatAmount_${rowId}`).val()) || 0;
-
-            totalOtherAmt += parseFloat($row.find(`#otherExpenses_${rowId}`).val()) || 0;
-            totalNetAmt += parseFloat($row.find(`#netAmount_${rowId}`).val()) || 0;
-        });
-
-        // Update the total fields
-        $('#numQuantityIT').val(totalQty.toFixed(2));
-        $('#numAmountIT').val(totalAmount.toFixed(2));
-        $('#numPackAmtIT').val(totalPackAmt.toFixed(2));
-        $('#numDiscAmtIT').val(totalDiscAmt.toFixed(2));
-        $('#numBulkQtyIT').val(totalBulkQty.toFixed(2));
-        $('#numBulkDiscAmtIT').val(totalBulkDiscAmt.toFixed(2));
-
-        $('#numFreightIT').val(totalFreight.toFixed(2));
-        $('#numCGSTAmtIT').val(totalCGST.toFixed(2));
-        $('#numSGSTAmtIT').val(totalSGST.toFixed(2));
-        $('#numIGSTAmtIT').val(totalIGST.toFixed(2));
-        $('#numCessAmtIT').val(totalCess.toFixed(2));
-        $('#numVATAmtIT').val(totalVAT.toFixed(2));
-
-        $('#numOtherAmtIT').val(totalOtherAmt.toFixed(2));
-        $('#numNetAmtIT').val(totalNetAmt.toFixed(2));
-    }
-
-    // function recalculateRowWithTax($row, rowId) {
-    //     const rate = $row.find(`#rate_${rowId}`).val();
-    //     const qty = $row.find(`#qty_${rowId}`).val();
-    //     const packPerc = $row.find(`#packPerc_${rowId}`).val();
-    //     const discPerc = $row.find(`#discountPerc_${rowId}`).val();
-
-    //     const cgstPer = parseFloat($row.find(`#cgstPerc_${rowId}`).val()) || 0;
-    //     const sgstPer = parseFloat($row.find(`#sgstPerc_${rowId}`).val()) || 0;
-    //     const igstPer = parseFloat($row.find(`#igstPerc_${rowId}`).val()) || 0;
-
-    //     const result = calculateAmounts(rate, qty, packPerc, discPerc, cgstPer, sgstPer, igstPer);
-
-    //     $row.find(`#amount_${rowId}`).val(result.amount);
-    //     $row.find(`#packAmount_${rowId}`).val(result.packAmt);
-    //     $row.find(`#discountAmount_${rowId}`).val(result.discAmt);
-
-    //     $row.find(`#cgstAmount_${rowId}`).val(result.cgstAmt);
-    //     $row.find(`#sgstAmount_${rowId}`).val(result.sgstAmt);
-    //     $row.find(`#igstAmount_${rowId}`).val(result.igstAmt);
-
-    //     $row.find(`#netAmount_${rowId}`).val(result.netAmount);
-    //     $row.find(`#ldRate_${rowId}`).val(result.ldRate);
-    // }
-
-    function recalculateRowWithTax($row, rowId) {
-        const rate = $row.find(`#rate_${rowId}`).val();
-        const qty = $row.find(`#qty_${rowId}`).val();
-        const packPerc = $row.find(`#packPerc_${rowId}`).val();
-        const discPerc = $row.find(`#discountPerc_${rowId}`).val();
     
-        const cgstPer = parseFloat($row.find(`#cgstPerc_${rowId}`).val()) || 0;
-        const sgstPer = parseFloat($row.find(`#sgstPerc_${rowId}`).val()) || 0;
-        const igstPer = parseFloat($row.find(`#igstPerc_${rowId}`).val()) || 0;
-        const vatPer  = parseFloat($row.find(`#vatPerc_${rowId}`).val())  || 0;
-        const cessPer = parseFloat($row.find(`#cessPerc_${rowId}`).val()) || 0;
-    
-        const result = calculateAmounts(rate, qty, packPerc, discPerc, cgstPer, sgstPer, igstPer, vatPer, cessPer);
-    
-        $row.find(`#amount_${rowId}`).val(result.amount);
-        $row.find(`#packAmount_${rowId}`).val(result.packAmt);
-        $row.find(`#discountAmount_${rowId}`).val(result.discAmt);
-    
-        $row.find(`#cgstAmount_${rowId}`).val(result.cgstAmt);
-        $row.find(`#sgstAmount_${rowId}`).val(result.sgstAmt);
-        $row.find(`#igstAmount_${rowId}`).val(result.igstAmt);
-        $row.find(`#vatAmount_${rowId}`).val(result.vatAmt);
-        $row.find(`#cessAmount_${rowId}`).val(result.cessAmt);
-    
-        $row.find(`#netAmount_${rowId}`).val(result.netAmount);
-        $row.find(`#ldRate_${rowId}`).val(result.ldRate);
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
     }
-
-
-    function calculateAmounts(rate, qty, packPerc, discPerc, cgstPer, sgstPer, igstPer, vatPer, cessPer) {
-        rate = parseFloat(rate) || 0;
-        qty = parseFloat(qty) || 0;
-        packPerc = parseFloat(packPerc) || 0;
-        discPerc = parseFloat(discPerc) || 0;
-
-        const amount = rate * qty;
-        const packAmt = (packPerc / 100) * amount;
-        const amtBeforeDisc = amount + packAmt;
-        const discAmt = (discPerc / 100) * amtBeforeDisc;
-        const amtAfterDisc = amtBeforeDisc - discAmt;
-
-        const cgstAmt = (cgstPer / 100) * amtAfterDisc;
-        const sgstAmt = (sgstPer / 100) * amtAfterDisc;
-        const igstAmt = (igstPer / 100) * amtAfterDisc;
-        const vatAmt  = (vatPer  / 100) * amtAfterDisc;
-        const cessAmt = (cessPer / 100) * amtAfterDisc;
-
-        const netAmount = amtAfterDisc + cgstAmt + sgstAmt + igstAmt + vatAmt + cessAmt;
-        const ldRate = qty ? netAmount / qty : 0;
-
-        return {
-            amount: amount.toFixed(2),
-            packAmt: packAmt.toFixed(2),
-            amtBeforeDisc: amtBeforeDisc.toFixed(2),
-            discAmt: discAmt.toFixed(2),
-            amtAfterDisc: amtAfterDisc.toFixed(2),
-            cgstAmt: cgstAmt.toFixed(2),
-            sgstAmt: sgstAmt.toFixed(2),
-            igstAmt: igstAmt.toFixed(2),
-            vatAmt: vatAmt.toFixed(2),
-            cessAmt: cessAmt.toFixed(2),
-            netAmount: netAmount.toFixed(2),
-            ldRate: ldRate.toFixed(2)
-        };
-    }
-
-
-    // function calculateAmounts(rate, qty, packPerc, discPerc, cgstPer, sgstPer, igstPer) {
-    //     rate = parseFloat(rate) || 0;
-    //     qty = parseFloat(qty) || 0;
-    //     packPerc = parseFloat(packPerc) || 0;
-    //     discPerc = parseFloat(discPerc) || 0;
-
-    //     const amount = rate * qty;
-    //     const packAmt = (packPerc / 100) * amount;
-    //     const amtBeforeDisc = amount + packAmt;
-    //     const discAmt = (discPerc / 100) * amtBeforeDisc;
-    //     const amtAfterDisc = amtBeforeDisc - discAmt;
-
-    //     const cgstAmt = (cgstPer / 100) * amtAfterDisc;
-    //     const sgstAmt = (sgstPer / 100) * amtAfterDisc;
-    //     const igstAmt = (igstPer / 100) * amtAfterDisc;
-
-    //     const netAmount = amtAfterDisc + cgstAmt + sgstAmt + igstAmt;
-    //     const ldRate = qty ? netAmount / qty : 0;
-
-    //     return {
-    //         amount: amount.toFixed(2),
-    //         packAmt: packAmt.toFixed(2),
-    //         amtBeforeDisc: amtBeforeDisc.toFixed(2),
-    //         discAmt: discAmt.toFixed(2),
-    //         amtAfterDisc: amtAfterDisc.toFixed(2),
-    //         cgstAmt: cgstAmt.toFixed(2),
-    //         sgstAmt: sgstAmt.toFixed(2),
-    //         igstAmt: igstAmt.toFixed(2),
-    //         netAmount: netAmount.toFixed(2),
-    //         ldRate: ldRate.toFixed(2)
-    //     };
-    // }
-
-
-    // function calculateAmounts(rate, qty, packPerc, discPerc, taxPerc) {
-    //     // alert('working Change');
-    //     rate = parseFloat(rate) || 0;
-    //     qty = parseFloat(qty) || 0;
-    //     packPerc = parseFloat(packPerc) || 0;
-    //     discPerc = parseFloat(discPerc) || 0;
-    //     taxPerc = parseFloat(taxPerc) || 0;
-    //     debugger;
-    //     const amount = rate * qty;
-    //     const packAmt = (packPerc / 100) * amount;
-    //     const amtBeforeDisc = amount + packAmt;
-    //     const discAmt = (discPerc / 100) * amtBeforeDisc;
-    //     const amtAfterDisc = amtBeforeDisc - discAmt;
-    //     const amtTaxable = (taxPerc / 100) * amtAfterDisc;
-    //     const netAmount = amtAfterDisc + amtTaxable;
-    //     const ldRate = qty ? netAmount / qty : 0;
-
-    //     return {
-    //         amount: amount.toFixed(2),
-    //         packAmt: packAmt.toFixed(2),
-    //         amtBeforeDisc: amtBeforeDisc.toFixed(2),
-    //         discAmt: discAmt.toFixed(2),
-    //         amtAfterDisc: amtAfterDisc.toFixed(2),
-    //         amtTaxable: amtTaxable.toFixed(2),
-    //         netAmount: netAmount.toFixed(2),
-    //         ldRate: ldRate.toFixed(2)
-    //     };
-    // }
-    
-
 </script>
-<script>
-    document.getElementById('fileUpload').addEventListener('change', function () {
-        const fileInput = this;
-        const fileNameField = document.getElementById('txtFileName');
 
-        if (fileInput.files.length > 0) {
-            fileNameField.value = fileInput.files[0].name;
-        } else {
-            fileNameField.value = '';
-        }
-    });
-</script>
+<script src="~/common/dropdown.js"></script>
+<script src="~/js/erpjs/purchase/transaction/purchasequotationjs/purchasequotation.js"></script>
+
+
 

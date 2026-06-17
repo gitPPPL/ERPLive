@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Office.Word;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net.Mail;
@@ -12,9 +13,6 @@ using travelexpensemanagement.Controllers.AddAttachmentService;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Purchase.Transiction;
-using static iTextSharp.text.pdf.AcroFields;
-using static iTextSharp.text.pdf.PRTokeniser;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
@@ -27,99 +25,141 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         private readonly FileHelper _filehelper;
+        private readonly GlobalValidationdate _globalValidationdate;
         public PurchaseQuotationController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+        DropdownService dropdownService, DbHelper dbHelper, GlobalValidationdate globalValidationdate, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
+
         }
         public IActionResult Index()
         {
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVariables = _globalVariableService.GetGlobalVariables();
             var globalVar = _globalVariableService.GetGlobalVariables();
             ViewBag.CompCode = globalVar.PubCompCode;
-            ViewBag.BranchCode = 1;
+            ViewBag.BranchCode = globalVar.PubBranchCode;
             ViewBag.YearCode = globalVar.PubFYearCode;
             return View("~/Views/Purchase/Transaction/PurchaseQuotation/Index.cshtml");
         }
 
-        [HttpGet]
-        public int GetNextV_NO(string yearCode)
+        private string GenerateVNo(string vType)
         {
-            string newV_NO = "00000";
+            string newV_NO = "00001";
+
+            var getdata = _globalVariableService.GetGlobalVariables();
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
 
-                // Get PREFIXYR
                 string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
-
                 SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
-                prefixCmd.Parameters.AddWithValue("@YearCode", yearCode);
+                prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
 
                 string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
 
-                // Get last V_NO of same year prefix
-                    string lastV_NO_Query = @"
-                    SELECT TOP 1 V_NO
-                    FROM QUOTATION1
-                    WHERE CAST(V_NO AS VARCHAR(20)) LIKE @Prefix + '%'
-                    ORDER BY V_NO DESC";
+                string lastV_NO_Query = @"
+                SELECT ISNULL(MAX(CAST(RIGHT(V_NO,5) AS INT)), 0) + 1 
+                FROM QUOTATION1 
+                WHERE V_TYPE = @V_TYPE 
+                AND COMP_CODE = @COMP_CODE 
+                AND BRANCH_CODE = @BRANCH_CODE 
+                AND YEAR_CODE = @YEAR_CODE";
 
-                SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
-                lastVnoCmd.Parameters.AddWithValue("@Prefix", prefixYR);
+                SqlCommand cmd = new SqlCommand(lastV_NO_Query, con);
 
-                string lastV_NO = lastVnoCmd.ExecuteScalar()?.ToString();
+                cmd.Parameters.AddWithValue("@V_TYPE", vType);
+                cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
 
-                int lastNumber = 0;
+                int nextNo = Convert.ToInt32(cmd.ExecuteScalar());
 
-                if (!string.IsNullOrEmpty(lastV_NO))
-                {
-                    string numericPart = lastV_NO.Substring(prefixYR.Length);
-
-                    int.TryParse(numericPart, out lastNumber);
-                }
-
-                string newRunningNo = (lastNumber + 1).ToString("D5");
-
-                newV_NO = prefixYR + newRunningNo;
+                newV_NO = prefixYR + nextNo.ToString("D5");
             }
 
-            return Convert.ToInt32(newV_NO);
+            return newV_NO;
+        }
+
+        [HttpGet]
+        public JsonResult GetNextV_NO(string vType)
+        {
+            try
+            {
+                string vNo = GenerateVNo(vType);
+                return Json(new { v_NO = vNo });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        //==========Global Dropdown============
+        [HttpGet]
+        public IActionResult GetDropdown(string type)
+        {
+            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+
+            string query = "";
+
+            switch (type)
+            {
+                case "PARTY":
+                    query = @"SELECT 
+                            a.CODE,
+                            a.NAME,
+                            b.ADD1,
+                            b.ADD2,
+                            b.CITY_CODE,
+                            b.GSTIN
+                        FROM SUBGROUP_MAST a
+                        LEFT JOIN SUBGROUP_ADDRESS b
+                            ON a.COMP_CODE = b.COMP_CODE
+                            AND a.CODE = b.CODE
+                            AND b.IS_DEFAULT = 1
+                        WHERE a.NATURE IN ('supplier')
+                            AND a.COMP_CODE ='" + compCode +"' AND a.ACTIVE = 1 ORDER BY a.NAME";
+                    break;
+
+                case "STATUS":
+                    query = @"SELECT CODE,NAME FROM DOCSTATUS_MAST WHERE V_TYPE = 'Document' ORDER BY CODE";
+                    break;
+                 
+                case "PAYMENTTERM":
+                    query = @"SELECT CODE,NAME FROM PAYTERM_MAST WHERE COMP_CODE='" + compCode + "' AND ACTIVE=1 ORDER BY NAME";
+                    break;
+
+                case "Currency":
+                    query = @"Select Code,CURR_CODE + ' ' + SHORTNAME 'Name' from CURRENCY_MAST where ACTIVE=1";
+                    break;
+
+                default:
+                    return Json(new List<object>());
+            }
+
+            var list = _dropdownService.GetDropdownList(query);
+            return Json(list);
         }
 
         public IActionResult GetDocTypeList()
         {
-            string query = "SELECT CODE,NAME FROM DOCTYPE_MAST WHERE DOCTYPE= 'PurchaseQuotation' ORDER BY NAME DESC";
+            string query = "SELECT CODE,NAME FROM DOCTYPE_MAST WHERE DOCTYPE= 'PurchaseQuotation' ORDER BY NAME";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
 
-        public IActionResult GetPartyList()
-        {
-            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-            string query = "SELECT CODE,NAME FROM SUBGROUP_MAST WHERE COMP_CODE='" + compCode + "' AND ACTIVE=1 ORDER BY NAME ";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-
-        public IActionResult GetPaymentTermList()
-        {
-            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-            string query = "SELECT CODE,NAME FROM PAYTERM_MAST WHERE COMP_CODE='" + compCode + "' AND ACTIVE=1 ORDER BY NAME ";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetStatusList()
-        {
-            string query = "SELECT CODE,NAME FROM DOCSTATUS_MAST WHERE V_TYPE = 'Document' ORDER BY NAME";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
         public IActionResult GetItemList()
         {
             var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
@@ -137,9 +177,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
             return Json(moduelList);
         }
+
         public IActionResult GetUOMList()
         {
-            string query = "SELECT CODE,NAME FROM QCPUNIT_MAST WHERE ACTIVE=1 ORDER BY NAME";
+            string query = "SELECT CODE,NAME FROM ITEMUNIT_MAST WHERE ACTIVE=1 ORDER BY NAME";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
@@ -155,11 +196,28 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     string query = @"
-                    SELECT DISTINCT IMK.MAKE_CODE, IMM.NAME 
-                    FROM ITEM_MAKE IMK
-                    LEFT JOIN ITEMMAKE_MAST IMM ON IMM.CODE = IMK.MAKE_CODE
-                    WHERE IMM.COMP_CODE = @COMP_CODE  
-                    AND IMK.ITEM_CODE = @ITEM_CODE
+                   SELECT DISTINCT
+                        IMK.MAKE_CODE,
+                        IMM.NAME AS MAKE_NAME,
+                        IU.CODE AS UNIT_CODE,
+                        IU.NAME AS UNIT_NAME
+                    FROM ITEM_MAST IM
+
+                    LEFT JOIN ITEM_MAKE IMK
+                        ON IM.CODE = IMK.ITEM_CODE
+                        AND IM.COMP_CODE = IMK.COMP_CODE
+
+                    LEFT JOIN ITEMMAKE_MAST IMM
+                        ON IMM.CODE = IMK.MAKE_CODE
+                        AND IMM.COMP_CODE = IMK.COMP_CODE
+
+                    LEFT JOIN ITEMUNIT_MAST IU
+                        ON IU.CODE = IM.UNIT_CODE
+                        AND IU.COMP_CODE = IM.COMP_CODE
+
+                    WHERE IM.CODE = @ITEM_CODE
+                        AND IM.COMP_CODE = @COMP_CODE
+
                     ORDER BY IMM.NAME";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
@@ -174,8 +232,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             {
                                 makeItems.Add(new
                                 {
-                                    MakeCode = reader["MAKE_CODE"],
-                                    Name = reader["NAME"]
+                                    MakeCode = reader["MAKE_CODE"] == DBNull.Value ? "" : reader["MAKE_CODE"].ToString(),
+                                    MakeName = reader["MAKE_NAME"] == DBNull.Value ? "" : reader["MAKE_NAME"].ToString(),
+                                    UnitCode = reader["UNIT_CODE"] == DBNull.Value ? "" : reader["UNIT_CODE"].ToString(),
+                                    UnitName = reader["UNIT_NAME"] == DBNull.Value ? "" : reader["UNIT_NAME"].ToString()
                                 });
                             }
                         }
@@ -190,45 +250,55 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
-        //[HttpGet]
-        //public IActionResult GetMakeItemByItemCode(int itemCode)
-        //{
-        //    string itemMake = string.Empty;
-        //    var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-
-        //    try
-        //    {
-        //        using (SqlConnection con = _dbConnection.GetErpConnection())
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Select M_TYPE from ITEM_MAST WHERE CODE = @CODE", con))
-        //            {
-        //                cmd.Parameters.AddWithValue("@CODE", itemCode);
-
-        //                con.Open();
-        //                using (var reader = cmd.ExecuteReader())
-        //                {
-        //                    if (reader.Read())
-        //                    {
-        //                        itemMake = reader["M_TYPE"].ToString();
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        return Json(new { success = true, itemMake });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { success = false, message = "Error retrieving next ID", error = ex.Message });
-        //    }
-        //}
-
+        [HttpGet]
         public IActionResult GetTextCodeList()
         {
             string query = "SELECT CODE,NAME FROM TAX_MAST WHERE ACTIVE=1 AND NAME<>'' ORDER BY NAME";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
+        }
+
+        [HttpGet]
+        public IActionResult GetTaxDetails(int taxCode)
+        {
+            string query = @"
+            SELECT
+                PACK_ONBASIC,
+                CGST_PER,
+                SGST_PER,
+                IGST_PER,
+                VAT_PER
+            FROM TAX_MAST
+            WHERE CODE = @TaxCode";
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@TaxCode", taxCode);
+
+                con.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return Json(new
+                        {
+                            success = true,
+                            data = new
+                            {
+                                packOnBasic = Convert.ToInt32(reader["PACK_ONBASIC"]),
+                                cgstPer = Convert.ToDecimal(reader["CGST_PER"]),
+                                sgstPer = Convert.ToDecimal(reader["SGST_PER"]),
+                                igstPer = Convert.ToDecimal(reader["IGST_PER"]),
+                                vatPer = Convert.ToDecimal(reader["VAT_PER"])
+                            }
+                        });
+                    }
+                }
+            }
+
+            return Json(new { success = false });
         }
 
         public IActionResult GetTextRelatedDetailsTaxCode(int taxCode)
@@ -352,7 +422,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         FAPROV_STATUS = rdr["FAPROV_STATUS"]?.ToString(),
                         FAPROV_REMARKS = rdr["FAPROV_REMARKS"]?.ToString(),
                         MAILSEND = rdr["MAILSEND"] as int? ?? 0,
-                        SRNO = rdr["SRNO"] as int? ?? 0
+                        SRNO = rdr["SRNO"] as int? ?? 0,
+                        IMPORT_CURRENCY= rdr["IMPORT_CURRENCY"]?.ToString(),
+                        EXRATE = rdr["EXRATE"] as decimal? ?? 0
                     };
                 }
 
@@ -382,6 +454,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             REF_DOCID = rdr["REF_DOCID"]?.ToString(),
                             QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
                             RATE = rdr["RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["RATE"]) : 0,
+                            IMPORT_RATE = rdr["IMPORT_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["IMPORT_RATE"]) : 0,
                             AMOUNT = rdr["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(rdr["AMOUNT"]) : 0,
                             PACK_PER = rdr["PACK_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["PACK_PER"]) : 0,
                             PACK_AMT = rdr["PACK_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["PACK_AMT"]) : 0,
@@ -487,23 +560,94 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
         [HttpPost]
         public async Task<IActionResult> SaveQuotation([FromBody] QuotationWrapper data)
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            int vNo = GetNextV_NO(globalVar.PubFYearCode);
-            var model = data.header;
-            string action = "INSERTANDUPDATE";
-            string subAction = "";
 
-            // Check for duplicate name before insert
-            if (IsDuplicateQuotationEntry(vNo, Convert.ToInt32(globalVar.PubCompCode), Convert.ToInt32(globalVar.PubFYearCode)))
+            if (data.header == null)
+            {
+                return Json(new { success = false, message = "HEADER IS NULL" });
+            }
+
+            if (data.lineRows == null)
+            {
+                return Json(new { success = false, message = "Line items missing" });
+            }
+
+            var globalVar = _globalVariableService.GetGlobalVariables();
+
+            //var model = data.header;
+            //string vNoStr = GenerateVNo(model.V_TYPE);
+            //int vNo = Convert.ToInt32(vNoStr.Substring(vNoStr.Length - 5));
+            //string action = "INSERTANDUPDATE";
+            //string subAction = "";
+
+            //// Check for duplicate name before insert
+            //if (IsDuplicateQuotationEntry(vNo, Convert.ToInt32(globalVar.PubCompCode), Convert.ToInt32(globalVar.PubFYearCode)))
+            //{
+            //    subAction = "UPDATE";
+            //}
+            //else
+            //{
+            //    subAction = "INSERT";
+            //}
+            //=========
+            //var model = data.header;
+
+            //int vNo;
+            //string subAction;
+
+            //if (model.AED == "D")
+            //{
+            //    subAction = "INSERT";
+            //    model.V_NO = 0;
+            //}
+            //else if (model.V_NO > 0)
+            //{
+            //    vNo = model.V_NO.Value;
+            //    subAction = "UPDATE";
+            //}
+            //else
+            //{
+            //    string vNoStr = GenerateVNo(model.V_TYPE);
+            //    vNo = Convert.ToInt32(vNoStr.Substring(vNoStr.Length - 5));
+            //    subAction = "INSERT";
+            //} 
+
+            var validationResult = await ValidateQuotationAsync(data.header, data.lineRows, data.Attachement);
+
+            if (!validationResult.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = validationResult.Message
+                });
+            }
+
+            var model = data.header;
+
+            int vNo;
+            string subAction;
+
+            if (model.AED == "D")
+            {
+                subAction = "INSERT";
+
+                string vNoStr = GenerateVNo(model.V_TYPE);
+
+                vNo = Convert.ToInt32(vNoStr);
+                model.V_NO = vNo;
+            }
+            else if (model.V_NO > 0 && model.AED == "E")
             {
                 subAction = "UPDATE";
+                vNo = model.V_NO.Value;
             }
             else
             {
+                string vNoStr = GenerateVNo(model.V_TYPE);
+                vNo = Convert.ToInt32(vNoStr.Substring(vNoStr.Length - 5));
                 subAction = "INSERT";
             }
             try
@@ -518,11 +662,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.CommandType = CommandType.StoredProcedure;
 
                         // Basic Parameters
-                        cmd.Parameters.AddWithValue("@Action", action);
+                        //cmd.Parameters.AddWithValue("@Action", action);
+                        cmd.Parameters.AddWithValue("@Action", "INSERTANDUPDATE");
                         cmd.Parameters.AddWithValue("@SubAction", subAction);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
                         cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? "");
                         cmd.Parameters.AddWithValue("@V_NO", model.V_NO);
                         cmd.Parameters.AddWithValue("@V_DATE", model.V_DATE);
@@ -535,6 +680,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@PRICE_TYPE", model.PRICE_TYPE ?? "");
                         cmd.Parameters.AddWithValue("@STATUS", model.STATUS);
                         cmd.Parameters.AddWithValue("@PAYTERM_CODE", model.PAYTERM_CODE);
+                        cmd.Parameters.AddWithValue("@PAYMENT_TERM", model.PAYMENT_TERM);
                         cmd.Parameters.AddWithValue("@FREIGHT_TERM", model.FREIGHT_TERM ?? "");
                         cmd.Parameters.AddWithValue("@DELIVERY_TERM", model.DELIVERY_TERM ?? "");
                         cmd.Parameters.AddWithValue("@GROUP_NO", model.GROUP_NO);
@@ -556,6 +702,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@FAPROV_STATUS", model.FAPROV_STATUS ?? "");
                         cmd.Parameters.AddWithValue("@FAPROV_REMARKS", model.FAPROV_REMARKS ?? "");
                         cmd.Parameters.AddWithValue("@MAILSEND", model.MAILSEND);
+                        cmd.Parameters.AddWithValue("@IMPORT_CURRENCY", model.IMPORT_CURRENCY);
+                        cmd.Parameters.AddWithValue("@EXRATE", model.EXRATE);
 
                         // System Audit Fields
                         cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
@@ -563,18 +711,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
                         cmd.Parameters.AddWithValue("@EDATE", DateTime.Now);
                         cmd.Parameters.AddWithValue("@AED", model.AED ?? "A");
-                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? "WEB");
-                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? "127.0.0.1");
+                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
+                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
                         // Convert QUOT2 to DataTable
-                        DataTable dtQuotation2 = ConvertToQuotation2TVP(data.lineRows, docID);
+                        DataTable dtQuotation2 = ConvertToQuotation2TVP(data.lineRows, data.header, docID);
                         SqlParameter tvpParam = cmd.Parameters.AddWithValue("@TVP_Quotation2", dtQuotation2);
                         tvpParam.SqlDbType = SqlDbType.Structured;
                         tvpParam.TypeName = "dbo.TVP_Quotation2";
 
                         // Convert QUOT3 to DataTable
-                        DataTable dtQuotation3 = await ConvertToQuotation3TVP(model.V_NO, model.V_TYPE, data.Attachement, docID);
+                        DataTable dtQuotation3 = await ConvertToQuotation3TVP(data.header, data.Attachement, docID);
                         var tvpParam3 = cmd.Parameters.AddWithValue("@TVP_Quotation3", dtQuotation3);
                         tvpParam3.SqlDbType = SqlDbType.Structured;
                         tvpParam3.TypeName = "dbo.TVP_Quotation3";
@@ -583,7 +731,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     }
                 }
 
-                return Json(new { success = true });
+                return Json(new { success = true, action = subAction });
             }
             catch (SqlException sqlEx)
             {
@@ -595,7 +743,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        public DataTable ConvertToQuotation2TVP(List<QUOTATION2> list, string DocId)
+        public DataTable ConvertToQuotation2TVP(List<QUOTATION2> list, QUOTATION1 header, string DocId)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
 
@@ -620,6 +768,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             dt.Columns.Add("REF_TYPE", typeof(string));
             dt.Columns.Add("REF_DOCID", typeof(string));
             dt.Columns.Add("QTY", typeof(decimal));
+            dt.Columns.Add("IMPORT_RATE", typeof(decimal));
             dt.Columns.Add("RATE", typeof(decimal));
             dt.Columns.Add("AMOUNT", typeof(decimal));
             dt.Columns.Add("PACK_PER", typeof(decimal));
@@ -687,9 +836,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     item.SRNO ?? (object)DBNull.Value,
                     globalVar.PubFYearCode,
                     globalVar.PubCompCode,
-                    1,
-                    item.V_NO ?? (object)DBNull.Value,
-                    item.V_TYPE ?? "",
+                    globalVar.PubBranchCode,
+                    header.V_NO,
+                    header.V_TYPE ?? "",
                     item.ITEM_CODE ?? (object)DBNull.Value,
                     item.MAKE_CODE ?? (object)DBNull.Value,
                     item.V_DATE ?? (object)DBNull.Value,
@@ -701,6 +850,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     item.REF_TYPE ?? "",
                     item.REF_DOCID ?? "",
                     item.QTY ?? (object)DBNull.Value,
+                    item.IMPORT_RATE ?? (object)DBNull.Value,
                     item.RATE ?? (object)DBNull.Value,
                     item.AMOUNT ?? (object)DBNull.Value,
                     item.PACK_PER ?? (object)DBNull.Value,
@@ -757,8 +907,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     globalVar.PubUserId,
                     item.EDATE ?? (object)DBNull.Value,
                     item.AED ?? "",
-                    globalVar.PubWorkStationID ?? "WEB",
-                    globalVar.PubLocalId ?? "127.0.0.1",
+                    globalVar.PubWorkStationID,
+                    globalVar.PubLocalId,
                     Environment.MachineName
                 );
             }
@@ -766,7 +916,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return dt;
         }
 
-        public async Task<DataTable> ConvertToQuotation3TVP(int? vNO, string? vType, List<QUOTATION3> list, string DocId)
+        public async Task<DataTable> ConvertToQuotation3TVP(QUOTATION1 header, List<QUOTATION3> list, string DocId)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
 
@@ -792,7 +942,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             dt.Columns.Add("SRNO", typeof(int));
             dt.Columns.Add("ATTACHMENT_FILE", typeof(byte[]));
 
-
             // Prepare files for saving
             var filesToSave = list
                 .Where(x => x.ATTACHMENT_FILE != null && x.ATTACHMENT_FILE.Length > 0)
@@ -804,8 +953,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
             string folderName = "PurchaseQuotation";
             var savedFiles = await FileHelper.SaveBase64FilesAsync(filesToSave, folderName);
-
-
 
             // Use ToDictionary on the actual List<SaveFileModel>
             var fileMap = savedFiles.ToDictionary(f => f.FileName, f => f);
@@ -821,10 +968,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 dt.Rows.Add(
                     globalVar.PubFYearCode,
                     globalVar.PubCompCode,
-                    1,
-                    vNO,
-                    vType,
-                    item.V_DATE ?? (object)DBNull.Value,
+                    globalVar.PubBranchCode,
+                    header.V_NO,
+                    header.V_TYPE,
+                    header.V_DATE,
                     item.ATTACHMENT ?? "",// ATTACHMENT
                     DocId ?? "",
                     globalVar.PubUserId,
@@ -832,8 +979,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     globalVar.PubUserId,
                     item.EDATE.HasValue ? (object)item.EDATE.Value : DBNull.Value,
                     item.AED ?? "",
-                    globalVar.PubWorkStationID ?? "WEB",
-                    globalVar.PubLocalId ?? "127.0.0.1",
+                    globalVar.PubWorkStationID,
+                    globalVar.PubLocalId,
                     Environment.MachineName,
                     item.SRNO,
                     attachmentBytes // ATTACHMENT_FILE
@@ -859,6 +1006,68 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        private async Task<(bool IsValid, string Message)> ValidateQuotationAsync(QUOTATION1 model, List<QUOTATION2> lineRows,List<QUOTATION3> attachments)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            // ======================
+            // Party State Validation
+            // ======================
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                await con.OpenAsync();
+
+                // Party State
+                SqlCommand partyCmd = new SqlCommand(
+                    @"SELECT STATE_CODE FROM SUBGROUP_MAST WHERE CODE=@PartyCode AND COMP_CODE=@CompCode", con);
+
+                partyCmd.Parameters.AddWithValue("@PartyCode", model.PARTY_CODE);
+                partyCmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+
+                object stateObj = await partyCmd.ExecuteScalarAsync();
+
+                int partyStateCode = stateObj != null
+                    ? Convert.ToInt32(stateObj)
+                    : 0;
+
+                // Company State
+                SqlCommand companyCmd = new SqlCommand(
+                    @"SELECT STATE_CODE FROM COMP_MAST WHERE CODE=@CompCode", con);
+
+                companyCmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+
+                object companyStateObj = await companyCmd.ExecuteScalarAsync();
+
+                int companyStateCode = companyStateObj != null ? Convert.ToInt32(companyStateObj) : 0;
+
+                string stateType = partyStateCode == companyStateCode ? "Local" : "Central/Other";
+
+                if (partyStateCode == companyStateCode &&
+                    Convert.ToDecimal(model.IGST_AMT ?? 0) > 0)
+                {
+                    return (false,
+                        $"IGST Not applicable as per Party State type is {stateType}");
+                }
+
+                if (partyStateCode != companyStateCode &&
+                    (Convert.ToDecimal(model.CGST_AMT ?? 0)
+                    + Convert.ToDecimal(model.SGST_AMT ?? 0)) > 0)
+                {
+                    return (false,
+                        $"CGST/SGST not applicable as per Party State type is {stateType}");
+                }
+
+                if (Convert.ToDecimal(model.IGST_AMT ?? 0) > 0 &&
+                    (Convert.ToDecimal(model.CGST_AMT ?? 0)
+                    + Convert.ToDecimal(model.SGST_AMT ?? 0)) > 0)
+                {
+                    return (false,
+                        "CGST+SGST+IGST all three type tax not applicable.");
+                }
+            }
+
+            return (true, "");
+        }
 
         [HttpPost]
         public JsonResult DeletePurchaseQuotationByCode(int code, string vType, int compCode, int branchCode, int yearCode)
@@ -887,6 +1096,299 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult CopyData(string actionType, DateTime? vDate )
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            var data = new List<object>();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_QUOTATION1_MGMT", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", actionType);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.Add("@V_DATE", SqlDbType.DateTime).Value = (object)vDate ?? DBNull.Value;
+                        con.Open();
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                data.Add(new
+                                {
+                                    VNo = reader["VNo"],
+                                    VType = reader["VType"],
+                                    VDate = reader["VDate"],
+                                    ItemCode = reader["ItemCode"],
+                                    ItemName = reader["ItemName"],
+                                    Make = reader["Make"],
+                                    TechDesc = reader["TechDesc"],
+                                    Unit = reader["Unit"] == DBNull.Value ? "" : reader["Unit"].ToString(),
+                                    Qty = reader["Qty"] == DBNull.Value ? "" : reader["Qty"].ToString(),
+                                    MakeCode = reader["MakeCode"] == DBNull.Value ? "" : reader["MakeCode"].ToString(),
+                                    UCode = reader["UCode"] == DBNull.Value ? "" : reader["UCode"].ToString(),
+                                    TaxCode = reader["TaxCode"] == DBNull.Value ? "" : reader["TaxCode"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+                return Json(new { success = true, message = "Data copied successfully." ,data = data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("QUOTATION1", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseHistory(int itemcode)
+        {
+            var globalVariable= _globalVariableService.GetGlobalVariables();
+            var result = new List<object>();
+            try
+            {
+                using(SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    SqlCommand cmd = new SqlCommand("[sp_QUOTATION1_MGMT]", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "PurchaseHistory");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVariable.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVariable.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@ITEM_CODE", itemcode);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            result.Add(new
+                            {
+                                VNo = reader["VNo"]?.ToString() ?? "",
+                                Date = reader["Date"]?.ToString() ?? "",
+                                Supplier = reader["Supplier"]?.ToString() ?? "",
+                                ItemName = reader["ItemName"]?.ToString() ?? "",
+                                Make = reader["Make"]?.ToString() ?? "",
+                                Unit = reader["Unit"]?.ToString() ?? "",
+
+                                Qty = reader["Qty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Qty"]),
+                                Rate = reader["Rate"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Rate"]),
+                                OthAmt = reader["OthAmt"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OthAmt"]),
+
+                                CGSTPer = reader["CGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CGSTPer"]),
+                                SGSTPer = reader["SGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SGSTPer"]),
+                                IGSTPer = reader["IGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["IGSTPer"]),
+
+                                PackPer = reader["PackPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["PackPer"]),
+                                DiscPer = reader["DiscPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiscPer"]),
+                                LDRate = reader["LDRate"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["LDRate"]),
+
+                                Remarks = reader["Remarks"]?.ToString() ?? "",
+                                Status = reader["Status"]?.ToString() ?? ""
+                            });
+                        }
+                    }
+                }
+                return Json(new { success = true, data = result});
+
+            }
+            catch(Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseQuotation(int itemcode)
+        {
+            var globalVariable = _globalVariableService.GetGlobalVariables();
+            var result = new List<object>();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    SqlCommand cmd = new SqlCommand("[sp_QUOTATION1_MGMT]", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "PurchaseQuotationHistory");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVariable.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVariable.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalVariable.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@ITEM_CODE", itemcode);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            result.Add(new
+                            {
+                                VNo = reader["VNo"]?.ToString() ?? "",
+                                Date = reader["Date"]?.ToString() ?? "",
+                                Supplier = reader["Supplier"]?.ToString() ?? "",
+                                ItemName = reader["ItemName"]?.ToString() ?? "",
+                                Make = reader["Make"]?.ToString() ?? "",
+                                Unit = reader["Unit"]?.ToString() ?? "",
+                                GroupNo = reader["GroupNo"] == DBNull.Value ? 0 : Convert.ToInt32(reader["GroupNo"]),
+                                Qty = reader["Qty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Qty"]),
+                                Rate = reader["Rate"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Rate"]),
+                                Freight = reader["Freight"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Freight"]),
+                                CGSTPer = reader["CGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CGSTPer"]),
+                                SGSTPer = reader["SGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SGSTPer"]),
+                                IGSTPer = reader["IGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["IGSTPer"]),
+                                PackPer = reader["PackPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["PackPer"]),
+                                DiscPer = reader["DiscPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiscPer"]),
+                                OthExps = reader["OthExps"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OthExps"]),
+                                LDRate = reader["LDRate"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["LDRate"]),
+                                Remarks = reader["Remarks"]?.ToString() ?? "",
+                                Status = reader["Status"]?.ToString() ?? ""
+                            });
+                        }
+                    }
+                }
+                return Json(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+
+        }
+
+        [HttpGet]
+        public IActionResult OrderHistory(int itemcode, DateTime? Vdate)
+        {
+            var globalVariable = _globalVariableService.GetGlobalVariables();
+            var result = new List<object>();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    SqlCommand cmd = new SqlCommand("[sp_QUOTATION1_MGMT]", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "OrderHistory");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVariable.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVariable.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@ITEM_CODE", itemcode);
+                    cmd.Parameters.AddWithValue("@V_DATE", Vdate ?? (object)DBNull.Value);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            result.Add(new
+                            {
+                                VNo = reader["VNo"]?.ToString() ?? "",
+                                Date = reader["Date"]?.ToString() ?? "",
+                                Supplier = reader["Supplier"]?.ToString() ?? "",
+                                ItemName = reader["ItemName"]?.ToString() ?? "",
+                                Make = reader["Make"]?.ToString() ?? "",
+                                Unit = reader["Unit"]?.ToString() ?? "",
+                                Qty = reader["Qty"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Qty"]),
+                                Rate = reader["Rate"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Rate"]),
+                                CGSTPer = reader["CGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CGSTPer"]),
+                                SGSTPer = reader["SGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SGSTPer"]),
+                                IGSTPer = reader["IGSTPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["IGSTPer"]),
+                                PackPer = reader["PackPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["PackPer"]),
+                                DiscPer = reader["DiscPer"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiscPer"]),
+                                OthExps = reader["OthExps"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OthExps"]),
+                                LDRate = reader["LDRate"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["LDRate"]),
+                                Remarks = reader["Remarks"]?.ToString() ?? "",
+                                Status = reader["Status"]?.ToString() ?? ""
+                            });
+                        }
+                    }
+                }
+                return Json(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+
+        }
+
+        [HttpGet]
+        public IActionResult ExportToExcel(int vNo, string vType)
+        {
+            var globalVariable = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                SqlCommand cmd = new SqlCommand("[sp_QUOTATION1_MGMT]", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
+                cmd.Parameters.AddWithValue("@COMP_CODE", globalVariable.PubCompCode);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVariable.PubBranchCode);
+                cmd.Parameters.AddWithValue("@YEAR_CODE", globalVariable.PubFYearCode);
+                cmd.Parameters.AddWithValue("@V_TYPE", vType);
+                cmd.Parameters.AddWithValue("@V_NO", vNo);
+
+                con.Open();
+
+                using var workbook = new ClosedXML.Excel.XLWorkbook();
+                var ws = workbook.Worksheets.Add("Quotation");
+
+                int row = 1;
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    // Header
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        ws.Cell(row, i + 1).Value = reader.GetName(i);
+                    }
+
+                    row++;
+
+                    // Data
+                    while (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            ws.Cell(row, i + 1).Value = reader[i]?.ToString();
+                        }
+
+                        row++;
+                    }
+                }
+
+                ws.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Quotation_{vType}_{vNo}.xlsx");
             }
         }
 

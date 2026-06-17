@@ -4,6 +4,7 @@ using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transiction;
 
@@ -18,8 +19,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         public PurchaseQuotationListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+        DropdownService dropdownService, DbHelper dbHelper,
+        ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -27,13 +28,24 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _dbHelper = dbHelper;
             _moduleService = moduleService;
         }
+
         public IActionResult Index()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
             ViewBag.CompCode = globalVar.PubCompCode;
             ViewBag.BranchCode = 1;
             ViewBag.YearCode = globalVar.PubFYearCode;
-            return View("~/Views/Purchase/Transaction/PurchaseQuotationList/Index.cshtml");
+            ViewBag.CurrentMenu = "Purchase Quotation";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel
+            };
+
+            return View("~/Views/Purchase/Transaction/PurchaseQuotationList/Index.cshtml", model);
         }
 
         [HttpGet]
@@ -145,7 +157,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         }
                     }
                 }
-
                 return Json(new { success = true, data = quotation });
             }
             catch (Exception ex)

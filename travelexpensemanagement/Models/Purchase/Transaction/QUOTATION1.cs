@@ -55,6 +55,8 @@ namespace travelexpensemanagement.Models.Purchase.Transiction
         public int? SRNO { get; set; }
         public string? ACTION { get; set; }
         public List<QUOTATION2>? QUOT2 { get; set; }
+        public string? IMPORT_CURRENCY { get; set; }
+        public decimal? EXRATE { get; set; }
         // public List<QUOTATION3>? QUOT3 { get; set; }
     }
 

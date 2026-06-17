@@ -203,7 +203,7 @@
     display: block;
     margin-bottom: 6px;
     font-size: 13px;
-    color: #1C5E31;
+    color: #0f0f0f;
     font-weight: 600;
 }
 
@@ -220,7 +220,7 @@
     outline: none;
     font-family: 'Poppins';
     background: #FFFFFF;
-    color: #1C5E31;
+    color: #0f0f0f;
     transition: 0.3s;
     font-size: 14px;
 }

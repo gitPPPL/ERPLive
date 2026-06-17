@@ -1,196 +1,416 @@
 ﻿@{
 	ViewBag.Title = "Purchase Quotation List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.MENU_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+
 }
-
-<fieldset>
-	<legend class="legend-field">Purchase Quotation List</legend>
-
-	<div class="row">
-		<div class="col-lg-3">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="tableSearch" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-
-
-		<div class="col-lg-9 btn-rightalign">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "PurchaseQuotation")'" type="button" class="btn btn-add">
-				<i class="fa fa-plus"></i>Add 
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Quotation List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "PurchaseQuotation")'">
+				<i class="fa fa-plus"></i>Add New
 			</button>
-			<button class="btn btn-print" onclick="printCityMasterReport()">
+		}
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search Module..." />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
 				<i class="fa fa-print"></i> Print
 			</button>
-			<button class="btn btn-export">
-				<i class="fas fa-file-export"></i> Export 
-			</button>  
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail 
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
+				<i class="fa fa-file-excel"></i> Export
 			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
+		}
+
+		@if (canApproval)
+		{
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+					data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i> Approved
 			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseQuotationList" class="excel-table fixed-grid-table resizable-table">
+			<colgroup>
+				<col style="display:none;">      <!-- Code -->
+				<col style="width: 77px;">       <!-- Doc No -->
+				<col style="width: 70px;">       <!-- Doc Type -->
+				<col style="width: 76px;">       <!-- Doc Date -->
+				<col style="width: 213px;">       <!-- Party Name -->
+				<col style="width: 75px;">       <!-- Quote No -->
+				<col style="width: 83px;">       <!-- Quote Date -->
+				<col style="width: 209px;">       <!-- Contact Person -->
+				<col style="width: 74px;">       <!-- Valid Date -->
+				<col style="width: 108px;">       <!-- Remarks -->
+				<col style="width: 53px;">       <!-- Status -->
+				<col style="width:100px;">       <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Doc No</th>
+					<th>Doc Type</th>
+					<th>Doc date</th>
+					<th>Party Name</th>
+					<th>Quote No</th>
+					<th>Quote Date</th>
+					<th>Contact Person</th>
+					<th>Valid Date</th>
+					<th>Remarks</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button class="page-nav" id="prevBtn">‹</button>
+			<div id="tablePagination" class="page-numbers"></div>
+			<button class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
+</div>
 
-
-
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseQuotationList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
-						<th>Party Name</th>
-						<th>Quote No</th>
-						<th>Quote Date</th>
-						<th>Contact Person</th>
-						<th>Valid Date</th>
-						<th>Remarks</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-</fieldset>
-
+<script src="~/common/pagination.js"></script>
 <script>
+	var permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+
 	// Global Variable getting from controller
 	var compCode = '@ViewBag.CompCode';
 	var branchCode = '@ViewBag.BranchCode';
 	var yearCode = '@ViewBag.YearCode';
 
-
 	let currentPage = 1;
 	const pageSize = 10;
 
+	// $(document).ready(function () {
+	// 	loadAllQuotations();
+	// });
+
+	// function loadAllQuotations() {
+	// 	const searchTerm = $('#tableSearch').val();
+
+	// 	$.ajax({
+	// 		url: '/PurchaseQuotationList/GetAllQuotations', 
+	// 		type: 'GET',
+	// 		dataType: 'json',
+	// 		data: {
+	// 			searchTerm: searchTerm,
+	// 			pageNumber: currentPage,
+	// 			pageSize: pageSize
+	// 		},
+	// 		success: function (res) {
+	// 			console.log(res);
+	// 			const quotations = res.quotations || [];
+	// 			const totalCount = res.totalCount || 0;
+
+	// 			let tbody = $('#tblPurchaseQuotationList tbody');
+	// 			tbody.empty();
+
+	// 			if (quotations.length === 0) {
+	// 				tbody.append('<tr><td colspan="13" class="text-center text-muted">No quotations found.</td></tr>');
+	// 				renderPagination(0, pageSize, currentPage);
+	// 				return;
+	// 			}
+
+	// 				$.each(quotations, function (index, item) {
+
+	// 	let actions = '';
+
+	// 	if (permissions.canEdit) {
+	// 		actions += `
+	// 			<button class="act-btn edit btn-edit"
+	// 					onclick="editQuotation(${item.v_NO}, '${item.v_TYPE}')">
+	// 				<i class="fa fa-edit"></i>
+	// 			</button>`;
+	// 	}
+
+	// 	actions += `
+	// 		<button class="act-btn view btn-view"
+	// 				title="View"
+	// 				onclick="viewQuotation(${item.v_NO}, '${item.v_TYPE}')">
+	// 			<i class="fa fa-eye"></i>
+	// 		</button>`;
+
+	// 	if (permissions.canDelete) {
+	// 		actions += `
+	// 			<button class="act-btn delete btn-delete"
+	// 					title="Delete"
+	// 					onclick="deleteQuotation(${item.v_NO}, '${item.v_TYPE}')">
+	// 				<i class="fa fa-trash"></i>
+	// 			</button>`;
+	// 	}
+
+	// 	tbody.append(`
+	// 		<tr>
+	// 			<td style="display:none;">${item.code}</td>
+	// 			<td>${item.v_NO || ''}</td>
+	// 			<td>${item.v_TYPE || ''}</td>
+	// 			<td>${formatDate(item.v_DATE) || ''}</td>
+	// 			<td>${item.partY_NAME || ''}</td>
+	// 			<td>${item.quotE_NO || ''}</td>
+	// 			<td>${formatDate(item.quotE_DATE) || ''}</td>
+	// 			<td>${item.conT_PERSON || ''}</td>
+	// 			<td>${formatDate(item.valiD_DATE) || ''}</td>
+	// 			<td>${item.remarks || ''}</td>
+	// 			<td>${item.statuS_NAME || ''}</td>
+	// 			<td class="action-col">
+	// 				${actions}
+	// 			</td>
+	// 		</tr>
+	// 	`);
+	// });
+
+	// 			renderPagination(totalCount, pageSize, currentPage);
+	// 		},
+	// 		error: function (xhr) {
+	// 			toastr.error('Error loading quotations: ' + xhr.responseText);
+	// 		}
+	// 	});
+	// }
+
+	// function renderPagination(total, pageSize, currentPage) {
+	// 	const totalPages = Math.ceil(total / pageSize);
+	// 	const paginationContainer = $('#tablePagination');
+	// 	paginationContainer.empty();
+
+	// 	if (totalPages <= 1) return;
+
+	// 	let html = '';
+
+	// 	if (currentPage > 1) {
+	// 		html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+	// 		html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+	// 	}
+
+	// 	let startPage = Math.max(1, currentPage - 2);
+	// 	let endPage = Math.min(totalPages, currentPage + 2);
+
+	// 	if (currentPage <= 3) endPage = Math.min(5, totalPages);
+	// 	if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+	// 	for (let i = startPage; i <= endPage; i++) {
+	// 		html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+	// 	}
+
+	// 	if (currentPage < totalPages) {
+	// 		html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+	// 		html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+	// 	}
+
+	// 	paginationContainer.html(html);
+	// }
+
+	// function goToPage(page) {
+	// 	currentPage = page;
+	// 	loadAllQuotations();
+	// }
+
+	// $('#tableSearch').on('keyup', function () {
+	// 	currentPage = 1;
+	// 	loadAllQuotations();
+	// });
+
+	let quotationPagination;
+
 	$(document).ready(function () {
-		loadAllQuotations();
-	});
 
-	function loadAllQuotations() {
-		const searchTerm = $('#tableSearch').val();
+		quotationPagination = Pagination.create({
+			pageSize: 10,
 
-		$.ajax({
-			url: '/PurchaseQuotationList/GetAllQuotations', // 👈 Update with actual endpoint
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
+			paginationContainer: '#tablePagination',
+			infoContainer: '#pageInfoText',
+
+			loader: function (params) {
+
+				const searchTerm = $('#searchBox').val();
+
+				$.ajax({
+					url: '/PurchaseQuotationList/GetAllQuotations',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						searchTerm: searchTerm,
+						pageNumber: params.pageNumber,
+						pageSize: params.pageSize
+					},
+					success: function (res) {
+
+						params.callback({
+							data: res.quotations || [],
+							totalCount: res.totalCount || 0
+						});
+
+					},
+					error: function (xhr) {
+						toastr.error('Error loading quotations: ' + xhr.responseText);
+
+						params.callback({
+							data: [],
+							totalCount: 0
+						});
+					}
+				});
 			},
-			success: function (res) {
-				console.log(res);
-				const quotations = res.quotations || [];
-				const totalCount = res.totalCount || 0;
+
+			render: function (quotations) {
 
 				let tbody = $('#tblPurchaseQuotationList tbody');
 				tbody.empty();
 
 				if (quotations.length === 0) {
-					tbody.append('<tr><td colspan="13" class="text-center text-muted">No quotations found.</td></tr>');
-					renderPagination(0, pageSize, currentPage);
+
+					tbody.append(`
+						<tr>
+							<td colspan="12" class="text-center text-muted">
+								No quotations found.
+							</td>
+						</tr>
+					`);
+
 					return;
 				}
 
 				$.each(quotations, function (index, item) {
+
+					let actions = '';
+
+					if (permissions.canEdit) {
+						actions += `
+							<button class="act-btn edit btn-edit"
+									onclick="editQuotation(${item.v_NO}, '${item.v_TYPE}')">
+								<i class="fa fa-edit"></i>
+							</button>`;
+					}
+
+					actions += `
+						<button class="act-btn view btn-view"
+								onclick="viewQuotation(${item.v_NO}, '${item.v_TYPE}')">
+							<i class="fa fa-eye"></i>
+						</button>`;
+
+					if (permissions.canDelete) {
+						actions += `
+							<button class="act-btn delete btn-delete"
+									onclick="deleteQuotation(${item.v_NO}, '${item.v_TYPE}')">
+								<i class="fa fa-trash"></i>
+							</button>`;
+					}
+
 					tbody.append(`
 						<tr>
 							<td style="display:none;">${item.code}</td>
 							<td>${item.v_NO || ''}</td>
 							<td>${item.v_TYPE || ''}</td>
-							<td>${item.v_DATE || ''}</td>
+							<td>${formatDate(item.v_DATE) || ''}</td>
 							<td>${item.partY_NAME || ''}</td>
 							<td>${item.quotE_NO || ''}</td>
-							<td>${item.quotE_DATE || ''}</td>
+							<td>${formatDate(item.quotE_DATE) || ''}</td>
 							<td>${item.conT_PERSON || ''}</td>
-							<td>${item.valiD_DATE || ''}</td>
+							<td>${formatDate(item.valiD_DATE) || ''}</td>
 							<td>${item.remarks || ''}</td>
 							<td>${item.statuS_NAME || ''}</td>
-							<td>
-								<i class="fa fa-edit btn-edit" title="Edit" onclick="editQuotation(${item.v_NO})"></i>
-								<i class="fa fa-eye btn-view" title="View" onclick="viewQuotation(${item.v_NO})"></i>
-								<i class="fa fa-trash btn-delete" title="Delete" onclick="deleteQuotation(${item.v_NO}, '${item.v_TYPE}')"></i>
+							<td class="action-col">
+								${actions}
 							</td>
 						</tr>
 					`);
 				});
-
-				renderPagination(totalCount, pageSize, currentPage);
-			},
-			error: function (xhr) {
-				toastr.error('Error loading quotations: ' + xhr.responseText);
 			}
 		});
-	}
 
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const paginationContainer = $('#tablePagination');
-		paginationContainer.empty();
-
-		if (totalPages <= 1) return;
-
-		let html = '';
-
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, currentPage + 2);
-
-		if (currentPage <= 3) endPage = Math.min(5, totalPages);
-		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-		for (let i = startPage; i <= endPage; i++) {
-			html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
-
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-
-		paginationContainer.html(html);
-	}
-
-	function goToPage(page) {
-		currentPage = page;
-		loadAllQuotations();
-	}
-
-	$('#tableSearch').on('keyup', function () {
-		currentPage = 1;
-		loadAllQuotations();
+		quotationPagination.load();
 	});
 
-	function editQuotation(id) {
-		window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id);
+    $('#pageSizeSelect').on('change', function () {
+
+		quotationPagination.setPageSize(
+			parseInt($(this).val())
+		);
+
+	});
+
+	$('#searchBox').on('keyup', function () {
+		quotationPagination.load();
+	});
+
+	$('#prevBtn').on('click', function () {
+		Pagination.prev();
+	});
+
+	$('#nextBtn').on('click', function () {
+		Pagination.next();
+	});
+
+    function editQuotation(vNo, vType) {
+		window.location.href =
+			`/PurchaseQuotation/Index?id=${vNo}&vType=${encodeURIComponent(vType)}`;
 	}
 
-	function viewQuotation(id) {
-		window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	function viewQuotation(vNo, vType) {
+		window.location.href =
+			`/PurchaseQuotation/Index?id=${vNo}&vType=${encodeURIComponent(vType)}&readOnly=true`;
 	}
 
 	function deleteQuotation(code,vType) {
@@ -232,5 +452,17 @@
 		});
 	}
 
+    function formatDate(dateString) {
+
+		if (!dateString) return '';
+
+		const date = new Date(dateString);
+
+		const day = String(date.getDate()).padStart(2, '0');
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const year = date.getFullYear();
+
+		return `${day}/${month}/${year}`;
+	}
 
 </script>

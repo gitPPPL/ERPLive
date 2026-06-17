@@ -95,7 +95,7 @@ $(document).ready(function () {
         let value = $(this).val();
 
         // Allow only 2 decimal places
-        if (!/^\d{0,16}(\.\d{0,2})?$/.test(value)) {
+        if (!/^\d{0,18}(\.\d{0,2})?$/.test(value)) {
             $(this).val(value.slice(0, -1));
         }
     });
@@ -168,10 +168,6 @@ function loadItemGroupTypeList(compC) {
                     }
                 }, 50);
             });
-
-            //if (data.includes("Raw")) {
-            //    ddl.val("Raw").trigger('change');
-            //}
         },
         error: function (xhr, status, error) {
             showToast("Error Loading DocType List: " + error, { type: "error" });
