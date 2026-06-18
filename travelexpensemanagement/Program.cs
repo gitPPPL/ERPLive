@@ -64,6 +64,8 @@ builder.Services.AddScoped<ITempratureMasterRepository, TemperatureMasterReposit
 builder.Services.AddScoped<ITemperatureMasterListRepository, TemperatureMasterListRepository>();
 builder.Services.AddScoped<IItemMarketRateRepository, ItemMarketRateRepository>();
 builder.Services.AddScoped<IItemMarketRateListRepository, ItemMarketRateListRepository>();
+builder.Services.AddScoped<IPurchaseQuotationRepository, PurchaseQuotationRepository>();
+builder.Services.AddScoped<IPurchaseQuotationListRepository, PurchaseQuotationListRepository>();
 
 
 // Gete Entry Transaction repositories

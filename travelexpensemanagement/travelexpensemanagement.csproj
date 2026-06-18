@@ -76,7 +76,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Remove="wwwroot\css\oldmasterstyle.css" />
 	  <Content Remove="wwwroot\js\bootstrap-growl.min.js" />
 	  <Content Remove="wwwroot\js\classie.js" />
 	  <Content Remove="wwwroot\js\common-pages.js" />

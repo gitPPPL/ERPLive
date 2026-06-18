@@ -1,295 +1,345 @@
 ﻿@{
     ViewBag.Title = "Quotation Rate Approval";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
 }
-
-<fieldset>
-    <legend class="legend-field">Quotation Rate Approval</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "QuotationRateApprovalList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-signature"></i>
         </div>
+        <div class="erppage-header-title">Quotation Rate Approval</div>
     </div>
-    <form id="PurchaseRequestForm">
-        <input type="hidden" class="form-control" id="TxtDocid">
-        <div class="row">
-            <!-- Left Panel -->
-            <div class="col-md-4">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Doc Type</label>
-                            <select id="ddlDocType" class="form-control">
-                                @* <option value="STAP">Quotation Rate Approval</option> *@
-                            </select>
-                        </div>
-                    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "QuotationRateApprovalList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PurchaseRequestForm">
+    <input type="hidden" class="form-control" id="TxtDocid" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Doc No</label>
-                            <input type="text" id="txtDocNo" class="form-control" placeholder="Enter Doc No" readonly>
-                        </div>
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="txtDocNo" placeholder="Enter Doc No" readonly>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Doc Date</label>
-                            <input type="date" id="dtDocDate" class="form-control">
-                        </div>
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="dtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-required" id="ddlStatus">
+                        <option value="1">Open</option>
+                        <option value="2">Cancel</option>
+                        <option value="3">Close</option>
+                    </select>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Select Item</label>
-                            <select id="ddlItem" class="form-control">
-                                <option>-- Select Item --</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="table-bg">
-                            <table id="itemTable" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th>Selected Items</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group position-relative">
-                            <label for="chkFromDate">Date From</label>
-                            <div class="calender-check">
-                                <input type="date" class="form-control" id="dtFrom" name="WaybillExpiry" style="padding-left: 30px;">
-                                <input type="checkbox" id="chkFromDate" class="checkbox-inside">
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Filter Information</legend>
+                <div class="erppagesrow">
+                    <div class="erppagescol-6">
+                        <div class="erppage-tablefield">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Select Item</label>
+                                <select id="ddlItem" class="erppage-input">
+                                    <option>Select Item</option>
+                                </select>
+                            </div>
+                            <div class="erppage-tablefield">
+                                <div class="erppagetabledynamic-wrapper">
+                                    <table id="itemTable" class="erppagetabledynamic-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Selected Items</th>
+                                                <th style="width:80px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="erppage-grid2">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Date From</label>
+                                    <div class="erppage-datebox">
+                                        <input type="date" class="erppage-input erppage-dateinput" id="dtFrom">
+                                        <label class="erppage-checkbox-inside">
+                                            <input type="checkbox" class="erppage-checkbox-input" id="chkFromDate">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Date To</label>
+                                    <div class="erppage-datebox">
+                                        <input type="date" class="erppage-input erppage-dateinput" id="dtTo">
+                                        <label class="erppage-checkbox-inside">
+                                            <input type="checkbox" class="erppage-checkbox-input" id="chkToDate">
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group position-relative">
-                            <label for="chkToDate">Date To</label>
-                            <div class="calender-check">
-                                <input type="date" class="form-control" id="dtTo" name="WaybillExpiry" style="padding-left: 30px;">
-                                <input type="checkbox" id="chkToDate" class="checkbox-inside">
+                    <div class="erppagescol-6">
+                        <div class="erppage-tablefield">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Vendor</label>
+                                <select id="ddlVendor" class="erppage-input">
+                                    <option>Select Vendor</option>
+                                </select>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Vendor</label>
-                            <select id="ddlVendor" class="form-control">
-                                <option>-- Select Vendor --</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="table-bg">
-                            <table id="vendorTable" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th>Selected Parties</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Group No</label>
-                            <input type="text" id="txtGroupNo" class="form-control" placeholder="Enter Group No">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Sorted By</label>
-                            <select id="ddlSortedBy" class="form-control">
-                                <option value="">--Select Sorted By--</option>
-                                <option value="ItemName">Item</option>
-                                <option value="Partyname">Vendor</option>
-                                <option value="V_DATE">Date</option>
-                                <option value="LD_RATE">Basic Rate</option>
-                                <option value="RATE">Landed Rate</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="offset-md-6 col-md-6">
-                <div class="button-right">
-                    <!-- Fill Button -->
-                    <button type="button" class="btn btn-success" id="btnFill">
-                        <i class="fa fa-pen-to-square"></i> Fill
-                    </button>
-
-                    <!-- Comparison Button -->
-                    <button type="button" class="btn btn-primary" id="btnComparison">
-                        <i class="fa fa-balance-scale"></i> Comparison
-                    </button>
-
-                    <!-- Show QC Detail Button -->
-                    <button type="button" class="btn btn-primary" id="btnShowQcDetail">
-                        <i class="fa fa-clipboard-list"></i> Show QC Detail
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="navtab-form">
-            <ul class="nav nav-tabs" id="formTabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Details</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Attachments</button>
-                </li>
-            </ul>
-
-            <div class="tab-content">
-                <!-- tab 1 -->
-                <div class="tab-pane fade show active" id="tab1">
-                    <div class="card">
-                        <div class="table-responsive-entry">
-                            <table id="tblItemDetailsQR" class="table-entry">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th style="display:none;">V_NO</th>
-                                        <th style="display:none;">V_TYPE</th>
-                                        <th style="display:none;">V_DATE</th>
-                                        <th class="sticky-col">Item Name</th>
-                                        <th>Make </th>
-                                        <th>Unit</th>
-                                        <th>Quote No</th>
-                                        <th>Qty</th>
-                                        <th>Rate</th>
-                                        <th style="display:none">Amount</th>
-                                        <th>Pack %</th>
-                                        <th>Pack Amt</th>
-                                        <th>Disc %</th>
-                                        <th>Disc Amt</th>
-                                        <th>Freight</th>
-                                        <th style="display:none">Tax Code</th>
-                                        <th>CGST %</th>
-                                        <th style="display:none">CGST Amt</th>
-                                        <th>SGST %</th>
-                                        <th style="display:none">SGST Amt</th>
-                                        <th>IGST %</th>
-                                        <th style="display:none">IGST Amt</th>
-                                        <th>VAT %</th>
-                                        <th style="display:none">VAT Amt</th>
-                                        <th>CESS %</th>
-                                        <th style="display:none">CESS Amt</th>
-                                        <th style="display:none">Other Expenses</th>
-                                        <th>LD Rate</th>
-                                        <th>Vendor Name</th>
-                                        <th>Purchaser Remarks</th>
-                                        <th>Priority Level</th>
-                                        <th>Rate Monthly</th>
-                                        <th>Rate Quarterly</th>
-                                        <th>Rate Annually</th>
-                                        <th>Rate Special</th>
-                                        <th>Req Type</th>
-                                        <th>Req No</th>
-                                        <th>Final Approval Status</th>
-                                        <th style="display:none;">Technical Description</th>
-                                        <th style="display:none;">UOM Code</th>
-                                        <th style="display:none;">Ref No</th>
-                                        <th style="display:none;">Ref Date</th>
-                                        <th style="display:none;">Ref Type</th>
-                                        <th style="display:none;">Ref Doc ID</th>
-                                        <th style="display:none;">Net Amount</th>
-                                        <th style="display:none;">Bulk Qty</th>
-                                        <th style="display:none;">Bulk Rate</th>
-                                        <th style="display:none;">Bulk Disc %</th>
-                                        <th style="display:none;">Bulk Disc Amt</th>
-                                        <th style="display:none;">Warranty</th>
-                                        <th style="display:none;">Lead Time (Days)</th>
-                                        <th style="display:none;">Status</th>
-                                        <th style="display:none;">Approval Code</th>
-                                        <th style="display:none;">Approval Status</th>
-                                        <th style="display:none;">Approval Remarks</th>
-                                        @* <th>Final Approval Status</th> *@
-                                        <th style="display:none;">Final Approval Remarks</th>
-                                        <th style="display:none;">Pack UR</th>
-                                        <th style="display:none;">Disc UR</th>
-                                        <th style="display:none;">Freight UR</th>
-                                        <th style="display:none;">CGST UR</th>
-                                        <th style="display:none;">SGST UR</th>
-                                        <th style="display:none;">IGST UR</th>
-                                        <th style="display:none;">OtherExp UR</th>
-                                        <th style="display:none;">BulkDisc UR</th>
-                                        <th style="display:none;">Auto PO Flag</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination container -->
-                        <div class="row">
-                            <div class="col-md-12">
+                            <div class="erppage-tablefield">
+                                <div class="erppagetabledynamic-wrapper">
+                                    <table id="vendorTable" class="erppagetabledynamic-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Selected Parties</th>
+                                                <th style="width:80px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- tab 2 -->
-                <div class="tab-pane fade" id="tab2">
-                    <div class="card">
-                        <div class="table-responsive-entry">
-                            <table id="tblAttachmentQR" class="table-entry">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th>File Upload</th>
-                                        <th>Preview</th>
-                                        <th>File Name</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination container -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-add-row-last">
-                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                            <div class="erppage-grid2">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Group No</label>
+                                    <input type="text" id="txtGroupNo" class="erppage-input" placeholder="Enter Group No">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Sorted By</label>
+                                    <select id="ddlSortedBy" class="erppage-input">
+                                        <option value="Item">Item</option>
+                                        <option value="Vendor">Vendor</option>
+                                        <option value="Date">Date</option>
+                                        <option value="BasicRate">Basic Rate</option>
+                                        <option value="LandedRate">Landed Rate</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+                <div class="erppage-internalaction">
+                    <button type="button" id="btnFill" class="erppage-btn erppage-btn-save">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Fill</span>
+                    </button>
+                    <button type="button" id="btnComparison" class="erppage-btn erppage-btn-common-disabled" onclick="PendingQCReport()">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <span>Comparison</span>
+                    </button>
+                    <button type="button" id="btnShowQcDetail" class="erppage-btn erppage-btn-common-disabled">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Show QC Detail</span>
+                    </button>
+                </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblItemDetailsQR" class="excel-table fixed-grid-table">
+                            <colgroup>
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col style="width:250px;" />
+                                <col style="width:150px;" />
+                                <col style="width:90px;" />
+                                <col style="width:130px;" />
+                                <col style="width:100px;" />
+                                <col style="width:120px;" />
+                                <col class="hidden-col" />
+                                <col style="width:90px;" />
+                                <col style="width:120px;" />
+                                <col style="width:90px;" />
+                                <col style="width:120px;" />
+                                <col style="width:120px;" />
+                                <col class="hidden-col" />
+                                <col style="width:100px;" />
+                                <col class="hidden-col" />
+                                <col style="width:100px;" />
+                                <col class="hidden-col" />
+                                <col style="width:100px;" />
+                                <col class="hidden-col" />
+                                <col style="width:100px;" />
+                                <col class="hidden-col" />
+                                <col style="width:100px;" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col style="width:100px;" />
+                                <col style="width:220px;" />
+                                <col style="width:250px;" />
+                                <col style="width:140px;" />
+                                <col style="width:130px;" />
+                                <col style="width:130px;" />
+                                <col style="width:130px;" />
+                                <col style="width:130px;" />
+                                <col style="width:120px;" />
+                                <col style="width:120px;" />
+                                <col style="width:180px;" />
+                                <col style="width:200px" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                                <col class="hidden-col" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">V_NO</th>
+                                    <th class="hidden-col">V_TYPE</th>
+                                    <th class="hidden-col">V_DATE</th>
+                                    <th class="freeze-item">Item Name</th>
+                                    <th>Make</th>
+                                    <th>Unit</th>
+                                    <th>Quote No</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th class="hidden-col">Amount</th>
+                                    <th>Pack %</th>
+                                    <th>Pack Amt</th>
+                                    <th>Disc %</th>
+                                    <th>Disc Amt</th>
+                                    <th>Freight</th>
+                                    <th class="hidden-col">Tax Code</th>
+                                    <th>CGST %</th>
+                                    <th class="hidden-col">CGST Amt</th>
+                                    <th>SGST %</th>
+                                    <th class="hidden-col">SGST Amt</th>
+                                    <th>IGST %</th>
+                                    <th class="hidden-col">IGST Amt</th>
+                                    <th>VAT %</th>
+                                    <th class="hidden-col">VAT Amt</th>
+                                    <th>CESS %</th>
+                                    <th class="hidden-col">CESS Amt</th>
+                                    <th class="hidden-col">Other Expenses</th>
+                                    <th>LD Rate</th>
+                                    <th>Vendor Name</th>
+                                    <th>Purchaser Remarks</th>
+                                    <th>Priority Level</th>
+                                    <th>Rate Monthly</th>
+                                    <th>Rate Quarterly</th>
+                                    <th>Rate Annually</th>
+                                    <th>Rate Special</th>
+                                    <th>Req Type</th>
+                                    <th>Req No</th>
+                                    <th>Final Approval Status</th>
+                                    <th>Final Approval Remarks</th>
+                                    <th class="hidden-col">Technical Description</th>
+                                    <th class="hidden-col">UOM Code</th>
+                                    <th class="hidden-col">Ref No</th>
+                                    <th class="hidden-col">Ref Date</th>
+                                    <th class="hidden-col">Ref Type</th>
+                                    <th class="hidden-col">Ref Doc ID</th>
+                                    <th class="hidden-col">Net Amount</th>
+                                    <th class="hidden-col">Bulk Qty</th>
+                                    <th class="hidden-col">Bulk Rate</th>
+                                    <th class="hidden-col">Bulk Disc %</th>
+                                    <th class="hidden-col">Bulk Disc Amt</th>
+                                    <th class="hidden-col">Warranty</th>
+                                    <th class="hidden-col">Lead Time (Days)</th>
+                                    <th class="hidden-col">Status</th>
+                                    <th class="hidden-col">Approval Code</th>
+                                    <th class="hidden-col">Approval Status</th>
+                                    <th class="hidden-col">Approval Remarks</th>
+                                    
+                                    <th class="hidden-col">Pack UR</th>
+                                    <th class="hidden-col">Disc UR</th>
+                                    <th class="hidden-col">Freight UR</th>
+                                    <th class="hidden-col">CGST UR</th>
+                                    <th class="hidden-col">SGST UR</th>
+                                    <th class="hidden-col">IGST UR</th>
+                                    <th class="hidden-col">OtherExp UR</th>
+                                    <th class="hidden-col">BulkDisc UR</th>
+                                    <th class="hidden-col">Auto PO Flag</th>
+                                    <th class="hidden-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Attachment</legend>
+                <div class="erppageattachmentsection">
+                    <div class="erppageattachmentsectionrow">
+                        <div class="erppageattachmentsectioncol">
+                            <div class="erppageattachmentsectionuploadcard">
+                                <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                    <div class="erppageattachmentsectioncloud">
+                                        <i class="fa fa-cloud"></i>
+                                    </div>
+                                    <div class="erppageattachmentsectiondragtext">
+                                        Drag & Drop your files here
+                                    </div>
+                                    <div class="erppageattachmentsectionor">
+                                        OR
+                                    </div>
+                                    <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                        Browse Files
+                                    </button>
+                                    <input type="file" id="fileInput" multiple hidden>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppageattachmentsectioncol">
+                            <div class="erppageattachmentsectionfilecard">
+                                <div class="erppageattachmentsectionheader">
+                                    Uploaded Files
+                                </div>
+                                <div class="erppageattachmentsectionfilelist"
+                                     id="fileList">
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </fieldset>
+
+        </fieldset>
+
         <ul id="customContextMenu" class="custom-context-menu" style="display:none;">
             <li data-action="exporttoexcel" data-bs-toggle="modal" data-bs-target="#ExportToExcel">Export To Excel</li>
             <li data-action="purchasereceipthistory" data-bs-toggle="modal" data-bs-target="#purchasereceipthistory" id="purchaseReceiptLink">Purchase Receipt History</li>
@@ -384,14 +434,6 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="offset-md-8 col-md-4">
-                <div class="button-right btn-mt">
-                    <button type="submit" class="btn btn-primary" id="btn-save"><i class="fa fa-save"></i>Save</button>
-                    <button type="button" class="btn btn-danger" id="btn_cancel"><i class="fa fa-close"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
         <!--orderhistory-->
         <div class="modal fade" id="orderhistory" tabindex="-1" aria-labelledby="orderhistoryLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -411,7 +453,8 @@
                                             <th>Supplier</th>
                                             <th>Item Name</th>
                                             <th>Make</th>
-                                            <th>Unit</th>                                    
+                                            <th>Unit</th>
+                                            <th>Qty</th>
                                             <th>Rate</th>
                                             <th>CGST %</th>
                                             <th>SGST %</th>
@@ -421,7 +464,7 @@
                                             <th>Other Expenses</th>
                                             <th>LD Rate</th>
                                             <th>Remarks</th>
-                                            <th>Status</th>                                           
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -432,12 +475,94 @@
                 </div>
             </div>
         </div>
-    </form>
-</fieldset>
 
-<script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
+        <div class="erppage-actions">
+            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+</div>
 
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+                    width:100%;
+                    height:75vh;
+                    object-fit:contain;
+                    display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/erpjs/purchase/transaction/quotationrateapprovaljs/quotationrateapproval.js"></script>
 <script>
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>
+
+
+@* <script>
     var fieldsId = ['ddlDocType', 'dtDocDate', 'ddlItem', 'dtFrom', 'chkFromDate', 'dtTo', 'chkToDate', 'ddlVendor',
                   'txtGroupNo', 'ddlSortedBy','btnFill', 'btnComparison', 'btnShowQcDetail'];
 
@@ -445,17 +570,15 @@
         $(this).find('td:eq(0)').addClass('sticky-col');
     });
 
-
 </script>
 
 <script>
+    let rowsAttachment = [];
     let docId = "";
     let readOnly;
-
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
+    const selectedItemSet = new Set();
+    const urlParams = new URLSearchParams(window.location.search);
+    let isReadOnly = urlParams.get('readOnly') === 'true';
 
     $(async function () {
         try {
@@ -470,7 +593,6 @@
     $(document).ready(function () {
         GetVendorList();
         GetItemList();
-        addAttachmentRow();
 
         $(document).on('click', '#QuotRtDetail', '#attach-del', function(){
             $(this).closest('tr').remove();
@@ -480,24 +602,112 @@
             addAttachmentRow();
         });
 
-        // docId = getQueryParam('id');
-        // readOnly = getQueryParam('readOnly');
+        $('#fileInput').on('change', function (e) {
 
-        // if (docId) {
-        //     GetDocData(docId, readOnly);
-        // } else {
-        //     GetDocid();
-        //  const today = new Date();
-        //  const todayDate = today.getFullYear() + '-' +
-        //               (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-        //               today.getDate().toString().padStart(2, '0');
+            const files = e.target.files;
 
-        //  $('#dtDocDate').val(todayDate);
-        //  $('#dtFrom').val(todayDate);
-        //  $('#dtTo').val(todayDate);
+            $('#fileList').empty();
+            rowsAttachment = [];
 
-        // }
+            Array.from(files).forEach(file => {
 
+                const reader = new FileReader();
+
+                reader.onload = function (ev) {
+
+                    const base64 = ev.target.result.split(',')[1];
+                    const mime = file.type || 'application/octet-stream';
+
+                    // store
+                    rowsAttachment.push({
+                        FileName: file.name,
+                        FileContentBase64: base64,
+                        FileType: mime
+                    });
+
+                    // UI
+                    const card = `
+                        <div class="erp-file-row" data-filename="${file.name}">
+
+                            <div class="erp-file-preview">
+                                ${mime.startsWith('image/')
+                                    ? `<img src="${ev.target.result}" class="erp-file-thumbnail">`
+                                    : mime === 'application/pdf'
+                                        ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
+                                        : `<i class="fa fa-file"></i>`
+                                }
+                            </div>
+
+                            <div class="erp-file-info">
+                                <div class="erp-file-name">${file.name}</div>
+                                <div class="erp-file-type">${file.type || 'FILE'}</div>
+                            </div>
+
+                            <div class="erp-file-actions">
+
+                                    <button type="button"
+                                        class="erp-btn view btn-view-attachment"
+                                        data-src="${ev.target.result}"
+                                        data-type="${mime}">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+
+                                <button type="button"
+                                        class="erp-btn delete btn-delete-attachment">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                    $('#fileList').append(card);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        });
+        
+        $(document).on('click', '.btn-delete-attachment', function () {
+
+            const row = $(this).closest('.erp-file-row');
+            const fileName = row.data('filename');
+
+            // remove from array
+            rowsAttachment = rowsAttachment.filter(x => x.FileName !== fileName);
+
+            row.remove();
+        });
+
+        $(document).on('click', '.btn-view-attachment', function (e) {
+            e.preventDefault();
+
+            const src = $(this).data('src');  
+            const type = $(this).data('type');getFileType
+
+            const img = document.getElementById('previewImage');
+            const pdf = document.getElementById('previewPdf');
+               
+            img.style.display = "none";
+            pdf.style.display = "none";
+
+            const modalEl = document.getElementById('imagePreviewModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            if (!src || !type) return;
+
+            if (type.startsWith('image/')) {
+                img.src = src;   
+                img.style.display = "block";
+            }
+            else if (type === 'application/pdf') {
+                pdf.src = src;
+                pdf.style.display = "block";
+            }
+
+            modal.show();
+        });
 
         $('#chkFromDate').on('change', function () {
             $(this).val(this.checked ? '1' : '0');
@@ -508,111 +718,177 @@
         });
 
         $('#ddlItem').on('change', function () {
-        let selectedItemName = $('#ddlItem option:selected').text();
-        let selectedItemCode = $('#ddlItem').val();
-        if (!selectedItemCode) return;
 
-        if (isItemAlreadyAdded(selectedItemCode)) {
-            toastr.warning("is already added" , selectedItemName);
-            $('#ddlItem').val("");
-            return;
-        }
-            $('#itemTable tbody').append(`
+            console.time("total");
+
+            let code = $(this).val();
+            let name = $('#ddlItem option:selected').text();
+
+            if (!code) return;
+
+            if (selectedItemSet.has(code)) {
+                console.timeEnd("total");
+                return;
+            }
+
+            addItemToTable(code, name);
+
+            requestAnimationFrame(() => {
+                flushItemTable();
+                console.timeEnd("total");
+            });
+
+            $(this).val(null).trigger('change');
+
+        });
+
+        function addItem(selectedItemCode, selectedItemName) {
+
+            if (selectedItemSet.has(selectedItemCode)) return;
+
+            selectedItemSet.add(selectedItemCode);
+
+            const rowHtml = `
                 <tr data-code="${selectedItemCode}">
                     <td>${selectedItemName}</td>
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button type="button" class="act-btn delete btn-itemRemove">
+                                <i class="fa fa-trash btn-delete"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            setTimeout(() => {
+                $('#itemTable tbody')[0].insertAdjacentHTML('beforeend', rowHtml);
+            }, 0);
+
+            $('#ddlItem').val(null).trigger('change');
+        }
+        let itemBuffer = [];
+
+        function addItemToTable(code, name) {
+            console.time("add-row");
+
+            if (selectedItemSet.has(code)) return;
+
+            selectedItemSet.add(code);
+            selectedItemSet.add(code);
+
+            itemBuffer.push(`
+                <tr data-code="${code}">
+                    <td>${name}</td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-light btn-itemRemove">
-                            <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete"></i>
-                        </button>
+                        <button type="button" class="btn-itemRemove">Delete</button>
                     </td>
                 </tr>
             `);
-            $('#ddlItem').val("");
 
-    });
-
-    function isItemAlreadyAdded(itemCode) {
-        return $('#itemTable tbody tr').filter(function () {
-            return $(this).data('code') == itemCode;
-        }).length > 0;
-    }
- 
-    $(document).on('click', '#itemTable .btn-itemRemove', function () {
-        $(this).closest('tr').remove();
-    });
-
-
-    $('#ddlVendor').on('change', function () {
-           let selectedvendorName = $('#ddlVendor option:selected').text();
-           let selectedvendorId = $('#ddlVendor').val();
-        if (selectedvendorId && !isVendorAlreadyAdded(selectedvendorId)) {
-          $('#vendorTable tbody').append(`
-            <tr data-code="${selectedvendorId}">
-                <td>${selectedvendorName}</td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-light btn-vendeorRemove"> <i class="fas fa-trash text-danger"></i></button>
-                </td>
-              </tr>
-        `);
-        $('#ddlVendor').val("");
+            console.timeEnd("add-row");
         }
-    });
 
-    $(document).on('click', '#vendorTable tbody .btn-vendeorRemove', function () {
-        $(this).closest('tr').remove();
-    });
+        function flushItemTable() {
+            console.time("flush");
 
+            if (itemBuffer.length === 0) return;
 
-    $(document).on('click', '.attach-row', function () {
-        addAttachmentRow();
-    });
+            $('#itemTable tbody')[0].insertAdjacentHTML(
+                'beforeend',
+                itemBuffer.join('')
+            );
 
+            itemBuffer = [];
 
-    function isVendorAlreadyAdded(item) {
-        let exists = false;
-        $('#vendorTable tbody tr').each(function () {
-            if ($(this).find('td:first').text() === item) {
-                exists = true;
+            console.timeEnd("flush");
+        }
+
+        function isItemAlreadyAdded(itemCode) {
+            return $('#itemTable tbody tr').filter(function () {
+                return $(this).data('code') == itemCode;
+            }).length > 0;
+        }
+
+        $(document).on('click', '.btn-itemRemove', function () {
+
+            const code = $(this).closest('tr').data('code');
+
+            selectedItemSet.delete(code);
+
+            $(this).closest('tr').remove();
+        });
+
+        $('#ddlVendor').on('change', function () {
+               let selectedvendorName = $('#ddlVendor option:selected').text();
+               let selectedvendorId = $('#ddlVendor').val();
+            if (selectedvendorId && !isVendorAlreadyAdded(selectedvendorId)) {
+              $('#vendorTable tbody').append(`
+                <tr data-code="${selectedvendorId}">
+                    <td>${selectedvendorName}</td>
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button type="button" class="act-btn delete btn-vendeorRemove"> <i class="fa fa-trash"></i></button>
+                        </div>
+                    </td>
+                  </tr>
+            `);
+            $('#ddlVendor').val("");
             }
         });
-        return exists;
-    }
 
-    $('#dtFrom, #dtTo').on('change', function () {
-        validateDateRange();
-        updateDateDisplay();
-    });
+        $(document).on('click', '#vendorTable tbody .btn-vendeorRemove', function () {
+            $(this).closest('tr').remove();
+        });
 
-    $('#btnFill').on('click', function () {
-       FilterDataList();
-    });
+        $(document).on('click', '.attach-row', function () {
+            addAttachmentRow();
+        });
 
-    $('#ddlSortedBy').on('change', function(){
-        FilterDataList();
-    });
-
-    $('#btn-save').on('click', async function (e) {
-        e.preventDefault();
-
-        try {
-            const tableData = await collectFormData();
-
-            if (docId) {
-                UpdateData(tableData);
-            } else {
-                SaveData(tableData);
-            }
-        } catch (error) {
-
-            toastr.error('An error occurred while saving the data.');
+        function isVendorAlreadyAdded(item) {
+            let exists = false;
+            $('#vendorTable tbody tr').each(function () {
+                if ($(this).find('td:first').text() === item) {
+                    exists = true;
+                }
+            });
+            return exists;
         }
 
-    });
+        $('#dtFrom, #dtTo').on('change', function () {
+            validateDateRange();
+        });
+
+        $('#btnFill').on('click', function () {
+
+          FilterDataList();    
+        });
+
+        $('#ddlSortedBy').on('change', function(){
+            FilterDataList();
+        });
+
+        $('#btn-save').on('click', async function (e) {
+            e.preventDefault();
+
+            try {
+                const tableData = await collectFormData();
+
+                if (docId) {
+                    UpdateData(tableData);
+                } else {
+                    SaveData(tableData);
+                }
+            } catch (error) {
+
+               toastr.error('An error occurred while saving the data.');
+            }
+
+        });
 
        $('#tblItemDetailsQR tbody').on('contextmenu', 'tr', function (e) {
-        e.preventDefault();
+         e.preventDefault();
         const $row = $(this);
-        const rowIndex = $row.data('row-index'); 
+        const rowIndex = $row.data('row-index');
          var ITEM_CODE= $row.find(`#row-${rowIndex}-ITEM_CODE`).attr('value');
         selectedItemCode = ITEM_CODE;
         $('#customContextMenu')
@@ -635,89 +911,93 @@
         }
         $('#customContextMenu').hide();
        });
-       
+
        $(document).on('click', '#PurchaseOrderLink', function (e) {
         e.preventDefault();
         if (selectedItemCode) {
             fillPurchaseOrderData(selectedItemCode);
         }
-        $('#customContextMenu').hide();
+         $('#customContextMenu').hide();
        });
 
-        $(document).on('click', function () {
-        $('#customContextMenu').hide();
-        });
+       $(document).on('click', function () {
+          $('#customContextMenu').hide();
+       });
 
     });
 
 </script>
 
 <script>
-
     function GetDocTypeAsync(selectedValue) {
-          return new Promise((resolve, reject) => {
-              $.ajax({
-                  url: '@Url.Action("GetDocType", "QuotationRateApproval")',
-                  type: 'GET',
-                  dataType: 'json',
-                  success: function (response) {
-                      if (response.status) {
-                          const $dropdown = $('#ddlDocType');
-                          $dropdown.empty();
-                          // $dropdown.append('<option value="">-select doc Type-</option>');
-                          $.each(response.data, function (index, item) {
-                              $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                          });
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url:'/QuotationRateApproval/GetDocType',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status) {
+                        const $dropdown = $('#ddlDocType');
+                        $dropdown.empty();
+                        // $dropdown.append('<option value="">-select doc Type-</option>');
+                        $.each(response.data, function (index, item) {
+                            $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
+                        });
 
-                          if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                              $dropdown.val(selectedValue).trigger('change');
-                          } else {
-                              $dropdown.prop('selectedIndex', 0);
-                          }
+                        if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
+                            $dropdown.val(selectedValue).trigger('change');
+                        } else {
+                            $dropdown.prop('selectedIndex', 0);
+                        }
 
-                          resolve();
-                      } else {
-                          reject("Invalid response status.");
-                      }
-                  },
-                  error: function (xhr, status, error) {
-                      toastr.error("Document Type Load failed: " + error);
-                      reject(error);
-                  }
-              });
-          });
+                        resolve();
+                    } else {
+                        reject("Invalid response status.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Document Type Load failed: " + error);
+                    reject(error);
+                }
+            });
+        });
     }
 
     async function handleDocLoad() {
-             docId = getQueryParam('id');
-             readOnly = getQueryParam('readOnly');
 
-            if (docId) {
-                $('#ddlDocType').prop('readonly', true);
-                await GetDocData(docId, readOnly);
-            } else {
-                const Vtype = $('#ddlDocType').val();                           
-                if(Vtype)
-                {
-                  GetDocid(Vtype);
-                }
-               const today = new Date();
-               const todayDate = today.getFullYear() + '-' +
-                      (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                      today.getDate().toString().padStart(2, '0');
+        docId = urlParams.get('id');   
+        readOnly = isReadOnly;         
 
-              $('#dtDocDate').val(todayDate);
-              $('#dtFrom').val(todayDate);
-              $('#dtTo').val(todayDate);
+        if (docId) {
 
+            if (readOnly) {
+                $('#ddlDocType').prop('disabled', true); 
             }
-    }
 
+            await GetDocData(docId, readOnly);
+
+        } else {
+
+            const Vtype = $('#ddlDocType').val();
+            if (Vtype) {
+                GetDocid(Vtype);
+            }
+
+            const today = new Date();
+            const todayDate = today.getFullYear() + '-' +
+                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                today.getDate().toString().padStart(2, '0');
+
+            $('#dtDocDate').val(todayDate);
+            $('#dtFrom').val(todayDate);
+            $('#dtTo').val(todayDate);
+        }
+    }
 
     function fillPurchaseDataDetail(selectedItemCode)
     {
-        $.ajax({
-        url: '@Url.Action("GetpurchaseReceiptHistory", "QuotationRateApprovalList")',
+      $.ajax({
+        url:'/QuotationRateApprovalList/GetpurchaseReceiptHistory',
         type: 'GET',
         dataType: 'JSON',
         data:{itemcode : selectedItemCode},
@@ -735,7 +1015,7 @@
                         <td>${item.MAKE_CODE}</td>
                         <td>${item.UOM_CODE}</td>
                         <td>${item.RECD_QTY}</td>
-                        <td>${item.RATE}</td>                      
+                        <td>${item.RATE}</td>
                         <td>${item.OTH_AMT}</td>
                         <td>${item.CGST_PER}</td>
                         <td>${item.SGST_PER}</td>
@@ -749,7 +1029,7 @@
                     `;
                     $tableId.append(rowDt);
                 });
-            } 
+            }
         },
         error: function (xhr, status, error) {
             console.error('AJAX Error:', status, error);
@@ -757,10 +1037,10 @@
       });
     }
 
-     function fillPurchaseApprovalData(selectedItemCode)
+    function fillPurchaseApprovalData(selectedItemCode)
     {
-        $.ajax({
-        url: '@Url.Action("GetQuotationApprovalData", "QuotationRateApprovalList")',
+      $.ajax({
+        url:'/QuotationRateApprovalList/GetQuotationApprovalData',
         type: 'GET',
         dataType: 'JSON',
         data:{itemcode : selectedItemCode},
@@ -780,7 +1060,7 @@
                         <td>${item.UOM_CODE}</td>
                         <td>${item.RECD_QTY}</td>
                         <td>${item.RATE}</td>
-                       <td></td>                        
+                       <td></td>
                         <td>${item.CGST_PER}</td>
                         <td>${item.SGST_PER}</td>
                         <td>${item.IGST_PER}</td>
@@ -806,16 +1086,16 @@
 
     function fillPurchaseOrderData(selectedItemCode)
     {
-        $.ajax({
-        url: '@Url.Action("GetPurchaseOrderData", "QuotationRateApprovalList")',
+      $.ajax({
+        url:'/QuotationRateApprovalList/GetPurchaseOrderData',
         type: 'GET',
         dataType: 'JSON',
         data:{itemcode : selectedItemCode},
         success: function (response) {
             if (response.status) {
-                let $tableId = $('#tblorderhistory tbody'); // Corrected selector
+                let $tableId = $('#tblorderhistory tbody'); 
                 $tableId.empty();
-
+               
                 $.each(response.data, function (index, item) {
                     var rowDt = `
                     <tr>
@@ -826,7 +1106,7 @@
                         <td>${item.MAKE_CODE}</td>
                         <td>${item.UOM_CODE}</td>
                         <td>${item.RECD_QTY}</td>
-                        <td>${item.RATE}</td>                       
+                        <td>${item.RATE}</td>
                         <td>${item.CGST_PER}</td>
                         <td>${item.SGST_PER}</td>
                         <td>${item.IGST_PER}</td>
@@ -894,13 +1174,7 @@
             if (id) vendorList.push(id.toString());
         });
 
-        // Collect item IDs
-        const itemList = [];
-        $('#itemTable tbody tr').each(function () {
-            const id = $(this).data('code');
-            if (id) itemList.push(id.toString());
-        });
-
+        const itemList = Array.from(selectedItemSet);
         const payload = {
             FromDt: toNullableDate(fromDate),
             ToDt: toNullableDate(toDate),
@@ -920,13 +1194,23 @@
                     console.log(response.data);
                     fillItemDetailsTable(response.data);
                 } else {
-                    toastr.error('❌ Error:', response.message || 'Failed to fetch item details.');
+                    toastr.error('Error:', response.message || 'Failed to fetch item details.');
                 }
             },
             error: function (xhr) {
-                toastr.error('❌ Error:', xhr.responseText);
+                toastr.error('Error:', xhr.responseText);
             }
         });
+    }
+
+    function validateDateRange() {
+        const fromDate = $('#dtFrom').val();
+        const toDate = $('#dtTo').val();
+
+        if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+            toastr.warning('From Date cannot be greater than To Date');
+            $('#dtTo').val('');
+        }
     }
 
     function GetDocData(MasterTblId, readOnly) {
@@ -936,24 +1220,13 @@
             data: { id: MasterTblId },
             success: function (res) {
                 if (res.status) {
+                    console.log("Edit Data", res);
                     console.log(res.attachment);
                     fillFormFields(res.detail[0]);
                     fillItemDetailsTable(res.detail);
-
-                    $('#tblAttachmentQR tbody').empty();
-                    if (res.attachment) {
-                        if (Array.isArray(res.attachment)) {
-                            res.attachment.forEach(att => addAttachmentRow(att));
-                        } else if (typeof res.attachment === 'object') {
-                            addAttachmentRow(res.attachment);
-                        } else {
-                            addAttachmentRow();
-                        }
-                    } else {
-                        addAttachmentRow();
-                    }
+                    loadAttachmentsForEdit(res.attachment);
                     if (readOnly === 'true') {
-                           $('#btn-save, #cancelBtn').hide();
+                        $('#btn-save, #cancelBtn').hide();
                         setReadonly(fieldsId, true);
                         setTableReadonly('tblItemDetailsQR', true);
 
@@ -971,33 +1244,113 @@
         });
     }
 
+    function getFileType(fileName) {
+
+        const ext = fileName?.split('.').pop()?.toLowerCase();
+
+        switch (ext) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'webp':
+                return 'image/jpeg';
+
+            case 'pdf':
+                return 'application/pdf';
+
+            default:
+                return '';
+        }
+    }
+
+    function loadAttachmentsForEdit(attachments) {
+
+        const $list = $('#fileList');
+        $list.empty();
+        rowsAttachment = [];
+
+        if (!attachments || attachments.length === 0) return;
+
+        attachments.forEach(att => {
+
+            const fileName = att.FileName || att.ATTACHMENT || att.filE_NAME;
+            const base64 = att.FileContentBase64 || att.ATTACHMENT_FILE || att.filE_BASE64;
+            const type = att.filE_TYPE || att.FileType || getFileType(fileName);
+
+            rowsAttachment.push({
+                FileName: fileName,
+                FileContentBase64: base64,
+                FileType: type
+            });
+
+           const dataUrl = normalizeBase64(base64, type);
+
+            const html = `
+                <div class="erp-file-row" data-filename="${fileName}">
+
+                       <div class="erp-file-preview">
+                            ${type && type.startsWith('image/')
+                                ? `<img src="${dataUrl}" class="erp-file-thumbnail">`
+                                : `<i class="fa fa-file-pdf-o"></i>`
+                            }
+                        </div>
+
+                    <div class="erp-file-info">
+                        <div class="erp-file-name">${fileName}</div>
+                        <div class="erp-file-type">${type}</div>
+                    </div>
+
+                    <div class="erp-file-actions">
+
+                        <button type="button"
+                                class="erp-btn view btn-view-attachment"
+                                data-src="${dataUrl}"
+                                data-type="${type}">
+                            <i class="fa fa-eye"></i>
+                        </button>
+
+                        <button type="button"
+                                class="erp-btn delete btn-delete-attachment">
+                            <i class="fa fa-trash"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+            $list.append(html);
+        });
+    }
+
      function SaveData(saveDt) {
-                $.ajax({
-                    url: '@Url.Action("SaveOrUpdateQuotRateApproval", "QuotationRateApproval")',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(saveDt),
-                    success: function (response) {
-                        console.log(response.status, JSON.stringify(saveDt));
-                        if (response?.status) {
-                            showFlashMessageByKey('insert', 'success');
-                            // resetFields();
-                            setTimeout(() => {
-                                window.location.href = '/QuotationRateApprovalList/Index';
-                            }, 1500);
-                        } else {
-                            toastr.error(response?.message || "Save failed. Please try again.");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error occurred while saving. Please contact admin.");
-                    }
-                });
+        $.ajax({
+            url:'/QuotationRateApproval/SaveOrUpdateQuotRateApproval',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(saveDt),
+            success: function (response) {
+                console.log(response.status, JSON.stringify(saveDt));
+                if (response?.status) {
+                    showFlashMessageByKey('insert', 'success');
+                    // resetFields();
+                    // setTimeout(() => {
+                    //     window.location.href = '/QuotationRateApprovalList/Index';
+                    // }, 1000);
+                } else {
+                    toastr.error(response?.message || "Save failed. Please try again.");
+                }
+            },
+            error: function () {
+                toastr.error("Error occurred while saving. Please contact admin.");
+            }
+        });
      }
 
      function UpdateData(UpdateDt) {
         $.ajax({
-            url: '@Url.Action("SaveOrUpdateQuotRateApproval", "QuotationRateApproval")',
+            url:'/QuotationRateApproval/SaveOrUpdateQuotRateApproval',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(UpdateDt),
@@ -1034,7 +1387,7 @@
         const id = toNullableInt(docId);
         const attachments = await getAttachmentDetails();
 
-        return {
+        const data = {
             V_NO: toNullableInt($('#txtDocNo').val()),
             V_DOCID: toNullableString($('#TxtDocid').val()),
             V_DATE: toNullableString($('#dtDocDate').val()),
@@ -1046,6 +1399,10 @@
             quotationRateApprovalDetail: getItemDetailsFromTable(),
             quotatRateApprovalAttachment: attachments
         };
+
+        console.log("SAVE DATA => ", data);
+
+        return data;
     }
 
     function getItemDetailsFromTable() {
@@ -1062,18 +1419,18 @@
         const getSelect = (field) => $(`#row-${rowIndex}-${field}`).val();
 
         const detail = {
-            PARTY_CODE: null,
+            PARTY_CODE: parseIntSafe(getText('PARTY_CODE')),
             ITEM_CODE: parseIntSafe(getVal('ITEM_CODE')),
             MAKE_CODE: parseIntSafe(getVal('MAKE_CODE')),
             TECH_DESC: getText('TECH_DESC'),
             UOM_CODE: parseIntSafe(getVal('UOM_CODE')),
             REF_NO: parseIntSafe(getText('REF_NO')),
             REF_DATE: parseDate(getText('REF_DATE')),
-            REF_TYPE: getText('REF_TYPE'),
-            REF_DOCID: getText('REF_DOCID'),
+            REF_TYPE: getStringOrNull(getText('REF_TYPE')),
+            REF_DOCID: getStringOrNull(getText('REF_DOCID')),
             QTY: parseFloatSafe(getText('QTY')),
             RATE: parseFloatSafe(getText('RATE')),
-            AMOUNT: parseFloatSafe(getText('AMOUNT')),
+            AMOUNT: getDecimalOrZero(getText('AMOUNT')),
             PACK_PER: parseFloatSafe(getText('PACK_PER')),
             PACK_AMT: parseFloatSafe(getText('PACK_AMT')),
             DISC_PER: parseFloatSafe(getText('DISC_PER')),
@@ -1081,83 +1438,64 @@
             FREIGHT: parseFloatSafe(getText('FREIGHT')),
             TAX_CODE: parseIntSafe(getText('TAX_CODE')),
             CGST_PER: parseFloatSafe(getText('CGST_PER')),
-            CGST_AMT: parseFloatSafe(getText('CGST_AMT')),
+            CGST_AMT: getDecimalOrZero(getText('CGST_AMT')),
             SGST_PER: parseFloatSafe(getText('SGST_PER')),
-            SGST_AMT: parseFloatSafe(getText('SGST_AMT')),
+            SGST_AMT: getDecimalOrZero(getText('SGST_AMT')),
             IGST_PER: parseFloatSafe(getText('IGST_PER')),
-            IGST_AMT: parseFloatSafe(getText('IGST_AMT')),
+            IGST_AMT: getDecimalOrZero(getText('IGST_AMT')),
             VAT_PER: parseFloatSafe(getText('VAT_PER')),
-            VAT_AMT: parseFloatSafe(getText('VAT_AMT')),
+            VAT_AMT: getDecimalOrZero(getText('VAT_AMT')),
             CESS_PER: parseFloatSafe(getText('CESS_PER')),
-            CESS_AMT: parseFloatSafe(getText('CESS_AMT')),
-            OTH_EXPS: parseFloatSafe(getText('OTH_EXPS')),
+            CESS_AMT: getDecimalOrZero(getText('CESS_AMT')),
+            OTH_EXPS: getDecimalOrZero(getText('OTH_EXPS')),
             LD_RATE: parseFloatSafe(getText('LD_RATE')),
-            NET_AMT: parseFloatSafe(getText('NET_AMT')),
+            NET_AMT: getDecimalOrZero(getText('NET_AMT')),
             BULK_QTY: parseFloatSafe(getText('BULK_QTY')),
-            BULK_RATE: parseFloatSafe(getText('BULK_RATE')),
+            BULK_RATE: getDecimalOrZero(getText('BULK_RATE')),
             BULK_DISC_PER: parseFloatSafe(getText('BULK_DISC_PER')),
-            BULK_DISC_AMT: parseFloatSafe(getText('BULK_DISC_AMT')),
-            WARRANTY: getText('WARRANTY'),
+            BULK_DISC_AMT: getDecimalOrZero(getText('BULK_DISC_AMT')),
+            WARRANTY: getStringOrNull(getText('WARRANTY')),
             LEADTIME_DAYS: parseIntSafe(getText('LEADTIME_DAYS')),
-            PURCHASER_REMARKS: getText('PURCHASER_REMARKS'),
+            PURCHASER_REMARKS: getStringOrNull(getText('PURCHASER_REMARKS')),
             PREORITY_LEVEL:  parseIntSafe(getSelect('APPROVAL_LEVEL')),
             RATE_MONTHLY: parseFloatSafe(getText('RATE_MONTHLY')),
             RATE_QUARTERLY: parseFloatSafe(getText('RATE_QUARTERLY')),
             RATE_ANNUALY: parseFloatSafe(getText('RATE_ANNUALY')),
             RATE_SPECIAL: parseFloatSafe(getText('RATE_SPECIAL')),
-            REQ_TYPE: getText('REQ_TYPE'),
+            REQ_TYPE: getStringOrNull(getText('REQ_TYPE')),
             REQ_NO: parseIntSafe(getText('REQ_NO')),
             STATUS: parseIntSafe(getText('STATUS')),
-            APROV_CODE: 0,
-            APROV_STATUS: getText('APROV_STATUS'),
-            APROV_REMARKS: getText('APROV_REMARKS'),
-            FAPROV_STATUS:selectedValue,
-            FAPROV_REMARKS: getText('FAPROV_REMARKS'),
-            PACK_UR: getText('PACK_UR'),
-            DISC_UR: getText('DISC_UR'),
-            FREIGHT_UR: getText('FREIGHT_UR'),
-            CGST_UR: getText('CGST_UR'),
-            SGST_UR: getText('SGST_UR'),
-            IGST_UR: getText('IGST_UR'),
-            OTHEXP_UR: getText('OTHEXP_UR'),
-            BULKDISC_UR: getText('BULKDISC_UR'),
-            AUTOPO_FLG: parseIntSafe(getText('AUTOPO_FLG')),
+            APROV_CODE: 0, 
+            APROV_STATUS: getStringOrNull(getText('APROV_STATUS')),
+            APROV_REMARKS: getStringOrNull(getText('APROV_REMARKS')),
+            FAPROV_STATUS: getStringOrNull(selectedValue),
+            FAPROV_REMARKS: getStringOrNull(getText('FAPROV_REMARKS')),
+            PACK_UR: getStringOrNull(getText('PACK_UR')),
+            DISC_UR: getStringOrNull(getText('DISC_UR')),
+            FREIGHT_UR: getStringOrNull(getText('FREIGHT_UR')),
+            CGST_UR: getStringOrNull(getText('CGST_UR')),
+            SGST_UR: getStringOrNull(getText('SGST_UR')),
+            IGST_UR: getStringOrNull(getText('IGST_UR')),
+            OTHEXP_UR: getStringOrNull(getText('OTHEXP_UR')),
+            BULKDISC_UR: getStringOrNull(getText('BULKDISC_UR')),
             DOC_ID: getText('DOC_ID')
         };
 
         details.push(detail);
     });
-    return details;
+    console.log("DETAILS => ", details);
+       return details;
     }
 
+   
     async function getAttachmentDetails() {
-        const attachments = [];
 
-        const rows = $('#tblAttachmentQR tbody tr').toArray();
-        for (const row of rows) {
-            const $row = $(row);
-            const fileNameInput = $row.find('.file-name-input').val()?.trim() || null;
-            const fileInput = $row.find('.file-input')[0];
-            const file = fileInput?.files[0];
+        return rowsAttachment.map(x => ({
+            FileName: x.FileName,
+            FileContentBase64: x.FileContentBase64,
+            FileType: x.FileType
+        }));
 
-            if (!file && !fileNameInput) continue;
-
-            let base64String = null;
-
-            if (file) {
-                base64String = await toBase64(file);
-            }
-
-            attachments.push({
-                fileName: fileNameInput || file?.name || null,
-                fileSize: file?.size || null,
-                fileType: file?.type || null,
-                filePath: file ? `/uploads/${file.name}` : null,
-                fileContentBase64: base64String // ✅ add this field
-            });
-        }
-
-        return attachments;
     }
 
     function toBase64(file) {
@@ -1171,9 +1509,9 @@
 
     function GetDocid(VType) {
         $.ajax({
-            url: '@Url.Action("GetMaxVNo", "QuotationRateApproval")',
+            url:'/QuotationRateApproval/GetMaxVNo',
             type: 'GET',
-             data:{V_type:VType},
+            data:{V_type:VType},
             success: function (response) {
                 console.log(response);
                 if (response.status === true && response.data) {
@@ -1190,75 +1528,9 @@
         });
     }
 
-
-    function addAttachmentRow(data = {}) {
-        const $attachmentTbody = $('#tblAttachmentQR tbody');
-        $attachmentTbody.empty();
-        const row = $(`
-            <tr class="no-border-input">
-                <td>
-                    <input type="file" class="form-control file-input" />
-                </td>
-                <td>
-                    <div class="file-preview mt-2"></div>
-                </td>
-                <td>
-                    <input type="text" class="form-control file-name-input" placeholder="Enter file name" value="${data.FILE_NAME || ''}" />
-                </td>
-                <td>
-                    <i class="fa fa-plus btn-add-action attach-row" title="Add Row"></i>
-                    <i class="fa fa-trash btn-delete-action" id="attach-del" title="Delete Row"></i>
-                </td>
-            </tr>
-        `);
-
-        $attachmentTbody.append(row);
-
-        const previewDiv = row.find('.file-preview');
-        if (data.FILE_Path) {
-            previewDiv.html(`<img src="${data.FILE_Path}" alt="Preview" style="max-width: 20%; max-height: 30%; padding:2px;" />`);
-        }
-        row.find('.file-input').on('change', function () {
-            const file = this.files[0];
-            previewDiv.empty();
-            const fileNameInput = row.find('.file-name-input');
-            if (file) {
-                const fileURL = URL.createObjectURL(file);
-                fileNameInput.val(file.name);
-
-                if (file.type.startsWith('image/')) {
-                    previewDiv.append(
-                        $('<img>', {
-                            src: fileURL,
-                            css: {
-                                width: '20px',
-                                height: '20px',
-                                objectFit: 'cover',
-                                border: '1px solid #ccc',
-                            }
-                        })
-                    );
-                } else if (file.type === 'application/pdf') {
-                    previewDiv.append(
-                        $('<iframe>', {
-                            src: fileURL,
-                            css: {
-                                width: '20px',
-                                height: '20px',
-                                border: '1px solid #ccc',
-                            }
-                        })
-                    );
-                } else {
-                    previewDiv.text('Preview not available');
-                }
-            }
-        });
-    }
-
     function GetVendorList(selectedValue = null) {
         $.ajax({
-            url: '@Url.Action("GetVendorName", "QuotationRateApproval")',
+            url:'/QuotationRateApproval/GetVendorName',
             type: 'GET',
             dataType: 'json',
             success: function (response) {
@@ -1275,6 +1547,7 @@
                         placeholder: "- Select Party -",
                         allowClear: true
                     });
+
                     if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
                         $dropdown.val(selectedValue).trigger('change');
                     } else {
@@ -1290,39 +1563,44 @@
         });
     }
 
-    function GetItemList(selectedValue = null) {
-        $.ajax({
-            url: '@Url.Action("GetItemName", "QuotationRateApproval")',
-            type: 'GET',
-            dataType: 'json',
-            success: function (response) {
-                if (response.status) {
-                    const $dropdown = $('#ddlItem');
-                    $dropdown.empty();
-                    $dropdown.append('<option selected disabled>- Select Item -</option>');
+    function GetItemList() {
 
-                    $.each(response.data, function (index, item) {
-                        $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                    });
-                    $dropdown.select2({
-                        placeholder: "- Select Item -",
-                        allowClear: true
-                    });
-                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                        $dropdown.val(selectedValue).trigger('change');
-                    } else {
-                        $dropdown.prop('selectedIndex', 0);
-                    }
-                } else {
-                    toastr.error("Item Load failed");
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error("Item Load failed: " + error);
+        $('#ddlItem').select2({
+            placeholder: "Search Item",
+            allowClear: true,
+            minimumInputLength: 0,
+
+            ajax: {
+                url: '/QuotationRateApproval/GetItemName',
+                dataType: 'json',
+                delay: 250,
+
+                data: function (params) {
+                    return {
+                        search: params.term || '',
+                        page: params.page || 1
+                    };
+                },
+
+                processResults: function (response, params) {
+
+                    params.page = params.page || 1;
+
+                    return {
+                        results: response.data.map(x => ({
+                            id: x.value,
+                            text: x.text
+                        })),
+                        pagination: {
+                            more: response.pagination.more
+                        }
+                    };
+                },
+
+                cache: true
             }
         });
     }
-
 
     function parseIntSafe(value) {
         const parsed = parseInt(value, 10);
@@ -1334,7 +1612,22 @@
         return isNaN(parsed) ? null : parsed;
     }
 
-     function parseDate(dateStr) {
+    function getStringOrNull(val) {
+        const str = String(val).trim();
+
+        return (
+            str === '' ||
+            str === 'undefined' ||
+            str === 'null'
+        ) ? null : str;
+    }
+
+    function getDecimalOrZero(val) {
+        const num = parseFloat(val);
+        return isNaN(num) ? 0.000 : num;
+    }
+
+    function parseDate(dateStr) {
         if (!dateStr) return null;
         const parts = dateStr.split(/[-\/]/);
         if (parts.length === 3) {
@@ -1343,12 +1636,13 @@
             return new Date(year, month - 1, day);
         }
         return null;
-     }
+    }
 
     function toNullableInt(val) {
         const parsed = parseInt(val);
         return isNaN(parsed) ? null : parsed;
     }
+
     function toNullableDate(val) {
         const date = new Date(val);
         return isNaN(date.getTime()) ? null : val;
@@ -1388,6 +1682,7 @@
             <td id="row-${index}-V_NO" style="display:none;">${item.V_NO}</td>
             <td id="row-${index}-V_TYPE" style="display:none;">${item.V_TYPE}</td>
             <td id="row-${index}-V_DATE" style="display:none;">${item.V_DATE}</td>
+            <td style="display:none;" id="row-${index}-PARTY_CODE">${item.PARTY_CODE}</td>
             <td id="row-${index}-ITEM_CODE" class="sticky-col" value="${item.ITEM_CODE}">${item.ItemName}</td>
             <td id="row-${index}-MAKE_CODE" value="${item.MAKE_CODE}">${item.make}</td>
             <td id="row-${index}-UOM_CODE" value="${item.UOM_CODE}">${item.Unit}</td>
@@ -1415,7 +1710,7 @@
             <td id="row-${index}-OTH_EXPS" style="display:none;">${item.OTH_EXPS}</td>
             <td id="row-${index}-LD_RATE">${item.LD_RATE}</td>
             <td id="row-${index}-PARTY_NAME">${item.Partyname}</td>
-            <td id="row-${index}-PURCHASER_REMARKS">${item.PURCHASER_REMARKS}</td>
+            <td id="row-${index}-PURCHASER_REMARKS">${item.TECH_DESC}</td>
             <td id="row-${index}-APPROVAL">
               <select class="form-control" id="row-${index}-APPROVAL_LEVEL">
                 <option value="">-select Priority level-</option>
@@ -1434,8 +1729,8 @@
             <td style="display:none;" id="row-${index}-UOM_CODE_H">${item.UOM_CODE}</td>
             <td style="display:none;" id="row-${index}-REF_NO">${item.V_NO}</td>
             <td style="display:none;" id="row-${index}-REF_DATE">${item.V_DATE}</td>
-            <td style="display:none;" id="row-${index}-REF_TYPE">${item.V_TYPE}</td>
-            <td style="display:none;" id="row-${index}-REF_DOCID">${item.DOC_ID}</td>
+           <td style="display:none;" id="row-${index}-REF_TYPE">${item.Ref_Type || ''}</td>
+            <td style="display:none;" id="row-${index}-REF_DOCID">${item.ref_docid}</td>
             <td style="display:none;" id="row-${index}-NET_AMT">${item.NET_AMT}</td>
             <td style="display:none;" id="row-${index}-BULK_QTY">${item.BULK_QTY}</td>
             <td style="display:none;" id="row-${index}-BULK_RATE">${item.BULK_RATE}</td>
@@ -1463,7 +1758,7 @@
             </td>
           </tr>
         `;
-
+         
         $tbody.append(row);
       });
 
@@ -1474,12 +1769,12 @@
 
       // Find column index by matching header text (trimmed)
       let colIndex = -1;
-      $table.find('thead th').each(function(i) {
-        if ($(this).text().trim() === headerText) {
-          colIndex = i;
-          return false; // break loop
-        }
-      });
+        $table.find('thead th').each(function(i) {
+            if ($(this).text().trim() === headerText) {
+               colIndex = i;
+                return false; // break loop
+            }
+        });
 
       if (colIndex === -1) {
         console.warn(`Header "${headerText}" not found.`);
@@ -1495,125 +1790,103 @@
       });
     }
 
-    // function fillItemDetailsTable(data, ApprvlStage) {
-    //   const ApprovalLevel = [1, 2, 3, 4, 5, 6];
-    //   const ApprovedStatus = ['Approved', 'Unapproved'];
-    //   const $tbody = $('#tblItemDetailsQR tbody');
-    //   $tbody.empty();
-      
-    //   data.forEach((item, index) => {
-    //     // Replace all null/undefined values with empty strings
-    //     Object.keys(item).forEach(key => {
-    //       if (item[key] === null || item[key] === undefined) {
-    //         item[key] = '';
-    //       }
-    //     });
+    function openPreview(fileType, base64) {
 
-    //     const row = `
-    //       <tr data-row-index="${index}">
-    //         <td id="row-${index}-V_NO" style="display:none;">${item.V_NO}</td>
-    //         <td id="row-${index}-V_TYPE" style="display:none;">${item.V_TYPE}</td>
-    //         <td id="row-${index}-V_DATE" style="display:none;">${item.V_DATE}</td>
-    //         <td id="row-${index}-ITEM_CODE" class="sticky-col" value="${item.ITEM_CODE}">${item.ItemName}</td>
-    //         <td id="row-${index}-MAKE_CODE" value="${item.MAKE_CODE}">${item.make}</td>
-    //         <td id="row-${index}-UOM_CODE" value="${item.UOM_CODE}">${item.Unit}</td>
-    //         <td id="row-${index}-UOM_CODE" value="${item.V_NO}">${item.V_NO}</td>
-    //         <td id="row-${index}-V_NO_DUP" style="display:none;">${item.V_NO}</td>
-    //         <td id="row-${index}-QTY">${item.QTY}</td>
-    //         <td id="row-${index}-RATE">${item.RATE}</td>
-    //         <td id="row-${index}-AMOUNT" style="display:none;">${item.AMOUNT}</td>
-    //         <td id="row-${index}-PACK_PER">${item.PACK_PER}</td>
-    //         <td id="row-${index}-PACK_AMT">${item.PACK_AMT}</td>
-    //         <td id="row-${index}-DISC_PER">${item.DISC_PER}</td>
-    //         <td id="row-${index}-DISC_AMT">${item.DISC_AMT}</td>
-    //         <td id="row-${index}-FREIGHT">${item.FREIGHT}</td>
-    //         <td id="row-${index}-TAX_CODE" style="display:none;">${item.TAX_CODE}</td>
-    //         <td id="row-${index}-CGST_PER">${item.CGST_PER}</td>
-    //         <td id="row-${index}-CGST_AMT" style="display:none;">${item.CGST_AMT}</td>
-    //         <td id="row-${index}-SGST_PER">${item.SGST_PER}</td>
-    //         <td id="row-${index}-SGST_AMT" style="display:none;">${item.SGST_AMT}</td>
-    //         <td id="row-${index}-IGST_PER">${item.IGST_PER}</td>
-    //         <td id="row-${index}-IGST_AMT" style="display:none;">${item.IGST_AMT}</td>
-    //         <td id="row-${index}-VAT_PER">${item.VAT_PER}</td>
-    //         <td id="row-${index}-VAT_AMT" style="display:none;">${item.VAT_AMT}</td>
-    //         <td id="row-${index}-CESS_PER">${item.CESS_PER}</td>
-    //         <td id="row-${index}-CESS_AMT" style="display:none;">${item.CESS_AMT}</td>
-    //         <td id="row-${index}-OTH_EXPS" style="display:none;">${item.OTH_EXPS}</td>
-    //         <td id="row-${index}-LD_RATE">${item.LD_RATE}</td>
-    //         <td id="row-${index}-PARTY_NAME">${item.Partyname}</td>
-    //         <td id="row-${index}-PURCHASER_REMARKS">${item.PURCHASER_REMARKS}</td>
-    //         <td id="row-${index}-APPROVAL">
-    //           <select class="form-control" id="row-${index}-APPROVAL_LEVEL">
-    //             <option value="">-select Priority level-</option>
-    //                 <option value="1" ${item.PREORITY_LEVEL == '1' ? 'selected' : ''}>1</option>
-    //                 <option value="2" ${item.PREORITY_LEVEL == '2' ? 'selected' : ''}>2</option>
-    //                 <option value="3" ${item.PREORITY_LEVEL == '3' ? 'selected' : ''}>3</option>
-    //                 <option value="4" ${item.PREORITY_LEVEL == '4' ? 'selected' : ''}>4</option>
-    //                 <option value="5" ${item.PREORITY_LEVEL == '5' ? 'selected' : ''}>5</option>
-    //                 <option value="6" ${item.PREORITY_LEVEL == '6' ? 'selected' : ''}>6</option>
-    //           </select>
-    //         </td>
-    //         <td id="row-${index}-RATE_MONTHLY">${item.RATE_MONTHLY}</td>
-    //         <td id="row-${index}-RATE_QUARTERLY">${item.RATE_QUARTERLY}</td>
-    //         <td id="row-${index}-RATE_ANNUALY">${item.RATE_ANNUALY}</td>
-    //         <td id="row-${index}-RATE_SPECIAL">${item.RATE_SPECIAL}</td>
-    //         <td id="row-${index}-REQ_TYPE">${item.REQ_TYPE}</td>
-    //         <td id="row-${index}-REQ_NO">${item.REQ_NO}</td>
-    //         <td style="display:none;" id="row-${index}-TECH_DESC">${item.TECH_DESC}</td>
-    //         <td style="display:none;" id="row-${index}-UOM_CODE_H">${item.UOM_CODE}</td>
-    //         <td style="display:none;" id="row-${index}-REF_NO">${item.V_NO}</td>
-    //         <td style="display:none;" id="row-${index}-REF_DATE">${item.V_DATE}</td>
-    //         <td style="display:none;" id="row-${index}-REF_TYPE">${item.V_TYPE}</td>
-    //         <td style="display:none;" id="row-${index}-REF_DOCID">${item.DOC_ID}</td>
-    //         <td style="display:none;" id="row-${index}-NET_AMT">${item.NET_AMT}</td>
-    //         <td style="display:none;" id="row-${index}-BULK_QTY">${item.BULK_QTY}</td>
-    //         <td style="display:none;" id="row-${index}-BULK_RATE">${item.BULK_RATE}</td>
-    //         <td style="display:none;" id="row-${index}-BULK_DISC_PER">${item.BULK_DISC_PER}</td>
-    //         <td style="display:none;" id="row-${index}-BULK_DISC_AMT">${item.BULK_DISC_AMT}</td>
-    //         <td style="display:none;" id="row-${index}-WARRANTY">${item.WARRANTY}</td>
-    //         <td style="display:none;" id="row-${index}-LEADTIME_DAYS">${item.LEADTIME_DAYS}</td>
-    //         <td style="display:none;" id="row-${index}-STATUS">${item.STATUS}</td>
-    //         <td style="display:none;" id="row-${index}-APROV_CODE">${item.APROV_CODE}</td>
-    //         <td style="display:none;" id="row-${index}-APROV_STATUS">${item.APROV_STATUS}</td>
-    //         <td style="display:none;" id="row-${index}-APROV_REMARKS">${item.APROV_REMARKS}</td>
-    //         if(ApprvlStage==1)
-    //         {
-    //           <td id="row-${index}-FAPROV_STATUS">
-    //           <select class="form-control">
-    //             <option value="">-select final status-</option>
-    //                 <option value="Approved" ${item.FAPROV_STATUS == 'Approved' ? 'selected' : ''}>Approved</option>
-    //                 <option value="Rejected" ${item.FAPROV_STATUS == 'Reject' ? 'selected' : ''}>Rejected</option>
-    //                 <option value="Hold" ${item.FAPROV_STATUS == 'Hold' ? 'selected' : ''}>Rejected</option>
+        const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
 
-    //           </select>
-    //         </td>
-    //         }
-    //         <td id="row-${index}-FAPROV_STATUS">
-    //           <select class="form-control">
-    //             <option value="">-select final status-</option>
-    //                 <option value="Approved" ${item.FAPROV_STATUS == 'Approved' ? 'selected' : ''}>Approved</option>
-    //                 <option value="Rejected" ${item.FAPROV_STATUS == 'Reject' ? 'selected' : ''}>Rejected</option>
-    //                 <option value="Hold" ${item.FAPROV_STATUS == 'Hold' ? 'selected' : ''}>Rejected</option>
+        const img = document.getElementById('previewImage');
+        const pdf = document.getElementById('previewPdf');
 
-    //           </select>
-    //         </td>
-    //         <td style="display:none;" id="row-${index}-FAPROV_REMARKS">${item.FAPROV_REMARKS}</td>
-    //         <td style="display:none;" id="row-${index}-PACK_UR">${item.PACK_UR}</td>
-    //         <td style="display:none;" id="row-${index}-DISC_UR">${item.DISC_UR}</td>
-    //         <td style="display:none;" id="row-${index}-FREIGHT_UR">${item.FREIGHT_UR}</td>
-    //         <td style="display:none;" id="row-${index}-CGST_UR">${item.CGST_UR}</td>
-    //         <td style="display:none;" id="row-${index}-SGST_UR">${item.SGST_UR}</td>
-    //         <td style="display:none;" id="row-${index}-IGST_UR">${item.IGST_UR}</td>
-    //         <td style="display:none;" id="row-${index}-OTHEXP_UR">${item.OTHEXP_UR}</td>
-    //         <td style="display:none;" id="row-${index}-BULKDISC_UR">${item.BULKDISC_UR}</td>
-    //         <td style="display:none;" id="row-${index}-AUTOPO_FLG">${item.AUTOPO_FLG}</td>
-    //         <td>
-    //           <i class="fa fa-trash btn-delete-action" id="QuotRtDetail" title="Delete Row"></i>
-    //         </td>
-    //       </tr>
-    //     `;
-    //     $tbody.append(row);
-    //   });
-    // }
+            img.style.display = "none";
+           pdf.style.display = "none";
+
+        if (fileType?.startsWith('image')) {
+
+            img.src = `data:${fileType};base64,${base64}`;
+            img.style.display = "block";
+            pdf.style.display = "none";
+
+        } else if (fileType === "application/pdf") {
+
+            pdf.src = `data:${fileType};base64,${base64}`;
+            pdf.style.display = "block";
+            img.style.display = "none";
+
+        } else {
+            alert("Preview not supported");
+            return;
+        }
+
+        modal.show();
+    }
+
+    function renderAttachmentList(attachments) {
+
+        const $list = $('#fileList');
+        $list.empty();
+
+        if (!attachments || attachments.length === 0) return;
+
+        attachments.forEach(att => {
+
+            const fileType = getFileType(att.filE_NAME);
+
+            const item = $(`
+                <div class="attachment-item"
+                    style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+
+                    <i class="fa fa-file"></i>
+
+                    <span style="flex:1;">${att.filE_NAME}</span>
+
+                    <button type="button" class="btn btn-sm btn-primary btn-view">
+                        View
+                    </button>
+
+                </div>
+            `);
+
+            item.find('.btn-view').on('click', function () {
+                openPreview(fileType, att.filE_BASE64);
+            });
+
+            $list.append(item);
+        });
+    }
+
+    function normalizeBase64(base64, type) {
+        if (!base64) return null;
+
+        if (base64.startsWith("data:")) return base64;
+
+        return `data:${type || 'application/octet-stream'};base64,${base64}`;
+    }
+
+    function getFileType(fileName) {
+
+        const ext = fileName?.split('.').pop()?.toLowerCase();
+
+        switch (ext) {
+            case 'jpg':
+            case 'jpeg':
+                return 'image/jpeg';
+
+            case 'png':
+                return 'image/png';
+
+            case 'gif':
+                return 'image/gif';
+
+            case 'webp':
+                return 'image/webp';
+
+            case 'pdf':
+                return 'application/pdf';
+
+            default:
+                return '';
+        }
+    }
 
 </script>
+ *@

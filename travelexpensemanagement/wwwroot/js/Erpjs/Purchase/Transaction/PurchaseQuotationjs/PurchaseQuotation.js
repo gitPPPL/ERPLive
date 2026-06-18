@@ -17,7 +17,7 @@ let taxCodeMap = {};
 const urlParams = new URLSearchParams(location.search);
 let rowId = parseInt(urlParams.get('id'));
 let vType = urlParams.get('vType');
-const isReadOnly = urlParams.get('readOnly') === 'true';
+let isReadOnly = urlParams.get('readOnly') === 'true';
 
 let isEditMode = rowId > 0;
 let isDuplicateMode = false;
@@ -58,15 +58,20 @@ $(document).ready(async function () {
         await GetVNo();
         addNewRowBelow();
         initSelect2($(document));
-
     }
 
     registerEvents();
 });
 
+$(document).on('change', 'input[id^="rate_"]', function () {
+    console.log("Rate Changed");
+    const rowId = this.id.split('_')[1];
+
+    checkLastOrderRate(rowId);
+});
+
 //==== Import Rate -> Rate Calculation ==================
 $(document).on('input', 'input[id^="importRate_"]', function () {
-    console.log("RATE CHANGED BY:", this.id);
     if (isPageLoading) return;
     const rowId = this.id.split('_')[1];
 
@@ -91,7 +96,6 @@ $(document).on('input', 'input[id^="importRate_"]', function () {
 });
 
 $(document).on('input', 'input[id^="importRate_"]', function () {
-    console.log("RATE CHANGED BY:", this.id);
     if (isPageLoading) return;
     const rowId = this.id.split('_')[1];
 
@@ -172,22 +176,13 @@ $(document).on('change', 'select[id^="itemName_"]', function () {
 
     if (!selectedItem) return;
 
-    let count = 0;
-
-    $('select[id^="itemName_"]').each(function () {
-
-        if ($(this).val() === selectedItem) {
-            count++;
-        }
-    });
-
-    if (count > 1) {
+    if (isDuplicateItem(selectedItem)) {
 
         showToast("This Item is already added.", {
             type: "warning"
         });
 
-        $(this).val('').trigger('change'); // selection clear
+        $(this).val('').trigger('change');
         return;
     }
 });
@@ -219,12 +214,16 @@ $('#NumExRate').on('input change', function () {
 
 //=========preview Image on edit==============
 $(document).on('click', '.btn-view-attachment', function () {
-
+    
     const src = $(this).data('src');
     const type = $(this).data('type');
 
     $('#previewImage').hide();
     $('#previewPdf').hide();
+
+    if (!src || !type) {
+        return;
+    }
 
     if (type.startsWith('image/')) {
 
@@ -234,9 +233,7 @@ $(document).on('click', '.btn-view-attachment', function () {
     }
     else if (type === 'application/pdf') {
 
-        $('#previewPdf')
-            .attr('src', src)
-            .show();
+        $('#previewPdf').attr('src', src).show();
     }
     else {
 
@@ -258,15 +255,11 @@ $(document).on('click', '.btn-delete-attachment', function () {
 
     const fileName = row.attr('data-filename');
 
-    console.log("DELETE CLICKED:", fileName);
-
     rowsAttachment = rowsAttachment.filter(function (item) {
         return item.ATTACHMENT !== fileName;
     });
 
     row.remove();
-
-    console.log("Remaining Attachments:", rowsAttachment);
 });
 
 //============Toggle Three Dot Menu===========
@@ -444,8 +437,6 @@ function registerEvents() {
                 ATTACHMENT: file.name,
                 ATTACHMENT_FILE: base64
             });
-
-            console.log("Added to rowsAttachment:", rowsAttachment);
         };
 
         reader.readAsDataURL(file);
@@ -538,7 +529,6 @@ async function GetVNo() {
         if (data.v_NO) {
             $('#NumDocNo').val(data.v_NO);
             const docId = vType + data.v_NO;
-            console.log("DOC_ID:", docId);
         } else {
             console.warn("V_NO not found in response");
         }
@@ -765,13 +755,13 @@ $(document).on('change', '.ddlTaxCode', function () {
     });
 });
 
+//=====Load on Edit========
 function loadFullQuotationByVno(vNo, vType) {
     $.ajax({
         url: '/PurchaseQuotation/GetFullQuotationByVno',
         type: 'GET',
         data: { vNo, vType },
         success: function (res) {
-            console.log(res);
             if (!res.success || !res.header) {
                 toastr.warning("Quotation not found.");
                 return;
@@ -780,9 +770,6 @@ function loadFullQuotationByVno(vNo, vType) {
             const items = res.items || [];
             const attachments = res.attachments || [];
 
-            console.log("Header:", header);
-            console.log("Items:", items);
-            console.log("Attachments:", attachments);
             isPageLoading = true;
             $('#TxtCode').val(header.DOC_ID);
             $('#ddlDocType').val(header.v_TYPE)
@@ -949,8 +936,7 @@ function loadFullQuotationByVno(vNo, vType) {
                                 <i class="fa fa-eye"></i>
                             </button>
 
-                            <button type="button"
-                                    class="erp-btn delete btn-delete-attachment">
+                            <button type="button" class="erp-btn delete btn-delete-attachment">
                                 <i class="fa fa-trash"></i>
                             </button>
 
@@ -1068,9 +1054,11 @@ async function addNewRowBelow(skipInit = false) {
                     <td><input id="requestType_${currentRowId}" name="requestType[${currentRowId}]" value="" maxlength="4" readonly class="erppagetable-control"></td>
                     <td><input id="requestNo_${currentRowId}" name="requestNo[${currentRowId}]" value="" class="erppagetable-control"></td>
                     <td class="action-col">
-                        <button class="act-btn add add-row-icon" onclick="addNewRowBelow()"><i class="fa fa-plus-circle"></i></button>
-                        <button class="act-btn delete" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
-                        <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
+                        <div class="action-wrap">
+                            <button class="act-btn add add-row-icon" onclick="addNewRowBelow()"><i class="fa fa-plus-circle"></i></button>
+                            <button class="act-btn delete" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
+                            <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
+                        </div>
                     </td>
             </tr>`;
     };
@@ -1206,17 +1194,18 @@ function generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap, uomMap, isLas
                  <td><input id="requestType_${i}" name="requestType[${i}]" value="${row.reQ_TYPE || ''}" maxlength="4" readonly class="erppagetable-control"></td>
                  <td><input id="requestNo_${i}" name="requestNo[${i}]" value="${row.reQ_NO || ''}" class="erppagetable-control"></td>
                  <td class="action-col">
-                 ${isLastRow ? `
-                        <button type="button" class="act-btn add add-row-icon" onclick="addNewRowBelow()">
-                            <i class="fa fa-plus-circle"></i>
-                        </button>
-                    ` : ''}
+                    <div class="action-wrap">
+                       ${isLastRow ? `
+                              <button type="button" class="act-btn add add-row-icon" onclick="addNewRowBelow()">
+                                  <i class="fa fa-plus-circle"></i>
+                              </button>
+                          ` : ''}
 
-                    <button type="button" class="act-btn delete" onclick="deleteRow(this)">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                     <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
-                    
+                          <button type="button" class="act-btn delete" onclick="deleteRow(this)">
+                              <i class="fa fa-trash"></i>
+                          </button>
+                          <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
+                    </div>
                 </td>
              </tr>
          `;
@@ -1267,16 +1256,49 @@ $('#btnAddAttachment').on('click', function () {
             previewHtml = `<a href="${fullBase64}" target="_blank">Preview</a>`;
         }
 
-        const row = `
-                <tr data-filename="${fileName}" style="height: 100px;">
-                    <td style="vertical-align: middle;">${fileName}</td>
-                    <td ${tdStyle}>${previewHtml}</td>
-                    <td style="vertical-align: middle;">
-                        <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
-                    </td>
-                </tr>`;
+        //const row = `
+        //        <tr data-filename="${fileName}" style="height: 100px;">
+        //            <td style="vertical-align: middle;">${fileName}</td>
+        //            <td ${tdStyle}>${previewHtml}</td>
+        //            <td style="vertical-align: middle;">
+        //                <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
+        //            </td>
+        //        </tr>`;
+
+        const extension = fileName.split('.').pop()?.toLowerCase();
+        const card = `
+        <div class="erp-file-row" data-filename="${fileName}">
+
+            <div class="erp-file-preview">
+                ${previewHtml}
+            </div>
+
+            <div class="erp-file-info">
+                <div class="erp-file-name">${fileName}</div>
+                <div class="erp-file-type">${extension.toUpperCase()} File</div>
+            </div>
+
+            <div class="erp-file-actions">
+
+                <button type="button"
+                        class="erp-btn view btn-view-attachment"
+                        data-src="${fullBase64}"
+                        data-type="${fileInput.type}">
+                    <i class="fa fa-eye"></i>
+                </button>
+
+                <button type="button"
+                        class="erp-btn delete btn-delete-attachment">
+                    <i class="fa fa-trash"></i>
+                </button>
+
+            </div>
+
+        </div>
+        `;
         
-        $('#tblAttachmentPQ tbody').append(row);
+        /* $('#tblAttachmentPQ tbody').append(row);*/
+        $('#fileList').append(card);
 
         $('#txtFileName').val('');
         $('#fileUpload').val('');
@@ -1423,9 +1445,6 @@ $('#btn-save').click(async function (e) {
         lineRows: rowsData,
         Attachement: rowsAttachment
     };
-
-    console.log("header data", headerData);
-    console.log("line rows", rowsData);
      
     $.ajax({
         url: '/PurchaseQuotation/SaveQuotation',
@@ -1434,18 +1453,15 @@ $('#btn-save').click(async function (e) {
         data: JSON.stringify(data),
         success: function (response) {
             if (response.success === true) {
-                console.log("SAVE RESPONSE:", response);
                 if (response.action === "INSERT") {
                     showToast("Data Saved Successfully", { type: "success" });
                 }
                 else if (response.action === "UPDATE") {
                     showToast("Data Update Successfully", { type: "success" });
                 }
-                //$('#btn-save').hide();
+                isReadOnly = true;
                 applyReadOnlyMode();
-                //setTimeout(() => {
-                //    window.location.href = '/PurchaseQuotationList/Index';
-                //}, 1000);
+                
             } else {
                 showToast(response.message, { type: "warning"});
             }
@@ -1494,18 +1510,16 @@ function deleteRow(iconElement) {
 
 //======Header Validation function===========
 function validateHeader() {
-    console.log("HEader Validation called")
     const vDate = $('#dtDocDate').val();
     const quoteDate = $('#dtQuotDate').val();
     const validDate = $('#dtValidDate').val();
-
-    console.log("Quote:", quoteDate, new Date(quoteDate));
-    console.log("Valid:", validDate, new Date(validDate));
 
     if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
     if (!validateRequiredField('#dtDocDate', 'Doc Date')) return;
     if (!validateRequiredField('#txtPartyName', 'Party Name')) return;
     if (!validateRequiredField('#ddlStatus', 'Status')) return;
+    if (!validateRequiredField('#ddlPaymentTerm', 'Payment Term')) return;
+    if (!validateRequiredField('#ddlFreightTerm', 'Freight Term')) return;
 
     if (quoteDate && vDate && new Date(quoteDate) < new Date(vDate)) {
         showToast("Quotation Date must be greater than voucher date.", { type: "warning" });
@@ -1522,8 +1536,6 @@ function validateHeader() {
 
 //========Validate Grid==========
 function validateGrid(rowsData, rowsAttachment) {
-
-    console.log("Validation Called !!:");
 
     if (!rowsData || rowsData.length === 0) {
         showToast("No Record in grid to save.", { type: "warning" });
@@ -1608,8 +1620,6 @@ $(document).on(
     input[id^="cessPerc_"]
     `,
     function () {
-
-        console.log("Changed Field => ", this.id);
         const $row = $(this).closest('tr');
         const rowId = this.id.split('_')[1];
 
@@ -1668,10 +1678,6 @@ $(document).on(
 
         const rowId = this.id.split('_')[1];
 
-        console.log("Bulk Field Changed => ", this.id);
-        console.log("Bulk Qty => ", $(`#bulkQty_${rowId}`).val());
-        console.log("Bulk Disc Amt => ", $(`#bulkDiscountAmount_${rowId}`).val());
-
         // Sirf footer totals update karo
         updateItemTotals();
     }
@@ -1703,9 +1709,6 @@ function updateItemTotals() {
         
         totalOtherAmt += parseFloat($row.find(`#otherExpenses_${rowId}`).val()) || 0;
         totalNetAmt += parseFloat($row.find(`#netAmount_${rowId}`).val()) || 0;
-
-        console.log("Bulk Quantity", totalBulkQty);
-        console.log("Bulk Disc Quantity", totalBulkDiscAmt);
 
     });
 
@@ -1910,8 +1913,6 @@ $('#btn-duplicate').click(async function () {
         return;
     }
 
-    console.log("duplicate Clicked");
-
     await GetVNo();
 
     // reset state
@@ -1933,6 +1934,9 @@ $('#btn-duplicate').click(async function () {
 
 //=======Open Copy Modal===========   
 function openCopyModal(actionType, modalId, tableId) {
+
+    console.time("ajax-total");
+
     $.ajax({
         url: '/PurchaseQuotation/CopyData',
         type: 'GET',
@@ -1940,17 +1944,18 @@ function openCopyModal(actionType, modalId, tableId) {
             actionType: actionType.trim(),
             vDate: $('#dtDocDate').val()
         },
+
         success: function (res) {
-            console.log("Copr Response", res);
-            if (!res.success) {
-                alert(res.message);
-                return;
-            }
+
+            console.timeEnd("ajax-total");
+
+            console.time("tbody-build");
 
             let tbody = $(tableId + ' tbody');
             tbody.empty();
 
             $.each(res.data, function (i, item) {
+
                 tbody.append(`
                     <tr>
                         <td><input type="checkbox"></td>
@@ -1970,7 +1975,13 @@ function openCopyModal(actionType, modalId, tableId) {
                 `);
             });
 
+            console.timeEnd("tbody-build");
+
+            console.time("modal-show");
+
             $(modalId).modal('show');
+
+            console.timeEnd("modal-show");
         }
     });
 }
@@ -2002,8 +2013,27 @@ function wireSelectAll(selectAllId, tableId) {
     );
 }
 
+//========== Modal Table Search ==========
+function wireTableSearch(searchBoxId, tableId) {
+
+    $(document).on('keyup', searchBoxId, function () {
+
+        const searchText = $(this).val().toLowerCase().trim();
+
+        $(`${tableId} tbody tr`).each(function () {
+
+            const rowText = $(this).text().toLowerCase();
+
+            $(this).toggle(rowText.includes(searchText));
+        });
+    });
+}
+
 wireSelectAll('#selectAllPR', '#tblpurchaserequestmodal');
 wireSelectAll('#selectAllPQ', '#tblpurchasequotationmodal');
+
+wireTableSearch('#searchBoxPR', '#tblpurchasequotationmodal');
+wireTableSearch('#searchBoxRS', '#tblpurchaserequestmodal');
 
 async function getSelectedRows(tableId, modalId) {
 
@@ -2036,6 +2066,17 @@ async function getSelectedRows(tableId, modalId) {
         const uomCode = $row.find('td:eq(11)').text().trim();
         const taxCode = $row.find('td:eq(12)').text().trim();
 
+        const alreadyExists = $('select[id^="itemName_"]').filter(function () {
+            return $(this).val() === itemCode;
+        }).length > 0;
+
+        if (alreadyExists) {
+            showToast("Duplicate item found. Only one entry is allowed.", {
+                type: "warning"
+            });
+            continue;
+        }
+
         const newRowId = await addNewRowBelow();
 
         $(`#requestNo_${newRowId}`).val(reqNo);
@@ -2046,11 +2087,6 @@ async function getSelectedRows(tableId, modalId) {
         await new Promise(resolve => setTimeout(resolve, 300));
 
         $(`#itemMake_${newRowId}`).val(makeCode).trigger('change');
-
-        console.log(
-            "Selected Value:",
-            $(`#itemMake_${newRowId}`).val()
-        );
 
         $(`#itemMake_${newRowId} option`).each(function () {
             console.log("Option:", `[${$(this).val()}]`);
@@ -2106,31 +2142,96 @@ function applyReadOnlyMode() {
 
     $('#PurchaseQuotationForm').find('input, select, textarea').prop('disabled', true);
     $('#btn-save').hide();
-
+    $('#btn-duplicate').hide();
     $('#dtDocDate,#dtQuotDate,#dtValidDate').prop('disabled', true);
-
-    // Copy From section hide
+   
     $('.erppage-internalaction').hide();
     $('#CopyFrom').closest('.erppagedropdown').hide();
-    // Attachment upload hide
     $('#browseBtn').hide();
     $('#dropZone').css('pointer-events', 'none');
-
-    // Print rakhna hai to enable kar do
     $('.erppage-btn-print').prop('disabled', false);
-
-    // Back button enabled rahega
     $('.erppage-header-back').prop('disabled', false);
-
 
     $('#tblPurchaseQuotationListByVno').find('input, select, textarea').prop('disabled', true);
     $('#tblPurchaseQuotationListByVno').find('.act-btn').prop('disabled', true);
+    $('.btn-delete-attachment').hide();
 }
 
-//=======QC Report========
+//=======Report 1========
 function PendingQCReport() {
 
     var reportName = "QUOTATION1";
+    // Crystal Report Formula
+    var SelForMul =
+        "{QUOTATION1.V_TYPE}='" + $("#ddlDocType").val() + "'" +
+        " AND {QUOTATION1.V_NO}= " + $("#NumDocNo").val() +
+        " AND {QUOTATION1.COMP_CODE}= " + window.globalVariables.compCode +
+        " AND {QUOTATION1.BRANCH_CODE}= " + window.globalVariables.branchCode +
+        " AND {QUOTATION1.YEAR_CODE}= " + window.globalVariables.yearCode;
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: SelForMul,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: "PURCHASE QUOTATION"
+        }
+    };
+
+    // ===== DEBUG LOGS =====
+    console.log("Company Name:", window.globalVariables.companyName);
+    console.log("Company Add1:", window.globalVariables.add1);
+    console.log("Company Add2:", window.globalVariables.add2);
+
+    console.log("Comp Code:", window.globalVariables.compCode);
+    console.log("Branch Code:", window.globalVariables.branchCode);
+    console.log("Year Code:", window.globalVariables.yearCode);
+
+    console.log("Database:", window.database.db);
+
+    console.log("Selection Formula:", SelForMul);
+
+    console.log("Formula Fields:", formulaFields);
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+}
+
+//======Report 2=============
+function PendingQCReport1() {
+
+    var reportName = "QUOTATION2";
     // Crystal Report Formula
     var SelForMul =
         "{QUOTATION1.V_TYPE}='" + $("#ddlDocType").val() + "'" +
@@ -2168,7 +2269,6 @@ function PendingQCReport() {
             responseType: 'blob'
         },
         success: function (response) {
-            console.log('PDF response:', response);
             var file = new Blob([response], { type: 'application/pdf' });
             var fileName = `${reportName}_${timestamp}.pdf`;
 
@@ -2390,4 +2490,78 @@ function bindOrderHistory(data) {
     }
 
     $('#lastTenOrderQuotation tbody').html(tbody);
+}
+
+function isDuplicateItem(selectedItem) {
+
+    let count = 0;
+
+    $('select[id^="itemName_"]').each(function () {
+
+        if ($(this).val() === selectedItem) {
+            count++;
+        }
+    });
+
+    return count > 1;
+}
+
+//=======Check Last Order Rate========
+function checkLastOrderRate(rowId) {
+
+    const itemCode = $(`#itemName_${rowId}`).val();
+    const currentLdRate = parseFloat($(`#ldRate_${rowId}`).val()) || 0;
+    const vDate = $('#dtDocDate').val();
+
+    console.log({
+        itemCode,
+        currentLdRate,
+        vDate
+    });
+
+    if (!itemCode || !vDate) return;
+
+    $.ajax({
+        url: '/PurchaseQuotation/GetLastOrderRate',
+        type: 'GET',
+        data: {
+            itemCode: itemCode,
+            vDate: vDate
+        },
+        success: function (res) {
+
+            if (!res.success) return;
+
+            const lastRate =
+                parseFloat(res.lastRate) || 0;
+
+            const $rateBox =
+                $(`#rate_${rowId}`);
+
+            $rateBox.css('background-color', '');
+
+            if (lastRate <= 0) return;
+
+            if (currentLdRate > lastRate) {
+
+                $rateBox.css(
+                    'background-color',
+                    '#ffcdd2'
+                );
+
+                showToast(
+                    `Current LD Rate (${currentLdRate.toFixed(2)}) is higher than Last Order Rate (${lastRate.toFixed(2)})`,
+                    { type: "warning" }
+                );
+
+            } else if (currentLdRate < lastRate) {
+
+                $rateBox.css(
+                    'background-color',
+                    '#c8e6c9'
+                );
+
+            }
+        }
+    });
 }

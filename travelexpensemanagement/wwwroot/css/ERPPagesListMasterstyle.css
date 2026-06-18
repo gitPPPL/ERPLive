@@ -53,10 +53,10 @@
 
 /* Three Dot Button */
 .erppage-dropdownaction-btn {
-    background: #d9d9d9 !important;
-    color: #555;
+    background: #c6d8ff !important;
+    color: #0f0f0f;
     border-radius: 4px;
-    padding: 4px 8px;
+    padding: 3px 7px;
 }
 
     .erppage-dropdownaction-btn:hover {
@@ -184,7 +184,7 @@
         border: none;
         outline: none;
         width: 100%;
-        font-size: 13px;
+        font-size: 12px;
     }
 
 /* ACTIONS RIGHT */
@@ -267,7 +267,7 @@
 .page-nav {
     border: none;
     background: #256d29;
-    padding: 6px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
     color: #fff;
@@ -310,14 +310,19 @@
 }
 
 /* TABLE */
-.excel-table {
+/*.excel-table {
     table-layout: auto;
     width: max-content;
     min-width: 100%;
+}*/
+.excel-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 100%;
 }
 .width-table td {
-    padding: 5px;
-}
+    padding: 8px;
+}   
 /* ACTION BAR */
 .erppage-actions {
     position: sticky;
@@ -404,11 +409,11 @@
     background: none;
     cursor: pointer;
     margin: 0 3px;
-    font-size: 13px;
+    font-size: 12px;
 }
 
     .act-btn.edit {
-        border-radius: 4px;
+        color: #24A0ED;
     }
 
     .act-btn.document {
@@ -423,7 +428,7 @@
         color: #27723f;
     }
     .act-btn.view {
-        color: #0492a9;
+        color: #11912e;
     }
     .act-btn.delete {
         color: #ff4949;
@@ -506,6 +511,7 @@
 .fixed-grid-table {
     border-collapse: separate;
     border-spacing: 0;
+    position: relative;
 }
     
     /* Fixed cells */
@@ -531,6 +537,7 @@
         min-width: 0 !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
+        scroll-margin-right: 120px; /* keeps action column visible */
     }
 
 /* Wrapper scroll */
@@ -643,12 +650,18 @@ button:focus {
     overflow: visible !important;
     gap: 6px;
 }
-
+.fixed-grid-wrapper,
 .excel-wrapper,
+.erppagelist-container {
+    overflow-x: auto !important;
+    overflow-y: auto;
+    position: relative;
+}
+/*.excel-wrapper,
 .erppagelist-container,
 .fixed-grid-wrapper {
     overflow: visible;
-}
+}*/
 /* Zebra striping for all excel-table rows with light grey shades */
 .excel-table tbody tr:nth-child(even) td,
 .excel-table tbody tr:nth-child(even) th {
@@ -657,7 +670,7 @@ button:focus {
 
 .excel-table tbody tr:nth-child(odd) td,
 .excel-table tbody tr:nth-child(odd) th {
-    background-color: #f0f0f0; 
+    background-color: #e4f1ff;
 }
 
 /* Hover effect for full row including action column */
@@ -671,7 +684,8 @@ button:focus {
 }
 .fixed-grid-table thead th.action-col {
     z-index: 99;
-   
+    background: linear-gradient(135deg, #232323, #0f0f0f);
+    color: #fff;
 }
 .fixed-grid-table tbody tr:hover td.action-col {
     background: #f2f2f2;
@@ -697,13 +711,24 @@ button:focus {
     position: sticky;
     right: 0;
     background: #fff;
-    z-index: 10;
-    padding: 6px 8px !important;
-    width: 1%;
-    white-space: nowrap;
+    z-index: 20;
+    /* IMPORTANT: remove flex */
+    display: table-cell;
     text-align: center !important;
     vertical-align: middle !important;
-}   
+    white-space: nowrap;
+    width: 120px; /* fixed width solves mismatch */
+    min-width: 120px;
+    max-width: 120px;
+    box-shadow: -4px 0 6px rgba(0,0,0,0.08);
+}
+
+.action-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
     /* HEADER ABOVE EVERYTHING */
     .fixed-grid-table th.action-col {
     z-index: 999;
@@ -723,8 +748,7 @@ button:focus {
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-   /* margin-top: 10px;*/
-    padding: 8px 0px;
+    padding: 8px;
     background: #fff;
     border-radius: 8px;
 }
@@ -768,9 +792,8 @@ button:focus {
 /* Improve scroll behavior */
 .erppagelist-container::-webkit-scrollbar,
 .excel-wrapper::-webkit-scrollbar {
-    width: 6px; /* vertical scrollbar width */
-
-    height: 6px;
+    width: 8px; /* vertical */
+    height: 10px; /* horizontal (increase this) */
 }
 
 .erppagelist-container::-webkit-scrollbar-thumb,

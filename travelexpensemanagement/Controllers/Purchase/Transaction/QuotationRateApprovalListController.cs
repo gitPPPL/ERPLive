@@ -24,9 +24,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _moduleService = moduleService;
 
         }
+
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Quotation Rate Approval";
+            ViewBag.CurrentMenu = "Purchase Rate Approval";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
 
@@ -47,7 +48,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 var parameter = new Dictionary<string, object> {
                     {"@COMP_CODE", UsersessionDt.PubCompCode },
                     {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE" , 1},
+                    {"@BRANCH_CODE" , UsersessionDt.PubBranchCode},
                     {"@Action",  "List"}
                 };
                 var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_QuotationRateApproval]", parameter);
@@ -68,10 +69,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
 
                 var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+                var pagedList = fullList.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
                 return Json(new { status = true, data = pagedList, totalCount });
             }
@@ -81,7 +79,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DelQuotationRateApprovalData(string docid)
         {
             try
@@ -94,7 +92,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "Delete");
                         cmd.Parameters.AddWithValue("@COMP_CODE", UsersessionDt.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", UsersessionDt.PubBranchCode);
                         cmd.Parameters.AddWithValue("@DOC_ID", docid);
                         var returnParam = new SqlParameter("@ResultVal", SqlDbType.Int)
                         {
@@ -113,11 +111,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                         if (result > 0)
                         {
-                            return Json(new { status = true, message = "data delete successfully" });
+                            return Json(new { success = true, message = "data delete successfully" });
                         }
                         else
                         {
-                            return Json(new { status = false, message = "data delete failed" });
+                            return Json(new { success = false, message = "data delete failed" });
                         }
                     }
                 }
@@ -128,28 +126,118 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> GetpurchaseReceiptHistory(string itemcode)
+        //{
+        //    try
+        //    {
+        //        var UsersessionDt = _globalValue.GetGlobalVariables();
+        //        var parameter = new Dictionary<string, object>
+        //        {
+        //            {"@COMP_CODE",  UsersessionDt.PubCompCode},
+        //            {"@BRANCH_CODE", UsersessionDt.PubBranchCode },
+        //            {"@ItemCode", itemcode  },
+        //            {"@Action",  "PurchaseReceiptHistory"}
+        //        };
+        //        var purchaseReceiptHistoryQuery = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_QuotationRateApproval]", parameter);
+        //        return Json(new { status = true, data = purchaseReceiptHistoryQuery });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { status = false, message = ex.Message });
+        //    }
+
+        //}
+
+        //[HttpGet]
+        //public IActionResult GetpurchaseReceiptHistory(int itemcode)
+        //{
+        //    var globalVaribale = _globalValue.GetGlobalVariables();
+
+        //    try
+        //    {
+        //        List<object> data = new List<object>();
+
+        //        using (SqlConnection con = _dbcontext.GetErpConnection())
+        //        {
+        //            using (SqlCommand cmd = new SqlCommand("sp_QuotationRateApproval", con))
+        //            {
+        //                cmd.CommandType = CommandType.StoredProcedure;
+
+        //                cmd.Parameters.AddWithValue("@Action", "PurchaseReceiptHistory");
+        //                cmd.Parameters.AddWithValue("@COMP_CODE", globalVaribale.PubCompCode);
+        //                cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVaribale.PubBranchCode);
+        //                cmd.Parameters.AddWithValue("@ItemCode",itemcode);
+
+        //                con.Open();
+
+        //                using (SqlDataReader reader = cmd.ExecuteReader())
+        //                {
+        //                    Console.WriteLine(reader.HasRows);
+        //                    while (reader.Read())
+        //                    {
+        //                        data.Add(new
+        //                        {
+        //                            V_NO = reader["VNo"],
+        //                            V_DATE = reader["Date"],
+        //                            Supplier = reader["Supplier"],
+        //                            ItemName = reader["ItemName"],
+        //                            Make = reader["Make"],
+        //                            Unit = reader["Unit"],
+        //                            Qty = reader["Qty"],
+        //                            Rate = reader["Rate"],
+        //                            OthAmt = reader["OthAmt"],
+        //                            CGSTPer = reader["CGSTPer"],
+        //                            SGSTPer = reader["SGSTPer"],
+        //                            IGSTPer = reader["IGSTPer"],
+        //                            PackPer = reader["PackPer"],
+        //                            DiscPer = reader["DiscPer"],
+        //                            LDRate = reader["LDRate"],
+        //                            Remarks = reader["Remarks"],
+        //                            Status = reader["Status"]
+        //                        });
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        return Json(new { status = true, data = data });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new
+        //        {
+        //            status = false,
+        //            message = ex.Message,
+        //            inner = ex.InnerException?.Message
+        //        });
+        //    }
+        //}
+
         [HttpGet]
         public async Task<IActionResult> GetpurchaseReceiptHistory(string itemcode)
         {
             try
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
+                var userSession = _globalValue.GetGlobalVariables();
+
                 var parameter = new Dictionary<string, object>
                 {
-                    {"@COMP_CODE",  UsersessionDt.PubCompCode},
-                    {"@YEAR_CODE",  UsersessionDt.PubFYearCode},
-                    {"@BRANCH_CODE", 1 },
-                    {"@ItemCode", itemcode  },
-                    {"@Action",  "QuotationApprovalHistory"}
+                    {"@COMP_CODE", userSession.PubCompCode},
+                    {"@BRANCH_CODE", userSession.PubBranchCode},
+                    {"@ItemCode", itemcode},
+                    {"@Action", "PurchaseReceiptHistory"}
                 };
-                var purchaseReceiptHistoryQuery = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_QuotationRateApproval]", parameter);
-                return Json(new { status = true, data = purchaseReceiptHistoryQuery });
+
+                var data = await _dbHelper.GetJsonFromProcedureAsync(
+                    "[dbo].[sp_QuotationRateApproval]", parameter);
+
+                return Json(new { status = true, data = data });
             }
             catch (Exception ex)
             {
                 return Json(new { status = false, message = ex.Message });
             }
-
         }
 
         [HttpGet]
@@ -162,7 +250,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE",  UsersessionDt.PubCompCode},
                     {"@YEAR_CODE",  UsersessionDt.PubFYearCode},
-                    {"@BRANCH_CODE", 1 },
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode },
                     {"@ItemCode", itemcode  },
                     {"@Action",  "QuotationApprovalHistory"}
                 };
@@ -185,8 +273,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 var parameter = new Dictionary<string, object>
                 {
                     {"@COMP_CODE",  UsersessionDt.PubCompCode},
-                    {"@YEAR_CODE",  UsersessionDt.PubFYearCode},
-                    {"@BRANCH_CODE", 1 },
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode },
                     {"@ItemCode", itemcode},
                     {"@Action",  "PurchaseOrderHistory"}
                 };
@@ -214,7 +301,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@V_TYPE", docid.Substring(0, 4) },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }
@@ -231,7 +318,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         [HttpGet]
         public async Task<IActionResult> ExportAllDocs()
         {
-
             try
             {
                 var usersession = _globalValue.GetGlobalVariables();
@@ -239,7 +325,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@Action", "Excel" }
                 };
                 var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_QuotationRateApproval]", parameter);
@@ -252,7 +338,5 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
-  
     }
 }
