@@ -36,48 +36,33 @@ namespace travelexpensemanagement.Controllers.Approval
         {
             return View("~/Views/Approval/ApprovalSendList/Index.cshtml");
         }
-        [HttpGet]
-        public IActionResult GetApprovalList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public IActionResult GetApprovalList(string searchTerm = "")
         {
-
             var documentData = new List<ApprovalListModel>();
             var gv = _globalVariableService.GetGlobalVariables();
-            int totalCount = 0;
+
             try
             {
                 using (SqlConnection conn = _dbConnection.GetErpConnection())
                 {
                     conn.Open();
 
-                    using (SqlCommand countCmd = new SqlCommand(@"
-                        SELECT COUNT(*) FROM approval_status a 
-                        LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.send_code = b.CODE
-                        LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE 
-                        WHERE send_code = @send_code and a.comp_code=@comp_code and a.year_code=@year_code
-                         AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm) ", conn))
-                    {
-                        countCmd.Parameters.AddWithValue("@send_code", gv.PubUserId);
-                        countCmd.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
-                        countCmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
-                        countCmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
-                        totalCount = (int)countCmd.ExecuteScalar();
-                    }
                     using (SqlCommand cmd = new SqlCommand(@"
-                        SELECT doc_name, v_no, send_code, b.USER_NAME as sendname, send_date, 
-                        status AS Documentstatus, Approval_remark, c.NAME as Approvalstatus, remarks, 
-                        a.remarks as remarkname, new_modify, a.Department, origin_name, origin_date, 
-                        a.v_type, user_code, form_name
-                        FROM approval_status a 
-                        LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.send_code = b.CODE
-                        LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE 
-                        WHERE send_code = @send_code AND a.comp_code=@comp_code and a.year_code=@year_code
-                        AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm)
-                        ORDER BY send_date OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY ", conn))
+                SELECT doc_name, v_no, send_code, b.USER_NAME as sendname, send_date,
+                status AS Documentstatus, Approval_remark, c.NAME as Approvalstatus,
+                remarks, a.remarks as remarkname, new_modify, a.Department,
+                origin_name, origin_date, a.v_type, user_code, form_name
+                FROM approval_status a
+                LEFT JOIN CONDATABASE.dbo.USER_MAST b ON a.send_code = b.CODE
+                LEFT JOIN DOCSTATUS_MAST c ON a.Approval_Code = c.CODE
+                WHERE send_code = @send_code
+                AND a.comp_code = @comp_code
+                AND a.year_code = @year_code
+                AND (doc_name LIKE @searchTerm OR v_no LIKE @searchTerm)
+                ORDER BY send_date DESC", conn))
                     {
                         cmd.Parameters.AddWithValue("@send_code", gv.PubUserId);
                         cmd.Parameters.AddWithValue("@searchTerm", "%" + searchTerm + "%");
-                        cmd.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
-                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
                         cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
                         cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
 
@@ -108,13 +93,15 @@ namespace travelexpensemanagement.Controllers.Approval
                         }
                     }
                 }
-                return Json(new { success = true, data = documentData, totalCount });
+
+                return Json(new { success = true, data = documentData });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
         public class ApprovalListModel
         {
             public string DocName { get; set; }

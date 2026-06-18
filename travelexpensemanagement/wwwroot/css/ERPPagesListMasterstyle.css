@@ -432,7 +432,7 @@
 
     /* Body */
     .fixed-grid-table td {
-        padding: 2px 6px !important;
+        padding: 6px 6px !important;
     }
 
     /* Prevent form controls from stretching columns */
