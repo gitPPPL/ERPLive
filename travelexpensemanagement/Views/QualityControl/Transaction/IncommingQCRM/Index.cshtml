@@ -419,7 +419,7 @@
                 }
             });
        $('#ddlGateNo').on('change', function () {
-                var selectedNo = $(this).val(); // Gets the selected value
+               var selectedNo = $(this).val(); 
                const selectedText = $(this).find('option:selected').text();
                const parts = selectedText.split('|');
                if (parts.length > 1) {
@@ -439,10 +439,16 @@
                        },
                        success: function (response) {
                          if (!response.success) {
-                          toastr.warning(response.message, "Warning");
-                            return;
+                             if (vNo) {
+                                return;
+                             }
+                             else
+                             {
+                              toastr.warning(response.message, "Warning");
+                              return;
+                             }
                           }
-                             ddlMrnChange(response); // Passes response to a function
+                             ddlMrnChange(response);
                        },
                        error: function (xhr) {
                            console.error("Error:", xhr.responseText);
@@ -898,10 +904,7 @@
         });
 
    });
-
-    //=========================================list Add popup===================================
-
-    $(document).on('click', '.btnQCParameterList', function () {
+       $(document).on('click', '.btnQCParameterList', function () {
         const row = $(this).closest('tr');
         var VnNo = $('#NumDocNo').val();
         var V_type = $('#ddlDocType').val();
@@ -1443,38 +1446,7 @@
 
         });
     }
-   // function LoadQCParameterGrid(response) {
-   //      if (!response.success) {
-   //          toastr.error('No data found');
-   //          return;
-   //      }
-   //      let tbody = $('#tblQCParameter tbody');
-   //      tbody.empty();
-   //      $.each(response.data, function (i, item) {
-   //          tbody.append(`
-   //              <tr>
-   //                  <td>
-   //                      <input type="text" class="form-control"
-   //                             value="${item.Parameter || ''}">
-   //                  </td>
-   //                  <td>
-   //                      <input type="text" class="form-control"
-   //                             value="${item.Unit || ''}">
-   //                  </td>
-   //                  <td>
-   //                      <input type="text" class="form-control"
-   //                             value="${item.QCP_STD || ''}">
-   //                  </td>
-   //                  <td>
-   //                      <input type="text" class="form-control">
-   //                  </td>
-   //              </tr>
-   //          `);
-
-   //      });
-   //  }
-    /////////////////////////////
-       function GetallDataPreIncommingQCRM(response) {
+   function GetallDataPreIncommingQCRM(response) {
             console.log('List page', response);
             const Headerdata = response.header;
             const Itemdata = response.items;
@@ -1667,8 +1639,6 @@
 
             }
         }
-    ////////////////////////////
-
    function convertToDateInputFormat(dateStr) {
         if (!dateStr) return '';
         // Check if date is in dd/MM/yyyy format
