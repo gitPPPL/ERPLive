@@ -48,6 +48,7 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
         public int? REF_NO { get; set; }  
         public int? SHIP_CODE { get; set; }  
         public decimal? EXRATE { get; set; } 
+        public decimal? OfferRate { get; set; } 
         public decimal? RATE { get; set; }  
         public string? CURRENCY { get; set; }
         public int? TAX_CODE { get; set; }  

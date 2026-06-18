@@ -1,7 +1,10 @@
 ﻿
 using iTextSharp.text;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using StackExchange.Redis;
 using System.Data;
 using System.Reflection.Metadata;
 using System.Text.Json;
@@ -110,18 +113,16 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
-        public JsonResult DDLItemGroup()
+
+        public JsonResult DDLCityMast()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "select CODE,NAME from ITEM_MGROUP  where COMP_CODE = " + getdata.PubCompCode + " order by name asc ";
-
-                var ItemGroupList = _dropdownService.GetDropdownList(query);
-
-                return Json(ItemGroupList);
+                string query = "select CODE , NAME from CITY_MAST  where active = 1 ";
+                var DDLCityMast = _dropdownService.GetDropdownList(query);
+                return Json(DDLCityMast);
             }
-
         }
         public JsonResult DDLShipFrom()
         {
@@ -237,30 +238,35 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         public JsonResult GetDataByPartyCode(int PartyId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
+
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
-                string query = @"
-                        SELECT a.Code, a.NAME, a.ADD1, a.ADD2, a.ADD3, a.CITY_CODE, b.NAME AS CityName, 
-                        a.MOBILE, c.Name AS Country, a.Pincode, a.gstin AS GST
-                        FROM SUBGROUP_MAST a
-                        LEFT JOIN CITY_MAST b ON a.CITY_CODE = b.CODE
-                        LEFT JOIN COUNTRY_MAST c ON b.COUNTRY_CODE = c.CODE
-                        WHERE a.Active = 1 
-                        AND a.NATURE = 'Supplier' 
-                        AND a.comp_code = " + getdata.PubCompCode + @"
-                        AND a.CODE = " + PartyId + @"
-                        ORDER BY a.name asc;";
-                             
-                var dataList = new List<object>();
 
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                // -------------------- 1st QUERY (Supplier Master) --------------------
+                string query1 = @" SELECT TOP 1 a.Code, a.NAME, a.ADD1, a.ADD2, a.ADD3, a.CITY_CODE,
+                    b.NAME AS CityName, a.MOBILE,  c.Name AS Country, a.Pincode, a.gstin AS GST
+                    FROM SUBGROUP_MAST a
+                    LEFT JOIN CITY_MAST b ON a.CITY_CODE = b.CODE
+                    LEFT JOIN COUNTRY_MAST c ON b.COUNTRY_CODE = c.CODE
+                    WHERE a.Active = 1 
+                    AND a.NATURE = 'Supplier'
+                    AND a.comp_code = @CompCode
+                    AND a.CODE = @PartyId;
+                    ";
+
+                object supplier = null;
+
+                using (SqlCommand cmd = new SqlCommand(query1, con))
                 {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        if (reader.Read())
                         {
-                            var data = new
+                            supplier = new
                             {
                                 Code = reader["Code"].ToString(),
                                 Name = reader["NAME"].ToString(),
@@ -274,17 +280,44 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 Pincode = reader["Pincode"].ToString(),
                                 GST = reader["GST"].ToString()
                             };
-
-                            dataList.Add(data);
                         }
                     }
                 }
 
-            
-                return Json(dataList);
+                // -------------------- 2nd QUERY (SAUDA Latest) --------------------
+                string query2 = @" SELECT TOP 1 COALESCE(A.FRT_TERM, '') AS FRT_TERM, COALESCE(A.DEL_TERM, '') AS DEL_TERM,
+                    B.NAME AS ITEM_NAME,  A.ITEM_CODE, A.ITEM_TYPE FROM SAUDA A  LEFT JOIN ITEM_MAST B ON A.ITEM_CODE = B.CODE
+                    AND A.COMP_CODE = B.COMP_CODE
+                    WHERE A.PARTY_CODE = @PartyId ORDER BY A.V_DATE DESC; ";
+
+                object sauda = null;
+
+                using (SqlCommand cmd = new SqlCommand(query2, con))
+                {
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            sauda = new
+                            {
+                                FrtTerm = reader["FRT_TERM"].ToString(),
+                                DelTerm = reader["DEL_TERM"].ToString(),
+                                ItemName = reader["ITEM_NAME"].ToString(),
+                                ItemCode = reader["ITEM_CODE"].ToString(),
+                                ItemType = reader["ITEM_TYPE"].ToString()
+                            };
+                        }
+                    }
+                }
+
+                // -------------------- FINAL RESPONSE --------------------
+                return Json(new { Supplier = supplier, Sauda = sauda });
             }
         }
-          public IActionResult SaveDispatchDetails([FromBody] PurchaseSauda_model model)
+
+        public IActionResult SaveDispatchDetails([FromBody] PurchaseSauda_model model)
         {
             if (model == null || model.DispatchDelivery == null || model.DispatchDelivery.Count == 0)
             {
@@ -317,8 +350,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
             }
 
-        }
-        
+        }        
         private void SaveDispatchDeliveryData(SqlConnection connection, SqlTransaction transaction, DispatchDeliveryPlaning dispatch)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -386,49 +418,101 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return result == "Success" ? Json(new { success = true }) : Json(new { success = false, message = result });
 
         }
+
+
+
+
         private string SubmitRequest(PurchaseSauda_Header header,  List<DocumentAttachment> Attachments, string action)
         {
             try
             {
+                Boolean isApprovalBody = false;
+                Boolean isFinalApprovalBody = false;
+                string DOC_APPROSTAGE = "";
+                string APPROV_USER = "";
+                string fappstatus = "";
+                string fappRemark = "";
+                var refflg = 0;
+
                 var globalVaraible = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
 
-
-                string sql = "Select isnull(SMS,'') from SUBGROUP_MAST Where " +
-                    "Comp_code= "+ globalVaraible.PubCompCode  +" and Code= " +  header.PARTY_CODE + " ";
-
-
+                string sql = "Select isnull(SMS,'') from SUBGROUP_MAST Where " + "Comp_code= "+ globalVaraible.PubCompCode  +" and Code= " +  header.PARTY_CODE + " ";
                 string smsValue = "";
-
                 using var cmd1 = new SqlCommand(sql, conn);
                 cmd1.Parameters.AddWithValue("@CompCode", globalVaraible.PubCompCode);
                 cmd1.Parameters.AddWithValue("@Code", header.PARTY_CODE);
 
                 var result = cmd1.ExecuteScalar();
-                if (result != null)
-                {
-                    smsValue = result.ToString();
+                if (result == null)
+                {                   
                     return "SMS Number is blank of => " + header.PartyName  + "";
-                }
+                }     
 
-                string deletePRequest2Sql = @"  DELETE FROM IMG_TABLE   WHERE COMP_CODE = @CompCode 
-                    AND V_NO = @VNo  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YearCode;";
 
-                using (var deletePRequest2Cmd = conn.CreateCommand())
+                DOC_APPROSTAGE = GetText("select 1 from DOC_APPROSTAGE where USER_CODE=" +  globalVaraible.PubUserId + " and DOC_CODE='PAUD' and" +
+                " comp_code=" + globalVaraible.PubCompCode + " ");
+
+                if (DOC_APPROSTAGE == "1")
                 {
-                    deletePRequest2Cmd.CommandText = deletePRequest2Sql;
-                    deletePRequest2Cmd.Parameters.AddWithValue("@CompCode", globalVaraible.PubCompCode);
-                    deletePRequest2Cmd.Parameters.AddWithValue("@VNo", header.V_NO);
-                    deletePRequest2Cmd.Parameters.AddWithValue("@BranchCode", globalVaraible.PubBranchCode);
-                    deletePRequest2Cmd.Parameters.AddWithValue("@YearCode", globalVaraible.PubFYearCode);
-
-                    deletePRequest2Cmd.ExecuteNonQuery();
+                    isApprovalBody = true;
                 }
 
+                APPROV_USER = GetText("select APPROV_USER from DOC_APPROSTAGE where USER_CODE=" + globalVaraible.PubUserId + " and " +
+                "DOC_CODE='PAUD' and comp_code=" + globalVaraible.PubCompCode + " ");
+
+                if(APPROV_USER == "FINAL")
+                {
+                    isFinalApprovalBody = true;
+                }
+     
+                if(isFinalApprovalBody == true)
+                {
+                    fappstatus = "Approved";
+                    fappRemark = "Document Approved.";
+                }
+
+
+                decimal minRate = 0, maxRate = 0;        
+                        
+                string query = @"
+                SELECT TOP 1 MIN_RATE, MAX_RATE
+                FROM MARKET_RATE1 a
+                LEFT JOIN MARKET_RATE2 b 
+                ON a.V_Type = b.V_Type 
+                AND a.v_no = b.v_no 
+                AND a.comp_code = b.comp_code 
+                AND a.branch_code = b.branch_code 
+                AND a.year_code = b.year_code
+                WHERE a.Comp_code = @Comp_code
+                AND a.faprov_status = 'Approved'
+                AND b.Item_code = @ITEM_CODE
+                AND a.eff_date >= DATEADD(DAY, -20, GETDATE())
+                ORDER BY a.V_DATE DESC, a.V_no DESC";
+
+                using var cmd2 = new SqlCommand(query, conn);
+
+                cmd2.Parameters.AddWithValue("@Comp_code", globalVaraible.PubCompCode);
+                cmd2.Parameters.AddWithValue("@ITEM_CODE", header.ITEM_CODE);
+
+                using var reader = cmd2.ExecuteReader();
+                {
+                    if (reader.Read())
+                    {
+                        minRate = Convert.ToDecimal(reader["MIN_RATE"]);
+                        maxRate = Convert.ToDecimal(reader["MAX_RATE"]);
+                    }
+
+                    if (header.RATE >= minRate && header.RATE <= maxRate)
+                    {
+                        fappstatus = "Approved";
+                        fappRemark = "Document Approved.";
+                    }
+                }
                 conn.Close();
 
-        
+
                 conn.Open();
 
                 using (var cmd = new SqlCommand("sp_PurchaseSauda", conn))
@@ -448,6 +532,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.Parameters.AddWithValue("@ADD1", header.ADD1);
                     cmd.Parameters.AddWithValue("@ADD2", header.ADD2);
                     cmd.Parameters.AddWithValue("@ADD3", header.ADD3);
+                    cmd.Parameters.AddWithValue("@REF_NO", header.REF_NO);
                     cmd.Parameters.AddWithValue("@CITY_CODE", header.CITY_CODE);
                     cmd.Parameters.AddWithValue("@PHONE", header.PHONE);
                     cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE);
@@ -470,8 +555,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.Parameters.AddWithValue("@PAYTERM_CODE", header.PAYTERM_CODE);
                     cmd.Parameters.AddWithValue("@DEL_TERM", header.DEL_TERM);
                     cmd.Parameters.AddWithValue("@REMARK", header.REMARK);
-                    cmd.Parameters.AddWithValue("@FAPROV_STATUS", "");
-                    cmd.Parameters.AddWithValue("@FAPROV_REMARKS", "");
+                    cmd.Parameters.AddWithValue("@FAPROV_STATUS", fappstatus);
+                    cmd.Parameters.AddWithValue("@FAPROV_REMARKS", fappRemark);
                     cmd.Parameters.AddWithValue("@STATUS", header.STATUS);
                     cmd.Parameters.AddWithValue("@HOLD_PAY", header.HOLD_PAY);
                     cmd.Parameters.AddWithValue("@PINO", header.PINO);
@@ -480,6 +565,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.Parameters.AddWithValue("@GRADE", header.GRADE);
                     cmd.Parameters.AddWithValue("@BROKER", header.BROKER);
                     cmd.Parameters.AddWithValue("@BROKER_RATE", header.BROKER_RATE);
+               
                     cmd.Parameters.AddWithValue("@DELIVERY_TERMIMP", "");
                     cmd.Parameters.AddWithValue("@DISPATCH_FROM", header.DISPATCH_FROM);
                     cmd.Parameters.AddWithValue("@SHIP_CODE", header.SHIP_CODE);
@@ -501,7 +587,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.ExecuteNonQuery();
                 }
 
+                string deletePRequest2Sql = @"  DELETE FROM IMG_TABLE   WHERE COMP_CODE = @CompCode 
+                    AND V_NO = @VNo  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YearCode;";
 
+                using (var deletePRequest2Cmd = conn.CreateCommand())
+                {
+                    deletePRequest2Cmd.CommandText = deletePRequest2Sql;
+                    deletePRequest2Cmd.Parameters.AddWithValue("@CompCode", globalVaraible.PubCompCode);
+                    deletePRequest2Cmd.Parameters.AddWithValue("@VNo", header.V_NO);
+                    deletePRequest2Cmd.Parameters.AddWithValue("@BranchCode", globalVaraible.PubBranchCode);
+                    deletePRequest2Cmd.Parameters.AddWithValue("@YearCode", globalVaraible.PubFYearCode);
+                    deletePRequest2Cmd.ExecuteNonQuery();
+                }
 
                 foreach (var Attachment in Attachments)
                 {
@@ -532,6 +629,30 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.ExecuteNonQuery();
                 }
 
+                if (Attachments.Count > 0)
+                {
+                    string approval = GetText("SELECT 1  FROM approval_status WHERE user_Code = " + globalVaraible.PubUserId + " AND " +
+                    "V_Type = 'PAUD' AND V_No = " + header.V_NO + "  AND  " +
+                    "  COMP_CODE = " + globalVaraible.PubCompCode + "  AND Branch_Code = " + globalVaraible.PubBranchCode + "  AND Year_Code = " + globalVaraible.PubFYearCode + ";");
+
+                    if (isFinalApprovalBody == true && approval != "")
+                    {
+                        string UpdateSql = @"UPDATE approval_status SET STATUS = 'CLOSE', LOSE_DATE = GETDATE(),  Approval_code = 8, Approval_remark = 'Approved',
+                        remarks = 'Document Approved' WHERE V_Type = 'PAUD'  AND V_No = @V_No AND COMP_CODE = @COMP_CODE AND Branch_Code = @Branch_Code
+                        AND Year_Code = @Year_Code;";
+
+                        using (var updateCmd = new SqlCommand(UpdateSql, conn))
+                        {
+                            updateCmd.Parameters.AddWithValue("@V_No", header.V_NO);              
+                            updateCmd.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
+                            updateCmd.Parameters.AddWithValue("@Branch_Code", globalVaraible.PubBranchCode);
+                            updateCmd.Parameters.AddWithValue("@Year_Code", globalVaraible.PubFYearCode);
+                            updateCmd.ExecuteNonQuery();
+
+                        }
+                    }
+                }
+
 
                 return "Success";
             }
@@ -540,9 +661,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return $"Error: {ex.Message}";
             }
         }
-
-
-
 
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
@@ -554,11 +672,72 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return Ok(result);
         }
 
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                  
+                                return reader[0].ToString();
+                               
+                            }
+                            else
+                            {
+                          
+                                return string.Empty;
+                               
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+        //cherack outherrization for create purchase order by user level and user menu permission for add
+        public JsonResult CheckOutherrised(int partycode)
+        { 
+
+            var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+
+            var ADD = GetText("select isnull(_ADD,0) as 'ADD' from user_menu where comp_code= " + globalVaraible.PubCompCode + " and MENU_CODE=83 and YEAR_CODE= " + globalVaraible.PubFYearCode + " and USER_CODE=" + globalVaraible.PubUserId + "");
+
+
+            var Statetype = GetText("SELECT TOP 1 State_type  FROM State_Mast WHERE code = ( SELECT state_code FROM SUBGROUP_MAST  WHERE code = " + partycode + "   AND COMP_CODE = " + globalVaraible.PubCompCode + ");");
+
+
+
+            if(globalVaraible.PubUserLevel != "1")
+            {
+                return new JsonResult(new { success = false , message = "You are not authorised to Create Purchase Order."  });
+            }
+            else
+            {
+                return new JsonResult(new { success = true, message = "You are not authorised to Create Purchase Order.", Statetype = Statetype });
+            }
 
 
 
 
 
+
+
+            return new JsonResult(new { success = true });
+        }
 
     }
 }
