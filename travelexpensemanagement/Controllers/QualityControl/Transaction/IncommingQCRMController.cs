@@ -103,58 +103,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
-
-        //[HttpPost]
-        //public IActionResult OnchangeItem([FromBody] ItemRequestCode model)
-        //{
-        //    DataTable dt = new DataTable();
-        //    var gv = _globalVariableService.GetGlobalVariables();
-        //    string vTypeFilter = model.V_TYPE switch
-        //    {
-        //        "QCRM" => "AND a.V_TYPE = 'RCPT'",
-        //        "QCRI" => "AND a.V_TYPE = 'RCPI'",
-        //        "QCBF" => "AND a.V_TYPE = 'BFRC'",
-        //        _ => string.Empty
-        //    };
-
-        //    using (SqlConnection con = _dbConnection.GetErpConnection())
-        //    {
-        //        string query = @"SELECT ITEM_CODE, ITEM_NAME, RECD_QTY
-        //                 FROM PURCHASE2
-        //                 WHERE V_TYPE=@V_TYPE
-        //                 AND V_NO=@V_NO AND ITEM_CODE=@ITEM_CODE and COMP_CODE=@COMP_CODE and 
-        //                YEAR_CODE=@YEAR_CODE and BRANCH_CODE=@BRANCH_CODE";
-
-        //        using (SqlCommand cmd = new SqlCommand(query, con))
-        //        {
-        //            cmd.Parameters.AddWithValue("@V_TYPE", vTypeFilter);
-        //            cmd.Parameters.AddWithValue("@V_NO", model.V_NO);
-        //            cmd.Parameters.AddWithValue("@ITEM_CODE", model.ITEM_CODE);
-        //            cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-        //            cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
-        //            cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
-
-        //            SqlDataAdapter da = new SqlDataAdapter(cmd);
-        //            da.Fill(dt);
-        //        }
-        //    }
-
-        //    if (dt.Rows.Count == 0)
-        //    {
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            message = "Item not found."
-        //        });
-        //    }
-
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        qty = dt.Rows[0]["RECD_QTY"]
-        //    });
-        //}
-
         [HttpPost]
         public IActionResult OnchangeItem([FromBody] ItemRequestCode model)
         {
@@ -200,7 +148,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 qty = Convert.ToDecimal(dt.Rows[0]["RECD_QTY"])
             });
         }
-
         public JsonResult GetddlQCIncharge()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -216,7 +163,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var moduleList = _dropdownService.GetDropdownList(query);
             return Json(moduleList);
         }
-
         public JsonResult GetddlChem()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -225,7 +171,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var moduleList = _dropdownService.GetDropdownList(query);
             return Json(moduleList);
         }
-
         public JsonResult GetddlItemName()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -235,8 +180,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
             return Json(moduleList);
         }
-               
-
         [HttpPost]
         public async Task<IActionResult> GetGatDetailsList(string StrVNo, string StrV_type)
         {
@@ -370,7 +313,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 });
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> GetItemDetails([FromBody] List<ItemRequest> items)
         {
@@ -461,9 +403,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 });
             }
         }
-
         //=======================================save code===================================
-
         [HttpPost]
         public async Task<IActionResult> SaveQCData()
         {
@@ -852,7 +792,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 
                             // Reinsert QC2 details
                             int sno = 1;
-
+                            int rid = 1;
                             foreach (var item in request.QCData)
                             {
                                 int itemCode2 = 0;
@@ -888,7 +828,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                                 ? DBNull.Value
                                                 : Convert.ToInt32(detail.QCP_CODE));
 
-                                        detailCommand.Parameters.AddWithValue("@RID", DBNull.Value);
+                                        detailCommand.Parameters.AddWithValue("@RID", rid);
                                         detailCommand.Parameters.AddWithValue("@WT_KG", DBNull.Value);
                                         detailCommand.Parameters.AddWithValue("@SNO", sno++);
 
@@ -934,7 +874,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                     }
                                 }
 
-
+                                rid++;
                             }
                             await transaction.CommitAsync();
 
@@ -976,494 +916,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 });
             }
         }
-        //=======================================save code===================================
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> SaveQCData()
-        //{
-        //    SqlTransaction transaction = null;
-
-        //    try
-        //    {
-        //        using var reader = new StreamReader(Request.Body);
-        //        string body = await reader.ReadToEndAsync();
-
-        //        var request = JsonConvert.DeserializeObject<SaveQCRequest>(body);
-
-        //        if (request == null)
-        //        {
-        //            return Json(new
-        //            {
-        //                success = false,
-        //                message = "Request data is null"
-        //            });
-        //        }
-
-        //        var header = request.Header;
-        //        var globalVar = _globalVariableService.GetGlobalVariables();
-
-        //        using var connection = _dbConnection.GetErpConnection();
-        //        await connection.OpenAsync();
-
-        //        transaction = connection.BeginTransaction();
-
-        //        string DOC_ID = $"{header.docType}{header.docNo}";
-
-        //        string gateNo = header.gateNo ?? "";
-        //        string[] parts = gateNo.Split('|');
-
-        //        string mrnPart = parts.Length > 0 ? parts[0].Trim() : "";
-        //        string mrnDateText = parts.Length > 1 ? parts[1].Trim() : "";
-
-        //        string mrnType = new string(mrnPart.TakeWhile(char.IsLetter).ToArray());
-        //        string mrnNo = new string(mrnPart.SkipWhile(char.IsLetter).ToArray());
-
-        //        DateTime? mrnDate = null;
-
-        //        if (!string.IsNullOrWhiteSpace(mrnDateText))
-        //        {
-        //            if (DateTime.TryParseExact(
-        //                mrnDateText,
-        //                "dd/MM/yyyy",
-        //                System.Globalization.CultureInfo.InvariantCulture,
-        //                System.Globalization.DateTimeStyles.None,
-        //                out DateTime parsedDate))
-        //            {
-        //                mrnDate = parsedDate;
-        //            }
-        //        }
-
-        //        // ==========================
-        //        // INSERT
-        //        // ==========================
-        //        if (header.ACTION == "INSERT")
-        //        {
-        //            using (SqlCommand command = new SqlCommand(
-        //                "usp_InsertQC1IncommingQCRM",
-        //                connection,
-        //                transaction))
-        //            {
-        //                command.CommandType = CommandType.StoredProcedure;
-        //                command.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-        //                command.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                command.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
-        //                command.Parameters.AddWithValue("@V_TYPE", header.docType ?? "");
-        //                command.Parameters.AddWithValue("@V_NO", header.docNo ?? "");
-        //                command.Parameters.AddWithValue("@V_DATE", Convert.ToDateTime(header.date));
-        //                command.Parameters.AddWithValue("@DOC_ID", DOC_ID);
-        //                command.Parameters.AddWithValue("@MRN_TYPE", mrnType);
-        //                command.Parameters.AddWithValue("@MRN_NO", mrnNo);
-        //                command.Parameters.AddWithValue("@PARTY_CODE", header.partyName);
-        //                command.Parameters.AddWithValue("@QC_INCHARGE", string.IsNullOrEmpty(header.qcIncharge) ? 0
-        //                        : Convert.ToInt32(header.qcIncharge));
-        //                command.Parameters.AddWithValue("@CHEMIST", string.IsNullOrEmpty(header.chem)
-        //                        ? 0 : Convert.ToInt32(header.chem));
-        //                command.Parameters.AddWithValue("@ITEM_CODE", 0);
-        //                command.Parameters.AddWithValue("@TRANSPORT", (object?)header.transport ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@TRUCK_NO",
-        //                    (object?)header.truckNo ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@CONTAINER_NO",
-        //                    (object?)header.containerNo ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@INV_QTY",
-        //                    header.invoiceQty ?? 0);
-        //                command.Parameters.AddWithValue("@RECD_QTY",
-        //                    header.recordedQty ?? 0);
-        //                command.Parameters.AddWithValue("@PUR_TYPE",
-        //                    (object?)header.purType ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@SHORT_QTY",
-        //                    header.shortage ?? 0);
-        //                command.Parameters.AddWithValue("@BILL_NO",
-        //                    (object?)header.billNo ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@BILL_DATE", string.IsNullOrWhiteSpace(header.billDate) ? DBNull.Value : Convert.ToDateTime(header.billDate));
-        //                command.Parameters.AddWithValue("@WASTE_WGT", header.wastage ?? 0);
-        //                command.Parameters.AddWithValue("@MRN_DATE",
-        //                    mrnDate.HasValue ? mrnDate.Value : DBNull.Value);
-        //                command.Parameters.AddWithValue("@BALES",
-        //                    header.bales ?? 0);
-        //                command.Parameters.AddWithValue("@DEDUCT_AMT",
-        //                    header.DeductAmount ?? (object)DBNull.Value);
-        //                command.Parameters.AddWithValue("@DEDUCT_NARR",
-        //                    (object?)header.Narration ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@REMARKS",
-        //                    (object?)header.remarks ?? DBNull.Value);
-        //                command.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-        //                command.Parameters.AddWithValue("@UDATE", DateTime.Now);
-        //                command.Parameters.AddWithValue("@EUSER", DBNull.Value);
-        //                command.Parameters.AddWithValue("@EDATE", DBNull.Value);
-        //                command.Parameters.AddWithValue("@AED", "A");
-        //                command.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
-        //                command.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
-        //                command.Parameters.AddWithValue("@LID", Environment.MachineName);
-        //                command.Parameters.AddWithValue("@Action", "Insert");
-
-        //                await command.ExecuteNonQueryAsync();
-        //            }
-
-        //            // ==========================
-        //            // SAVE QC2 DETAILS
-        //            // ==========================
-
-        //            int sno = 1;
-
-        //            foreach (var item in request.QCData)
-        //            {
-        //                int itemCode = 0;
-        //                int.TryParse(item.ItemCode, out itemCode);
-        //                int RID = 1;
-
-        //                foreach (var detail in item.Details)
-        //                {
-        //                    using (SqlCommand detailCommand = new SqlCommand(
-        //                        "usp_InsertQC2IncommingQCRM",
-        //                        connection,
-        //                        transaction))
-        //                    {
-        //                        detailCommand.CommandType = CommandType.StoredProcedure;
-
-        //                        detailCommand.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-        //                        detailCommand.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                        detailCommand.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
-
-        //                        detailCommand.Parameters.AddWithValue("@V_TYPE", header.docType ?? "");
-        //                        detailCommand.Parameters.AddWithValue("@V_NO", header.docNo ?? "");
-        //                        detailCommand.Parameters.AddWithValue("@V_DATE", Convert.ToDateTime(header.date));
-        //                        detailCommand.Parameters.AddWithValue("@DOC_ID", DOC_ID);
-
-        //                        detailCommand.Parameters.AddWithValue("@ITEM_CODE", itemCode);
-
-        //                        detailCommand.Parameters.AddWithValue("@QC_CODE",
-        //                            string.IsNullOrEmpty(detail.QC_CODE)
-        //                                ? DBNull.Value
-        //                                : Convert.ToInt32(detail.QC_CODE));
-
-        //                        detailCommand.Parameters.AddWithValue("@QCP_CODE",
-        //                            string.IsNullOrEmpty(detail.QCP_CODE)
-        //                                ? DBNull.Value
-        //                                : Convert.ToInt32(detail.QCP_CODE));
-
-        //                        detailCommand.Parameters.AddWithValue("@RID", RID++);
-        //                        detailCommand.Parameters.AddWithValue("@WT_KG", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@SNO", sno++);
-
-        //                        detailCommand.Parameters.AddWithValue("@UNIT",
-        //                            (object?)detail.Unit ?? DBNull.Value);
-
-        //                        decimal acceptance = 0;
-        //                        decimal.TryParse(detail.Level, out acceptance);
-
-        //                        detailCommand.Parameters.AddWithValue("@ACCEPTANCE", acceptance);
-
-        //                        decimal result = 0;
-        //                        decimal.TryParse(detail.Result, out result);
-
-        //                        detailCommand.Parameters.AddWithValue("@RESULT", result);
-
-        //                        detailCommand.Parameters.AddWithValue("@MIN_RES", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@MAX_RES", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@REMARK", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_AMT",
-        //                            detail.DeductAmont ?? (object)DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@ALLOW_AMT", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_NARR",
-        //                            (object?)detail.DeductNarr ?? DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_AMT1", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_NARR1", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-        //                        detailCommand.Parameters.AddWithValue("@UDATE", DateTime.Now);
-        //                        detailCommand.Parameters.AddWithValue("@AED", "A");
-        //                        detailCommand.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
-        //                        detailCommand.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
-        //                        detailCommand.Parameters.AddWithValue("@LID", Environment.MachineName);
-
-        //                        detailCommand.Parameters.AddWithValue("@Action", "Insert");
-
-        //                        await detailCommand.ExecuteNonQueryAsync();
-        //                    }
-        //                }
-        //            }
-
-        //            await transaction.CommitAsync();
-
-        //            return Json(new
-        //            {
-        //                success = true,
-        //                message = "Data Saved Successfully"
-        //            });
-        //        }
-
-        //        //else if (header.ACTION == "UPDATE")
-        //        //{
-        //        //    return Json(new
-        //        //    {
-        //        //        success = false,
-        //        //        message = "Update logic not implemented yet."
-        //        //    });
-        //        //}
-
-        //        else if (header.ACTION == "UPDATE")
-        //        {
-        //            using (SqlCommand command = new SqlCommand(
-        //                "usp_InsertQC1IncommingQCRM",
-        //                connection,
-        //                transaction))
-        //            {
-        //                command.CommandType = CommandType.StoredProcedure;
-
-        //                command.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-        //                command.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                command.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
-
-        //                command.Parameters.AddWithValue("@V_TYPE", header.docType ?? "");
-        //                command.Parameters.AddWithValue("@V_NO", header.docNo ?? "");
-        //                command.Parameters.AddWithValue("@V_DATE", Convert.ToDateTime(header.date));
-
-        //                command.Parameters.AddWithValue("@MRN_TYPE", mrnType);
-        //                command.Parameters.AddWithValue("@MRN_NO", mrnNo);
-        //                command.Parameters.AddWithValue("@MRN_DATE",
-        //                    mrnDate.HasValue ? mrnDate.Value : DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@BALES", header.bales ?? 0);
-        //                command.Parameters.AddWithValue("@PARTY_CODE", header.partyName);
-
-        //                command.Parameters.AddWithValue("@BILL_NO",
-        //                    (object?)header.billNo ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@BILL_DATE",
-        //                    string.IsNullOrWhiteSpace(header.billDate)
-        //                        ? DBNull.Value
-        //                        : Convert.ToDateTime(header.billDate));
-
-        //                command.Parameters.AddWithValue("@TRANSPORT",
-        //                    (object?)header.transport ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@TRUCK_NO",
-        //                    (object?)header.truckNo ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@CONTAINER_NO",
-        //                    (object?)header.containerNo ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@INV_QTY",
-        //                    header.invoiceQty ?? 0);
-
-        //                command.Parameters.AddWithValue("@RECD_QTY",
-        //                    header.recordedQty ?? 0);
-
-        //                command.Parameters.AddWithValue("@SHORT_QTY",
-        //                    header.shortage ?? 0);
-
-        //                command.Parameters.AddWithValue("@REMARKS",
-        //                    (object?)header.remarks ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@DEDUCT_AMT",
-        //                    header.DeductAmount ?? (object)DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@DEDUCT_NARR",
-        //                    (object?)header.Narration ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@PUR_TYPE",
-        //                    (object?)header.purType ?? DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@WASTE_WGT",
-        //                    header.wastage ?? 0);
-
-        //                command.Parameters.AddWithValue("@ITEM_CODE", 0);
-        //                command.Parameters.AddWithValue("@ITEM_NAME", DBNull.Value);
-        //                command.Parameters.AddWithValue("@TENACITY_CODE", DBNull.Value);
-        //                command.Parameters.AddWithValue("@BALE_STATUSCODE", DBNull.Value);
-        //                command.Parameters.AddWithValue("@CREEL_NO", DBNull.Value);
-        //                command.Parameters.AddWithValue("@LAST_BALENO", DBNull.Value);
-        //                command.Parameters.AddWithValue("@LOT_NO", DBNull.Value);
-        //                command.Parameters.AddWithValue("@SHIFT", DBNull.Value);
-        //                command.Parameters.AddWithValue("@PROD_PLACECODE", DBNull.Value);
-        //                command.Parameters.AddWithValue("@PROD_LINE", DBNull.Value);
-        //                command.Parameters.AddWithValue("@STATUS", DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@SAMPLE_RECDBY", DBNull.Value);
-        //                command.Parameters.AddWithValue("@FROM_BALENO", DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@QC_INCHARGE",
-        //                    string.IsNullOrEmpty(header.qcIncharge)
-        //                        ? 0
-        //                        : Convert.ToInt32(header.qcIncharge));
-
-        //                command.Parameters.AddWithValue("@CHEMIST",
-        //                    string.IsNullOrEmpty(header.chem)
-        //                        ? 0
-        //                        : Convert.ToInt32(header.chem));
-
-        //                command.Parameters.AddWithValue("@QC_INCHARGENAME", DBNull.Value);
-        //                command.Parameters.AddWithValue("@CHEMISTNAME", DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@NOS_PREQC", DBNull.Value);
-
-        //                command.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-        //                command.Parameters.AddWithValue("@UDATE", DateTime.Now);
-
-        //                command.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
-        //                command.Parameters.AddWithValue("@EDATE", DateTime.Now);
-
-        //                command.Parameters.AddWithValue("@AED", "E");
-        //                command.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
-        //                command.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
-        //                command.Parameters.AddWithValue("@LID", Environment.MachineName);
-
-        //                command.Parameters.AddWithValue("@Action", "Update");
-
-        //                await command.ExecuteNonQueryAsync();
-        //            }
-
-        //            // Delete old QC2 records first
-        //            using (SqlCommand deleteCmd = new SqlCommand(@"
-        //DELETE FROM QC2
-        //WHERE COMP_CODE=@COMP_CODE
-        //AND YEAR_CODE=@YEAR_CODE
-        //AND BRANCH_CODE=@BRANCH_CODE
-        //AND V_TYPE=@V_TYPE
-        //AND V_NO=@V_NO",
-        //                connection,
-        //                transaction))
-        //            {
-        //                deleteCmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                deleteCmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-        //                deleteCmd.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
-        //                deleteCmd.Parameters.AddWithValue("@V_TYPE", header.docType ?? "");
-        //                deleteCmd.Parameters.AddWithValue("@V_NO", header.docNo ?? "");
-
-        //                await deleteCmd.ExecuteNonQueryAsync();
-        //            }
-
-        //            // Reinsert QC2 details
-        //            int sno = 1;
-
-        //            foreach (var item in request.QCData)
-        //            {
-        //                int itemCode = 0;
-        //                int.TryParse(item.ItemCode, out itemCode);
-
-        //                foreach (var detail in item.Details)
-        //                {
-        //                    using (SqlCommand detailCommand = new SqlCommand(
-        //                        "usp_InsertQC2IncommingQCRM",
-        //                        connection,
-        //                        transaction))
-        //                    {
-        //                        detailCommand.CommandType = CommandType.StoredProcedure;
-
-        //                        detailCommand.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-        //                        detailCommand.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                        detailCommand.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
-
-        //                        detailCommand.Parameters.AddWithValue("@V_TYPE", header.docType ?? "");
-        //                        detailCommand.Parameters.AddWithValue("@V_NO", header.docNo ?? "");
-        //                        detailCommand.Parameters.AddWithValue("@V_DATE", Convert.ToDateTime(header.date));
-        //                        detailCommand.Parameters.AddWithValue("@DOC_ID", DOC_ID);
-
-        //                        detailCommand.Parameters.AddWithValue("@ITEM_CODE", itemCode);
-
-        //                        detailCommand.Parameters.AddWithValue("@QC_CODE",
-        //                            string.IsNullOrEmpty(detail.QC_CODE)
-        //                                ? DBNull.Value
-        //                                : Convert.ToInt32(detail.QC_CODE));
-
-        //                        detailCommand.Parameters.AddWithValue("@QCP_CODE",
-        //                            string.IsNullOrEmpty(detail.QCP_CODE)
-        //                                ? DBNull.Value
-        //                                : Convert.ToInt32(detail.QCP_CODE));
-
-        //                        detailCommand.Parameters.AddWithValue("@RID", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@WT_KG", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@SNO", sno++);
-
-        //                        detailCommand.Parameters.AddWithValue("@UNIT",
-        //                            (object?)detail.Unit ?? DBNull.Value);
-
-        //                        decimal acceptance = 0;
-        //                        decimal.TryParse(detail.Level, out acceptance);
-
-        //                        detailCommand.Parameters.AddWithValue("@ACCEPTANCE", acceptance);
-
-        //                        decimal result = 0;
-        //                        decimal.TryParse(detail.Result, out result);
-
-        //                        detailCommand.Parameters.AddWithValue("@RESULT", result);
-
-        //                        detailCommand.Parameters.AddWithValue("@MIN_RES", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@MAX_RES", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@REMARK", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_AMT",
-        //                            detail.DeductAmont ?? (object)DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@ALLOW_AMT", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_NARR",
-        //                            (object?)detail.DeductNarr ?? DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_AMT1", DBNull.Value);
-        //                        detailCommand.Parameters.AddWithValue("@DEDU_NARR1", DBNull.Value);
-
-        //                        detailCommand.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-        //                        detailCommand.Parameters.AddWithValue("@UDATE", DateTime.Now);
-        //                        detailCommand.Parameters.AddWithValue("@AED", "A");
-        //                        detailCommand.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID);
-        //                        detailCommand.Parameters.AddWithValue("@LIP", globalVar.PubLocalId);
-        //                        detailCommand.Parameters.AddWithValue("@LID", Environment.MachineName);
-
-        //                        detailCommand.Parameters.AddWithValue("@Action", "Insert");
-
-        //                        await detailCommand.ExecuteNonQueryAsync();
-        //                    }
-        //                }
-        //            }
-        //            await transaction.CommitAsync();
-
-        //            return Json(new
-        //            {
-        //                success = true,
-        //                message = "Data Updated Successfully"
-        //            });
-        //        }
-
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            message = "Invalid Action"
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        if (transaction != null)
-        //            await transaction.RollbackAsync();
-
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            message = ex.Message
-        //        });
-        //    }
-        //}
-
-
-
-
-
+        
         private string Truncate(string input, int maxLength)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
             return input.Length <= maxLength ? input : input.Substring(0, maxLength);
         }
-
- 
-        /////////working this url
+        
         public async Task<IActionResult> GetAllDatadetails([FromBody] RequestModel request)
         {
             var gv = _globalVariableService.GetGlobalVariables();
@@ -1509,18 +969,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 response.Items.Add(item);
                             }
                         }
-
-                        // ----------- Item Codes List (third result set) -----------
-                        //if (await reader.NextResultAsync())
-                        //{
-                        //    while (await reader.ReadAsync())
-                        //    {
-                        //        var itemCode = reader["ITEM_CODE"]?.ToString();
-                        //        if (!string.IsNullOrEmpty(itemCode))
-                        //            response.ItemCodes.Add(itemCode); 
-                        //    }
-                        //}
-
                         if (await reader.NextResultAsync())
                         {
                             while (await reader.ReadAsync())
@@ -1544,7 +992,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-        /////////working this url
 
         //=========================================list Add popup===================================
         [HttpPost]
@@ -1606,7 +1053,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
         //=========================================list Add popup===================================
-
         public class QCParameterModel
         {
             public string VnNo { get; set; }
@@ -1614,24 +1060,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             public string ItemCode { get; set; }
             public string RID { get; set; }
         }
-
         public class ItemRequest
         {
             public int ItemCode { get; set; }
             public string? V_TYPE { get; set; }
             public int? V_NO { get; set; }
         }
-
         public class RequestModel
         {
             public string vNo { get; set; }
             public string vType { get; set; }
         }
-        //public class ItemRequest
-        //{
-        //    public string ItemCode { get; set; }
-        //    public string ItemName { get; set; }
-        //}
         public class GateIncommingQCRM
         {
             public List<Dictionary<string, object>> Header { get; set; } = new List<Dictionary<string, object>>();
@@ -1639,7 +1078,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             //public List<string> ItemCodes { get; set; } = new List<string>(); // Added this property to fix CS1061
             public List<ItemResult> ItemResults { get; set; } = new();
         }
-
         public class ItemResult
         {
             public string ItemCodes { get; set; }
@@ -1653,15 +1091,12 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             public QCHeaderModel Header { get; set; }
             public List<QCItemModel> QCData { get; set; }
         }
-
         public class ItemRequestCode
         {
             public int V_NO { get; set; }
             public string V_TYPE { get; set; }
             public string ITEM_CODE { get; set; }
         }
-
-
         public class QCHeaderModel
         {
             public string? docType { get; set; }
@@ -1691,7 +1126,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             public string? Narration { get; set; }
             public string? ACTION { get; set; }
         }
-
         public class QCItemModel
         {
             public string ItemCode { get; set; }
@@ -1699,18 +1133,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             public string Qty { get; set; }
             public List<QCDetailModel> Details { get; set; }
         }
-
-        //public class QCDetailModel
-        //{
-        //    public string? QCP_CODE { get; set; }
-        //    public string? Parameter { get; set; }
-        //    public string? Unit { get; set; }
-        //    public string? Level { get; set; }
-        //    public string? Result { get; set; }
-        //    public decimal? DeductAmont { get; set; }
-        //    public string? DeductNarr { get; set; }
-        //}
-
         public class QCDetailModel
         {
             public string? ItemCode { get; set; }
