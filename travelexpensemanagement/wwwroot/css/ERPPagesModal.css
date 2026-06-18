@@ -36,7 +36,7 @@
     }
 /* Header */
 .erppagesmodal-header {
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #142966, #4680ff);
     color: #fff;
     padding: 8px 14px;
     display: flex;
@@ -88,7 +88,7 @@
 
 /* Body */
 .erppagesmodal-body {
-    padding: 16px;
+    padding: 10px;
     max-height: 85vh;
     overflow-y: auto;
     overflow-x: hidden;

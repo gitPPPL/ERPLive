@@ -36,17 +36,15 @@
 		</div>
 	</div>
 
-
-
 	<div class="card">
 		<div class="table-responsive">
 			<table id="tblPurchaseQuotationList" class="table-width">
 				<thead class="table-head">
 					<tr>
 						<th style="display:none;">Code</th>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
+						<th>Doc No</th>
+						<th>Doc Type</th>
+						<th>Doc date</th>
 						<th>Party Name</th>
 						<th>Quote No</th>
 						<th>Quote Date</th>
@@ -118,17 +116,17 @@
 							<td style="display:none;">${item.code}</td>
 							<td>${item.v_NO || ''}</td>
 							<td>${item.v_TYPE || ''}</td>
-							<td>${item.v_DATE || ''}</td>
+							<td>${formatDate(item.v_DATE) || ''}</td>
 							<td>${item.partY_NAME || ''}</td>
 							<td>${item.quotE_NO || ''}</td>
-							<td>${item.quotE_DATE || ''}</td>
+							<td>${formatDate(item.quotE_DATE) || ''}</td>
 							<td>${item.conT_PERSON || ''}</td>
-							<td>${item.valiD_DATE || ''}</td>
+							<td>${formatDate(item.valiD_DATE) || ''}</td>
 							<td>${item.remarks || ''}</td>
 							<td>${item.statuS_NAME || ''}</td>
 							<td>
-								<i class="fa fa-edit btn-edit" title="Edit" onclick="editQuotation(${item.v_NO})"></i>
-								<i class="fa fa-eye btn-view" title="View" onclick="viewQuotation(${item.v_NO})"></i>
+								<i class="fa fa-edit btn-edit" title="Edit" onclick="editQuotation(${item.v_NO},'${item.v_TYPE}')"></i>
+								<i class="fa fa-eye btn-view" title="View" onclick="viewQuotation(${item.v_NO}, '${item.v_TYPE}')"></i>
 								<i class="fa fa-trash btn-delete" title="Delete" onclick="deleteQuotation(${item.v_NO}, '${item.v_TYPE}')"></i>
 							</td>
 						</tr>
@@ -185,12 +183,23 @@
 		loadAllQuotations();
 	});
 
-	function editQuotation(id) {
-		window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id);
+	// function editQuotation(id) {
+	// 	window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id);
+	// }
+
+	// function viewQuotation(id) {
+	// 	window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	// }
+
+
+    function editQuotation(vNo, vType) {
+		window.location.href =
+			`/PurchaseQuotation/Index?id=${vNo}&vType=${encodeURIComponent(vType)}`;
 	}
 
-	function viewQuotation(id) {
-		window.location.href = '/PurchaseQuotation/Index?id=' + encodeURIComponent(id) + '&readOnly=true';
+	function viewQuotation(vNo, vType) {
+		window.location.href =
+			`/PurchaseQuotation/Index?id=${vNo}&vType=${encodeURIComponent(vType)}&readOnly=true`;
 	}
 
 	function deleteQuotation(code,vType) {
@@ -232,5 +241,17 @@
 		});
 	}
 
+    function formatDate(dateString) {
+
+		if (!dateString) return '';
+
+		const date = new Date(dateString);
+
+		const day = String(date.getDate()).padStart(2, '0');
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const year = date.getFullYear();
+
+		return `${day}/${month}/${year}`;
+	}
 
 </script>

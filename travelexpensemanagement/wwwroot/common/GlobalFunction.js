@@ -159,3 +159,316 @@ function sortTable(table, columnIndex, header) {
 document.querySelectorAll(".sortable-table").forEach((table, index) => {
     table.dataset.sortId = index;
 });
+
+
+//Global Attachment
+
+const fileInput = document.getElementById('fileInput');
+const browseBtn = document.getElementById('browseBtn');
+const dropZone = document.getElementById('dropZone');
+const fileList = document.getElementById('fileList');
+// Browse button
+if (browseBtn && fileInput) {
+    browseBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+}
+
+// File input change
+if (fileInput && fileList) {
+    fileInput.addEventListener('change', function () {
+        renderFiles(this.files, fileList);
+    });
+}
+
+// Drag over
+if (dropZone) {
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+}
+
+// Drop
+if (dropZone && fileList) {
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        renderFiles(e.dataTransfer.files, fileList);
+    });
+}
+ 
+//browseBtn.addEventListener('click', () => {
+//    fileInput.click();
+//});
+
+//fileInput.addEventListener('change', function () {
+//    renderFiles(this.files);
+//});
+
+//dropZone.addEventListener('dragover', e => {
+//    e.preventDefault();
+//});
+
+//dropZone.addEventListener('drop', e => {
+//    e.preventDefault();
+//    renderFiles(e.dataTransfer.files);
+//});
+
+function renderFiles(files) {
+
+    Array.from(files).forEach(file => {
+
+        const fileItem = document.createElement('div');
+        fileItem.className =
+            'erppageattachmentsectionfileitem';
+
+        fileItem.innerHTML = `
+                <div class="erppageattachmentsectionicon ${getFileColorClass(file.name)}">
+                    ${getFileType(file.name)}
+                </div>
+
+                <div class="erppageattachmentsectioncontent">
+
+                    <div class="erppageattachmentsectionfilename">
+                        ${file.name}
+                    </div>
+
+                    <div class="erppageattachmentsectionprogress">
+                        <div class="erppageattachmentsectionprogressbar"></div>
+                    </div>
+
+                </div>
+
+                <div class="erppageattachmentsectionactions">
+
+                    <button class="erppageattachmentsectionview">
+                        View
+                    </button>
+
+                    <button class="erppageattachmentsectiondelete">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+
+        fileList.appendChild(fileItem);
+
+        const progressBar =
+            fileItem.querySelector(
+                '.erppageattachmentsectionprogressbar'
+            );
+
+        let progress = 0;
+
+        const interval = setInterval(() => {
+
+            progress += 5;
+
+            progressBar.style.width =
+                progress + '%';
+
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+
+        }, 100);
+
+        fileItem
+            .querySelector(
+                '.erppageattachmentsectiondelete'
+            )
+            .addEventListener('click', () => {
+                fileItem.remove();
+            });
+
+    });
+}
+
+function getFileType(fileName) {
+    return fileName.split('.').pop().toUpperCase();
+}
+
+function getFileColorClass(fileName) {
+
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    switch (ext) {
+
+        case 'pdf':
+            return 'erppageattachmentsectionpdf';
+
+        case 'png':
+        case 'jpg':
+        case 'jpeg':
+        case 'gif':
+        case 'svg':
+        case 'webp':
+            return 'erppageattachmentsectionimage';
+
+        case 'doc':
+        case 'docx':
+            return 'erppageattachmentsectionword';
+
+        case 'xls':
+        case 'xlsx':
+        case 'csv':
+            return 'erppageattachmentsectionexcel';
+
+        case 'ppt':
+        case 'pptx':
+            return 'erppageattachmentsectionppt';
+
+        case 'txt':
+            return 'erppageattachmentsectiontxt';
+
+        case 'zip':
+        case 'rar':
+        case '7z':
+            return 'erppageattachmentsectionzip';
+
+        default:
+            return 'erppageattachmentsectiondefault';
+    }
+}
+
+
+//Smart Global Search Dropdown
+
+const SearchDropdownManager = {};
+
+function InitializeSearchDropdown(dropdownId, getDataFunction) {
+    const box = document.getElementById(dropdownId);
+    if (!box) {
+        console.error("Dropdown not found : " + dropdownId);
+        return;
+    }
+    const input = box.querySelector("input");
+    const list = box.querySelector(".dropdown-list");
+    let items = [];
+    let selectedIndex = -1;
+    SearchDropdownManager[dropdownId] = {
+        setValue: async function (value) {
+
+
+            // Load data if not loaded
+            if (items.length === 0) {
+
+                items = await getDataFunction();
+
+                SearchDropdownManager[dropdownId].items = items;
+
+            }
+
+
+            console.log("All dropdown items:", items);
+
+            console.log("Searching value:", value);
+
+
+
+            let selected = items.find(x =>
+                Number(x.value) === Number(value)
+            );
+
+
+
+            console.log("Found:", selected);
+
+
+
+            if (selected) {
+
+
+                input.value = selected.text;
+
+
+                input.setAttribute(
+                    "data-value",
+                    selected.value
+                );
+
+
+            }
+
+
+        },
+        //setValue: function (value) {
+        //    let selected = items.find(x => x.value.toString() === value.toString());
+        //    if (selected) {
+        //        input.value = selected.text;
+        //        input.setAttribute("data-value", selected.value);
+        //    }
+        //},
+        getValue: function () {
+            return input.getAttribute("data-value");
+        },
+        reload: function () {
+            items = [];
+        }
+    };
+    async function loadData() {
+        if (items.length === 0) {
+            let response = await getDataFunction();
+            items = response;
+            SearchDropdownManager[dropdownId].items = items;
+        }
+    }
+
+    function showList(searchText = "") {
+        let filterData = items.filter(x => x.text.toLowerCase().includes(searchText.toLowerCase()));
+        list.innerHTML = filterData.map(x => `
+
+        <div class="dropdown-item"
+             data-value="${x.value}">
+
+             ${x.text}
+
+        </div>
+
+
+        `).join("");
+        list.style.display = filterData.length ? "block" : "none";
+        [...list.children].forEach(row => {
+            row.onclick = function () {
+                input.value = this.innerText;
+                input.setAttribute("data-value", this.dataset.value);
+                list.style.display = "none";
+            };
+        });
+        selectedIndex = -1;
+    }
+    input.addEventListener("click", async function () {
+        await loadData();
+        showList(input.value);
+    });
+    input.addEventListener("input", function () {
+        showList(this.value);
+    });
+    input.addEventListener("keydown", function (e) {
+        let rows = list.children;
+        if (rows.length === 0) return;
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % rows.length;
+        }
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + rows.length) % rows.length;
+        }
+        [...rows].forEach(x => x.classList.remove("active"));
+        if (selectedIndex >= 0) {
+            rows[selectedIndex].classList.add("active");
+        }
+        if (e.key === "Enter" && selectedIndex >= 0) {
+            let row = rows[selectedIndex];
+            input.value = row.innerText;
+            input.setAttribute("data-value", row.dataset.value);
+            list.style.display = "none";
+        }
+    });
+    document.addEventListener("click", function (e) {
+        if (!box.contains(e.target)) {
+            list.style.display = "none";
+        }
+    });
+}

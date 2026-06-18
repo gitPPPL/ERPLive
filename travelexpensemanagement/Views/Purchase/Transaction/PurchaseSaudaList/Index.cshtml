@@ -1,213 +1,397 @@
 ﻿@{
-	ViewBag.Title = "Purchase Sauda List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Purchase Sauda List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            break;
+        }
+    }
 }
 
-<fieldset>
-	<legend class="legend-field">Purchase Sauda List</legend>
+<!-- HEADER -->
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Purchase Sauda List</span>
+    </div>
 
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
+    @if (canAdd)
+    {
+        <div class="erppagelist-header-right">
+            <button type="button"
+                    class="erppage-header-back"
+                    onclick="location.href='@Url.Action("Index", "PurchaseSauda")'">
+                <i class="fa fa-plus"></i> Add New
+            </button>
+        </div>
+    }
+</div>
+
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+
+    <div class="erppagelist-actions">
+
+        @if (canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action" id="btnPrint">
+                <i class="fa fa-print"></i> Print
+            </button>
+        }
+
+        @if (canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action" id="btnExport">
+                <i class="fa fa-file-excel"></i> Export
+            </button>
+        }
+
+        @if (canMail)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action" id="btnMail">
+                <i class="fa fa-envelope"></i> Mail
+            </button>
+        }
+
+        @if (canApproval)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action" id="btnApprove">
+                <i class="fa fa-check"></i> Approved
+            </button>
+        }
+
+    </div>
+</div>
+
+<!-- TABLE -->
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+
+        <table id="tblPurchaseSaudaList" class="excel-table fixed-grid-table resizable-table">
+            <colgroup>
+                <col style="width: 71px;">
+                <col style="width: 82px;">
+                <col style="width: 114px;">
+                <col style="width: 75px;">
+                <col style="width: 141px;">
+                <col style="width: 71px;">
+                <col style="width: 62px;">
+                <col style="width: 94px;">
+                <col style="width: 98px;">
+                <col style="width: 60px;">
+                <col style="width: 64px;">
+                <col style="width: 120px;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Serial No</th>
+                    <th>Date</th>
+                    <th>Vender Name</th>
+                    <th>City</th>
+                    <th>Item Name</th>
+                    <th>Weight</th>
+                    <th>Rate</th>
+                    <th>Freight Term</th>
+                    <th>PI No.</th>
+                    <th>Offer No.</th>
+
+                    <th>Remarks</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+    </div>
 
 
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "PurchaseSauda")'" type="submit" class="btn btn-add">
-				<i class="fa fa-plus"></i>Add
-			</button>
-			<button class="btn btn-print" onclick="printCityMasterReport()">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export">
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			@* <button class="btn btn-approved">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button> *@
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-			</div>
-		</div>
-	</div>
+    <!-- PAGINATION -->
+    <div class="erppagelist-pagination">
 
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
 
+        <div class="pagination-center">
+            <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+        </div>
 
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseQuotationList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Serial No</th>
-						<th>Date</th>
-						<th>Customer Name</th>
-						<th>City</th>
-						<th>Item Name</th>
-						<th>Remarks</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
 
-
-
-</fieldset>
+    </div>
+</div>
 
 <script>
 
-	let currentPage = 1;
-	let pageSize = 10;
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
 
-	$(document).ready(function () {
-		loadAllMenus();
-	});
+    $(document).ready(function () {
 
-	function loadAllMenus() {
-			const searchTerm = $('#searchBox').val();
-			$.ajax({
-				url: '/PurchaseSaudaList/GetList',
-				type: 'GET',
-				dataType: 'json',
-				data: {
-					searchTerm: searchTerm,
-					pageNumber: currentPage,
-					pageSize: pageSize
-				},
-				success: function (res) {
-					if (!res.success) {
-						toastr.error("Failed to load data.");
-						return;
-					}
+        loadSaudaList();
 
-					const list = res.lists;
-					const totalCount = res.totalCount;
-					let tbody = $('#tblPurchaseQuotationList tbody');
-					tbody.empty();
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadSaudaList();
+        });
+          
 
-					if (list.length === 0) {
-						tbody.append('<tr><td colspan="11" class="text-center text-muted">No list found.</td></tr>');
-					} else {
-						$.each(list, function (index, item) {
-							tbody.append(`
-								<tr>
-								<td>${item.v_NO}</td>
-								<td>${formatDate(item.v_DATE)}</td>
-								<td>${item.customerName}</td>
-								<td>${item.cityName}</td>
-								<td>${item.itemName}</td>
-								<td>${item.remark}</td>
-															
-									<td>
-										<i class="fas fa-edit btn-edit" title="Edit" onclick="AddOrEditFunction('${item.v_NO}')"></i>
-										<i class="fa fa-eye btn-view" title="View Detail" onclick="viewMenuDetails('${item.v_NO}')"></i>
-										<i class="fa fa-trash text-danger btn-delete" title="Delete" onclick="deleteTemp('${item.v_NO}')"></i>
-									</td>
-								</tr>
-							`);
-						});
-						renderPagination(totalCount, pageSize, currentPage);
-					}
-				},
-				error: function (xhr) {
-					toastr.error('Error loading menu list: ' + xhr.responseText);
-				}
-			});
-		}
+         $('#btnExport').on('click', function () {
+        var text = $('#searchBox').val();
+        window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
 
+         $('#btnPrint').on('click', function () {
+        var text = $('#searchBox').val();
+        window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+        });
+
+    });
+
+    // LOAD DATA
+    function loadSaudaList() {
+
+        $.ajax({
+            url: '/PurchaseSaudaList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log("Res", res);
+                if (!res.success) {
+                    toastr.error("Failed to load data");
+                    return;
+                }
+
+                renderTable(res.lists || []);
+                totalCount = res.totalCount || 0;
+                renderPagination();
+
+            },
+            error: function (xhr) {
+                toastr.error(xhr.responseText);
+            }
+        });
+    }
+
+    // TABLE
+    function renderTable(list) {
+
+        let tbody = $('#tblPurchaseSaudaList tbody');
+        tbody.empty();
+
+        if (list.length === 0) {
+            tbody.append('<tr><td colspan="7" class="text-center">No data found</td></tr>');
+            return;
+        }
+
+        $.each(list, function (i, item) {
+
+            tbody.append(`
+                <tr>
+                    <td>${item.v_NO || ''}</td>
+                    <td>${formatDate(item.v_DATE)}</td>
+                    <td>${item.customerName || ''}</td>
+                    <td>${item.cityName || ''}</td>
+                    <td>${item.itemName || ''}</td>
+                     <td>${item.qty || ''}</td>
+                     <td>${item.rate || ''}</td>
+                     <td>${item.frT_TERM || ''}</td>
+                     <td>${item.pino || ''}</td>
+                     <td>${item.offerno || ''}</td>
+                    <td>${item.remark || ''}</td>
+
+                    <td class="action-col">
+
+                        @if (canEdit)
+                        {
+                                <button class="act-btn edit" onclick="edit('${item.v_NO}')"><i class="fa fa-edit"></i></button>
+                                
+                        }
+                        <button class="act-btn view" onclick="view('${item.v_NO}')"><i class="fa fa-eye"></i></button>
+                        
+
+                        @if (canDelete)
+                        {
+                            <button class="act-btn delete"
+                                 onclick="deletevalidation('${item.v_NO}', '${item.v_TYPE}')">
+                            <i class="fa fa-trash"></i>
+                            </button>
+                                
+                        }
+                         <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                    </td>
+                </tr>
+            `);
+
+        });
+    }
+
+    // PAGINATION
+    function renderPagination() {
+
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+        let html = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<span onclick="goToPage(${i})"
+                        class="${i === currentPage ? 'active' : ''}">
+                        ${i}
+                     </span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // PAGINATION ACTIONS
+    function goToPage(p) {
+        currentPage = p;
+        loadSaudaList();
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadSaudaList();
+        }
+    }
+
+    function nextPage() {
+        currentPage++;
+        loadSaudaList();
+    }
+
+    function changePageSize() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadSaudaList();
+    }
+
+    // ACTIONS
+    function edit(id) {
+        window.location.href = '/PurchaseSauda/Index?id=' + id;
+    }
+
+    function view(id) {
+        window.location.href = '/PurchaseSauda/Index?id=' + id + '&mode=view';
+    }
+
+    function deletevalidation(id, v_TYPE) {
+             
+
+        $.post('/PurchaseSaudaList/Deletevalidation',
+            {
+                code: id,
+                v_type: v_TYPE
+            },
+            function (res) {        
+                if (!res.success) {
+                    toastr.warning(res.message);
+                    return;
+                }       
+                if (confirm(res.message + "\n\nDo you want to proceed with DELETE?")) {
+                    deleteRow(id, v_TYPE);
+                }
+            }
+        );
+    }
+
+
+    function deleteRow(id, v_TYPE) {
+       if (!confirm("Do you want to delete this record?")) return;
+
+         $.post('/PurchaseSaudaList/Delete',
+            {
+                code: id,
+                v_type: v_TYPE
+            },
+            function (res) {
+                if (res.success) {
+                    toastr.success(res.message || "Deleted successfully");
+                    loadSaudaList();
+                } else {
+                    toastr.warning(res.message);
+                }
+            }
+        );
+    }
+
+    // UTIL
     function formatDate(dateStr) {
-				if (!dateStr) return '';
-				const d = new Date(dateStr);
-				if (isNaN(d)) return '';
-				return d.toISOString().slice(0, 10);
-			}
+        if (!dateStr) return '';
+        let d = new Date(dateStr);
+        if (isNaN(d)) return '';
+        return d.toISOString().split('T')[0];
+    }
 
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const pagination = $('#tablePagination');
-		pagination.empty();
-
-		if (totalPages <= 1) return;
-
-		let html = '';
-
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-
-		const startPage = Math.max(1, currentPage - 2);
-		const endPage = Math.min(totalPages, currentPage + 2);
-
-		for (let i = startPage; i <= endPage; i++) {
-			html += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
-
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-
-		pagination.html(html);
-	}
-
-	function goToPage(page) {
-		currentPage = page;
-	loadAllMenus();
-	}
-
-	$('#searchBox').on('keyup', function () {
-		currentPage = 1;
-		loadAllMenus();
-	});
-
-	function AddOrEditFunction(code) {
-	
-		window.location.href = '/PurchaseSauda/Index?id=' + encodeURIComponent(code);
-	}
-
-	function viewMenuDetails(code) {
-		window.location.href = '/PurchaseSauda/Index?id=' + encodeURIComponent(code) + '&mode=view';
-	}
-
-	function deleteTemp(code) {
-		if (!confirm('Are you sure you want to delete this Purchase Request?')) return;
-
-		$.ajax({
-			url: '/PurchaseSaudaList/Delete',
-			type: 'POST',
-			data: { code: code },
-			success: function (res) {
-				if (res.success) {
-					toastr.success('Deleted successfully.');
-					loadAllMenus();
-				} else {
-					toastr.error(res.message || 'Failed to delete.');
-				}
-			},
-			error: function () {
-				toastr.error('Error deleting Purchase Sauda .');
-			}
-		});
-	}
+   function showDocumentPopup(docCode) {
+    
+        $.ajax({
+            url: '/PurchaseSaudaList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
 
 </script>

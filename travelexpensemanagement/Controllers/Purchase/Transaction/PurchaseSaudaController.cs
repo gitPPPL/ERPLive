@@ -3,6 +3,8 @@ using iTextSharp.text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Reflection.Metadata;
+using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -18,8 +20,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly GlobalValidationdate _globalValidationdate;
 
-        public PurchaseSaudaController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+        public PurchaseSaudaController(DataBaseConnection dbConnection, GlobalValidationdate globalValidationdate, GlobalVariableService globalVariableService,
             DropdownService dropdownService, DbHelper dbHelper,
             ModuleService.ModuleService moduleService)
         {
@@ -28,10 +31,23 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
 
         public IActionResult Index()
         {
+
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
+
             return View("~/Views/Purchase/Transaction/PurchaseSauda/Index.cshtml");
         }
 
@@ -94,19 +110,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
-        public JsonResult DDLItemGroup()
+
+        public JsonResult DDLCityMast()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "select CODE,NAME from ITEM_MGROUP  where COMP_CODE = " + getdata.PubCompCode + " order by name asc ";
-
-                var ItemGroupList = _dropdownService.GetDropdownList(query);
-
-                return Json(ItemGroupList);
+                string query = "select CODE , NAME from CITY_MAST  where active = 1 ";
+                var DDLCityMast = _dropdownService.GetDropdownList(query);
+                return Json(DDLCityMast);
             }
-
         }
+
         public JsonResult DDLShipFrom()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -221,30 +236,35 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         public JsonResult GetDataByPartyCode(int PartyId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
+
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
-                string query = @"
-                        SELECT a.Code, a.NAME, a.ADD1, a.ADD2, a.ADD3, a.CITY_CODE, b.NAME AS CityName, 
-                        a.MOBILE, c.Name AS Country, a.Pincode, a.gstin AS GST
-                        FROM SUBGROUP_MAST a
-                        LEFT JOIN CITY_MAST b ON a.CITY_CODE = b.CODE
-                        LEFT JOIN COUNTRY_MAST c ON b.COUNTRY_CODE = c.CODE
-                        WHERE a.Active = 1 
-                        AND a.NATURE = 'Supplier' 
-                        AND a.comp_code = " + getdata.PubCompCode + @"
-                        AND a.CODE = " + PartyId + @"
-                        ORDER BY a.name asc;";
-                             
-                var dataList = new List<object>();
 
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                // -------------------- 1st QUERY (Supplier Master) --------------------
+                string query1 = @" SELECT TOP 1 a.Code, a.NAME, a.ADD1, a.ADD2, a.ADD3, a.CITY_CODE,
+                    b.NAME AS CityName, a.MOBILE,  c.Name AS Country, a.Pincode, a.gstin AS GST
+                    FROM SUBGROUP_MAST a
+                    LEFT JOIN CITY_MAST b ON a.CITY_CODE = b.CODE
+                    LEFT JOIN COUNTRY_MAST c ON b.COUNTRY_CODE = c.CODE
+                    WHERE a.Active = 1 
+                    AND a.NATURE = 'Supplier'
+                    AND a.comp_code = @CompCode
+                    AND a.CODE = @PartyId;
+                    ";
+
+                object supplier = null;
+
+                using (SqlCommand cmd = new SqlCommand(query1, con))
                 {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        if (reader.Read())
                         {
-                            var data = new
+                            supplier = new
                             {
                                 Code = reader["Code"].ToString(),
                                 Name = reader["NAME"].ToString(),
@@ -258,17 +278,131 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 Pincode = reader["Pincode"].ToString(),
                                 GST = reader["GST"].ToString()
                             };
-
-                            dataList.Add(data);
                         }
                     }
                 }
 
-            
-                return Json(dataList);
+                // -------------------- 2nd QUERY (SAUDA Latest) --------------------
+                string query2 = @" SELECT TOP 1 COALESCE(A.FRT_TERM, '') AS FRT_TERM, COALESCE(A.DEL_TERM, '') AS DEL_TERM,
+                    B.NAME AS ITEM_NAME,  A.ITEM_CODE, A.ITEM_TYPE FROM SAUDA A  LEFT JOIN ITEM_MAST B ON A.ITEM_CODE = B.CODE
+                    AND A.COMP_CODE = B.COMP_CODE
+                    WHERE A.PARTY_CODE = @PartyId ORDER BY A.V_DATE DESC; ";
+
+                object sauda = null;
+
+                using (SqlCommand cmd = new SqlCommand(query2, con))
+                {
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            sauda = new
+                            {
+                                FrtTerm = reader["FRT_TERM"].ToString(),
+                                DelTerm = reader["DEL_TERM"].ToString(),
+                                ItemName = reader["ITEM_NAME"].ToString(),
+                                ItemCode = reader["ITEM_CODE"].ToString(),
+                                ItemType = reader["ITEM_TYPE"].ToString()
+                            };
+                        }
+                    }
+                }
+
+                // -------------------- FINAL RESPONSE --------------------
+                return Json(new { Supplier = supplier, Sauda = sauda });
             }
         }
-          public IActionResult SaveDispatchDetails([FromBody] PurchaseSauda_model model)
+
+        public JsonResult GetDataByRefNo(int RefNo)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            object resultData = null;
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseSauda", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@V_NO", RefNo);
+                    cmd.Parameters.AddWithValue("@Action", "RefNoData");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            resultData = new
+                            {
+                                Disc = reader["DISC"],
+                                VType = reader["V_TYPE"],
+                                VNo = reader["V_no"],
+                                VDate = reader["V_date"],
+                                PartyCode = reader["P_code"],
+                                PartyName = reader["P_name"],
+                                Address1 = reader["Add1"],
+                                Address2 = reader["Add2"],
+                                Address3 = reader["Add3"],
+                                CityCode = reader["C_code"],
+                                CityName = reader["C_name"],
+                                Phone = reader["Phone"],
+                                DeliveryTo = reader["Delivery_to"],
+                                ItemCode = reader["I_code"],
+                                ItemName = reader["I_name"],
+                                Qty = reader["Qty"],
+                                Rate = reader["Rate"],
+                                TaxRate = reader["Tax_rate"],
+                                Truck = reader["Truck"],
+                                Type = reader["Type"],
+
+                                NetRate = reader["Net_rate"],
+                                Remark = reader["Remark"],
+                                DealThrough = reader["DealThrough"],
+                                DEAL_THROUGHCode = reader["DEAL_THROUGHCode"],
+                                COUNTRY_CODE = reader["COUNTRY_CODE"],
+                                F_rate = reader["F_rate"],
+                                F_term = reader["F_term"],
+                                T_term = reader["T_term"],
+                                PAYTERM_CODE = reader["PAYTERM_CODE"],
+                                d_term = reader["d_term"]
+                            };
+                        }
+                    }
+                }
+            }
+
+            return Json(new { Refnodata = resultData });
+        }
+
+
+
+
+
+
+
+
+        public JsonResult DDLRefREqNo()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select V_No as 'No' , V_No as 'Text' from SAUDA  Order by V_NO";
+
+                var ItemList = _dropdownService.GetDropdownList(query);
+
+                return Json(ItemList);
+            }
+        }
+
+        public IActionResult SaveDispatchDetails([FromBody] PurchaseSauda_model model)
         {
             if (model == null || model.DispatchDelivery == null || model.DispatchDelivery.Count == 0)
             {
@@ -307,14 +441,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using var conn = _dbConnection.GetErpConnection();
+
             conn.Open();
 
-            string deletePRequest2Sql = @"
-                    DELETE FROM ORDER_DELPLAN 
-                    WHERE COMP_CODE = @CompCode 
-                    AND V_NO = @VNo 
-                    AND BRANCH_CODE = @BranchCode 
-                    AND YEAR_CODE = @YearCode;";
+            string deletePRequest2Sql = @" DELETE FROM ORDER_DELPLAN  WHERE COMP_CODE = @CompCode 
+                    AND V_NO = @VNo  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YearCode;";
 
             using (var deletePRequest2Cmd = conn.CreateCommand())
             {
@@ -365,43 +496,41 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         {
             if (request?.Header == null)
             {
-                     return Json(new { success = false, message = "Input model is null" });
+             return Json(new { success = false, message = "Input model is null" });
             }
-
 
             var action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
             var result = SubmitRequest(request.Header, request.Document, action);
+            return result == "Success" ? Json(new { success = true }) : Json(new { success = false, message = result });
 
-            return result == "Success"
-                ? Json(new { success = true })
-                : Json(new { success = false, message = result });
         }
         private string SubmitRequest(PurchaseSauda_Header header,  List<DocumentAttachment> Attachments, string action)
         {
             try
             {
-                var g = _globalVariableService.GetGlobalVariables();
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
 
-                string deletePRequest2Sql = @"
-                    DELETE FROM IMG_TABLE 
-                    WHERE COMP_CODE = @CompCode 
-                    AND V_NO = @VNo 
-                    AND BRANCH_CODE = @BranchCode 
-                    AND YEAR_CODE = @YearCode;";
 
-                using (var deletePRequest2Cmd = conn.CreateCommand())
+                string sql = "Select isnull(SMS,'') from SUBGROUP_MAST Where " +
+                    "Comp_code= "+ globalVaraible.PubCompCode  +" and Code= " +  header.PARTY_CODE + " ";
+
+
+                string smsValue = "";
+
+                using var cmd1 = new SqlCommand(sql, conn);
+                cmd1.Parameters.AddWithValue("@CompCode", globalVaraible.PubCompCode);
+                cmd1.Parameters.AddWithValue("@Code", header.PARTY_CODE);
+
+                var result = cmd1.ExecuteScalar();
+                if (result == null)
                 {
-                    deletePRequest2Cmd.CommandText = deletePRequest2Sql;
-                    deletePRequest2Cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                    deletePRequest2Cmd.Parameters.AddWithValue("@VNo", header.V_NO);
-                    deletePRequest2Cmd.Parameters.AddWithValue("@BranchCode", 1);
-                    deletePRequest2Cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-
-                    deletePRequest2Cmd.ExecuteNonQuery();
+                   
+                    return "SMS Number is blank of => " + header.PartyName  + "";
                 }
 
+             
                 conn.Close();
 
         
@@ -409,74 +538,89 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                 using (var cmd = new SqlCommand("sp_PurchaseSauda", conn))
                 {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@Action", header.action);
-                            cmd.Parameters.AddWithValue("@SaveAction", "Header");
-                            cmd.Parameters.AddWithValue("@DOC_ID", ("PAUD") + header.V_NO);
-                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                            cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                            cmd.Parameters.AddWithValue("@V_TYPE", "PAUD");
-                            cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
-                            cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
-                            cmd.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
-                            cmd.Parameters.AddWithValue("@PARTY_TO", header.Delivery_From);
-                            cmd.Parameters.AddWithValue("@ADD1", header.ADD1);
-                            cmd.Parameters.AddWithValue("@ADD2", header.ADD2);
-                            cmd.Parameters.AddWithValue("@ADD3", header.ADD3);
-                            cmd.Parameters.AddWithValue("@CITY_CODE", header.CITY_CODE);
-                            cmd.Parameters.AddWithValue("@PHONE", header.PHONE);
-                            cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE);
-                            cmd.Parameters.AddWithValue("@ITEM_CODE", header.ITEM_CODE);
-                            cmd.Parameters.AddWithValue("@TRUCK_NO", header.TRUCK_NO);
-                            cmd.Parameters.AddWithValue("@Waste_Per", header.WASTE_PER);
-                            cmd.Parameters.AddWithValue("@QTY", header.QTY);
-                            cmd.Parameters.AddWithValue("@RATE", header.RATE);
-                            cmd.Parameters.AddWithValue("@EXRATE", header.EXRATE);
-                            cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);
-                            cmd.Parameters.AddWithValue("@SHIP_TYPE", header.SHIP_TYPE);
-                            cmd.Parameters.AddWithValue("@DISC_PER", header.DISC_PER);
-                            cmd.Parameters.AddWithValue("@FRT_TERM", header.FRT_TERM);
-                            cmd.Parameters.AddWithValue("@TAX_TERM", header.TAX_TERM);
-                            cmd.Parameters.AddWithValue("@FRT_RATE", header.FRT_RATE);
-                            cmd.Parameters.AddWithValue("@TAX_CODE", header.TAX_CODE);
-                            cmd.Parameters.AddWithValue("@TAX_RATE", header.TAX_RATE);
-                            cmd.Parameters.AddWithValue("@NET_RATE", header.NET_RATE);
-                            cmd.Parameters.AddWithValue("@ONLY_NATURAL", header.ONLY_NATURAL);
-                            cmd.Parameters.AddWithValue("@PAYTERM_CODE", header.PAYTERM_CODE);
-                            cmd.Parameters.AddWithValue("@DEL_TERM", header.DEL_TERM);
-                            cmd.Parameters.AddWithValue("@REMARK", header.REMARK);
-                            cmd.Parameters.AddWithValue("@FAPROV_STATUS", "");
-                            cmd.Parameters.AddWithValue("@FAPROV_REMARKS", "");
-                            cmd.Parameters.AddWithValue("@STATUS", header.STATUS);
-                            cmd.Parameters.AddWithValue("@HOLD_PAY", header.HOLD_PAY);
-                            cmd.Parameters.AddWithValue("@PINO", header.PINO);
-                            cmd.Parameters.AddWithValue("@PIDATE", header.PIDATE);
-                            cmd.Parameters.AddWithValue("@OFFERNO", header.OFFERNO);
-                            cmd.Parameters.AddWithValue("@GRADE", header.GRADE);
-                            cmd.Parameters.AddWithValue("@BROKER", header.BROKER);
-                            cmd.Parameters.AddWithValue("@BROKER_RATE", header.BROKER_RATE);
-                            cmd.Parameters.AddWithValue("@DELIVERY_TERMIMP", "");
-                            cmd.Parameters.AddWithValue("@DISPATCH_FROM", header.DISPATCH_FROM);
-                            cmd.Parameters.AddWithValue("@SHIP_CODE", header.SHIP_CODE);
-                            cmd.Parameters.AddWithValue("@SHIP_FROM", header.SHIP_FROM);
-                            cmd.Parameters.AddWithValue("@PACK_TYPE", header.PACK_TYPE);
-                            cmd.Parameters.AddWithValue("@PAYMENT_STATUS", header.PAYMENT_STATUS);
-                            cmd.Parameters.AddWithValue("@SBLC_DUEDATE", header.SBLC_DUEDATE);
-                            cmd.Parameters.AddWithValue("@LC_DUEDATE", header.LC_DUEDATE);
-                            cmd.Parameters.AddWithValue("@ITEM_REMARKS", header.ITEM_REMARKS);
-                            cmd.Parameters.AddWithValue("@DEAL_THROUGH", header.DEAL_THROUGH);
-                            cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                            cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                            cmd.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                            cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
-                            cmd.Parameters.AddWithValue("@AED", "A");
-                            cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                            cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
-                            cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-                            cmd.ExecuteNonQuery();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", header.action);
+                    cmd.Parameters.AddWithValue("@SaveAction", "Header");
+                    cmd.Parameters.AddWithValue("@DOC_ID", ("PAUD") + header.V_NO);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@V_TYPE", "PAUD");
+                    cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
+                    cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
+                    cmd.Parameters.AddWithValue("@PARTY_CODE", header.PARTY_CODE);
+                    cmd.Parameters.AddWithValue("@PARTY_TO", header.Delivery_From);
+                    cmd.Parameters.AddWithValue("@ADD1", header.ADD1);
+                    cmd.Parameters.AddWithValue("@ADD2", header.ADD2);
+                    cmd.Parameters.AddWithValue("@ADD3", header.ADD3);
+                    cmd.Parameters.AddWithValue("@REF_NO", header.REF_NO);
+                    cmd.Parameters.AddWithValue("@CITY_CODE", header.CITY_CODE);
+                    cmd.Parameters.AddWithValue("@PHONE", header.PHONE);
+                    cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE);
+                    cmd.Parameters.AddWithValue("@ITEM_CODE", header.ITEM_CODE);
+                    cmd.Parameters.AddWithValue("@TRUCK_NO", header.TRUCK_NO);
+                    cmd.Parameters.AddWithValue("@Waste_Per", header.WASTE_PER);
+                    cmd.Parameters.AddWithValue("@QTY", header.QTY);
+                    cmd.Parameters.AddWithValue("@RATE", header.RATE);
+                    cmd.Parameters.AddWithValue("@EXRATE", header.EXRATE);
+                    cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);
+                    cmd.Parameters.AddWithValue("@SHIP_TYPE", header.SHIP_TYPE);
+                    cmd.Parameters.AddWithValue("@DISC_PER", header.DISC_PER);
+                    cmd.Parameters.AddWithValue("@FRT_TERM", header.FRT_TERM);
+                    cmd.Parameters.AddWithValue("@TAX_TERM", header.TAX_TERM);
+                    cmd.Parameters.AddWithValue("@FRT_RATE", header.FRT_RATE);
+                    cmd.Parameters.AddWithValue("@TAX_CODE", header.TAX_CODE);
+                    cmd.Parameters.AddWithValue("@TAX_RATE", header.TAX_RATE);
+                    cmd.Parameters.AddWithValue("@NET_RATE", header.NET_RATE);
+                    cmd.Parameters.AddWithValue("@ONLY_NATURAL", header.ONLY_NATURAL);
+                    cmd.Parameters.AddWithValue("@PAYTERM_CODE", header.PAYTERM_CODE);
+                    cmd.Parameters.AddWithValue("@DEL_TERM", header.DEL_TERM);
+                    cmd.Parameters.AddWithValue("@REMARK", header.REMARK);
+                    cmd.Parameters.AddWithValue("@FAPROV_STATUS", "");
+                    cmd.Parameters.AddWithValue("@FAPROV_REMARKS", "");
+                    cmd.Parameters.AddWithValue("@STATUS", header.STATUS);
+                    cmd.Parameters.AddWithValue("@HOLD_PAY", header.HOLD_PAY);
+                    cmd.Parameters.AddWithValue("@PINO", header.PINO);
+                    cmd.Parameters.AddWithValue("@PIDATE", header.PIDATE);
+                    cmd.Parameters.AddWithValue("@OFFERNO", header.OFFERNO);
+                    cmd.Parameters.AddWithValue("@GRADE", header.GRADE);
+                    cmd.Parameters.AddWithValue("@BROKER", header.BROKER);
+                    cmd.Parameters.AddWithValue("@BROKER_RATE", header.BROKER_RATE);
+               
+                    cmd.Parameters.AddWithValue("@DELIVERY_TERMIMP", "");
+                    cmd.Parameters.AddWithValue("@DISPATCH_FROM", header.DISPATCH_FROM);
+                    cmd.Parameters.AddWithValue("@SHIP_CODE", header.SHIP_CODE);
+                    cmd.Parameters.AddWithValue("@SHIP_FROM", header.SHIP_FROM);
+                    cmd.Parameters.AddWithValue("@PACK_TYPE", header.PACK_TYPE);
+                    cmd.Parameters.AddWithValue("@PAYMENT_STATUS", header.PAYMENT_STATUS);
+                    cmd.Parameters.AddWithValue("@SBLC_DUEDATE", header.SBLC_DUEDATE);
+                    cmd.Parameters.AddWithValue("@LC_DUEDATE", header.LC_DUEDATE);
+                    cmd.Parameters.AddWithValue("@ITEM_REMARKS", header.ITEM_REMARKS);
+                    cmd.Parameters.AddWithValue("@DEAL_THROUGH", header.DEAL_THROUGH);
+                    cmd.Parameters.AddWithValue("@UUSER", globalVaraible.PubUserId);
+                    cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+                    cmd.Parameters.AddWithValue("@EUSER", globalVaraible.PubUserId);
+                    cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
+                    cmd.Parameters.AddWithValue("@AED", "A");
+                    cmd.Parameters.AddWithValue("@WSID", globalVaraible.PubWorkStationID);
+                    cmd.Parameters.AddWithValue("@LIP", globalVaraible.PubLocalId);
+                    cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
+                    cmd.ExecuteNonQuery();
                 }
 
+
+                string deletePRequest2Sql = @"  DELETE FROM IMG_TABLE   WHERE COMP_CODE = @CompCode 
+                    AND V_NO = @VNo  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YearCode;";
+
+                using (var deletePRequest2Cmd = conn.CreateCommand())
+                {
+                    deletePRequest2Cmd.CommandText = deletePRequest2Sql;
+                    deletePRequest2Cmd.Parameters.AddWithValue("@CompCode", globalVaraible.PubCompCode);
+                    deletePRequest2Cmd.Parameters.AddWithValue("@VNo", header.V_NO);
+                    deletePRequest2Cmd.Parameters.AddWithValue("@BranchCode", globalVaraible.PubBranchCode);
+                    deletePRequest2Cmd.Parameters.AddWithValue("@YearCode", globalVaraible.PubFYearCode);
+                    deletePRequest2Cmd.ExecuteNonQuery();
+                }
 
 
                 foreach (var Attachment in Attachments)
@@ -484,25 +628,26 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     if (string.IsNullOrWhiteSpace(Attachment.FileName))
                         continue;
 
-                    using var cmd3 = new SqlCommand("sp_PurchaseSauda", conn) { CommandType = CommandType.StoredProcedure };
-                    cmd3.Parameters.AddWithValue("@Action", "INSERT");
+                    using var cmd3 = new SqlCommand("sp_PurchaseSauda", conn)
+                    { CommandType = CommandType.StoredProcedure };
+                    cmd3.Parameters.AddWithValue("@Action", header.action);
                     cmd3.Parameters.AddWithValue("@SaveAction", "Documnets");
-                    cmd3.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                    cmd3.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                    cmd3.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd3.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
+                    cmd3.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
+                    cmd3.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
                     cmd3.Parameters.AddWithValue("@DOC_ID", (header.V_TYPE ?? "PAUD") + header.V_NO);
                     cmd3.Parameters.AddWithValue("@V_NO", header.V_NO);
                     cmd3.Parameters.AddWithValue("@V_DATE", header.V_DATE);
                     cmd3.Parameters.AddWithValue("@V_TYPE", "PAUD");
                     cmd3.Parameters.AddWithValue("@FILE_NAME", Attachment.FileName);
                     cmd3.Parameters.AddWithValue("@FILE_Path", "/attachments/pan/" + (Attachment.FileName ?? ""));
-                    cmd3.Parameters.AddWithValue("@UUSER", g.PubUserId);
+                    cmd3.Parameters.AddWithValue("@UUSER", globalVaraible.PubUserId);
                     cmd3.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                    cmd3.Parameters.AddWithValue("@EUSER", g.PubUserId);
+                    cmd3.Parameters.AddWithValue("@EUSER", globalVaraible.PubUserId);
                     cmd3.Parameters.AddWithValue("@EDATE", DBNull.Value);
                     cmd3.Parameters.AddWithValue("@AED", "A");
-                    cmd3.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                    cmd3.Parameters.AddWithValue("@LIP", g.PubLocalId);
+                    cmd3.Parameters.AddWithValue("@WSID", globalVaraible.PubWorkStationID);
+                    cmd3.Parameters.AddWithValue("@LIP", globalVaraible.PubLocalId);
                     cmd3.Parameters.AddWithValue("@LID", Environment.MachineName);
                     cmd3.ExecuteNonQuery();
                 }
@@ -516,7 +661,15 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("SAUDA", vdate, vtype, vno);
+            return Ok(result);
+        }
 
     }
 }

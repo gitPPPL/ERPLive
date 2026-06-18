@@ -262,7 +262,7 @@ body {
         color: #1c5e31;
     }
 
-/* ACTIVE */
+/* ACTIVE */ 
 
 .ERPPageLayout-menu li.active > .ERPPageLayout-menu-link {
     background: linear-gradient(135deg,#1C5E31,#2d7b46);
