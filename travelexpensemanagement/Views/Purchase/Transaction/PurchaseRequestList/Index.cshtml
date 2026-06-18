@@ -2,80 +2,137 @@
 	ViewBag.Title = "Purchase Request List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
+	var currentMenu = ViewBag.CurrentMenu as string;
+	bool canAdd = false;
+	bool canEdit = false;
+	bool canDelete = false;
+	bool canPrint = false;
+	bool canExport = false;
+	bool canMail = false;
+	bool canApproval = false;
+	bool canDocDetail = false;
+
+	foreach (var permission in Model.UserMenuPermissions)
+	{
+		if (permission.MENU_NAME == ViewBag.CurrentMenu)
+		{
+			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+			break;
+		}
+	}
+
 }
+<div id="erp-center-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Request List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "PurchaseRequest")'">
+				<i class="fa fa-plus"></i>Add New
+			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+				<i class="fa fa-print"></i>Print
+			</button>
+		}
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+				<i class="fa fa-file-excel"></i>Export
+			</button>
+		}
+		@if (canMail)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+				<i class="fa fa-envelope"></i>Mail
+			</button>
+		}
+		@if (canApproval)
+		{
 
-
-<fieldset>
-	<legend class="legend-field">Purchase Request List</legend>
-
-	<div class="row">
-		<div class="col-lg-3">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i>Approved
+			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseRequestList" class="excel-table fixed-grid-table resizable-table">
+			<colgroup>
+				<col style="display:none;" />      
+				<col style="width:120px;" />       
+				<col style="width:120px;" />       
+				<col style="width:120px;" />       
+				<col style="width:150px;" />       
+				<col style="width:180px;" />       
+				<col style="width:180px;" />       
+				<col style="width:130px;" />       
+				<col style="width:250px;" />       
+				<col style="width:120px;" />       
+				<col style="width:140px;" />       
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Doc No</th>
+					<th>Doc Type</th>
+					<th>Doc Date</th>
+					<th>Department</th>
+					<th>Owner Name</th>
+					<th>Place</th>
+					<th>Required Date</th>
+					<th>Remarks</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		 
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
 
-		<div class="col-lg-9 btn-rightalign">
-			<button onclick="window.location.href='@Url.Action("Index", "PurchaseRequest")'" type="button" class="btn btn-add">
-				<i class="fa fa-plus"></i>Add 
-			</button>
-			<button class="btn btn-print" onclick="printCityMasterReport()">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export">
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send">
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
+</div>
 
 
-
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseRequestList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
-						<th>Department</th>
-						<th>Owner Name</th>
-						<th>Place</th>
-
-						<th>Required Date</th>
-						<th>Remarks</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-
-</fieldset>
 
 
 

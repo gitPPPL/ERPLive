@@ -20,6 +20,7 @@
         public string? REF_DOCID { get; set; }
         public decimal? QTY { get; set; }
         public decimal? RATE { get; set; }
+        public decimal? IMPORT_RATE { get; set; }
         public decimal? AMOUNT { get; set; }
         public decimal? PACK_PER { get; set; }
         public decimal? PACK_AMT { get; set; }
@@ -82,4 +83,3 @@
         public string HIDDEN { get; set; }
     }
 }
-    
