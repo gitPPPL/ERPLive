@@ -36,8 +36,19 @@ $(document).ready(async function () {
 
     if (!rowId) {
         await GetVNo();
-/*        document.getElementById('dtDocDate').valueAsDate = new Date();*/
+
         document.getElementById('DispatchDocDate').valueAsDate = new Date();
+    }
+    else {
+        document.getElementById("ddlPartyName").disabled = true;
+
+        if (mode === "view") {
+            setFormReadOnly();
+            $('#PurchaseRequestForm').after(
+                '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
+            );
+        }
+
     }
 
     LoadDropDown() .then(() => {
@@ -71,25 +82,13 @@ $(document).ready(async function () {
         });
 
 
-    if (mode === "view") {
-        setFormReadOnly();
-        $('#PurchaseRequestForm').after(
-            '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
-        );
-    }
-
     $('#ddlPartyName').on('change', function () {
         const selectedValue = this.value;
-        if (selectedValue) {
             fetchDDlParty(selectedValue);
-
             var CountryName = $('#txtCountry').val();
-
             if (CountryName != 'INDIA') {
                 $('#ddlSupplyFrom').val('LOCAL');
             }
-
-        }
     });
 
     $('#ddlSupplyFrom').on('change', function () {
@@ -182,11 +181,9 @@ $(document).ready(async function () {
 
         if (CITY_CODE) {
              CityName = $.trim($('#txtStation option:selected').text()) || "";
+        }    
 
-        }      
-
-
-        const PHONE = $.trim($('#NumContactNo').val()) || "";
+        const PHONE = $.trim($('#txtContactNo').val()) || "";
         const ITEM_CODE = parseInt($('#ddlItemName').val()) || 0;
         const TRUCK_NO = parseInt($('#numTrucks').val()) || 0;
         const EXRATE = parseFloat($('#txtExRate').val()) || 0;
@@ -241,7 +238,6 @@ $(document).ready(async function () {
 
 
         if ($("#chkSBLCDue").is(":checked")) {
-
             if (!validateRequiredField('#DtSBLCDue', 'Please Select SBLC Due Date')) return;
         }
 
@@ -250,7 +246,6 @@ $(document).ready(async function () {
         }
 
         const checkdate = await checkValidDate();
-
         if (!checkdate) {
             return;
         }
@@ -320,11 +315,6 @@ $(document).ready(async function () {
                 return;
             }
         }
-
-
-        console.log('Header', Header);
-
-
 
         const payload = {
             Header: Header,
@@ -447,12 +437,8 @@ $(document).ready(async function () {
         $row.find('.icode').val(selectedCode);
     });
 
-
     $('#btn_CreatePurchaseOrder').on('click', function () {  
-
         var partycode = $('#ddlPartyName').val();
-
-
         CheckOutherrised(partycode);
     });
 

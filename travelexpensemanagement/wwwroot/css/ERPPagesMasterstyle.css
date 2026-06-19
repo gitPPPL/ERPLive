@@ -30,7 +30,7 @@
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 10px; /* space between buttons and span */
+    gap: 10px; 
 }
 .btn-add-row-last {
     display: flex;
@@ -38,7 +38,7 @@
 }
 /* ===== ADD BUTTON (GREEN / SUCCESS STYLE) ===== */
 .erppage-btn-add {
-    background: linear-gradient(135deg, #4c6ef5, #364fc7); /* accessible blue */
+    background: linear-gradient(135deg, #4c6ef5, #364fc7);
     color: #ffffff;
     border: 1px solid #2b3a99;
 }
@@ -81,7 +81,6 @@
         font-size: 12px;
     }
 /*Search Dropdown data datalist Css Start */
-/* Main Dropdown Container */
 .search_dropdown {
     position: relative;
     width: 100%;
@@ -155,7 +154,6 @@
         border-radius: 10px;
     }
 /*Search Dropdown data datalist Css End */
-/* Container */
 .erppagedropdown .dropdown-menu {
     left: 0 !important;
     right: auto !important;
@@ -169,7 +167,6 @@
 }
 
 .erppagedropdown-btn {
-    display: flex;
     align-items: center;
     gap: 8px;
     background: #0d6efd;
@@ -177,7 +174,7 @@
     border: none;
     padding: 4px 12px;
     /* padding: 10px 16px; */
-    height: 28px;
+    height: 26px;
     border-radius: 8px 0 0 8px;
     font-size: 12px;
     font-weight: 500;
@@ -191,8 +188,8 @@
     }
 
 .erppagedropdown-toggle {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     background: #0d6efd;
     color: #fff;
     border: none;
@@ -249,7 +246,6 @@
 /*Upload divide section Attachment css*/
 .erppageattachmentsection {
     width: 100%;
-  
     background: #f5f6fa;
     box-sizing: border-box;
 }
@@ -270,17 +266,18 @@
     background: #fff;
     border-radius: 12px;
     border: 1px solid #d5d7ff;
-    padding: 20px;
+    padding: 14px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+    margin-top: 8px;
 }
 
 .erppageattachmentsectiontitle {
     text-align: center;
     color: #6c73a8;
     margin: 0;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 /*.erppageattachmentsectionsubtitle {
@@ -292,7 +289,7 @@
 .erppageattachmentsectiondropzone {
     border: 2px dashed #c8cbff;
     border-radius: 12px;
-    min-height: 200px;
+    min-height: 130px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -302,7 +299,7 @@
 }
 
 .erppageattachmentsectioncloud {
-    font-size: 50px;
+    font-size: 25px;
     color: #d6d9ff;
 }
 
@@ -312,16 +309,17 @@
 }
 
 .erppageattachmentsectionor {
-    margin: 8px 0;
+    margin: 2px 0;
     color: #b0b5d5;
+    font-size: 11px;
 }
 
 .erppageattachmentsectionbrowsebtn {
     background: #6574ff;
     color: #fff;
     border: none;
-    border-radius: 8px;
-    padding: 8px 12px;
+    border-radius: 4px;
+    padding: 4px 8px;
     cursor: pointer;
     font-weight: 600;
 }
@@ -338,7 +336,7 @@
 }
 
 .erppageattachmentsectionfilelist {
-    max-height: 194px;
+    max-height: 120px;
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -568,10 +566,10 @@
     border: 1px solid #a2bee7;
     border-left: 3px solid #2952cc;
     border-radius: 8px;
-    padding: 15px;
+    padding: 6px;
     background: #fafcff;
     box-sizing: border-box;
-    margin-top:12px;
+    margin-top: 10px;
 }
 
 .erppagefieldset-legend {
@@ -1030,37 +1028,41 @@
 .erppage-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    column-gap: 35px;
-    row-gap: 18px;
-    padding: 6px;
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: start;
 }
 .erppage-grid1 {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    column-gap: 35px;
-    row-gap: 18px;
-    padding: 6px;
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: start;
 }
 .erppage-grid2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    column-gap: 8px;
-    row-gap: 14px;
-    padding: 6px;
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: start;
 }
 .erppage-grid3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    column-gap: 35px;
-    row-gap: 18px;
-    padding: 6px;
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: start;
 }
 .erppage-grid4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    column-gap: 10px;
-    row-gap: 18px;
-    padding: 6px;
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
     align-items: start;
 }
 .erppage-btn-group-right {
@@ -1250,7 +1252,7 @@
     align-items: center;
     gap: 6px;
 }
-
+    
 .erppage-label {
     width: 80px;
     flex-shrink: 0;
@@ -1276,9 +1278,9 @@
 }
 /* ===== Selected Box ===== */
 .select2-container--default .select2-selection--single {
-    height: 28px !important;
-    min-height: 28px !important;
-    max-height: 28px !important;
+    height: 24px !important;
+    /*min-height: 28px !important;
+    max-height: 28px !important;*/
     overflow: hidden;
     border: 1px solid #ced4da;
     border-radius: 6px;
@@ -1293,23 +1295,30 @@
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        line-height: 20px !important;
-        color: #121212 !important;
-        padding: 4px 8px;
-        padding-right:0px;
+        line-height: 14px !important;
+        color: #1e1e1e !important;
+        padding: 5px 0px 5px 4px !important;
         word-wrap: break-word;
+        font-size: 12px;
     }
-
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        
+        margin-left: -2px !important;
+        margin-top: -4px !important;
+       
+    }
 /* ===== Arrow ===== */
 .select2-container--default .select2-selection__arrow {
     height: 100%;
     right: 8px;
 }
-
-/* ===== Focus Effect ===== */
-.select2-container--default.select2-container--focus .select2-selection--single {
-    box-shadow: 0 0 0 1px rgb(47 125 50 / 95%);
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    height: 24px !important;
 }
+/* ===== Focus Effect ===== */
+/*.select2-container--default.select2-container--focus .select2-selection--single {
+    box-shadow: 0 0 0 1px rgb(47 125 50 / 95%);
+}*/
 
 /* ===== Dropdown Panel ===== */
 .select2-dropdown {
@@ -1400,7 +1409,7 @@
 /* ===== LABEL ===== */
 .erppage-label {
     font-size: 12px;
-    color: #1a1a1a;
+    color: #2c2c2c;
     display: inline-block;
     margin: 0;
     font-weight: 600;
@@ -1473,8 +1482,8 @@ select.erppage-input {
 }
 
 .erppage-checkbox-input {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     accent-color: #2f7d32; /* ERP Green Theme */
     cursor: pointer;
     margin: 0;
@@ -1483,7 +1492,7 @@ select.erppage-input {
 
 .erppage-checkbox-label {
     margin: 0;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: #1f2937;
     cursor: pointer;
@@ -1820,12 +1829,12 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
-.erppage-split {
+/*.erppage-split {
     display: grid;
     grid-template-columns: 1fr 1fr; 
     gap: 15px;
     align-items: start;
-}
+}*/
 /* ===== INPUT + BUTTON GROUP ===== */
 .erppage-inputgroup {
     display: flex;
@@ -1875,11 +1884,20 @@ input[type="number"] {
 
     .erppage-btn-common:hover {
         background: linear-gradient(135deg, #1e40af, #1e3a8a);
-        transform: translateY(-1px);
+        
     }
 
-    .erppage-btn-common:active {
-        transform: scale(0.97);
+    
+.erppage-btn-common-disabled {
+    color: #2359da !important;
+    font-weight: 600;
+    border: 2px solid #2359da !important;
+}
+
+        /* Prevent hover effect on disabled */
+    .erppage-btn-common-disabled:hover {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: #fff !important;
     }
 
 
@@ -2124,11 +2142,11 @@ input[type="number"] {
         column-gap: 25px;
     }
     .erppage-grid3 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         column-gap: 25px;
     }
     .erppage-grid2 {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         column-gap: 25px;
     }
     .erppage-grid4 {

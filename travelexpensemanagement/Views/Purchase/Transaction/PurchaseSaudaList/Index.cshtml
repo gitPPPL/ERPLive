@@ -92,7 +92,7 @@
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
 
-        <table id="tblPurchaseSaudaList" class="excel-table fixed-grid-table resizable-table">
+        <table id="tblPurchaseSaudaList" class="excel-table fixed-grid-table width-table resizable-table">
             <colgroup>
                 <col style="width: 71px;">
                 <col style="width: 82px;">
@@ -374,7 +374,7 @@
         return d.toISOString().split('T')[0];
     }
 
-   function showDocumentPopup(docCode) {
+    function showDocumentPopup(docCode) {
     
         $.ajax({
             url: '/PurchaseSaudaList/DocDetailsCode',

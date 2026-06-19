@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 //Global Sorting of Table columns
 const sortDirections = {};
+
 document.addEventListener("click", function (e) {
 
     const th = e.target.closest("th");
@@ -159,3 +160,174 @@ function sortTable(table, columnIndex, header) {
 document.querySelectorAll(".sortable-table").forEach((table, index) => {
     table.dataset.sortId = index;
 });
+
+const fileInput = document.getElementById('fileInput');
+const browseBtn = document.getElementById('browseBtn');
+const dropZone = document.getElementById('dropZone');
+const fileList = document.getElementById('fileList');
+
+//browseBtn.addEventListener('click', () => {
+//    fileInput.click();
+//});
+
+
+// Browse button
+if (browseBtn && fileInput) {
+    browseBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+}
+
+// File input change
+if (fileInput && fileList) {
+    fileInput.addEventListener('change', function () {
+        renderFiles(this.files, fileList);
+    });
+}
+
+// Drag over
+if (dropZone) {
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+}
+
+// Drop
+if (dropZone && fileList) {
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        renderFiles(e.dataTransfer.files, fileList);
+    });
+}
+
+//fileInput.addEventListener('change', function () {
+//    renderFiles(this.files);
+//});
+
+//dropZone.addEventListener('dragover', e => {
+//    e.preventDefault();
+//});
+
+//dropZone.addEventListener('drop', e => {
+//    e.preventDefault();
+//    renderFiles(e.dataTransfer.files);
+//});
+
+function renderFiles(files) {
+
+    Array.from(files).forEach(file => {
+
+        const fileItem = document.createElement('div');
+        fileItem.className =
+            'erppageattachmentsectionfileitem';
+
+        fileItem.innerHTML = `
+                <div class="erppageattachmentsectionicon ${getFileColorClass(file.name)}">
+                    ${getFileType(file.name)}
+                </div>
+
+                <div class="erppageattachmentsectioncontent">
+
+                    <div class="erppageattachmentsectionfilename">
+                        ${file.name}
+                    </div>
+
+                    <div class="erppageattachmentsectionprogress">
+                        <div class="erppageattachmentsectionprogressbar"></div>
+                    </div>
+
+                </div>
+
+                <div class="erppageattachmentsectionactions">
+
+                    <button class="erppageattachmentsectionview">
+                        View
+                    </button>
+
+                    <button class="erppageattachmentsectiondelete">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+
+        fileList.appendChild(fileItem);
+
+        const progressBar =
+            fileItem.querySelector(
+                '.erppageattachmentsectionprogressbar'
+            );
+
+        let progress = 0;
+
+        const interval = setInterval(() => {
+
+            progress += 5;
+
+            progressBar.style.width =
+                progress + '%';
+
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+
+        }, 100);
+
+        fileItem
+            .querySelector(
+                '.erppageattachmentsectiondelete'
+            )
+            .addEventListener('click', () => {
+                fileItem.remove();
+            });
+
+    });
+}
+
+function getFileType(fileName) {
+    return fileName.split('.').pop().toUpperCase();
+}
+
+function getFileColorClass(fileName) {
+
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    switch (ext) {
+
+        case 'pdf':
+            return 'erppageattachmentsectionpdf';
+
+        case 'png':
+        case 'jpg':
+        case 'jpeg':
+        case 'gif':
+        case 'svg':
+        case 'webp':
+            return 'erppageattachmentsectionimage';
+
+        case 'doc':
+        case 'docx':
+            return 'erppageattachmentsectionword';
+
+        case 'xls':
+        case 'xlsx':
+        case 'csv':
+            return 'erppageattachmentsectionexcel';
+
+        case 'ppt':
+        case 'pptx':
+            return 'erppageattachmentsectionppt';
+
+        case 'txt':
+            return 'erppageattachmentsectiontxt';
+
+        case 'zip':
+        case 'rar':
+        case '7z':
+            return 'erppageattachmentsectionzip';
+
+        default:
+            return 'erppageattachmentsectiondefault';
+    }
+}
+

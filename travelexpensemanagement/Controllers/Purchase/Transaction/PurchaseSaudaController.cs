@@ -419,9 +419,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         }
 
-
-
-
         private string SubmitRequest(PurchaseSauda_Header header,  List<DocumentAttachment> Attachments, string action)
         {
             try
@@ -565,6 +562,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.Parameters.AddWithValue("@GRADE", header.GRADE);
                     cmd.Parameters.AddWithValue("@BROKER", header.BROKER);
                     cmd.Parameters.AddWithValue("@BROKER_RATE", header.BROKER_RATE);
+                    cmd.Parameters.AddWithValue("@Offer_Rate", header.OfferRate);
                
                     cmd.Parameters.AddWithValue("@DELIVERY_TERMIMP", "");
                     cmd.Parameters.AddWithValue("@DISPATCH_FROM", header.DISPATCH_FROM);
@@ -617,7 +615,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.Parameters.AddWithValue("@V_DATE", header.V_DATE);
                     cmd3.Parameters.AddWithValue("@V_TYPE", "PAUD");
                     cmd3.Parameters.AddWithValue("@FILE_NAME", Attachment.FileName);
-                    cmd3.Parameters.AddWithValue("@FILE_Path", "/attachments/pan/" + (Attachment.FileName ?? ""));
+                    cmd3.Parameters.AddWithValue("@FILE_Path", "/attachments/Purchase/" + (Attachment.FileName ?? ""));
                     cmd3.Parameters.AddWithValue("@UUSER", globalVaraible.PubUserId);
                     cmd3.Parameters.AddWithValue("@UDATE", DateTime.Now);
                     cmd3.Parameters.AddWithValue("@EUSER", globalVaraible.PubUserId);
@@ -731,13 +729,164 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
 
-
-
-
-
-
             return new JsonResult(new { success = true });
         }
+
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePurchaseOrder([FromBody] PurchaseOrderDto model)
+        {
+            try
+            {
+
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+
+                using var con = _dbConnection.GetErpConnection();        
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseSauda", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // ---------------- COMMON ----------------
+                        cmd.Parameters.AddWithValue("@Action", "CreatePurcOrder");
+
+                        cmd.Parameters.AddWithValue("@COMP_CODE", model.CompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", model.BranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", model.YearCode);
+                        cmd.Parameters.AddWithValue("@V_TYPE", model.VType ?? "RORD");
+                        cmd.Parameters.AddWithValue("@V_NO", model.VNo);
+                        cmd.Parameters.AddWithValue("@DOC_ID", model.DocId);
+                        cmd.Parameters.AddWithValue("@V_DATE", DateTime.Now);
+                        // ---------------- HEADER ----------------
+                        cmd.Parameters.AddWithValue("@PARTY_CODE", model.PartyCode);
+                        cmd.Parameters.AddWithValue("@BILL_ADD1", model.BillAdd1 ?? "");
+                        cmd.Parameters.AddWithValue("@BILL_ADD2", model.BillAdd2 ?? "");
+                        cmd.Parameters.AddWithValue("@BILL_ADD3", model.BillAdd3 ?? "");
+                        cmd.Parameters.AddWithValue("@BILL_CITY", model.BillCity);
+                        cmd.Parameters.AddWithValue("@BILL_PINCODE", model.BillPincode ?? "");
+                        cmd.Parameters.AddWithValue("@BILL_GST", model.BillGst ?? "");
+                        cmd.Parameters.AddWithValue("@SHIP_FROM", model.ShipFrom);
+                        cmd.Parameters.AddWithValue("@SHIP_ADD1", model.ShipAdd1 ?? "");
+                        cmd.Parameters.AddWithValue("@SHIP_ADD2", model.ShipAdd2 ?? "");
+                        cmd.Parameters.AddWithValue("@SHIP_ADD3", model.ShipAdd3 ?? "");
+                        cmd.Parameters.AddWithValue("@SHIP_CITY", model.ShipCity);
+                        cmd.Parameters.AddWithValue("@SHIP_PINCODE", model.ShipPincode ?? "");
+                        cmd.Parameters.AddWithValue("@SHIP_GST", model.ShipGst ?? "");
+                        cmd.Parameters.AddWithValue("@SAUDA_TYPE", "PAUD");
+                        cmd.Parameters.AddWithValue("@SAUDA_NO", model.SaudaNo);
+                        cmd.Parameters.AddWithValue("@PLACE_CODE", model.PlaceCode);
+                        cmd.Parameters.AddWithValue("@PRICE_TYPE", model.PriceType ?? "");
+                        cmd.Parameters.AddWithValue("@IMPORT_CURRENCY", model.Currency ?? "");
+
+                        // ---------------- QUANTITY / AMOUNT ----------------
+                        cmd.Parameters.AddWithValue("@NOS", model.Nos);
+                        cmd.Parameters.AddWithValue("@QTY", model.Qty);
+                        cmd.Parameters.AddWithValue("@AMOUNT", model.Amount);
+                        cmd.Parameters.AddWithValue("@PACK_AMT", model.PackAmt);
+                        cmd.Parameters.AddWithValue("@DISC_AMT", model.DiscAmt);
+                        cmd.Parameters.AddWithValue("@CGST_AMT", model.CgstAmt);
+                        cmd.Parameters.AddWithValue("@SGST_AMT", model.SgstAmt);
+                        cmd.Parameters.AddWithValue("@IGST_AMT", model.IgstAmt);
+                        cmd.Parameters.AddWithValue("@TCS_PER", model.TcsPer);
+                        cmd.Parameters.AddWithValue("@TCS_AMT", model.TcsAmt);
+                        cmd.Parameters.AddWithValue("@OTH_AMT", model.OtherAmt);
+                        cmd.Parameters.AddWithValue("@NET_AMT", model.NetAmt);
+                        cmd.Parameters.AddWithValue("@DELIVERY_TERM", model.DeliveryTerm ?? "");
+                        cmd.Parameters.AddWithValue("@PARTY_REF", model.PartyRef ?? "");
+                        cmd.Parameters.AddWithValue("@FAPROV_STATUS", "Approved");
+                        cmd.Parameters.AddWithValue("@FAPROV_REMARKS", "Auto Generated PO");
+                        cmd.Parameters.AddWithValue("@PAYTERM_CODE", model.PayTermCode);
+                        cmd.Parameters.AddWithValue("@REMARKS", model.Remarks ?? "");
+                        cmd.Parameters.AddWithValue("@CDISC_AMT", model.CDiscAmt);
+                        cmd.Parameters.AddWithValue("@AUTOGEN_PO", 1);
+                        cmd.Parameters.AddWithValue("@STATUS", 1);
+                        // ---------------- AUDIT ----------------
+                        cmd.Parameters.AddWithValue("@UUSER", globalVaraible.PubUserId);
+                        cmd.Parameters.AddWithValue("@WSID", globalVaraible.PubWorkStationID ?? "");
+                        cmd.Parameters.AddWithValue("@LIP", globalVaraible.PubLocalId ?? "");
+                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName ?? "");
+
+                        await con.OpenAsync();
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return Json(new { status = true, message = "Purchase Order created successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = ex.Message });
+            }
+        }
+
+
+
+        public class PurchaseOrderDto
+        {
+            public int CompCode { get; set; }
+            public int BranchCode { get; set; }
+            public int YearCode { get; set; }
+
+            public string VType { get; set; }
+            public int VNo { get; set; }
+            public string DocId { get; set; }
+            public int PartyCode { get; set; }
+            public string BillAdd1 { get; set; }
+            public string BillAdd2 { get; set; }
+            public string BillAdd3 { get; set; }
+            public int BillCity { get; set; }
+            public string BillPincode { get; set; }
+            public string BillGst { get; set; }
+            public int ShipFrom { get; set; }
+            public string ShipAdd1 { get; set; }
+            public string ShipAdd2 { get; set; }
+            public string ShipAdd3 { get; set; }
+            public int ShipCity { get; set; }
+            public string ShipPincode { get; set; }
+            public string ShipGst { get; set; }
+            public int SaudaNo { get; set; }
+            public int PlaceCode { get; set; }
+            public string PriceType { get; set; }
+            public string Currency { get; set; }
+            public decimal Nos { get; set; }
+            public decimal Qty { get; set; }
+            public decimal Amount { get; set; }
+            public decimal PackAmt { get; set; }
+            public decimal DiscAmt { get; set; }
+            public decimal CgstAmt { get; set; }
+            public decimal SgstAmt { get; set; }
+            public decimal IgstAmt { get; set; }
+            public decimal TcsPer { get; set; }
+            public decimal TcsAmt { get; set; }
+            public decimal OtherAmt { get; set; }
+            public decimal NetAmt { get; set; }
+            public decimal IMPORT_CURRENCY { get; set; }
+
+            public string DeliveryTerm { get; set; }
+            public string PartyRef { get; set; }
+
+            public int PayTermCode { get; set; }
+            public string Remarks { get; set; }
+
+            public decimal CDiscAmt { get; set; }
+
+
+            public string IpAddress { get; set; }
+ 
+        }
+
+
+
+
+
+
+
+
+
 
     }
 }

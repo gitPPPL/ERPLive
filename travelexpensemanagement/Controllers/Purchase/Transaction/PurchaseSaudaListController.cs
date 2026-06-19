@@ -144,7 +144,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@searchOption", "Header");
                         cmd.Parameters.AddWithValue("@V_NO", code);
                         cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
 
                         using (SqlDataReader rdr = cmd.ExecuteReader())
@@ -177,7 +177,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                         PINO  = rdr["PINO"]?.ToString(),
                                         PIDATE = rdr["PIDATE"] != DBNull.Value ? Convert.ToDateTime(rdr["PIDATE"]) : DateTime.MinValue,
                                         OFFERNO = rdr["OFFERNO"]?.ToString(),
-                                        BROKER_RATE = rdr["BROKER_RATE"] != DBNull.Value ? Convert.ToInt32(rdr["BROKER_RATE"]) : 0,
+                                        BROKER_RATE = rdr["BROKER_RATE"] != DBNull.Value ? Convert.ToInt64(rdr["BROKER_RATE"]) : 0,
                                         BROKER = rdr["BROKER"] != DBNull.Value ? Convert.ToInt32(rdr["BROKER"]) : 0,
                                         PACK_TYPE = rdr["PACK_TYPE"]?.ToString(),
                                         DISPATCH_FROM =  rdr["DISPATCH_FROM"] != DBNull.Value ? Convert.ToInt32(rdr["DISPATCH_FROM"]) : 0,
@@ -203,7 +203,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                         Delivery_From = rdr["Delivery_From"]?.ToString(),
                                         COUNTRY = rdr["COUNTRY"]?.ToString(),
                                         COUNTRY_CODE = rdr["COUNTRY_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["COUNTRY_CODE"]) : 0,
-                                        TAX_RATE = rdr["TAX_RATE"] != DBNull.Value ? Convert.ToInt32(rdr["TAX_RATE"]) : 0
+                                        TAX_RATE = rdr["TAX_RATE"] != DBNull.Value ? Convert.ToInt32(rdr["TAX_RATE"]) : 0,
+                                        OfferRate = rdr["Offer_Rate"] != DBNull.Value ? Convert.ToInt32(rdr["Offer_Rate"]) : 0
                                        
 
                                 };
@@ -220,13 +221,13 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd3.Parameters.AddWithValue("@searchOption", "Attachment");
                         cmd3.Parameters.AddWithValue("@V_NO", code);
                         cmd3.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode) ;
                         cmd3.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd3.Parameters.AddWithValue("@V_TYPE", "PAUD");
 
                         using (SqlDataReader rdr = cmd3.ExecuteReader())
                         {
-                            // Check if any rows are returned
+                      
                             if (rdr.HasRows)
                             {
                                 while (rdr.Read())
@@ -234,7 +235,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     var fileName = rdr["FILE_NAME"]?.ToString();
                                     var filePath = rdr["FILE_Path"]?.ToString();
 
-                                    // Add a null check to ensure we only add valid data to the list
                                     if (!string.IsNullOrEmpty(fileName) && !string.IsNullOrEmpty(filePath))
                                     {
                                         wrapper.Document.Add(new DocumentAttachment
@@ -257,7 +257,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd4.Parameters.AddWithValue("@searchOption", "Dispatch");
                         cmd4.Parameters.AddWithValue("@V_NO", code);
                         cmd4.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd4.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd4.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd4.Parameters.AddWithValue("@V_TYPE", "PAUD");
 
                         cmd4.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
