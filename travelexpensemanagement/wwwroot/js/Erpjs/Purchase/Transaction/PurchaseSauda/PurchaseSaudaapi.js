@@ -919,7 +919,7 @@ async function loadPurchaseHistory() {
         const V_date = $('#dtDocDate').val()?.trim();
 
         if (!V_NO) {
-            alert("Please enter document number");
+            toastr.info("Please enter document number");
             return;
         }
 
@@ -933,23 +933,18 @@ async function loadPurchaseHistory() {
 
         if (res.success) {
 
-            const data = res.data || [];
+            const data = res.data || [];               
 
             if (!data || data.length === 0) {
                 toastr.info("Purchase History Not Found For this Doc No = " + V_NO + " and Doc Date " + V_date);
                 return;
             }
-
             renderPurchaseHistory(data);
-               
-
-        } else {
-            alert(res.message || "No data found");
         }
 
     } catch (err) {
         console.error("AJAX Error:", err);
-        alert("Something went wrong while fetching data");
+        toastr.info("Something went wrong while fetching data");
     }
 }
 function renderPurchaseHistory(data) {
@@ -976,12 +971,10 @@ function renderPurchaseHistory(data) {
         });
     }
 
-    // 👉 OPEN MODAL AFTER DATA LOAD
-    const modalEl = document.getElementById('showpurchasehistoryModal');
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    const modalElement = document.getElementById('showpurchasehistoryModal');
+    const myModal = new bootstrap.Modal(modalElement);
+    myModal.show();
 }
-
-
 
 function TransitReport() {
 
@@ -1085,6 +1078,7 @@ async function paymentterm(partyCode, payTermCode) {
         console.error("Error fetching payment term:", error);
     }
 }
+
 async function GetTaxRate( taxrate) {
     try {
         const res = await $.ajax({
