@@ -9,6 +9,7 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
@@ -16,6 +17,7 @@ using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transacti
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
@@ -63,6 +65,8 @@ builder.Services.AddScoped<IQCGroupMasterListRepository, QCGroupMasterListReposi
 builder.Services.AddScoped<IQCGroupMasterRepository, QCGroupMasterRepository>();
 builder.Services.AddScoped<IParameterMasterListRepository, ParameterMasterListRepository>();
 builder.Services.AddScoped<IParameterMasterRepository, ParameterMasterRepository>();
+builder.Services.AddScoped<IPurchaseRequestListRepository, PurchaseRequestListRepository>();
+builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
 
 // Gete Entry Transaction repositories
 

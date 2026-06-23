@@ -12,6 +12,7 @@ let userLevel = window.userLevel;
 let isInitialLoad = false;
 let isMonthlyRequirementLoad = false;
 let isCopyFromOrMonthly = false;
+let uploadedFiles = [];
 
 $(document).ready(async function () {
     await InitPage(rowId);
@@ -30,6 +31,7 @@ async function InitPage(rowId) {
     await CheckIsFinalApprovalBody();
     ApprovalFields();
     $('#DtDocDate').focus();
+    await WireAllEvents();
     if (!rowId) {
         GetVNo();
         document.getElementById('DtDocDate').valueAsDate = new Date();
@@ -40,10 +42,12 @@ async function InitPage(rowId) {
     else {
         await LoadFormByID(rowId);
     }
-    await bindHeaderDropDowns();
-    fetchPlanList();
-    await WireAllEvents();
-    addAttachmentRow({ index: 0 });
+    if (!isInitialLoad) {
+        await bindHeaderDropDowns();
+        fetchPlanList();
+    }
+    
+    //addAttachmentRow({ index: 0 });
 
 }
 
@@ -104,7 +108,6 @@ function ApprovalFields() {
         $('#item-status, #itemCol-status').show();
     }
     else {
-        console.log("IsApprovalBody: ", IsApprovalBody);
         $('#item-approx-rate, #itemCol-approx-rate, #item-OpenReqQty, #itemCol-OpenReqQty, #btn-lastTenPurchaseOrder, #btn-lastTenPurchases, #div-ApproxTotalAmt').hide();
         $tbody.find('tr').each(function () {
             $(this).find('.td-approxRate, .td-open-req-qty').hide();
@@ -126,7 +129,7 @@ async function WireAllEvents() {
         const selectedValue = this.value;
         const docDate = $('#DtDocDate').val();
         if (!docDate) {
-            toastr.warning('Please select a valid Doc Date before proceeding.');
+            showToast('Please select a valid Doc Date before proceeding.', { type:"warning"});
             $("#DtDocDate").focus();
             return;
         }
@@ -193,9 +196,8 @@ async function WireAllEvents() {
         e.preventDefault();
         
         if (!await Validate()) return;
-        
+
         const payload = await CollectFormData();
-        console.log("payload", payload);
         $("#btnSaves").prop("disabled", true);
 
         saveUpdate(payload);
@@ -229,7 +231,7 @@ async function WireAllEvents() {
             const $lastRow = $tbody.find('tr:last');
             if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
                 $lastRow.find('td:last').prepend(
-                    `<i class="fa fa-plus btn-add-action" title="Add Row"></i>`
+                    `<button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>`
                 );
             }
         }
@@ -237,47 +239,21 @@ async function WireAllEvents() {
         calculateTotalAmount();
     });
 
-    //=============Delete Attachment Button Click==========
-    $(document).on('click', '.btn-delete-Attaction', function () {
-        $(this).closest('tr').remove();
-    });
+    ////======Delete  Event for Image on Edit=========
+    $(document).on('click', '.erppageattachmentsectiondelete', function () {
+        const $fileItem = $(this).closest('.erppageattachmentsectionfileitem');
 
-    //=============File==========
-    $(document).on('change', 'input[type="file"]', function (event) {
-        const fileInput = event.target;
-        const file = fileInput.files[0];
+        const fileName = $fileItem.find('.erppageattachmentsectionfilename').text().trim();
 
-        if (file) {
-            const fileName = file.name;
-            const rowId = $(fileInput).closest('tr').find('td').eq(0).attr('id');
-            const index = rowId.split('_')[1];
+        const index = uploadedFiles.findIndex(item => item && item.FILE_NAME === fileName);
 
-            $(`#fileName_${index}`).val(fileName);
+        if (index !== -1) {
+            uploadedFiles.splice(index, 1);
         }
+
+        $fileItem.remove();
     });
 
-    //=============Add Attachment Button Click==========
-    $(document).on('click', '.btn-add-attachment-row', function () {
-        const $tbody = $('#tblAttachmentPR tbody');
-        const rowCount = $tbody.find('tr').length;
-
-        if (rowCount > 0) {
-            const $lastRow = $tbody.find('tr').last();
-            const $lastFileNameInput = $lastRow.find('input[type="text"]');
-            const lastFileName = $lastFileNameInput.val()?.trim();
-
-            if (lastFileName) {
-                const index = rowCount;
-                addAttachmentRow({ index });
-            } else {
-                toastr.warning('Please Select File Name in the last row before adding a new one.');
-                $lastFileNameInput.focus();
-            }
-        } else {
-
-            addAttachmentRow({ index: 0 });
-        }
-    });
 
     $('#selectAllPR').on('change', function () {
         const isChecked = $(this).is(':checked');
@@ -385,6 +361,7 @@ async function WireAllEvents() {
 
 //===================Collect Form Data===========
 async function CollectFormData() {
+    await new Promise(resolve => setTimeout(resolve, 500));
     let approvStatus = '';
     let approvRemarks = '';
     if (IsFinalApprovalBody) {
@@ -394,7 +371,8 @@ async function CollectFormData() {
    
     const Code = $.trim($('#TxtCode').val());
     const rowsData = collectRowsData();
-    const AttachmentsRowsData = collectPurchaseDocumentsData();
+    //const AttachmentsRowsData = collectPurchaseDocumentsData();
+    const AttachmentsRowsData = getUploadedFiles();
     const Header = {
         DOC_ID : $.trim($('#TxtCode').val()),
         V_NO : parseFloat($.trim($('#NumDocNo').val())) || 0,
@@ -500,8 +478,8 @@ function collectRowsData() {
             WORK_TYPE: $workType.find('option:selected').text().trim() || "",
 
             REMARKS: $row.find('.remarks').val()?.trim() || "",
-            STATUS: $status.val() === "Approved" ? 2 :
-                $status.val() === "Rejected" ? 3 : 1
+            STATUS: parseInt($status.val()) || 0,
+            MONTHLY: $row.find('.monthly').val()
         };
 
         rows.push(rowData);
@@ -518,12 +496,11 @@ function saveUpdate(payload) {
         data: JSON.stringify(payload),
         success: function (response) {
             if (response.success) {
-                toastr.success("Saved successfully!");
-
+                showToast("Saved successfully!", { type:"success" });
                 setTimeout(() => window.location.href = '/PurchaseRequestList/Index', 1000);
 
             } else {
-                toastr.error(response.message || "Save failed.");
+                showToast(response.message || "Save failed.", { type:"error" });
             }
         },
         error: function (xhr, status, error) {
@@ -536,7 +513,7 @@ function saveUpdate(payload) {
                 errorMessage = "Unexpected error: " + xhr.statusText;
             }
 
-            toastr.error("Error: ", errorMessage);
+            showToast("Error: ", errorMessage, { type:"error" });
 
         },
         complete: function () {
@@ -550,11 +527,14 @@ function setFormReadOnly() {
     const form = $('#PurchaseRequestForm');
     form.addClass('erppage-readonly');
     form.find('input, textarea, select').prop('disabled', true);
-    $('#btnSaves, #btn-monthlyrequirement, #btn-copyFromDiv').hide();
+    $('#btnSaves, #btn-monthlyrequirement, #btn-copyFromDiv, .erppageattachmentsectiondelete').hide();
     $('.btn-add-action, .btn-delete-action').addClass('disabled').css('pointer-events', 'none');
-    //form.find('textarea').css('background-color', '#f0f0f0');
-    //form.find('table tbody tr').css('background-color', '#f9f9f9');
-    //$('.btn-add-row-last').hide();
+    $('#dropZone')
+        .css({
+            'pointer-events': 'none', 
+            //'opacity': '0.65',      
+            'cursor': 'not-allowed'   
+        });
 }
 
 //============VNO==================
@@ -568,7 +548,7 @@ async function GetVNo() {
         $('#NumDocNo').val(data.v_NO);
     }
     catch (e) {
-        toastr.warning('Error loading Document Number: ' + e.message);
+        showToast('Error loading Document Number: ' + e.message, { type:"warning" });
     }
 }
 
@@ -582,24 +562,19 @@ async function LoadFormByID(id) {
         });
 
         if (!res.success) {
-            toastr.error(res.message || "Failed to load data.");
+            showToast(res.message || "Failed to load data.", { type:"error" });
             return;
         }
 
         const header = res.data.header;
         const details = res.data.itamDetails;
         const attachments = res.data.purchaseDocuments;
-        const deptId = header.depT_CODE;
-
-        // Set global load flag to true
-        isInitialLoad = true;
-
         await bindHeaderData(header);
-        await ItemTableData(details, deptId);
-        //AttachmentTableData(attachments);
+        await ItemTableData(details);
+        await AttachmentTableData(attachments);
         
     } catch (err) {
-        toastr.error("Something went wrong while loading the form.");
+        showToast("Something went wrong while loading the form.", { type:"error" });
         //console.error(err);
     }
 }
@@ -622,11 +597,11 @@ async function bindHeaderData(header){
     });
     fetchPlanList(header.plaN_NO)
 }
-async function ItemTableData(details, deptId) {
-    console.log("details", details);
+async function ItemTableData(details) {
     const $tbody = $('#tblItemDetailsPR tbody');
     $tbody.empty();
     if (details && details.length > 0) {
+        isInitialLoad = true;
         for (const item of details) {
             await addRow(item);
         }
@@ -637,17 +612,56 @@ async function ItemTableData(details, deptId) {
     }
 }
 async function AttachmentTableData(attachments){
-    const $attachmentBody = $('#tblAttachmentPR tbody');
-    $attachmentBody.empty();
+    //const $attachmentBody = $('#tblAttachmentPR tbody');
+    //$attachmentBody.empty();
 
-    for (const attach of attachments) {
-        const attachRowData = {
-            index: attach.index || Date.now(),
-            fileName: attach.filE_NAME || 'No file',
-            filePath: attach.filE_Path || ''
-        };
-        addAttachmentRow(attachRowData);
+    //for (const attach of attachments) {
+    //    const attachRowData = {
+    //        index: attach.index || Date.now(),
+    //        fileName: attach.filE_NAME || 'No file',
+    //        filePath: attach.filE_Path || ''
+    //    };
+    //    addAttachmentRow(attachRowData);
+    //}
+    //const attachments = res.data.purchaseDocuments || [];
+
+    if (attachments.length) {
+
+        const files = attachments.map(x =>
+            base64ToFile(x.filE_DATA, x.filE_NAME)
+        );
+
+        renderFiles(files);
     }
+}
+function base64ToFile(base64, fileName) {
+
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    let mimeType = 'application/octet-stream';
+
+    if (['jpg', 'jpeg'].includes(ext))
+        mimeType = 'image/jpeg';
+    else if (ext === 'png')
+        mimeType = 'image/png';
+    else if (ext === 'gif')
+        mimeType = 'image/gif';
+    else if (ext === 'pdf')
+        mimeType = 'application/pdf';
+
+    const byteString = atob(base64);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const intArray = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+        intArray[i] = byteString.charCodeAt(i);
+    }
+
+    return new File(
+        [intArray],
+        fileName,
+        { type: mimeType }
+    );
 }
 
 function formatDate(dateStr) {
@@ -677,9 +691,7 @@ function fetchPlanList(selectedValue = null) {
         type: 'GET',
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             if (response) {
-                console.log(response.data);
                 const $ddl = $('#ddlPlanComplain');
                 let html = '<option value="">-- Select Plan/Complain --</option>';
                 $.each(response.data, function (i, item) {
@@ -755,7 +767,6 @@ function fetchDDlItems(selector, deptId, selectedValue = null) {
         data: {deptid: deptId },
         success: function (response) {
             if (response) {
-                console.log("Item response", response)
                 let html = '<option value="">-- Select Item --</option>';
 
                 $.each(response.data, function (i, item) {
@@ -780,59 +791,91 @@ function fetchDDlItems(selector, deptId, selectedValue = null) {
     });
 }
 
+
 //==========================Add Item Rows=====================
 async function addRow(data = {}) {
     $tbody.find('.btn-add-action').remove();
     const row = `
                 <tr class="no-border-input">
                         <td style="display:none;">${data.iteM_CODE || ''}</td>
-                        <td><select class="form-control ddlItem" style="width:300px" ></select></td>
-                        <td><select class="form-control ddlMake" style="width:200px" ></select></td>
+                        <td><select class="erppagetable-control ddlItem" style="width:300px" ></select></td>
+                        <td><select class="erppagetable-control ddlMake" style="width:200px" ></select></td>
                         <td>
-                            <input type="text" class="form-control unit-name" value="${data.uniT_NAME || ''}" readonly />
+                            <input type="text" class="erppagetable-control unit-name" value="${data.uniT_NAME || ''}" readonly />
                             <input type="hidden" class="unit-code" value="${data.uniT_CODE || ''}" />
                         </td>
-                        <td><input type="text" class="form-control tech-desc" value="${data.tecH_DESC || ''}"/></td>
+                        <td><input type="text" class="erppagetable-control tech-desc" value="${data.tecH_DESC || ''}"/></td>
                         <td class="td-approxRate">
-                            <input type="number" class="form-control approx-rate" value="${data.aproX_RATE || ''}" />
+                            <input type="text" class="erppagetable-control approx-rate"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 18, 2);"
+                            value="${data.aproX_RATE || ''}" />
                         </td>
-                       <td><select class="form-control approvalStatus"></select></td>
-                        <td><input type="text" class="form-control approval-remarks" value="${data.aproV_REMARKS || ''}"/></td>
-                        <td><input type="number" class="form-control std-req" value="${data.stD_REQ || ''}" readonly/></td>
-                        <td><input type="number" class="form-control current-stock" value="${data.cuR_STK || ''}" readonly/></td>
-                        <td class="td-avgCons">
-                            <input type="number" class="form-control avg-consumption" value="${data.avG_CONS || ''}" readonly/>
-                        </td>
-                        <td><input type="number" class="form-control pending-po-qty" value="${data.opeN_POQTY || ''}" readonly/></td>
-                        <td  class="td-open-req-qty"><input type="number" class="form-control open-req-qty" value="${data.opeN_RQQTY || ''}" readonly/></td>
-                        <td><input type="number" class="form-control user-qty" value="${data.useR_QTY || ''}" readonly/></td>
-                        <td><input type="number" class="form-control required-qty" value="${data.reQ_QTY || ''}"/></td>
-                        <td><input type="text" class="form-control req-reason" value="${data.reQ_REASON || ''}"/></td>
-                        <td><select class="form-control ddlplaceuse" style="width:300px"></select></td>
-                        <td><select class="form-control priority-type"></select></td>
+                       <td><select class="erppagetable-control approvalStatus"></select></td>
+                        <td><input type="text" class="erppagetable-control approval-remarks" value="${data.aproV_REMARKS || ''}"/></td>
                         <td>
-                            <select class="form-control scrap-type">
+                            <input type="text" class="erppagetable-control std-req"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.stD_REQ || ''}" readonly/>
+                        </td>
+                        <td>
+                            <input type="text" class="erppagetable-control current-stock"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.cuR_STK || ''}" readonly/>
+                        </td>
+                        <td class="td-avgCons">
+                            <input type="text" class="erppagetable-control avg-consumption" 
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.avG_CONS || ''}" readonly/>
+                        </td>
+                        <td>
+                            <input type="text" class="erppagetable-control pending-po-qty"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.opeN_POQTY || ''}" readonly/>
+                        </td>
+                        <td  class="td-open-req-qty">
+                            <input type="text" class="erppagetable-control open-req-qty"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.opeN_RQQTY || ''}" readonly/>
+                        </td>
+                        <td>
+                            <input type="text" class="erppagetable-control user-qty"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.useR_QTY || ''}" readonly/>
+                        </td>
+                        <td>
+                            <input type="text" class="erppagetable-control required-qty"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.reQ_QTY || ''}"/>
+                        </td>
+                        <td><input type="text" class="erppagetable-control req-reason" value="${data.reQ_REASON || ''}" maxlength="200"/></td>
+                        <td><select class="erppagetable-control ddlplaceuse" style="width:300px"></select></td>
+                        <td><select class="erppagetable-control priority-type"></select></td>
+                        <td>
+                            <select class="erppagetable-control scrap-type">
                                 <option value="">--Select--</option>
                                 <option value="Yes" ${data.scraP_TYPE === "Yes" ? "selected" : ""}>Yes</option>
                                 <option value="No" ${data.scraP_TYPE === "No" ? "selected" : ""}>No</option>
                             </select>
                         </td>
-                        <td><select class="form-control work-type"></select>
+                        <td><select class="erppagetable-control work-type"></select>
                         </td>
-                        <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
+                        <td><input type="text" class="erppagetable-control remarks" value="${data.remarks || ''}"/></td>
                         <td class="td-status">
-                          <select class="form-control status">
+                          <select class="erppagetable-control status">
                             <option value="">--Select--</option>
                             <option value="1" ${data.status == 1 ? "selected" : ""}>Pending</option>
                             <option value="2" ${data.status == 2 ? "selected" : ""}>Approved</option>
                             <option value="3" ${data.status == 3 ? "selected" : ""}>Rejected</option>
                           </select>
                         </td>
+                        <td style="display:none;"><input type="text" class="erppagetable-control monthly" value="${data.isMonthly ? 'MONTHLY' : ''}"/></td>
                     <td class="action-col">
+                       <div class="action-wrap">
                         <button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>
                         <button type="button" class="act-btn delete btn-delete-action" title="Delete Row"><i class="fa fa-trash"></i></button>
                         <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
-                    </td>
+                       </div>
+                   </td>
             </tr>
         `;
 
@@ -842,7 +885,6 @@ async function addRow(data = {}) {
     // 🔥 IMPORTANT: bind item after row is added
     const deptId = $('#ddlDepartment').val();
     
-
     await fetchDDlItems(
         $row.find('.ddlItem'),
         deptId,
@@ -908,27 +950,22 @@ function validateItemRow() {
     return true;
 }
 
-function collectPurchaseDocumentsData() {
-    const documents = [];
-    let hasError = false;
+function collectFile(file) {
 
-    $('#tblAttachmentPR tbody tr').each(function () {
-        const $row = $(this);
-        const fileName = $row.find('input[type="text"]').val()?.trim() || "";
-        const fileInput = $row.find('input[type="file"]')[0];
-        const fileSelected = fileInput?.files[0];
+    const reader = new FileReader();
 
-        if (!fileSelected && !fileName) {
-            hasError = true;
-        }
-        const documentData = {
-            FILE_NAME: fileName,
-            FILE_Path: fileSelected ? fileSelected.name : null
-        };
-        documents.push(documentData);
-    });
+    reader.onload = function (e) {
 
-    return hasError ? [] : documents;
+        uploadedFiles.push({
+            FILE_NAME: file.name,
+            FILE_DATA: e.target.result.split(',')[1] // base64 only
+        });
+    };
+
+    reader.readAsDataURL(file);
+}
+function getUploadedFiles() {
+    return uploadedFiles;
 }
 
 //================Fetch Records on behalf of item=============
@@ -939,10 +976,7 @@ function fetchApproxRate(itemCode, $row) {
         data: { Itemcode: itemCode },
         success: function (response) {
 
-            console.log("fetchApproxRate", response);
-
             const rate = response?.rate;
-
 
             if (rate !== undefined) {
                 $row.find('input.approx-rate').val(rate);
@@ -960,8 +994,6 @@ function fetchPendingQty(itemCode, $row) {
         type: 'GET',
         data: { Itemcode: itemCode },
         success: function (response) {
-
-            console.log("fetchPendingQty", response);
 
             const qty = response?.pendingQty;
 
@@ -982,9 +1014,6 @@ function fetchTotal_Qty(itemCode, $row) {
         data: { Itemcode: itemCode },
         success: function (response) {
 
-            console.log("fetchTotal_Qty", response);
-
-
             const qty = response?.total_Qty;
 
             if (qty !== undefined) {
@@ -1003,7 +1032,6 @@ function fetchCurrentStock(itemCode, $row) {
         type: 'GET',
         data: { Itemcode: itemCode },
         success: function (response) {
-            console.log("fetchCurrentStock", response);
             const qty = response?.currentStocklist;
             if (qty !== undefined) {
                 $row.find('input.current-stock').val(qty);
@@ -1026,7 +1054,6 @@ function fetchAvgConsumption(itemCode, $row) {
             Vdate: docDate
         },
         success: function (response) {
-            console.log("fetchAvgConsumption", response);
             const qty = response?.avgConsumption;
             if (qty !== undefined) {
                 $row.find('input.avg-consumption').val(qty);
@@ -1044,7 +1071,6 @@ function fetchTECH_DESC(itemCode, $row) {
         type: 'GET',
         data: { Itemcode: itemCode },
         success: function (response) {
-            console.log("fetchTECH_DESC", response);
             const tecH_DESC = response?.tecH_DESC;
             if (tecH_DESC !== undefined) {
                 $row.find('input.tech-desc').val(tecH_DESC);
@@ -1054,27 +1080,6 @@ function fetchTECH_DESC(itemCode, $row) {
             console.error("Error fetching pending tecH_DESC:", error);
         }
     });
-}
-
-//=================Add Attachment Row========================
-function addAttachmentRow(data = {}) {
-    const row = `
-            <tr class="no-border-input">
-                <td id="fileNameCell_${data.index || ''}">
-                    <input type="text" class="form-control mb-1" id="fileName_${data.index || ''}" value="${data.fileName || ''}" placeholder="Enter file name"/>
-                </td>
-                <td id="fileInputCell_${data.index || ''}">
-                    <input type="file" class="form-control file-upload" id="fileInput_${data.index || ''}" />
-                </td>
-                <td id="actionCell_${data.index || ''}">
-                             <i class="fa fa-plus btn-add-attachment-row" title="Add Row" id="addAttaction_${data.index || ''}"></i>
-                        <i class="fa fa-edit btn-edit-Attaction" title="Edit Row" id="editAttaction_${data.index || ''}"></i>
-                       <i class="fa fa-trash btn-delete-Attaction" title="Delete Row" id="deleteAttaction_${data.index || ''}"></i>
-                </td>
-            </tr>
-        `;
-
-    $('#tblAttachmentPR tbody').append(row);
 }
 
 //====================VALIDATION==============================
@@ -1097,6 +1102,9 @@ async function Validate() {
     let vDate = $('#DtDocDate').val();
     let docNo = $('#NumDocNo').val();
 
+    if (!(await checkValidDate())) {
+        return false;
+    }
     //1. Required Date Validation
     if (requiredDate < docDate) {
         setInvalid($('#DtRequiredDate'), "Required Date should be greater than Document date.");
@@ -1115,7 +1123,6 @@ async function Validate() {
 
     //3. Maximum two requests
     const isWithinMaxRequest = await checkMaxRequestCount(docNo, vDate)
-    console.log("IsApprovalBody: ", IsApprovalBody);
     if (!IsApprovalBody && !isWithinMaxRequest) {
         showToast("Max. Limit Exceeds.", {type:"warning"});
         isValid = false;
@@ -1127,7 +1134,8 @@ async function Validate() {
     let $rows = $('#tblItemDetailsPR tbody tr');
 
     $rows.each(function () {
-        const itemCode = $(this).find('.ddlItem').val();
+        const $row = $(this); 
+        const itemCode = $row.find('.ddlItem').val();
 
         if (itemCode && itemCode.trim() !== '') {
             hasItemRecord = true;
@@ -1170,7 +1178,7 @@ async function Validate() {
         const pendingPOQty = $row.find('.pending-po-qty').val();
 
         const approvalStatusInput = $row.find('.approvalStatus');
-        const approvalStatus = approvalStatusInput.val();
+        const approvalStatus = approvalStatusInput.find("option:selected").text().toLocaleUpperCase() || '';
 
         const approxRateInput = $row.find('.approx-rate');
 
@@ -1211,7 +1219,6 @@ async function Validate() {
 
             //8. Monthly requirements
             const isMonthly = await CheckMonthlyReq(itemCode);
-            console.log("isMonthly: ", isMonthly);
             if (isMonthly) {
                 setInvalid(itemInput, 'This Item is a Monthly Requirement Item, So You Can not Make a Requistion');
                 isValid = false;
@@ -1280,7 +1287,7 @@ async function Validate() {
             }
 
             //16. Approval Status
-            if ((approvalStatus === "Hold" || approvalStatus === "Reject") && !approvalRemarks ) {
+            if ((approvalStatus === "HOLD" || approvalStatus === "REJECT") && !approvalRemarks ) {
                 setInvalid(
                     approvalRemarksInput,
                     `Reason for ${approvalStatus.toUpperCase()} of ${itemtext} is required.`
@@ -1296,6 +1303,31 @@ async function Validate() {
     return isValid;
 }
 
+async function checkValidDate() {
+    const data = {
+        vdate: $("#DtDocDate").val(),
+        vno: $("#NumDocNo").val()
+    };
+    try {
+        const response = await fetch('/PurchaseRequest/CheckValidDate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        console.log("result: ", result);
+        if (result.status === false) {
+            showToast(result.message, { type: "warning" });
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error("Error:", error);
+        return false;
+    }
+}
 //======================Validation Helper Methods==============
     //========Request Number=========
 async function GetRequestNo(itemCode) {
@@ -1408,7 +1440,6 @@ async function CheckMonthlyReq(itemCode) {
     //========Max Request Limit=====
 async function checkMaxRequestCount(vNo, vDate) {
     try {
-        console.log("vDate: ", vDate);
         const response = await $.ajax({
             url: '/PurchaseRequest/GetMaxRequestCount',
             type: 'GET',
@@ -1422,12 +1453,12 @@ async function checkMaxRequestCount(vNo, vDate) {
         if (response.success) {
             return response.isWithinLimit; // Return the entire response object
         } else {
-            toastr.error(response.message || "Failed to check request count.");
+            showToast(response.message || "Failed to check request count.", { type:"error" });
             return null;
         }
     } catch (error) {
         console.error("Error checking max request count:", error);
-        toastr.error("An error occurred while checking the request count.");
+        showToast("An error occurred while checking the request count.", { type:"error" });
         return null;
     }
 }
@@ -1454,7 +1485,6 @@ function GetLastTenPurchaseRequest() {
         showToast("There are more than 5 item in Grid, Please select Rowwise History View!.", { type: "warning" });
         return;
     }
-    console.log(itemCodes.length)
     if (itemCodes.length === 0) {
         showToast("No Items Available!.", {type:"warning"});
         return;
@@ -1477,14 +1507,13 @@ function GetLastTenPurchaseRequest() {
                 $("#lastTenPurchaseRequestModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type:"warning" });
             }
         }
     });
 }
 function bindLastTenPurchaseRequestGrid(data) {
 
-    console.log("Last 10 purchase Request: ", data);
     var tbody = $("#tblLastTenPurchaseRequest tbody");
 
     tbody.empty();
@@ -1567,17 +1596,15 @@ function GetLastTenConsumptionDetails() {
                 $("#lastTenConsumptionModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr) {
-            alert("Error while loading consumption history.");
+            showToast("Error while loading consumption history.", { type: "error" });
         }
     });
 }
 function bindLastTenConsumptionGrid(data) {
-
-    console.log("Last 10 Consumption History:", data);
 
     var tbody = $("#tblLastTenConsumption tbody");
 
@@ -1660,17 +1687,15 @@ function GetLastTenPurchaseHistory() {
                 $("#lastTenPurchaseHistoryModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr) {
-            alert("Error while loading purchase history.");
+            showToast("Error while loading purchase history.", { type: "error" });
         }
     });
 }
 function bindLastTenPurchaseHistoryGrid(data) {
-
-    console.log("Last 10 Purchase History:", data);
 
     var tbody = $("#tblLastTenPurchaseHistory tbody");
 
@@ -1759,17 +1784,15 @@ function GetLastTenOrderHistory() {
                 $("#lastTenOrderHistoryModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function () {
-            alert("Error while loading purchase history.");
+            showToast("Error while loading purchase history.", { type: "error" });
         }
     });
 }
 function bindLastTenOrderGrid(data) {
-
-    console.log("Last 10 Purchase History:", data);
 
     var tbody = $("#tblLastTenOrderHistory tbody");
 
@@ -1833,7 +1856,8 @@ async function LoadMonthlyRequirementData() {
             $tbody.empty();
             isCopyFromOrMonthly = true;
             
-            await Promise.all(res.data.map(r => addRow(r)));
+            //await Promise.all(res.data.map(r => addRow(r)));
+            await Promise.all(res.data.map(r => addRow({ ...r, isMonthly: true })));
             
             let hasDuplicate = false;
             const seen = new Map();
@@ -1855,17 +1879,17 @@ async function LoadMonthlyRequirementData() {
 
             // single toastr
             if (hasDuplicate) {
-                toastr.warning("Duplicate items found and marked. Please remove them!");
+                showToast("Duplicate items found and marked. Please remove them!", { type:"warning" });
             }
 
         } else {
             console.error("Error from server:", res.message);
-            toastr.error(res.message || "Failed to load data.");
+            showToast(res.message || "Failed to load data.", { type:"error" });
         }
 
     } catch (err) {
         console.error("Failed to load data", err);
-        toastr.error("Something went wrong while loading the form.");
+        showToast("Something went wrong while loading the form.", { type:"error" });
     }
 }
 
@@ -1886,12 +1910,11 @@ function getItemWisePurchaseRequest(itemCode) {
                 $("#lastTenPurchaseRequestModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            console.log(error);
-            alert("Error while fetching data.");
+            showToast("Error while fetching data." + error, { type: "error" });
         }
     });
 }
@@ -1911,12 +1934,11 @@ function getItemWiseConsumptionHistory(itemCode) {
                 $("#lastTenConsumptionModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            console.log(error);
-            alert("Error while fetching data.");
+            showToast("Error while fetching data." + error, { type: "error" });
         }
     });
 }
@@ -1936,12 +1958,11 @@ function getItemWisePurchaseOrder(itemCode) {
                 $("#lastTenOrderHistoryModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            console.log(error);
-            alert("Error while fetching data.");
+            showToast("Error while fetching data." + error, { type: "error" });
         }
     });
 }
@@ -1961,12 +1982,11 @@ function getItemWisePurchaseQuotation(itemCode) {
                 $("#purchaseQuotationHistoryModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            console.log(error);
-            alert("Error while fetching quotation history.");
+            showToast("Error while fetching quotation history." + error, { type: "error" });
         }
     });
 }
@@ -2032,12 +2052,11 @@ function getItemWisePurchaseReceiptHistory(itemCode) {
                 $("#lastTenPurchaseHistoryModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            console.log(error);
-            alert("Error while fetching material receipt history.");
+            showToast("Error while fetching material receipt history." + error, { type: "error" });
         }
     });
 }
@@ -2059,12 +2078,11 @@ function getItemWisePurchaseHistory(itemCode) {
                 $("#lastTenPurchaseHistoryModal").modal("show");
             }
             else {
-                alert(response.message);
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr, status, error) {
-            console.log(error);
-            alert("Error while fetching purchase invoice history.");
+            showToast("Error while fetching purchase invoice history." + error, { type: "error" });
         }
     });
 }
@@ -2076,8 +2094,7 @@ function LoadCopyForm() {
         data: {},
         success: function (res) {
             if (res.success) {
-                console.log('copyform', res);
-
+                
                 $('#tblpurchasequotationmodal tbody').empty();
                 res.data.forEach(function (item) {
                     var row = '<tr>';
@@ -2103,12 +2120,12 @@ function LoadCopyForm() {
 
             } else {
                 console.error("Error from server:", res.message);
-                toastr.error(res.message || "Failed to load data.");
+                showToast(res.message || "Failed to load data.", { type:"error" });
             }
         },
         error: function (err) {
             console.error("Failed to load data", err);
-            toastr.error("Something went wrong while loading the form.");
+            showToast("Something went wrong while loading the form.", { type:"error" });
         }
     });
 }
@@ -2136,9 +2153,9 @@ function getSelectedRows() {
 
     if (selectedRowsData.length > 0) {
         addRowsToMainTable(selectedRowsData);
-        toastr.success(selectedRowsData.length + " row(s) copied successfully.");
+        showToast(selectedRowsData.length + " row(s) copied successfully.", { type:"success" });
     } else {
-        toastr.warning("No rows selected.");
+        showToast("No rows selected.", { type:"warning"});
     }
 }
 
@@ -2192,18 +2209,13 @@ async function addRowsToMainTable(selectedRowsData) {
 
 //===========Approx Total Amt Calculation==========
 function calculateTotalAmount() {
-    console.log("calculateTotalAmount called");
     let totalAmt = 0;
-    console.log($tbody);
-    console.log($tbody.length);
-    console.log($tbody.find('tr').length);
     $tbody.find('tr').each(function () {
         const approxRate = parseFloat($(this).find('.approx-rate').val()) || 0;
         const reqQty = parseFloat($(this).find('.required-qty').val()) || 0;
         totalAmt += approxRate * reqQty;
     });
-    console.log("Total Amount =", totalAmt);
-    $('#lbl-ApproxTotalAmt #lbl-totalApproxAmount').text(
+    $('#lbl-totalApproxAmount').text(
         totalAmt.toFixed(2)
     );
 }
@@ -2257,3 +2269,16 @@ $(document).on("click", ".erppage-dropdownaction-btn", function (e) {
 $(document).on("click", function () {
     $(".erppage-dropdownaction-menu").remove();
 });
+
+//========Helper========
+function SetMaxlength(selector, numeric, decimal) {
+    console.log(selector);
+
+    let value = $(selector).val();
+
+    let regex = new RegExp(`^\\d{0,${numeric}}(\\.\\d{0,${decimal}})?$`);
+
+    if (!regex.test(value)) {
+        $(selector).val(value.slice(0, -1));
+    }
+}

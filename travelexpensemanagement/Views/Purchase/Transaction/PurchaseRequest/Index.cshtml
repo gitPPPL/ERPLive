@@ -60,7 +60,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Req. Instruc.</label>
-                    <input type="text" class="erppage-redinput" id="txtRequiredDate">
+                    <input type="text" class="erppage-input" id="txtRequiredDate" maxlength="200">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Agst. Plan</label>
@@ -78,7 +78,7 @@
                     <label class="erppage-label">Remarks</label>
                     <input class="erppage-input" id="txtRemarks" placeholder="Enter Remarks" />
                 </div>
-                <div class="erppage-divfield erppage-col-span-2">
+                <div class="erppage-internalaction erppage-col-span-2">
                     <div class="dropdown erppagedropdown" id="btn-copyFromDiv">
                         <button type="button" class="erppagedropdown-btn">
                             <i class="fa fa-copy"></i>
@@ -105,13 +105,14 @@
                     </button>
                 </div>
             </div>
-            <div class="erppage-grid4">
-                <div class="divfield" style="background-color: #66a644; padding: 3px 5px;border-radius: 6px;color: white !important;" id="div-ApproxTotalAmt">
-                    <label class="erppage-label" id="lbl-ApproxTotalAmt" style="display: contents;     color: white;">
+            <div class="approval-toolbar">
+                <div class="erppage-divfield" style="background-color: #66a644; padding: 3px 5px;border-radius: 6px;color: white !important;" id="div-ApproxTotalAmt">
+                    <label class="erppage-label" style="display: contents;color: white;">
                         Approx Total Amount: ₹<span id="lbl-totalApproxAmount">0.00</span>
                     </label>
                 </div>
-                <div class="erppage-internalaction erppage-col-span-3" style="margin:0px;">
+
+                <div class="erppage-internalaction" style="margin:0px;">
                     <button id="btn-lastTenPurchaseOrder" type="button" class="erppage-btn erppage-btn-common">
                         <i class="fa fa-calendar"></i><span>Last 10 Purchase Order</span>
                     </button>
@@ -126,10 +127,9 @@
                     </button>
                 </div>
             </div>
-            
+           
             <div class="erppage-container">
                 @*  <div class="erppage-tab-content" id="attachment">
-
                     <fieldset class="erppage-fieldset">
                         <div class="excel-wrapper fixed-grid-wrapper">
                             <table id="tblAttachmentPR" class="excel-table fixed-grid-table resizable-table">
@@ -152,124 +152,118 @@
                         </div>
                     </fieldset>
                 </div> *@
-                <div class="erppage-tabs">
-                    <button class="erppage-tab active" data-tab="itemdetails">Item Details</button>
-                    <button class="erppage-tab" data-tab="attachment">Attachment</button>
-                </div>
-                <div class="erppage-tab-content active" id="itemdetails">
-                    <div class="erppage-accordion-header">Item Details</div>
-                    <div class="erppage-accordion-body">
-                        <fieldset class="erppage-fieldset">
-                            <div class="excel-wrapper fixed-grid-wrapper">
-                                <table id="tblItemDetailsPR" class="excel-table fixed-grid-table resizable-table sortable-table">
-                                    <colgroup>
-                                        <col style="display:none;">
-                                        <col style="width:180px;">
-                                        <col style="width:150px;">
-                                        <col style="width:100px;">
-                                        <col style="width:250px;">
-                                        <col style="width:120px;" id="itemCol-approx-rate">
-                                        <col style="width:120px;">
-                                        <col style="width:200px;">
-                                        <col style="width:100px;">
-                                        <col style="width:120px;">
-                                        <col style="width:130px;" id="itemCol-avgConsumption">
-                                        <col style="width:130px;">
-                                        <col style="width:130px;" id="itemCol-OpenReqQty">
-                                        <col style="width:100px;">
-                                        <col style="width:120px;">
-                                        <col style="width:250px;">
-                                        <col style="width:180px;">
-                                        <col style="width:130px;">
-                                        <col style="width:130px;">
-                                        <col style="width:130px;">
-                                        <col style="width:200px;">
-                                        <col style="width:100px;" id="itemCol-status">
-                                        <col style="width:100px;">
-                                    </colgroup>
-                                    <thead>
-                                        <tr>
-                                            <th class="hidden-col" data-column="0">
-                                                Code <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="1">
-                                                Item Name<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="2">
-                                                Make <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="3">
-                                                Unit <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="4">
-                                                Tech Description <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="5" id="item-approx-rate">
-                                                Approx Rate <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="6">
-                                                Approval Status <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="7">
-                                                Approval Remarks <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="8">
-                                                Std Req <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="9">
-                                                Current Stock <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="10" id="item-avgConsumption">
-                                                Avg Consumption <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="11">
-                                                Pending PO Qty <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="12" id="item-OpenReqQty">
-                                                Open Req Qty <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="13">
-                                                User Qty <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="14">
-                                                Required Qty<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="15">
-                                                Reason of Requirement<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="16">
-                                                Place of Use<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="17">
-                                                Priority Type<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="18">
-                                                Scrap Type<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="19">
-                                                Work Type<span class="required">*</span> <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="20">
-                                                Remarks <span class="sort-icon"></span>
-                                            </th>
-                                            <th data-column="21" id="item-status">
-                                                Status <span class="sort-icon"></span>
-                                            </th>
-                                            <th class="action-col">
-                                                Action
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-               
-
+                
             </div>
-          
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Detail</legend>
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblItemDetailsPR" class="excel-table fixed-grid-table resizable-table sortable-table">
+                        <colgroup>
+                            <col style="display:none;">
+                            <col style="width:180px;">
+                            <col style="width:150px;">
+                            <col style="width:100px;">
+                            <col style="width:250px;">
+                            <col style="width:120px;" id="itemCol-approx-rate">
+                            <col style="width:120px;">
+                            <col style="width:200px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:130px;" id="itemCol-avgConsumption">
+                            <col style="width:130px;">
+                            <col style="width:130px;" id="itemCol-OpenReqQty">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:250px;">
+                            <col style="width:180px;">
+                            <col style="width:130px;">
+                            <col style="width:130px;">
+                            <col style="width:130px;">
+                            <col style="width:200px;">
+                            <col style="width:100px;" id="itemCol-status">
+                            <col style="display:none;">
+                            <col style="width:100px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="hidden-col" data-column="0">
+                                    Code <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="1">
+                                    Item Name<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="2">
+                                    Make <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="3">
+                                    Unit <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="4">
+                                    Tech Description <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="5" id="item-approx-rate">
+                                    Approx Rate <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="6">
+                                    Approval Status <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="7">
+                                    Approval Remarks <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="8">
+                                    Std Req <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="9">
+                                    Current Stock <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="10" id="item-avgConsumption">
+                                    Avg Consumption <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="11">
+                                    Pending PO Qty <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="12" id="item-OpenReqQty">
+                                    Open Req Qty <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="13">
+                                    User Qty <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="14">
+                                    Required Qty<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="15">
+                                    Reason of Requirement<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="16">
+                                    Place of Use<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="17">
+                                    Priority Type<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="18">
+                                    Scrap Type<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="19">
+                                    Work Type<span class="required">*</span> <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="20">
+                                    Remarks <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="21" id="item-status">
+                                    Status <span class="sort-icon"></span>
+                                </th>
+                                <th class="hidden-col" data-column="0">
+                                    Monthly <span class="sort-icon"></span>
+                                </th>
+                                <th class="action-col">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Attachment</legend>
                 <div class="erppageattachmentsection">
@@ -279,7 +273,7 @@
                                 <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
                                 <div class="erppageattachmentsectiondropzone" id="dropZone">
                                     <div class="erppageattachmentsectioncloud">
-                                        ?
+                                        <i class="fa fa-cloud"></i>
                                     </div>
                                     <div class="erppageattachmentsectiondragtext">
                                         Drag & Drop your files here
@@ -303,11 +297,8 @@
                                      id="fileList">
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
             </fieldset>
         </fieldset>
@@ -410,7 +401,6 @@
         </div>
     </div>
 </div>
-
 
 @* Last 10 Purchase Request Modal *@
 <div class="modal fade" id="lastTenPurchaseRequestModal" tabindex="-1" aria-labelledby="lastTenPurchaseRequestLabel" aria-hidden="true">
@@ -812,10 +802,243 @@
         </div>
     </div>
 </div>
+
+@* Image Preview Modal *@
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script>
     window.userLevel = "@ViewBag.UserLevel";
 </script>
 
 <script src="~/js/erpjs/purchase/transaction/purchaserequest/purchaserequest.js"></script>
+
+ <script>
+    const fileInput = document.getElementById('fileInput');
+    const browseBtn = document.getElementById('browseBtn');
+    const dropZone = document.getElementById('dropZone');
+    const fileList = document.getElementById('fileList');
+    
+
+    browseBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function () {
+        renderFiles(this.files);
+    });
+
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        renderFiles(e.dataTransfer.files);
+    });
+
+    function renderFiles(files) {
+
+        Array.from(files).forEach(file => {
+
+            collectFile(file);
+            const fileItem = document.createElement('div');
+            fileItem.className =
+                'erppageattachmentsectionfileitem';
+
+            fileItem.innerHTML = `
+                <div class="erppageattachmentsectionicon ${getFileColorClass(file.name)}">
+                    ${getFileType(file.name)}
+                </div>
+
+                <div class="erppageattachmentsectioncontent">
+
+                    <div class="erppageattachmentsectionfilename">
+                        ${file.name}
+                    </div>
+
+                    <div class="erppageattachmentsectionprogress">
+                        <div class="erppageattachmentsectionprogressbar"></div>
+                    </div>
+
+                </div>
+
+                <div class="erppageattachmentsectionactions">
+
+                    <button class="erppageattachmentsectionview">
+                        View
+                    </button>
+
+                    <button class="erppageattachmentsectiondelete">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+            fileItem.setAttribute('data-file-index', uploadedFiles.length - 1);
+            fileList.appendChild(fileItem);
+
+            const progressBar =
+                fileItem.querySelector(
+                    '.erppageattachmentsectionprogressbar'
+                );
+
+            let progress = 0;
+
+            const interval = setInterval(() => {
+
+                progress += 5;
+
+                progressBar.style.width =
+                    progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+
+            }, 10);
+
+            fileItem.querySelector('.erppageattachmentsectionview').addEventListener('click', () => {
+
+                const fileUrl = URL.createObjectURL(file);
+
+                
+                $('#previewImage').hide();
+                $('#previewPdf').hide();
+
+                if (file.type.startsWith('image/')) {
+
+                    $('#previewImage')
+                        .attr('src', fileUrl)
+                        .show();
+                }
+                else if (file.type === 'application/pdf') {
+
+                    $('#previewPdf')
+                        .attr('src', fileUrl)
+                        .show();
+                }
+                else {
+
+                    window.open(fileUrl, '_blank');
+                    return;
+                }
+
+                const modal = new bootstrap.Modal(
+                    document.getElementById('imagePreviewModal')
+                );
+
+                modal.show();
+            });
+
+            // reset input here too (extra safety)
+            if (fileInput) {
+                fileInput.value = "";
+            }
+        });
+    }
+
+    function getFileType(fileName) {
+        return fileName.split('.').pop().toUpperCase();
+    }
+
+    function getFileColorClass(fileName) {
+
+        const ext = fileName.split('.').pop().toLowerCase();
+
+        switch (ext) {
+
+            case 'pdf':
+                return 'erppageattachmentsectionpdf';
+
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+            case 'gif':
+            case 'svg':
+            case 'webp':
+                return 'erppageattachmentsectionimage';
+
+            case 'doc':
+            case 'docx':
+                return 'erppageattachmentsectionword';
+
+            case 'xls':
+            case 'xlsx':
+            case 'csv':
+                return 'erppageattachmentsectionexcel';
+
+            case 'ppt':
+            case 'pptx':
+                return 'erppageattachmentsectionppt';
+
+            case 'txt':
+                return 'erppageattachmentsectiontxt';
+
+            case 'zip':
+            case 'rar':
+            case '7z':
+                return 'erppageattachmentsectionzip';
+
+            default:
+                return 'erppageattachmentsectiondefault';
+        }
+    }
+</script> 
 
        

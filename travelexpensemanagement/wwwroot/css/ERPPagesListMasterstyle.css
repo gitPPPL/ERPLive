@@ -53,15 +53,16 @@
 
 /* Three Dot Button */
 .erppage-dropdownaction-btn {
-    background: #d9d9d9 !important;
-    color: #555;
+    background: #c6d8ff !important;
+    color: #0f0f0f;
     border-radius: 4px;
-    padding: 4px 8px;
+    padding: 3px 7px;
 }
 
     .erppage-dropdownaction-btn:hover {
         background: #e9ecef;
     }
+
 
 /* Dropdown Menu */
 .erppage-dropdownaction-menu {
@@ -98,6 +99,7 @@
             color: #3f7c52;
             border: 1px solid #549368;
         }
+
 
 .erppagelisthighlight {
     display: inline-block;
@@ -182,7 +184,7 @@
         border: none;
         outline: none;
         width: 100%;
-        font-size: 13px;
+        font-size: 12px;
     }
 
 /* ACTIONS RIGHT */
@@ -265,7 +267,7 @@
 .page-nav {
     border: none;
     background: #256d29;
-    padding: 6px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
     color: #fff;
@@ -307,24 +309,21 @@
     border-radius: 6px;
 }
 
-
-
 /* TABLE */
 .excel-table {
-    position: relative;
-    background: #fff;
-    border-radius: 8px;
-    /* IMPORTANT FIX */
-    overflow: visible; /* 🔥 change this */
-    width: 100%; /* FIX */
-    table-layout: fixed;
+    table-layout: auto;
+    width: max-content;
+    min-width: 100%;
 }
+.width-table td {
+    padding: 8px;
+}   
 /* ACTION BAR */
 .erppage-actions {
     position: sticky;
     bottom: 0;
-    display: flex; /* 🔥 MISSING */
-    justify-content: flex-end; /* now works */
+    display: flex; 
+    justify-content: flex-end; 
     gap: 10px;
     background: #fff;
     padding: 6px 12px; /* better spacing */
@@ -337,7 +336,7 @@
         top: 0;
         background: linear-gradient(135deg, #232323, #0f0f0f);
         padding: 10px;
-        font-size: 13px;
+        font-size: 12px;
         text-align: left;
         user-select: none;
         color: #ffffff;
@@ -346,7 +345,7 @@
     
     /* CELLS */
     .excel-table td {
-        padding: 5px;
+        /*padding: 5px;*/
         font-size: 12px;
         border-bottom: 1px solid #eee;
         border-right: 1px solid #eee;
@@ -354,10 +353,8 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .excel-table th,
-    .excel-table td {
-        background-clip: padding-box; /* prevents overlap glitches */
-    }
+   
+
     .excel-table input,
     .excel-table select {
         width: 100%;
@@ -401,61 +398,64 @@
         max-width: none;
     }
 
-
 /* ACTION BUTTONS */
 .act-btn {
     border: none;
     background: none;
     cursor: pointer;
     margin: 0 3px;
-    font-size: 14px;
+    font-size: 12px;
 }
 
     .act-btn.edit {
-        background: #d4e9ff;
-        color: #007bff;
-        border-radius: 4px;
-        padding: 4px 6px;
+        color: #24A0ED;
     }
 
     .act-btn.document {
-        background: #ffe7c9;
         color: #ff8100;
-        border-radius: 4px;
-        padding: 4px 6px;
     }
 
-        /* Optional: add hover effect consistent with others */
         .act-btn.document:hover {
             opacity: 0.85;
             transform: translateY(-1px);
         }
     .act-btn.add {
-        background: #bbedca;
         color: #27723f;
-        border-radius: 4px;
-        padding: 4px 6px;
     }
     .act-btn.view {
-        background: #d9faff;
-        color: #0492a9;
-        border-radius: 4px;
-        padding: 4px 6px;
+        color: #11912e;
     }
     .act-btn.delete {
-        background: #ffdcdc;
         color: #ff4949;
-        border-radius: 4px;
-        padding: 4px 6px;
     }
 
     .act-btn:hover {
         opacity: 0.85;
         transform: translateY(-1px);
     }
-.action-col {
-    text-align: center;
-}
+
+    .erp-btn {
+        border: none;
+        background: none;
+        cursor: pointer;
+        margin: 0 3px;
+        font-size: 13px;
+    }
+
+        .erp-btn.view {
+            color: #266e2a;
+            background-color: #d3ffd5;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .erp-btn.delete {
+            color: #fc6180;
+            background-color: #ffd2db;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
 .report-type-switch {
     display: inline-flex;
     align-items: center;
@@ -504,14 +504,11 @@
 }
 /* ================= FIXED GRID TABLE ================= */
 .fixed-grid-table {
-    width: 100%;
-    table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
+    position: relative;
 }
-
-
-
+    
     /* Fixed cells */
     .fixed-grid-table th,
     .fixed-grid-table td {
@@ -519,7 +516,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
         border: 1px solid #d3d3d3;
-
     }
 
     /* Header */
@@ -527,25 +523,65 @@
         padding: 6px 8px !important;
     }
 
-    /* Body */
-    .fixed-grid-table td {
-        padding: 2px 6px !important;
-    }
 
     /* Prevent form controls from stretching columns */
     .fixed-grid-table input,
     .fixed-grid-table select,
     .fixed-grid-table textarea {
-        width: 100% !important;
+        /*width: 100% !important;*/
         min-width: 0 !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
+        scroll-margin-right: 120px; /* keeps action column visible */
     }
 
 /* Wrapper scroll */
 .fixed-grid-wrapper {
     overflow-x: auto;
     position: relative;
+}
+/*Fixed table Grid Entry*/
+.erppagetable-control {
+    display: block;
+    line-height: 1.25;
+    background-image: none;
+    background-clip: padding-box;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    height: 25px;
+    border-radius: 3px !important;
+    padding: 2px 6px;
+    font-size: 12px;
+    border:none!important;
+}
+
+    .erppagetable-control:focus, .form-select:focus {
+        border: 1px solid #1c5e31 !important;
+        background-color: #fff3e0 !important;
+    }
+
+    .erppagetable-control:focus {
+        color: #495057;
+        background-color: #fff;
+        border-color: #80bdff;
+        outline: 0;
+    }
+/* Single Select */
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border: 1px solid #1c5e31 !important;
+    /*background-color: #fff3e0 !important;*/
+    outline: none !important;
+}
+
+/* Multiple Select */
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+    border: 1px solid #1c5e31 !important;
+    background-color: #fff3e0 !important;
+    outline: none !important;
+}
+button:focus {
+    outline: 1px dotted;
 }
 /* TOASTER ITEM */
 .erp-toast {
@@ -574,6 +610,27 @@
         font-weight: bold;
         font-size: 14px;
     }
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toast-ok-btn {
+    margin-left: 10px;
+    padding: 4px 12px;
+    border: none;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+    .toast-ok-btn:hover {
+        background: #f1f1f1;
+    }
 /* RESIZER */
 .resizer {
     width: 5px;
@@ -584,34 +641,37 @@
     cursor: col-resize;
 }
 
-th {
-    position: relative;
-}
-
 .fixed-grid-table td.action-col {
     overflow: visible !important;
+    gap: 6px;
 }
-
+.fixed-grid-wrapper,
 .excel-wrapper,
+.erppagelist-container {
+    overflow-x: auto !important;
+    overflow-y: auto;
+    position: relative;
+}
+/*.excel-wrapper,
 .erppagelist-container,
 .fixed-grid-wrapper {
     overflow: visible;
-}
+}*/
 /* Zebra striping for all excel-table rows with light grey shades */
 .excel-table tbody tr:nth-child(even) td,
 .excel-table tbody tr:nth-child(even) th {
-    background-color: #f9f9f9; /* very light grey */
+    background-color: #f9f9f9; 
 }
 
 .excel-table tbody tr:nth-child(odd) td,
 .excel-table tbody tr:nth-child(odd) th {
-    background-color: #f0f0f0; /* white */
+    background-color: #e4f1ff;
 }
 
 /* Hover effect for full row including action column */
 .excel-table tbody tr:hover td,
 .excel-table tbody tr:hover th {
-    background-color: #e6e6e6; /* slightly darker grey on hover */
+    background-color: #e6e6e6; 
 }
 /* ACTION COLUMN FREEZE (FINAL) */
 .fixed-grid-table td.action-col {
@@ -619,30 +679,53 @@ th {
 }
 .fixed-grid-table thead th.action-col {
     z-index: 99;
-   
+    background: linear-gradient(135deg, #232323, #0f0f0f);
+    color: #fff;
 }
 .fixed-grid-table tbody tr:hover td.action-col {
     background: #f2f2f2;
 }
-.fixed-grid-table th.action-col,
+/*.fixed-grid-table th.action-col,
 .fixed-grid-table td.action-col {
     position: sticky;
     right: 0;
     width: 140px !important;
     background: #fff;
     z-index: 10;
-    padding: 6px 0px !important;
+    padding: 6px 0px !important;*/
     /* CENTER EVERYTHING */
-    text-align: center !important;
+    /*text-align: center !important;
     vertical-align: middle !important;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 6px;
+}*/
+.fixed-grid-table th.action-col,
+.fixed-grid-table td.action-col {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 20;
+    /* IMPORTANT: remove flex */
+    display: table-cell;
+    text-align: center !important;
+    vertical-align: middle !important;
+    white-space: nowrap;
+    width: 120px; /* fixed width solves mismatch */
+    min-width: 120px;
+    max-width: 120px;
+    box-shadow: -4px 0 6px rgba(0,0,0,0.08);
 }
 
-/* HEADER ABOVE EVERYTHING */
-.fixed-grid-table th.action-col {
+.action-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+    /* HEADER ABOVE EVERYTHING */
+    .fixed-grid-table th.action-col {
     z-index: 999;
     background: linear-gradient(135deg, #232323, #0f0f0f);
 }
@@ -660,8 +743,7 @@ th {
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-   /* margin-top: 10px;*/
-    padding: 8px 6px;
+    padding: 8px;
     background: #fff;
     border-radius: 8px;
 }
@@ -705,9 +787,8 @@ th {
 /* Improve scroll behavior */
 .erppagelist-container::-webkit-scrollbar,
 .excel-wrapper::-webkit-scrollbar {
-    width: 6px; /* vertical scrollbar width */
-
-    height: 6px;
+    width: 8px; /* vertical */
+    height: 10px; /* horizontal (increase this) */
 }
 
 .erppagelist-container::-webkit-scrollbar-thumb,
@@ -785,7 +866,6 @@ th {
 
     /* Remove default button margins */
     .fixed-grid-table td.action-col .act-btn {
-        margin: 0 !important;
         display: inline-flex;
         align-items: center;
         justify-content: center;

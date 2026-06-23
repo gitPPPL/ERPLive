@@ -91,6 +91,7 @@
             public string? APROV_STATUS { get; set; }
             public string? APROV_REMARKS { get; set; }
             public int? STATUS { get; set; }
+            public string? MONTHLY { get; set; }
 
         }
 
@@ -98,6 +99,7 @@
         {
             public string? FILE_NAME { get; set; }
             public string? FILE_Path { get; set; }
+            public string FILE_DATA { get; set; }
 
         }
 

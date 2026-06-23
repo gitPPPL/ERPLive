@@ -100,26 +100,26 @@ body {
 .ERPPageLayout-company-info {
     margin: 14px 16px 8px;
     padding: 12px 14px;
-    background: linear-gradient(135deg,#1f1f1f,#262626);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(135deg, #1f1f1f, #262626);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    gap: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
 
 .ERPPageLayout-company-icon {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.08);
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #8dd9a2;
-    font-size: 18px;
+    font-size: 14px;
 }
 
 .ERPPageLayout-company-details {
@@ -127,7 +127,7 @@ body {
 }
 
     .ERPPageLayout-company-details h3 {
-        font-size: 14px;
+        font-size: 12px;
         color: #ffffff;
         margin-bottom: 2px;
         white-space: nowrap;
@@ -145,7 +145,7 @@ body {
 /* SEARCH */
 
 .ERPPageLayout-search {
-    padding: 15px 20px;
+    padding: 5px 15px;
     position: relative;
 }
 .ERPPageLayout-search-results {
@@ -184,16 +184,16 @@ body {
             background: #edf4ea;
             padding-left: 18px;
         }
-    .ERPPageLayout-search input {
-        width: 100%;
-        height: 35px;
-        border: 1px solid #ccd8c7;
-        border-radius: 12px;
-        padding: 0 15px 0 42px;
-        outline: none;
-        font-size: 14px;
-        transition: 0.3s;
-    }
+.ERPPageLayout-search input {
+    width: 100%;
+    height: 30px;
+    border: 1px solid #ccd8c7;
+    border-radius: 30px;
+    padding: 0 15px 0 42px;
+    outline: none;
+    font-size: 13px;
+    transition: 0.3s;
+}
 
         .ERPPageLayout-search input:focus {
             border-color: #1C5E31;
@@ -212,7 +212,7 @@ body {
 
 .ERPPageLayout-menu {
     list-style: none;
-    padding: 12px 14px;
+    padding: 4px 10px;
 }
 
     .ERPPageLayout-menu li {
@@ -242,10 +242,10 @@ body {
     width: 100%;
     text-decoration: none;
     color: #edf4ea;
-    padding: 8px 12px;
+    padding: 6px 8px;
     border-radius: 10px;
     transition: 0.25s;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -262,7 +262,7 @@ body {
         color: #1c5e31;
     }
 
-/* ACTIVE */
+/* ACTIVE */ 
 
 .ERPPageLayout-menu li.active > .ERPPageLayout-menu-link {
     background: linear-gradient(135deg,#1C5E31,#2d7b46);
@@ -308,10 +308,10 @@ body {
             display: flex;
             align-items: center;
             text-decoration: none;
-            padding: 8px 10px;
+            padding: 6px 8px;
             border-radius: 10px;
             color: #edf4ea;
-            font-size: 13px;
+            font-size: 12px;
             transition: 0.25s;
         }
 
