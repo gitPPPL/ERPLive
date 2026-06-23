@@ -14,7 +14,7 @@ var database = window.database || "";
 let PubUserLevel = globalVars.UserLevel;
 let CompCode = globalVars.CompCode;
 let LoginDate = globalVars.LoginDate;
-
+let globalAttachments = [];
 
 const $attachmentTbody = $('#tblAttachmentPS tbody');
 const $dispatchtableTbody = $('#tblPurchaseQuotationList tbody');

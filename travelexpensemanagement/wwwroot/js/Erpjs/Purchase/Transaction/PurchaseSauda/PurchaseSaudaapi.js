@@ -32,12 +32,46 @@ function formatDate(dateStr) {
 }
 
 function collectPurchaseDocumentsData() {
+
     const documents = [];
     let errorMessages = [];
 
-    // ----------------------------
-    // 1. EXISTING FILES (from UI list)
-    // ----------------------------
+    // =================================================
+    // 1. GLOBAL VARIABLE (DB LOADED DATA)
+    // =================================================
+    if (Array.isArray(globalAttachments)) {
+        globalAttachments.forEach(att => {
+
+            if (!att) return;
+
+            documents.push({
+                FileName: att.FileName || att.fileName || "",
+                FilePath: att.FilePath || att.filePath || null,
+                IsNew: false
+            });
+        });
+    }
+
+    // =================================================
+    // 2. UI - NEW ERP STYLE (.erp-file-row)
+    // =================================================
+    $("#fileList .erp-file-row").each(function () {
+
+        const fileName = $(this).data("filename");
+        const filePath = $(this).data("filepath");
+
+        if (fileName && !documents.some(d => d.FileName === fileName)) {
+            documents.push({
+                FileName: fileName,
+                FilePath: filePath || null,
+                IsNew: false
+            });
+        }
+    });
+
+    // =================================================
+    // 3. UI - OLD STYLE (.erppageattachmentsectionfileitem)
+    // =================================================
     $("#fileList .erppageattachmentsectionfileitem").each(function () {
 
         const fileName = $(this)
@@ -45,18 +79,18 @@ function collectPurchaseDocumentsData() {
             .text()
             .trim();
 
-        if (fileName) {
+        if (fileName && !documents.some(d => d.FileName === fileName)) {
             documents.push({
                 FileName: fileName,
-                FilePath: null, // set if you store it in data attribute
+                FilePath: null,
                 IsNew: false
             });
         }
     });
 
-    // ----------------------------
-    // 2. NEW FILES (from input)
-    // ----------------------------
+    // =================================================
+    // 4. NEW FILES FROM INPUT
+    // =================================================
     const fileInput = document.getElementById("fileInput");
 
     if (fileInput && fileInput.files.length > 0) {
@@ -77,9 +111,9 @@ function collectPurchaseDocumentsData() {
         });
     }
 
-    // ----------------------------
-    // 3. ERROR HANDLING
-    // ----------------------------
+    // =================================================
+    // 5. ERROR HANDLING
+    // =================================================
     if (errorMessages.length > 0) {
         toastr.error(errorMessages.join(" "));
         return [];
@@ -87,7 +121,6 @@ function collectPurchaseDocumentsData() {
 
     return documents;
 }
-
 function addAttachmentRow(data = {}) {
     const index = data.index || attachmentIndex++;
     const row = `
@@ -162,23 +195,15 @@ async function LoadFormByID(id) {
             $('#txtDocNo').val(header.v_NO || '');
             $('#TxtDispatchDocNo').val(header.v_NO || '');
             $('#dtDocDate').val(formatDate(header.v_DATE));
-            $('#DispatchDocDate').val(formatDate(header.v_DATE));
-          
+            $('#DispatchDocDate').val(formatDate(header.v_DATE));          
             $('#ddlSupplyFrom').val(header.shiP_TYPE || '');
-
-                //$('#ddlItemName').val(header.iteM_CODE || '');
-                //$('#ddlShipFrom').val(header.shiP_CODE || '');
-                // $('#ddlPartyName').val(header.partY_CODE || '');
-
             $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
             $('#ddlShipFrom').val(header.shiP_CODE || '').trigger('change');
             $('#ddlItemName').val(header.iteM_CODE || '').trigger('change');
-
             $('#txtAddress1').val(header.adD1 || '');
             $('#txtAddress2').val(header.adD2 || '');
             $('#txtAddress3').val(header.adD3 || '');
             $('#txtStation').val( header.citY_CODE || 0);
-
             $('#numTrucks').val(header.trucK_NO || '');
             $('#txtExRate').val(header.exrate || '');
             $('#numDiscount').val(header.disC_PER || '');
@@ -216,20 +241,24 @@ async function LoadFormByID(id) {
             $('#numFreightRate').val(header.frT_RATE || '');
             $('#NumOfferRate').val(header.offerRate || '');
 
-
             const attachBody = $('#fileList');
             attachBody.empty();
 
             if (!attachments || attachments.length === 0) {
                 attachBody.html(`
-        <div class="erp-empty-state text-center text-muted">
-            No attachments found.
-        </div>
-    `);
+                    <div class="erp-empty-state text-center text-muted">
+                        No attachments found.
+                    </div>
+                `);
             } else {
 
-                attachments.forEach((att, idx) => {
+                globalAttachments = res.data.attachment || [];
+                const attachments = globalAttachments;
 
+                console.log("attachments", globalAttachments);
+
+
+                attachments.forEach((att, idx) => {
                     const fileName = att.FileName ?? att.fileName ?? `File_${idx + 1}`;
                     const filePath = att.FilePath ?? att.filePath ?? '';
 
