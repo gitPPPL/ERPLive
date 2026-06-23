@@ -682,11 +682,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
 
 
-                if (action == "UPDATE")
-                {
-                    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "IMG_TABLE", sourceTable: "IMG_TABLE", transactionType: "Transaction",
-                    codeVNo: header.V_NO.ToString(), vtype: "PAUD");
-                }
+                //if (action == "UPDATE")
+                //{
+                //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "IMG_TABLE", sourceTable: "IMG_TABLE", transactionType: "Transaction",
+                //    codeVNo: header.V_NO.ToString(), vtype: "PAUD");
+                //}
 
                 return "Success";
             }

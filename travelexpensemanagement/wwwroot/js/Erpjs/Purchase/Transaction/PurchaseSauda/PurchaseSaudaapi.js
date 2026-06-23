@@ -31,8 +31,6 @@ function formatDate(dateStr) {
     return `${year}-${month}-${day}`;
 }
 
-
-
 function collectPurchaseDocumentsData() {
     const documents = [];
     let errorMessages = [];
@@ -40,23 +38,32 @@ function collectPurchaseDocumentsData() {
     // ----------------------------
     // 1. EXISTING FILES (from UI list)
     // ----------------------------
-    $("#fileList .file-item").each(function () {
-        const fileName = $(this).data("filename");
-        const filePath = $(this).data("filepath");
+    $("#fileList .erppageattachmentsectionfileitem").each(function () {
 
-        if (fileName && filePath) {
+        const fileName = $(this)
+            .find(".erppageattachmentsectionfilename")
+            .text()
+            .trim();
+
+        if (fileName) {
             documents.push({
                 FileName: fileName,
-                FilePath: filePath
+                FilePath: null, // set if you store it in data attribute
+                IsNew: false
             });
         }
     });
 
+    // ----------------------------
+    // 2. NEW FILES (from input)
+    // ----------------------------
     const fileInput = document.getElementById("fileInput");
 
-    if (fileInput && fileInput.files && fileInput.files.length > 0) {
-        Array.from(fileInput.files).forEach((file) => {
-            if (!file.name) {
+    if (fileInput && fileInput.files.length > 0) {
+
+        Array.from(fileInput.files).forEach(file => {
+
+            if (!file || !file.name) {
                 errorMessages.push("Invalid file detected.");
                 return;
             }
@@ -64,12 +71,15 @@ function collectPurchaseDocumentsData() {
             documents.push({
                 FileName: file.name,
                 FilePath: "/attachments/pan/" + file.name,
-                IsNew: true   // optional flag (useful backend side)
+                FileObject: file,
+                IsNew: true
             });
         });
     }
 
-
+    // ----------------------------
+    // 3. ERROR HANDLING
+    // ----------------------------
     if (errorMessages.length > 0) {
         toastr.error(errorMessages.join(" "));
         return [];
@@ -156,9 +166,9 @@ async function LoadFormByID(id) {
           
             $('#ddlSupplyFrom').val(header.shiP_TYPE || '');
 
-            //$('#ddlItemName').val(header.iteM_CODE || '');
-            //$('#ddlShipFrom').val(header.shiP_CODE || '');
-           // $('#ddlPartyName').val(header.partY_CODE || '');
+                //$('#ddlItemName').val(header.iteM_CODE || '');
+                //$('#ddlShipFrom').val(header.shiP_CODE || '');
+                // $('#ddlPartyName').val(header.partY_CODE || '');
 
             $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
             $('#ddlShipFrom').val(header.shiP_CODE || '').trigger('change');
@@ -220,86 +230,51 @@ async function LoadFormByID(id) {
 
                 attachments.forEach((att, idx) => {
 
-                    const fileName = att.fileName || att.FileName || `File_${idx + 1}`;
-                    const filePath = att.filePath || att.FilePath || '';
+                    const fileName = att.FileName ?? att.fileName ?? `File_${idx + 1}`;
+                    const filePath = att.FilePath ?? att.filePath ?? '';
 
                     const extension = fileName.split('.').pop()?.toLowerCase() || '';
 
                     let filePreview = '';
 
-                    // IMAGE PREVIEW
                     if (filePath && ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension)) {
-                        filePreview = `
-                <img src="${filePath}" 
-                     alt="${fileName}" 
-                     class="erp-file-thumbnail" />
-            `;
+                        filePreview = `<span>${extension.toUpperCase()}</span>`;
                     }
-
-                    // PDF
                     else if (extension === 'pdf') {
-                        filePreview = `
-                <i class="fa fa-file-pdf-o" style="font-size:40px;color:#e53935;"></i>
-            `;
+                        filePreview = `<i class="fa fa-file-pdf-o" style="color:#e53935;"></i>`;
                     }
-
-                    // OTHER FILES
                     else {
-                        filePreview = `
-                <i class="fa fa-file-o" style="font-size:40px;color:#555;"></i>
-            `;
+                        filePreview = `<i class="fa fa-file-o"></i>`;
                     }
 
                     const card = `
-            <div class="file-item erp-file-row"
-                 data-filename="${fileName}"
-                 data-filepath="${filePath}">
+                        <div class="file-item erp-file-row"
+                             data-filename="${fileName}"
+                             data-filepath="${filePath}">
 
-                <div class="erp-file-preview">
-                    ${filePreview}
-                </div>
+                            <div class="erp-file-preview">
+                                ${filePreview}
+                            </div>
 
-                <div class="erp-file-info">
-                    <div class="erp-file-name" title="${fileName}">
-                        ${fileName}
-                    </div>
+                            <div class="erp-file-info">
+                                <div class="erp-file-name">${fileName}</div>
+                                <div class="erp-file-type">${extension.toUpperCase() || 'FILE'}</div>
+                            </div>
 
-                    <div class="erp-file-type">
-                        ${extension.toUpperCase() || 'FILE'}
-                    </div>
-                </div>
+                            <div class="erp-file-actions">
+                                <a href="${filePath}" target="_blank" class="erp-view-btn">View</a>
 
-                <div class="erp-file-actions">
-                    <a href="${filePath}" target="_blank" class="erp-view-btn">
-                        View
-                    </a>
+                                <button type="button"
+                                        class="erp-delete-btn btn-delete-attachment">
+                                    Delete
+                                </button>
+                            </div>
 
-                    <button type="button" class="erp-delete-btn btn-delete-attachment">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-
-            </div>
-        `;
+                        </div>
+                        `;
 
                     attachBody.append(card);
                 });
-            }
-
-
-            $dispatchtableTbody.empty();
-            if (DispatchDetails.length === 0) {
-                addPurchaseQuotationRow();
-            } else {
-                for (const Dispatch of DispatchDetails) {
-                    addPurchaseQuotationRow({
-                        icode: Dispatch.itemCode || '',
-                        itemName: Dispatch.itemName || '',
-                        delDate: Dispatch.deliveryDate ? formatDate(Dispatch.deliveryDate) : '',
-                        quantity: Dispatch.qty || '',
-                        remarks: Dispatch.remarks || ''
-                    });
-                }
             }
 
         } else {
