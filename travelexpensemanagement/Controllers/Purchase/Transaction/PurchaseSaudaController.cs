@@ -530,6 +530,15 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                 conn.Open();
 
+
+
+                if (action == "UPDATE")
+                {
+                    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "SAUDA", sourceTable: "SAUDA", transactionType: "Transaction",
+                    codeVNo: header.V_NO.ToString(), vtype: "PAUD");
+                }
+
+
                 using (var cmd = new SqlCommand("sp_PurchaseSauda", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -603,6 +612,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.ExecuteNonQuery();
                 }
 
+
+         
                 string deletePRequest2Sql = @"  DELETE FROM IMG_TABLE   WHERE COMP_CODE = @CompCode 
                     AND V_NO = @VNo  AND BRANCH_CODE = @BranchCode  AND YEAR_CODE = @YearCode;";
 
@@ -615,6 +626,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     deletePRequest2Cmd.Parameters.AddWithValue("@YearCode", globalVaraible.PubFYearCode);
                     deletePRequest2Cmd.ExecuteNonQuery();
                 }
+
 
                 foreach (var Attachment in Attachments)
                 {
@@ -669,6 +681,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     }
                 }
 
+
+                if (action == "UPDATE")
+                {
+                    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "IMG_TABLE", sourceTable: "IMG_TABLE", transactionType: "Transaction",
+                    codeVNo: header.V_NO.ToString(), vtype: "PAUD");
+                }
 
                 return "Success";
             }
@@ -962,8 +980,27 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
 
 
+        public JsonResult FinalUser(int v_no)
+        {
+            var globalVaraible = _globalVariableService.GetGlobalVariables();
+            string  FinalUser = GetText("select APPROV_USER from DOC_APPROSTAGE where  USER_CODE = " + globalVaraible.PubUserId + "  ");
+
+            using var con = _dbConnection.GetConDbConnection();
+
+                    string imgQuery = @" SELECT IMGDATABASE_NAME  FROM COMP_MAST  WHERE CODE = @Code";
+
+                    using var cmd = new SqlCommand(imgQuery, con);
+                    cmd.Parameters.AddWithValue("@Code", globalVaraible.PubCompCode);
+
+                    con.Open();
+                    var result = cmd.ExecuteScalar();
+
+            string modificationcount = GetText("select count(*) from  "+ result + ".dbo.SAUDA where V_NO = " + v_no + " and V_TYPE = 'PAUD' and COMP_CODE = " + globalVaraible.PubCompCode + "  and YEAR_CODE = " + globalVaraible.PubFYearCode + "  and BRANCH_CODE = " + globalVaraible.PubBranchCode + "  ");
+
+            return Json(new { FinalUser = FinalUser , modificationcount = modificationcount });
 
 
+        }
 
     }
 }

@@ -753,5 +753,72 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+
+        [HttpGet]
+        public async Task<object> GetModificationData(int V_NO)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+            var Datalist = new List<object>();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd3 = new SqlCommand("[dbo].[sp_PurchaseSauda]", con))
+                    {
+                        cmd3.CommandType = CommandType.StoredProcedure;
+                        cmd3.Parameters.AddWithValue("@Action", "MODIFICATIONHISTORY");
+                        cmd3.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd3.Parameters.AddWithValue("@V_NO", V_NO);
+
+                        using (SqlDataReader rdr = cmd3.ExecuteReader())
+                        {
+                            if (rdr.HasRows)
+                            {
+                                while (rdr.Read())
+                                {
+                                    var PARTY_CODE = rdr["PARTY_CODE"]?.ToString();
+                                    var SaudaNo = rdr["SaudaNo"]?.ToString();
+                                    var Party = rdr["Party"]?.ToString();
+                                    var ItemName = rdr["ItemName"]?.ToString();
+                                    var Qty = rdr["Qty"]?.ToString();
+                                    var Rate = rdr["Rate"]?.ToString();
+                                    var Remark = rdr["Remark"]?.ToString();
+                                    var ModifyDate = rdr["ModifyDate"]?.ToString();
+                          
+                                    if (!string.IsNullOrEmpty(PARTY_CODE) && !string.IsNullOrEmpty(PARTY_CODE))
+                                    {
+                                        Datalist.Add(new
+                                        {
+                                            SaudaNo = SaudaNo,
+                                            Party = Party,
+                                            ItemName = ItemName,
+                                            Qty = Qty,
+                                            Rate = Rate,
+                                            Remark = Remark,
+                                            ModifyDate = ModifyDate
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return (new { success = true, data = Datalist });
+            }
+            catch (Exception ex)
+            {
+                return (new { success = false, message = "Error fetching attachment data", error = ex.Message });
+            }
+        }
+
+
+
+
+
+
     }
 }

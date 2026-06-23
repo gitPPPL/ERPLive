@@ -30,6 +30,9 @@ function formatDate(dateStr) {
 
     return `${year}-${month}-${day}`;
 }
+
+
+
 function collectPurchaseDocumentsData() {
     const documents = [];
     let errorMessages = [];
@@ -1095,6 +1098,99 @@ async function GetTaxRate( taxrate) {
 
 
         return res;
+
+    } catch (error) {
+        console.error("Error fetching payment term:", error);
+    }
+}
+
+
+async function loadModificationdata() {
+
+    try {
+        const V_NO = $('#txtDocNo').val()?.trim();
+        const V_date = $('#dtDocDate').val()?.trim();
+
+        if (!V_NO) {
+            toastr.info("Please enter document number");
+            return;
+        }
+
+        const res = await $.ajax({
+            url: '/PurchaseSaudaList/GetModificationData',
+            method: 'GET',
+            data: { V_NO: V_NO }
+        });
+
+        console.log("Full response:", res);
+
+        if (res.success) {
+
+            const data = res.data || [];
+
+            if (!data || data.length === 0) {
+                toastr.info("Purchase Modification Not Found For this Doc No = " + V_NO + " and Doc Date " + V_date);
+                return;
+            }
+            renderPurchaseModification(data);
+        }
+
+    } catch (err) {
+        console.error("AJAX Error:", err);
+        toastr.info("Something went wrong while fetching data");
+    }
+}
+
+function renderPurchaseModification(data) {
+    console.log("Rendering Purchase Modification Data:", data);
+    const tbody = $('#modificationList tbody');
+    tbody.empty();
+
+    if (!data || data.length === 0) {
+        tbody.append(`
+            <tr>
+                <td colspan="4" class="text-center">No data found</td>
+            </tr>
+        `);
+    } else {
+        data.forEach(item => {
+            tbody.append(`
+                <tr>
+                    <td>${item.saudaNo ?? ''}</td>
+                    <td>${item.party ?? ''}</td>
+                    <td>${item.itemName ?? ''}</td>
+                    <td>${item.qty ?? ''}</td>
+                    <td>${item.rate ?? ''}</td>
+                    <td>${item.remark ?? ''}</td>
+                    <td>${item.modifyDate ?? ''}</td>
+                </tr>
+            `);
+        });
+    }
+
+    const modalElement = document.getElementById('modificationModal');
+    const myModal = new bootstrap.Modal(modalElement);
+    myModal.show();
+}
+
+async function GetFinalUser(v_no) {
+    try {
+        const res = await $.ajax({
+            url: '/PurchaseSauda/FinalUser',
+            type: 'GET',
+            data: { v_no: v_no },
+            dataType: 'json'
+        });
+
+        console.log("dd", res);
+
+        if (res.finalUser && res.finalUser.toUpperCase() === "FINAL") {    
+            $("#btn_ModificationOrder").show();       
+            $("#modification_count")  .show() .text("Modification(" + (res.modificationcount || 0) + ")");
+        } else {
+            $("#btn_ModificationOrder").hide();
+            $("#modification_count").hide().text("");
+        }
 
     } catch (error) {
         console.error("Error fetching payment term:", error);

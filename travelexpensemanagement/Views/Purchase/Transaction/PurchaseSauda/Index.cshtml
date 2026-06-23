@@ -410,9 +410,13 @@
                     <i class="fa-solid fa-truck"></i>
                     <span>Create/View Delivery Plan</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-common" id="btn_CreatePurchaseOrder">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn_CreatePurchaseOrder">
                     <i class="fa-solid fa-file-invoice"></i>
                     <span>Create Purchase Order</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common" id="btn_ModificationOrder" style="display:none;">
+                   <i class="fa fa-pencil-square-o"></i>
+                    <span id="modification_count" style="display:none;"></span>
                 </button>
             </div>
         </fieldset>
@@ -522,6 +526,55 @@
                                 <th>Bill Date</th>
                                 <th>Quantity</th>
                                 <th>Party Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>   
+
+<div class="modal fade" id="modificationModal" tabindex="-1" aria-labelledby="modificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                       <i class="fa fa-pencil-square-o"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="modificationModalLabel">Modification</h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+               
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="modificationList" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">  
+                            <col style="width:200px;">  
+                            <col style="width:200px;">  
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:250px;">  
+                            <col style="width:150px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Sauda No</th>
+                                <th>Party Name</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Rate</th>
+                                <th>Remarks</th>
+                                <th>Modify Date</th>
                             </tr>
                         </thead>
                         <tbody>

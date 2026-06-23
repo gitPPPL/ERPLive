@@ -36,12 +36,12 @@ $(document).ready(async function () {
 
     if (!rowId) {
         await GetVNo();
-
         document.getElementById('DispatchDocDate').valueAsDate = new Date();
     }
     else {
-        document.getElementById("ddlPartyName").disabled = true;
+      
 
+        document.getElementById("ddlPartyName").disabled = true;
         if (mode === "view") {
             setFormReadOnly();
             $('#PurchaseRequestForm').after(
@@ -54,6 +54,12 @@ $(document).ready(async function () {
     LoadDropDown() .then(() => {
             if (rowId) {
                 return LoadFormByID(rowId).then(() => {
+
+                   const v_no = $('#txtDocNo').val(); 
+
+                    GetFinalUser(v_no);
+
+
                     const selectedValue = $('#ddlSupplyFrom').val();
 
                     if (selectedValue === "IMPORT") {
@@ -103,7 +109,6 @@ $(document).ready(async function () {
             $('#GradeID').html('Grade');
         }
     });
-
 
     $('#numRate, #numDiscount,  #ddlTaxRate').on('change', recalculateNetRate);
 
@@ -454,6 +459,10 @@ $(document).ready(async function () {
         }
     });
 
+
+    $('#btn_ModificationOrder').on('click', function () {
+        loadModificationdata();
+    });
 
 });
 
