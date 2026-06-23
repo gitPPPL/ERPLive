@@ -378,3 +378,33 @@ async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO, typeText) {
   
     }
 }
+
+
+
+function SetFYDate(inputId, loginDate) {
+    var $input = $('#' + inputId);
+    var d = new Date(loginDate);
+
+    // Determine the financial year start year
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+
+    var minDate = fyStartYear + '-04-01';  // FY start
+    var maxDate = loginDate;               // Cannot select beyond login date
+
+    // Set attributes and default value
+    $input.attr('min', minDate)
+        .attr('max', maxDate)
+        .val(maxDate);
+
+    // Validate user input
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
+}

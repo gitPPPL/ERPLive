@@ -1,4 +1,5 @@
 ﻿
+using DocumentFormat.OpenXml.Presentation;
 using iTextSharp.text;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transaction;
+using UglyToad.PdfPig.Content;
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseSaudaController : Controller
@@ -54,7 +56,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return View("~/Views/Purchase/Transaction/PurchaseSauda/Index.cshtml");
         }
 
-        public JsonResult GetVNo()
+        public JsonResult GetVNo(String v_type = "PAUD" , string TableName = "SAUDA")
         {
             string newV_NO = "00000";
 
@@ -72,11 +74,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
                     string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
 
-                    string lastV_NO_Query = "SELECT MAX(V_NO) FROM SAUDA WHERE COMP_CODE = @CompCode AND YEAR_CODE = @YearCode  and SAUDA.BRANCH_CODE = @BRANCH_CODE and V_TYPE = 'PAUD'   ";
+                    string lastV_NO_Query = "SELECT MAX(V_NO) FROM "+  TableName +" WHERE COMP_CODE = @CompCode AND YEAR_CODE = @YearCode  and BRANCH_CODE = @BRANCH_CODE and V_TYPE = @v_type ";
                     SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
                     lastVnoCmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
                     lastVnoCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                    lastVnoCmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    lastVnoCmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+                    lastVnoCmd.Parameters.AddWithValue("@TableName", TableName);
+                    lastVnoCmd.Parameters.AddWithValue("@v_type", v_type);
+
 
                     object result = lastVnoCmd.ExecuteScalar();
 
@@ -110,6 +115,19 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 var PartyList = _dropdownService.GetDropdownList(query);
 
                 return Json(PartyList);
+            }
+
+        }
+        public JsonResult DDLstatus()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document' Order by CODE ";
+
+                var DDLstatus = _dropdownService.GetDropdownList(query);
+
+                return Json(DDLstatus);
             }
 
         }
@@ -349,8 +367,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     return StatusCode(500, new { success = false, message = ex.Message });
                 }
             }
-
         }        
+
         private void SaveDispatchDeliveryData(SqlConnection connection, SqlTransaction transaction, DispatchDeliveryPlaning dispatch)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -536,7 +554,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.Parameters.AddWithValue("@ITEM_CODE", header.ITEM_CODE);
                     cmd.Parameters.AddWithValue("@TRUCK_NO", header.TRUCK_NO);
                     cmd.Parameters.AddWithValue("@Waste_Per", header.WASTE_PER);
-                    cmd.Parameters.AddWithValue("@QTY", header.QTY);
+                    cmd.Parameters.AddWithValue("@HQTY", header.QTY);
                     cmd.Parameters.AddWithValue("@RATE", header.RATE);
                     cmd.Parameters.AddWithValue("@EXRATE", header.EXRATE);
                     cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);
@@ -732,10 +750,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return new JsonResult(new { success = true });
         }
 
-
-
-
-
         [HttpPost]
         public async Task<IActionResult> CreatePurchaseOrder([FromBody] PurchaseOrderDto model)
         {
@@ -744,6 +758,37 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                 var globalVaraible = _globalVariableService.GetGlobalVariables();
 
+                int V_NO = 0;
+                var jsonResult = GetVNo("RORD" , "order1") as JsonResult;
+                dynamic data = jsonResult.Value;
+                V_NO = Convert.ToInt32(data.V_NO);
+
+
+                string docid = "RORD" + V_NO;
+
+
+                decimal basicAmt = Math.Round((model.Qty ?? 0m) * (model.indrate ?? 0m), 2);
+                string csgstper = GetText("select isnull(CGST_PER,0) from TAX_MAST where Code=" + model.taxrate + " ");
+                string igstper = GetText("select isnull(IGST_PER,0) from TAX_MAST where Code=" + model.taxrate + " ");
+                string vatper = GetText("select isnull(VAT_PER,0) from TAX_MAST where Code=" + model.taxrate + " ");
+
+                decimal cgstPer = Convert.ToDecimal(csgstper);
+                decimal igstPer = Convert.ToDecimal(igstper);
+                decimal cvatper = Convert.ToDecimal(vatper);                            
+
+                // CGST
+                decimal cgstAmt = Math.Round(basicAmt * cgstPer / 100m, 2);
+
+                // SGST (same as CGST)
+                decimal sgstAmt = Math.Round(basicAmt * cgstPer / 100m, 2);   
+                // IGST
+                decimal igstAmt = Math.Round(basicAmt * igstPer / 100m, 2);
+
+                decimal VAT_AMT = Math.Round(basicAmt * cvatper / 100m, 2);
+
+                decimal netAmt = basicAmt + cgstAmt + sgstAmt + igstAmt + VAT_AMT;
+
+                decimal LandRate = Math.Round(netAmt / (model.Qty ?? 1m), 2);   
 
                 using var con = _dbConnection.GetErpConnection();        
                 {
@@ -753,14 +798,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                         // ---------------- COMMON ----------------
                         cmd.Parameters.AddWithValue("@Action", "CreatePurcOrder");
-
-                        cmd.Parameters.AddWithValue("@COMP_CODE", model.CompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", model.BranchCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", model.YearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", model.VType ?? "RORD");
-                        cmd.Parameters.AddWithValue("@V_NO", model.VNo);
-                        cmd.Parameters.AddWithValue("@DOC_ID", model.DocId);
-                        cmd.Parameters.AddWithValue("@V_DATE", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);           
+                        cmd.Parameters.AddWithValue("@V_NO", V_NO);           
+                        cmd.Parameters.AddWithValue("@DOC_ID", docid);           
                         // ---------------- HEADER ----------------
                         cmd.Parameters.AddWithValue("@PARTY_CODE", model.PartyCode);
                         cmd.Parameters.AddWithValue("@BILL_ADD1", model.BillAdd1 ?? "");
@@ -781,29 +823,47 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@PLACE_CODE", model.PlaceCode);
                         cmd.Parameters.AddWithValue("@PRICE_TYPE", model.PriceType ?? "");
                         cmd.Parameters.AddWithValue("@IMPORT_CURRENCY", model.Currency ?? "");
-
                         // ---------------- QUANTITY / AMOUNT ----------------
                         cmd.Parameters.AddWithValue("@NOS", model.Nos);
                         cmd.Parameters.AddWithValue("@QTY", model.Qty);
-                        cmd.Parameters.AddWithValue("@AMOUNT", model.Amount);
-                        cmd.Parameters.AddWithValue("@PACK_AMT", model.PackAmt);
-                        cmd.Parameters.AddWithValue("@DISC_AMT", model.DiscAmt);
-                        cmd.Parameters.AddWithValue("@CGST_AMT", model.CgstAmt);
-                        cmd.Parameters.AddWithValue("@SGST_AMT", model.SgstAmt);
-                        cmd.Parameters.AddWithValue("@IGST_AMT", model.IgstAmt);
-                        cmd.Parameters.AddWithValue("@TCS_PER", model.TcsPer);
-                        cmd.Parameters.AddWithValue("@TCS_AMT", model.TcsAmt);
-                        cmd.Parameters.AddWithValue("@OTH_AMT", model.OtherAmt);
-                        cmd.Parameters.AddWithValue("@NET_AMT", model.NetAmt);
+                        cmd.Parameters.AddWithValue("@AMOUNT", basicAmt);
+                        cmd.Parameters.AddWithValue("@PACK_AMT", 0);              
+                        cmd.Parameters.AddWithValue("@CGST_AMT", cgstAmt);
+                        cmd.Parameters.AddWithValue("@SGST_AMT", sgstAmt);
+                        cmd.Parameters.AddWithValue("@IGST_AMT", igstAmt);
+                        cmd.Parameters.AddWithValue("@VAT_AMT", VAT_AMT);
+                        cmd.Parameters.AddWithValue("@TCS_PER", 0);
+                        cmd.Parameters.AddWithValue("@TCS_AMT", 0);
+                        cmd.Parameters.AddWithValue("@OTH_AMT", 0);
+                        cmd.Parameters.AddWithValue("@NET_AMT", netAmt);
                         cmd.Parameters.AddWithValue("@DELIVERY_TERM", model.DeliveryTerm ?? "");
                         cmd.Parameters.AddWithValue("@PARTY_REF", model.PartyRef ?? "");
                         cmd.Parameters.AddWithValue("@FAPROV_STATUS", "Approved");
                         cmd.Parameters.AddWithValue("@FAPROV_REMARKS", "Auto Generated PO");
                         cmd.Parameters.AddWithValue("@PAYTERM_CODE", model.PayTermCode);
                         cmd.Parameters.AddWithValue("@REMARKS", model.Remarks ?? "");
-                        cmd.Parameters.AddWithValue("@CDISC_AMT", model.CDiscAmt);
-                        cmd.Parameters.AddWithValue("@AUTOGEN_PO", 1);
+                        cmd.Parameters.AddWithValue("@DISC_AMT", 0);
+                        cmd.Parameters.AddWithValue("@CDISC_AMT", 0);                                 
                         cmd.Parameters.AddWithValue("@STATUS", 1);
+
+                        //---------------- ITEM DETAILS ----------------    
+                        cmd.Parameters.AddWithValue("@ITEM_CODE", model.ITEM_CODE);
+                        cmd.Parameters.AddWithValue("@ITEM_NAME", model.ITEM_NAME);
+                        cmd.Parameters.AddWithValue("@RATE", model.RATE);
+                        cmd.Parameters.AddWithValue("@IMPORT_RATE", model.imprate);
+                        cmd.Parameters.AddWithValue("@CALC_RATE", model.indrate);
+                        cmd.Parameters.AddWithValue("@PACK_PER", 0);
+                        cmd.Parameters.AddWithValue("@DISC_PER", 0);
+                        cmd.Parameters.AddWithValue("@TAX_CODE", model.taxrate);
+                        cmd.Parameters.AddWithValue("@CGST_PER", cgstPer);
+                        cmd.Parameters.AddWithValue("@SGST_PER", cgstPer); ;
+                        cmd.Parameters.AddWithValue("@IGST_PER", igstper);
+                        cmd.Parameters.AddWithValue("@VAT_PER", vatper);
+                        cmd.Parameters.AddWithValue("@CESS_PER", 0);
+                        cmd.Parameters.AddWithValue("@CESS_AMT", 0);
+                        cmd.Parameters.AddWithValue("@LAND_RATE", LandRate);
+                       
+
                         // ---------------- AUDIT ----------------
                         cmd.Parameters.AddWithValue("@UUSER", globalVaraible.PubUserId);
                         cmd.Parameters.AddWithValue("@WSID", globalVaraible.PubWorkStationID ?? "");
@@ -813,6 +873,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         await con.OpenAsync();
                         await cmd.ExecuteNonQueryAsync();
                     }
+
                 }
 
                 return Json(new { status = true, message = "Purchase Order created successfully" });
@@ -823,64 +884,80 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
-
         public class PurchaseOrderDto
         {
-            public int CompCode { get; set; }
-            public int BranchCode { get; set; }
-            public int YearCode { get; set; }
-
-            public string VType { get; set; }
-            public int VNo { get; set; }
-            public string DocId { get; set; }
-            public int PartyCode { get; set; }
-            public string BillAdd1 { get; set; }
-            public string BillAdd2 { get; set; }
-            public string BillAdd3 { get; set; }
-            public int BillCity { get; set; }
-            public string BillPincode { get; set; }
-            public string BillGst { get; set; }
-            public int ShipFrom { get; set; }
-            public string ShipAdd1 { get; set; }
-            public string ShipAdd2 { get; set; }
-            public string ShipAdd3 { get; set; }
-            public int ShipCity { get; set; }
-            public string ShipPincode { get; set; }
-            public string ShipGst { get; set; }
-            public int SaudaNo { get; set; }
-            public int PlaceCode { get; set; }
-            public string PriceType { get; set; }
-            public string Currency { get; set; }
-            public decimal Nos { get; set; }
-            public decimal Qty { get; set; }
-            public decimal Amount { get; set; }
-            public decimal PackAmt { get; set; }
-            public decimal DiscAmt { get; set; }
-            public decimal CgstAmt { get; set; }
-            public decimal SgstAmt { get; set; }
-            public decimal IgstAmt { get; set; }
-            public decimal TcsPer { get; set; }
-            public decimal TcsAmt { get; set; }
-            public decimal OtherAmt { get; set; }
-            public decimal NetAmt { get; set; }
-            public decimal IMPORT_CURRENCY { get; set; }
-
-            public string DeliveryTerm { get; set; }
-            public string PartyRef { get; set; }
-
-            public int PayTermCode { get; set; }
-            public string Remarks { get; set; }
-
-            public decimal CDiscAmt { get; set; }
-
-
-            public string IpAddress { get; set; }
+            public int? CompCode { get; set; }
+            public int? BranchCode { get; set; }
+            public int? YearCode { get; set; }
+            public string? VType { get; set; }
+            public int? VNo { get; set; }
+            public string? DocId { get; set; }
+            public int? PartyCode { get; set; }
+            public string? BillAdd1 { get; set; }
+            public string? BillAdd2 { get; set; }
+            public string? BillAdd3 { get; set; }
+            public int? BillCity { get; set; }
+            public string? BillPincode { get; set; }
+            public string? BillGst { get; set; }
+            public int? ShipFrom { get; set; }
+            public string? ShipAdd1 { get; set; }
+            public string? ShipAdd2 { get; set; }
+            public string? ShipAdd3 { get; set; }
+            public int? ShipCity { get; set; }
+            public string? ShipPincode { get; set; }
+            public string? ShipGst { get; set; }
+            public int? SaudaNo { get; set; }
+            public int? PlaceCode { get; set; }
+            public string? PriceType { get; set; }
+            public string? Currency { get; set; }
+            public decimal? Nos { get; set; }
+            public decimal? Qty { get; set; }
+            public decimal? RATE { get; set; }
+            public decimal? Amount { get; set; }
+            public decimal? PackAmt { get; set; }
+            public decimal? DiscAmt { get; set; }
+            public decimal? CgstAmt { get; set; }
+            public decimal? SgstAmt { get; set; }
+            public decimal? IgstAmt { get; set; }
+            public decimal? TcsPer { get; set; }
+            public decimal? TcsAmt { get; set; }
+            public decimal? OtherAmt { get; set; }
+            public decimal? NetAmt { get; set; }
+            public decimal? IMPORT_CURRENCY { get; set; }
+            public string?  DeliveryTerm { get; set; }
+            public string? PartyRef { get; set; }
+            public int? PayTermCode { get; set; }
+            public string? Remarks { get; set; }
+            public decimal? CDiscAmt { get; set; }
+            public decimal? taxrate { get; set; }
+            public decimal? BasicAmmount { get; set; }
+            public decimal? indrate { get; set; }
+            public decimal? imprate { get; set; }
+            public string? IpAddress { get; set; }
  
+            public int? ITEM_CODE { get; set; }
+            public int? status { get; set; }
+            public string? ITEM_NAME { get; set; }
+
         }
 
 
+        public string Paymentterm(int partyCode)
+        {
+            var globalVaraible = _globalVariableService.GetGlobalVariables();
 
+            string payterm_code = GetText("select isnull(payterm_code,0) from subgroup_mast where code=" + partyCode + " and comp_code=" + globalVaraible.PubCompCode + "");
+
+            return payterm_code;
+        }
+        public string GetTaxRate(int taxrate)
+        {
+            var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+            string GetTaxRate = GetText("Select CGST_PER+SGST_PER+IGST_PER From TAX_MAST Where code=" + taxrate + "");
+
+            return GetTaxRate ;
+        }
 
 
 
@@ -890,3 +967,4 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
     }
 }
+

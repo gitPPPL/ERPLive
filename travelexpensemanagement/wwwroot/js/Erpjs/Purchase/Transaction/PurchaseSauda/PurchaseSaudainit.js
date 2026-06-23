@@ -28,7 +28,7 @@ $(document).ready(async function () {
         addPurchaseQuotationRow();
     });
 
-    addAttachmentRow()
+/*    addAttachmentRow()*/
 
 
     SetFYDate('dtDocDate', LoginDate);
@@ -83,12 +83,16 @@ $(document).ready(async function () {
 
 
     $('#ddlPartyName').on('change', function () {
-        const selectedValue = this.value;
+
+        if (!rowId) {
+            const selectedValue = this.value;
             fetchDDlParty(selectedValue);
             var CountryName = $('#txtCountry').val();
             if (CountryName != 'INDIA') {
                 $('#ddlSupplyFrom').val('LOCAL');
             }
+        }
+              
     });
 
     $('#ddlSupplyFrom').on('change', function () {
@@ -100,27 +104,8 @@ $(document).ready(async function () {
         }
     });
 
-    $('.btn-add-row-last').on('click', function () {
-        const lastRowFileNameInput = $attachmentTbody.find('tr:last input[type="text"]').val();
-        if (lastRowFileNameInput === '') {
-            toastr.warning('Please Select Prevoius Row Attachment.');
-            return;
-        }
-        addAttachmentRow();
-    });
 
     $('#numRate, #numDiscount,  #ddlTaxRate').on('change', recalculateNetRate);
-
-    $(document).on('click', '.btn-add-action', function () {
-
-        const lastRowFileNameInput = $attachmentTbody.find('tr:last input[type="text"]').val();
-        if (lastRowFileNameInput === '') {
-            toastr.warning('Please Select Prevoius Row Attachment.');
-            return;
-        }
-
-        addAttachmentRow();
-    });
 
     $(document).on('click', '.btn-delete-action', function () {
         if (confirm('Are you sure you want to delete this attachment?')) {
@@ -155,7 +140,7 @@ $(document).ready(async function () {
         if (!validateRequiredField('#ddlSupplyFrom', 'Please select a Supply From.')) return;
         if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
         if (!validateRequiredField('#ddlItemName', 'Please select a Item Name.')) return;
-        if (!validateRequiredField('#ddlItemName', 'Please select a Item Name.')) return;
+
         if (!validateRequiredField('#ddlFreightTerm', 'Please Select Freight Term')) return;
         if (!validateRequiredField('#numWeight', 'Please Fill Weight (Kgs) .')) return;
         if (!validateRequiredField('#numRate', 'Please Fill Rate .')) return;
@@ -199,6 +184,7 @@ $(document).ready(async function () {
         const PAYMENT_STATUS = $.trim($('#ddlPaymentType').val()) || "";
         const CURRENCY = $.trim($('#ddlRate').val()) || "";
 
+     
         let SBLC_DUEDATE = null;
         if ($("#chkSBLCDue").is(":checked")) {
             const dateVal = $("#DtSBLCDue").val();
@@ -222,10 +208,9 @@ $(document).ready(async function () {
         const FRT_RATE = parseFloat($('#numFreightRate').val()) || 0;
         const OfferRate = parseFloat($('#NumOfferRate').val()) || 0;
         const PAYTERM_CODE = parseInt($('#ddlPaymentTerm').val()) || 0;
+        const STATUS = parseInt($('#ddlDocStatus').val()) || 0;
         const DEL_TERM = $.trim($('#txtDeliveryTerm').val()) || "";
-        const selectedStatus = $('#ddlDocStatus').val();
-        const STATUS = selectedStatus === 'open' ? 1 : 0;
-        let LC_DUEDATE = null;
+            let LC_DUEDATE = null;
         if ($("#chkDtLCDue").is(":checked")) {
             const dateVal = $("#DtLCDue").val();
             LC_DUEDATE = dateVal ? dateVal : null;
@@ -305,7 +290,7 @@ $(document).ready(async function () {
         const documentData = collectPurchaseDocumentsData();
 
         if (SHIP_TYPE === "IMPORT") {
-            if (GRADE === "-- Select Grade --" || !GRADE) {
+            if (!GRADE) {
                 toastr.warning("Please Select Grade.");
                 return;
             }
@@ -334,7 +319,13 @@ $(document).ready(async function () {
 
                 if (response.success) {
                     toastr.success("Saved successfully!");
-                    setTimeout(() => window.location.href = '/PurchaseSaudaList/Index', 1000);
+
+
+                    setTimeout(function () {
+                        window.location.href = '/PurchaseSauda/Index?id=' + V_NO + '&VType=' + encodeURIComponent('Paud');
+                            //+
+                            //'&mode=view';
+                    }, 3000);
 
                 } else {
                     toastr.error(response.message || "Save failed.");
@@ -442,4 +433,30 @@ $(document).ready(async function () {
         CheckOutherrised(partycode);
     });
 
+    $('#btn_ShowPuchasehistory').on('click', function () {
+        loadPurchaseHistory();
+    });
+
+
+    $('#ddlPaymentTerm').on('change', function () {
+   
+        var PAYTERM_CODE  = $('#ddlPaymentTerm').val();
+        var partyCode = $('#ddlPartyName').val();
+        if (partyCode) {
+            paymentterm(partyCode, PAYTERM_CODE );
+        }
+    });
+
+    $('#ddlTaxRate').on('change', function () {
+        var taxrate = $('#ddlTaxRate').val();
+        if (taxrate) {
+            GetTaxRate(taxrate);
+        }
+    });
+
+
 });
+
+
+
+

@@ -170,14 +170,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                         PARTY_TO = rdr["PARTY_TO"]?.ToString(),
                                         ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
                                         TRUCK_NO = rdr["TRUCK_NO"] != DBNull.Value ? Convert.ToInt32(rdr["TRUCK_NO"]) : 0,
-                                        EXRATE = rdr["EXRATE"] != DBNull.Value ? Convert.ToInt32(rdr["EXRATE"]) : 0,
-                                        DISC_PER = rdr["DISC_PER"] != DBNull.Value ? Convert.ToInt32(rdr["DISC_PER"]) : 0,
-                                        FRT_RATE = rdr["FRT_RATE"] != DBNull.Value ? Convert.ToInt32(rdr["FRT_RATE"]) : 0,
+                                        EXRATE = rdr["EXRATE"] != DBNull.Value ? Convert.ToDecimal(rdr["EXRATE"]) : 0,
+                                        DISC_PER = rdr["DISC_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["DISC_PER"]) : 0,
+                                        FRT_RATE = rdr["FRT_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["FRT_RATE"]) : 0,
                                         REMARK = rdr["REMARK"]?.ToString(),
                                         PINO  = rdr["PINO"]?.ToString(),
                                         PIDATE = rdr["PIDATE"] != DBNull.Value ? Convert.ToDateTime(rdr["PIDATE"]) : DateTime.MinValue,
                                         OFFERNO = rdr["OFFERNO"]?.ToString(),
-                                        BROKER_RATE = rdr["BROKER_RATE"] != DBNull.Value ? Convert.ToInt64(rdr["BROKER_RATE"]) : 0,
+                                        BROKER_RATE = rdr["BROKER_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["BROKER_RATE"]) : 0,
                                         BROKER = rdr["BROKER"] != DBNull.Value ? Convert.ToInt32(rdr["BROKER"]) : 0,
                                         PACK_TYPE = rdr["PACK_TYPE"]?.ToString(),
                                         DISPATCH_FROM =  rdr["DISPATCH_FROM"] != DBNull.Value ? Convert.ToInt32(rdr["DISPATCH_FROM"]) : 0,
@@ -186,14 +186,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                         SBLC_DUEDATE = rdr["SBLC_DUEDATE"] != DBNull.Value ? Convert.ToDateTime(rdr["SBLC_DUEDATE"]) : DateTime.MinValue,
                                         GRADE = rdr["GRADE"]?.ToString(),
                                         ITEM_REMARKS  = rdr["ITEM_REMARKS"]?.ToString(),
-                                        WASTE_PER = rdr["Waste_per"] != DBNull.Value ? Convert.ToInt32(rdr["Waste_per"]) : 0,
-                                        RATE = rdr["RATE"] != DBNull.Value ? Convert.ToInt32(rdr["RATE"]) : 0,
+                                        WASTE_PER = rdr["Waste_per"] != DBNull.Value ? Convert.ToDecimal(rdr["Waste_per"]) : 0,
+                                        RATE = rdr["RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["RATE"]) : 0,
                                         TAX_CODE = rdr["TAX_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["TAX_CODE"]) : 0,
                                         ONLY_NATURAL = rdr["ONLY_NATURAL"] != DBNull.Value ? Convert.ToInt32(rdr["ONLY_NATURAL"]) : 0,
                                         ITEM_TYPE = rdr["ITEM_TYPE"]?.ToString(),
-                                        QTY = rdr["QTY"] != DBNull.Value ? Convert.ToInt32(rdr["QTY"]) : 0,
+                                        QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
                                         FRT_TERM = rdr["FRT_TERM"]?.ToString(),
-                                        NET_RATE = rdr["NET_RATE"] != DBNull.Value ? Convert.ToInt32(rdr["NET_RATE"]) : 0,
+                                        NET_RATE = rdr["NET_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["NET_RATE"]) : 0,
                                         PAYTERM_CODE = rdr["PAYTERM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["PAYTERM_CODE"]) : 0,
                                         DEL_TERM  = rdr["DEL_TERM"]?.ToString(),
                                         STATUS =  rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0,
@@ -203,8 +203,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                         Delivery_From = rdr["Delivery_From"]?.ToString(),
                                         COUNTRY = rdr["COUNTRY"]?.ToString(),
                                         COUNTRY_CODE = rdr["COUNTRY_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["COUNTRY_CODE"]) : 0,
-                                        TAX_RATE = rdr["TAX_RATE"] != DBNull.Value ? Convert.ToInt32(rdr["TAX_RATE"]) : 0,
-                                        OfferRate = rdr["Offer_Rate"] != DBNull.Value ? Convert.ToInt32(rdr["Offer_Rate"]) : 0
+                                        TAX_RATE = rdr["TAX_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["TAX_RATE"]) : 0,
+                                        OfferRate = rdr["Offer_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Offer_Rate"]) : 0
                                        
 
                                 };
@@ -271,7 +271,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     ItemCode = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
                                     ItemName = rdr["ITEM_NAME"]?.ToString(),
                                     DeliveryDate = rdr["DELIVERY_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["DELIVERY_DATE"]) : DateTime.MinValue,
-                                    Qty = rdr["QTY"] != DBNull.Value ? Convert.ToInt32(rdr["QTY"]) : 0,
+                                    Qty = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
                                     Remarks = rdr["Remarks"]?.ToString(),
                                 });
                             }
@@ -296,7 +296,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
-
 
        public JsonResult Deletevalidation(int code, string v_type)
         {
@@ -511,8 +510,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             public string? LID { get; set; }
         }
 
-
-
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
         {
@@ -701,6 +698,60 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        [HttpGet]
+        public async Task<object> GetDataByPurchaseHistory(int V_NO)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+            var Datalist = new List<object>();    
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd3 = new SqlCommand("[dbo].[sp_PurchaseSauda]", con))
+                    {
+                        cmd3.CommandType = CommandType.StoredProcedure;
+                        cmd3.Parameters.AddWithValue("@Action", "ShowPurchaseHistory");                   
+                        cmd3.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);                   
+                        cmd3.Parameters.AddWithValue("@V_NO", V_NO);           
+
+                        using (SqlDataReader rdr = cmd3.ExecuteReader())
+                        {
+                            if (rdr.HasRows)
+                            {
+                                while (rdr.Read())
+                                {
+                                    var Doc_id = rdr["Doc_id"]?.ToString();
+                                    var qty = rdr["qty"]?.ToString();
+                                    var vdate = rdr["v_date"]?.ToString();
+                                    var party_name = rdr["party_name"]?.ToString();
+                  
+
+                                    if (!string.IsNullOrEmpty(party_name) && !string.IsNullOrEmpty(party_name))
+                                    {
+                                        Datalist.Add(new
+                                        {
+                                            Doc_id = Doc_id,
+                                            qty = qty,
+                                            vdate = vdate,
+                                            party_name = party_name                                      
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return (new { success = true, data = Datalist });
+            }
+            catch (Exception ex)
+            {
+                return (new { success = false, message = "Error fetching attachment data", error = ex.Message });
+            }
+        }
 
     }
 }
