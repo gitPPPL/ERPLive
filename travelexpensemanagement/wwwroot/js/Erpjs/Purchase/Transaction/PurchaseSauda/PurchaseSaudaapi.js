@@ -329,7 +329,8 @@ async function fetchDDlParty(PartyId) {
         $('#txtCountry').val(data?.supplier?.country || '');
         $('#txtDeliveryFrom').val(data?.supplier?.name || '');
         $('#ddlShipFrom').val(data?.supplier?.code || '').trigger('change');
-       // $('#ddlShipFrom').val(data?.ddlShipFrom?.code || '');
+ 
+        $('#ddlPaymentTerm').val(data?.partermcode || '');
         $('#ddlFreightTerm').val(data?.sauda?.frtTerm || '');
         $('#txtDeliveryTerm').val(data?.sauda?.delTerm || '');
         $('#ddlItemName').val(data?.sauda?.itemCode || '');
@@ -375,7 +376,7 @@ async function DDLstatus() {
         const res = await fetch('/PurchaseSauda/DDLstatus');
         const data = await res.json();
         const ddl = $('#ddlDocStatus');
-        ddl.empty().append('<option value="">-- Select Status --</option>');
+        ddl.empty().append('');
         data.forEach(item => {
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
@@ -874,6 +875,14 @@ async function createPurchaseOrder(indrate, imprate) {
         });
 
         const result = await response.json();
+        console.log("Result", result);
+
+
+
+        if (result.validation == true) {
+            toastr.warning(result.message);
+            return;
+        }
 
         if (result.status) {
             toastr.success(result.message || "Purchase Order created successfully");
@@ -982,7 +991,6 @@ function renderPurchaseHistory(data) {
     const myModal = new bootstrap.Modal(modalElement);
     myModal.show();
 }
-
 function TransitReport() {
 
     if (!rowId) {
@@ -1108,7 +1116,6 @@ async function GetTaxRate( taxrate) {
     }
 }
 
-
 async function loadModificationdata() {
 
     try {
@@ -1144,7 +1151,6 @@ async function loadModificationdata() {
         toastr.info("Something went wrong while fetching data");
     }
 }
-
 function renderPurchaseModification(data) {
     console.log("Rendering Purchase Modification Data:", data);
     const tbody = $('#modificationList tbody');
@@ -1188,9 +1194,16 @@ async function GetFinalUser(v_no) {
 
         console.log("dd", res);
 
+        if (mode === "view") {
+            $("#btn_ModificationOrder").show();
+            $("#modification_count").show().text("Modification(" + (res.modificationcount || 0) + ")");
+        }        
+
         if (res.finalUser && res.finalUser.toUpperCase() === "FINAL") {    
-            $("#btn_ModificationOrder").show();       
-            $("#modification_count")  .show() .text("Modification(" + (res.modificationcount || 0) + ")");
+
+                $("#btn_ModificationOrder").show();
+                $("#modification_count").show().text("Modification(" + (res.modificationcount || 0) + ")");
+
         } else {
             $("#btn_ModificationOrder").hide();
             $("#modification_count").hide().text("");
@@ -1198,5 +1211,55 @@ async function GetFinalUser(v_no) {
 
     } catch (error) {
         console.error("Error fetching payment term:", error);
+    }
+}
+
+
+async function CheackSendMail() {
+    const v_no = parseInt($('#txtDocNo').val()) || 0;
+    const res = await $.ajax({
+        url: '/PurchaseSauda/CheackMail',
+        type: 'GET',
+        data: { v_no: v_no },
+        dataType: 'json'
+    });
+
+    if (res.status == false) {
+        toastr.warning(res.message);
+        return;
+    }
+
+    Swal.fire({
+        title: "Do you want to send mail?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No"
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            SendMail();
+        }        
+    });
+}
+
+
+async function SendMail() {
+    try {
+
+        let PartyCode = $('#ddlPartyName').val();
+        const vno = parseInt($('#txtDocNo').val()) || 0;
+        const res = await $.ajax({
+            url: '/PurchaseSauda/SendMail',
+            type: 'GET',
+            data: { PartyCode: PartyCode, vno: vno },
+            dataType: 'json'
+        });
+
+        console.log("res", res);
+        return res;
+    } catch (error) {
+        console.error("Error sending mail:", error);
+        return null;
     }
 }

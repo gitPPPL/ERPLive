@@ -7,7 +7,10 @@ using Microsoft.Data.SqlClient;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using StackExchange.Redis;
 using System.Data;
+using System.Net;
+using System.Net.Mail;
 using System.Reflection.Metadata;
+using System.Text;
 using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
@@ -15,6 +18,7 @@ using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using UglyToad.PdfPig.Content;
+
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseSaudaController : Controller
@@ -48,11 +52,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             {
                 databaseName = connection.Database;
             }
-
             ViewBag.GlobalVariables = globalVariables;
             ViewBag.DatabaseName = databaseName;
-
-
             return View("~/Views/Purchase/Transaction/PurchaseSauda/Index.cshtml");
         }
 
@@ -131,7 +132,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
-
         public JsonResult DDLCityMast()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -253,6 +253,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(ItemList);
             }
         }
+
         public JsonResult GetDataByPartyCode(int PartyId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -330,8 +331,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     }
                 }
 
+
+                string partermcode = GetText("select isnull(payterm_code,0) as  payterm_code from subgroup_mast where code=" + PartyId + " and comp_code= " + getdata.PubCompCode + "");
+
+
                 // -------------------- FINAL RESPONSE --------------------
-                return Json(new { Supplier = supplier, Sauda = sauda });
+                return Json(new { Supplier = supplier, Sauda = sauda , partermcode = partermcode });
             }
         }
 
@@ -741,7 +746,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        //cherack outherrization for create purchase order by user level and user menu permission for add
+
         public JsonResult CheckOutherrised(int partycode)
         { 
 
@@ -765,6 +770,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
 
+
+
+      
+
+
             return new JsonResult(new { success = true });
         }
 
@@ -775,6 +785,36 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             {
 
                 var globalVaraible = _globalVariableService.GetGlobalVariables();
+                using var conn = _dbConnection.GetErpConnection();
+                conn.Open();
+
+                        string sql = @"
+                        SELECT Sauda_No
+                        FROM Order1 
+                        WHERE V_type = @VType 
+                        AND Sauda_Type = @SaudaType 
+                        AND Sauda_No = @SaudaNo 
+                        AND Comp_code = @CompCode";
+
+                using var cmd2 = new SqlCommand(sql, conn);
+
+                // IMPORTANT: ensure variables are actually assigned
+                string vType = "RORD";
+                string saudaType = "PAUD";
+
+
+                cmd2.Parameters.AddWithValue("@VType", vType);
+                cmd2.Parameters.AddWithValue("@SaudaType", saudaType);
+                cmd2.Parameters.AddWithValue("@SaudaNo", model.SaudaNo ?? (object)DBNull.Value);
+                cmd2.Parameters.AddWithValue("@CompCode", globalVaraible.PubCompCode);
+
+                var result = cmd2.ExecuteScalar();
+
+                if(result is not null)
+                {
+                    return Json(new { status = false, message = "Order already created of this Sauda." , validation = true });
+                }
+
 
                 int V_NO = 0;
                 var jsonResult = GetVNo("RORD" , "order1") as JsonResult;
@@ -977,9 +1017,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return GetTaxRate ;
         }
 
-
-
-
         public JsonResult FinalUser(int v_no)
         {
             var globalVaraible = _globalVariableService.GetGlobalVariables();
@@ -1001,6 +1038,205 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
 
         }
+
+
+
+        public JsonResult CheackMail(int v_no)
+        {
+            var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+            string FAPROV_STATUS = GetText("select FAPROV_STATUS from SAUDA where FAPROV_STATUS='Approved' and V_TYPE='PAUD' and V_NO=" + v_no + " and " +
+            "COMP_CODE=" + globalVaraible.PubCompCode + " and BRANCH_CODE="  + globalVaraible.PubBranchCode + " and YEAR_CODE=" + globalVaraible.PubFYearCode + " ");
+
+
+            if(FAPROV_STATUS != "Approved")
+            {
+                return Json(new { status = false , message = "Document not approved, Mail not sent." });
+            }
+            else
+            {
+                return Json(new { status = true });
+            }        
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> SendMail(int PartyCode , int vno)
+        {
+            try
+            {
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+                //string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
+                //                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
+
+
+
+                string Mail = "sg256001@gmail.com";
+
+
+
+
+                if (Mail == "")
+                {
+                    return Json(new { success = false, message = "Email address is blank for the selected party." });
+                }
+
+                string compname = GetText("Select COMP_NAME from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
+                string comadd1 = GetText("Select ADD1 from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
+                string comadd2 = GetText("Select ADD2 from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
+
+                string mailBody = "Please find attached Purchase Contract/Order.<br><br><br>";
+                mailBody += "Kindly send us acceptance mail of Purchase Contract/Order within 3 days, otherwise it will be deemed to be accepted.";
+                mailBody += "<br><br>Regards,<br>" + compname + "<br>" + comadd1 + "<br>" + comadd2;
+
+                return await GlobalSendMail("PAUD", vno, Mail,  mailBody,  "" );
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        //[HttpGet]
+        //public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, string ccEmail = "")
+        //{
+        //    try
+        //    {
+        //        string subject = vtype switch
+        //        {
+        //            "PAUD" => "Purchase Contract/Order",
+        //            "PORD" => $"Purchase Order No : {vno}",
+        //            "SAGT" or "SASI" => $"Invoice No : {vno}",
+        //            "BPMS" => "Confirmation of Balance",
+        //            "TASK" => "New Task Received",
+        //            "CLMT" => "Credit Limit Updation",
+        //            _ => $"Document No : {vno}"
+        //        };
+
+        //        using SqlConnection con = _dbConnection.GetErpConnection();
+        //        await con.OpenAsync();
+
+        //        using SqlCommand cmd = new SqlCommand("dbo.usp_SendMail", con);
+        //        cmd.CommandType = CommandType.StoredProcedure;
+
+        //        cmd.Parameters.AddWithValue("@ToEmail", toEmail);
+        //        cmd.Parameters.AddWithValue("@CcEmail", ccEmail ?? "");
+        //        cmd.Parameters.AddWithValue("@Subject", subject);
+        //        cmd.Parameters.AddWithValue("@Body", body);
+
+        //        await cmd.ExecuteNonQueryAsync();
+
+        //        return Json(new { success = true, message = "Mail sent successfully via SQL Server" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = ex.Message });
+        //    }
+        //}
+
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, string ccEmail = "")
+        {
+            try
+            {
+                string host = "";
+                string user = "";
+                string pass = "";
+                char? convpass =null;
+                int port = 0;
+                bool ssl = true;
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    string query = @"SELECT smtp_server, user_id, password, smtp_port, smtp_ussl FROM email_setting1
+                             WHERE comp_code = @comp AND V_TYPE = @vtype";
+
+                    using SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@comp", globalVaraible.PubCompCode);
+                    cmd.Parameters.AddWithValue("@vtype", vtype);
+
+                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    if (!reader.Read())
+                        return Json(new { success = false, message = "Email settings not found" });
+
+                    host = reader["smtp_server"].ToString();
+                    user = reader["user_id"].ToString();
+                      
+
+                     pass = reader["password"].ToString();
+
+
+                    StringBuilder convpass = new StringBuilder();
+
+                    foreach (char ch in pass)
+                    {
+                        convpass.Append((char)(255 - ch));
+                    }
+
+
+                    port = Convert.ToInt32(reader["smtp_port"]);
+                    ssl = Convert.ToBoolean(reader["smtp_ussl"]);
+                }
+
+                    host = "smtp-mail.outlook.com";
+                    user = "noreply@pashupatigrp.com";           
+                    pass = "Apple@213";
+
+                    port = 587;
+                    ssl = true;
+                    using SmtpClient smtp = new SmtpClient(host)
+                {
+                    Port = port,
+                    Credentials = new NetworkCredential(user, pass),
+                    EnableSsl = ssl
+                };
+
+                using MailMessage mail = new MailMessage
+                {
+                    From = new MailAddress(user),
+                    Subject = vtype switch
+                    {
+                        "PAUD" => "Purchase Contract/Order",
+                        "PORD" => $"Purchase Order No : {vno}",
+                        "SAGT" or "SASI" => $"Invoice No : {vno}",
+                        "BPMS" => "Confirmation of Balance",
+                        "TASK" => "New Task Received",
+                        "CLMT" => "Credit Limit Updation",
+                        _ => $"Document No : {vno}"
+                    },
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                mail.To.Add(toEmail);
+
+                if (!string.IsNullOrWhiteSpace(ccEmail))
+                    mail.CC.Add(ccEmail);
+
+                await smtp.SendMailAsync(mail);
+
+                return Json(new { success = true, message = "Mail sent successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+
+      
+
+
 
     }
 }

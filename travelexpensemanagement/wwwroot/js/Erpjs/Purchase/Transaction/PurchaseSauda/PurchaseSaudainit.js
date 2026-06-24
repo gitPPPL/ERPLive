@@ -38,10 +38,8 @@ $(document).ready(async function () {
         await GetVNo();
         document.getElementById('DispatchDocDate').valueAsDate = new Date();
     }
-    else {
-      
+    else {     
 
-        document.getElementById("ddlPartyName").disabled = true;
         if (mode === "view") {
             setFormReadOnly();
             $('#PurchaseRequestForm').after(
@@ -294,16 +292,36 @@ $(document).ready(async function () {
 
         const documentData = collectPurchaseDocumentsData();
 
+        console.log("documentData", documentData);
+
+
+
+
+
         if (SHIP_TYPE === "IMPORT") {
             if (!GRADE) {
                 toastr.warning("Please Select Grade.");
                 return;
             }
 
-            if (!documentData[0].FileName || documentData[0].FileName.trim() === "") {
+            if ((!documentData || documentData.length === 0) &&
+                (!globalAttachments || globalAttachments.length === 0)) {
+
                 toastr.warning("Please Fill Atleast One Row Document Details.");
                 return;
             }
+
+            const hasValidDocument =
+                documentData?.some(x => x.FileName && x.FileName.trim() !== "") || false;
+
+            const hasValidAttachment =
+                globalAttachments?.some(x => x.FileName && x.FileName.trim() !== "") || false;
+
+            if (!hasValidDocument && !hasValidAttachment) {
+                toastr.warning("Please Fill Atleast One Row Document Details.");
+                return;
+            }
+
         }
 
         const payload = {
@@ -327,7 +345,8 @@ $(document).ready(async function () {
 
 
                     setTimeout(function () {
-                        window.location.href = '/PurchaseSauda/Index?id=' + V_NO + '&VType=' + encodeURIComponent('Paud');
+                        window.location.href = '/PurchaseSauda/Index?id=' + V_NO + '&VType=' + encodeURIComponent('Paud') +
+                            '&mode=view';
                             //+
                             //'&mode=view';
                     }, 3000);
@@ -442,7 +461,6 @@ $(document).ready(async function () {
         loadPurchaseHistory();
     });
 
-
     $('#ddlPaymentTerm').on('change', function () {
    
         var PAYTERM_CODE  = $('#ddlPaymentTerm').val();
@@ -459,10 +477,15 @@ $(document).ready(async function () {
         }
     });
 
-
     $('#btn_ModificationOrder').on('click', function () {
         loadModificationdata();
     });
+
+
+    $('#btnMail').on('click', function () {
+        CheackSendMail();
+    });
+
 
 });
 
