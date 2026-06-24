@@ -1060,21 +1060,27 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> SendMail(int PartyCode , int vno)
+        [HttpPost]
+        public async Task<IActionResult> SendMail(int PartyCode , int vno, IFormFile file)
         {
             try
             {
                 var globalVaraible = _globalVariableService.GetGlobalVariables();
 
+
+                if (file == null)
+                    return Json(new { success = false, message = "Report file missing" });
+
+                using var ms = new MemoryStream();
+                file.CopyTo(ms);
+
+                byte[] pdfBytes = ms.ToArray();
+
+
                 //string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
                 //                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
 
-
-
                 string Mail = "sg256001@gmail.com";
-
-
 
 
                 if (Mail == "")
@@ -1083,14 +1089,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
 
                 string compname = GetText("Select COMP_NAME from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
-                string comadd1 = GetText("Select ADD1 from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
-                string comadd2 = GetText("Select ADD2 from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
 
                 string mailBody = "Please find attached Purchase Contract/Order.<br><br><br>";
                 mailBody += "Kindly send us acceptance mail of Purchase Contract/Order within 3 days, otherwise it will be deemed to be accepted.";
-                mailBody += "<br><br>Regards,<br>" + compname + "<br>" + comadd1 + "<br>" + comadd2;
+                mailBody += "<br><br>Regards,<br>" + compname + "<br>" + globalVaraible.Address1 + "<br>" + globalVaraible.Address2;
 
-                return await GlobalSendMail("PAUD", vno, Mail,  mailBody,  "" );
+                return await GlobalSendMail("PAUD", vno, Mail,  mailBody, file ,  "" );
             }
             catch (Exception ex)
             {
@@ -1099,64 +1103,31 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
 
-        //[HttpGet]
-        //public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, string ccEmail = "")
-        //{
-        //    try
-        //    {
-        //        string subject = vtype switch
-        //        {
-        //            "PAUD" => "Purchase Contract/Order",
-        //            "PORD" => $"Purchase Order No : {vno}",
-        //            "SAGT" or "SASI" => $"Invoice No : {vno}",
-        //            "BPMS" => "Confirmation of Balance",
-        //            "TASK" => "New Task Received",
-        //            "CLMT" => "Credit Limit Updation",
-        //            _ => $"Document No : {vno}"
-        //        };
-
-        //        using SqlConnection con = _dbConnection.GetErpConnection();
-        //        await con.OpenAsync();
-
-        //        using SqlCommand cmd = new SqlCommand("dbo.usp_SendMail", con);
-        //        cmd.CommandType = CommandType.StoredProcedure;
-
-        //        cmd.Parameters.AddWithValue("@ToEmail", toEmail);
-        //        cmd.Parameters.AddWithValue("@CcEmail", ccEmail ?? "");
-        //        cmd.Parameters.AddWithValue("@Subject", subject);
-        //        cmd.Parameters.AddWithValue("@Body", body);
-
-        //        await cmd.ExecuteNonQueryAsync();
-
-        //        return Json(new { success = true, message = "Mail sent successfully via SQL Server" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { success = false, message = ex.Message });
-        //    }
-        //}
-
-
-
-
-
-        [HttpGet]
-        public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, string ccEmail = "")
+        [HttpPost]
+        public async Task<IActionResult> GlobalSendMail(
+        string vtype,
+        int vno,
+        string toEmail,
+        string body,
+        IFormFile file,
+        string ccEmail = "")
         {
             try
             {
                 string host = "";
                 string user = "";
                 string pass = "";
-                char? convpass =null;
                 int port = 0;
                 bool ssl = true;
+
                 var globalVaraible = _globalVariableService.GetGlobalVariables();
+
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     await con.OpenAsync();
 
-                    string query = @"SELECT smtp_server, user_id, password, smtp_port, smtp_ussl FROM email_setting1
+                    string query = @"SELECT smtp_server, user_id, password, smtp_port, smtp_ussl 
+                             FROM email_setting1
                              WHERE comp_code = @comp AND V_TYPE = @vtype";
 
                     using SqlCommand cmd = new SqlCommand(query, con);
@@ -1170,30 +1141,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                     host = reader["smtp_server"].ToString();
                     user = reader["user_id"].ToString();
-                      
-
-                     pass = reader["password"].ToString();
-
-
-                    StringBuilder convpass = new StringBuilder();
-
-                    foreach (char ch in pass)
-                    {
-                        convpass.Append((char)(255 - ch));
-                    }
-
-
+                    pass = "Apple@213";
                     port = Convert.ToInt32(reader["smtp_port"]);
                     ssl = Convert.ToBoolean(reader["smtp_ussl"]);
                 }
 
-                    host = "smtp-mail.outlook.com";
-                    user = "noreply@pashupatigrp.com";           
-                    pass = "Apple@213";
-
-                    port = 587;
-                    ssl = true;
-                    using SmtpClient smtp = new SmtpClient(host)
+                using SmtpClient smtp = new SmtpClient(host)
                 {
                     Port = port,
                     Credentials = new NetworkCredential(user, pass),
@@ -1222,6 +1175,23 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 if (!string.IsNullOrWhiteSpace(ccEmail))
                     mail.CC.Add(ccEmail);
 
+                // 🔥 STEP 1: ADD ATTACHMENT (IMPORTANT PART)
+                if (file != null && file.Length > 0)
+                {
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+
+                    var fileBytes = ms.ToArray();
+
+                    mail.Attachments.Add(
+                        new Attachment(
+                            new MemoryStream(fileBytes),
+                            file.FileName,
+                            "application/pdf"
+                        )
+                    );
+                }
+
                 await smtp.SendMailAsync(mail);
 
                 return Json(new { success = true, message = "Mail sent successfully" });
@@ -1231,11 +1201,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
-
-
-      
-
 
 
     }

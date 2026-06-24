@@ -670,19 +670,10 @@ function collectPurchaseQuotationData() {
 function SetFYDate(inputId, loginDate) {
     var $input = $('#' + inputId);
     var d = new Date(loginDate);
-
-    // Determine the financial year start year
     var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
-
-    var minDate = fyStartYear + '-04-01';  // FY start
-    var maxDate = loginDate;               // Cannot select beyond login date
-
-    // Set attributes and default value
-    $input.attr('min', minDate)
-        .attr('max', maxDate)
-        .val(maxDate);
-
-    // Validate user input
+    var minDate = fyStartYear + '-04-01';  
+    var maxDate = loginDate;               
+    $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
     $input.on('change', function () {
         var selectedDate = new Date(this.value);
         var min = new Date(minDate);
@@ -999,11 +990,10 @@ function TransitReport() {
     }
 
     var reportName = "SAUDA_PURCH";
-    // Get input values
+
     var v_no = $('#TxtCode').val();
     var v_type = "PAUD";
 
-    // Build Crystal Reports selection formula
     var formula =
         "{SAUDA.COMP_CODE} = " + globalVars.CompCode +
         " and {SAUDA.YEAR_CODE} = " + globalVars.FYearCode +
@@ -1039,9 +1029,8 @@ function TransitReport() {
         String(now.getMinutes()).padStart(2, '0') +
         String(now.getSeconds()).padStart(2, '0');
 
-    // AJAX call to the Crystal Report API
     $.ajax({
-        url: 'http://localhost:34089/Report/PendingQCReport', // check port
+        url: 'http://localhost:24085/Report/PendingQCReport', // check port
         type: 'POST',
         data: JSON.stringify(payload),
         contentType: "application/json",
@@ -1243,23 +1232,109 @@ async function CheackSendMail() {
     });
 }
 
-
 async function SendMail() {
     try {
 
         let PartyCode = $('#ddlPartyName').val();
         const vno = parseInt($('#txtDocNo').val()) || 0;
+
+        // 🔥 STEP 1: GET REPORT FILE
+        const report = await GetTransitReportFile();
+
+        // STEP 2: SEND TO CONTROLLER
+        let formData = new FormData();
+        formData.append("PartyCode", PartyCode);
+        formData.append("vno", vno);
+
+        formData.append("file", report.file, report.fileName);
+
         const res = await $.ajax({
             url: '/PurchaseSauda/SendMail',
-            type: 'GET',
-            data: { PartyCode: PartyCode, vno: vno },
-            dataType: 'json'
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false
         });
 
-        console.log("res", res);
+        console.log("Mail response:", res);
         return res;
+
     } catch (error) {
-        console.error("Error sending mail:", error);
-        return null;
+        console.error("Error:", error);
     }
 }
+
+
+
+
+
+function GetTransitReportFile() {
+
+    return new Promise((resolve, reject) => {
+
+        if (!rowId) {
+            showToast(`Please save the data before printing the report.`, { type: "info" });
+            reject("No rowId");
+            return;
+        }
+
+        var reportName = "SAUDA_PURCH";
+
+        var v_no = $('#TxtCode').val();
+        var v_type = "PAUD";
+
+        var formula =
+            "{SAUDA.COMP_CODE} = " + globalVars.CompCode +
+            " and {SAUDA.YEAR_CODE} = " + globalVars.FYearCode +
+            " and {SAUDA.BRANCH_CODE} = " + globalVars.BranchCode +
+            " and {SAUDA.V_NO} = " + v_no +
+            " and {SAUDA.V_TYPE} = '" + v_type + "'";
+
+        var payload = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: database,
+            Parameters: {
+                comp_name: globalVars.CompanyName || "",
+                comp_add1: globalVars.Address1 || "",
+                comp_phone: globalVars.Phone || "",
+                RPTNAME: "PURCHASE CONTRACT/ORDER"
+            }
+        };
+
+        $.ajax({
+            url: 'http://localhost:24085/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(payload),
+            contentType: "application/json",
+            xhrFields: { responseType: 'blob' },
+
+            success: function (response) {
+
+                // 🔥 return file instead of downloading
+                const file = new Blob([response], { type: 'application/pdf' });
+
+                const v_no = $('#TxtCode').val();
+                const now = new Date();
+
+                const timestamp =
+                    String(now.getDate()).padStart(2, '0') +
+                    String(now.getMonth() + 1).padStart(2, '0') +
+                    String(now.getFullYear()).slice(-2) + "_" +
+                    String(now.getHours()).padStart(2, '0') +
+                    String(now.getMinutes()).padStart(2, '0') +
+                    String(now.getSeconds()).padStart(2, '0');
+
+                const fileName = `SAUDA_PURCH_${v_no}_${timestamp}.pdf`;
+
+                resolve({ file, fileName });
+            },
+
+            error: function (xhr) {
+                reject(xhr);
+            }
+        });
+    });
+}
+
+
