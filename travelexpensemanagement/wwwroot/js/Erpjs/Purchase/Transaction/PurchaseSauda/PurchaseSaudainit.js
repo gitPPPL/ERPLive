@@ -479,10 +479,7 @@ $(document).ready(async function () {
         CheackSendMail();
     });
 
-
-
    // Attachment code
-
 
     browseBtn.addEventListener("click", function () {
         fileInput.click();
@@ -501,121 +498,6 @@ $(document).ready(async function () {
         this.value = "";
     });
 
-    function renderFileList() {
-
-        const attachBody = $("#fileList");
-        attachBody.empty();
-
-        // ===== EXISTING ATTACHMENTS =====
-        if (globalAttachments && globalAttachments.length > 0) {
-
-            globalAttachments.forEach((att, index) => {
-
-                const fileName = att.FileName ?? att.fileName;
-                const filePath = att.FilePath ?? att.filePath;
-
-                const extension = fileName.split('.').pop().toLowerCase();
-
-                let previewHtml = "";
-
-                if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
-                    previewHtml = `<img src="${filePath}" class="erp-file-thumb">`;
-                }
-                else if (extension === "pdf") {
-                    previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
-                }
-                else {
-                    previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
-                }
-
-                attachBody.append(`
-                <div class="file-item erp-file-row">
-
-                    <!-- LEFT: ICON / IMAGE -->
-                    <div class="erp-file-preview">
-                        ${previewHtml}
-                    </div>
-
-                    <!-- MIDDLE: NAME -->
-                    <div class="erp-file-info">
-                        <div class="erp-file-name">${fileName}</div>
-                    </div>
-
-                    <!-- RIGHT: ACTIONS -->
-                    <div class="erp-file-actions">
-                        <a href="${filePath}" target="_blank" class="erp-view-btn">
-                            View
-                        </a>
-
-                        <button type="button"
-                                class="erp-delete-db-btn"
-                                data-index="${index}">
-                            Delete
-                        </button>
-                    </div>
-
-                </div>
-            `);
-            });
-        }
-
-        // ===== NEWLY SELECTED FILES =====
-        selectedFiles.forEach((file, index) => {
-
-            const extension = file.name.split('.').pop().toLowerCase();
-            const fileUrl = URL.createObjectURL(file);
-
-            let previewHtml = "";
-
-            if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
-                previewHtml = `<img src="${fileUrl}" class="erp-file-thumb">`;
-            }
-            else if (extension === "pdf") {
-                previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
-            }
-            else {
-                previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
-            }
-
-            attachBody.append(`
-            <div class="file-item erp-file-row">
-
-                <!-- LEFT: ICON / IMAGE -->
-                <div class="erp-file-preview">
-                    ${previewHtml}
-                </div>
-
-                <!-- MIDDLE: NAME -->
-                <div class="erp-file-info">
-                    <div class="erp-file-name">${file.name}</div>
-                </div>
-
-                <!-- RIGHT: ACTIONS -->
-                <div class="erp-file-actions">
-                    <a href="${fileUrl}" target="_blank" class="erp-view-btn">
-                        View
-                    </a>
-
-                    <button type="button"
-                            class="erp-delete-file-btn"
-                            data-index="${index}">
-                        Delete
-                    </button>
-                </div>
-
-            </div>
-        `);
-        });
-
-        if (globalAttachments.length === 0 && selectedFiles.length === 0) {
-            attachBody.html(`
-            <div class="erp-empty-state text-center text-muted">
-                No attachments found.
-            </div>
-        `);
-        }
-    }
-
     $(document).on("click", ".erp-delete-file-btn", function () {
 
         const index = $(this).data("index");
@@ -633,7 +515,6 @@ $(document).ready(async function () {
 
         renderFileList();
     });
-
 
     dropZone.addEventListener("dragover", function (e) {
         e.preventDefault();
@@ -659,33 +540,6 @@ $(document).ready(async function () {
 
         renderFileList();
     });
-
-    function isDuplicateFile(file) {
-
-        const fileName = file.name;
-
-        // 1. check in newly selected files
-        const inNew = selectedFiles.some(f =>
-            f.name === file.name &&
-            f.size === file.size &&
-            f.lastModified === file.lastModified
-        );
-
-        // 2. check in existing DB attachments
-        const inExisting = globalAttachments.some(att => {
-            const name = att.FileName ?? att.fileName;
-            return name.toLowerCase() === file.name.toLowerCase();
-        });
-
-        if (inNew || inExisting) {
-            toastr.warning(`File "${fileName}" already exists in attachment list.`);
-            return true;
-        }
-
-        return false;
-    }
-
-
 
 });
 
