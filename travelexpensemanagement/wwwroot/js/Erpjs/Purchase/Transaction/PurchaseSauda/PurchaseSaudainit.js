@@ -483,6 +483,7 @@ $(document).ready(async function () {
 
 
     $('#btnMail').on('click', function () {
+
         CheackSendMail();
     });
 

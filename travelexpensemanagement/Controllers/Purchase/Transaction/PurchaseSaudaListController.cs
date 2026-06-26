@@ -30,7 +30,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         public IActionResult Index()
         {
-
             ViewBag.CurrentMenu = "Purchase Contract";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
@@ -39,8 +38,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 UserMenuPermissions = permissions,
                 UserLevel = userLevel,
             };
-
-
             return View("~/Views/Purchase/Transaction/PurchaseSaudaList/Index.cshtml", model);
         }
 
@@ -116,11 +113,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
         [HttpGet]
-
         public IActionResult GetDataByCode(int code)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
-
 
             PurchaseSauda_model wrapper = new PurchaseSauda_model
             {
@@ -753,7 +748,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
         [HttpGet]
         public async Task<object> GetModificationData(int V_NO)
         {
@@ -814,11 +808,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return (new { success = false, message = "Error fetching attachment data", error = ex.Message });
             }
         }
-
-
-
-
-
 
     }
 }

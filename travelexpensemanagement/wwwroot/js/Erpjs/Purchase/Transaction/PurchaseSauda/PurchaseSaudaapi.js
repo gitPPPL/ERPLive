@@ -30,15 +30,11 @@ function formatDate(dateStr) {
 
     return `${year}-${month}-${day}`;
 }
-
 function collectPurchaseDocumentsData() {
 
     const documents = [];
     let errorMessages = [];
 
-    // =================================================
-    // 1. GLOBAL VARIABLE (DB LOADED DATA)
-    // =================================================
     if (Array.isArray(globalAttachments)) {
         globalAttachments.forEach(att => {
 
@@ -52,9 +48,6 @@ function collectPurchaseDocumentsData() {
         });
     }
 
-    // =================================================
-    // 2. UI - NEW ERP STYLE (.erp-file-row)
-    // =================================================
     $("#fileList .erp-file-row").each(function () {
 
         const fileName = $(this).data("filename");
@@ -69,9 +62,6 @@ function collectPurchaseDocumentsData() {
         }
     });
 
-    // =================================================
-    // 3. UI - OLD STYLE (.erppageattachmentsectionfileitem)
-    // =================================================
     $("#fileList .erppageattachmentsectionfileitem").each(function () {
 
         const fileName = $(this)
@@ -88,9 +78,6 @@ function collectPurchaseDocumentsData() {
         }
     });
 
-    // =================================================
-    // 4. NEW FILES FROM INPUT
-    // =================================================
     const fileInput = document.getElementById("fileInput");
 
     if (fileInput && fileInput.files.length > 0) {
@@ -111,9 +98,6 @@ function collectPurchaseDocumentsData() {
         });
     }
 
-    // =================================================
-    // 5. ERROR HANDLING
-    // =================================================
     if (errorMessages.length > 0) {
         toastr.error(errorMessages.join(" "));
         return [];
@@ -520,6 +504,8 @@ function setFormReadOnly() {
         $(this).css('background-color', '#f9f9f9');
     });
     form.find('.btn-save').hide();
+    const v_no = $('#TxtCode').val();
+    GetFinalUser(v_no);
 }
 
 async function checkValidDate() {
@@ -688,6 +674,15 @@ function SetFYDate(inputId, loginDate) {
 
 async function CheckOutherrised(partycode) {
     try {
+
+        if (!rowId) {
+            showToast(`Please save the data before Create Purchase Order.`, { type: "info" });
+            return;
+        }
+
+        if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
+
+
         const res = await $.ajax({
             url: '/PurchaseSauda/CheckOutherrised',
             method: 'GET',
@@ -727,11 +722,7 @@ async function CheckOutherrised(partycode) {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         console.log("User selected YES");
-
-
                         createPurchaseOrder(indrate, imprate);
-
-
                     } else {
                         return;
                     }
@@ -886,7 +877,6 @@ async function createPurchaseOrder(indrate, imprate) {
         toastr.error("Error while creating Purchase Order");
     }
 }
-
 function enforceDecimal(el, maxInt = 10, maxDec = 2) {
     let val = el.value;
 
@@ -1183,16 +1173,14 @@ async function GetFinalUser(v_no) {
 
         console.log("dd", res);
 
-        if (mode === "view") {
+        if (res.cretePurchaseorder != "Approved") {
+            $('#btn_CreatePurchaseOrder').prop('disabled', true);
+        }     
+
+        if (res.finalUser && res.finalUser.toUpperCase() === "FINAL" || mode === "view" ) {   
             $("#btn_ModificationOrder").show();
             $("#modification_count").show().text("Modification(" + (res.modificationcount || 0) + ")");
-        }        
-
-        if (res.finalUser && res.finalUser.toUpperCase() === "FINAL") {    
-
-                $("#btn_ModificationOrder").show();
-                $("#modification_count").show().text("Modification(" + (res.modificationcount || 0) + ")");
-
+            $('#btn_ModificationOrder').prop('disabled', false);
         } else {
             $("#btn_ModificationOrder").hide();
             $("#modification_count").hide().text("");
@@ -1203,9 +1191,14 @@ async function GetFinalUser(v_no) {
     }
 }
 
-
 async function CheackSendMail() {
+
+    if (!rowId) {
+        showToast(`Please save the data before Send Mail.`, { type: "info" });
+        return;
+    }
     const v_no = parseInt($('#txtDocNo').val()) || 0;
+
     const res = await $.ajax({
         url: '/PurchaseSauda/CheackMail',
         type: 'GET',
@@ -1263,11 +1256,6 @@ async function SendMail() {
         console.error("Error:", error);
     }
 }
-
-
-
-
-
 function GetTransitReportFile() {
 
     return new Promise((resolve, reject) => {
@@ -1336,5 +1324,3 @@ function GetTransitReportFile() {
         });
     });
 }
-
-

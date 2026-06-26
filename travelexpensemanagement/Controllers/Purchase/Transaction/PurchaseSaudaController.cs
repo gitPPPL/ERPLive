@@ -439,7 +439,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
             var result = SubmitRequest(request.Header, request.Document, action);
             return result == "Success" ? Json(new { success = true }) : Json(new { success = false, message = result });
-
         }
 
         private string SubmitRequest(PurchaseSauda_Header header,  List<DocumentAttachment> Attachments, string action)
@@ -687,12 +686,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
 
 
-                //if (action == "UPDATE")
-                //{
-                //    _globalValidationdate.LogInsertUpdateDelete(destinationTable: "IMG_TABLE", sourceTable: "IMG_TABLE", transactionType: "Transaction",
-                //    codeVNo: header.V_NO.ToString(), vtype: "PAUD");
-                //}
-
                 return "Success";
             }
             catch (Exception ex)
@@ -745,7 +738,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return string.Empty;
             }
         }
-
 
         public JsonResult CheckOutherrised(int partycode)
         { 
@@ -999,7 +991,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         }
 
-
         public string Paymentterm(int partyCode)
         {
             var globalVaraible = _globalVariableService.GetGlobalVariables();
@@ -1034,12 +1025,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
             string modificationcount = GetText("select count(*) from  "+ result + ".dbo.SAUDA where V_NO = " + v_no + " and V_TYPE = 'PAUD' and COMP_CODE = " + globalVaraible.PubCompCode + "  and YEAR_CODE = " + globalVaraible.PubFYearCode + "  and BRANCH_CODE = " + globalVaraible.PubBranchCode + "  ");
 
-            return Json(new { FinalUser = FinalUser , modificationcount = modificationcount });
+            string CretePurchaseorder = GetText("select FAPROV_STATUS from SAUDA where V_NO = " + v_no + " and V_TYPE = 'PAUD' AND  FAPROV_STATUS = 'Approved'");
+
+            return Json(new { FinalUser = FinalUser , modificationcount = modificationcount , CretePurchaseorder = CretePurchaseorder } );
 
 
         }
-
-
 
         public JsonResult CheackMail(int v_no)
         {
@@ -1058,7 +1049,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = true });
             }        
         }
-
 
         [HttpPost]
         public async Task<IActionResult> SendMail(int PartyCode , int vno, IFormFile file)
@@ -1102,15 +1092,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> GlobalSendMail(
-        string vtype,
-        int vno,
-        string toEmail,
-        string body,
-        IFormFile file,
-        string ccEmail = "")
+        public async Task<IActionResult> GlobalSendMail(  string vtype,  int vno, string toEmail,  string body, IFormFile file,  string ccEmail = "")
         {
             try
             {
@@ -1127,8 +1110,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     await con.OpenAsync();
 
                     string query = @"SELECT smtp_server, user_id, password, smtp_port, smtp_ussl 
-                             FROM email_setting1
-                             WHERE comp_code = @comp AND V_TYPE = @vtype";
+                        FROM email_setting1
+                        WHERE comp_code = @comp AND V_TYPE = @vtype";
 
                     using SqlCommand cmd = new SqlCommand(query, con);
                     cmd.Parameters.AddWithValue("@comp", globalVaraible.PubCompCode);
@@ -1201,7 +1184,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
 
     }
 }
