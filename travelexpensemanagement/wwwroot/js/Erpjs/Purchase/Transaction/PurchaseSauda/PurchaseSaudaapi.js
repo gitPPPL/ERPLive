@@ -1,165 +1,98 @@
-﻿async function LoadDropDown() {
-    try {
-        await Promise.all([
-            DDLShipFrom(),
-            DDLPurchaseThrough(),
-            DDLTaxRate(),
-            DDLPaymentTerm(),
-            DDLBrokerName(),
-            DDLDispatchForm(),   
-            DDLPartyMast(),
-            DDLItemMaster(),
-            ddlDeliveryFrom(),
-            DDLCityMast(),
-            DDLstatus()
-        ]);
-    } catch (error) {
-        console.error("Error loading dropdowns:", error);
-    }
-}
-function formatDate(dateStr) {
-    if (!dateStr) return null;
-
-    const date = new Date(dateStr);
-    if (isNaN(date)) return null;
-
-    // Extract local date parts
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months 0-11
-    const day = String(date.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-}
-function collectPurchaseDocumentsData() {
+﻿function collectPurchaseDocumentsData() {
 
     const documents = [];
-    let errorMessages = [];
 
+    // =========================
+    // EXISTING FILES (DB)
+    // =========================
     if (Array.isArray(globalAttachments)) {
+
         globalAttachments.forEach(att => {
 
-            if (!att) return;
+            const fileName = att.FileName ?? att.fileName;
+            const filePath = att.FilePath ?? att.filePath;
+
+            if (!fileName) return;
 
             documents.push({
-                FileName: att.FileName || att.fileName || "",
-                FilePath: att.FilePath || att.filePath || null,
+                FileName: fileName,
+                FilePath: filePath,
                 IsNew: false
             });
         });
     }
 
-    $("#fileList .erp-file-row").each(function () {
+    // =========================
+    // NEW FILES (UPLOAD)
+    // =========================
+    if (Array.isArray(selectedFiles)) {
 
-        const fileName = $(this).data("filename");
-        const filePath = $(this).data("filepath");
+        selectedFiles.forEach(file => {
 
-        if (fileName && !documents.some(d => d.FileName === fileName)) {
-            documents.push({
-                FileName: fileName,
-                FilePath: filePath || null,
-                IsNew: false
-            });
-        }
-    });
-
-    $("#fileList .erppageattachmentsectionfileitem").each(function () {
-
-        const fileName = $(this)
-            .find(".erppageattachmentsectionfilename")
-            .text()
-            .trim();
-
-        if (fileName && !documents.some(d => d.FileName === fileName)) {
-            documents.push({
-                FileName: fileName,
-                FilePath: null,
-                IsNew: false
-            });
-        }
-    });
-
-    const fileInput = document.getElementById("fileInput");
-
-    if (fileInput && fileInput.files.length > 0) {
-
-        Array.from(fileInput.files).forEach(file => {
-
-            if (!file || !file.name) {
-                errorMessages.push("Invalid file detected.");
-                return;
-            }
+            if (!file?.name) return;
 
             documents.push({
                 FileName: file.name,
-                FilePath: "/attachments/pan/" + file.name,
+                FilePath: null,
                 FileObject: file,
                 IsNew: true
             });
         });
     }
 
-    if (errorMessages.length > 0) {
-        toastr.error(errorMessages.join(" "));
-        return [];
-    }
-
     return documents;
 }
 function addAttachmentRow(data = {}) {
-    const index = data.index || attachmentIndex++;
+
+    const index = data.index ?? attachmentIndex++;
+
     const row = `
-        <tr>
-          <td style="display:none;">
-            <input type="hidden" class="attachment-code" value="${index}" />
-          </td>
-          <td>
-            <input type="text" class="form-control mb-1" id="fileName_${index}" value="${data.fileName || ''}" placeholder="Enter file name" disabled />
-          </td>
-          <td>
-            <input type="file" class="form-control file-upload" id="fileInput_${index}" />
-          </td>
-          <td>
-            <i class="fa fa-plus btn-add-action" title="Add Row" style="cursor:pointer; margin-right:8px;"></i>
-            <i class="fa fa-edit btn-edit-action" title="Edit Row" style="cursor:pointer; margin-right:8px;"></i>
-            <i class="fa fa-trash btn-delete-action" title="Delete Row" style="cursor:pointer;"></i>
-          </td>
+        <tr class="attachment-row" data-index="${index}">
+
+            <td style="display:none;">
+                <input type="hidden"
+                       class="attachment-code"
+                       value="${index}" />
+            </td>
+
+            <td>
+                <input type="text"
+                       class="form-control file-name"
+                       id="fileName_${index}"
+                       value="${data.fileName || ''}"
+                       placeholder="Enter file name"
+                       disabled />
+            </td>
+
+            <td>
+                <input type="file"
+                       class="form-control file-upload"
+                       id="fileInput_${index}"
+                       data-index="${index}" />
+            </td>
+
+            <td>
+                <i class="fa fa-plus btn-add-action"
+                   title="Add Row"
+                   data-index="${index}"
+                   style="cursor:pointer; margin-right:8px;"></i>
+
+                <i class="fa fa-edit btn-edit-action"
+                   title="Edit Row"
+                   data-index="${index}"
+                   style="cursor:pointer; margin-right:8px;"></i>
+
+                <i class="fa fa-trash btn-delete-action"
+                   title="Delete Row"
+                   data-index="${index}"
+                   style="cursor:pointer;"></i>
+            </td>
+
         </tr>
-      `;
+    `;
+
     $attachmentTbody.append(row);
 }
-function recalculateNetRate() {
-    const baseRate = parseFloat($('#numRate').val()) || 0;
-    const discountPercent = parseFloat($('#numDiscount').val()) || 0;
-    let taxRate = 0;
-    const selectedText = $('#ddlTaxRate').find('option:selected').text();
-    const taxMatch = selectedText.match(/\d+(\.\d+)?/);
-    if (taxMatch) {
-        taxRate = parseFloat(taxMatch[0]);
-    }
-    const discountAmount = baseRate * discountPercent / 100;
-    const rateAfterDiscount = baseRate - discountAmount;
-    const taxAmount = rateAfterDiscount * taxRate / 100;
-    const roundedTax = Math.round(taxAmount);
-    const finalNetRate = rateAfterDiscount + taxAmount;
-    $('#numNetRate').val(finalNetRate.toFixed(2));
-    $('#numTaxRate').val(taxRate.toFixed(2));
-}
-
-async function GetVNo() {
-    try {
-        const res = await fetch('/PurchaseSauda/GetVNo');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (!data.v_NO) throw new Error('Response missing v_NO');
-        $('#txtDocNo').val(data.v_NO);
-        $('#TxtDispatchDocNo').val(data.v_NO);
-
-    } catch (e) {
-        console.error('GetVNo failed:', e);
-        toastr.error('Error loading Document Number: ' + e.message);
-    }
-}
-
 async function LoadFormByID(id) {
     try {
         const res = await $.ajax({
@@ -168,373 +101,157 @@ async function LoadFormByID(id) {
             data: { code: id }
         });
 
-        if (res.success) {
-            const header = res.data.header;
-            const DispatchDetails = res.data.details;
-            const attachments = res.data.attachment || [];
+        if (!res.success) {
+            toastr.error(res.message || "Failed to load data.");
+            return;
+        }
 
-            console.log("attachments", attachments);
+        const header = res.data.header;
 
-            $('#TxtCode').val(header.v_NO || '');
-            $('#txtDocNo').val(header.v_NO || '');
-            $('#TxtDispatchDocNo').val(header.v_NO || '');
-            $('#dtDocDate').val(formatDate(header.v_DATE));
-            $('#DispatchDocDate').val(formatDate(header.v_DATE));          
-            $('#ddlSupplyFrom').val(header.shiP_TYPE || '');
-            $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
-            $('#ddlShipFrom').val(header.shiP_CODE || '').trigger('change');
-            $('#ddlItemName').val(header.iteM_CODE || '').trigger('change');
-            $('#txtAddress1').val(header.adD1 || '');
-            $('#txtAddress2').val(header.adD2 || '');
-            $('#txtAddress3').val(header.adD3 || '');
-            $('#txtStation').val( header.citY_CODE || 0);
-            $('#numTrucks').val(header.trucK_NO || '');
-            $('#txtExRate').val(header.exrate || '');
-            $('#numDiscount').val(header.disC_PER || '');
-            $('#txtRemarks').val(header.remark || '');
-            $('#NumPINO').val(header.pino || '');
-            $('#DtPIDate').val(formatDate(header.pidate));
-            $('#NumOfferNo').val(header.offerno || '');
-            $('#NumBrokerage').val(header.brokeR_RATE || '');
-            $('#ddlBrokerName').val(header.broker || '');
-            $('#ddlPackingType').val(header.pacK_TYPE || '');
-            $('#ddlDispatchFrom').val(header.dispatcH_FROM || '');
-            $('#ddlPaymentType').val(header.paymenT_STATUS || '');
-            $('#ddlRate').val(header.currency || '');
-            $('#DtSBLCDue').val(formatDate(header.sblC_DUEDATE));
-            $('#ddlGrade').val(header.grade || '');
-            $('#TxtItemRemarks').val(header.iteM_REMARKS || '');
-            $('#numWaste').val(header.wastE_PER || 0);
-            $('#numRate').val(header.rate || 0);
-            $('#numTaxRate').val(header.taX_RATE || 0);
-            $('#ddlTaxRate').val(header.taX_CODE || 0);
-            $('#chkNatural').prop('checked', header.onlY_NATURAL == 1);
-            $('#ddlItemType').val(header.iteM_TYPE || '');
-            $('#numWeight').val(header.qty || 0);
-            $('#ddlFreightTerm').val(header.frT_TERM || '');
-            $('#numNetRate').val(header.neT_RATE || 0);
-            $('#ddlPaymentTerm').val(header.payterM_CODE || 0);
-            $('#txtDeliveryTerm').val(header.deL_TERM || '');
-            $('#ddlDocStatus').val(header.status);
-            $('#DtLCDue').val(formatDate(header.lC_DUEDATE));
-            $('#ddlPurchaseThrough').val(header.deaL_THROUGH || 0);
-            $('#txtCountry').val(header.countrY_CODE || 0);
-            $('#txtCountry').val(header.country || '');
-            $('#txtContactNo').val(header.phone || '');
-            $('#txtDeliveryFrom').val(header.partY_TO || '');
-            $('#numFreightRate').val(header.frT_RATE || '');
-            $('#NumOfferRate').val(header.offerRate || '');
+        // =========================
+        // HEADER FIELDS
+        // =========================
+        $('#TxtCode').val(header.v_NO || '');
+        $('#txtDocNo').val(header.v_NO || '');
+        $('#TxtDispatchDocNo').val(header.v_NO || '');
+        $('#dtDocDate').val(formatDate(header.v_DATE));
+        $('#DispatchDocDate').val(formatDate(header.v_DATE));
 
-            const attachBody = $('#fileList');
-            attachBody.empty();
+        $('#ddlSupplyFrom').val(header.shiP_TYPE || '');
+        $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
+        $('#ddlShipFrom').val(header.shiP_CODE || '').trigger('change');
+        $('#ddlItemName').val(header.iteM_CODE || '').trigger('change');
 
-            if (!attachments || attachments.length === 0) {
-                attachBody.html(`
-                    <div class="erp-empty-state text-center text-muted">
-                        No attachments found.
-                    </div>
-                `);
-            } else {
+        $('#txtAddress1').val(header.adD1 || '');
+        $('#txtAddress2').val(header.adD2 || '');
+        $('#txtAddress3').val(header.adD3 || '');
+        $('#txtStation').val(header.citY_CODE || 0);
 
-                globalAttachments = res.data.attachment || [];
-                const attachments = globalAttachments;
+        $('#numTrucks').val(header.trucK_NO || '');
+        $('#txtExRate').val(header.exrate || '');
+        $('#numDiscount').val(header.disC_PER || '');
+        $('#txtRemarks').val(header.remark || '');
 
-                console.log("attachments", globalAttachments);
+        $('#NumPINO').val(header.pino || '');
+        $('#DtPIDate').val(formatDate(header.pidate));
 
+        $('#NumOfferNo').val(header.offerno || '');
+        $('#NumBrokerage').val(header.brokeR_RATE || '');
+        $('#ddlBrokerName').val(header.broker || '');
 
-                attachments.forEach((att, idx) => {
-                    const fileName = att.FileName ?? att.fileName ?? `File_${idx + 1}`;
-                    const filePath = att.FilePath ?? att.filePath ?? '';
+        $('#ddlPackingType').val(header.pacK_TYPE || '');
+        $('#ddlDispatchFrom').val(header.dispatcH_FROM || '');
+        $('#ddlPaymentType').val(header.paymenT_STATUS || '');
+        $('#ddlRate').val(header.currency || '');
 
-                    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+        $('#DtSBLCDue').val(formatDate(header.sblC_DUEDATE));
+        $('#ddlGrade').val(header.grade || '');
+        $('#TxtItemRemarks').val(header.iteM_REMARKS || '');
 
-                    let filePreview = '';
+        $('#numWaste').val(header.wastE_PER || 0);
+        $('#numRate').val(header.rate || 0);
+        $('#numTaxRate').val(header.taX_RATE || 0);
+        $('#ddlTaxRate').val(header.taX_CODE || 0);
 
-                    if (filePath && ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension)) {
-                        filePreview = `<span>${extension.toUpperCase()}</span>`;
-                    }
-                    else if (extension === 'pdf') {
-                        filePreview = `<i class="fa fa-file-pdf-o" style="color:#e53935;"></i>`;
-                    }
-                    else {
-                        filePreview = `<i class="fa fa-file-o"></i>`;
-                    }
+        $('#chkNatural').prop('checked', header.onlY_NATURAL == 1);
+        $('#ddlItemType').val(header.iteM_TYPE || '');
 
-                    const card = `
-                        <div class="file-item erp-file-row"
-                             data-filename="${fileName}"
-                             data-filepath="${filePath}">
+        $('#numWeight').val(header.qty || 0);
+        $('#ddlFreightTerm').val(header.frT_TERM || '');
+        $('#numNetRate').val(header.neT_RATE || 0);
 
-                            <div class="erp-file-preview">
-                                ${filePreview}
-                            </div>
+        $('#ddlPaymentTerm').val(header.payterM_CODE || 0);
+        $('#txtDeliveryTerm').val(header.deL_TERM || '');
+        $('#ddlDocStatus').val(header.status);
 
-                            <div class="erp-file-info">
-                                <div class="erp-file-name">${fileName}</div>
-                                <div class="erp-file-type">${extension.toUpperCase() || 'FILE'}</div>
-                            </div>
+        $('#DtLCDue').val(formatDate(header.lC_DUEDATE));
+        $('#ddlPurchaseThrough').val(header.deaL_THROUGH || 0);
 
-                            <div class="erp-file-actions">
-                                <a href="${filePath}" target="_blank" class="erp-view-btn">View</a>
+        $('#txtCountry').val(header.country || '');
+        $('#txtContactNo').val(header.phone || '');
+        $('#txtDeliveryFrom').val(header.partY_TO || '');
 
-                                <button type="button"
-                                        class="erp-delete-btn btn-delete-attachment">
-                                    Delete
-                                </button>
-                            </div>
+        $('#numFreightRate').val(header.frT_RATE || '');
+        $('#NumOfferRate').val(header.offerRate || '');
 
-                        </div>
-                        `;
+        // =========================
+        // ATTACHMENTS (INLINE RENDER)
+        // =========================
+        globalAttachments = res.data.attachment || [];
+        selectedFiles = [];
 
-                    attachBody.append(card);
-                });
+        const attachBody = $("#fileList");
+        attachBody.empty();
+
+        if (!globalAttachments || globalAttachments.length === 0) {
+            attachBody.html(`
+                <div class="erp-empty-state text-center text-muted">
+                    No attachments found.
+                </div>
+            `);
+            return;
+        }
+
+        globalAttachments.forEach((att, idx) => {
+
+            const fileName = att.FileName ?? att.fileName ?? `File_${idx + 1}`;
+            let filePath = att.FilePath ?? att.filePath ?? "";
+
+            // FIX: safe URL
+            if (filePath && !filePath.startsWith("http") && !filePath.startsWith("/")) {
+                filePath = "/" + filePath;
             }
 
-        } else {
-            toastr.error(res.message || "Failed to load data.");
-            console.error("Error from server:", res.message);
-        }
+            const ext = (fileName.split('.').pop() || "").toLowerCase();
+
+            let preview = "";
+
+            if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(ext)) {
+                preview = `
+                    <img src="${filePath}"
+                         style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
+                `;
+            }
+            else if (ext === "pdf") {
+                preview = `<i class="fa fa-file-pdf-o" style="color:red;font-size:20px;"></i>`;
+            }
+            else {
+                preview = `<i class="fa fa-file-o" style="font-size:20px;"></i>`;
+            }
+
+            attachBody.append(`
+                <div class="file-item erp-file-row"
+                     data-id="${att.Id || idx}"
+                     data-type="existing">
+
+                    <div class="erp-file-preview">
+                        ${preview}
+                    </div>
+
+                    <div class="erp-file-info">
+                        <div class="erp-file-name">${fileName}</div>
+                        <div class="erp-file-type">${ext.toUpperCase() || 'FILE'}</div>
+                    </div>
+
+                    <div class="erp-file-actions">
+                        <a href="${filePath}" target="_blank" class="erp-view-btn">
+                            View
+                        </a>
+
+                        <button type="button"
+                                class="erp-delete-db-btn"
+                                data-id="${att.Id || idx}">
+                            Delete
+                        </button>
+                    </div>
+
+                </div>
+            `);
+        });
+
     } catch (err) {
         console.error("Failed to load data", err);
         toastr.error("Something went wrong while loading the form.");
-    }
-}
-
-async function fetchDDlParty(PartyId) {
-    try {
-        const response = await fetch(`/PurchaseSauda/GetDataByPartyCode?PartyId=${PartyId}`);
-        const data = await response.json();
-        console.log("data", data);
-        $('#txtAddress1').val(data?.supplier?.address1 || '');
-        $('#txtAddress2').val(data?.supplier?.address2 || '');
-        $('#txtAddress3').val(data?.supplier?.address3 || '');
-        $('#txtContactNo').val(data?.supplier?.mobile || '');
-        $('#txtStation').val(data?.supplier?.cityCode || '');
-        $('#txtCountry').val(data?.supplier?.country || '');
-        $('#txtDeliveryFrom').val(data?.supplier?.name || '');
-        $('#ddlShipFrom').val(data?.supplier?.code || '').trigger('change');
- 
-        $('#ddlPaymentTerm').val(data?.partermcode || '');
-        $('#ddlFreightTerm').val(data?.sauda?.frtTerm || '');
-        $('#txtDeliveryTerm').val(data?.sauda?.delTerm || '');
-        $('#ddlItemName').val(data?.sauda?.itemCode || '');
-        $('#ddlItemType').val(data?.sauda?.itemType || '');
-
-    } catch (error) {
-        console.error('Failed to fetch party data:', error);
-    }
-}
-
-async function DDLPartyMast() {
-    const res = await fetch("/PurchaseSauda/DDLPartyMast");
-    const list = await res.json();
-    const ddl = $("#ddlPartyName");
-
-    ddl.empty().append('<option value="">Select Party Name</option>');
-    list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
-
-    ddl.select2({
-        placeholder: "-- Select Party Name --",
-        allowClear: true,
-        width: '100%'
-    });
-
-}
-
-async function DDLCityMast() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLCityMast');
-        const data = await res.json();
-        const ddl = $('#txtStation');
-        ddl.empty().append('<option value="">-- Select City Name --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading City:", error);
-    }
-}
-
-async function DDLstatus() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLstatus');
-        const data = await res.json();
-        const ddl = $('#ddlDocStatus');
-        ddl.empty().append('');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Status:", error);
-    }
-}
-
-async function DDLShipFrom() {
-    const res = await fetch("/PurchaseSauda/DDLShipFrom");
-    const list = await res.json();
-    const ddl = $("#ddlShipFrom");
-
-    ddl.empty().append('<option value="">Select Ship From</option>');
-    list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
-
-    ddl.select2({
-        placeholder: "-- Select Ship From--",
-        allowClear: true,
-        width: '100%'
-    });
-
-}
-
-async function ddlDeliveryFrom() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLShipFrom');
-        const data = await res.json();
-        const ddl = $('#ddlDeliveryFrom');
-        ddl.empty().append('<option value="">-- Select Delivery From --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Delivery From:", error);
-    }
-}
-
-async function DDLPurchaseThrough() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLPurchaseThrough');
-        const data = await res.json();
-
-        const ddl = $('#ddlPurchaseThrough');
-        ddl.empty().append('<option value="">-- Select Purchase Through --</option>');
-
-        if (Array.isArray(data)) {
-            data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.value} - ${item.text}</option>`);
-            });
-        } else {
-            console.warn('Unexpected data format:', data);
-        }
-
-    } catch (error) {
-        console.error("Error loading Purchase Through:", error);
-        toastr.error("Failed to load Purchase Through options.");
-    }
-}
-
-async function DDLItemMaster() {
-    const res = await fetch("/PurchaseSauda/DDLItemMaster");
-    const list = await res.json();
-    const ddl = $("#ddlItemName");
-
-    ddl.empty().append('<option value="">Select Item Name</option>');
-    list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
-
-    ddl.select2({
-        placeholder: "-- Select Item Name --",
-        allowClear: true,
-        width: '100%'
-    });
-
-
-
-
-}
-
-async function DDLTaxRate() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLTaxRate');
-        const data = await res.json();
-        const ddl = $('#ddlTaxRate');
-        ddl.empty().append('<option value="">-- Select Tax Rate --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Tax Rate:", error);
-    }
-}
-
-async function DDLPaymentTerm() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLPaymentTerm');
-        const data = await res.json();
-        const ddl = $('#ddlPaymentTerm');
-        ddl.empty().append('<option value="">-- Select Payment Term --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Payment Term:", error);
-    }
-}
-
-async function DDLBrokerName() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLBrokerName');
-        const data = await res.json();
-        const ddl = $('#ddlBrokerName');
-        ddl.empty().append('<option value="">-- Select Broker Name --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Broker Name:", error);
-    }
-}
-
-async function DDLDispatchForm() {
-    try {
-        const res = await fetch('/PurchaseSauda/DDLDispatchForm');
-        const data = await res.json();
-        const ddl = $('#ddlDispatchFrom');
-        ddl.empty().append('<option value="">-- Select Dispatch From --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Dispatch Form:", error);
-    }
-}
-function setFormReadOnly() {
-    const form = $('#PurchaseSaudaForm');
-    form.find('input, select, textarea, button').prop('disabled', true);
-    form.find('textarea').css('background-color', '#f0f0f0');
-    form.find('table tbody tr').each(function () {
-        $(this).find('input, select, textarea').prop('disabled', true);
-        $(this).css('background-color', '#f9f9f9');
-    });
-    form.find('.btn-save').hide();
-    const v_no = $('#TxtCode').val();
-    GetFinalUser(v_no);
-}
-
-async function checkValidDate() {
-    const data = {
-        vdate: $("#dtDocDate").val(),
-        vtype: 'PAUD',
-        vno: $("#txtDocNo").val()
-    };
-    try {
-        const response = await fetch('/PurchaseSauda/CheckValidDate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.status === false) {
-            showToast(result.message, { type: "warning" });
-            return false;
-        }
-
-        return true;
-
-    } catch (error) {
-        showToast(result.message, { type: "warning" });
-        return false;
     }
 }
 function generateSelect(data, selectedValue = '') {
@@ -972,355 +689,4 @@ function renderPurchaseHistory(data) {
     const myModal = new bootstrap.Modal(modalElement);
     myModal.show();
 }
-function TransitReport() {
 
-    if (!rowId) {
-        showToast(`Please save the data before printing the report.`, { type: "info" });
-        return;
-    }
-
-    var reportName = "SAUDA_PURCH";
-
-    var v_no = $('#TxtCode').val();
-    var v_type = "PAUD";
-
-    var formula =
-        "{SAUDA.COMP_CODE} = " + globalVars.CompCode +
-        " and {SAUDA.YEAR_CODE} = " + globalVars.FYearCode +
-        " and {SAUDA.BRANCH_CODE} = " + globalVars.BranchCode +
-        " and {SAUDA.V_NO} = " + v_no +
-        " and {SAUDA.V_TYPE} = '" + v_type + "'";
-
-    // Prepare the payload for the API
-    var payload = {
-        Reportname: reportName,
-        selectionFormula: formula,
-        Database: database,
-        Parameters: {
-            comp_name: globalVars.CompanyName || "",
-            comp_add1: globalVars.Address1 || "",
-            comp_add2: globalVars.Address2 || "",
-            COMP_GST: globalVars.GST || "",
-            COMP_PAN: globalVars.PAN || "",
-            COMP_CIN: globalVars.COMP_CIN || "",
-            COMP_EMAIL: globalVars.Email || "",
-            comp_phone: globalVars.Phone || "",     
-            RPTNAME: "PURCHASE CONTRACT/ORDER"
-        }
-    };
-
-    // Timestamp for file name
-    var now = new Date();
-    var timestamp =
-        String(now.getDate()).padStart(2, '0') +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getFullYear()).slice(-2) + "_" +
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0') +
-        String(now.getSeconds()).padStart(2, '0');
-
-    $.ajax({
-        url: 'http://localhost:24085/Report/PendingQCReport', // check port
-        type: 'POST',
-        data: JSON.stringify(payload),
-        contentType: "application/json",
-        xhrFields: { responseType: 'blob' }, // Important for PDF
-
-        success: function (response) {
-            // Convert response to a Blob
-            var file = new Blob([response], { type: 'application/pdf' });
-            var fileName = `${reportName}_${timestamp}.pdf`;
-
-            // Trigger download
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(file);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
-
-        error: function (xhr, status, error) {
-            if (xhr.status === 0) {
-                console.error("Cannot connect to API. Is the backend running?");
-            } else {
-                console.error('Error generating report:', xhr.status, xhr.statusText, error);
-                xhr.responseText && console.error('Response:', xhr.responseText);
-            }
-        }
-    });
-}
-
-async function paymentterm(partyCode, payTermCode) {
-    try {
-        const res = await $.ajax({
-            url: '/PurchaseSauda/Paymentterm',
-            type: 'GET',
-            data: { partyCode: partyCode },
-            dataType: 'json'
-        });
-
-        console.log("dd", res);
-
-        if (String(res).trim() !== String(payTermCode ?? '').trim()) {
-            toastr.info("Payment Term is not matching with Party Master, please check it");
-        }
-
-        return res;
-
-    } catch (error) {
-        console.error("Error fetching payment term:", error);
-    }
-}
-
-async function GetTaxRate( taxrate) {
-    try {
-        const res = await $.ajax({
-            url: '/PurchaseSauda/GetTaxRate',
-            type: 'GET',
-            data: { taxrate: taxrate },
-            dataType: 'json'
-        });
-
-        console.log("dd", res);
-
-
-        $('#numTaxRate').val(res);
-
-
-        return res;
-
-    } catch (error) {
-        console.error("Error fetching payment term:", error);
-    }
-}
-
-async function loadModificationdata() {
-
-    try {
-        const V_NO = $('#txtDocNo').val()?.trim();
-        const V_date = $('#dtDocDate').val()?.trim();
-
-        if (!V_NO) {
-            toastr.info("Please enter document number");
-            return;
-        }
-
-        const res = await $.ajax({
-            url: '/PurchaseSaudaList/GetModificationData',
-            method: 'GET',
-            data: { V_NO: V_NO }
-        });
-
-        console.log("Full response:", res);
-
-        if (res.success) {
-
-            const data = res.data || [];
-
-            if (!data || data.length === 0) {
-                toastr.info("Purchase Modification Not Found For this Doc No = " + V_NO + " and Doc Date " + V_date);
-                return;
-            }
-            renderPurchaseModification(data);
-        }
-
-    } catch (err) {
-        console.error("AJAX Error:", err);
-        toastr.info("Something went wrong while fetching data");
-    }
-}
-function renderPurchaseModification(data) {
-    console.log("Rendering Purchase Modification Data:", data);
-    const tbody = $('#modificationList tbody');
-    tbody.empty();
-
-    if (!data || data.length === 0) {
-        tbody.append(`
-            <tr>
-                <td colspan="4" class="text-center">No data found</td>
-            </tr>
-        `);
-    } else {
-        data.forEach(item => {
-            tbody.append(`
-                <tr>
-                    <td>${item.saudaNo ?? ''}</td>
-                    <td>${item.party ?? ''}</td>
-                    <td>${item.itemName ?? ''}</td>
-                    <td>${item.qty ?? ''}</td>
-                    <td>${item.rate ?? ''}</td>
-                    <td>${item.remark ?? ''}</td>
-                    <td>${item.modifyDate ?? ''}</td>
-                </tr>
-            `);
-        });
-    }
-
-    const modalElement = document.getElementById('modificationModal');
-    const myModal = new bootstrap.Modal(modalElement);
-    myModal.show();
-}
-
-async function GetFinalUser(v_no) {
-    try {
-        const res = await $.ajax({
-            url: '/PurchaseSauda/FinalUser',
-            type: 'GET',
-            data: { v_no: v_no },
-            dataType: 'json'
-        });
-
-        console.log("dd", res);
-
-        if (res.cretePurchaseorder != "Approved") {
-            $('#btn_CreatePurchaseOrder').prop('disabled', true);
-        }     
-
-        if (res.finalUser && res.finalUser.toUpperCase() === "FINAL" || mode === "view" ) {   
-            $("#btn_ModificationOrder").show();
-            $("#modification_count").show().text("Modification(" + (res.modificationcount || 0) + ")");
-            $('#btn_ModificationOrder').prop('disabled', false);
-        } else {
-            $("#btn_ModificationOrder").hide();
-            $("#modification_count").hide().text("");
-        }
-
-    } catch (error) {
-        console.error("Error fetching payment term:", error);
-    }
-}
-
-async function CheackSendMail() {
-
-    if (!rowId) {
-        showToast(`Please save the data before Send Mail.`, { type: "info" });
-        return;
-    }
-    const v_no = parseInt($('#txtDocNo').val()) || 0;
-
-    const res = await $.ajax({
-        url: '/PurchaseSauda/CheackMail',
-        type: 'GET',
-        data: { v_no: v_no },
-        dataType: 'json'
-    });
-
-    if (res.status == false) {
-        toastr.warning(res.message);
-        return;
-    }
-
-    Swal.fire({
-        title: "Do you want to send mail?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No"
-    }).then((result) => {
-
-        if (result.isConfirmed) {
-            SendMail();
-        }        
-    });
-}
-
-async function SendMail() {
-    try {
-
-        let PartyCode = $('#ddlPartyName').val();
-        const vno = parseInt($('#txtDocNo').val()) || 0;
-
-        // 🔥 STEP 1: GET REPORT FILE
-        const report = await GetTransitReportFile();
-
-        // STEP 2: SEND TO CONTROLLER
-        let formData = new FormData();
-        formData.append("PartyCode", PartyCode);
-        formData.append("vno", vno);
-
-        formData.append("file", report.file, report.fileName);
-
-        const res = await $.ajax({
-            url: '/PurchaseSauda/SendMail',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false
-        });
-
-        console.log("Mail response:", res);
-        return res;
-
-    } catch (error) {
-        console.error("Error:", error);
-    }
-}
-function GetTransitReportFile() {
-
-    return new Promise((resolve, reject) => {
-
-        if (!rowId) {
-            showToast(`Please save the data before printing the report.`, { type: "info" });
-            reject("No rowId");
-            return;
-        }
-
-        var reportName = "SAUDA_PURCH";
-
-        var v_no = $('#TxtCode').val();
-        var v_type = "PAUD";
-
-        var formula =
-            "{SAUDA.COMP_CODE} = " + globalVars.CompCode +
-            " and {SAUDA.YEAR_CODE} = " + globalVars.FYearCode +
-            " and {SAUDA.BRANCH_CODE} = " + globalVars.BranchCode +
-            " and {SAUDA.V_NO} = " + v_no +
-            " and {SAUDA.V_TYPE} = '" + v_type + "'";
-
-        var payload = {
-            Reportname: reportName,
-            selectionFormula: formula,
-            Database: database,
-            Parameters: {
-                comp_name: globalVars.CompanyName || "",
-                comp_add1: globalVars.Address1 || "",
-                comp_phone: globalVars.Phone || "",
-                RPTNAME: "PURCHASE CONTRACT/ORDER"
-            }
-        };
-
-        $.ajax({
-            url: 'http://localhost:24085/Report/PendingQCReport',
-            type: 'POST',
-            data: JSON.stringify(payload),
-            contentType: "application/json",
-            xhrFields: { responseType: 'blob' },
-
-            success: function (response) {
-
-                // 🔥 return file instead of downloading
-                const file = new Blob([response], { type: 'application/pdf' });
-
-                const v_no = $('#TxtCode').val();
-                const now = new Date();
-
-                const timestamp =
-                    String(now.getDate()).padStart(2, '0') +
-                    String(now.getMonth() + 1).padStart(2, '0') +
-                    String(now.getFullYear()).slice(-2) + "_" +
-                    String(now.getHours()).padStart(2, '0') +
-                    String(now.getMinutes()).padStart(2, '0') +
-                    String(now.getSeconds()).padStart(2, '0');
-
-                const fileName = `SAUDA_PURCH_${v_no}_${timestamp}.pdf`;
-
-                resolve({ file, fileName });
-            },
-
-            error: function (xhr) {
-                reject(xhr);
-            }
-        });
-    });
-}

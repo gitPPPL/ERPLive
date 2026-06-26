@@ -1,7 +1,4 @@
-﻿
-
-
-let $tbody;
+﻿let $tbody;
 let rowIndex = 0;
 let itemMap = {};
 let reverseItemMap = {};
@@ -15,10 +12,13 @@ let PubUserLevel = globalVars.UserLevel;
 let CompCode = globalVars.CompCode;
 let LoginDate = globalVars.LoginDate;
 let globalAttachments = [];
-
 const $attachmentTbody = $('#tblAttachmentPS tbody');
 const $dispatchtableTbody = $('#tblPurchaseQuotationList tbody');
 let attachmentIndex = Date.now();
+const browseBtn = document.getElementById("browseBtn");
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+let selectedFiles = [];
 
 $(document).ready(async function () {
     $tbody = $('#tblPurchaseQuotationList tbody');
@@ -28,11 +28,7 @@ $(document).ready(async function () {
         addPurchaseQuotationRow();
     });
 
-/*    addAttachmentRow()*/
-
-
     SetFYDate('dtDocDate', LoginDate);
-
 
     if (!rowId) {
         await GetVNo();
@@ -42,11 +38,8 @@ $(document).ready(async function () {
 
         if (mode === "view") {
             setFormReadOnly();
-            $('#PurchaseRequestForm').after(
-                '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
-            );
+            $('#PurchaseRequestForm').after( '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>' );
         }
-
     }
 
     LoadDropDown() .then(() => {
@@ -483,9 +476,215 @@ $(document).ready(async function () {
 
 
     $('#btnMail').on('click', function () {
-
         CheackSendMail();
     });
+
+
+
+   // Attachment code
+
+
+    browseBtn.addEventListener("click", function () {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener("change", function () {
+
+        Array.from(this.files).forEach(file => {
+
+            if (!isDuplicateFile(file)) {
+                selectedFiles.push(file);
+            }
+        });
+
+        renderFileList();
+        this.value = "";
+    });
+
+    function renderFileList() {
+
+        const attachBody = $("#fileList");
+        attachBody.empty();
+
+        // ===== EXISTING ATTACHMENTS =====
+        if (globalAttachments && globalAttachments.length > 0) {
+
+            globalAttachments.forEach((att, index) => {
+
+                const fileName = att.FileName ?? att.fileName;
+                const filePath = att.FilePath ?? att.filePath;
+
+                const extension = fileName.split('.').pop().toLowerCase();
+
+                let previewHtml = "";
+
+                if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
+                    previewHtml = `<img src="${filePath}" class="erp-file-thumb">`;
+                }
+                else if (extension === "pdf") {
+                    previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+                }
+                else {
+                    previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
+                }
+
+                attachBody.append(`
+                <div class="file-item erp-file-row">
+
+                    <!-- LEFT: ICON / IMAGE -->
+                    <div class="erp-file-preview">
+                        ${previewHtml}
+                    </div>
+
+                    <!-- MIDDLE: NAME -->
+                    <div class="erp-file-info">
+                        <div class="erp-file-name">${fileName}</div>
+                    </div>
+
+                    <!-- RIGHT: ACTIONS -->
+                    <div class="erp-file-actions">
+                        <a href="${filePath}" target="_blank" class="erp-view-btn">
+                            View
+                        </a>
+
+                        <button type="button"
+                                class="erp-delete-db-btn"
+                                data-index="${index}">
+                            Delete
+                        </button>
+                    </div>
+
+                </div>
+            `);
+            });
+        }
+
+        // ===== NEWLY SELECTED FILES =====
+        selectedFiles.forEach((file, index) => {
+
+            const extension = file.name.split('.').pop().toLowerCase();
+            const fileUrl = URL.createObjectURL(file);
+
+            let previewHtml = "";
+
+            if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
+                previewHtml = `<img src="${fileUrl}" class="erp-file-thumb">`;
+            }
+            else if (extension === "pdf") {
+                previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+            }
+            else {
+                previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
+            }
+
+            attachBody.append(`
+            <div class="file-item erp-file-row">
+
+                <!-- LEFT: ICON / IMAGE -->
+                <div class="erp-file-preview">
+                    ${previewHtml}
+                </div>
+
+                <!-- MIDDLE: NAME -->
+                <div class="erp-file-info">
+                    <div class="erp-file-name">${file.name}</div>
+                </div>
+
+                <!-- RIGHT: ACTIONS -->
+                <div class="erp-file-actions">
+                    <a href="${fileUrl}" target="_blank" class="erp-view-btn">
+                        View
+                    </a>
+
+                    <button type="button"
+                            class="erp-delete-file-btn"
+                            data-index="${index}">
+                        Delete
+                    </button>
+                </div>
+
+            </div>
+        `);
+        });
+
+        if (globalAttachments.length === 0 && selectedFiles.length === 0) {
+            attachBody.html(`
+            <div class="erp-empty-state text-center text-muted">
+                No attachments found.
+            </div>
+        `);
+        }
+    }
+
+    $(document).on("click", ".erp-delete-file-btn", function () {
+
+        const index = $(this).data("index");
+
+        selectedFiles.splice(index, 1);
+
+        renderFileList();
+    });
+
+    $(document).on("click", ".erp-delete-db-btn", function () {
+
+        const index = $(this).data("index");
+
+        globalAttachments.splice(index, 1);
+
+        renderFileList();
+    });
+
+
+    dropZone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", function () {
+        dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+
+        const files = e.dataTransfer.files;
+
+        Array.from(files).forEach(file => {
+
+            if (!isDuplicateFile(file)) {
+                selectedFiles.push(file);
+            }
+        });
+
+        renderFileList();
+    });
+
+    function isDuplicateFile(file) {
+
+        const fileName = file.name;
+
+        // 1. check in newly selected files
+        const inNew = selectedFiles.some(f =>
+            f.name === file.name &&
+            f.size === file.size &&
+            f.lastModified === file.lastModified
+        );
+
+        // 2. check in existing DB attachments
+        const inExisting = globalAttachments.some(att => {
+            const name = att.FileName ?? att.fileName;
+            return name.toLowerCase() === file.name.toLowerCase();
+        });
+
+        if (inNew || inExisting) {
+            toastr.warning(`File "${fileName}" already exists in attachment list.`);
+            return true;
+        }
+
+        return false;
+    }
+
 
 
 });
