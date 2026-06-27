@@ -5,6 +5,7 @@ using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.FincialAccounting.Master;
 using travelexpensemanagement.Models.GateEntry.Transaction;
 using travelexpensemanagement.Models.Purchase.Transaction;
@@ -118,7 +119,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 {
                                     cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
                                     cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
                                     cmd.Parameters.AddWithValue("@V_TYPE", VType);
                                     cmd.Parameters.AddWithValue("@V_NO", VNo);
                                     await cmd.ExecuteNonQueryAsync();
@@ -193,15 +194,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             public string? LID { get; set; }
         }
 
-
-
-
-
-
-
-
-
-
         [HttpGet]
         public async Task<IActionResult> ExportAllDocs()
         {
@@ -213,7 +205,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@Action", "Excel" }
                 };
                 var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parameter);
@@ -225,7 +217,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = ex.Message });
             }
         }
-
 
         public JsonResult DeleteValidation(int v_no, string v_type)
         {

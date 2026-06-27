@@ -467,25 +467,25 @@
 			});
 		}
 
-   function showEmployeePopup(docCode) {
-			 $.ajax({
-				 url: '/PurchaseOrderList/GetPurchaseOrderEntryDetails',
-				 type: 'Get',
-				 dataType: 'json',
-				 data: { docid: docCode },
-				 success: function(response) {
-						 if(response.status) {
-								 console.log(response.data);
-						 showDocumentPopupjQuery(response.data, docCode);
-					 } else {
-						 toastr.error("Failed to get document details.");
-					 }
-				 },
-				 error: function() {
-					 toastr.error("An error occurred while fetching document details.");
+	 function showEmployeePopup(docid) {
+
+		 $.ajax({
+			   url: '/PurchaseOrderList/GetPurchaseOrderEntryDetails',
+			 type: 'POST',
+			 dataType: 'json',
+			   data: { docid: docid },
+			 success: function (response) {
+				 if (response.success) {
+					  showDocumentPopupjQuery(response.data, docid);
+				 } else {
+					 toastr.error("Failed to get document details.");
 				 }
-			 });
-		 }
+			 },
+			 error: function () {
+				 toastr.error("Error fetching document details.");
+			 }
+		 });
+	 }
 
 </script>
 

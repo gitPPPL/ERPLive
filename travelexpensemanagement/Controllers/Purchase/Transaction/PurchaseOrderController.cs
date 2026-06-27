@@ -7,6 +7,7 @@ using Org.BouncyCastle.Asn1.X509.Qualified;
 using Org.BouncyCastle.Utilities;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Data.Common;
 using System.Linq.Expressions;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
@@ -34,6 +35,15 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
         public IActionResult Index()
         {
+            var globalVariables = _globalValue.GetGlobalVariables();
+            string databaseName;
+            using (var connection = _dbcontext.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
             return View("~/Views/Purchase/Transaction/PurchaseOrder/Index.cshtml");
         }
 

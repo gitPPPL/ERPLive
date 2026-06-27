@@ -1,6 +1,22 @@
-﻿@{
+﻿
+@using System.Text.Json
+
+
+
+
+
+@{
     ViewBag.Title = "Purchase Order";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; // Ensure proper type conversion
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
+
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -493,6 +509,8 @@
                     </div>
                 </div>
             </fieldset>
+
+
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Attachment</legend>
                 <div class="erppageattachmentsection">
@@ -502,7 +520,7 @@
                                 <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
                                 <div class="erppageattachmentsectiondropzone" id="dropZone">
                                     <div class="erppageattachmentsectioncloud">
-                                        <i class="fa fa-cloud"></i>
+                                        ☁
                                     </div>
                                     <div class="erppageattachmentsectiondragtext">
                                         Drag & Drop your files here
@@ -510,23 +528,33 @@
                                     <div class="erppageattachmentsectionor">
                                         OR
                                     </div>
+
                                     <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
                                         Browse Files
                                     </button>
                                     <input type="file" id="fileInput" multiple hidden>
+
+
+
                                 </div>
                             </div>
                         </div>
                         <div class="erppageattachmentsectioncol">
                             <div class="erppageattachmentsectionfilecard">
-                                <div class="erppageattachmentsectionheader">Uploaded Files</div>
-                                <div class="erppageattachmentsectionfilelist" id="fileList">
+                                <div class="erppageattachmentsectionheader">
+                                    Uploaded Files
+                                </div>
+                                <div class="erppageattachmentsectionfilelist"
+                                     id="fileList">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </fieldset>
+
+
+
 
             <fieldset class="erppagefieldset" id="SaudaDetail">
                 <legend class="erppagefieldset-legend">Sauda Details</legend>
@@ -1010,6 +1038,37 @@
 
 <script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
 
+
+
+
+<script>
+    // Passing only required variables to JS
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email
+    }));
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
+
+
+
+
+
+
+
 <script>
 
     const AllFieldsId = [
@@ -1034,8 +1093,8 @@
 
     let docId = "";
     let readOnly;
-
-
+    let selectedFiles = [];
+    let globalAttachments = [];
     console.log("readOnly", readOnly); 
 
 
@@ -1337,6 +1396,76 @@
             }
         });
 
+
+        //Attachment
+
+    browseBtn.addEventListener("click", function () {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener("change", function () {
+
+        Array.from(this.files).forEach(file => {
+
+            if (!isDuplicateFile(file)) {
+                selectedFiles.push(file);
+            }
+        });
+
+        renderFileList();
+        this.value = "";
+    });
+
+    $(document).on("click", ".erp-delete-file-btn", function () {
+
+        const index = $(this).data("index");
+
+        selectedFiles.splice(index, 1);
+
+        renderFileList();
+    });
+
+    $(document).on("click", ".erp-delete-db-btn", function () {
+
+        const index = $(this).data("index");
+
+        globalAttachments.splice(index, 1);
+
+        renderFileList();
+    });
+
+    dropZone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", function () {
+        dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+
+        const files = e.dataTransfer.files;
+
+        Array.from(files).forEach(file => {
+
+            if (!isDuplicateFile(file)) {
+                selectedFiles.push(file);
+            }
+        });
+
+        renderFileList();
+    });
+
+
+
+
+
+
+
+
     });
 
 </script>
@@ -1346,7 +1475,7 @@
     async function handleDocLoad() {
         const docId = getQueryParam('id');
         const readOnly = getQueryParam('readOnly');
-
+          SetFYDate('dtDocDate', LoginDate);
         if (docId) {
             $('#SaudaDetail').show();
             $('#ddlStatus').prop('disabled', false);
@@ -1368,7 +1497,11 @@
                 (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
                 today.getDate().toString().padStart(2, '0');
 
-            $('#dtDocDate').val(todayDate);
+
+
+
+
+           // $('#dtDocDate').val(todayDate);
             $('#DtDeliveryDate').val(todayDate);
             $('#DtValidateDate').val(todayDate);
         }
@@ -3183,7 +3316,7 @@
     }
 
 
-        function handleBack(redirectUrl, isReadOnly = false) {
+    function handleBack(redirectUrl, isReadOnly = false) {
 
         if (isReadOnly) {
             window.location.href = redirectUrl;
@@ -3206,7 +3339,168 @@
         });
     }
 
+        function isDuplicateFile(file) {
 
+        const fileName = file.name;
+
+        // 1. check in newly selected files
+        const inNew = selectedFiles.some(f =>
+            f.name === file.name &&
+            f.size === file.size &&
+            f.lastModified === file.lastModified
+        );
+
+        // 2. check in existing DB attachments
+        const inExisting = globalAttachments.some(att => {
+            const name = att.FileName ?? att.fileName;
+            return name.toLowerCase() === file.name.toLowerCase();
+        });
+
+        if (inNew || inExisting) {
+            toastr.warning(`File "${fileName}" already exists in attachment list.`);
+            return true;
+        }
+
+        return false;
+    }
+
+        function renderFileList() {
+
+        const attachBody = $("#fileList");
+        attachBody.empty();
+
+        // ===== EXISTING ATTACHMENTS =====
+        if (globalAttachments && globalAttachments.length > 0) {
+
+            globalAttachments.forEach((att, index) => {
+
+                const fileName = att.FileName ?? att.fileName;
+                const filePath = att.FilePath ?? att.filePath;
+
+                const extension = fileName.split('.').pop().toLowerCase();
+
+                let previewHtml = "";
+
+                if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
+                    previewHtml = `<img src="${filePath}" class="erp-file-thumb">`;
+                }
+                else if (extension === "pdf") {
+                    previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+                }
+                else {
+                    previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
+                }
+
+                attachBody.append(`
+                    <div class="file-item erp-file-row">
+
+                        <!-- LEFT: ICON / IMAGE -->
+                        <div class="erp-file-preview">
+                            ${previewHtml}
+                        </div>
+
+                        <!-- MIDDLE: NAME -->
+                        <div class="erp-file-info">
+                            <div class="erp-file-name">${fileName}</div>
+                        </div>
+
+                        <!-- RIGHT: ACTIONS -->
+                        <div class="erp-file-actions">
+                            <a href="${filePath}" target="_blank" class="erp-view-btn">
+                                View
+                            </a>
+
+                            <button type="button"
+                                    class="erp-delete-db-btn"
+                                    data-index="${index}">
+                                Delete
+                            </button>
+                        </div>
+
+                    </div>
+                `);
+            });
+        }
+
+        // ===== NEWLY SELECTED FILES =====
+        selectedFiles.forEach((file, index) => {
+
+            const extension = file.name.split('.').pop().toLowerCase();
+            const fileUrl = URL.createObjectURL(file);
+
+            let previewHtml = "";
+
+            if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
+                previewHtml = `<img src="${fileUrl}" class="erp-file-thumb">`;
+            }
+            else if (extension === "pdf") {
+                previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+            }
+            else {
+                previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
+            }
+
+            attachBody.append(`
+                <div class="file-item erp-file-row">
+
+                    <!-- LEFT: ICON / IMAGE -->
+                    <div class="erp-file-preview">
+                        ${previewHtml}
+                    </div>
+
+                    <!-- MIDDLE: NAME -->
+                    <div class="erp-file-info">
+                        <div class="erp-file-name">${file.name}</div>
+                    </div>
+
+                    <!-- RIGHT: ACTIONS -->
+                    <div class="erp-file-actions">
+                        <a href="${fileUrl}" target="_blank" class="erp-view-btn">
+                            View
+                        </a>
+
+                        <button type="button"
+                                class="erp-delete-file-btn"
+                                data-index="${index}">
+                            Delete
+                        </button>
+                    </div>
+
+                </div>
+            `);
+        });
+
+        if (globalAttachments.length === 0 && selectedFiles.length === 0) {
+            attachBody.html(`
+                <div class="erp-empty-state text-center text-muted">
+                    No attachments found.
+                </div>
+            `);
+        }
+    }
+
+    function SetFYDate(inputId, loginDate) {
+        var $input = $('#' + inputId);
+        var d = new Date(loginDate);
+
+        var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+
+        var minDate = fyStartYear + '-04-01';  
+        var maxDate = loginDate;             
+
+        $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
+
+        $input.on('change', function () {
+            var selectedDate = new Date(this.value);
+            var min = new Date(minDate);
+            var max = new Date(maxDate);
+
+            if (selectedDate < min || selectedDate > max) {
+                toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+                this.value = maxDate;
+            }
+    });
+}
 
 </script>
 
