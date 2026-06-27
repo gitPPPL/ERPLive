@@ -58,6 +58,7 @@ $(document).ready(async function () {
         await GetVNo();
         addNewRowBelow();
         initSelect2($(document));
+
     }
 
     registerEvents();
@@ -72,6 +73,7 @@ $(document).on('change', 'input[id^="rate_"]', function () {
 
 //==== Import Rate -> Rate Calculation ==================
 $(document).on('input', 'input[id^="importRate_"]', function () {
+    console.log("RATE CHANGED BY:", this.id);
     if (isPageLoading) return;
     const rowId = this.id.split('_')[1];
 
@@ -96,6 +98,7 @@ $(document).on('input', 'input[id^="importRate_"]', function () {
 });
 
 $(document).on('input', 'input[id^="importRate_"]', function () {
+    console.log("RATE CHANGED BY:", this.id);
     if (isPageLoading) return;
     const rowId = this.id.split('_')[1];
 
@@ -437,6 +440,8 @@ function registerEvents() {
                 ATTACHMENT: file.name,
                 ATTACHMENT_FILE: base64
             });
+
+            console.log("Added to rowsAttachment:", rowsAttachment);
         };
 
         reader.readAsDataURL(file);
@@ -510,6 +515,7 @@ function registerEvents() {
         }
     });
 
+
 }
 
 //====Generate VNo========
@@ -529,6 +535,7 @@ async function GetVNo() {
         if (data.v_NO) {
             $('#NumDocNo').val(data.v_NO);
             const docId = vType + data.v_NO;
+            console.log("DOC_ID:", docId);
         } else {
             console.warn("V_NO not found in response");
         }
@@ -587,6 +594,7 @@ async function LoadAllDropDowns() {
 
         bindDropdown("PurchaseQuotation", "Currency", "#ddlCurrency", "-- Select Currency --")
     ]);
+
 }
 
 function loadItemList() {
@@ -762,6 +770,7 @@ function loadFullQuotationByVno(vNo, vType) {
         type: 'GET',
         data: { vNo, vType },
         success: function (res) {
+            console.log(res);
             if (!res.success || !res.header) {
                 toastr.warning("Quotation not found.");
                 return;
@@ -770,6 +779,9 @@ function loadFullQuotationByVno(vNo, vType) {
             const items = res.items || [];
             const attachments = res.attachments || [];
 
+            console.log("Header:", header);
+            console.log("Items:", items);
+            console.log("Attachments:", attachments);
             isPageLoading = true;
             $('#TxtCode').val(header.DOC_ID);
             $('#ddlDocType').val(header.v_TYPE)
@@ -790,7 +802,7 @@ function loadFullQuotationByVno(vNo, vType) {
 
             $('#ddlPaymentTerm').val(header.payterM_CODE).trigger('change');
             $('#txtPaymentTerm').val(header.paymenT_TERM);
-   
+
             const freightTerm = header.freighT_TERM?.trim();
             $("#ddlFreightTerm").val(freightTerm).trigger("change");
             $('#txtDeliveryTerm').val(header.deliverY_TERM);
@@ -868,7 +880,7 @@ function loadFullQuotationByVno(vNo, vType) {
             //const attachBody = $('#tblAttachmentPQ tbody');
             const attachBody = $('#fileList');
             attachBody.empty();
-            
+
             if (attachments.length === 0) {
                 attachBody.append('<tr><td colspan="3" class="text-center text-muted">No attachments found.</td></tr>');
             } else {
@@ -901,7 +913,7 @@ function loadFullQuotationByVno(vNo, vType) {
                     let tdStyle = '';
 
                     if (guessedMime.startsWith('image/')) {
-                    // filePreview = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
+                       // filePreview = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
                         filePreview = `<img src="${fullBase64}" alt="${fileName}" class="erp-file-thumbnail">`;
                         tdStyle = 'style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #ccc; overflow: hidden; text-align: center; vertical-align: middle;"';
                     } else if (guessedMime === 'application/pdf') {
@@ -927,7 +939,7 @@ function loadFullQuotationByVno(vNo, vType) {
                             </div>
                         </div>
                     
-                      <div class="erp-file-actions">
+                        <div class="erp-file-actions">
 
                             <button type="button" class="erp-btn view btn-view-attachment" data-src="${fullBase64}" data-type="${guessedMime}">
                                 <i class="fa fa-eye"></i>
@@ -1051,8 +1063,8 @@ async function addNewRowBelow(skipInit = false) {
                     <td><input id="requestNo_${currentRowId}" name="requestNo[${currentRowId}]" value="" class="erppagetable-control"></td>
                     <td class="action-col">
                         <div class="action-wrap">
-                            <button class="act-btn add add-row-icon" onclick="addNewRowBelow()"><i class="fa fa-plus-circle"></i></button>
-                            <button class="act-btn delete" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
+                        <button class="act-btn add add-row-icon" onclick="addNewRowBelow()"><i class="fa fa-plus-circle"></i></button>
+                        <button class="act-btn delete" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
                             <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
                         </div>
                     </td>
@@ -1191,15 +1203,15 @@ function generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap, uomMap, isLas
                  <td><input id="requestNo_${i}" name="requestNo[${i}]" value="${row.reQ_NO || ''}" class="erppagetable-control"></td>
                  <td class="action-col">
                     <div class="action-wrap">
-                       ${isLastRow ? `
-                              <button type="button" class="act-btn add add-row-icon" onclick="addNewRowBelow()">
-                                  <i class="fa fa-plus-circle"></i>
-                              </button>
-                          ` : ''}
+                 ${isLastRow ? `
+                        <button type="button" class="act-btn add add-row-icon" onclick="addNewRowBelow()">
+                            <i class="fa fa-plus-circle"></i>
+                        </button>
+                    ` : ''}
 
-                          <button type="button" class="act-btn delete" onclick="deleteRow(this)">
-                              <i class="fa fa-trash"></i>
-                          </button>
+                    <button type="button" class="act-btn delete" onclick="deleteRow(this)">
+                        <i class="fa fa-trash"></i>
+                    </button>
                           <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
                     </div>
                 </td>
@@ -1441,6 +1453,9 @@ $('#btn-save').click(async function (e) {
         lineRows: rowsData,
         Attachement: rowsAttachment
     };
+
+    console.log("header data", headerData);
+    console.log("line rows", rowsData);
      
     $.ajax({
         url: '/PurchaseQuotation/SaveQuotation',
@@ -1449,6 +1464,7 @@ $('#btn-save').click(async function (e) {
         data: JSON.stringify(data),
         success: function (response) {
             if (response.success === true) {
+                console.log("SAVE RESPONSE:", response);
                 if (response.action === "INSERT") {
                     showToast("Data Saved Successfully", { type: "success" });
                 }
@@ -1506,9 +1522,13 @@ function deleteRow(iconElement) {
 
 //======Header Validation function===========
 function validateHeader() {
+    console.log("HEader Validation called")
     const vDate = $('#dtDocDate').val();
     const quoteDate = $('#dtQuotDate').val();
     const validDate = $('#dtValidDate').val();
+
+    console.log("Quote:", quoteDate, new Date(quoteDate));
+    console.log("Valid:", validDate, new Date(validDate));
 
     if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
     if (!validateRequiredField('#dtDocDate', 'Doc Date')) return;
@@ -1532,6 +1552,8 @@ function validateHeader() {
 
 //========Validate Grid==========
 function validateGrid(rowsData, rowsAttachment) {
+
+    console.log("Validation Called !!:");
 
     if (!rowsData || rowsData.length === 0) {
         showToast("No Record in grid to save.", { type: "warning" });
@@ -1616,6 +1638,8 @@ $(document).on(
     input[id^="cessPerc_"]
     `,
     function () {
+
+
         const $row = $(this).closest('tr');
         const rowId = this.id.split('_')[1];
 
@@ -1902,12 +1926,15 @@ function initSelect2($context) {
 }
 
 //==========Duplicate Function=============
+
 $('#btn-duplicate').click(async function () {
 
     if (!rowId) {
         toastr.warning("Nothing to duplicate");
         return;
     }
+
+    console.log("duplicate Clicked");
 
     await GetVNo();
 
@@ -2084,6 +2111,11 @@ async function getSelectedRows(tableId, modalId) {
 
         $(`#itemMake_${newRowId}`).val(makeCode).trigger('change');
 
+        console.log(
+            "Selected Value:",
+            $(`#itemMake_${newRowId}`).val()
+        );
+
         $(`#itemMake_${newRowId} option`).each(function () {
             console.log("Option:", `[${$(this).val()}]`);
         });
@@ -2140,13 +2172,19 @@ function applyReadOnlyMode() {
     $('#btn-save').hide();
     $('#btn-duplicate').hide();
     $('#dtDocDate,#dtQuotDate,#dtValidDate').prop('disabled', true);
-   
+
+    // Copy From section hide
     $('.erppage-internalaction').hide();
     $('#CopyFrom').closest('.erppagedropdown').hide();
     $('#browseBtn').hide();
     $('#dropZone').css('pointer-events', 'none');
+
+    // Print rakhna hai to enable kar do
     $('.erppage-btn-print').prop('disabled', false);
+
+    // Back button enabled rahega
     $('.erppage-header-back').prop('disabled', false);
+
 
     $('#tblPurchaseQuotationListByVno').find('input, select, textarea').prop('disabled', true);
     $('#tblPurchaseQuotationListByVno').find('.act-btn').prop('disabled', true);
