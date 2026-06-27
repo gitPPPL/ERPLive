@@ -4,6 +4,7 @@
     var compCode = @ViewBag.CompCode;
     var branchCode = @ViewBag.BranchCode;
     var yearCode = @ViewBag.YearCode;
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
 <div id="erp-toast-container"></div>
@@ -39,11 +40,17 @@
                     <label class="erppage-label">Doc Date</label>
                     <input type="date" class="erppage-input" id="dtDocDate">
                 </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-required" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
             </div>
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Party Name</label>
-                    <select class="erppage-input erppage-select" id="txtPartyName">
+                    <select class="erppage-input erppage-required" id="txtPartyName">
                         <option value="">Select Party Name</option>
                     </select>
                 </div>
@@ -65,22 +72,22 @@
                     <label class="erppage-label">Valid Date</label>
                     <input type="date" class="erppage-input" id="dtValidDate">
                 </div>
-                <div class="erppage-divfield">
+                <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Paym. Term</label>
-                    <select class="erppage-input erppage-select" id="ddlPaymentTerm" style="width:80%;">
+                    <select class="erppage-input erppage-select erppage-required" id="ddlPaymentTerm">
                         <option value="">Select Payment Term</option>
                     </select>
                     <input type="text" class="erppage-input" id="txtPaymentTerm" />
                 </div>
+            </div>
+            <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Freight Term</label>
-                    <select class="erppage-input erppage-select" id="ddlFreightTerm">
+                    <select class="erppage-input erppage-required" id="ddlFreightTerm">
                         <option value="Ex-Work">Ex-Work</option>
                         <option value="F.O.R-at out Plant">F.O.R-at out Plant</option>
                     </select>
                 </div>
-            </div>
-            <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Delivery Term</label>
                     <input type="text" class="erppage-input" id="txtDeliveryTerm" maxlength="250">
@@ -95,57 +102,50 @@
                         <option value="">Select Currency</option>
                     </select>
                 </div>
+            </div>
+            <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Ex-Rate</label>
                     <input type="number" class="erppage-input" id="NumExRate">
                 </div>
-            </div>
-            <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Remarks</label>
                     <input type="text" class="erppage-input" id="txtRemarks" placeholder="Enter Remarks">
                 </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Status</label>
-                    <select class="erppage-input erppage-select" id="ddlStatus">
-                        <option value="">Select Status</option>
-                    </select>
+            </div>
+            <div class="erppage-internalaction erppage-col-span-3" style="margin:0px;">
+                <div class="dropdown erppagedropdown">
+                    <button type="button" class="erppagedropdown-btn" id="CopyFrom">
+                        <i class="fa fa-copy"></i>
+                        <span>Copy From</span>
+                    </button>
+                    <button type="button" class="erppagedropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu erppagedropdown-menu">
+                        <li>
+                            <a class="erppagedropdown-item" data-bs-toggle="modal" data-bs-target="#purchasequotationModal" onclick="openCopyModal('CopyFromPurchaseQuotation', '#purchasequotationModal', '#tblpurchasequotationmodal')">
+                                <i class="fa-solid fa-file-invoice"></i>
+                                <span>Purchase Quotation</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="erppagedropdown-item" data-bs-toggle="modal" data-bs-target="#purchaserequestModal" onclick="openCopyModal('CopyFromPurchaseRequest', '#purchaserequestModal', '#tblpurchaserequestmodal')">
+                                <i class="fa-solid fa-file-invoice"></i>
+                                <span>Purchase Request</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="erppage-action erppage-col-span-2" style="margin:0px;gap: 240px;display: flex;">
-                    <div class="dropdown erppagedropdown">
-                        <button type="button" class="erppagedropdown-btn">
-                            <i class="fa fa-copy"></i>
-                            <span>Copy From</span>
-                        </button>
-                        <button type="button" class="erppagedropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-chevron-down"></i>
-                        </button>
-                        <ul class="dropdown-menu erppagedropdown-menu">
-                            <li>
-                                <a class="erppagedropdown-item" data-bs-toggle="modal" data-bs-target="#purchasequotationModal" onclick="openCopyModal('CopyFromPurchaseQuotation', '#purchasequotationModal', '#tblpurchasequotationmodal')">
-                                    <i class="fa-solid fa-file-invoice"></i>
-                                    <span>Purchase Quotation</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="erppagedropdown-item" data-bs-toggle="modal" data-bs-target="#purchaserequestModal" onclick="openCopyModal('CopyFromPurchaseRequest', '#purchaserequestModal', '#tblpurchaserequestmodal')">
-                                    <i class="fa-solid fa-file-invoice"></i>
-                                    <span>Purchase Request</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    @* <button type="button" class="erppage-btn erppage-btn-print">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn-duplicate">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Create Duplicate</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-print" onclick="PendingQCReport1()">
                     <i class="fa-solid fa-print"></i>
                     <span>Print</span>
-                </button> *@
-                    <button type="button" class="erppage-btn erppage-btn-common" id="btn-duplicate">
-                        <i class="fa-solid fa-copy"></i>
-                        <span>Create Duplicate</span>
-                    </button>
-                </div>
+                </button>
             </div>
-            
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Item Record</legend>
                 <div class="erppagelist-container">
@@ -246,63 +246,59 @@
                 </div>
             </fieldset>
             <fieldset class="erppagefieldset">
-                <legend class="erppagefieldset-legend">Item Total</legend>
-                <div class="erppage-grid4">
+                <div class="erppage-grid5">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Quantity</label>
-                        <input type="number" class="erppage-input" id="numQuantityIT" placeholder="Enter Quantity">
+                        <input type="number" class="erppage-input" id="numQuantityIT" placeholder="Enter Quantity" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Amount</label>
-                        <input type="number" class="erppage-input" id="numAmountIT" placeholder="Enter Amount">
+                        <input type="number" class="erppage-input" id="numAmountIT" placeholder="Enter Amount" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Pack Amt</label>
-                        <input type="number" class="erppage-input" id="numPackAmtIT" placeholder="Enter Pack Amt">
+                        <input type="number" class="erppage-input" id="numPackAmtIT" placeholder="Enter Pack Amt" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Disc Amt</label>
-                        <input type="number" class="erppage-input" id="numDiscAmtIT" placeholder="Enter Disc Amt">
+                        <input type="number" class="erppage-input" id="numDiscAmtIT" placeholder="Enter Disc Amt" readonly>
                     </div>
-                </div>
-                <div class="erppage-grid4">
-                    
                     <div class="erppage-divfield">
                         <label class="erppage-label">Freight</label>
-                        <input type="number" class="erppage-input" id="numFreightIT" placeholder="Enter Freight">
+                        <input type="number" class="erppage-input" id="numFreightIT" placeholder="Enter Freight" readonly>
                     </div>
+                </div>
+                <div class="erppage-grid5">
                     <div class="erppage-divfield">
                         <label class="erppage-label">CGST Amt</label>
-                        <input type="number" class="erppage-input" id="numCGSTAmtIT" placeholder="Enter CGST Amt">
+                        <input type="number" class="erppage-input" id="numCGSTAmtIT" placeholder="Enter CGST Amt" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">SGST Amt</label>
-                        <input type="number" class="erppage-input" id="numSGSTAmtIT" placeholder="Enter SGST Amt">
+                        <input type="number" class="erppage-input" id="numSGSTAmtIT" placeholder="Enter SGST Amt" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">IGST Amt</label>
-                        <input type="number" class="erppage-input" id="numIGSTAmtIT" placeholder="Enter IGST Amt">
+                        <input type="number" class="erppage-input" id="numIGSTAmtIT" placeholder="Enter IGST Amt" readonly>
                     </div>
-                </div>
-                <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cess Amt</label>
-                        <input type="number" class="erppage-input" id="numCessAmtIT" placeholder="Enter Cess Amt">
+                        <input type="number" class="erppage-input" id="numCessAmtIT" placeholder="Enter Cess Amt" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">VAT Amt</label>
-                        <input type="number" class="erppage-input" id="numVATAmtIT" placeholder="Enter VAT Amt">
+                        <input type="number" class="erppage-input" id="numVATAmtIT" placeholder="Enter VAT Amt" readonly>
                     </div>
+                </div>
+                <div class="erppage-grid5">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Other Amt</label>
-                        <input type="number" class="erppage-input" id="numOtherAmtIT" placeholder="Enter Other Amt">
+                        <input type="number" class="erppage-input" id="numOtherAmtIT" placeholder="Enter Other Amt" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Net Amt</label>
-                        <input type="number" class="erppage-input" id="numNetAmtIT" placeholder="Enter Net Amount">
+                        <input type="number" class="erppage-input" id="numNetAmtIT" placeholder="Enter Net Amount" readonly>
                     </div>
-                </div>
-                <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Bulk Qty</label>
                         <input type="number" class="erppage-input" id="numBulkQtyIT" placeholder="Enter Bulk Qty">
@@ -322,7 +318,7 @@
                                     <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
                                     <div class="erppageattachmentsectiondropzone" id="dropZone">
                                         <div class="erppageattachmentsectioncloud">
-                                            ☁
+                                            <i class="fa fa-cloud"></i>
                                         </div>
                                         <div class="erppageattachmentsectiondragtext">
                                             Drag & Drop your files here
@@ -346,17 +342,14 @@
                                          id="fileList">
                                     </div>
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
                 </fieldset>
 
         </fieldset>
         <div class="erppage-actions">
-            <button type="button" class="erppage-btn erppage-btn-common">
+            <button type="button" class="erppage-btn erppage-btn-common" onclick="PendingQCReport()">
                 <i class="fa-solid fa-print"></i>
                 <span>Print</span>
             </button>
@@ -401,7 +394,7 @@
                     </div>
                 </div>
                 <div class="excel-wrapper fixed-grid-wrapper">
-                    <table id="tblpurchasequotationmodal" class="excel-table fixed-grid-table resizable-table">
+                    <table id="tblpurchasequotationmodal" class="excel-table width-table fixed-grid-table resizable-table">
                         <colgroup>
                             <col style="width:50px;">
                             <col style="width:100px;">
@@ -433,7 +426,7 @@
                                 <th>Make Code</th>
                                 <th>U Code</th>
                                 <th>Tax Code</th>
-                                <th style="display:none;">Action</th>
+                                <th class="hidden-col">Action</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -483,7 +476,7 @@
                     </div>
                 </div>
                 <div class="excel-wrapper fixed-grid-wrapper">
-                    <table id="tblpurchaserequestmodal" class="excel-table fixed-grid-table resizable-table">
+                    <table id="tblpurchaserequestmodal" class="excel-table width-table fixed-grid-table resizable-table">
                         <colgroup>
                             <col style="width:50px;">
                             <col style="width:100px;">
@@ -531,6 +524,542 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@* Last 10 Order History Modal *@
+<div class="modal fade" id="lastTenOrderHistoryModal" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Order History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenOrderHistory"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Oth Amt</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 History Quotation modal *@
+<div class="modal fade" id="lastTenPurchaseHistoryQuotation" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Quotation History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenQuotationOrderHistory"class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width: 89px;">
+                            <col style="width: 90px;">
+                            <col style="width: 91px;">
+                            <col style="width: 93px;">
+                            <col style="width: 130px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Group No</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Freight</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>Oth Exps</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 History Quotation modal *@
+<div class="modal fade" id="lastTenOrderHistory" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Quotation History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="lastTenOrderQuotation" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width: 89px;">
+                            <col style="width: 90px;">
+                            <col style="width: 91px;">
+                            <col style="width: 93px;">
+                            <col style="width: 130px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>Oth Exps</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <script>
     const fileInput = document.getElementById('fileInput');
     const browseBtn = document.getElementById('browseBtn');
@@ -559,8 +1088,7 @@
         Array.from(files).forEach(file => {
 
             const fileItem = document.createElement('div');
-            fileItem.className =
-                'erppageattachmentsectionfileitem';
+            fileItem.className ='erppageattachmentsectionfileitem';
 
             fileItem.innerHTML = `
                 <div class="erppageattachmentsectionicon ${getFileColorClass(file.name)}">
@@ -583,7 +1111,7 @@
 
                     <button class="erppageattachmentsectionview">
                         View
-                    </button>
+                    </button>   
 
                     <button class="erppageattachmentsectiondelete">
                         Delete
@@ -613,6 +1141,40 @@
                 }
 
             }, 10);
+
+     fileItem
+    .querySelector('.erppageattachmentsectionview')
+    .addEventListener('click', () => {
+
+        const fileUrl = URL.createObjectURL(file);
+
+        $('#previewImage').hide();
+        $('#previewPdf').hide();
+
+        if (file.type.startsWith('image/')) {
+
+            $('#previewImage')
+                .attr('src', fileUrl)
+                .show();
+        }
+        else if (file.type === 'application/pdf') {
+
+            $('#previewPdf')
+                .attr('src', fileUrl)
+                .show();
+        }
+        else {
+
+            window.open(fileUrl, '_blank');
+            return;
+        }
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('imagePreviewModal')
+        );
+
+        modal.show();
+    });
 
             fileItem
                 .querySelector(
@@ -671,12 +1233,27 @@
                 return 'erppageattachmentsectiondefault';
         }
     }
+
 </script>
 
 <script>
     var compCode = '@ViewBag.CompCode';
     var branchCode = '@ViewBag.BranchCode';
     var yearCode = '@ViewBag.YearCode';
+    
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
 </script>
 
 <script src="~/common/dropdown.js"></script>

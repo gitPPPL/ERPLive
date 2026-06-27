@@ -27,9 +27,9 @@
 			break;
 		}
 	}
-
+	var userlevel = Model.UserLevel;
 }
-<div id="erp-center-toast-container"></div>
+<div id="erp-toast-container"></div>
 <div class="erppagelist-header">
 	<div class="erppagelist-title">
 		<i class="fa fa-list"></i>
@@ -58,7 +58,7 @@
 		}
 		@if (canExport)
 		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
 				<i class="fa fa-file-excel"></i>Export
 			</button>
 		}
@@ -79,19 +79,19 @@
 </div>
 <div class="erppagelist-container">
 	<div class="excel-wrapper fixed-grid-wrapper">
-		<table id="tblPurchaseRequestList" class="excel-table fixed-grid-table resizable-table">
+		<table id="tblPurchaseRequestList" class="excel-table fixed-grid-table width-table resizable-table">
 			<colgroup>
-				<col style="display:none;" />      
-				<col style="width:120px;" />       
-				<col style="width:120px;" />       
-				<col style="width:120px;" />       
-				<col style="width:150px;" />       
-				<col style="width:180px;" />       
-				<col style="width:180px;" />       
-				<col style="width:130px;" />       
-				<col style="width:250px;" />       
-				<col style="width:120px;" />       
-				<col style="width:140px;" />       
+				<col style="display:none;">
+				<col style="width: 85px;">
+				<col style="width: 74px;">
+				<col style="width: 81px;">
+				<col style="width: 96px;">
+				<col style="width: 137px;">
+				<col style="width: 66px;">
+				<col style="width: 107px;">
+				<col style="width: 118px;">
+				<col style="width:120px;">
+				<col style="width:140px;">
 			</colgroup>
 			<thead>
 				<tr>
@@ -132,158 +132,21 @@
 	</div>
 </div>
 
+		
 
 
-
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/purchase/transaction/purchaserequestlist/purchaserequestlist.js"></script>
 
 <script>
-	let currentPage = 1;
-	let pageSize = 10;
-
-	$(document).ready(function () {
-		loadAllMenus();
-	});
-
-	function loadAllMenus() {
-		const searchTerm = $('#searchBox').val();
-	
-
-		$.ajax({
-			url: '/PurchaseRequestList/GetList',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
-			},
-			success: function (res) {
-				if (!res.success) {
-					toastr.error("Failed to load data.");
-					return;
-				}
-
-				const list = res.lists;
-				const totalCount = res.totalCount;
-				let tbody = $('#tblPurchaseRequestList tbody');
-				tbody.empty();
-
-				if (list.length === 0) {
-					tbody.append('<tr><td colspan="11" class="text-center text-muted">No list found.</td></tr>');
-				} else {
-					$.each(list, function (index, item) {
-						tbody.append(`
-							<tr>
-							<td>${item.v_NO}</td>
-							<td>${item.v_TYPE}</td>
-							<td>${formatDate(item.v_DATE)}</td>
-							<td>${item.depT_NAME}</td>
-							<td>${item.owneR_NAME}</td>
-							<td>${item.placeName}</td>
-							<td>${formatDate(item.targeT_DATE)}</td>
-							<td>${item.remarks}</td>
-							<td>${item.status === 1 ? 'Open' : item.status === 2 ? 'Cancel' : item.status === 3 ? 'Close' : 'Unknown'}</td>
-								<td>
-								    <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.v_NO}')"></i>
-									<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.v_NO}')"></i>
-									<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete"onclick="deleteTemp('${item.v_NO}')"></i>
-								</td>
-							</tr>
-						`);
-					});
-					renderPagination(totalCount, pageSize, currentPage);
-				}
-			},
-			error: function (xhr) {
-				toastr.error('Error loading menu list: ' + xhr.responseText);
-			}
-		});
-	}
-
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const paginationContainer = $('#tablePagination');
-		paginationContainer.empty();
-
-		if (total === 0 || totalPages <= 1) return;
-
-		let paginationHtml = '';
-
-		if (currentPage > 1) {
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, currentPage + 2);
-
-		if (currentPage <= 3) endPage = Math.min(5, totalPages);
-		if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
-
-		for (let i = startPage; i <= endPage; i++) {
-			paginationHtml += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
-
-		if (currentPage < totalPages) {
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			paginationHtml += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-
-		paginationContainer.html(paginationHtml);
-	}
-
-	function goToPage(page) {
-		currentPage = page;
-		loadAllMenus();
-	}
-
-	$('#searchBox').on('keyup', function () {
-		currentPage = 1;
-		loadAllMenus();
-	});
-
-
-
-		function formatDate(dateStr) {
-			if (!dateStr) return null;
-			const date = new Date(dateStr);
-			if (isNaN(date)) return null;
-			const year = date.getFullYear();
-			const month = String(date.getMonth() + 1).padStart(2, '0');
-			const day = String(date.getDate()).padStart(2, '0');
-			return `${year}-${month}-${day}`;
-		}
-
-
-		function AddOrEditFunction(code) {
-			window.location.href = '/PurchaseRequest/Index?id=' + encodeURIComponent(code);
-		}
-
-		function viewMenuDetails(code) {
-			window.location.href = '/PurchaseRequest/Index?id=' + encodeURIComponent(code) + '&mode=view';
-		}
-
-	function deleteTemp(code) {
-		if (!confirm('Are you sure you want to delete this Purchase Request?')) return;
-		$.ajax({
-			url: '/PurchaseRequestList/Delete',
-			type: 'POST',
-			data: { code: code },
-			success: function (res) {
-				if (res.success) {
-					toastr.success('Deleted successfully.');
-					loadAllMenus();
-				} else {
-					toastr.error(res.message || 'Failed to delete.');
-				}
-			},
-			error: function () {
-				toastr.error('Error deleting Purchase Request .');
-			}
-		});
-	}
+	window.permissions = {
+		canEdit: @canEdit.ToString().ToLower(),
+		canDelete: @canDelete.ToString().ToLower(),
+		canDocDetail: @canDocDetail.ToString().ToLower()
+	};
+	window.userLevel = @userlevel;
 </script>
-
 
 
 

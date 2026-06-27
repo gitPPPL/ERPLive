@@ -17,7 +17,7 @@ let taxCodeMap = {};
 const urlParams = new URLSearchParams(location.search);
 let rowId = parseInt(urlParams.get('id'));
 let vType = urlParams.get('vType');
-const isReadOnly = urlParams.get('readOnly') === 'true';
+let isReadOnly = urlParams.get('readOnly') === 'true';
 
 let isEditMode = rowId > 0;
 let isDuplicateMode = false;
@@ -38,6 +38,14 @@ $(document).ready(async function () {
         loadTaxCodeList()
     ]);
 
+    if (!isEditMode) {
+        setTimeout(() => {
+            $('#ddlStatus').prop('disabled', true);
+            $('#ddlStatus').val('1').trigger('change');
+           
+        }, 100);
+    }
+
     if (rowId > 0) {
 
         await loadFullQuotationByVno(
@@ -50,14 +58,20 @@ $(document).ready(async function () {
         await GetVNo();
         addNewRowBelow();
         initSelect2($(document));
-
     }
 
     registerEvents();
 });
 
+$(document).on('change', 'input[id^="rate_"]', function () {
+    console.log("Rate Changed");
+    const rowId = this.id.split('_')[1];
+
+    checkLastOrderRate(rowId);
+});
+
+//==== Import Rate -> Rate Calculation ==================
 $(document).on('input', 'input[id^="importRate_"]', function () {
-    console.log("RATE CHANGED BY:", this.id);
     if (isPageLoading) return;
     const rowId = this.id.split('_')[1];
 
@@ -82,7 +96,6 @@ $(document).on('input', 'input[id^="importRate_"]', function () {
 });
 
 $(document).on('input', 'input[id^="importRate_"]', function () {
-    console.log("RATE CHANGED BY:", this.id);
     if (isPageLoading) return;
     const rowId = this.id.split('_')[1];
 
@@ -106,6 +119,7 @@ $(document).on('input', 'input[id^="importRate_"]', function () {
     }
 });
 
+//=======For sync both fields(Rate ÷ Exchange Rate = Import Rate)=========
 $(document).on('input', 'input[id^="rate_"]', function () {
 
     if (isPageLoading) return;
@@ -128,6 +142,52 @@ $(document).on('input', 'input[id^="rate_"]', function () {
     }
 });
 
+//==== Auto Fill Tax Percentage On Tax Selection ========
+$(document).on('change', '.ddlTaxCode', function () {
+
+    const $row = $(this).closest('tr');
+    const rowId = this.id.split('_')[1];
+    const taxCode = $(this).val();
+
+    if (!taxCode) return;
+
+    $.get('/PurchaseQuotation/GetTaxDetails',
+        { taxCode: taxCode },
+        function (res) {
+
+            if (!res.success) return;
+
+            $row.data('packOnBasic', res.data.packOnBasic);
+
+            $row.find(`#cgstPerc_${rowId}`).val(res.data.cgstPer);
+            $row.find(`#sgstPerc_${rowId}`).val(res.data.sgstPer);
+            $row.find(`#igstPerc_${rowId}`).val(res.data.igstPer);
+            $row.find(`#vatPerc_${rowId}`).val(res.data.vatPer);
+            $row.find(`#cessPerc_${rowId}`).val(res.data.cessPer);
+
+            recalculateRowWithTax($row, rowId);
+        });
+});
+
+//======Duplicate Item validation(on Change)=========
+$(document).on('change', 'select[id^="itemName_"]', function () {
+
+    const selectedItem = $(this).val();
+
+    if (!selectedItem) return;
+
+    if (isDuplicateItem(selectedItem)) {
+
+        showToast("This Item is already added.", {
+            type: "warning"
+        });
+
+        $(this).val('').trigger('change');
+        return;
+    }
+});
+
+//==== Recalculate Rate When Exchange Rate Changes ======
 $('#NumExRate').on('input change', function () {
 
     const exRate = parseFloat($(this).val()) || 0;
@@ -152,6 +212,195 @@ $('#NumExRate').on('input change', function () {
     });
 });
 
+//=========preview Image on edit==============
+$(document).on('click', '.btn-view-attachment', function () {
+    
+    const src = $(this).data('src');
+    const type = $(this).data('type');
+
+    $('#previewImage').hide();
+    $('#previewPdf').hide();
+
+    if (!src || !type) {
+        return;
+    }
+
+    if (type.startsWith('image/')) {
+
+        $('#previewImage')
+            .attr('src', src)
+            .show();
+    }
+    else if (type === 'application/pdf') {
+
+        $('#previewPdf').attr('src', src).show();
+    }
+    else {
+
+        window.open(src, '_blank');
+        return;
+    }
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('imagePreviewModal')
+    );
+
+    modal.show();
+});
+
+//======Delete  Event for Image on Edit=========
+$(document).on('click', '.btn-delete-attachment', function () {
+
+    const row = $(this).closest('.erp-file-row');
+
+    const fileName = row.attr('data-filename');
+
+    rowsAttachment = rowsAttachment.filter(function (item) {
+        return item.ATTACHMENT !== fileName;
+    });
+
+    row.remove();
+});
+
+//============Toggle Three Dot Menu===========
+$(document).on("click", ".erppage-dropdownaction-btn", function (e) {
+    e.stopPropagation();
+
+    $(".erppage-dropdownaction-menu").remove();
+
+    const $btn = $(this);
+    const offset = $btn.offset();
+
+    const menuWidth = 150; // approx width of dropdown
+    const windowWidth = $(window).width();
+
+    let leftPos = offset.left;
+
+    // ? If going out of screen, open to LEFT
+    if (offset.left + menuWidth > windowWidth) {
+        leftPos = offset.left - menuWidth + $btn.outerWidth();
+    }
+
+    const row = $btn.closest('tr');
+
+    const itemCode = row.find('select[id^="itemName_"]').val();
+
+    const dropdown = $(`
+        <div class="erppage-dropdownaction-menu" data-itemcode="${itemCode}">
+            <a href="#" id="btn-itemWise-ExportToExcel"><i class="fa fa-file-excel-o"></i> Export To Excel</a>
+            <a href="#" id="btn-itemWise-PurchaseHistory"><i class="fa fa-history"></i>Purchase History</a>
+            <a href="#" id="btn-itemWise-PurchaseQuotationHistory"><i class="fa fa-history"></i>Quotation History</a>
+            <a href="#" id="btn-itemWise-OrderHistory"><i class="fa fa-history"></i>Qrder History</a>
+        </div>
+    `);
+    
+    $("body").append(dropdown);
+
+    dropdown.css({
+        top: offset.top + $btn.outerHeight(),
+        left: leftPos
+    });
+});
+
+//===Close dropdown when clicking outside========
+$(document).on("click", function () {
+    $(".erppage-dropdownaction-menu").remove();
+});
+
+//=========Purchase History Event=========
+$(document).on('click', '#btn-itemWise-PurchaseHistory', async function (e) {
+
+    e.preventDefault();
+
+    const itemCode = $(this).closest('.erppage-dropdownaction-menu').data('itemcode');
+
+    if (!itemCode) {
+        showToast("Please select item first.", { type: "warning" });
+        return;
+    }
+
+    const data = await loadPurchaseHistory(itemCode);
+
+    if (!data) return;
+
+    bindPurchaseHistory(data);
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('lastTenOrderHistoryModal')
+    );
+
+    modal.show();
+
+    $(".erppage-dropdownaction-menu").remove();
+});
+
+//=========PurchaseQuotation History Event=========
+$(document).on('click', '#btn-itemWise-PurchaseQuotationHistory', async function (e) {
+
+    e.preventDefault();
+
+    const itemCode = $(this).closest('.erppage-dropdownaction-menu').data('itemcode');
+
+    if (!itemCode) {
+        showToast("Please select item first.", { type: "warning" });
+        return;
+    }
+
+    const data = await loadPurchaseQuotationHistory(itemCode);
+
+    if (!data) return;
+
+    bindPurchaseQuotationHistory(data);
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('lastTenPurchaseHistoryQuotation')
+    );
+
+    modal.show();
+
+    $(".erppage-dropdownaction-menu").remove();
+});
+
+//=========PurchaseQuotation History Event=========
+$(document).on('click', '#btn-itemWise-OrderHistory', async function (e) {
+
+    e.preventDefault();
+
+    const itemCode = $(this).closest('.erppage-dropdownaction-menu').data('itemcode');
+    const Vdate = $('#dtDocDate').val();
+
+    if (!itemCode) {
+        showToast("Please select item first.", { type: "warning" });
+        return;
+    }
+
+    const data = await loadOrderHistory(itemCode, Vdate);
+
+    if (!data) return;
+
+    bindOrderHistory(data);
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('lastTenOrderHistory')
+    );
+
+    modal.show();
+
+    $(".erppage-dropdownaction-menu").remove();
+});
+
+$(document).on('click', '#btn-itemWise-ExportToExcel', function (e) {
+
+    e.preventDefault();
+
+    const vNo = $('#NumDocNo').val();
+    const vType = $('#ddlDocType').val();
+
+    window.location.href =
+        `/PurchaseQuotation/ExportToExcel?vNo=${vNo}&vType=${encodeURIComponent(vType)}`;
+});
+
+//=======Init Page===========
 function initializePage() {
     const today = new Date().toISOString().split('T')[0];
 
@@ -161,6 +410,7 @@ function initializePage() {
     $("#dtValidDate").val(today);
 }
 
+//========Register Events===================
 function registerEvents() {
 
     $('#ddlDocType').off('change').on('change', function () {
@@ -187,8 +437,6 @@ function registerEvents() {
                 ATTACHMENT: file.name,
                 ATTACHMENT_FILE: base64
             });
-
-            console.log("Added to rowsAttachment:", rowsAttachment);
         };
 
         reader.readAsDataURL(file);
@@ -262,7 +510,6 @@ function registerEvents() {
         }
     });
 
-
 }
 
 //====Generate VNo========
@@ -282,7 +529,6 @@ async function GetVNo() {
         if (data.v_NO) {
             $('#NumDocNo').val(data.v_NO);
             const docId = vType + data.v_NO;
-            console.log("DOC_ID:", docId);
         } else {
             console.warn("V_NO not found in response");
         }
@@ -328,7 +574,7 @@ function DocTypeDDL(callback) {
     });
 }
 
-//======Bind Dropdown=====
+//======Bind Dropdown(header)=====
 async function LoadAllDropDowns() {
 
     await Promise.all([
@@ -339,9 +585,8 @@ async function LoadAllDropDowns() {
 
         bindDropdown("PurchaseQuotation", "STATUS", "#ddlStatus", "-- Select Status --"),
 
-        bindDropdown("PurchaseQuotation", "Currency", "#ddlCurrency", "-- Select Currency --" )
+        bindDropdown("PurchaseQuotation", "Currency", "#ddlCurrency", "-- Select Currency --")
     ]);
-
 }
 
 function loadItemList() {
@@ -428,6 +673,7 @@ $(document).on('change', 'select[id^="itemName_"]', function () {
         }
     });
 });
+
 function loadUOMList() {
     return $.ajax({
         url: '/PurchaseQuotation/GetUOMList',
@@ -509,13 +755,13 @@ $(document).on('change', '.ddlTaxCode', function () {
     });
 });
 
+//=====Load on Edit========
 function loadFullQuotationByVno(vNo, vType) {
     $.ajax({
         url: '/PurchaseQuotation/GetFullQuotationByVno',
         type: 'GET',
         data: { vNo, vType },
         success: function (res) {
-            console.log(res);
             if (!res.success || !res.header) {
                 toastr.warning("Quotation not found.");
                 return;
@@ -524,9 +770,6 @@ function loadFullQuotationByVno(vNo, vType) {
             const items = res.items || [];
             const attachments = res.attachments || [];
 
-            console.log("Header:", header);
-            console.log("Items:", items);
-            console.log("Attachments:", attachments);
             isPageLoading = true;
             $('#TxtCode').val(header.DOC_ID);
             $('#ddlDocType').val(header.v_TYPE)
@@ -547,7 +790,7 @@ function loadFullQuotationByVno(vNo, vType) {
 
             $('#ddlPaymentTerm').val(header.payterM_CODE).trigger('change');
             $('#txtPaymentTerm').val(header.paymenT_TERM);
-
+   
             const freightTerm = header.freighT_TERM?.trim();
             $("#ddlFreightTerm").val(freightTerm).trigger("change");
             $('#txtDeliveryTerm').val(header.deliverY_TERM);
@@ -609,6 +852,9 @@ function loadFullQuotationByVno(vNo, vType) {
                     // IMPORTANT: init select2 AFTER DOM append
                     initSelect2($('#tblPurchaseQuotationListByVno tbody'));
 
+                    //New Code
+                    /*$('#tblPurchaseQuotationListByVno tbody .ddlTaxCode').trigger('change');*/
+
                     updateItemTotals();
 
                     if (isReadOnly) {
@@ -622,7 +868,7 @@ function loadFullQuotationByVno(vNo, vType) {
             //const attachBody = $('#tblAttachmentPQ tbody');
             const attachBody = $('#fileList');
             attachBody.empty();
-
+            
             if (attachments.length === 0) {
                 attachBody.append('<tr><td colspan="3" class="text-center text-muted">No attachments found.</td></tr>');
             } else {
@@ -655,7 +901,7 @@ function loadFullQuotationByVno(vNo, vType) {
                     let tdStyle = '';
 
                     if (guessedMime.startsWith('image/')) {
-                       // filePreview = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
+                    // filePreview = `<img src="${fullBase64}" alt="${fileName}" style="height: 100%; width: 100%; border-radius: 50%; object-fit: cover;" />`;
                         filePreview = `<img src="${fullBase64}" alt="${fileName}" class="erp-file-thumbnail">`;
                         tdStyle = 'style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #ccc; overflow: hidden; text-align: center; vertical-align: middle;"';
                     } else if (guessedMime === 'application/pdf') {
@@ -681,11 +927,15 @@ function loadFullQuotationByVno(vNo, vType) {
                             </div>
                         </div>
                     
-                        <div class="erp-file-actions">
-                            <button type="button"
-                                    class="erp-delete-btn btn-delete-attachment">
+                      <div class="erp-file-actions">
+
+                            <button type="button" class="erp-btn view btn-view-attachment" data-src="${fullBase64}" data-type="${guessedMime}">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <button type="button" class="erp-btn delete btn-delete-attachment">
                                 <i class="fa fa-trash"></i>
                             </button>
+
                         </div>
                     
                     </div>
@@ -784,7 +1034,7 @@ async function addNewRowBelow(skipInit = false) {
                     <td><input type="number" id="vatAmount_${currentRowId}" name="vatAmount[${currentRowId}]" value="" class="erppagetable-control"></td>
                     <td><input type="number" id="cessPerc_${currentRowId}" name="cessPerc[${currentRowId}]" value="" class="erppagetable-control"></td>
                     <td><input type="number" id="cessAmount_${currentRowId}" name="cessAmount[${currentRowId}]" value="" class="erppagetable-control"></td>
-                    <td><input type="number" id="otherExpenses_${currentRowId}" name="otherExpenses[${currentRowId}]" value="" class="erppagetable-control"></td>
+                    <td><input type="number" id="otherExpenses_${currentRowId}" name="otherExpenses[${currentRowId}]" value="" class="erppagetable-control" readonly></td>
                     <td><input type="number" id="ldRate_${currentRowId}" name="ldRate[${currentRowId}]" value="" readonly class="erppagetable-control"></td>
                     <td><input type="number" id="netAmount_${currentRowId}" name="netAmount[${currentRowId}]" value="" class="erppagetable-control"></td>
                     <td><input type="text" id="warranty_${currentRowId}" name="warranty[${currentRowId}]" value="" class="erppagetable-control"></td>
@@ -800,9 +1050,10 @@ async function addNewRowBelow(skipInit = false) {
                     <td><input id="requestType_${currentRowId}" name="requestType[${currentRowId}]" value="" maxlength="4" readonly class="erppagetable-control"></td>
                     <td><input id="requestNo_${currentRowId}" name="requestNo[${currentRowId}]" value="" class="erppagetable-control"></td>
                     <td class="action-col">
-                    <div class="action-wrap">
-                        <button class="act-btn add add-row-icon" onclick="addNewRowBelow()"><i class="fa fa-plus-circle"></i></button>
-                        <button class="act-btn delete" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
+                        <div class="action-wrap">
+                            <button class="act-btn add add-row-icon" onclick="addNewRowBelow()"><i class="fa fa-plus-circle"></i></button>
+                            <button class="act-btn delete" onclick="deleteRow(this)"><i class="fa fa-trash"></i></button>
+                            <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
                         </div>
                     </td>
             </tr>`;
@@ -885,18 +1136,18 @@ function generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap, uomMap, isLas
 
                  <td>
                      <select id="itemName_${i}" name="itemName[${i}]" class="form-control">
-                       ${generateDropdownOptions(itemMap, itemCode) }
+                       ${generateDropdownOptions(itemMap, itemCode)}
                     </select>
                  </td>
                  <td>
                      <select id="itemMake_${i}" name="itemMake[${i}]" class="form-control">
-                        ${generateDropdownOptions(itemMakeMap, makeCode) }
+                        ${generateDropdownOptions(itemMakeMap, makeCode)}
                     </select>
                  </td>
                  <td><input type="text" id="purchaserRemarks_${i}" name="purchaserRemarks[${i}]" value="${row.purchaseR_REMARKS || ''}" class="erppagetable-control"></td>
                   <td>
                       <select id="uom_${i}" name="uom[${i}]" class="erppagetable-control">
-                       ${generateDropdownOptions(uomMap, uomCode) }
+                       ${generateDropdownOptions(uomMap, uomCode)}
                     </select>
                 </td>
                  <td><input type="number" id="qty_${i}" name="qty[${i}]" class="erppagetable-control" value="${getValue(row.qty)}"></td>
@@ -910,7 +1161,7 @@ function generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap, uomMap, isLas
                  <td><input type="number" id="freight_${i}" name="freight[${i}]" value="${getValue(row.freight)}" class="erppagetable-control"></td>
                  <td>
                     <select id="taxCode_${i}" name="taxCode[${i}]" class="ddlTaxCode erppagetable-control">
-                        ${generateDropdownOptions(taxCodeMap, taxCode) }
+                        ${generateDropdownOptions(taxCodeMap, taxCode)}
                     </select>
                  </td>
                  <td><input type="number" id="cgstPerc_${i}" name="cgstPerc[${i}]" value="${getValue(row.cgsT_PER)}" readonly class="form-control"></td>
@@ -939,17 +1190,17 @@ function generateRowHtml(row, i, itemMap, itemMakeMap, taxCodeMap, uomMap, isLas
                  <td><input id="requestType_${i}" name="requestType[${i}]" value="${row.reQ_TYPE || ''}" maxlength="4" readonly class="erppagetable-control"></td>
                  <td><input id="requestNo_${i}" name="requestNo[${i}]" value="${row.reQ_NO || ''}" class="erppagetable-control"></td>
                  <td class="action-col">
-                  <div class="action-wrap">
-                 ${isLastRow ? `
-                        <button type="button" class="act-btn add add-row-icon" onclick="addNewRowBelow()">
-                            <i class="fa fa-plus-circle"></i>
-                        </button>
-                    ` : ''}
+                    <div class="action-wrap">
+                       ${isLastRow ? `
+                              <button type="button" class="act-btn add add-row-icon" onclick="addNewRowBelow()">
+                                  <i class="fa fa-plus-circle"></i>
+                              </button>
+                          ` : ''}
 
-                    <button type="button" class="act-btn delete" onclick="deleteRow(this)">
-                        <i class="fa fa-trash"></i>
-                    </button>
-
+                          <button type="button" class="act-btn delete" onclick="deleteRow(this)">
+                              <i class="fa fa-trash"></i>
+                          </button>
+                          <button type="button" class="act-btn more erppage-dropdownaction-btn"><i class="fa fa-ellipsis-v"></i></button>
                     </div>
                 </td>
              </tr>
@@ -1001,16 +1252,49 @@ $('#btnAddAttachment').on('click', function () {
             previewHtml = `<a href="${fullBase64}" target="_blank">Preview</a>`;
         }
 
-        const row = `
-                <tr data-filename="${fileName}" style="height: 100px;">
-                    <td style="vertical-align: middle;">${fileName}</td>
-                    <td ${tdStyle}>${previewHtml}</td>
-                    <td style="vertical-align: middle;">
-                        <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
-                    </td>
-                </tr>`;
+        //const row = `
+        //        <tr data-filename="${fileName}" style="height: 100px;">
+        //            <td style="vertical-align: middle;">${fileName}</td>
+        //            <td ${tdStyle}>${previewHtml}</td>
+        //            <td style="vertical-align: middle;">
+        //                <i class="fa fa-trash text-danger cursor-pointer btn-delete-attachment"></i>
+        //            </td>
+        //        </tr>`;
+
+        const extension = fileName.split('.').pop()?.toLowerCase();
+        const card = `
+        <div class="erp-file-row" data-filename="${fileName}">
+
+            <div class="erp-file-preview">
+                ${previewHtml}
+            </div>
+
+            <div class="erp-file-info">
+                <div class="erp-file-name">${fileName}</div>
+                <div class="erp-file-type">${extension.toUpperCase()} File</div>
+            </div>
+
+            <div class="erp-file-actions">
+
+                <button type="button"
+                        class="erp-btn view btn-view-attachment"
+                        data-src="${fullBase64}"
+                        data-type="${fileInput.type}">
+                    <i class="fa fa-eye"></i>
+                </button>
+
+                <button type="button"
+                        class="erp-btn delete btn-delete-attachment">
+                    <i class="fa fa-trash"></i>
+                </button>
+
+            </div>
+
+        </div>
+        `;
         
-        $('#tblAttachmentPQ tbody').append(row);
+        /* $('#tblAttachmentPQ tbody').append(row);*/
+        $('#fileList').append(card);
 
         $('#txtFileName').val('');
         $('#fileUpload').val('');
@@ -1029,7 +1313,7 @@ $('#tblAttachmentPQ').on('click', '.btn-delete-attachment', function () {
     row.remove();
 });
 
-//For SAVING DATA TO DATABASE.....
+//===========Save And Update==========
 $('#btn-save').click(async function (e) {
     e.preventDefault();
 
@@ -1157,9 +1441,6 @@ $('#btn-save').click(async function (e) {
         lineRows: rowsData,
         Attachement: rowsAttachment
     };
-
-    console.log("header data", headerData);
-    console.log("line rows", rowsData);
      
     $.ajax({
         url: '/PurchaseQuotation/SaveQuotation',
@@ -1168,16 +1449,15 @@ $('#btn-save').click(async function (e) {
         data: JSON.stringify(data),
         success: function (response) {
             if (response.success === true) {
-                console.log("SAVE RESPONSE:", response);
                 if (response.action === "INSERT") {
                     showToast("Data Saved Successfully", { type: "success" });
                 }
                 else if (response.action === "UPDATE") {
                     showToast("Data Update Successfully", { type: "success" });
                 }
-                setTimeout(() => {
-                    window.location.href = '/PurchaseQuotationList/Index';
-                }, 1000);
+                isReadOnly = true;
+                applyReadOnlyMode();
+                
             } else {
                 showToast(response.message, { type: "warning"});
             }
@@ -1224,20 +1504,18 @@ function deleteRow(iconElement) {
     });
 }
 
-//Header Validation function
+//======Header Validation function===========
 function validateHeader() {
-    console.log("HEader Validation called")
     const vDate = $('#dtDocDate').val();
     const quoteDate = $('#dtQuotDate').val();
     const validDate = $('#dtValidDate').val();
-
-    console.log("Quote:", quoteDate, new Date(quoteDate));
-    console.log("Valid:", validDate, new Date(validDate));
 
     if (!validateRequiredField('#NumDocNo', 'Doc No')) return;
     if (!validateRequiredField('#dtDocDate', 'Doc Date')) return;
     if (!validateRequiredField('#txtPartyName', 'Party Name')) return;
     if (!validateRequiredField('#ddlStatus', 'Status')) return;
+    if (!validateRequiredField('#ddlPaymentTerm', 'Payment Term')) return;
+    if (!validateRequiredField('#ddlFreightTerm', 'Freight Term')) return;
 
     if (quoteDate && vDate && new Date(quoteDate) < new Date(vDate)) {
         showToast("Quotation Date must be greater than voucher date.", { type: "warning" });
@@ -1252,9 +1530,8 @@ function validateHeader() {
     return true;
 }
 
+//========Validate Grid==========
 function validateGrid(rowsData, rowsAttachment) {
-
-    console.log("Validation Called !!:");
 
     if (!rowsData || rowsData.length === 0) {
         showToast("No Record in grid to save.", { type: "warning" });
@@ -1325,10 +1602,20 @@ function validateGrid(rowsData, rowsAttachment) {
 
 $(document).on(
     'input change',
-    '#tblPurchaseQuotationListByVno tbody input, #tblPurchaseQuotationListByVno tbody select',
+    `
+    input[id^="qty_"],
+    input[id^="rate_"],
+    input[id^="packPerc_"],
+    input[id^="discountPerc_"],
+    input[id^="freight_"],
+    input[id^="otherExpenses_"],
+    input[id^="cgstPerc_"],
+    input[id^="sgstPerc_"],
+    input[id^="igstPerc_"],
+    input[id^="vatPerc_"],
+    input[id^="cessPerc_"]
+    `,
     function () {
-
-
         const $row = $(this).closest('tr');
         const rowId = this.id.split('_')[1];
 
@@ -1373,6 +1660,21 @@ $(document).on(
         $row.find(`#netAmount_${rowId}`).val(result.netAmount);
         $row.find(`#ldRate_${rowId}`).val(result.ldRate);
 
+        updateItemTotals();
+    }
+);
+
+$(document).on(
+    'input change',
+    `
+    input[id^="bulkQty_"],
+    input[id^="bulkDiscountAmount_"]
+    `,
+    function () {
+
+        const rowId = this.id.split('_')[1];
+
+        // Sirf footer totals update karo
         updateItemTotals();
     }
 );
@@ -1453,6 +1755,9 @@ function recalculateRowWithTax($row, rowId) {
     const cessPer =
         parseFloat($row.find(`#cessPerc_${rowId}`).val()) || 0;
 
+    const packOnBasic =
+        parseInt($row.data('packOnBasic')) || 0;
+
     const result = calculateAmounts(
         rate,
         qty,
@@ -1464,7 +1769,8 @@ function recalculateRowWithTax($row, rowId) {
         sgstPer,
         igstPer,
         vatPer,
-        cessPer
+        cessPer,
+        packOnBasic
     );
 
     $row.find(`#amount_${rowId}`).val(result.amount);
@@ -1492,7 +1798,8 @@ function calculateAmounts(
     sgstPer,
     igstPer,
     vatPer,
-    cessPer
+    cessPer,
+    packOnBasic
 ) {
 
     rate = parseFloat(rate) || 0;
@@ -1511,7 +1818,16 @@ function calculateAmounts(
     const discAmt = amount * discPerc / 100;
 
     // VB Cell(10)
-    const packAmt = (amount - discAmt) * packPerc / 100;
+    // const packAmt = (amount - discAmt) * packPerc / 100;
+
+    let packAmt = 0;
+
+    if (packOnBasic == 1) {
+        packAmt = amount * packPerc / 100;
+    }
+    else {
+        packAmt = (amount - discAmt) * packPerc / 100;
+    }
 
     // VB Cell(26)
     const cessAmt = (amount + packAmt - discAmt) * cessPer / 100;
@@ -1586,15 +1902,12 @@ function initSelect2($context) {
 }
 
 //==========Duplicate Function=============
-
 $('#btn-duplicate').click(async function () {
 
     if (!rowId) {
         toastr.warning("Nothing to duplicate");
         return;
     }
-
-    console.log("duplicate Clicked");
 
     await GetVNo();
 
@@ -1615,7 +1928,11 @@ $('#btn-duplicate').click(async function () {
    
 });
 
+//=======Open Copy Modal===========   
 function openCopyModal(actionType, modalId, tableId) {
+
+    console.time("ajax-total");
+
     $.ajax({
         url: '/PurchaseQuotation/CopyData',
         type: 'GET',
@@ -1623,17 +1940,18 @@ function openCopyModal(actionType, modalId, tableId) {
             actionType: actionType.trim(),
             vDate: $('#dtDocDate').val()
         },
+
         success: function (res) {
-            console.log("Copr Response", res);
-            if (!res.success) {
-                alert(res.message);
-                return;
-            }
+
+            console.timeEnd("ajax-total");
+
+            console.time("tbody-build");
 
             let tbody = $(tableId + ' tbody');
             tbody.empty();
 
             $.each(res.data, function (i, item) {
+
                 tbody.append(`
                     <tr>
                         <td><input type="checkbox"></td>
@@ -1653,7 +1971,13 @@ function openCopyModal(actionType, modalId, tableId) {
                 `);
             });
 
+            console.timeEnd("tbody-build");
+
+            console.time("modal-show");
+
             $(modalId).modal('show');
+
+            console.timeEnd("modal-show");
         }
     });
 }
@@ -1685,8 +2009,27 @@ function wireSelectAll(selectAllId, tableId) {
     );
 }
 
+//========== Modal Table Search ==========
+function wireTableSearch(searchBoxId, tableId) {
+
+    $(document).on('keyup', searchBoxId, function () {
+
+        const searchText = $(this).val().toLowerCase().trim();
+
+        $(`${tableId} tbody tr`).each(function () {
+
+            const rowText = $(this).text().toLowerCase();
+
+            $(this).toggle(rowText.includes(searchText));
+        });
+    });
+}
+
 wireSelectAll('#selectAllPR', '#tblpurchaserequestmodal');
 wireSelectAll('#selectAllPQ', '#tblpurchasequotationmodal');
+
+wireTableSearch('#searchBoxPR', '#tblpurchasequotationmodal');
+wireTableSearch('#searchBoxRS', '#tblpurchaserequestmodal');
 
 async function getSelectedRows(tableId, modalId) {
 
@@ -1719,6 +2062,17 @@ async function getSelectedRows(tableId, modalId) {
         const uomCode = $row.find('td:eq(11)').text().trim();
         const taxCode = $row.find('td:eq(12)').text().trim();
 
+        const alreadyExists = $('select[id^="itemName_"]').filter(function () {
+            return $(this).val() === itemCode;
+        }).length > 0;
+
+        if (alreadyExists) {
+            showToast("Duplicate item found. Only one entry is allowed.", {
+                type: "warning"
+            });
+            continue;
+        }
+
         const newRowId = await addNewRowBelow();
 
         $(`#requestNo_${newRowId}`).val(reqNo);
@@ -1729,11 +2083,6 @@ async function getSelectedRows(tableId, modalId) {
         await new Promise(resolve => setTimeout(resolve, 300));
 
         $(`#itemMake_${newRowId}`).val(makeCode).trigger('change');
-
-        console.log(
-            "Selected Value:",
-            $(`#itemMake_${newRowId}`).val()
-        );
 
         $(`#itemMake_${newRowId} option`).each(function () {
             console.log("Option:", `[${$(this).val()}]`);
@@ -1751,6 +2100,7 @@ async function getSelectedRows(tableId, modalId) {
     $(modalId).modal('hide');
 }
 
+//=======Check Valid Date========
 async function checkValidDate() {
 
     const data = {
@@ -1783,28 +2133,431 @@ async function checkValidDate() {
     }
 }
 
+//======Read Only Mode========
 function applyReadOnlyMode() {
 
     $('#PurchaseQuotationForm').find('input, select, textarea').prop('disabled', true);
     $('#btn-save').hide();
-
+    $('#btn-duplicate').hide();
     $('#dtDocDate,#dtQuotDate,#dtValidDate').prop('disabled', true);
-
-    // Copy From section hide
+   
     $('.erppage-internalaction').hide();
-
-    // Attachment upload hide
+    $('#CopyFrom').closest('.erppagedropdown').hide();
     $('#browseBtn').hide();
     $('#dropZone').css('pointer-events', 'none');
-
-    // Print rakhna hai to enable kar do
     $('.erppage-btn-print').prop('disabled', false);
-
-    // Back button enabled rahega
     $('.erppage-header-back').prop('disabled', false);
-
 
     $('#tblPurchaseQuotationListByVno').find('input, select, textarea').prop('disabled', true);
     $('#tblPurchaseQuotationListByVno').find('.act-btn').prop('disabled', true);
+    $('.btn-delete-attachment').hide();
 }
 
+//=======Report 1========
+function PendingQCReport() {
+
+    var reportName = "QUOTATION1";
+    // Crystal Report Formula
+    var SelForMul =
+        "{QUOTATION1.V_TYPE}='" + $("#ddlDocType").val() + "'" +
+        " AND {QUOTATION1.V_NO}= " + $("#NumDocNo").val() +
+        " AND {QUOTATION1.COMP_CODE}= " + window.globalVariables.compCode +
+        " AND {QUOTATION1.BRANCH_CODE}= " + window.globalVariables.branchCode +
+        " AND {QUOTATION1.YEAR_CODE}= " + window.globalVariables.yearCode;
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: SelForMul,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: "PURCHASE QUOTATION"
+        }
+    };
+
+    // ===== DEBUG LOGS =====
+    console.log("Company Name:", window.globalVariables.companyName);
+    console.log("Company Add1:", window.globalVariables.add1);
+    console.log("Company Add2:", window.globalVariables.add2);
+
+    console.log("Comp Code:", window.globalVariables.compCode);
+    console.log("Branch Code:", window.globalVariables.branchCode);
+    console.log("Year Code:", window.globalVariables.yearCode);
+
+    console.log("Database:", window.database.db);
+
+    console.log("Selection Formula:", SelForMul);
+
+    console.log("Formula Fields:", formulaFields);
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+}
+
+//======Report 2=============
+function PendingQCReport1() {
+
+    var reportName = "QUOTATION2";
+    // Crystal Report Formula
+    var SelForMul =
+        "{QUOTATION1.V_TYPE}='" + $("#ddlDocType").val() + "'" +
+        " AND {QUOTATION1.V_NO}= " + $("#NumDocNo").val() +
+        " AND {QUOTATION1.COMP_CODE}= " + window.globalVariables.compCode +
+        " AND {QUOTATION1.BRANCH_CODE}= " + window.globalVariables.branchCode +
+        " AND {QUOTATION1.YEAR_CODE}= " + window.globalVariables.yearCode;
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: SelForMul,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: "PURCHASE QUOTATION"
+        }
+    };
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+}
+
+//=======Purchase History========
+async function loadPurchaseHistory(itemCode) {
+    try {
+        const res = await $.ajax({
+            url: '/PurchaseQuotation/GetPurchaseHistory',
+            type: 'GET',
+            data: {
+                itemcode: itemCode
+            }
+        });
+
+        if (!res.success) {
+            showToast(res.message, { type: "error" });
+            toastr.error(res.message);
+            return null;
+        }
+
+        return res.data;
+
+    } catch (err) {
+        console.error(err);
+        showToast("Error While Loading Load PurchaseHistory:" + err, { type: "error" });
+    }
+}
+
+//=======Bind Purchase History========
+function bindPurchaseHistory(data) {
+
+    let tbody = '';
+
+    if (!data || data.length === 0) {
+        tbody = `
+            <tr>
+                <td colspan="17" class="text-center">
+                    No Record Found
+                </td>
+            </tr>`;
+    }
+    else {
+
+        data.forEach(item => {
+
+            tbody += `
+                <tr>
+                    <td>${item.vNo ?? ''}</td>
+                    <td>${item.date ?? ''}</td>
+                    <td>${item.supplier ?? ''}</td>
+                    <td>${item.itemName ?? ''}</td>
+                    <td>${item.make ?? ''}</td>
+                    <td>${item.unit ?? ''}</td>
+                    <td class="text-end">${item.qty ?? 0}</td>
+                    <td class="text-end">${item.rate ?? 0}</td>
+                    <td class="text-end">${item.othAmt ?? 0}</td>
+                    <td class="text-end">${item.cgstPer ?? 0}</td>
+                    <td class="text-end">${item.sgstPer ?? 0}</td>
+                    <td class="text-end">${item.igstPer ?? 0}</td>
+                    <td class="text-end">${item.packPer ?? 0}</td>
+                    <td class="text-end">${item.discPer ?? 0}</td>
+                    <td class="text-end">${item.ldRate ?? 0}</td>
+                    <td>${item.remarks ?? ''}</td>
+                    <td>${item.status ?? ''}</td>
+                </tr>`;
+        });
+    }
+
+    $('#tblLastTenOrderHistory tbody').html(tbody);
+}
+
+//=======Purchase Quotation History========
+async function loadPurchaseQuotationHistory(itemCode) {
+    try {
+        const res = await $.ajax({
+            url: '/PurchaseQuotation/GetPurchaseQuotation',
+            type: 'GET',
+            data: {
+                itemcode: itemCode
+            }
+        });
+
+        if (!res.success) {
+            showToast(res.message, { type: "error" });
+            toastr.error(res.message);
+            return null;
+        }
+
+        return res.data;
+
+    } catch (err) {
+        console.error(err);
+        showToast("Error While Loading Load PurchaseQuotation History:" + err, { type: "error" });
+    }
+}
+
+//=======Bind Purchase Quotation History========
+function bindPurchaseQuotationHistory(data) {
+
+    let tbody = '';
+
+    if (!data || data.length === 0) {
+        tbody = `
+            <tr>
+                <td colspan="17" class="text-center">
+                    No Record Found
+                </td>
+            </tr>`;
+    }
+    else {
+
+        data.forEach(item => {
+
+            tbody += `
+                <tr>
+                    <td>${item.vNo ?? ''}</td>
+                    <td>${item.date ?? ''}</td>
+                    <td>${item.supplier ?? ''}</td>
+                    <td>${item.itemName ?? ''}</td>
+                    <td>${item.make ?? ''}</td>
+                    <td>${item.unit ?? ''}</td>
+                    <td>${item.groupNo ?? ''}</td>
+                    <td class="text-end">${item.qty ?? 0}</td>
+                    <td class="text-end">${item.rate ?? 0}</td>
+                    <td class="text-end">${item.freight ?? 0}</td>
+                    <td class="text-end">${item.cgstPer ?? 0}</td>
+                    <td class="text-end">${item.sgstPer ?? 0}</td>
+                    <td class="text-end">${item.igstPer ?? 0}</td>
+                    <td class="text-end">${item.packPer ?? 0}</td>
+                    <td class="text-end">${item.discPer ?? 0}</td>
+                    <td class="text-end">${item.othExps ?? 0}</td>
+                    <td class="text-end">${item.ldRate ?? 0}</td>
+                    <td>${item.remarks ?? ''}</td>
+                    <td>${item.status ?? ''}</td>
+                </tr>`;
+        });
+    }
+
+    $('#tblLastTenQuotationOrderHistory tbody').html(tbody);
+}
+
+//=======Order History========
+async function loadOrderHistory(itemCode, Vdate) {
+    try {
+        const res = await $.ajax({
+            url: '/PurchaseQuotation/OrderHistory',
+            type: 'GET',
+            data: {
+                itemcode: itemCode,
+                Vdate: Vdate
+            }
+        });
+
+        if (!res.success) {
+            showToast(res.message, { type: "error" });
+            toastr.error(res.message);
+            return null;
+        }
+
+        return res.data;
+
+    } catch (err) {
+        console.error(err);
+        showToast("Error While Loading Order History:" + err, { type: "error" });
+    }
+}
+
+//=======Bind Order History========
+function bindOrderHistory(data) {
+
+    let tbody = '';
+
+    if (!data || data.length === 0) {
+        tbody = `
+            <tr>
+                <td colspan="17" class="text-center">
+                    No Record Found
+                </td>
+            </tr>`;
+    }
+    else {
+
+        data.forEach(item => {
+
+            tbody += `
+                <tr>
+                    <td>${item.vNo ?? ''}</td>
+                    <td>${item.date ?? ''}</td>
+                    <td>${item.supplier ?? ''}</td>
+                    <td>${item.itemName ?? ''}</td>
+                    <td>${item.make ?? ''}</td>
+                    <td>${item.unit ?? ''}</td>
+                    <td class="text-end">${item.qty ?? 0}</td>
+                    <td class="text-end">${item.rate ?? 0}</td>
+                    <td class="text-end">${item.cgstPer ?? 0}</td>
+                    <td class="text-end">${item.sgstPer ?? 0}</td>
+                    <td class="text-end">${item.igstPer ?? 0}</td>
+                    <td class="text-end">${item.packPer ?? 0}</td>
+                    <td class="text-end">${item.discPer ?? 0}</td>
+                    <td class="text-end">${item.othExps ?? 0}</td>
+                    <td class="text-end">${item.ldRate ?? 0}</td>
+                    <td>${item.remarks ?? ''}</td>
+                    <td>${item.status ?? ''}</td>
+                </tr>`;
+        });
+    }
+
+    $('#lastTenOrderQuotation tbody').html(tbody);
+}
+
+function isDuplicateItem(selectedItem) {
+
+    let count = 0;
+
+    $('select[id^="itemName_"]').each(function () {
+
+        if ($(this).val() === selectedItem) {
+            count++;
+        }
+    });
+
+    return count > 1;
+}
+
+//=======Check Last Order Rate========
+function checkLastOrderRate(rowId) {
+
+    const itemCode = $(`#itemName_${rowId}`).val();
+    const currentLdRate = parseFloat($(`#ldRate_${rowId}`).val()) || 0;
+    const vDate = $('#dtDocDate').val();
+
+    console.log({
+        itemCode,
+        currentLdRate,
+        vDate
+    });
+
+    if (!itemCode || !vDate) return;
+
+    $.ajax({
+        url: '/PurchaseQuotation/GetLastOrderRate',
+        type: 'GET',
+        data: {
+            itemCode: itemCode,
+            vDate: vDate
+        },
+        success: function (res) {
+
+            if (!res.success) return;
+
+            const lastRate =
+                parseFloat(res.lastRate) || 0;
+
+            const $rateBox =
+                $(`#rate_${rowId}`);
+
+            $rateBox.css('background-color', '');
+
+            if (lastRate <= 0) return;
+
+            if (currentLdRate > lastRate) {
+
+                $rateBox.css(
+                    'background-color',
+                    '#ffcdd2'
+                );
+
+                showToast(
+                    `Current LD Rate (${currentLdRate.toFixed(2)}) is higher than Last Order Rate (${lastRate.toFixed(2)})`,
+                    { type: "warning" }
+                );
+
+            } else if (currentLdRate < lastRate) {
+
+                $rateBox.css(
+                    'background-color',
+                    '#c8e6c9'
+                );
+
+            }
+        }
+    });
+}

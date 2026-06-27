@@ -1,17 +1,19 @@
-﻿using iTextSharp.text.pdf.parser.clipper;
+﻿using DocumentFormat.OpenXml.Office.Word;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Org.BouncyCastle.Asn1.X509;
 using System.Data;
+using System.Text.Json;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using static Azure.Core.HttpHeader;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseRequestModel;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
+    [SessionAuthorize]
     public class PurchaseRequestController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -19,552 +21,455 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly GlobalValidationdate _globalValidationdate;
+        private readonly IPurchaseRequestRepository _IPRRepository;
 
         public PurchaseRequestController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
             DropdownService dropdownService, DbHelper dbHelper,
-            ModuleService.ModuleService moduleService)
+            ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IPurchaseRequestRepository IPRRepository)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
+            _IPRRepository = IPRRepository;
         }
 
         public IActionResult Index()
         {
+            var userLevel = _globalVariableService.GetGlobalVariables().PubUserLevel;
+
+            ViewBag.UserLevel = userLevel;
+
             return View("~/Views/Purchase/Transaction/PurchaseRequest/Index.cshtml");
         }
+        [HttpGet]
         public JsonResult GetVNo()
         {
-            string newV_NO = "00000";
-            try
+            var result = _globalValidationdate.GetVNo("STPI", "PREQUEST1");
+            return Json(new { status = true, V_NO = result });
+        }
+
+        //============Check IsApprovalBody=============
+        [HttpGet]
+        public JsonResult CheckIsApprovalBody()
+        {
+            var result = _IPRRepository.CheckIsApprovalBody();
+            return Json(new { exists = result.data });
+        }
+
+        //===========Check IsFinalApprovalBody============
+        [HttpGet]
+        public async Task<JsonResult> CheckIsFinalApprovalBody()
+        {
+            var result = await _IPRRepository.CheckIsFinalApprovalBodyAsync();
+            return Json(new { success = result.status, exists = result.data, message = result.message });
+        }
+
+        public JsonResult GetDropdown(string type, int data = 0)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = "";
+
+            switch (type)
             {
-                var getdata = _globalVariableService.GetGlobalVariables();
-
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-
-                    con.Open();
-                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
-                    SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
-                    prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                    string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
-                    string lastV_NO_Query = "SELECT MAX(V_NO) FROM PREQUEST1 WHERE COMP_CODE = @CompCode AND YEAR_CODE = @YearCode  and PREQUEST1.BRANCH_CODE = @BRANCH_CODE  and V_TYPE = 'STPI'  ";
-                    SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
-                    lastVnoCmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    lastVnoCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-                    lastVnoCmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                    object result = lastVnoCmd.ExecuteScalar();
-                    if (result != DBNull.Value && result != null)
+                case "Department":
+                    
+                    if (data == 1)
                     {
-                        int lastV_NO = Convert.ToInt32(result);
-                        newV_NO = (lastV_NO + 1).ToString("D5");
+                        query = $@"
+                        SELECT DISTINCT b.CODE, b.NAME FROM USER_DEPT a LEFT JOIN ITEMDEPT_MAST b ON a.DEPT_CODE = b.CODE 
+                         WHERE   a.USER_CODE = {gv.PubUserId} AND a.COMP_CODE = '{gv.PubCompCode}' AND b.TRAN_TYPE = 'Store' ORDER BY b.NAME ASC";
                     }
                     else
                     {
-                        newV_NO = prefixYR + "00001";
+                        query = $@"
+                        SELECT DISTINCT b.CODE, b.NAME FROM USER_DEPT a LEFT JOIN ITEMDEPT_MAST b ON a.DEPT_CODE = b.CODE 
+                         WHERE a.COMP_CODE = '{gv.PubCompCode}' AND b.TRAN_TYPE = 'Store' ORDER BY b.NAME ASC";
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error in GetVNo: {ex.Message}");
-                return Json(new { error = "An error occurred while generating the V_NO." });
+                        break;
+                
+                case "DocStatus":
+                    query = $@"Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document' Order by CODE";
+                    break;
+
+                case "Place":
+                    query = $@"
+                        select CODE,NAME from PLACE_MAST  WHERE  COMP_CODE = {gv.PubCompCode}  AND  NAME <> ''  ORDER BY NAME asc";
+                    break;
+
+                case "Requester":
+                    query = $@"
+                        Select a.Code , a.Name from EMP_MAST a where a.RESIGN_DATE is null and a.COMP_CODE=  {gv.PubCompCode}  order by a.Name asc";
+                    break;
+
+                case "PlaceUse":
+                    query = $@"
+                        select CODE , NAME  From MACHINE_MAST where COMP_CODE = {gv.PubCompCode} and NAME <> '' order by NAME asc  ";
+                    break;
+
+                case "Make":
+                    query = $@"
+                        SELECT distinct  a.MAKE_CODE as Code , b.name as Name FROM ITEM_MAKE a LEFT JOIN ITEMMAKE_MAST b ON a.MAKE_CODE = b.CODE AND
+                        b.comp_code = a.comp_code where a.ITEM_CODE ={data} and b.COMP_CODE = {gv.PubCompCode}  order by  b.name asc ;";
+                    break;
+                
+                case "Priority":
+                    query = $@"select CODE, NAME from DOCSTATUS_MAST WHERE V_TYPE = 'Preority' order by CODE";
+                    break;
+                
+                case "WorkType":
+                    query = $@"select CODE, NAME from DOCSTATUS_MAST WHERE V_TYPE = 'WorkType' order by name";
+                    break;
+                
+                case "ApprovalStatus":
+                    query = $@"select CODE, NAME from DOCSTATUS_MAST WHERE V_TYPE = 'Approval' and CODE in (4,5,8) order by name";
+                    break;
             }
 
-            return Json(new { V_NO = newV_NO });
+            var result = _dropdownService.GetDropdownList(query);
+            return Json(result);
         }
-        public JsonResult DDLDeptMast()
+
+        [HttpGet]
+        public async Task<JsonResult> GetddlItems(int deptid = 0)
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-
-                string query = $@" SELECT DISTINCT b.CODE, b.NAME FROM USER_DEPT a LEFT JOIN ITEMDEPT_MAST b ON a.DEPT_CODE = b.CODE 
-                WHERE   a.USER_CODE = {getdata.PubUserId} AND a.COMP_CODE = '{getdata.PubCompCode}' AND b.TRAN_TYPE = 'Store' ORDER BY b.NAME ASC;";
-
-                var DeptList = _dropdownService.GetDropdownList(query);
-                return Json(DeptList);
+            var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+            string query = "";
+            if (compCode == "1")
+            {   
+                query += $@"SELECT b.CODE, b.name, c.NAME as Unit, c.CODE as UCode FROM item_dept a 
+                        LEFT JOIN item_mast b ON a.ITEM_CODE = b.code AND b.ACTIVE = 1 AND b.comp_code = a.COMP_CODE 
+                        LEFT JOIN ITEMUNIT_MAST c ON b.UNIT_CODE = c.CODE AND c.comp_code = 1  
+                        LEFT JOIN ITEM_MGROUP d ON b.MGROUP_CODE = d.CODE AND d.comp_code = a.COMP_CODE  
+                        WHERE a.comp_code = {compCode}  AND d.mgroup_type IN ('Store', 'Fuel') AND  
+                        a.DEPT_CODE  = {deptid} 
+                        and b.NAME <> '' 
+                        ORDER BY b.name  asc ";
             }
+            else
+            {
+                query += $@"
+                    Select a.CODE, a.name, c.NAME as Unit, c.CODE as UCode
+                    from item_mast a 
+                    left outer join ITEMUNIT_MAST c on a.UNIT_CODE=c.CODE and c.comp_code=a.comp_Code 
+                    Left join ITEM_MGROUP d on a.MGROUP_CODE=d.CODE and a.comp_code=d.comp_code
+                    where a.comp_code={compCode} and a.active=1 and d.mgroup_type in ('Store','Fuel') 
+                    group by a.name ,a.CODE, c.NAME ,c.CODE,a.HSN_CODE,a.CATLOG  order by a.name";
+            }
+                var dataList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = dataList });
         }
-
-        public JsonResult GetApporxiateRate(int Itemcode)
+        [HttpGet]
+        public async Task<JsonResult> GetPlanList()
         {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            decimal? approxRate = null;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @"
-                 SELECT TOP 1 APROX_RATE 
-                 FROM PREQUEST2 
-                 WHERE item_code = @Itemcode 
-                 AND COMP_CODE = @CompCode 
-                 AND Branch_Code = @BranchCode
-                 ORDER BY v_date DESC, v_no DESC";
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Itemcode", Itemcode);
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", 1);
-
-
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        approxRate = Convert.ToDecimal(result);
-                    }
-                }
-            }
-            return Json(new { Rate = approxRate });
-        }
-        public JsonResult GetPendingQty(int Itemcode)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            decimal? PendingQty = null;
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @" SELECT sum(isnull(Qty,0)-isnull(ADJ_QTY,0)) AS RemainingQty FROM ORDER2 WHERE 
-                ITEM_CODE = @Itemcode AND Status = 1 AND COMP_CODE = @CompCode AND BRANCH_CODE = @BranchCode ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Itemcode", Itemcode);
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", 1);
-
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        PendingQty = Convert.ToDecimal(result);
-                    }
-                }
-            }
-
-            return Json(new { PendingQty = PendingQty });
-        }
-        public JsonResult GetTotal_Qty(int Itemcode)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            decimal? Total_Qty = null;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @"   SELECT   SUM(ISNULL(req_Qty, 0) - ISNULL(ADJ_QTY, 0)) AS Total_Qty FROM  PREQUEST2 WHERE ITEM_CODE=@Itemcode
-                and status=1 and COMP_CODE=@CompCode  and BRANCH_CODE=@BranchCode ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Itemcode", Itemcode);
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", 1);
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        Total_Qty = Convert.ToDecimal(result);
-                    }
-                }
-            }
-
-            return Json(new { Total_Qty = Total_Qty });
-        }
-        public JsonResult GetTECH_DESC(int Itemcode)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            string? TECH_DESC = null;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @"
-                    Select top 1 TECH_DESC from PREQUEST2 where ITEM_CODE= @Itemcode   and ISNULL(TECH_DESC,'')<>'' 
-                    and COMP_CODE=@CompCode  and BRANCH_CODE=@BranchCode and YEAR_CODE=@yearcode
-                    Order by V_Date desc,V_NO desc;
-                ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Itemcode", Itemcode);
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", 1);
-                    cmd.Parameters.AddWithValue("@yearcode", getdata.PubFYearCode);
-
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        TECH_DESC = Convert.ToString(result);
-                    }
-                }
-            }
-
-            return Json(new { TECH_DESC = TECH_DESC });
-        }
-        public JsonResult GetCurrentStock(int Itemcode)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            decimal? CurrentStocklist = null;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @" Select isnull(QTY,0) from tmpStockBalance where ITEM_CODE=@Itemcode and Comp_code=@CompCode; ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Itemcode", Itemcode);
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BranchCode", 1);
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        CurrentStocklist = Convert.ToDecimal(result);
-                    }
-                }
-            }
-
-            return Json(new { CurrentStocklist = CurrentStocklist });
-        }
-        public JsonResult GetAvgConsumption(int itemCode, DateTime vDate)
-        {
-            var globalVars = _globalVariableService.GetGlobalVariables();
-            if (vDate <= DateTime.MinValue.AddDays(90))
-            {
-                return Json(new { avgConsumption = 0, message = "Invalid date provided." });
-            }
-            DateTime endDate = vDate;
-            DateTime startDate = vDate.AddDays(-90);
-            decimal avgConsumption = 0;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @"Select isnull(sum(qty),0) from ISSUE2 where V_TYPE='SICO' and 
-                  item_code= @ItemCode and COMP_CODE=@CompCode   and BRANCH_CODE=@BranchCode   and v_date  between  @StartDate and @EndDate ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.Add("@ItemCode", SqlDbType.Int).Value = itemCode;
-                    cmd.Parameters.Add("@CompCode", SqlDbType.VarChar).Value = globalVars.PubCompCode;
-                    cmd.Parameters.Add("@BranchCode", SqlDbType.Int).Value = 1;
-                    cmd.Parameters.Add("@StartDate", SqlDbType.DateTime).Value = startDate;
-                    cmd.Parameters.Add("@EndDate", SqlDbType.DateTime).Value = endDate;
-
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        avgConsumption = Convert.ToDecimal(result);
-
-                        avgConsumption = avgConsumption / 3;
-
-                    }
-                }
-            }
-            return Json(new { avgConsumption = avgConsumption });
-        }
-        // end
-
-        public JsonResult GetUnit(int Itemcode)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            List<object> resultList = new List<object>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = @" SELECT   A.UNIT_CODE , A.UNIT_NAME   FROM item_mast A
-                WHERE A.COMP_CODE = @CompCode AND A.CODE = @Itemcode   AND A.NAME <> '' order by A.UNIT_NAME asc  ";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Itemcode", Itemcode);
-                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
-
-                    con.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            resultList.Add(new
-                            {
-                                CODE = reader["UNIT_CODE"],
-                                NAME = reader["UNIT_NAME"]
-                            });
-                        }
-                    }
-                }
-            }
-
-            return Json(resultList);
-        }
-        public JsonResult DDLplaceMast()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "select CODE,NAME from PLACE_MAST  WHERE  COMP_CODE = " + getdata.PubCompCode + "  AND  NAME <> ''  ORDER BY NAME asc";
-
-                var PlaceList = _dropdownService.GetDropdownList(query);
-                return Json(PlaceList);
-            }
-
-        }
-        public JsonResult DDLRequester()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = " Select a.Code , a.Name from EMP_MAST a where a.RESIGN_DATE is null and a.COMP_CODE=  " + getdata.PubCompCode + "  order by a.Name asc ";
-
-                var RequesterList = _dropdownService.GetDropdownList(query);
-                return Json(RequesterList);
-            }
-
-        }
-        public JsonResult DDLComplainNo()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "SELECT a.V_no VNo ,  a.V_Type FROM PM_MAINTENANCEPLAN a " +
-                  "left join ItemDept_Mast b on a.Dept_code=b.code and a.comp_code=b.comp_code " +
-                  "Left join Falt_Mast c on a.Fault_code=c.Code and a.comp_code=c.comp_code " +
-                  "Left join Machine_Mast d on a.mach_code=d.Code and a.comp_code=d.comp_code" +
-                  " where a.comp_code=" + getdata.PubCompCode + " and a.Branch_code= 1" +
-                  "and a.Year_code=" + getdata.PubFYearCode + " and V_type='PMCP'  order by a.V_no asc ";
-                var ComplainNoList = _dropdownService.GetDropdownList(query);
-                return Json(ComplainNoList);
-            }
-        }
-        public JsonResult DDLplaceUse()
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = " select CODE , NAME  From MACHINE_MAST where COMP_CODE = " + getdata.PubCompCode + " and NAME <> '' order by NAME asc  ";
-                var PlaceUseList = _dropdownService.GetDropdownList(query);
-                return Json(PlaceUseList);
-            }
-
-        }
-        public JsonResult DDLMake(int itemid)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-
-                string query = "SELECT   a.MAKE_CODE  , b.name  FROM ITEM_MAKE a LEFT JOIN ITEMMAKE_MAST b ON a.MAKE_CODE = b.CODE AND " +
-                    "b.comp_code = a.comp_code where b.CODE =" + itemid + " and b.COMP_CODE = " + getdata.PubCompCode + "  order by  b.name asc ;";
-
-                var MakeList = _dropdownService.GetDropdownList(query);
-
-                return Json(MakeList);
-            }
-
-        }
-        public JsonResult DDLItemMast(int deptid = 0)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                string query = "";
-                query ="SELECT  b.CODE ,b.name  " + "FROM item_dept a " +
-                "LEFT JOIN item_mast b ON a.ITEM_CODE = b.code AND b.ACTIVE = 1 AND b.comp_code = " + getdata.PubCompCode + " " +
-                "LEFT OUTER JOIN ITEMUNIT_MAST c ON b.UNIT_CODE = c.CODE AND c.comp_code = " + getdata.PubCompCode + "  " +
-                "LEFT JOIN ITEM_MGROUP d ON b.MGROUP_CODE = d.CODE AND d.comp_code = " + getdata.PubCompCode + "  " +
-                "WHERE a.comp_code = " + getdata.PubCompCode + "  AND d.mgroup_type IN ('Store', 'Fuel') AND  a.DEPT_CODE <> 0 or  a.DEPT_CODE  = " + deptid + " and b.NAME <> ''   " +
-                "GROUP BY b.name, b.CODE " + "ORDER BY b.name  asc ;";
-                var IitemMastList = _dropdownService.GetDropdownList(query);
-                return Json(IitemMastList);
-            }
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"SELECT a.V_no as PlanNo, a.V_Type as PlanType, b.NAME as deptName, c.NAME as FaltName, d.NAME as MachName, format(a.V_date,'dd/MM/yyyy') as ComplainDate
+                          FROM PM_MAINTENANCEPLAN a 
+                          left join ItemDept_Mast b on a.Dept_code=b.code and a.comp_code=b.comp_code
+                          Left join Falt_Mast c on a.Fault_code=c.Code and a.comp_code=c.comp_code
+                          Left join Machine_Mast d on a.mach_code=d.Code and a.comp_code=d.comp_code
+                           where a.comp_code={gv.PubCompCode} and a.Branch_code= {gv.PubBranchCode}
+                          and a.Year_code={gv.PubFYearCode} and V_type='PMCP'  order by a.V_no asc";
+            var dataList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = dataList });
         }
 
+        //=============================================
         [HttpPost]
         public IActionResult SavedData([FromBody] PurchaseRequest_model request)
         {
             if (request?.Header == null)
                 return Json(new { success = false, message = "Input model is null" });
 
-            var action = request.Header.action == "INSERT" ? "Insert" : "Update";
-            var result = SubmitRequest(request.Header, request.ItamDetails, request.PurchaseDocuments, action);
+            var result = _IPRRepository.SaveData(request);
 
-            return result == "Success"
+            return result.status
                 ? Json(new { success = true })
-                : Json(new { success = false, message = result });
+                : Json(new { success = false, message = result.message });
         }
 
-        private string SubmitRequest(Header header, List<ItamDetails> itamDetails, List<PurchaseDocuments> purchaseDocuments, string action)
+        //===========================Methods For Validation=======
+        [HttpGet]
+        public async Task<IActionResult> GetPurchaseRequests(int itemCode, int deptCode, int vNo)
         {
+            if (itemCode <= 0 || deptCode <= 0)
+                return Json(new { success = false, message = "Invalid parameters" });
+
+            var result = await _IPRRepository.GetPurchaseRequestsAsync(itemCode, deptCode, vNo);
+
+            return Json(new { success = result.status, data = result.data, message = result.message});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetItemMake(int itemCode, int makeCode)
+        {
+            if (itemCode <= 0 || makeCode <= 0)
+                return Json(new { success = false, exists = false, message = "Invalid parameters" });
+
+            var result = await _IPRRepository.GetItemMakeAsync(itemCode, makeCode);
+
+            return Json(new {success = result.status, exists = result.data, message = result.message});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckMonthlyReq(int itemCode)
+        {
+            if (itemCode <= 0)
+                return Json(new { success = false, message = "Invalid item code!" });
+
+            var result = await _IPRRepository.CheckMonthlyReqAsync(itemCode);
+
+            return Json(new { success = result.status, exists = result.data, message = result.message});
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetMaxRequestCount(int vNo, DateTime vDate)
+        {
+            if (vNo <= 0)
+                return Json(new { success = false, isWithinLimit = false, message = "Invalid VNo" });
+
+            var result = await _IPRRepository.GetMaxRequestCountAsync(vNo, vDate);
+
+            return Json(new {success = result.status, isWithinLimit = result.data, message = result.message});
+        }
+
+        //===Check Modification Days
+        [HttpGet]
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
             {
-                try
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
+
+        [HttpGet]
+        public JsonResult GetApprovalStatus(int VNo)
+        {
+            if (VNo <= 0)
+                return Json(new { Success = false, Message = "Invalid VNo" });
+
+            var result = _IPRRepository.GetApprovalStatus(VNo);
+
+            return Json(new {Success = result.status, FAPROV_STATUS = result.data});
+        }
+
+        [HttpGet]
+        public IActionResult ValidateDepartmentAccess(int deptCode)
+        {
+            if (deptCode <= 0)
+                return Json(new { success = false, exists = false });
+
+            var result = _IPRRepository.ValidateDepartmentAccess(deptCode);
+
+            return Json(new { success = result.status, exists = result.data });
+        }
+
+
+        //=============Modal Methods===============
+            //=============Overall History==========
+        [HttpGet]
+        public JsonResult GetLastTenPurchaseRequest(List<int> itemCodes)
+        {
+            var result = _IPRRepository.GetLastTenPurchaseRequest(itemCodes);
+
+            if(result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+        
+        [HttpGet]
+        public JsonResult GetLastTenConsumptionDetails(List<int> itemCodes)
+        {
+            var result = _IPRRepository.GetLastTenConsumptionDetails(itemCodes);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetLastTenPurchaseHistory(List<int> itemCodes)
+        {
+            var result = _IPRRepository.GetLastTenPurchaseHistory(itemCodes);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetLastTenOrderHistory(List<int> itemCodes)
+        {
+            var result = _IPRRepository.GetLastTenOrderHistory(itemCodes);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+           //===================Row Wise History============
+        [HttpGet]
+        public JsonResult GetItemWisePurchaseRequest(int itemCode)
+        {
+            var result = _IPRRepository.GetItemWisePurchaseRequest(itemCode);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetItemWiseConsumptionHistory(int itemCode)
+        {
+            var result = _IPRRepository.GetItemWiseConsumptionHistory(itemCode);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetItemWisePurchaseOrderHistory(int itemCode)
+        {
+            var result = _IPRRepository.GetItemWisePurchaseOrderHistory(itemCode);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetItemWisePurchaseQuotationHistory(int itemCode)
+        {
+            var result = _IPRRepository.GetItemWisePurchaseQuotationHistory(itemCode);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetItemWisePurchaseReceiptHistory(int itemCode)
+        {
+            var result = _IPRRepository.GetItemWisePurchaseReceiptHistory(itemCode);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult GetItemWisePurchaseHistory(int itemCode)
+        {
+            var result = _IPRRepository.GetItemWisePurchaseHistory(itemCode);
+            if (result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = "STPI";
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("PREQUEST1", vdate, vtype, vno);
+            return Ok(result);
+        }
+        [HttpGet]
+        public IActionResult ExportAllDocs()
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
                 {
-                    var g = _globalVariableService.GetGlobalVariables();
-                    using var conn = _dbConnection.GetErpConnection();
-                    conn.Open();
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode },
+                    { "@Action", "Excel" }
+                };
 
-                    string deletePRequest2Sql = @"
-                    DELETE FROM PREQUEST2 
-                    WHERE COMP_CODE = @CompCode 
-                    AND V_NO = @VNo 
-                    AND BRANCH_CODE = @BranchCode 
-                    AND YEAR_CODE = @YearCode and  V_TYPE = 'STPI';";
-                    using (var deletePRequest2Cmd = conn.CreateCommand())
-                    {
-                        deletePRequest2Cmd.CommandText = deletePRequest2Sql;
-                        deletePRequest2Cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        deletePRequest2Cmd.Parameters.AddWithValue("@VNo", header.V_NO);
-                        deletePRequest2Cmd.Parameters.AddWithValue("@BranchCode", 1);
-                        deletePRequest2Cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-                        deletePRequest2Cmd.ExecuteNonQuery();
-                    }
+                var fileBytes = _globalValidationdate.ExportToExcel("sp_PurchaseReq1", "Purchase Request", parameters);
 
-                    string deleteImgTableSql = @"
-                    DELETE FROM IMG_TABLE 
-                    WHERE COMP_CODE = @CompCode 
-                    AND V_NO = @VNo 
-                    AND BRANCH_CODE = @BranchCode 
-                    AND V_TYPE = @V_TYPE
-                    AND YEAR_CODE = @YearCode;";
-                    using (var deleteImgTableCmd = conn.CreateCommand())
-                    {
-                        deleteImgTableCmd.CommandText = deleteImgTableSql;
-                        deleteImgTableCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        deleteImgTableCmd.Parameters.AddWithValue("@VNo", header.V_NO);
-                        deleteImgTableCmd.Parameters.AddWithValue("@BranchCode", 1);
-                        deleteImgTableCmd.Parameters.AddWithValue("@V_TYPE", "STPI");
-                        deleteImgTableCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-                        deleteImgTableCmd.ExecuteNonQuery();
-                    }
-
-                    conn.Close();
-
-                    conn.Open();
-                    using (var cmd = new SqlCommand("sp_PurchaseReq1", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Action", action);
-                        cmd.Parameters.AddWithValue("@SaveAction", "Header");
-                        cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        cmd.Parameters.AddWithValue("@v_NO", header.V_NO);
-                        cmd.Parameters.AddWithValue("@V_TYPE", "STPI");
-                        cmd.Parameters.AddWithValue("@V_DATE", header.V_DATE);
-                        cmd.Parameters.AddWithValue("@DOC_ID", (header.V_TYPE ?? "STPI") + header.V_NO);
-                        cmd.Parameters.AddWithValue("@DEPT_CODE", header.DEPT_CODE);
-                        cmd.Parameters.AddWithValue("@TARGET_DATE", header.TARGET_DATE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@REASON", header.REASON ?? "");
-                        cmd.Parameters.AddWithValue("@PLACE_CODE", header.PLACE_CODE);
-                        cmd.Parameters.AddWithValue("@URGENT_REQUEST", header.URGENT_REQUEST);
-                        cmd.Parameters.AddWithValue("@status", header.STATUS);
-                        cmd.Parameters.AddWithValue("@OWNER_CODE", header.OWNER_CODE);
-                        cmd.Parameters.AddWithValue("@OWNER_NAME", header.OWNER_NAME);
-                        cmd.Parameters.AddWithValue("@PLAN_NO", header.PLAN_NO);
-                        cmd.Parameters.AddWithValue("@PLAN_TYPE", header.PLAN_TYPE ?? "");
-                        cmd.Parameters.AddWithValue("@REMARKS", header.REMARKS ?? "");
-                        cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                        cmd.Parameters.AddWithValue("@EDATE", DBNull.Value);
-                        cmd.Parameters.AddWithValue("@AED", "A");
-                        cmd.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                        cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
-                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    /// save dateails 
-
-                    foreach (var d in itamDetails)
-                    {
-                        if (!d.ITEM_CODE.HasValue || d.ITEM_CODE == 0)
-                            continue;
-                        using var cmd2 = new SqlCommand("sp_PurchaseReq1", conn) { CommandType = CommandType.StoredProcedure };
-                        cmd2.Parameters.AddWithValue("@Action", "INSERT");
-                        cmd2.Parameters.AddWithValue("@SaveAction", "table");
-                        cmd2.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                        cmd2.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                        cmd2.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        cmd2.Parameters.AddWithValue("@V_NO", header.V_NO);
-                        cmd2.Parameters.AddWithValue("@V_DATE", header.V_DATE);
-                        cmd2.Parameters.AddWithValue("@V_TYPE", "STPI");
-                        cmd2.Parameters.AddWithValue("@ITEM_CODE", d.ITEM_CODE);
-                        cmd2.Parameters.AddWithValue("@MAKE_CODE", d.MAKE_CODE);
-                        cmd2.Parameters.AddWithValue("@DEPT_CODE", header.DEPT_CODE);
-                        cmd2.Parameters.AddWithValue("@TECH_DESC", d.TECH_DESC ?? "");
-                        cmd2.Parameters.AddWithValue("@UOM_CODE", d.UOM_CODE);
-                        cmd2.Parameters.AddWithValue("@STD_REQ", d.STD_REQ);
-                        cmd2.Parameters.AddWithValue("@CUR_STK", d.CUR_STK);
-                        cmd2.Parameters.AddWithValue("@AVG_CONS", d.AVG_CONS ?? 0);
-                        cmd2.Parameters.AddWithValue("@RESERVE_QTY", d.RESERVE_QTY);
-                        cmd2.Parameters.AddWithValue("@OPEN_POQTY", d.OPEN_POQTY);
-                        cmd2.Parameters.AddWithValue("@OPEN_RQQTY", d.OPEN_RQQTY);
-                        cmd2.Parameters.AddWithValue("@USER_QTY", d.USER_QTY);
-                        cmd2.Parameters.AddWithValue("@REQ_QTY", d.REQ_QTY);
-                        cmd2.Parameters.AddWithValue("@REQ_REASON", d.REQ_REASON ?? "");
-                        cmd2.Parameters.AddWithValue("@REMARKS", d.REMARKS ?? "");
-                        cmd2.Parameters.AddWithValue("@PLACE_USE", d.PLACE_USE ?? "");
-                        cmd2.Parameters.AddWithValue("@APROX_RATE", d.APROX_RATE);
-                        cmd2.Parameters.AddWithValue("@PRIORITY_TYPE", d.PRIORITY_TYPE ?? "");
-                        cmd2.Parameters.AddWithValue("@SCRAP_TYPE", d.SCRAP_TYPE ?? "");
-                        cmd2.Parameters.AddWithValue("@WORK_TYPE", d.WORK_TYPE ?? "");
-                        cmd2.Parameters.AddWithValue("@APROV_STATUS", d.APROV_STATUS ?? "");
-                        cmd2.Parameters.AddWithValue("@APROV_REMARKS", d.APROV_REMARKS ?? "");
-                        cmd2.Parameters.AddWithValue("@STATUS", d.STATUS);
-                        cmd2.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                        cmd2.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                        cmd2.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                        cmd2.Parameters.AddWithValue("@EDATE", DBNull.Value);
-                        cmd2.Parameters.AddWithValue("@AED", "A");
-                        cmd2.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                        cmd2.Parameters.AddWithValue("@LIP", g.PubLocalId);
-                        cmd2.Parameters.AddWithValue("@LID", Environment.MachineName);
-                        cmd2.ExecuteNonQuery();
-                    }
-
-                    foreach (var Attachment in purchaseDocuments)
-                    {
-
-                        if (string.IsNullOrWhiteSpace(Attachment.FILE_NAME))
-                            continue;
-                        using var cmd3 = new SqlCommand("sp_PurchaseReq1", conn) { CommandType = CommandType.StoredProcedure };
-                        cmd3.Parameters.AddWithValue("@Action", "INSERT");
-                        cmd3.Parameters.AddWithValue("@SaveAction", "Documnets");
-                        cmd3.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                        cmd3.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        cmd3.Parameters.AddWithValue("@DOC_ID", (header.V_TYPE ?? "STPI") + header.V_NO);
-                        cmd3.Parameters.AddWithValue("@V_NO", header.V_NO);
-                        cmd3.Parameters.AddWithValue("@V_DATE", header.V_DATE);
-                        cmd3.Parameters.AddWithValue("@V_TYPE", "STPI");
-                        cmd3.Parameters.AddWithValue("@FILE_NAME", Attachment.FILE_NAME);
-                        cmd3.Parameters.AddWithValue("@FILE_Path", "/attachments/pan/" + (Attachment.FILE_Path ?? ""));
-                        cmd3.Parameters.AddWithValue("@UUSER", g.PubUserId);
-                        cmd3.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                        cmd3.Parameters.AddWithValue("@EUSER", g.PubUserId);
-                        cmd3.Parameters.AddWithValue("@EDATE", DBNull.Value);
-                        cmd3.Parameters.AddWithValue("@AED", "A");
-                        cmd3.Parameters.AddWithValue("@WSID", g.PubWorkStationID);
-                        cmd3.Parameters.AddWithValue("@LIP", g.PubLocalId);
-                        cmd3.Parameters.AddWithValue("@LID", Environment.MachineName);
-                        cmd3.ExecuteNonQuery();
-                    }
-                    return "Success";
-                }
-                catch (Exception ex)
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"PurchaseRequest_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Json(new
                 {
-                    return $"Error: {ex.Message}";
-                }
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        public class ItemAllDetailsDto
+        {
+            public decimal? Rate { get; set; }
+            public decimal? PendingQty { get; set; }
+            public decimal? Total_Qty { get; set; }
+            public decimal? CurrentStocklist { get; set; }
+            public decimal? AvgConsumption { get; set; }
+            public string TECH_DESC { get; set; }
+        }
+        public JsonResult GetItemAllDetails(int itemCode, DateTime vDate)
+        {
+            if (itemCode <= 0)
+            {
+                return Json(new { success = false, message = "Invalid item code!" });
             }
 
-        }
+            var model = new ItemAllDetailsDto();
 
+            // 1. Rate
+            var rateResult = _IPRRepository.GetApporxiateRate(itemCode);
+                model.Rate = rateResult.data;
+
+            // 2. Pending Qty
+            var pendingResult = _IPRRepository.GetPendingQty(itemCode);
+                model.PendingQty = pendingResult.data;
+
+            // 3. Total Qty
+            var totalResult = _IPRRepository.GetTotalQty(itemCode);
+                model.Total_Qty = totalResult.data;
+
+            // 4. TECH DESC
+            var techResult = _IPRRepository.GetTECH_DESC(itemCode);
+                model.TECH_DESC = techResult.data;
+
+            // 5. Current Stock
+            var cStock = _IPRRepository.GetCurrentStock(itemCode);
+            model.CurrentStocklist = cStock.data;
+           
+            // 6. Avg Consumption
+            var avgResult = _IPRRepository.GetAvgConsumption(itemCode, vDate);
+                model.AvgConsumption = avgResult.data;
+
+            return Json(new { success = true, data = model });
+        }
     }
+
 }

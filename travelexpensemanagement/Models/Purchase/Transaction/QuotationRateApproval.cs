@@ -105,6 +105,7 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
 
     public class FilterItemload
     {
+        public DateTime? VDate { get; set; }
         public string? FromDt { get; set; }
         public string? ToDt { get; set; }
         public int? groupCode { get; set; }

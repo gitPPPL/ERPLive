@@ -9,12 +9,16 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
+//using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
+//using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
@@ -54,6 +58,10 @@ builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryRepository, QCTemperatureEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryListRepository, QCTemperatureEntryListRepository>();
 builder.Services.AddScoped<ILaminationQCEntryRepository, LaminationQCEntryRepository>();
+builder.Services.AddScoped<IPurchaseQuotationRepository, PurchaseQuotationRepository>();
+builder.Services.AddScoped<IPurchaseQuotationListRepository, PurchaseQuotationListRepository>();
+builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
+builder.Services.AddScoped<IPurchaseRequestListRepository, PurchaseRequestListRepository>();
 // Gete Entry Transaction repositories
 
 

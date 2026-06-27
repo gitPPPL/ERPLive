@@ -1,19 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Office.CustomUI;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Data;
+using System.Data.Common;
 using System.Globalization;
 using System.Net.Mail;
 using System.Reflection.Emit;
+using System.Text.Json;
 using System.Threading.Tasks;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Master;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Payroll.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
-using static iTextSharp.text.pdf.AcroFields;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
@@ -23,16 +25,31 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public QuotationRateApprovalController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly DropdownService _dropdownService;
+        private readonly GlobalValidationdate _globalValidationdate;
+        public QuotationRateApprovalController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, DropdownService dropdownService, GlobalValidationdate globalValidationdate)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
-
+            _dropdownService = dropdownService;
+            _globalValidationdate = globalValidationdate;
         }
+
         public IActionResult Index()
         {
+            string databaseName;
+            using (var connection = _dbcontext.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVar = _globalValue.GetGlobalVariables();
+            ViewBag.GlobalVariables = globalVar;
+            ViewBag.CompCode = globalVar.PubCompCode;
+            ViewBag.BranchCode = globalVar.PubBranchCode;
+            ViewBag.YearCode = globalVar.PubFYearCode;
             return View("~/Views/Purchase/Transaction/QuotationRateApproval/Index.cshtml");
         }
 
@@ -43,19 +60,19 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 var userSession = _globalValue.GetGlobalVariables();
                 var companyCode = userSession.PubCompCode;
                 var yearCode = userSession.PubFYearCode;
-                var branchCode = "1";
+                var branchCode = userSession.PubBranchCode;
                 var vType = "STAP";
                 var tableName = "QUOTATION2";
 
                 var yearParams = new Dictionary<string, object> { { "@YearCd", yearCode } };
                 var vnoParams = new Dictionary<string, object>
-            {
-            { "@COMP_CODE", companyCode },
-            { "@BRANCH_CODE", branchCode },
-            { "@YEAR_CODE", yearCode },
-            { "@V_TYPE", vType },
-            { "@TableName", tableName }
-            };
+                {
+                { "@COMP_CODE", companyCode },
+                { "@BRANCH_CODE", branchCode },
+                { "@YEAR_CODE", yearCode },
+                { "@V_TYPE", vType },
+                { "@TableName", tableName }
+                };
 
                 string nextVNo = await _dbHelper.GetExecuteScalarAsync<string>("sp_GetMaxVNo", vnoParams, isStoredProc: true);
                 string year = await _dbHelper.GetExecuteScalarAsync<string>("SELECT dbo.fn_GetCurrentYear(@YearCd)", yearParams);
@@ -86,26 +103,57 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
         [HttpGet]
-        public async Task<IActionResult> GetItemName()
+
+        public IActionResult GetItemName(string search = "")
         {
-            try
-            {
-                var parameters = new Dictionary<string, object>
-                {
-                { "@CompanyCode", _globalValue.GetGlobalVariables().PubCompCode }
-                };
+            var compCode = _globalValue.GetGlobalVariables().PubCompCode;
 
-                var itemList = await _dbHelper.GetJsonFromProcedureAsync("dbo.Get_DdlList", parameters);
+            string query = $@"
+    SELECT CODE, NAME
+    FROM ITEM_MAST
+    WHERE COMP_CODE = {compCode}
+      AND ACTIVE = 1
+      AND ('{search}' = '' OR NAME LIKE '%{search}%')
+    ORDER BY NAME";
 
-                return Json(new { status = true, data = itemList });
-            }
-            catch (Exception ex)
+            var list = _dropdownService.GetDropdownList(query);
+
+            return Json(new
             {
-                return Json(new { status = false, message = "Data load failed" });
-            }
+                status = true,
+                data = list
+            });
         }
+
+        //public IActionResult GetItemName(string search = "", int page = 1)
+        //{
+        //    int pageSize = 500;
+
+        //    var compCode = _globalValue.GetGlobalVariables().PubCompCode;
+
+        //    string query = $@"
+        //    SELECT CODE, NAME
+        //    FROM ITEM_MAST
+        //    WHERE COMP_CODE = {compCode}
+        //      AND ACTIVE = 1
+        //      AND ('{search}' = '' OR NAME LIKE '%{search}%')
+        //    ORDER BY NAME
+        //    OFFSET {(page - 1) * pageSize} ROWS
+        //    FETCH NEXT {pageSize} ROWS ONLY";
+
+        //    var list = _dropdownService.GetDropdownList(query);
+
+        //    return Json(new
+        //    {
+        //        status = true,
+        //        data = list,
+        //        pagination = new
+        //        {
+        //            more = list.Count == pageSize
+        //        }
+        //    });
+        //}
 
         [HttpGet]
         public async Task<IActionResult> GetVendorName()
@@ -121,29 +169,63 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
- 
-       [HttpGet]
+
+        [HttpGet]
         public async Task<IActionResult> GetQuotRtApvrlDetailsById(string id)
         {
             try
             {
                 var userSession = _globalValue.GetGlobalVariables();
+
                 var parameters = new Dictionary<string, object>
                 {
-                { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
-                { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
-                { "@BRANCH_CODE", 1 },
-                { "@DOC_ID", id },              
-                { "@Action", "FilterDataByVNo" }
+                    { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
+                    { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
+                    { "@BRANCH_CODE", userSession.PubBranchCode },
+                    { "@DOC_ID", id },
+                    { "@Action", "FilterDataByVNo" }
                 };
-                var result = await _dbHelper.GetJsonFromProcedureAsync("sp_QuotationRateApproval", parameters);
-                var attachment = await _dbHelper.GetJsonDataAsync($@"select FILE_NAME,  FILE_Path  from IMG_TABLE  WHERE COMP_CODE = {userSession.PubCompCode} AND YEAR_CODE = {userSession.PubFYearCode} AND BRANCH_CODE = 1 and DOC_ID='{id}'  ");
+
+                var result = await _dbHelper.GetJsonFromProcedureAsync(
+                    "sp_QuotationRateApproval",
+                    parameters
+                );
+
+                var attachments = new List<object>();
+
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    string query = @"SELECT FILE_NAME, FILE_TYPE, IMG_FILE FROM IMG_TABLE WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND DOC_ID = @DOC_ID";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@DOC_ID", id);
+
+                        using (SqlDataReader dr = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await dr.ReadAsync())
+                            {
+                                attachments.Add(new
+                                {
+                                    FILE_NAME = dr["FILE_NAME"]?.ToString(),
+                                    FILE_TYPE = dr["FILE_TYPE"]?.ToString(),
+                                    FILE_BASE64 = dr["IMG_FILE"] == DBNull.Value ? null : Convert.ToBase64String((byte[])dr["IMG_FILE"])
+                                });
+                            }
+                        }
+                    }
+                }
 
                 return Json(new
                 {
                     status = true,
                     detail = result,
-                    attachment=attachment
+                    attachment = attachments
                 });
             }
             catch (Exception ex)
@@ -156,6 +238,40 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> GetQuotRtApvrlDetailsById(string id)
+        //{
+        //    try
+        //    {
+        //        var userSession = _globalValue.GetGlobalVariables();
+        //        var parameters = new Dictionary<string, object>
+        //        {
+        //        { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
+        //        { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
+        //        { "@BRANCH_CODE", userSession.PubBranchCode },
+        //        { "@DOC_ID", id },              
+        //        { "@Action", "FilterDataByVNo" }
+        //        };
+        //        var result = await _dbHelper.GetJsonFromProcedureAsync("sp_QuotationRateApproval", parameters);
+        //        var attachment = await _dbHelper.GetJsonDataAsync($@"select FILE_NAME,  FILE_Path  from IMG_TABLE  WHERE COMP_CODE = {userSession.PubCompCode} AND YEAR_CODE = {userSession.PubFYearCode} AND BRANCH_CODE = 1 and DOC_ID='{id}'  ");
+
+        //        return Json(new
+        //        {
+        //            status = true,
+        //            detail = result,
+        //            attachment=attachment
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new
+        //        {
+        //            status = false,
+        //            message = ex.Message
+        //        });
+        //    }
+        //}
+
         [HttpPost]
         public async Task<IActionResult> GetFilterItemdetails([FromBody] FilterItemload filtrItmModel)
         {
@@ -165,17 +281,21 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 var parameters = new Dictionary<string, object>
                 {
                 { "@COMP_CODE", usersessionDt.PubCompCode },             
-                { "@BRANCH_CODE", 1 },
+                { "@BRANCH_CODE", usersessionDt.PubBranchCode },
+                { "@YEAR_CODE", usersessionDt.PubFYearCode },
                 { "@V_TYPE", "STQT"},
                 { "@Action", "FilterData" }
                 };
 
-                if (filtrItmModel.FromDt != null && filtrItmModel.ToDt != null)
-                {
-                    parameters["@FromDate"] = filtrItmModel.FromDt.ToString();
-                    parameters["@ToDate"] = filtrItmModel.ToDt.ToString();
-                }
-               
+                if (filtrItmModel.VDate != null)
+                    parameters["@VDate"] = filtrItmModel.VDate;
+
+                if (filtrItmModel.FromDt != null)
+                    parameters["@FromDate"] = filtrItmModel.FromDt;
+
+                if (filtrItmModel.ToDt != null)
+                    parameters["@ToDate"] = filtrItmModel.ToDt;
+
                 if (filtrItmModel.groupCode > 0)
                     parameters["@GroupCode"] = filtrItmModel.groupCode;
 
@@ -214,7 +334,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     await con.OpenAsync();
                     var usersessionDt = _globalValue.GetGlobalVariables();               
                     DataTable equotationRtAprovlTable = FillDataTable(equotmodel.quotationRateApprovalDetail, "dbo.Type_Quotation2");
-                    DataTable equotationRtAprovlAttachTable = FillDataTable(equotmodel.quotatRateApprovalAttachment, "[dbo].[IMG_TABLE]");
+                    DataTable equotationRtAprovlAttachTable = FillDataTable(equotmodel.quotatRateApprovalAttachment, "[dbo].[IMG_TABLE_BINARY]");
 
                     using (var transaction = con.BeginTransaction())
                     {
@@ -228,12 +348,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 cmd.CommandType = CommandType.StoredProcedure;
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode);
                                 cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode);
-                                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
                                 cmd.Parameters.AddWithValue("@V_NO", _dbHelper.Xnull(equotmodel.V_NO));
                                 cmd.Parameters.AddWithValue("@V_TYPE", "STAP");
                                 cmd.Parameters.AddWithValue("@V_DATE", _dbHelper.Xnull(equotmodel.V_DATE));
                                 cmd.Parameters.AddWithValue("@DOC_ID", _dbHelper.Xnull(equotmodel.V_DOCID));
-                                cmd.Parameters.AddWithValue("@status", 1);
+                                cmd.Parameters.AddWithValue("@status", _dbHelper.Xnull(equotmodel.status));
                                 cmd.Parameters.AddWithValue("@User", usersessionDt.PubUserId ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@Lip", usersessionDt.PubLocalId);
 
@@ -243,7 +363,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                                 var tvpI = cmd.Parameters.AddWithValue("@ImgTable", equotationRtAprovlAttachTable);
                                 tvpI.SqlDbType = SqlDbType.Structured;
-                                tvpI.TypeName = "[dbo].[IMG_TABLE]";
+                                tvpI.TypeName = "dbo.IMG_TABLE_BINARY";
 
                                 var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int) { Direction = ParameterDirection.ReturnValue };
                                 cmd.Parameters.Add(returnParam);
@@ -291,44 +411,33 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             switch (typeName)
             {
 
-                case "[dbo].[IMG_TABLE]":
-                    var attachmentData = data as List<QuotatRateApprovalAttachment>;
-                    if (attachmentData == null || !attachmentData.Any())
+                case "[dbo].[IMG_TABLE_BINARY]":
                     {
-                        return QuotationRtApvlAttachTbl;
-                    }
+                        var attachmentData = data as List<QuotatRateApprovalAttachment>;
 
-                    string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "attachments", "Purchase");
+                        if (attachmentData == null || !attachmentData.Any())
+                            return QuotationRtApvlAttachTbl;
 
-                    if (!Directory.Exists(folderPath))
-                    {
-                        Directory.CreateDirectory(folderPath);
-                    }
-
-                    foreach (var attachment in attachmentData)
-                    {
-                        if (attachment.FileName != null && attachment.FileContentBase64 != null)
+                        foreach (var attachment in attachmentData)
                         {
-                            string sanitizedFileName = Path.GetFileName(attachment.FileName);
-                            string fullPath = Path.Combine(folderPath, sanitizedFileName);
-                            string relativePath = $"/attachments/Purchase/{sanitizedFileName}";
+                            if (!string.IsNullOrEmpty(attachment.FileName) &&
+                                !string.IsNullOrEmpty(attachment.FileContentBase64))
+                            {
+                                byte[] fileBytes =
+                                    Convert.FromBase64String(attachment.FileContentBase64);
 
-                            byte[] fileBytes = Convert.FromBase64String(attachment.FileContentBase64);
-                            System.IO.File.WriteAllBytes(fullPath, fileBytes); 
-                            attachment.FilePath = $"/attachments/Purchase/{sanitizedFileName}";
-
-                            QuotationRtApvlAttachTbl.Rows.Add(
-                                x,
-                                relativePath,
-                                sanitizedFileName,
-                                x++
-                            );
-                           
+                                QuotationRtApvlAttachTbl.Rows.Add(
+                                    x,
+                                    fileBytes,
+                                    attachment.FileName,
+                                    x++
+                                );
+                            }
                         }
+
+                        break;
                     }
-
-                    break;
-
+               
                 case "dbo.Type_Quotation2":
                     foreach (var detail in data.Cast<QuotationRateApprovalDetail>())
                     {
@@ -475,9 +584,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     dt.Columns.Add("DOC_ID", typeof(string));
                     break;
 
-                case "[dbo].[IMG_TABLE]":
+                case "[dbo].[IMG_TABLE_BINARY]":
                     dt.Columns.Add("ROWID", typeof(int));
-                    dt.Columns.Add("FILE_Path", typeof(string));
+                    dt.Columns.Add("IMG_FILE", typeof(byte[]));
                     dt.Columns.Add("FILE_NAME", typeof(string));
                     dt.Columns.Add("SRNO", typeof(int));
                     break;
@@ -486,6 +595,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     throw new ArgumentException("Unknown table type: " + typeName);
             }
             return dt;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            var global = _globalValue.GetGlobalVariables();
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("QUOTATION2", vdate, vtype, vno);
+            return Ok(result);
         }
 
     }

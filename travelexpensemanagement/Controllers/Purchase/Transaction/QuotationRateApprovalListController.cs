@@ -24,9 +24,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _moduleService = moduleService;
 
         }
+
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Quotation Rate Approval";
+            ViewBag.CurrentMenu = "Purchase Rate Approval";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
 
@@ -47,7 +48,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 var parameter = new Dictionary<string, object> {
                     {"@COMP_CODE", UsersessionDt.PubCompCode },
                     {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE" , 1},
+                    {"@BRANCH_CODE" , UsersessionDt.PubBranchCode},
                     {"@Action",  "List"}
                 };
                 var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_QuotationRateApproval]", parameter);
@@ -68,10 +69,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
 
                 var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+                var pagedList = fullList.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
                 return Json(new { status = true, data = pagedList, totalCount });
             }
@@ -81,7 +79,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DelQuotationRateApprovalData(string docid)
         {
             try
@@ -113,11 +111,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                         if (result > 0)
                         {
-                            return Json(new { status = true, message = "data delete successfully" });
+                            return Json(new { success = true, message = "data delete successfully" });
                         }
                         else
                         {
-                            return Json(new { status = false, message = "data delete failed" });
+                            return Json(new { success = false, message = "data delete failed" });
                         }
                     }
                 }
@@ -138,7 +136,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE",  UsersessionDt.PubCompCode},
                     {"@YEAR_CODE",  UsersessionDt.PubFYearCode},
-                    {"@BRANCH_CODE", 1 },
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode },
                     {"@ItemCode", itemcode  },
                     {"@Action",  "QuotationApprovalHistory"}
                 };
@@ -162,7 +160,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE",  UsersessionDt.PubCompCode},
                     {"@YEAR_CODE",  UsersessionDt.PubFYearCode},
-                    {"@BRANCH_CODE", 1 },
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode },
                     {"@ItemCode", itemcode  },
                     {"@Action",  "QuotationApprovalHistory"}
                 };
@@ -186,7 +184,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE",  UsersessionDt.PubCompCode},
                     {"@YEAR_CODE",  UsersessionDt.PubFYearCode},
-                    {"@BRANCH_CODE", 1 },
+                    {"@BRANCH_CODE", UsersessionDt.PubBranchCode },
                     {"@ItemCode", itemcode},
                     {"@Action",  "PurchaseOrderHistory"}
                 };
@@ -214,7 +212,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@V_TYPE", docid.Substring(0, 4) },
                     {"@V_NO", docid.Substring(4) },
                     {"@Action", "EntryDetail" }
@@ -239,7 +237,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
                     {"@Action", "Excel" }
                 };
                 var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_QuotationRateApproval]", parameter);
@@ -252,7 +250,5 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
-  
     }
 }

@@ -118,9 +118,12 @@
 
 .erppagelogin-description {
     font-size: 15px;
-    color: #fffcdb;
+    color: #fffcde;
     line-height: 1.7;
     max-width: 500px;
+    background-color: #2c2c2c;
+    padding: 10px;
+    border-radius: 4px;
 }
 
 .erppagelogin-buttons {
@@ -302,7 +305,7 @@
     width: 100%;
     padding: 10px;
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     background: #1C5E31;
     color: #FFFFFF;
     font-weight: 600;
@@ -343,8 +346,7 @@
 
 /* =========================================
        ERP LOGIN LOADER
-    ========================================= */
-
+   ========================================= */
 .erppagelogin-loader {
     position: fixed;
     inset: 0;
@@ -353,7 +355,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /*background: linear-gradient( 135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.96) ), url('../images/auth/pashupati_logo.webp');*/
     background-size: cover;
     background-position: center;
     backdrop-filter: blur(10px);
@@ -392,7 +393,6 @@
     width: 260px;
     height: 260px;
     border-radius: 30px;
-    /* GREY GLASS EFFECT */
     background: rgba(220, 220, 220, 0.18);
     border: 1px solid rgba(180, 180, 180, 0.30);
     backdrop-filter: blur(14px);
@@ -474,20 +474,17 @@
     font-size: 14px;
 }
 /* FINANCIAL YEAR + DATE ROW */
-
 .erppagelogin-row {
     display: flex;
     gap: 12px;
     width: 100%;
 }
-
     .erppagelogin-row .erppagelogin-group {
         width: 50%;
         flex: 0 0 calc(50% - 6px);
     }
 
 /* DATE ICON FIX */
-
 input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0;
     cursor: pointer;

@@ -1,9 +1,40 @@
 ﻿@{
     ViewBag.Title = "Outward Entry List";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+    var currentMenu = ViewBag.CurrentMenu as string;
+    bool canAdd = false;
+    bool canEdit = false;
+    bool canDelete = false;
+    bool canPrint = false;
+    bool canExport = false;
+    bool canMail = false;
+    bool canApproval = false;
+    bool canDocDetail = false;
+
+    foreach (var permission in Model.UserMenuPermissions)
+    {
+        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+        {
+            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+            break;
+        }
+    }
+
+
+
 }
 
-<!-- HEADER -->
+
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
@@ -11,10 +42,15 @@
     </div>
 
     <div class="erppagelist-header-right">
-        <button type="button" class="erppage-header-back"
-                onclick="location.href='@Url.Action("Index", "OutwardEntry")'">
-            <i class="fa fa-plus"></i>Add New
-        </button>
+
+
+        @if (canAdd == true)
+        {
+            <button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "OutwardEntry")'">
+                <i class="fa fa-plus"></i>Add New
+            </button>
+        }
+    
     </div>
 </div>
 
@@ -26,13 +62,23 @@
     </div>
 
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_Report">
+
+        @if(@canPrint)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Report">
             <i class="fa fa-print"></i>Print
         </button>
+        }
 
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_exportExcel">
-            <i class="fa fa-file-excel"></i>Export
-        </button>
+        @if(@canExport)
+        {
+            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"  data-tooltip="Export Report" id="btn_exportExcel">
+                <i class="fa fa-file-excel"></i>Export
+            </button>
+        }
+
+
+    
     </div>
 </div>
 
@@ -40,34 +86,30 @@
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
 
-        <table id="tblOutwardEntryList" class="excel-table fixed-grid-table">
+        <table id="tblOutwardEntryList" class="excel-table fixed-grid-table width-table resizable-table">
 
             <colgroup>
-                <col style="display:none;" />
-                <col style="width:120px;" />
-                <col style="width:130px;" />
-                <col style="width:120px;" />
-                <col style="width:150px;" />
-                <col style="width:130px;" />
-                <col style="width:120px;" />
-                <col style="width:120px;" />
-                <col style="width:120px;" />
-                <col style="width:150px;" />
-                <col style="width:120px;" />
+                <col style="display:none;"> <!-- Code -->
+                <col style="width: 112px;"> <!-- Party Name -->
+                <col style="width:75px;">   <!-- Item Type -->
+                <col style="width: 77px;">   <!-- E - Waybill No -->
+                <col style="width:80px;">   <!-- Vehicle No -->
+                <col style="width: 196px;">   <!-- GST No. -->
+                <col style="width:90px;">   <!-- Action -->
             </colgroup>
 
             <thead>
                 <tr>
-                    <th style="display:none;">Code</th>
+                    <th class="hidden-col">Code</th>
                     <th>Doc ID</th>
-                    <th>Voucher No</th>
-                    <th>Voucher Date</th>
-                    <th>Reference Type</th>
-                    <th>Reference No</th>
-                    <th>Truck No</th>
-                    <th>Bill No</th>
-                    <th>Bill Date</th>
+                    <th>Doc No</th>
+                    <th>Doc Type</th>
+                    <th>Doc Date</th>              
                     <th>Party Name</th>
+                    <th>Item Type</th>
+                    <th>E - Waybill No</th>
+                    <th>Vehicle No</th>
+                    <th>GST No.</th>              
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -134,7 +176,6 @@
     });
     // ================= LOAD DATA =================
      function loadAlloutward() {
-
         $.ajax({
             url: '/OutwardEntryList/GetList',
             type: 'GET',
@@ -145,6 +186,10 @@
                 pageSize: pageSize
             },
             success: function (res) {
+
+                console.log("List data",res);
+
+
 
                 if (!res.success) {
                     toastr.error("Failed to load data.");
@@ -173,28 +218,38 @@
             return;
         }
 
-        list.forEach(item => {
+        list.forEach(item => {     
 
             tbody.append(`
                 <tr>
                     <td style="display:none;">${item.doC_ID ?? ''}</td>
-                    <td>${item.doC_ID ?? ''}</td>
-                    <td>${item.v_NO ?? ''}</td>
-                    <td>${formatDate(item.v_DATE)}</td>
-                    <td>${item.reF_TYPE ?? ''}</td>
-                    <td>${item.reF_NO ?? ''}</td>
-                    <td>${item.trucK_NO ?? ''}</td>
-                    <td>${item.bilL_NO ?? ''}</td>
-                    <td>${formatDate(item.bilL_DATE)}</td>
-                    <td>${item.partY_NAME ?? ''}</td>
-
-                    <td class="action-col">
-                        <button class="act-btn edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
-                        <button class="act-btn view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
-                        <button class="act-btn delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
-                        <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
-
-                   </td>
+                      <+td>${item.doC_ID ?? ''}</td>
+                      <td>${item.v_NO ?? ''}</td>
+                      <td>${item.v_TYPE ?? ''}</td>
+                      <td>${formatDate(item.v_DATE) ?? ''}</td>
+                      <td>${item.partY_NAME ?? ''}</td>
+                      <td>${item.iteM_TYPE ?? ''}</td>
+                      <td>${item.waybilL_NO ?? ''}</td>
+                      <td>${item.trucK_NO ?? ''}</td>
+                      <td>${item.partY_GST ?? ''}</td>
+                      <td class="action-col">
+                        <div class="action-wrap">
+                            @if(@canEdit)
+                            {
+                              <button class="act-btn edit" title="Edit Data" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
+                            }
+                              <button class="act-btn view" title="View Data" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
+                               
+                            @if(@canDelete)
+                            {
+                              <button class="act-btn delete" title="Delete Data" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
+                            } 
+                            @if(@canDocDetail)
+                            {
+                              <button class="act-btn document" title="Document Data" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                            }
+                        </div>
+                      </td>
                 </tr>
             `);
         });
@@ -231,7 +286,6 @@
         $('#prevBtn').prop('disabled', currentPage === 1);
         $('#nextBtn').prop('disabled', currentPage === totalPages);
     }
-
     // ================= NAVIGATION =================
     function goToPage(p) {
         currentPage = p;
@@ -255,23 +309,18 @@
 
     // ================= UTIL =================
     function formatDate(dateStr) {
-
         // Handle null, undefined, empty
         if (!dateStr || dateStr === "0001-01-01T00:00:00") {
             return '';
         }
-
         const d = new Date(dateStr);
-
         // Invalid date
         if (isNaN(d.getTime())) {
             return '';
         }
-
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
-
         return `${day}-${month}-${year}`;
     }
     // ================= ACTIONS =================
@@ -293,7 +342,7 @@
             if (r.isConfirmed) {
                 $.post('/OutwardEntryList/Delete', { docId : docId }, function (res) {
                     if (res.success) {
-                        toastr.success("Deleted");
+                        toastr.success("Deleted Successfully ");
                         loadAlloutward();
                     } else {
                         toastr.error("Failed");
@@ -304,31 +353,22 @@
     }
 
     function showDocumentPopup(docCode) {
-
         $.ajax({
             url: '/OutwardEntryList/DocDetailsCode',
             type: 'GET',
             dataType: 'json',
             data: { docCode: docCode },
-
             success: function (response) {
-
-                console.log(response);
-
                 if (response.success) {
                     showDocumentPopupjQuery(response.data, docCode);
                 } else {
                     toastr.error(response.message || "Failed to get document details.");
                 }
             },
-
             error: function (xhr, status, error) {
-
                 console.log(xhr.responseText);
-
                 toastr.error("Error fetching document details.");
             }
         });
     }
-
 </script>

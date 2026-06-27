@@ -52,6 +52,8 @@
             public int? PLAN_NO { get; set; }
 
             public string? PLAN_TYPE { get; set; }
+            public string? FAPROV_STATUS { get; set; }
+            public string? FAPROV_REMARKS { get; set; }
 
 
 
@@ -59,6 +61,7 @@
 
         public class ItamDetails
         {
+            public bool isPOGenerated { get; set; } = false;
             public int? ITEM_CODE { get; set; }
             public string? ItemName { get; set; }
             public int? MAKE_CODE { get; set; }
@@ -78,13 +81,18 @@
             public string? REQ_REASON { get; set; }
             public string? REMARKS { get; set; }
             public decimal? APROX_RATE { get; set; }
+            public int? PRIORITY_CODE { get; set; }
             public string? PRIORITY_TYPE { get; set; }
             public string? SCRAP_TYPE { get; set; }
+            public int? PLACE_Code { get; set; }
             public string? PLACE_USE { get; set; }
+            public int? WORK_TYPECODE { get; set; }
             public string? WORK_TYPE { get; set; }
+            public int? APROV_CODE { get; set; }
             public string? APROV_STATUS { get; set; }
             public string? APROV_REMARKS { get; set; }
             public int? STATUS { get; set; }
+            public string? MONTHLY { get; set; }
 
         }
 
@@ -92,9 +100,91 @@
         {
             public string? FILE_NAME { get; set; }
             public string? FILE_Path { get; set; }
+            public string FILE_DATA { get; set; }
 
         }
 
+        public class LastTenPurchaseRequestModel
+        {
+            public int ItemCode { get; set; }
+            public string VNo { get; set; }
+            public string VDate { get; set; }
+            public string Department { get; set; }
+            public string ItemName { get; set; }
+            public string MakeName { get; set; }
+            public string Unit { get; set; }
+            public decimal Qty { get; set; }
+            public string PlaceofUse { get; set; }
+            public string TechDesc { get; set; }
+            public string Remarks { get; set; }
+            public string Status { get; set; }
+        }
+        public class LastTenConsumptionModel
+        {
+            public int ItemCode { get; set; }
+            public string VNo { get; set; }
+            public string Date { get; set; }
+            public string ItemName { get; set; }
+            public string Make { get; set; }
+            public string Unit { get; set; }
+            public decimal Qty { get; set; }
+            public decimal Rate { get; set; }
+            public string Department { get; set; }
+            public string Machine { get; set; }
+            public string Remarks { get; set; }
+            public string Status { get; set; }
+        }
+
+        public class LastTenPurchaseHistoryModel
+        {
+            public int ItemCode { get; set; }
+            public string VNo { get; set; }
+            public string Date { get; set; }
+            public string Supplier { get; set; }
+            public string ItemName { get; set; }
+            public string Make { get; set; }
+            public string Unit { get; set; }
+            public decimal Qty { get; set; }
+            public decimal Rate { get; set; }
+            public decimal OthAmt { get; set; }
+            public decimal CGSTPer { get; set; }
+            public decimal SGSTPer { get; set; }
+            public decimal IGSTPer { get; set; }
+            public decimal PackPer { get; set; }
+            public decimal DiscPer { get; set; }
+            public decimal LDRate { get; set; }
+            public string Remarks { get; set; }
+            public string Status { get; set; }
+        }
+
+        public class ItemWisePurchaseQuotationHistoryModel
+        {
+            public int ItemCode { get; set; }
+            public string VNo { get; set; }
+            public string Date { get; set; }
+            public string Supplier { get; set; }
+            public string ItemName { get; set; }
+            public string Make { get; set; }
+            public string Unit { get; set; }
+            public string GroupNo { get; set; }
+
+            public decimal Qty { get; set; }
+            public decimal Rate { get; set; }
+            public decimal Freight { get; set; }
+
+            public decimal CGSTPer { get; set; }
+            public decimal SGSTPer { get; set; }
+            public decimal IGSTPer { get; set; }
+
+            public decimal PackPer { get; set; }
+            public decimal DiscPer { get; set; }
+
+            public decimal OthExps { get; set; }
+            public decimal LDRate { get; set; }
+
+            public string Remarks { get; set; }
+            public string Status { get; set; }
+        }
 
     }
 }

@@ -1,7 +1,32 @@
 ﻿@{
     ViewBag.Title = "Purchase Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
 }
+<style>
+    .po-generated-row,
+    .po-generated-row td,
+    .po-generated-row input,
+    .po-generated-row select,
+    .po-generated-row textarea {
+        background-color: orange !important;
+    }
+
+        .po-generated-row .select2-container--default .select2-selection--single {
+            background: orange !important;
+            border: 1px solid orange !important;
+        }
+
+        .po-generated-row .select2-selection__rendered {
+            background: orange !important;
+            color: #000 !important;
+        }
+
+        .po-generated-row .select2-selection__arrow {
+            background: orange !important;
+        }
+</style>
+
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
@@ -31,16 +56,17 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Department</label>
-                    <select class="erppage-input erppage-required" id="ddlDepartment">
+                    @* <select class="erppage-input erppage-required" id="ddlDepartment">
                         <option value="">Select Department</option>
-                    </select>
+                    </select> *@
+                    <div id="ddlDepartment" class="erppage-search-inputdropdown erppage-required"></div>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Status</label>
                     <select class="erppage-input erppage-required" id="ddlStatus">
-                        <option value="1">Open</option>
+                        @* <option value="1">Open</option>
                         <option value="2">Cancel</option>
-                        <option value="3">Close</option>
+                        <option value="3">Close</option> *@
                     </select>
                 </div>
             </div>
@@ -57,7 +83,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Req. Instruc.</label>
-                    <input type="text" class="erppage-redinput" id="txtRequiredDate">
+                    <input type="text" class="erppage-input" id="txtRequiredDate" maxlength="200">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Agst. Plan</label>
@@ -75,8 +101,8 @@
                     <label class="erppage-label">Remarks</label>
                     <input class="erppage-input" id="txtRemarks" placeholder="Enter Remarks" />
                 </div>
-                <div class="erppage-divfield erppage-col-span-2">
-                    <div class="dropdown erppagedropdown">
+                <div class="erppage-internalaction erppage-col-span-2">
+                    <div class="dropdown erppagedropdown" id="btn-copyFromDiv">
                         <button type="button" class="erppagedropdown-btn">
                             <i class="fa fa-copy"></i>
                             <span>Copy From</span>
@@ -93,42 +119,64 @@
                             </li>
                         </ul>
                     </div>
-                    <button id="btn-closeprocess" type="button" class="erppage-btn erppage-btn-copy">
-                        <i class="fa fa-lock"></i>
-                        <span>Close Process</span>
-                    </button>
+                   
                     <button id="btn-monthlyrequirement" type="button" class="erppage-btn erppage-btn-copy" onclick="LoadMonthlyRequirementData()">
                         <i class="fa fa-calendar"></i><span>Monthly Requirement</span>
                     </button>
                 </div>
             </div>
+            <div class="approval-toolbar">
+                <div class="erppage-divfield" style="background-color: #66a644; padding: 3px 5px;border-radius: 6px;color: white !important;" id="div-ApproxTotalAmt">
+                    <label class="erppage-label" style="display: contents;color: white;">
+                        Approx Total Amount: ₹<span id="lbl-totalApproxAmount">0.00</span>
+                    </label>
+                </div>
+
+                <div class="erppage-internalaction" style="margin:0px;">
+                    <button id="btn-lastTenPurchaseOrder" type="button" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-calendar"></i><span>Last 10 Purchase Order</span>
+                    </button>
+                    <button id="btn-lastTenPurchases" type="button" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-calendar"></i><span>Last 10 Purchases</span>
+                    </button>
+                    <button id="btn-lastTenPurchaseRequest" type="button" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-calendar"></i><span>Last 10 Purchase Request</span>
+                    </button>
+                    <button id="btn-lastTenConsumption" type="button" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-calendar"></i><span>Last 10 Consumption</span>
+                    </button>
+                </div>
+            </div>
+           
+          
             <fieldset class="erppagefieldset">
-                <legend class="erppagefieldset-legend">Item Details</legend>
-                <div class="excel-wrapper fixed-grid-wrapper">
+                <legend class="erppagefieldset-legend">Item Detail</legend>
+                    <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblItemDetailsPR" class="excel-table fixed-grid-table resizable-table sortable-table">
                         <colgroup>
                             <col style="display:none;">
+                            <col style="width: 228px;">
+                            <col style="width: 132px;">
+                            <col style="width: 62px;">
+                            <col style="width: 136px;">
+                            <col style="width: 116px;" id="itemCol-approx-rate">
+                            <col style="width:120px;">
+                            <col style="width: 131px;">
+                            <col style="width: 90px;">
+                            <col style="width: 118px;">
+                            <col style="width: 145px;" id="itemCol-avgConsumption">
+                            <col style="width: 130px;">
+                            <col style="width: 125px;" id="itemCol-OpenReqQty">
+                            <col style="width: 96px;">
+                            <col style="width: 125px;">
+                            <col style="width: 178px;">
                             <col style="width:180px;">
-                            <col style="width:150px;">
-                            <col style="width:100px;">
-                            <col style="width:250px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:200px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
                             <col style="width:130px;">
-                            <col style="width:130px;">
-                            <col style="width:130px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:250px;">
-                            <col style="width:180px;">
-                            <col style="width:130px;">
-                            <col style="width:130px;">
-                            <col style="width:130px;">
-                            <col style="width:200px;">
-                            <col style="width:100px;">
+                            <col style="width: 107px;">
+                            <col style="width: 104px;">
+                            <col style="width: 99px;">
+                            <col style="width:100px;" id="itemCol-status">
+                            <col style="display:none;">
                             <col style="width:100px;">
                         </colgroup>
                         <thead>
@@ -136,7 +184,7 @@
                                 <th class="hidden-col" data-column="0">
                                     Code <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="1">
+                                <th data-column="1" class="freeze-item">
                                     Item Name<span class="required">*</span> <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="2">
@@ -148,7 +196,7 @@
                                 <th data-column="4">
                                     Tech Description <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="5">
+                                <th data-column="5" id="item-approx-rate">
                                     Approx Rate <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="6">
@@ -163,13 +211,13 @@
                                 <th data-column="9">
                                     Current Stock <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="10">
+                                <th data-column="10" id="item-avgConsumption">
                                     Avg Consumption <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="11">
                                     Pending PO Qty <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="12">
+                                <th data-column="12" id="item-OpenReqQty">
                                     Open Req Qty <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="13">
@@ -196,8 +244,11 @@
                                 <th data-column="20">
                                     Remarks <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="21">
+                                <th data-column="21" id="item-status">
                                     Status <span class="sort-icon"></span>
+                                </th>
+                                <th class="hidden-col" data-column="0">
+                                    Monthly <span class="sort-icon"></span>
                                 </th>
                                 <th class="action-col">
                                     Action
@@ -217,7 +268,7 @@
                                 <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
                                 <div class="erppageattachmentsectiondropzone" id="dropZone">
                                     <div class="erppageattachmentsectioncloud">
-                                        ☁
+                                        <i class="fa fa-cloud"></i>
                                     </div>
                                     <div class="erppageattachmentsectiondragtext">
                                         Drag & Drop your files here
@@ -245,49 +296,6 @@
                     </div>
                 </div>
             </fieldset>
-
-            @* <div class="erppage-container">
-                <div class="erppage-tabs">
-                    <button class="erppage-tab active" data-tab="itemdetails">Item Details</button>
-                    <button class="erppage-tab" data-tab="attachment">Attachment</button>
-                </div>
-                <div class="erppage-tab-content active" id="itemdetails">
-                    <div class="erppage-accordion-header">Item Details</div>
-                    <div class="erppage-accordion-body">
-                        <fieldset class="erppage-fieldset">
-                        </fieldset>
-                    </div>
-                </div>
-                <div class="erppage-tab-content" id="attachment">
-                    <fieldset class="erppage-fieldset">
-                        <div class="excel-wrapper fixed-grid-wrapper">
-                            <table id="tblAttachmentPR" class="excel-table fixed-grid-table resizable-table">
-                                <colgroup>
-                                    <col style="display:none;">
-                                    <col style="width:400px;">
-                                    <col style="width:350px;">
-                                    <col style="width:120px;">
-                                </colgroup>
-                                <thead>
-                                    <tr>
-                                        <th class="hidden-col">Code</th>
-                                        <th>File Name</th>
-                                        <th>File Upload</th>
-                                        <th class="action-col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </fieldset>
-                </div>
-
-            </div>
- *@
-
-
-
-
         </fieldset>
         <div class="erppage-actions">
             <button id="btnSaves" type="button" class="erppage-btn erppage-btn-save">
@@ -388,1352 +396,644 @@
         </div>
     </div>
 </div>
+
+@* Last 10 Purchase Request Modal *@
+<div class="modal fade" id="lastTenPurchaseRequestModal" tabindex="-1" aria-labelledby="lastTenPurchaseRequestLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenPurchaseRequestLabel">
+                        Purchase Request History
+                    </h5>
+                </div>
+
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenPurchaseRequest"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:100px;">
+                            <col style="width:220px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:180px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:200px;">
+                            <col style="width:250px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Department</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Place Of Use</th>
+                                <th>Technical Desc</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 Consumption History Modal *@
+<div class="modal fade" id="lastTenConsumptionModal" tabindex="-1" aria-labelledby="lastTenConsumptionLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenConsumptionLabel">
+                        Material Consumption History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenConsumption"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:180px;">
+                            <col style="width:180px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Department</th>
+                                <th>Machine</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 Purchase History Modal *@
+<div class="modal fade" id="lastTenPurchaseHistoryModal" tabindex="-1" aria-labelledby="lastTenPurchaseHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenPurchaseHistoryLabel">
+                        Purchase History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenPurchaseHistory"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Oth Amt</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Last 10 Order History Modal *@
+<div class="modal fade" id="lastTenOrderHistoryModal" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-history"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="lastTenOrderHistoryLabel">
+                        Purchase Order History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblLastTenOrderHistory"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
+                            <col style="width:150px;">
+                            <col style="width:80px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:100px;">
+                            <col style="width:120px;">
+                            <col style="width:250px;">
+                            <col style="width:100px;">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Oth Amt</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Purchase Quotation History Modal *@
+<div class="modal fade" id="purchaseQuotationHistoryModal" tabindex="-1" aria-labelledby="purchaseQuotationHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="purchaseQuotationHistoryLabel">
+                        Purchase Quotation History
+                    </h5>
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="erppagesmodal-body">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblPurchaseQuotationHistory"
+                           class="excel-table fixed-grid-table resizable-table">
+
+                        <colgroup>
+                            <col style="width:100px;">   @* Item Code *@
+                            <col style="width:100px;">   @* V No *@
+                            <col style="width:120px;">   @* Date *@
+                            <col style="width:220px;">   @* Supplier *@
+                            <col style="width:220px;">   @* Item Name *@
+                            <col style="width:150px;">   @* Make *@
+                            <col style="width:100px;">   @* Unit *@
+                            <col style="width:100px;">   @* Group No *@
+                            <col style="width:100px;">   @* Qty *@
+                            <col style="width:100px;">   @* Rate *@
+                            <col style="width:100px;">   @* Freight *@
+                            <col style="width:100px;">   @* CGST *@
+                            <col style="width:100px;">   @* SGST *@
+                            <col style="width:100px;">   @* IGST *@
+                            <col style="width:100px;">   @* Pack *@
+                            <col style="width:100px;">   @* Disc *@
+                            <col style="width:120px;">   @* Oth Exps *@
+                            <col style="width:120px;">   @* LD Rate *@
+                            <col style="width:250px;">   @* Remarks *@
+                            <col style="width:100px;">   @* Status *@
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>V No</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Group No</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Freight</th>
+                                <th>CGST %</th>
+                                <th>SGST %</th>
+                                <th>IGST %</th>
+                                <th>Pack %</th>
+                                <th>Disc %</th>
+                                <th>Oth Exps</th>
+                                <th>LD Rate</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* Image Preview Modal *@
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog erppagesmodal small-modal">
+
+        <div class="modal-content erppagesmodal-content">
+
+            <div class="erppagesmodal-header">
+
+                <div class="erppagesmodal-header-left">
+
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <h5 class="erppagesmodal-title">
+                        Attachment Preview
+                    </h5>
+
+                </div>
+
+                <button type="button"
+                        class="erppagesmodal-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+            <div class="erppagesmodal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     style="
+            width:100%;
+            height:75vh;
+            object-fit:contain;
+            display:none;" />
+
+                <iframe id="previewPdf"
+                        style="
+                width:100%;
+                height:75vh;
+                border:none;
+                display:none;">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script>
-     const $tbody = $('#tblItemDetailsPR tbody');
-     const $attachmentTbody = $('#tblAttachmentPR tbody');
-     const statusOptions ={ 1: "Pending", 2: "Approved", 3: "Rejected" };
-     const Approvstatus = ["Approved", "Hold","Reject"];
-     const priorityOptions = ["Low", "Medium", "High"];
-     const scrapOptions = ["Yes" , "No"];
-     const workOptions = ["Maintenance", "Project", "Operation"];
-     const urlParams = new URLSearchParams(location.search);
-     const rowId = urlParams.get('id');
-     const mode = urlParams.get('mode');
-     const isReadOnly = urlParams.get('readOnly') === 'true';
-     const rowDataArray = [];
-     let ItemMap = {};
-     let MakeMap = {};
-     let PlaceUseMap = {};
-
-      $(document).ready(async function () {
-
-         if (!rowId) {
-             GetVNo();
-             document.getElementById('DtDocDate').valueAsDate = new Date();
-             document.getElementById("ddlStatus").disabled = true;
-         }
-
-         LoadDropDown().then(() => {
-         if (rowId) {
-             return LoadFormByID(rowId).then(() => {
-             });
-         }
-     });
-
-         addAttachmentRow({ index: 0 });
-
-         if (mode === "view") {
-         setFormReadOnly();
-            $('#PurchaseRequestForm').after(
-           '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
-         );
-     }
-
-         $('#ddlDepartment').on('change', function () {
-         const selectedValue = this.value;
-         const docDate = $('#DtDocDate').val();
-         if (!docDate) {
-             toastr.warning('Please select a valid Doc Date before proceeding.');
-             $("#DtDocDate").focus();
-             return;
-         }
-             fetchDDlItems(selectedValue);
-         });
-
-         $(document).on('change', 'select.ddlItem', function () {
-         const selectedId = $(this).val();
-         const $row = $(this).closest('tr');
-               fetchPendingQty(selectedId, $row)
-             .then(() => {
-                return fetchTotal_Qty(selectedId, $row);
-             })
-             .then(() => {
-                  return fetchTECH_DESC(selectedId, $row);
-             })
-             .then(() => {
-               return fetchCurrentStock(selectedId, $row);
-             })
-             .then(() => {
-               return fetchAvgConsumption(selectedId, $row);
-             })
-
-             .then(() => {
-                return FetchDDlMake(selectedId, $row);
-             })
-             .then(() => {
-                 return fetchUnit(selectedId, $row);
-             })
-             .catch((err) => {
-                 console.error('Error in fetch chain:', err);
-             });
-     });
-
-         $("#btnSaves").click(function (e) {
-         e.preventDefault();
-         const DOC_ID = $.trim($('#TxtCode').val());
-         const V_NO = parseFloat($.trim($('#NumDocNo').val())) || 0;
-         const V_DATE = formatDate($("#DtDocDate").val());
-         const DEPT_CODE = parseInt($('#ddlDepartment').val()) || 0;
-         const TARGET_DATE = formatDate($("#DtRequiredDate").val());
-         const REASON = $.trim($('#txtRequiredDate').val());
-         const PLACE_CODE = parseInt($('#ddlPlace').val()) || 0;
-         const URGENT_REQUEST = $('#chkUrgentRequest').prop('checked') ? 1 : 0;
-         const STATUS = parseInt($('#ddlStatus').val()) || 0;
-         const OWNER_CODE = parseInt($.trim($('#ddlRequester').val())) || 0;
-         const OWNER_NAME = $.trim($('#ddlRequester option:selected').text()) || "";
-         const PLAN_NO = parseInt($.trim($('#ddlPlanComplain').val())) || 0;
-         const PLAN_TYPE = $.trim($('#ddlPlanComplain option:selected').text()) || "";
-         const REMARKS = $.trim($('#txtRemarks').val());
-         const ACTION = (!DOC_ID || DOC_ID.trim() === '') ? 'INSERT' : 'UPDATE';
-
-             if (!validateRequiredField('#ddlDepartment', 'Department')) return;
-             if (!validateRequiredField('#DtRequiredDate', 'Required Date')) return;
-             if (!validateRequiredField('#DtDocDate', ' Doc Date.')) return;
-             if (!validateRequiredField('#ddlPlace', 'Place.')) return;
-             if (!validateRequiredField('#ddlStatus', 'Status.')) return;
-             if (!validateRequiredField('#ddlRequester', 'Requester.')) return;
-            // const rowsData = collectRowsData();
-             const AttachmentsRowsData = collectPurchaseDocumentsData();
-
-           const $rows = $tbody.find('tr');
-     let hasAtLeastOneItem = false;
-
-     for (let i = 0; i < $rows.length; i++) {
-         const $row = $rows.eq(i);
-         const itemName = $row.find('.ddlItem option:selected').text().trim();
-
-         if (itemName !== '' && itemName.toLowerCase() !== 'select') {
-             hasAtLeastOneItem = true;
-
-             const isValid = validateItemRow($row, `Row ${i + 1}`);
-             if (!isValid) {
-                 // Stop at the first failed row
-                 return;
-             }
-         }
-     }
-
-     if (!hasAtLeastOneItem) {
-         toastr.warning("Please add at least one Item Detail");
-         return;
-     }
-
-     // ✅ Now it's safe to collect data from validated rows
-     const rowsData = collectRowsData();
-                  const Header = {
-                     DOC_ID,
-                     V_NO,
-                     V_DATE,
-                     DEPT_CODE,
-                     TARGET_DATE,
-                     REASON,
-                     PLACE_CODE,
-                     URGENT_REQUEST,
-                     STATUS,
-                     OWNER_CODE,
-                     OWNER_NAME,
-                     PLAN_NO,
-                     PLAN_TYPE,
-                     REMARKS,
-                     ACTION
-             };
-              const payload = {
-                 Header,
-                 itamDetails: rowsData,
-                 purchaseDocuments: AttachmentsRowsData
-             };
-             $("#btnSaves").prop("disabled", true);
-
-         $.ajax({
-             url: '/PurchaseRequest/SavedData',
-             type: 'POST',
-             contentType: 'application/json',
-             data: JSON.stringify(payload),
-             success: function (response) {
-                 if (response.success) {
-                     toastr.success("Saved successfully!");
-
-                    setTimeout(() => window.location.href = '/PurchaseRequestList/Index', 1000);
-
-                 } else {
-                     toastr.error(response.message || "Save failed.");
-                 }
-             },
-             error: function (xhr, status, error) {
-                 let errorMessage = "Something went wrong.";
-                 if (xhr.status === 400) {
-                     errorMessage = "Bad Request: " + xhr.responseText;
-                 } else if (xhr.status === 500) {
-                     errorMessage = "Server error: " + xhr.responseText;
-                 } else {
-                     errorMessage = "Unexpected error: " + xhr.statusText;
-                 }
-
-                   toastr.error("Error: ", errorMessage);
-
-             },
-             complete: function () {
-                 $("#btnSaves").prop("disabled", false);
-             }
-         });
-     });
-
-
-
-
-
-
-
-
-
-         $(document).on('click', '.btn-add-item-row, .btn-add-action', function () {
-         const $tbody = $('#tab1 tbody');
-         const rowCount = $tbody.find('tr').length;
-
-         if (rowCount > 0) {
-             const $lastRow = $tbody.find('tr:last');
-             const requiredFields = [
-                 { selector: '.ddlItem', name: 'Item' },
-                 { selector: '.required-qty', name: 'Required Quantity' },
-                 { selector: '.req-reason', name: 'Requirement Reason' },
-                 { selector: '.ddlplaceuse', name: 'Place of Use' },
-                 { selector: '.priority-type', name: 'Priority Type' },
-                 { selector: '.scrap-type', name: 'Scrap Type' },
-                 { selector: '.work-type', name: 'Work Type' }
-             ];
-
-             for (const field of requiredFields) {
-                 const $field = $lastRow.find(field.selector);
-                 const value = $field.val();
-                 if (!value || value === '0' || value.trim() === '') {
-                     toastr.warning(`Please fill "${field.name}" in the previous row.`);
-                     $field.focus();
-                     return;
-                 }
-             }
-         }
-
-         addRow();
-     });
-
-         $(document).on('click', '.btn-delete-action', function () {
-           $(this).closest('tr').remove();
-         });
-
-         $(document).on('click', '.btn-delete-Attaction', function () {
-           $(this).closest('tr').remove();
-         });
-
-         $(document).on('change', 'input[type="file"]', function (event) {
-             const fileInput = event.target;
-             const file = fileInput.files[0];
-
-             if (file) {
-             const fileName = file.name;
-             const rowId = $(fileInput).closest('tr').find('td').eq(0).attr('id');
-             const index = rowId.split('_')[1];
-
-                 $(`#fileName_${index}`).val(fileName);
-             }
-         });
-
-         $(document).on('click', '.btn-add-attachment-row', function () {
-         const $tbody = $('#tblAttachmentPR tbody');
-         const rowCount = $tbody.find('tr').length;
-
-         if (rowCount > 0) {
-             const $lastRow = $tbody.find('tr').last();
-             const $lastFileNameInput = $lastRow.find('input[type="text"]');
-             const lastFileName = $lastFileNameInput.val()?.trim();
-
-             if (lastFileName) {
-                 const index = rowCount;
-                 addAttachmentRow({ index });
-             } else {
-                    toastr.warning('Please Select File Name in the last row before adding a new one.');
-                 $lastFileNameInput.focus();
-             }
-         } else {
-
-             addAttachmentRow({ index: 0 });
-         }
-     });
-
-
-         ////  sorting data in item details table
-
-         $('#selectAllPR').on('change', function () {
-         const isChecked = $(this).is(':checked');
-         $('#tblpurchasequotationmodal tbody input[type="checkbox"]').prop('checked', isChecked);
-     });
-
-         $('#btnSort').on('click', function () {
-         const selectedValue = $('#ddlSortBy').val();
-         const isDescending = $('#chkDesc').is(':checked');
-         const columnClassMap = {
-             'ApproxRate': 'approx-rate',
-             'ItemName': 'ddlItem',
-             'Qty': 'user-qty'
-         };
-         const className = columnClassMap[selectedValue];
-         if (!className) {
-             alert('Please select a valid column to sort by.');
-             return;
-         }
-          const $rows = $tbody.find('tr');
-         const sortedRows = $rows.get().sort(function (a, b) {
-             const aVal = getCellValue($(a), className);
-             const bVal = getCellValue($(b), className);
-             const isNumeric = !isNaN(parseFloat(aVal)) && !isNaN(parseFloat(bVal));
-             if (isNumeric) {
-                 return isDescending
-                     ? parseFloat(bVal) - parseFloat(aVal)
-                     : parseFloat(aVal) - parseFloat(bVal);
-             } else {
-                 return isDescending
-                     ? bVal.localeCompare(aVal)
-                     : aVal.localeCompare(bVal);
-             }
-         });
-         $tbody.empty().append(sortedRows);
-     });
-
-         $(document).on('change', '#tblpurchasequotationmodal tbody input[type="checkbox"]', function () {
-         const totalCheckboxes = $('#tblpurchasequotationmodal tbody input[type="checkbox"]').length;
-         const checkedCheckboxes = $('#tblpurchasequotationmodal tbody input[type="checkbox"]:checked').length;
-
-         $('#selectAllPR').prop('checked', totalCheckboxes === checkedCheckboxes);
-     });
-
-         /////// end
-
-
-             //////////// Searching Data using dropdown Dropdown in purchase Quatation Table
-         let selectedColumn = parseInt($('#columnSelect').val());
-         $('#searchLabel').html(`Search in: <strong>${$('#columnSelect option:selected').text()}</strong>`);
-
-         $('#columnSelect').on('change', function () {
-                 selectedColumn = parseInt($(this).val());
-                 $('#searchLabel').html(`Search in: <strong>${$(this).find('option:selected').text()}</strong>`);
-                 $('#searchBoxPR').trigger('keyup');
-             });
-
-         $('#searchBoxPR').on('keyup', function () {
-                 const searchTerm = $(this).val().toLowerCase();
-                 $('#tblpurchasequotationmodal tbody tr').each(function () {
-                     const cell = $(this).find('td').eq(selectedColumn);
-                     const text = cell.text().toLowerCase();
-                     $(this).toggle(text.includes(searchTerm));
-                 });
-             });
-         //end
-
-     });
-
-     function getCellValue($row, className) {
-             const $cell = $row.find('.' + className);
-             if ($cell.is('select')) {
-                 return $cell.find('option:selected').text().trim();
-             }
-
-             return $cell.val()?.trim() || $cell.text().trim();
-     }
-
-     function setFormReadOnly() {
-         const form = $('#PurchaseRequestForm');
-         form.find(':input').prop('disabled', true);
-         form.find('textarea').css('background-color', '#f0f0f0');
-         form.find('table tbody tr').css('background-color', '#f9f9f9');
-         $('.btn-add-row-last').hide();
-     }
-
-     async function GetVNo() {
-         try
-         {
-         const res = await fetch('/PurchaseRequest/GetVNo');
-             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-             const data = await res.json();
-
-         if (!data.v_NO) throw new Error('Response missing v_NO');
-           $('#NumDocNo').val(data.v_NO);
-         }
-         catch (e)
-         {
-            toastr.warning('Error loading Document Number: ' + e.message);
-         }
-         }
-
-    async function LoadFormByID(id) {
-       try {
-         const res = await $.ajax({
-           url: '/PurchaseRequestList/GetDataByCode',
-           method: 'GET',
-           data: { code: id }
-         });
-
-         if (!res.success) {
-           toastr.error(res.message || "Failed to load data.");
-           return;
-         }
-
-         const header = res.data.header;
-         const details = res.data.itamDetails;
-         const attachments = res.data.purchaseDocuments;
-
-
-         $('#TxtCode').val(header.doC_ID || '');
-         $('#NumDocNo').val(header.v_NO || '');
-         $('#DtDocDate').val(formatDate(header.v_DATE));
-         $('#ddlDepartment').val(header.depT_CODE || '');
-         $('#DtRequiredDate').val(formatDate(header.targeT_DATE));
-         $('#txtRequiredDate').val(header.reason || '');
-         $('#ddlPlace').val(header.placE_CODE || '');
-         $('#chkUrgentRequest').prop('checked', header.urgenT_REQUEST === 1);
-         $('#ddlStatus').val(header.status || '');
-         $('#ddlRequester').val(header.owneR_CODE || '');
-         $('#ddlPlanComplain').val(header.plaN_NO || '');
-         $('#txtRemarks').val(header.remarks || '');
-
-         const [placeUseData] = await Promise.all([
-           fetch('/PurchaseRequest/DDLPlaceUse').then(r => r.json())
-         ]);
-
-         window.PlaceUseMap = {};
-         placeUseData.forEach(item => {
-           PlaceUseMap[item.value] = item.text;
-         });
-
-         window.ItemMap = {};
-         details.forEach(item => {
-           ItemMap[item.iteM_CODE] = item.itemName;
-         });
-
-
-         const uniqueItemIds = [...new Set(details.map(d => d.iteM_CODE))];
-         const makeDataMap = {};
-         await Promise.all(uniqueItemIds.map(async itemId => {
-           const makes = await fetch(`/PurchaseRequest/DDLMake?itemId=${itemId}`).then(r => r.json());
-           makeDataMap[itemId] = makes.map(make => ({
-             value: make.CODE,
-             text: make.name
-           }));
-         }));
-
-
-         const $tbody = $('#tblItemDetailsPR tbody');
-         $tbody.empty();
-
-         for (const item of details) {
-           const rowData = {
-             iteM_CODE: item.iteM_CODE,
-             makeValue: item.makE_CODE,
-             unitName: item.uniT_NAME,
-             unitCode: item.uniT_CODE,
-             techDesc: item.tecH_DESC,
-             approxRate: item.aproX_RATE,
-             approvalStatus: item.aproV_STATUS,
-             approvalRemarks: item.aproV_REMARKS,
-             stdReq: item.stD_REQ,
-             currentStock: item.cuR_STK,
-             avgConsumption: item.avG_CONS,
-             reservedQty: item.reservE_QTY,
-             pendingPOQty: item.opeN_POQTY,
-             openReqQty: item.opeN_RQQTY,
-             userQty: item.useR_QTY,
-             requiredQty: item.reQ_QTY,
-             reason: item.reQ_REASON,
-             placeOfUse: item.placE_USE,
-             priorityType: item.prioritY_TYPE,
-             scrapType: item.scraP_TYPE,
-             workType: item.worK_TYPE,
-             remarks: item.remarks,
-             status: item.status === 2 ? "Approved" : item.status === 3 ? "Rejected" : "Pending"
-           };
-
-           addRow(rowData);
-           const $lastRow = $('#tblItemDetailsPR tbody tr:last');
-
-
-           const itemOptions = generateSelect(ItemMap, item.iteM_CODE);
-           $lastRow.find('select.ddlItem').html(itemOptions).val(item.iteM_CODE);
-
-
-           const makesForItem = makeDataMap[item.iteM_CODE] || [];
-           const makeOptions = generateSelectFromArray(makesForItem, item.makE_CODE);
-           $lastRow.find('select.ddlMake').html(makeOptions).val(item.makE_CODE);
-
-
-           const placeUseOptions = generateSelect(PlaceUseMap, item.placE_USE);
-           $lastRow.find('select.ddlplaceuse').html(placeUseOptions).val(item.placE_USE);
-
-
-           const approvalOptions = generateSelect(Approvstatus, item.aproV_STATUS);
-           $lastRow.find('select.approval-status').html(approvalOptions).val(item.aproV_STATUS);
-
-
-           const priorityOptionsHtml = generateSelect(priorityOptions, item.prioritY_TYPE);
-           $lastRow.find('select.priority-type').html(priorityOptionsHtml).val(item.prioritY_TYPE);
-
-
-           const scrapOptionsHtml = generateSelect(scrapOptions, item.scraP_TYPE);
-           $lastRow.find('select.scrap-type').html(scrapOptionsHtml).val(item.scraP_TYPE);
-
-
-           const workOptionsHtml = generateSelect(workOptions, item.worK_TYPE);
-           $lastRow.find('select.work-type').html(workOptionsHtml).val(item.worK_TYPE);
-
-
-           const statusOptionsHtml = generateSelect(statusOptions, item.status);
-           $lastRow.find('select.status').html(statusOptionsHtml).val(item.status);
-         }
-
-
-         const $attachmentBody = $('#tblAttachmentPR tbody');
-         $attachmentBody.empty();
-
-         for (const attach of attachments) {
-           const attachRowData = {
-             index: attach.index || Date.now(),
-             fileName: attach.filE_NAME || 'No file',
-             filePath: attach.filE_Path || ''
-           };
-           addAttachmentRow(attachRowData);
-         }
-
-       } catch (err) {
-         toastr.error("Something went wrong while loading the form.");
-         console.error(err);
-       }
-     }
-
-    function formatDate(dateStr) {
-             if (!dateStr) return null;
-             const date = new Date(dateStr);
-             if (isNaN(date)) return null;
-             const year = date.getFullYear();
-             const month = String(date.getMonth() + 1).padStart(2, '0');
-             const day = String(date.getDate()).padStart(2, '0');
-             return `${year}-${month}-${day}`;
-             }
-
-    function generateSelect(options, selectedValue, selectedText = null) {
-       let html = `<option value="">Select</option>`;
-
-       if (Array.isArray(options)) {
-         const unique = [...new Set(options)];
-         unique.forEach(option => {
-           const isSelected = option === selectedValue ? ' selected' : '';
-           html += `<option value="${option}"${isSelected}>${option}</option>`;
-         });
-
-         if (selectedValue && !unique.includes(selectedValue)) {
-           html += `<option value="${selectedValue}" selected>${selectedText || selectedValue}</option>`;
-         }
-
-       } else if (typeof options === 'object' && options !== null) {
-         const keys = Object.keys(options).sort((a, b) => options[a].localeCompare(options[b]));
-         keys.forEach(key => {
-           const isSelected = key === selectedValue ? ' selected' : '';
-           html += `<option value="${key}"${isSelected}>${options[key]}</option>`;
-         });
-
-         if (selectedValue && !keys.includes(selectedValue)) {
-           html += `<option value="${selectedValue}" selected>${selectedText || selectedValue}</option>`;
-         }
-       }
-
-       return html;
-     }
-
-     function cpygenerateSelect(map, selectedValue, selectedText = null) {
-       let options = '<option value="">Select</option>';
-       let found = false;
-
-       for (const key in map) {
-         if (Object.prototype.hasOwnProperty.call(map, key)) {
-           const isSelected = key === selectedValue ? ' selected' : '';
-           if (key === selectedValue) found = true;
-           options += `<option value="${key}"${isSelected}>${map[key]}</option>`;
-         }
-       }
-
-       if (selectedValue && !found) {
-         options += `<option value="${selectedValue}" selected>${selectedText || selectedValue}</option>`;
-       }
-
-       return options;
-     }
-
-     function generateSelectFromArray(itemArray, selectedValue, selectedText = null) {
-       let options = '<option value="">-- Select --</option>';
-       const uniqueMap = {};
-
-       itemArray.forEach(item => {
-         if (item && item.value != null && !(item.value in uniqueMap)) {
-           uniqueMap[item.value] = item.text;
-         }
-       });
-
-       for (const val in uniqueMap) {
-         if (Object.prototype.hasOwnProperty.call(uniqueMap, val)) {
-           const isSelected = val === selectedValue ? ' selected' : '';
-           options += `<option value="${val}"${isSelected}>${uniqueMap[val]}</option>`;
-         }
-       }
-
-       if (selectedValue && !(selectedValue in uniqueMap)) {
-         options += `<option value="${selectedValue}" selected>${selectedText || selectedValue}</option>`;
-       }
-
-       return options;
-     }
-
-     function addRow(data = {}) {
-                const row = `
-                 <tr class="no-border-input">
-                     <td style="display:none;">${data.code || ''}</td>
-                     <td><select class="form-control ddlItem" style="width:300px" >${generateSelect(ItemMap, data.value)}</select></td>
-                     <td><select class="form-control ddlMake" style="width:200px" >${generateSelect(MakeMap, data.makeValue)}</select></td>
-                     <td>
-                     <input type="text" class="form-control unit-name" value="${data.unitName || ''}" readonly />
-                     <input type="hidden" class="unit-code" value="${data.unitCode || ''}" />
-                     </td>
-                     <td><input type="text" class="form-control tech-desc" value="${data.techDesc || ''}"/></td>
-                     <td><input type="number" class="form-control approx-rate" value="${data.approxRate || ''}" readonly /></td>
-                     <td><select class="form-control approval-status">${generateSelect(Approvstatus, data.approvalStatus)}</select></td>
-                     <td><input type="text" class="form-control approval-remarks" value="${data.approvalRemarks || ''}"/></td>
-                     <td><input type="number" class="form-control std-req" value="${data.stdReq || ''}"/></td>
-                     <td><input type="number" class="form-control current-stock" value="${data.currentStock || ''}"/></td>
-                     <td><input type="number" class="form-control avg-consumption" value="${data.avgConsumption || ''}"/></td>
-                     <td><input type="number" class="form-control pending-po-qty" value="${data.pendingPOQty || ''}"/></td>
-                     <td><input type="number" class="form-control open-req-qty" value="${data.openReqQty || ''}"/></td>
-                     <td><input type="number" class="form-control user-qty" value="${data.userQty || ''}"/></td>
-                     <td><input type="number" class="form-control required-qty" value="${data.requiredQty || ''}"/></td>
-                     <td><input type="text" class="form-control req-reason" value="${data.reason || ''}"/></td>
-                      <td><select class="form-control ddlplaceuse" style="width:300px">${generateSelect(PlaceUseMap, data.placeOfUse)}</select></td>
-                     <td><select class="form-control priority-type">${generateSelect(priorityOptions, data.priorityType)}</select></td>
-                     <td><select class="form-control scrap-type">${generateSelect(scrapOptions, data.scrapType)}</select></td>
-                     <td><select class="form-control work-type" style="width:100px">${generateSelect(workOptions, data.workType)}</select></td>
-                     <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-                     <td><select class="form-control status" style="width:100px">${generateSelect(statusOptions, data.status)}</select></td>
-                 <td>
-                     <i class="fa fa-plus btn-add-action" title="Add Row"></i>
-
-                     <i class="fa fa-trash btn-delete-action" title="Delete Row"></i>
-                 </td>
-             </tr>
-         `;
-         $tbody.append(row);
-     }
-
-     async function fetchPlaceUse() {
-         try {
-             const response = await fetch('/PurchaseRequest/DDLPlaceUse');
-             const data = await response.json();
-             window.PlaceUseMap = {};
-             data.forEach(item => {
-                 PlaceUseMap[item.value] = item.text;
-             });
-
-             $('#tblItemDetailsPR tbody tr').each(function () {
-                 const $placeUseSelect = $(this).find('select.ddlplaceuse');
-                 const selectedValue = $placeUseSelect.val();
-                 $placeUseSelect.html(generateSelect(PlaceUseMap, selectedValue));
-             });
-         } catch (error) {
-             console.error('Failed to fetch Place Use:', error);
-             toastr.error('Error loading Place Use: ' + error.message);
-         }
-     }
-
-     async function fetchDDlItems(deptId) {
-         try {
-
-             const response = await fetch(`/PurchaseRequest/DDLItemMast?deptId=${deptId}`);
-
-             const data = await response.json();
-
-             window.ItemMap = {};
-             data.forEach(item => {
-                 ItemMap[item.value] = item.text;
-             });
-
-             $('#tblItemDetailsPR tbody tr').each(function () {
-                 const $itemSelect = $(this).find('select.ddlItem');
-                 const selectedValue = $itemSelect.val();
-                 $itemSelect.html(generateSelect(ItemMap, selectedValue));
-             });
-
-         } catch (error) {
-             console.error('Failed to fetch item list:', error);
-             toastr.error('Error loading item list: ' + error.message);
-         }
-     }
-
-     async function FetchDDlMake(selectedId, $row) {
-         try {
-
-             await Promise.all([
-                 fetchApproxRate(selectedId, $row),
-                 fetchUnit(selectedId, $row)
-             ]);
-             const response = await fetch(`/PurchaseRequest/DDLMake?itemId=${selectedId}`);
-             const makeData = await response.json();
-             const $makeDropdown = $row.find('select.ddlMake');
-             if ($makeDropdown.length === 0) {
-                 console.warn('ddlMake dropdown not found in row.');
-                 return;
-             }
-             const selectedValue = $makeDropdown.val();
-             const optionsHtml = generateSelectFromArray(makeData, selectedValue);
-             $makeDropdown.html(optionsHtml);
-         } catch (error) {
-             console.error('Failed to fetch Make Master:', error);
-         }
-     }
-
-     async function DDlDeptMast() {
-             try {
-                 const response = await fetch('/PurchaseRequest/DDLDeptMast');
-                 const data = await response.json();
-                 const ddl = $('#ddlDepartment');
-                 ddl.empty().append('<option value="">-- Select Department --</option>');
-                 data.forEach(item => {
-                     ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                 });
-             } catch (error) {
-                 console.error("Error loading Department:", error);
-                      toastr.error('Error loading Department: ' + error.message);
-             }
-         }
-
-     function collectRowsData() {
-         const rows = [];
-         let hasError = false;
-         const $allRows = $('#tblItemDetailsPR tbody tr');
-
-         function isRowEmpty($row) {
-             const itemVal = $row.find('.ddlItem').val();
-             return !itemVal || itemVal === '0' || itemVal.trim() === '';
-         }
-
-         $allRows.each(function (index) {
-             const $row = $(this);
-
-             if (isRowEmpty($row)) {
-                 return; // skip blank row
-             }
-
-             const rowLabel = `row ${index + 1}`;
-
-             if (!validateItemRow($row, rowLabel)) {
-                 hasError = true;
-                 return false; // exit .each loop
-             }
-
-             // Build and push rowData as before...
-             const $ddlItem = $row.find('.ddlItem');
-             const $ddlPlaceUse = $row.find('.ddlplaceuse');
-             const $priorityType = $row.find('.priority-type');
-             const $scrapType = $row.find('.scrap-type');
-             const $workType = $row.find('.work-type');
-             const $status = $row.find('.status');
-             const $approvalStatus = $row.find('.approval-status');
-
-             let ITEM_CODE = $row.find('td:first').text().trim();
-             if (!ITEM_CODE) {
-                 ITEM_CODE = $ddlItem.val();
-                 $row.find('td:first').text(ITEM_CODE);
-             }
-
-             const rowData = {
-                 ITEM_CODE,
-                 ITEM_TEXT: $ddlItem.find('option:selected').text().trim(),
-                 MAKE_CODE: $row.find('.ddlMake').val() || 0,
-                 MAKE_TEXT: $row.find('.ddlMake option:selected').text().trim(),
-                 UOM_CODE: parseInt($row.find('.unit-code').val()) || 0,
-                 UOM_NAME: $row.find('.unit-name').val() || "",
-                 TECH_DESC: $row.find('.tech-desc').val()?.trim() || "",
-                 APROX_RATE: parseFloat($row.find('.approx-rate').val()) || 0,
-                 APROV_STATUS: $approvalStatus.val() || "",
-                 APROV_REMARKS: $row.find('.approval-remarks').val()?.trim() || "",
-                 STD_REQ: parseFloat($row.find('.std-req').val()) || 0,
-                 CUR_STK: parseFloat($row.find('.current-stock').val()) || 0,
-                 AVG_CONS: parseFloat($row.find('.avg-consumption').val()) || 0,
-                 OPEN_POQTY: parseFloat($row.find('.pending-po-qty').val()) || 0,
-                 OPEN_RQQTY: parseFloat($row.find('.open-req-qty').val()) || 0,
-                 USER_QTY: parseFloat($row.find('.user-qty').val()) || 0,
-                 REQ_QTY: parseFloat($row.find('.required-qty').val()) || 0,
-                 REQ_REASON: $row.find('.req-reason').val()?.trim() || "",
-                 PLACE_Code: parseInt($ddlPlaceUse.val()) || 0,
-                 PLACE_USE: $ddlPlaceUse.find('option:selected').text() || "",
-                 PRIORITY_TYPE: $priorityType.val() || "",
-                 SCRAP_TYPE: $scrapType.val() === "Reu" ? "Reusable" :
-                             $scrapType.val() === "Scr" ? "Scrap" :
-                             $scrapType.val() || "",
-                 WORK_TYPE: $workType.val() || "",
-                 REMARKS: $row.find('.remarks').val()?.trim() || "",
-                 STATUS: $status.val() === "Approved" ? 2 :
-                         $status.val() === "Rejected" ? 3 : 1
-             };
-
-             rows.push(rowData);
-         });
-
-         return hasError ? [] : rows;
-     }
-
-     function validateItemRow($row, rowLabel = '') {
-         const validations = [
-             // { selector: '.ddlItem', name: 'Item' }, <-- Removed this line
-             { selector: '.required-qty', name: 'Required Quantity' },
-             { selector: '.req-reason', name: 'Requirement Reason' },
-             { selector: '.ddlplaceuse', name: 'Place of Use' },
-             { selector: '.priority-type', name: 'Priority Type' },
-             { selector: '.scrap-type', name: 'Scrap Type' },
-             { selector: '.work-type', name: 'Work Type' }
-         ];
-
-         for (const field of validations) {
-             const $field = $row.find(field.selector);
-             const value = $field.val();
-
-             if (!value || value === '0' || value.trim() === '') {
-                toastr.warning(`Please fill "${field.name}" in ${rowLabel}.`);
-                 $field.focus();
-                 return false;
-             }
-         }
-
-         return true;
-     }
-
-     function collectPurchaseDocumentsData() {
-         const documents = [];
-         let hasError = false;
-
-         $('#tblAttachmentPR tbody tr').each(function () {
-             const $row = $(this);
-             const fileName = $row.find('input[type="text"]').val()?.trim() || "";
-             const fileInput = $row.find('input[type="file"]')[0];
-             const fileSelected = fileInput?.files[0];
-
-             if (!fileSelected && !fileName) {
-                 hasError = true;
-             }
-             const documentData = {
-                 FILE_NAME: fileName,
-                 FILE_Path: fileSelected ? fileSelected.name : null
-             };
-             documents.push(documentData);
-         });
-
-         return hasError ? [] : documents;
-     }
-
-     async function LoadDropDown() {
-             try {
-                 await Promise.all([
-                         DDlDeptMast(),
-                         DDlPlaceMast(),
-                         DDlRequester(),
-                         DDLComplainNo(),
-                         fetchPlaceUse(),
-                      await fetchDDlItems(0)
-                 ]);
-
-                 addRow()
-             } catch (error) {
-                 console.error("Error loading dropdowns:", error);
-             }
-         }
-
-     function fetchApproxRate(itemCode, $row) {
-             return $.ajax({
-                 url: '/PurchaseRequest/GetApporxiateRate',
-                 type: 'GET',
-                 data: { Itemcode: itemCode },
-                 success: function (response) {
-
-                      console.log("fetchApproxRate" , response);
-
-                              const rate = response?.rate  ;
-
-
-                     if (rate !== undefined) {
-                         $row.find('input.approx-rate').val(rate);
-                     }
-                 },
-                 error: function (xhr, status, error) {
-                     console.error("Error fetching rate:", error);
-                 }
-             });
-         }
-
-     function fetchPendingQty(itemCode, $row) {
-            return $.ajax({
-                url: '/PurchaseRequest/GetPendingQty',
-                type: 'GET',
-                data: { Itemcode: itemCode },
-                success: function (response) {
-
-                    console.log("fetchPendingQty" , response);
-
-                   const qty = response?.pendingQty;
-
-                    if (qty !== undefined) {
-                        $row.find('input.pending-po-qty').val(qty);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error fetching pending qty:", error);
-                }
-            });
-        }
-
-     function fetchTotal_Qty(itemCode, $row) {
-               return $.ajax({
-                 url: '/PurchaseRequest/GetTotal_Qty',
-                 type: 'GET',
-                   data: { Itemcode: itemCode },
-                   success: function (response) {
-
-                          console.log("fetchTotal_Qty" , response);
-
-
-                        const qty = response?.total_Qty;
-
-                       if (qty !== undefined) {
-                              $row.find('input.open-req-qty').val(qty);
-                       }
-                   },
-                   error: function (xhr, status, error) {
-                       console.error("Error fetching pending qty:", error);
-                   }
-               });
-           }
-
-     function fetchCurrentStock(itemCode, $row) {
-                  return $.ajax({
-                       url: '/PurchaseRequest/GetCurrentStock',
-                    type: 'GET',
-                      data: { Itemcode: itemCode },
-                      success: function (response) {
-                             console.log("fetchCurrentStock" , response);
-                              const qty = response?.currentStocklist;
-                          if (qty !== undefined) {
-                                    $row.find('input.current-stock').val(qty);
-                          }
-                      },
-                      error: function (xhr, status, error) {
-                          console.error("Error fetching pending qty:", error);
-                      }
-                  });
-              }
-
-     function fetchAvgConsumption(itemCode, $row) {
-             var docDate = document.getElementById("DtDocDate").value;
-
-                     return $.ajax({
-                            url: '/PurchaseRequest/Getavgconsumption',
-                         type: 'GET',
-                         data: { Itemcode: itemCode,
-                                         Vdate :docDate },
-                         success: function (response) {
-                               console.log("fetchAvgConsumption" , response);
-                             const qty = response?.avgConsumption;
-                             if (qty !== undefined) {
-                             $row.find('input.avg-consumption').val(qty);
-                             }
-                         },
-                         error: function (xhr, status, error) {
-                             console.error("Error fetching pending qty:", error);
-                         }
-                     });
-                 }
-
-     function fetchTECH_DESC(itemCode, $row) {
-                  return $.ajax({
-                       url: '/PurchaseRequest/GetTECH_DESC',
-                    type: 'GET',
-                      data: { Itemcode: itemCode },
-                      success: function (response) {
-                           console.log("fetchTECH_DESC" , response);
-                         const tecH_DESC = response?.tecH_DESC;
-                            if (tecH_DESC !== undefined) {
-                             $row.find('input.tech-desc').val(tecH_DESC);
-                         }
-                      },
-                      error: function (xhr, status, error) {
-                             console.error("Error fetching pending tecH_DESC:", error);
-                      }
-                  });
-              }
-
-     function fetchUnit(itemCode, $row) {
-             return $.ajax({
-                 url: '/PurchaseRequest/GetUnit',
-                 type: 'GET',
-                 data: { Itemcode: itemCode },
-                 success: function (response) {
-
-                     if (response.length > 0) {
-                         const unitCode = response[0].code || '';
-                         const unitName = response[0].name || '';
-                         $row.find('input.unit-name').val(unitName);
-                         $row.find('input.unit-code').val(unitCode);
-                     } else {
-                         $row.find('input.unit-name').val('');
-                         $row.find('input.unit-code').val('');
-                     }
-                 },
-                 error: function (xhr, status, error) {
-                     console.error("Error fetching unit:", error);
-                 }
-             });
-         }
-
-     async function DDlRequester() {
-         try {
-             const response = await fetch('/PurchaseRequest/DDLRequester');
-             const data = await response.json();
-             const ddl = $('#ddlRequester');
-             ddl.empty().append('<option value="">-- Select Requester --</option>');
-             data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}(${item.value})</option>`);
-             });
-                   $('#ddlRequester option').each(function () {
-                 const value = $(this).val();
-                 const text = $(this).text();
-            });
-
-         } catch (error) {
-             toastr.error('Error loading Requester: ' + error.message);
-         }
-     }
-
-     async function DDlPlaceMast() {
-             try {
-                 const response = await fetch('/PurchaseRequest/DDLplaceMast');
-                 const data = await response.json();
-                 const ddl = $('#ddlPlace');
-                 ddl.empty().append('<option value="">-- Select Place Mast --</option>');
-                 data.forEach(item => {
-                     ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                 });
-             } catch (error) {
-                 console.error("Error loading Place Mast:", error);
-                      toastr.error('Error loading Place Mast: ' + error.message);
-             }
-         }
-
-     async function DDLComplainNo() {
-         try {
-             const response = await fetch('/PurchaseRequest/DDLComplainNo');
-             const data = await response.json();
-             const ddl = $('#ddlPlanComplain');
-             ddl.empty().append('<option value="">-- Select Agst. Plan/Complain No --</option>');
-             data.forEach(item => {
-                 ddl.append(`<option value="${item.value}">${item.text} (${item.value})</option>`);
-             });
-         } catch (error) {
-             console.error("Error loading Place Mast:", error);
-             toastr.error('Error loading Place Mast: ' + error.message);
-         }
-     }
-
-     function addAttachmentRow(data = {}) {
-         const row = `
-             <tr class="no-border-input">
-                 <td id="fileNameCell_${data.index || ''}">
-                     <input type="text" class="form-control mb-1" id="fileName_${data.index || ''}" value="${data.fileName || ''}" placeholder="Enter file name"/>
-                 </td>
-                 <td id="fileInputCell_${data.index || ''}">
-                     <input type="file" class="form-control file-upload" id="fileInput_${data.index || ''}" />
-                 </td>
-                 <td id="actionCell_${data.index || ''}" class="action-col">
-                     <button class="act-btn add btn-add-attachment-row" title="Add Row" style="cursor:pointer;" id="addAttaction_${data.index || ''}"><i class="fa fa-plus"></i></button>
-                     <button class="act-btn edit btn-edit-Attaction" title="Edit Row" style="cursor:pointer;" id="editAttaction_${data.index || ''}"><i class="fa fa-edit"></i></button>
-                     <button class="act-btn delete btn-delete-Attaction" title="Delete Row" style="cursor:pointer;" id="deleteAttaction_${data.index || ''}"><i class="fa fa-trash"></i></button>
-                 </td>
-             </tr>
-         `;
-
-         $('#tblAttachmentPR tbody').append(row);
-     }
-
-     function LoadCopyForm() {
-         return $.ajax({
-             url: '/PurchaseRequestList/GetDataCopyForm',
-             method: 'GET',
-             data: {},
-             success: function (res) {
-                 if (res.success) {
-                       console.log('copyform', res);
-
-                     $('#tblpurchasequotationmodal tbody').empty();
-                     res.data.forEach(function(item) {
-                         var row = '<tr>';
-                         row += '<td><input type="checkbox" class="copyRowCheckbox" /></td>';
-                         row += '<td>' + item.v_NO + '</td>';
-                         row += '<td>' + item.v_TYPE + '</td>';
-                         row += '<td>' + formatDate(item.v_DATE) + '</td>';
-                         row += '<td>' + item.iteM_CODE + '</td>';
-                         row += '<td>' + item.itemName + '</td>';
-                         row += '<td>' + item.make + '</td>';
-                         row += '<td>' + item.techDesc + '</td>';
-                         row += '<td>' + item.unit + '</td>';
-                         row += '<td>' + item.qty + '</td>';
-                         row += '<td>' + item.makeCode + '</td>';
-                         row += '<td>' + item.uCode + '</td>';
-                         row += '<td>' + item.taxCode + '</td>';
-                         row += '<td style="display:none;">Action</td>';
-                         row += '</tr>';
-
-                         $('#tblpurchasequotationmodal tbody').append(row);
-                     });
-
-
-                 } else {
-                     console.error("Error from server:", res.message);
-                     toastr.error(res.message || "Failed to load data.");
-                 }
-             },
-             error: function (err) {
-                 console.error("Failed to load data", err);
-                 toastr.error("Something went wrong while loading the form.");
-             }
-         });
-     }
-
-     function getSelectedRows() {
-         var selectedRowsData = [];
-         $('#tblpurchasequotationmodal tbody tr').each(function() {
-             var checkbox = $(this).find('input[type="checkbox"]');
-
-             if (checkbox.prop('checked')) {
-                 var rowData = {
-                     vno: $(this).find('td').eq(1).text(),
-                     vtype: $(this).find('td').eq(2).text(),
-                     vdate: $(this).find('td').eq(3).text(),
-                     itemCode: $(this).find('td').eq(4).text(),
-                     itemName: $(this).find('td').eq(5).text(),
-                     make: $(this).find('td').eq(6).text(),
-                     techDesc: $(this).find('td').eq(7).text(),
-                     unit: $(this).find('td').eq(8).text(),
-                     qty: $(this).find('td').eq(9).text(),
-                     makeCode: $(this).find('td').eq(10).text(),
-                     uCode: $(this).find('td').eq(11).text(),
-                     taxCode: $(this).find('td').eq(12).text()
-                 };
-
-                 selectedRowsData.push(rowData);
-             }
-         });
-
-         if (selectedRowsData.length > 0) {
-             addRowsToMainTable(selectedRowsData);
-              toastr.success(selectedRowsData.length + " row(s) copied successfully.");
-         } else {
-             toastr.warning("No rows selected.");
-         }
-     }
-
-     function addRowsToMainTable(selectedRowsData) {
-         selectedRowsData.forEach(function(row) {
-             var data = {
-                 code: row.vno,
-                 value: row.itemCode,
-                 makeValue: row.makeCode,
-                 unitName: row.unit,
-                 techDesc: row.techDesc,
-                 approxRate: '',
-                 approvalStatus: '',
-                 approvalRemarks: '',
-                 stdReq: '',
-                 currentStock: '',
-                 avgConsumption: '',
-                 pendingPOQty: '',
-                 openReqQty: '',
-                 userQty: '',
-                 requiredQty: row.qty,
-                 reason: '',
-                 placeOfUse: '',
-                 priorityType: '',
-                 scrapType: '',
-                 workType: '',
-                 remarks: '',
-                 status: ''
-             };
-
-           CopyaddRow(data);
-         });
-     }
-
-     function CopyaddRow(data = {}) {
-
-         if ($tbody.find('tr').length === 1) {
-             const firstRowInputs = $tbody.find('tr:first input, tr:first select');
-             let isBlank = true;
-
-             firstRowInputs.each(function () {
-                 if ($(this).val().trim() !== '') {
-                     isBlank = false;
-                     return false;
-                 }
-             });
-
-             if (isBlank) {
-                 $tbody.find('tr:first').remove();
-             }
-         }
-
-         const row = `
-             <tr class="no-border-input">
-                 <td style="display:none;">${data.code || ''}</td>
-                    <td><select class="form-control ddlItem" style="width:250px;">${cpygenerateSelect(ItemMap, data.value)}</select></td>
-                    <td><select class="form-control ddlMake" style="width:100px;">${cpygenerateSelect(MakeMap, data.makeValue)}</select></td>
-                 <td>
-                     <input type="text" class="form-control unit-name" style="width:100px;" value="${data.unitName || ''}" readonly />
-                     <input type="hidden" class="unit-code" value="${data.unitCode || ''}" />
-                 </td>
-                 <td><input type="text" class="form-control tech-desc" value="${data.techDesc || ''}"/></td>
-                 <td><input type="number" class="form-control approx-rate" value="${data.approxRate || ''}" readonly /></td>
-                    <td><select class="form-control approval-status">${cpygenerateSelect(Approvstatus, data.approvalStatus)}</select></td>
-                 <td><input type="text" class="form-control approval-remarks" value="${data.approvalRemarks || ''}"/></td>
-                 <td><input type="number" class="form-control std-req" value="${data.stdReq || ''}"/></td>
-                 <td><input type="number" class="form-control current-stock" value="${data.currentStock || ''}" readonly/></td>
-                 <td><input type="number" class="form-control avg-consumption" value="${data.avgConsumption || ''}" readonly/></td>
-                 <td><input type="number" class="form-control pending-po-qty" value="${data.pendingPOQty || ''}" readonly/></td>
-                 <td><input type="number" class="form-control open-req-qty" value="${data.openReqQty || ''}" readonly/></td>
-                 <td><input type="number" class="form-control user-qty" value="${data.userQty || ''}" readonly/></td>
-                 <td><input type="number" class="form-control required-qty" value="${data.requiredQty || ''}" /></td>
-                 <td><input type="text" class="form-control req-reason" value="${data.reason || ''}"/></td>
-                    <td><select class="form-control ddlplaceuse">${cpygenerateSelect(PlaceUseMap, data.placeOfUse)}</select></td>
-                    <td><select class="form-control priority-type">${cpygenerateSelect(priorityOptions, data.priorityType)}</select></td>
-                    <td><select class="form-control scrap-type">${cpygenerateSelect(scrapOptions, data.scrapType)}</select></td>
-                    <td><select class="form-control work-type" style="width:120px;">${cpygenerateSelect(workOptions, data.workType)}</select></td>
-                 <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-                    <td><select class="form-control status" style="width:120px;">${cpygenerateSelect(statusOptions, data.status)}</select></td>
-                 <td>
-                     <i class="fa fa-plus btn-add-item-row" title="Add Row"></i>
-                     <i class="fa fa-trash btn-delete-action" title="Delete Row"></i>
-                 </td>
-             </tr>
-         `;
-         $tbody.append(row);
-     }
-
-     function LoadMonthlyRequirementData() {
-         const DEPT_CODE = parseInt($('#ddlDepartment').val()) || 0;
-
-         return $.ajax({
-                url: '/PurchaseRequestList/GetDataMonthlyRequirement',
-             method: 'GET',
-             data: { deptId: DEPT_CODE },
-             success: function (res) {
-                 if (res.success) {
-                   addRowsToMainTableMonthly(res.data);
-                 } else {
-                     console.error("Error from server:", res.message);
-                     toastr.error(res.message || "Failed to load data.");
-                 }
-             },
-             error: function (err) {
-                 console.error("Failed to load data", err);
-                 toastr.error("Something went wrong while loading the form.");
-             }
-         });
-     }
-
-     function addRowsToMainTableMonthly(selectedRowsData) {
-         selectedRowsData.forEach(function (row) {
-             const data = {
-                 code: row.iteM_CODE,
-                 value: row.itemName,
-                 makeValue: row.make,
-                 unitName: row.unit,
-                 unitCode: row.uCode,
-                 techDesc: '',
-                 approxRate: row.deptQty,
-                 approvalStatus: '',
-                 approvalRemarks: '',
-                 stdReq: '',
-                 currentStock: row.currentStock,
-                 avgConsumption: '',
-                 pendingPOQty: '',
-                 openReqQty: '',
-                 userQty: '',
-                 requiredQty: row.reserveQty,
-                 reason: '',
-                 placeOfUse: '',
-                 priorityType: '',
-                 scrapType: '',
-                 workType: '',
-                 remarks: '',
-                 status: ''
-             };
-
-             MonthlyReqRowData(data);
-         });
-     }
-
-     function MonthlyReqRowData(data = {}) {
-            const $tbody = $('#tblItemDetailsPR tbody');
-         if ($tbody.find('tr').length === 1) {
-             const firstRowInputs = $tbody.find('tr:first input, tr:first select');
-             let isBlank = true;
-
-             firstRowInputs.each(function () {
-                 if ($(this).val().trim() !== '') {
-                     isBlank = false;
-                     return false;
-                 }
-             });
-
-             if (isBlank) {
-                 $tbody.find('tr:first').remove();
-             }
-         }
-
-         const row = `
-             <tr class="no-border-input">
-                 <td style="display:none;">${data.code || ''}</td>
-                 <td><select class="form-control ddlItem" style="width:250px;">${cpygenerateSelect(ItemMap, data.value)}</select></td>
-                 <td><select class="form-control ddlMake" style="width:100px;">${cpygenerateSelect(MakeMap, data.makeValue)}</select></td>
-                 <td>
-                     <input type="text" class="form-control unit-name" style="width:100px;" value="${data.unitName || ''}" readonly />
-                     <input type="hidden" class="unit-code" value="${data.unitCode || ''}" />
-                 </td>
-                 <td><input type="text" class="form-control tech-desc" value="${data.techDesc || ''}"/></td>
-                 <td><input type="number" class="form-control approx-rate" value="${data.approxRate || ''}" readonly /></td>
-                 <td><select class="form-control approval-status">${cpygenerateSelect(Approvstatus, data.approvalStatus)}</select></td>
-                 <td><input type="text" class="form-control approval-remarks" value="${data.approvalRemarks || ''}"/></td>
-                 <td><input type="number" class="form-control std-req" value="${data.stdReq || ''}"/></td>
-                 <td><input type="number" class="form-control current-stock" value="${data.currentStock || ''}" readonly/></td>
-                 <td><input type="number" class="form-control avg-consumption" value="${data.avgConsumption || ''}" readonly/></td>
-                 <td><input type="number" class="form-control pending-po-qty" value="${data.pendingPOQty || ''}" readonly/></td>
-                 <td><input type="number" class="form-control open-req-qty" value="${data.openReqQty || ''}" readonly/></td>
-                 <td><input type="number" class="form-control user-qty" value="${data.userQty || ''}" readonly/></td>
-                 <td><input type="number" class="form-control required-qty" value="${data.requiredQty || ''}" /></td>
-                 <td><input type="text" class="form-control req-reason" value="${data.reason || ''}"/></td>
-                 <td><select class="form-control ddlplaceuse">${cpygenerateSelect(PlaceUseMap, data.placeOfUse)}</select></td>
-                 <td><select class="form-control priority-type">${cpygenerateSelect(priorityOptions, data.priorityType)}</select></td>
-                 <td><select class="form-control scrap-type">${cpygenerateSelect(scrapOptions, data.scrapType)}</select></td>
-                 <td><select class="form-control work-type" style="width:120px;">${cpygenerateSelect(workOptions, data.workType)}</select></td>
-                 <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-                 <td><select class="form-control status" style="width:120px;">${cpygenerateSelect(statusOptions, data.status)}</select></td>
-                 <td>
-                     <i class="fa fa-plus btn-add-item-row" title="Add Row"></i>
-                     <i class="fa fa-trash btn-delete-action" title="Delete Row"></i>
-                 </td>
-             </tr>
-         `;
-
-         $tbody.append(row);
-     }
-
+    window.userLevel = "@ViewBag.UserLevel";
 </script>
 
+<script src="~/js/erpjs/purchase/transaction/purchaserequest/purchaserequest.js"></script>
 
+ <script>
+    const fileInput = document.getElementById('fileInput');
+    const browseBtn = document.getElementById('browseBtn');
+    const dropZone = document.getElementById('dropZone');
+    const fileList = document.getElementById('fileList');
+    
 
+    browseBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function () {
+        renderFiles(this.files);
+    });
+
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+    });
+
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        renderFiles(e.dataTransfer.files);
+    });
+
+    function renderFiles(files) {
+
+        Array.from(files).forEach(file => {
+
+            collectFile(file);
+            const fileItem = document.createElement('div');
+            fileItem.className =
+                'erppageattachmentsectionfileitem';
+
+            fileItem.innerHTML = `
+                <div class="erppageattachmentsectionicon ${getFileColorClass(file.name)}">
+                    ${getFileType(file.name)}
+                </div>
+
+                <div class="erppageattachmentsectioncontent">
+
+                    <div class="erppageattachmentsectionfilename">
+                        ${file.name}
+                    </div>
+
+                    <div class="erppageattachmentsectionprogress">
+                        <div class="erppageattachmentsectionprogressbar"></div>
+                    </div>
+
+                </div>
+
+                <div class="erppageattachmentsectionactions">
+
+                    <button class="erppageattachmentsectionview">
+                        View
+                    </button>
+
+                    <button class="erppageattachmentsectiondelete">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+            fileItem.setAttribute('data-file-index', uploadedFiles.length - 1);
+            fileList.appendChild(fileItem);
+
+            const progressBar =
+                fileItem.querySelector(
+                    '.erppageattachmentsectionprogressbar'
+                );
+
+            let progress = 0;
+
+            const interval = setInterval(() => {
+
+                progress += 5;
+
+                progressBar.style.width =
+                    progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+
+            }, 10);
+
+            fileItem.querySelector('.erppageattachmentsectionview').addEventListener('click', () => {
+
+                const fileUrl = URL.createObjectURL(file);
+
+                
+                $('#previewImage').hide();
+                $('#previewPdf').hide();
+
+                if (file.type.startsWith('image/')) {
+
+                    $('#previewImage')
+                        .attr('src', fileUrl)
+                        .show();
+                }
+                else if (file.type === 'application/pdf') {
+
+                    $('#previewPdf')
+                        .attr('src', fileUrl)
+                        .show();
+                }
+                else {
+
+                    window.open(fileUrl, '_blank');
+                    return;
+                }
+
+                const modal = new bootstrap.Modal(
+                    document.getElementById('imagePreviewModal')
+                );
+
+                modal.show();
+            });
+
+            // reset input here too (extra safety)
+            if (fileInput) {
+                fileInput.value = "";
+            }
+        });
+    }
+
+    function getFileType(fileName) {
+        return fileName.split('.').pop().toUpperCase();
+    }
+
+    function getFileColorClass(fileName) {
+
+        const ext = fileName.split('.').pop().toLowerCase();
+
+        switch (ext) {
+
+            case 'pdf':
+                return 'erppageattachmentsectionpdf';
+
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+            case 'gif':
+            case 'svg':
+            case 'webp':
+                return 'erppageattachmentsectionimage';
+
+            case 'doc':
+            case 'docx':
+                return 'erppageattachmentsectionword';
+
+            case 'xls':
+            case 'xlsx':
+            case 'csv':
+                return 'erppageattachmentsectionexcel';
+
+            case 'ppt':
+            case 'pptx':
+                return 'erppageattachmentsectionppt';
+
+            case 'txt':
+                return 'erppageattachmentsectiontxt';
+
+            case 'zip':
+            case 'rar':
+            case '7z':
+                return 'erppageattachmentsectionzip';
+
+            default:
+                return 'erppageattachmentsectiondefault';
+        }
+    }
+</script> 
+
+       

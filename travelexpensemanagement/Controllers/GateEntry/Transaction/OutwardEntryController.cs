@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Text.Json;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
@@ -38,11 +39,18 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
         public IActionResult Index()
         {
-            TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
-            TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
-            TempData["CompCode"] = _globalVariableService.GetGlobalVariables().PubCompCode;
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database; 
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
             return View("~/Views/GateEntry/Transaction/OutwardEntry/Index.cshtml");
         }
+
         public JsonResult GetVNo(string Vtype , string Tablename)
         {
           string   newV_NO = _globalValidationdate.GetVNo(Vtype, Tablename);
@@ -53,7 +61,18 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateOutward') order by Name ";
+                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('GateOutward') order by Name desc";
+                var VtypeList = _dropdownService.GetDropdownList(query);
+                return Json(VtypeList);
+            }
+
+        }
+        public JsonResult DDLstate()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = " select * from STATE_MAST where ACTIVE = 1  order by Name desc";
                 var VtypeList = _dropdownService.GetDropdownList(query);
                 return Json(VtypeList);
             }
@@ -97,7 +116,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "SELECT  a.CODE, a.NAME AS Shortname, b.mgroup_type FROM  ITEM_MAST a\r\nLEFT JOIN  ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE\r\nWHERE  a.Active = 1  AND a.comp_code = 1 group by a.NAME ,a.code,b.mgroup_type order by a.NAME asc";
+                string query = "SELECT  a.CODE, a.NAME AS Shortname FROM  ITEM_MAST a  LEFT JOIN  ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE  WHERE   a.comp_code = "+ getdata.PubCompCode  +" group by a.NAME ,a.code,b.mgroup_type order by a.NAME asc";
                 var ItemList = _dropdownService.GetDropdownList(query);
                 return Json(ItemList);
             }
@@ -120,6 +139,49 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 var UnitList = _dropdownService.GetDropdownList(query);
                 return Json(UnitList);
             }
+        }
+        public JsonResult GetPendingrowHeaderData(String REF_TYPE , int REF_NO, string ItemType)
+        {
+
+            var getdata = _globalVariableService.GetGlobalVariables();
+            var dataList = new List<object>();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "PendingOrderHeaderData");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@REF_TYPE", REF_TYPE);
+                    cmd.Parameters.AddWithValue("@REF_NO", REF_NO);
+                    cmd.Parameters.AddWithValue("@ITEM_TYPE", ItemType);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            dataList.Add(new
+                            {
+                                VEHICLE_NO = reader["VEHICLE_NO"]?.ToString(),
+                                EWAYBILL_NO = reader["EWAYBILL_NO"]?.ToString(),
+                                BILL_ADD1 = reader["BILL_ADD1"]?.ToString(),
+                                BILL_ADD2 = reader["BILL_ADD2"]?.ToString(),
+                                BILL_ADD3 = reader["BILL_ADD3"]?.ToString(),
+                                BILL_CITY = reader["BILL_CITY"]?.ToString(),
+                                BILL_GST = reader["BILL_GST"]?.ToString(),
+                                BILL_PINCODE = reader["BILL_PINCODE"]?.ToString(),
+                                STATE_CODE = reader["STATE_CODE"]?.ToString(),
+                                BILL_ADDRESSID = reader["BILL_ADDRESSID"]?.ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return Json(dataList);
         }
         public JsonResult DDLcity_mast()
         {
@@ -161,6 +223,15 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             {
                 return Json(new  { success = false, message = ex.Message  });
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("Gate1", vdate, vtype, vno);
+            return Ok(result);
         }
 
     }

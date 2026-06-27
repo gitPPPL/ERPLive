@@ -399,22 +399,22 @@
 			   SIDEBAR TOGGLE
 			========================================= */
 
-			const sidebarBtn = document.getElementById('ERPPageLayoutToggleSidebar');
-			const sidebar = document.getElementById('ERPPageLayoutSidebar');
-			const overlay = document.getElementById('ERPPageLayoutOverlay');
+			// const sidebarBtn = document.getElementById('ERPPageLayoutToggleSidebar');
+			// const sidebar = document.getElementById('ERPPageLayoutSidebar');
+			// const overlay = document.getElementById('ERPPageLayoutOverlay');
 
-			if (sidebarBtn && sidebar && overlay) {
+			// if (sidebarBtn && sidebar && overlay) {
 
-				sidebarBtn.addEventListener('click', function () {
-					sidebar.classList.toggle('active');
-					overlay.classList.toggle('active');
-				});
+			// 	sidebarBtn.addEventListener('click', function () {
+			// 		sidebar.classList.toggle('active');
+			// 		overlay.classList.toggle('active');
+			// 	});
 
-				overlay.addEventListener('click', function () {
-					sidebar.classList.remove('active');
-					overlay.classList.remove('active');
-				});
-			}
+			// 	overlay.addEventListener('click', function () {
+			// 		sidebar.classList.remove('active');
+			// 		overlay.classList.remove('active');
+			// 	});
+			// }
 
 			/* =========================================
 			   USER DROPDOWN
@@ -454,6 +454,38 @@
 					}
 				});
 			}
+
+		/* =========================================
+		   SIDEBAR TOGGLE
+		========================================= */
+
+		const sidebarBtn = document.getElementById('ERPPageLayoutToggleSidebar');
+		const sidebar = document.getElementById('ERPPageLayoutSidebar');
+		const overlay = document.getElementById('ERPPageLayoutOverlay');
+		const main = document.querySelector('.ERPPageLayout-main');
+
+		if (sidebarBtn && sidebar) {
+
+			sidebarBtn.addEventListener('click', function () {
+
+				sidebar.classList.toggle('collapsed');
+
+				if (main) {
+					main.classList.toggle('expanded');
+				}
+
+			});
+
+			if (overlay) {
+				overlay.addEventListener('click', function () {
+					sidebar.classList.remove('collapsed');
+
+					if (main) {
+						main.classList.remove('expanded');
+					}
+				});
+			}
+		}
 
 			/* =========================================
 			   LOTTIE

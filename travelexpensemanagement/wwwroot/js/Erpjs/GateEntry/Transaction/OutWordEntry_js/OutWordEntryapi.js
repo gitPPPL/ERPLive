@@ -1,4 +1,5 @@
 ﻿
+
 async function loadItemMaster() {
     const res = await fetch("/OutwardEntry/DDLItemMaster");
     const data = await res.json();
@@ -28,18 +29,32 @@ async function DDLVtype() {
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 }
 
+async function DDLstate() {
+    const res = await fetch("/OutwardEntry/DDLstate");
+    const list = await res.json();
+    const ddl = $("#TxtState");
+    ddl.empty().append('<option value="">-- Select Party State--</option>');
+    list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
+}
+
+
 async function DDLParty() {
     const res = await fetch("/OutwardEntry/DDlParty");
     const list = await res.json();
     const ddl = $("#ddlPartyName");
 
-    ddl.empty().append('<option value="">-- Select Party --</option>');
+    ddl.empty().append('<option value="">Select Party Name</option>');
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 
     ddl.select2({
-        placeholder: "-- Select Party --",
-        allowClear: true
+        placeholder: "-- Select Party Name --",
+        allowClear: true,
+        width: '100%'
     });
+
+
+
+
 }
 
 async function DDLcity_mast() {
@@ -64,7 +79,8 @@ async function loadPartyAddresses(partyId) {
     const res = await fetch(`/OutwardEntry/fetchPartyAdd?PartyId=${encodeURIComponent(partyId)}`);
     const list = await res.json();
     const ddl = $("#ddlPartyNameByAddress");
-    ddl.empty().append('');
+    ddl.empty().append('<option value="">Select Party Address</option>');
+
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 }
 
@@ -77,6 +93,7 @@ async function fetchPartyDetails(partyId) {
     if (details.length) {
         const d = details[0];
 
+        $("#ddlPartyNameByAddress").val(d.addresS_ID || "");
         $("#TxtAdd1PD").val(d.add1 || "");
         $("#TxtAdd2PD").val(d.add2 || "");
         $("#TxtAdd3PD").val(d.add3 || "");
@@ -100,6 +117,8 @@ async function GetDataByPartyandAddressidCodeAsync(partyId, addressId) {
     if (details.length) {
         const d = details[0];
 
+        console.log("GetDataByPartyandAddressidCodeAsync", d);
+          
         $("#TxtAdd1PD").val(d.add1 || "");
         $("#TxtAdd2PD").val(d.add2 || "");
         $("#TxtAdd3PD").val(d.add3 || "");
@@ -129,29 +148,43 @@ function LoadFormByID(rowId, vtype) {
             const header = result.data.header;
             const details = result.data.details;
 
-            $('#TxtCode').val(header.doC_ID || '');
-            $('#ddlDocType').val(header.v_TYPE || '');
-            $('#NumDocNo').val(header.v_NO || '');
-            $('#DtDocDate').val(formatDate(header.v_DATE));
-            DDLParty().then(() => {
-                $('#ddlPartyName')
-                    .val(header.partY_CODE || '')
-                    .trigger('change');
-            });
-            $('#TxtVehicleNo').val(header.trucK_NO || '');
-            $('#TxtWayBillNo').val(header.waybilL_NO || '');
-            $('#TxtRemarks').val(header.remarks || '');
-            $('#TxtAdd1PD').val(header.add1 || '');
-            $('#TxtAdd2PD').val(header.add2 || '');
-            $('#TxtAdd3PD').val(header.add3 || '');
+            console.log("header", header);
+            console.log("Data", details);
 
-            $('#ddlCity').val(header.partY_CITY || '');
-            $('#TxtGSTNo').val(header.partY_GST || '');
-            $('#NumPincode').val(header.partY_PINCODE || '');
-            $('#ddlType').val(header.iteM_TYPE || '');
-            $('#DtTxtDocDate').val(header.v_TIME || '');
-            loadPartyAddresses(header.partY_CODE).then(() => {
-                $('#ddlPartyNameByAddress').val(header.partY_ADDRESSID || '');
+            if (header.v_TYPE === "OURT") {
+                document.getElementById("Conditionnaldesignid").style.display = "contents";
+            } else {
+                document.getElementById("Conditionnaldesignid").style.display = "none";
+            }
+      
+            DDLParty().then(() => {
+                $('#ddlPartyName').val(header.partY_CODE || '').trigger('change');
+            });
+
+            document.getElementById("ddlPartyName").disabled = true;
+
+
+            $('#TxtCode').val(header.doC_ID || '');
+                $('#ddlDocType').val(header.v_TYPE || '');
+                $('#NumDocNo').val(header.v_NO || '');
+                $('#DtDocDate').val(formatDate(header.v_DATE));
+                $('#DtExpectedDateReturn').val(formatDate(header.returN_DATE));
+                $('#TxtState').val(header.statE_CODE || '');
+                $('#TxtVehicleNo').val(header.trucK_NO || '');
+                $('#txtResponsiblePerson').val(header.responsiblE_PERSONB || '');
+                $('#TxtWayBillNo').val(header.waybilL_NO || '');
+                $('#TxtRemarks').val(header.remarks || '');
+                $('#TxtAdd1PD').val(header.add1 || '');
+                $('#TxtAdd2PD').val(header.add2 || '');
+                $('#TxtAdd3PD').val(header.add3 || '');
+
+                $('#ddlCity').val(header.partY_CITY || '');
+                $('#TxtGSTNo').val(header.partY_GST || '');
+                $('#NumPincode').val(header.partY_PINCODE || '');
+                $('#ddlType').val(header.iteM_TYPE || '');
+                $('#DtTxtDocDate').val(header.v_TIME || '');
+                loadPartyAddresses(header.partY_CODE).then(() => {
+                    $('#ddlPartyNameByAddress').val(header.partY_ADDRESSID || '');
             });
 
             const $tbody = $("#tblOutwardEntry tbody");
@@ -180,17 +213,27 @@ function LoadFormByID(rowId, vtype) {
     });
 }
 
-async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
+async function FetchPendindorderno(PartyCode, Type, v_date) {
     try {
-        const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}&BILL_NO=${BILL_NO}`);
+        const res = await fetch(`/OutwardEntryList/GetDataByPendingorder?PartyCode=${PartyCode}&Type=${Type}&v_date=${v_date}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const result = await res.json();
+
         if (result.success) {
+
             const details = result.data || [];
+            console.log("details", details);
+            if (details.length === 0) {
+                showToast("No pending orders found.", { type: "info" });
+                return; // Stop further execution
+            }
+
+
             pendingData = details.map(detail => ({
                 Vouchertype: detail.v_type,
                 VoucherNo: detail.v_no,
-                VoucherDate: formatDate(detail.v_DATE),
+                VoucherDate: detail.v_DATE,
                 ItemCode: detail.item_code,
                 ItemName: detail.item_name,
                 Qty: detail.qty,
@@ -202,15 +245,166 @@ async function FetchPendindorderno(PartyCode, Type, v_date, BILL_NO) {
                 SRno: detail.srno,
                 selected: false
             }));
+
             currentPage = 1;
             renderPendingTable();
+
+            const modalElement = document.getElementById('pendingorders');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+ 
+
         } else {
             showToast(`Failed to load pending orders: ${result.message}`, { type: "error" });
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         showToast(`Failed to load pending orders`, { type: "error" });
     }
 }
+function TransitReport() {
+
+    if (!rowId) {
+        showToast(`Please save the data before printing the report.`, { type: "info" });
+        return;
+    }
+
+    var reportName = "gatepass1";
+        // Get input values
+    var v_no = $('#NumDocNo').val();
+    var v_type = $('#ddlDocType').val();
+
+    // Ensure global variables exist
 
 
+
+
+
+    // Build Crystal Reports selection formula
+    var formula =
+        "{GATE1.comp_code} = " + globalVars.CompCode +
+        " and {GATE1.Year_code} = " + globalVars.FYearCode +
+        " and {GATE1.branch_code} = " + globalVars.BranchCode +
+        " and {GATE1.V_no} = " + v_no +
+        " and {GATE1.v_type} = '" + v_type + "'";
+
+    // Prepare the payload for the API
+    var payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            GST: globalVars.GST || "",
+            PAN: globalVars.PAN || "",
+            COMP_PHONE: globalVars.Phone || "",
+            EMAIL: globalVars.Email || "",
+            RPTNAME: "FACTORY GATE PASS FOR OUTGOING MATERIAL"
+        }
+    };
+
+    // Timestamp for file name
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    // AJAX call to the Crystal Report API
+    $.ajax({
+        url: 'http://localhost:34089/Report/PendingQCReport', // check port
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' }, // Important for PDF
+
+        success: function (response) {
+            // Convert response to a Blob
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            // Trigger download
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
+}
+
+async function fetchPendingOrderHeaderData(REF_TYPE, REF_NO, typeText) {
+    try {
+        const baseUrl = "/OutwardEntry/GetPendingrowHeaderData";
+        const queryParams = `REF_TYPE=${encodeURIComponent(REF_TYPE)}&REF_NO=${encodeURIComponent(REF_NO)}&ItemType=${encodeURIComponent(typeText)}`;
+        const url = `${baseUrl}?${queryParams}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const details = await res.json();
+        if (details.length) {
+            const d = details[0];
+
+            $("#TxtVehicleNo").val(d.vehiclE_NO || "");
+            $("#TxtWayBillNo").val(d.ewaybilL_NO || "");
+            $("#TxtAdd1PD").val(d.bilL_ADD1 || "");
+            $("#TxtAdd2PD").val(d.bilL_ADD2 || "");
+            $("#TxtAdd3PD").val(d.bilL_ADD3 || "");
+            $("#ddlCity").val(d.bilL_CITY || "");
+            $("#ddlPartyNameByAddress").val(d.bilL_ADDRESSID || "");
+            $("#TxtState").val(d.statE_CODE || "");     
+            $("#TxtGSTNo").val(d.bilL_GST || "");
+            $("#NumPincode").val(d.bilL_PINCODE || "");
+        } 
+    } catch (error) {
+        console.error("Error fetching pending order header data:", error);
+  
+    }
+}
+
+
+
+function SetFYDate(inputId, loginDate) {
+    var $input = $('#' + inputId);
+    var d = new Date(loginDate);
+
+    // Determine the financial year start year
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+
+    var minDate = fyStartYear + '-04-01';  // FY start
+    var maxDate = loginDate;               // Cannot select beyond login date
+
+    // Set attributes and default value
+    $input.attr('min', minDate)
+        .attr('max', maxDate)
+        .val(maxDate);
+
+    // Validate user input
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
+}
