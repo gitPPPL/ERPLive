@@ -1014,28 +1014,7 @@ async function addRow(data = {}) {
             //})
         ]);
     if (data.isPOGenerated === true) {
-        //$row.addClass('po-generated-row');
-        $row.find('td, input, select, textarea').css(
-            'background-color',
-            'orange'
-        );
-
-        setTimeout(() => {
-
-            $row.find('.select2-selection').css({
-                'background-color': 'orange',
-                'border': '1px solid orange'
-            });
-
-            $row.find('.select2-selection__rendered').css({
-                'background-color': 'orange'
-            });
-
-            $row.find('.select2-selection__arrow').css({
-                'background-color': 'orange'
-            });
-
-        }, 500);
+        $row.addClass('po-generated-row');
     }
 }
 
